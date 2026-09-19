@@ -189,7 +189,7 @@ review, not a recorded budget. It is valuable quality control but does not fill 
 A maintainer statement could clarify whether a relation is an intended public contract or whether the
 GEN3C admission behavior is considered a bug. It cannot supply the missing measured consequence and
 cannot make two consumers one method. It is also outside the current authorization: no maintainer
-contact has been made and outbound messages are forbidden (`AGENTS.md:15`; `AGENTS.md:15`).
+contact has been made and outbound messages are forbidden (`AGENTS.md:15`).
 **UNVERIFIED cost estimate:** no GPU but an unpredictable response delay of days to weeks. A non-response
 would unlock nothing; a reply that merely acknowledges the code would still not validate behavior.
 

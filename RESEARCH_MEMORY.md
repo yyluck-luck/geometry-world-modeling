@@ -2185,3 +2185,72 @@ R13-A 对 VMem 做过上游检查(四个精确词 issue+PR `total_count = 0`),**
 它的性质是**鲁棒性缺陷**(需要运维者自己的服务被按特定序列驱动,后果是内部状态不一致),
 **不是权限提升或数据泄露**。研究代码的惯例处置通常是提 GitHub issue 而非安全通告。
 **该判断与是否披露、何时披露,均属 owner 决定,不由本记录代为决定。**
+
+## 2026-09-19 R20-L 终局裁定:**STOP**
+
+### 裁定
+
+> **STOP.** owner 仍要求 method 贡献。已核验记录中**不存在幸存的、已验证的方法方向**,
+> 且**没有任何剩余检查能把下面两个部分资产变成方法**。
+> 在当前 scope 下,不再证成任何新的 GPU 运行、训练、权重下载、上游消息或候选检索。
+> **这是终局处置,不是"该代码不可被研究"的断言。**
+
+唯一的条件性未来是 **owner 对 C6 的人类决定**(接受 audit/measurement 交付物);
+**该决定尚未作出,且即便作出也不会把这项工作变成方法。**
+
+### Q2:为什么两个资产不能拼成完整主张(我原本想这么做,被驳回,我接受)
+
+> **`(oracle, no consequence)` + `(consequence, no oracle)` ≠ `(oracle and consequence)`。**
+> 两个实验的 consumer、状态所有者、公开合同、干预序列全都不同。
+> VMem 的测量不能验证 GEN3C 的 cache-admission 路径;
+> GEN3C 的准入 oracle 不能追溯地把 VMem 那个 **harness 定义的**干净臂变成公共 metamorphic relation。
+
+**把二者的并集当作同一个缺陷类,正是四元组被引入来防止的那个错误:
+writer / public sequence / exact consumer / dominance check 四项必须属于同一个案例。**
+配对文档只有在**明确标注为审计或 worked-example 报告**时才合法;
+**不得**呈现为方法、通用 stale-state prevalence 主张、或"陈旧状态导致世界模型质量下降"的证据。
+
+### 上游披露:独立双方一致
+
+它的 GEN3C 检查与我的独立检查**完全一致**:同一 GitHub REST API、
+`model_seeded` / `seed_model` / `clear_cache` / `model_was_seeded` 四词,**issue+PR 与 commit 检索均零匹配**。
+另核 NVIDIA 安全页面,无相关条目。**与 VMem 情形一致:两个系统的该条件在上游均未被报告。**
+
+### 给导师的事实性陈述(可原样宣读,无修饰)
+
+> 本项目审计了已发布、冻结的世界模型代码中的上下文选择与生命周期状态。
+> 它确立了 VMem 的一个陈旧读取,并在有限的、已暴露的 14 窗口面板上测得
+> `+0.245 dB` 的 clean-vs-leaked 对比,**但未能找到把该对比称为缺陷所需的公共 oracle**;
+> 它确立了 GEN3C 已发布代码中的服务端准入/闩锁不匹配,**但未测量冻结权重下的下游后果**。
+> 审计四元组经受住了对抗性复查并重新分类了 CausVid;
+> 构造器等价 oracle、跨层近名字段 oracle、后继实现声明、"Choose New Image" oracle、
+> 以及"retrieval-set 路线零 GPU"的假设,**均已撤回**。
+> 便利面板不是 prevalence 样本,冻结权重下已测 HIT 计数为 **0/20**,**未验证任何方法**。
+> 未决项为:VMem 的真正公共 R、GEN3C 的冻结权重后果、以及任一项目 maintainer 的确认。
+> **在方法贡献要求未变的前提下,记录在案的终局处置是 STOP。**
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回;全天零 GPU。
+
+## 2026-09-19 事故与恢复:后台 codex 进程静默回退了 45 行账本
+
+**发现方式:** 收尾核对时 `grep -c "R20-L 终局裁定" RESEARCH_MEMORY.md` 返回 **0**,
+而该条目明明已由 `a8ec3e7` 提交(该 commit 的 stat 显示 `RESEARCH_MEMORY.md | 45 ++++`)。
+
+**根因:** 我在一个持有 `workspace-write` 的 `codex exec`(R20-L)**仍在运行**时执行了 `gwm-sync`。
+该进程把 `RESEARCH_MEMORY.md` 回退成它读入时的版本(2232 → 2187 行),
+随后我的同步把这次回退**与收口文件一起提交**为 `a75a603`,提交信息为
+"add consolidated lifecycle-audit closeout document",**完全没有提示删除**。
+该进程退出时又从工作树删除了 `docs/LIFECYCLE_AUDIT_CLOSEOUT_20260919.md`(但它仍在 HEAD 中)。
+
+**所有表面指标都正常:** push 成功、`git status` 干净、三处哈希一致。
+
+**恢复(无损,未做任何破坏性操作):**
+- `git checkout -- docs/LIFECYCLE_AUDIT_CLOSEOUT_20260919.md` → 148 行还原;
+- 从 `git show a8ec3e7:RESEARCH_MEMORY.md | tail -45` 取回原文并重新追加 → 2232 行,条目在位;
+- 保留 codex 对**自己报告**的那处修改(`AGENTS.md:15`; `AGENTS.md:15` → 单个,无害去重)。
+
+**已落地的防护:** `gwm-sync` 新增并发写入者守卫(exit 8),
+在 fetch 前 `pgrep -f 'codex exec'`,发现存活进程即拒绝同步。原则记为 v2.21。
+
+**这是今天第二次同步器缺陷**(v2.17 是"先 commit 后 fetch 把陈旧变成回退")。
+两次的共同点是:**同步器把"当前工作树"当成"我的意图",而工作树可能被别的因素改写。**

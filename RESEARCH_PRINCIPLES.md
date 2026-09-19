@@ -360,3 +360,30 @@ DSH的gap、引用、审稿意见必须回到原始论文/源码/数据核实。
 配套要求:prompt 必须显式允许对方否定本方结论,并写明
 "I prefer a correct negative to an encouraging answer";
 **外部复核方的裁定不构成人类授权**,`new_method_validated` 与 `novelty_authorization` 只能由 owner 更改。
+
+### v2.21 并发写入者:后台 codex 进程静默回退了已提交的账本(2026-09-19)
+
+今天发生了一次**真实的记录丢失**,根因在我。
+
+时间线:
+1. 我把 R20-L 终局裁定追加进 `RESEARCH_MEMORY.md` 并提交 → `a8ec3e7`,文件 2232 行,**内容确已入库**;
+2. **但 R20-L 的 `codex exec` 进程当时仍在运行**,持有 `workspace-write`。它把
+   `RESEARCH_MEMORY.md` 回退成它读入时的 2187 行;
+3. 我随后写收口文件并跑 `gwm-sync` → `a75a603` **把新文件与那 45 行的回退一起提交**,
+   提交信息却是 "add consolidated lifecycle-audit closeout document";
+4. codex 进程退出时**又删掉了我刚提交的收口文件**。
+
+结果:一条终局裁定被静默删除,而提交信息完全没有提示;若非收尾时 `grep` 自己的标题返回 0,
+我不会发现。**`git status` 是干净的,推送是成功的,三处哈希一致——所有表面指标都正常。**
+
+**v2.17 的陈旧性守卫防不住这个。** 它检查的是"本地是否落后于 origin";
+而这次工作树**没有落后**,是**正在被本地另一个进程改写**。两种失效模式不同,必须分别设防。
+
+已落地(fail-closed,exit 8):`gwm-sync` 在 fetch 之前先 `pgrep -f 'codex exec'`;
+一旦发现存活进程即拒绝同步并打印 pid。
+
+更一般的教训,与 v2.17 同源但更强:
+**"提交成功"不等于"提交了我以为的内容"。** 凡是通过 `>>` 追加的记录,
+提交后必须用一个**只可能匹配本次新增内容的字符串**做一次回读验证
+(例如 `git show HEAD:FILE | grep -c '<本次标题>'`),而不是只看 push 是否成功、`git status` 是否干净。
+本条对账本尤其重要,因为账本是只增文件,**回退不会产生冲突,只会安静地少一段**。

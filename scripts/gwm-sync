@@ -35,6 +35,24 @@ STAGE=(git add --ignore-removal .)
 # three days behind and a sync produced a commit deleting a whole principles
 # section, which only a manual diff caught.  Fetch first; never commit from a
 # behind HEAD that also has local modifications.
+# ---- concurrent-writer guard (added 2026-09-19 after a real loss) ---------
+# A background `codex exec` holding workspace-write can rewrite tracked files
+# while this script runs.  On 2026-09-19 that happened: a still-running review
+# process reverted RESEARCH_MEMORY.md to the copy it had read, this script
+# staged the reversion, and the resulting commit silently deleted 45 lines of
+# ledger under the message "add consolidated closeout document".  The staleness
+# guard below does not catch this: the tree was not behind origin, it was being
+# mutated locally.  Refuse to sync while such a process is alive.
+if command -v pgrep >/dev/null 2>&1; then
+  CODEX_PIDS="$(pgrep -f 'codex exec' 2>/dev/null | tr '\n' ' ' | sed 's/ $//')"
+  if [ -n "${CODEX_PIDS}" ]; then
+    echo "REFUSING TO SYNC: a codex process with workspace-write is still running (pid: ${CODEX_PIDS})."
+    echo "It can rewrite tracked files mid-commit and the reversion would be staged silently."
+    echo "Wait for it to exit, then re-run.  To inspect: ps -p ${CODEX_PIDS}"
+    exit 8
+  fi
+fi
+
 echo "[${HOST}] fetching origin/main ..."
 git fetch -q origin main || { echo "[${HOST}] fetch failed"; exit 5; }
 BEHIND=$(git rev-list --count HEAD..FETCH_HEAD 2>/dev/null || echo 0)
