@@ -1497,3 +1497,67 @@ R14-C 提出的最强反对意见是:没有 reset contract 时,"字段没被清"
 **注意边界:** 这个 oracle 必须容许合法例外(已加载权重、刻意保温的缓存、RNG 状态等),
 不能退化为"reset 必须清空一切"。它约束的是**语义状态**,不是资源状态。
 该区分如何形式化,是这条路线成立与否的关键,已交 R15-E 压力测试。
+
+## 2026-09-19 R15-E 语义 oracle:**我的提案被部分推翻**;GEN3C 成立,VMem 降级为 INTENT-ORACLE-UNRESOLVED
+
+### 我错在哪(接受)
+
+我提出"构造器等价 + 跨层一致"作为统一 oracle,并把 GEN3C 的**两个近同名标志只清一个**当作主要论据。**这个强调是错的。**
+
+**"某字段没出现在 `reset()` 里"最多是静态异常信号,不是充分证据。** 可辩护的 oracle 必须把判定对象
+提升到**公共生命周期合同**:先写出用户可调用 API 的可观察前置/后置不变量或**事前固定的等价调用关系**,
+再用代码路径与执行结果证明违反。**字段是否应被清除只能作为归因,不能作为 oracle 本身。**
+按 R15-E 的排序,"跨层 duplicate-state consistency"只排第 4,**适合归因与候选排序,不能单独定罪**;
+"peer-group non-uniformity"排第 6,**最容易退化成 style checking**——正是原反对意见警告的那件事。
+
+### 逐实例裁定
+
+**GEN3C —— 有可辩护 oracle,但理由不是我说的那个。**
+最强证据是**公共准入安全不变量**:`model_seeded == True` ⇒ `request_inference()` 放行 ⇒
+**因此它必须代表一个可用的 3D cache**。清缓存后重新 seeding 抛异常、服务捕获返回 400、
+旧的 `True` 保留、推理仍被放行 —— 这是该不变量的反例。
+`model_was_seeded=False` 的跨层清除是**加强归因的佐证,不是唯一依据**。
+
+**VMem —— 降级为 `INTENT-ORACLE-UNRESOLVED`,不再计为 HIT。**
+未在 `__init__` 初始化、NMS-off 写、部分 NMS-on 读、`reset()` 不清 —— 这些足以证明
+**跨调用依赖的可达性与未初始化风险**,但**不足以证明它"按公开生命周期本应被清零"**。
+
+### 我复核 R15-E 时发现它一处精度错误(对我方更不利)
+
+R15-E 说该 relation "可由 `initialize()` docstring 的 'Reset internal state' 支持"。**不准确:**
+- `initialize()` 的 **docstring**(`pipeline.py:151-152`)写的是
+  "This method **sets up** internal state without generating additional frames";
+- "`# Reset internal state`" 是 **`:162` 的行内注释**,不是 docstring;
+- **`reset()` 完全没有 docstring**(`:135` 起直接赋值)。
+
+按 R15-E 自己的排序第 7 条,"单独依赖注释或变量名只能作弱证据"。
+**故 VMem 的文档合同比 R15-E 假设的更薄,其 UNRESOLVED 裁定反而更站得住。**
+
+### 最佳 oracle(采纳其表述)
+
+> **公共生命周期关系 oracle:**对一个**预先写入**并由文档/API 语义支持的关系 R,
+> 若两条调用序列从等价公共初态出发,R 声明它们在**公共可观察结果**
+> (成功/失败、错误类别、准入、返回值,或固定随机流下的输出)上应相等或满足指定变换,
+> 则观察到 R 被违反即可判定生命周期缺陷;**字段是否清除只作后续归因。**
+
+这是唯一能同时应对"作者没写 reset"和"内部字段只是实现细节"两种反对的定义。
+**前提:R 必须来自公开合同或事前冻结的产品语义,不能看过结果后再创造。**
+
+### metamorphic 路线
+
+(a) **在条件成立时 sound**;(b) **一般思想已被占据**(变形测试 Chen/Liu、PolDet/PRADET/ODRepair/NIO),
+故"使用 metamorphic relation"本身**不能作为新颖性主张**;(c) 原则上两实例都可检验,**但尚未执行**。
+
+### 方向状态
+
+**不关闭整个方向,但关闭一个过强版本**:
+- ✗ 关闭"reset peer 不齐 + 跨层近名字段不齐 = 已证明缺陷"的静态总 oracle;
+- ✓ 保留 GEN3C 的公共 admission invariant 作为可复核 HIT;
+- ⏸ VMem 暂停为 INTENT-ORACLE-UNRESOLVED,除非**先冻结再执行** fresh/reused 或 reset/no-reset 的公共 metamorphic relation;
+- 若该 relation 无法从 VMem 公开 API 合同中成立,VMem 应正式判为**没有可辩护 oracle**。
+
+**对 rename objection 的诚实处理:** 一般状态污染/顺序依赖 oracle 已有成熟先例;
+本项目只有在**"面向生成器/世界模型公共 API 的生命周期合同 + 可重复用户后果 + 领域特有关系"三者同时成立**时,
+才可能超出已有测试污染工作。
+
+**当前 M/N 因此从 2 个 HIT 降为 1 个可辩护 HIT。**
