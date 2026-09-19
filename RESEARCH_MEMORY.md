@@ -1230,3 +1230,29 @@ Q4 **拒绝编造门槛**:"我不伪造一个训练门槛来给已经被占用�
 这一条必须交回 owner,不能由我或评审代为排除或代为恢复。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+
+## 2026-09-19 泄漏可达性:自查完整链路——"前进后转身"即触发,`reset()` 清不掉
+
+在 pinned 源码(SHA `90a45f45…`,三份一致)中逐行走通了从用户动作到脏读的完整链:
+
+| 环节 | 位置 | 事实 |
+|---|---|---|
+| `move_backward` / `move_forward` | `navigation.py:185/234`(kwarg 在 187/236) | 显式 `use_non_maximum_suppression=False` |
+| 禁用分支 | `pipeline.py:704-705` | `else: self.initial_threshold = 1e8` ——**无条件写** |
+| `_turn` | `navigation.py:321` | `generate_trajectory_frames(interpolated_poses, interpolated_Ks)` ——**不传 NMS 参数** |
+| 签名默认 | `pipeline.py:1318` | `use_non_maximum_suppression=None` |
+| 透传 | `pipeline.py:1249` | `get_context_info(target_c2ws, use_non_maximum_suppression)`,`None` 原样传入 |
+| 解析默认 | `pipeline.py:678-679` | `if ... is None: use_non_maximum_suppression = self.use_non_maximum_suppression` |
+| 配置值 | `configs/inference/inference.yaml:16` | `use_non_maximum_suppression: true` |
+| 启用分支赋值守卫 | `pipeline.py:681-682` | `if use_nms:` → **`if is_second_step:`** ——只在该条件下才赋值 |
+| 无条件读 | `pipeline.py:708` | `current_threshold = self.initial_threshold` |
+| slot-0 先于阈值循环 | `pipeline.py:711` | `selected_indices.append(sorted_frames[0])` ——这解释了 slot-0 在 14/14 中不变 |
+| `reset()` | `pipeline.py:135-150` | 清 `rgb_vae_latents / rgb_encoder_embeddings / poses / focal_lengths / surfels / surfel_Ks / surfel_depths / Ks / surfel_to_timestep / all_pil_frames` 等 11+ 字段,**不清 `initial_threshold`** |
+
+**结论:触发条件是"任意一次 move,随后一次 turn"——导航交互中最基本的动作序列。**
+禁用分支无条件写 `1e8`;启用分支只在 `is_second_step` 赋值,否则读到陈旧的 `1e8`,
+使 NMS 在阈值意义上失去抑制作用。且 `reset()` 不清除,故"重新开一段"仍然继承。
+
+**这把该发现从"我们自建 harness 里的一个怪癖"提升为"公开发布系统在普通用户路径上可达的状态依赖缺陷"。**
+但下述两点尚未确认,不得先行断言:(i) 当前 public main 是否仍如此;(ii) 论文 benchmark 的评测脚本是否走这条混合路径
+——若评测每个对象只用单一 NMS 设置,则影响范围是**交互/导航用户**,不是论文表格。已交由独立核查(R13-A)。
