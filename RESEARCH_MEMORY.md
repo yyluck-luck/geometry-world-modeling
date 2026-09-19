@@ -1634,3 +1634,63 @@ Self-Forcing 是 CausVid 代码的**直接后继**(同名文件、同类结构�
 但把两者写成同一层面的"冻结模型行为",审稿人很可能拒绝。**
 
 `new_method_validated=false`;`novelty_authorization=NONE`;本轮零 GPU。
+
+## 2026-09-19 R16-H 执行前 spec 审查:**裁定不执行**——我的 E1 设计有三处实质缺陷
+
+封存的 spec(`c97f4f2`,SHA `080ffc5bcf1f160e...`)经 codex 在**执行之前**对抗审查。
+**裁定:当前 sealed spec 不应执行。保留原文件不变,另写新 spec 重新 seal;replacement text 不得回写。**
+
+### 三处实质缺陷(我接受)
+
+**① Q1 成立:失败是 harness 自己制造的。**
+spec 写明桩的 `seed_model_from_values` "call 2 raises a controlled exception"。
+于是即便 P2 成立,它直接证明的只是**发布版 `seed_model` 如何处理一个由 harness 注入的任意异常**,
+**不是 GEN3C 的发布版 seeding 实现会不会产生该异常**。它无法把 `gen3c_persistent.py:208` 变成实际触发源。
+
+**修正路线(可行,零权重零重模型构造):** 导入发布版 `Gen3cPersistentModel`,用 `__new__` 取得
+**不执行 `:79-131` 重构造**的 probe;call 2 把 kwargs **原样交给发布版 `seed_model_from_values`**,
+禁止 proxy 自己 `raise`;`req_B` 必须是**合法**多帧 `SeedingRequest`(`n>1`、`depths=None`、相机矩阵可逆),
+使执行真正到达 `:208`;记录异常类型、精确消息与 traceback 中的发布版 path/line。
+probe 的 `clear_cache` 也应绑定**发布版** `Gen3cPersistentModel.clear_cache`(`:551-553`)。
+**若导入失败,结果是 E1 INFEASIBLE,禁止退回到"复制同一异常文本的桩"。**
+诚实边界:S1 的成功路径仍是轻量 adapter,**发布版归属只覆盖清理路径与 call-2 校验路径**。
+
+**② Q2:P3 只有同步准入证据**,没有实际推理后果;需要把 admission 与 execution 分开观测。
+
+**③ 我未声明的前提会让 S1 在桩被调用前就崩。**
+`CosmosBaseModel.__init__`(`:32-38`)**不创建** `pose_history_w2c` / `intrinsics_history` /
+`aabb_min` / `aabb_max` / `self.model`,而 `seed_model` 在 `:51` 和 `:54-55` 立即读/清两个历史列表 →
+按 sealed S0 执行会先 `AttributeError`。
+
+### 其他未声明前提(全部需写进新 spec)
+
+- `seed_model:74-76` 在 `req.depths is None` 时调 `self.model.get_cache_input_depths().cpu().numpy()` → `req_A` 必须给 non-None depths;
+- 请求 dataclass 有真实校验:`api_types.py:53-69` 形状检查、`RequestBase.__len__`(`:101-102`)、
+  `world_to_cameras()`(`:71-75`)调 `np.linalg.inv` → **相机矩阵必须可逆,不能用全零**;
+- `min/max_frames_per_request`(`server_cosmos_base.py:226-234`)都返回 `self.model.frames_per_batch`
+  → `req_C` 帧数必须**恰好等于**它;request id 必须唯一(`server_base.py:124-125` 拒重复);
+- `request_inference` 需要**正在运行的 event loop**;
+- `run_inference`(`:134-135`)在 inner call 之前就追加 pose/intrinsics history,**失败也会留下新状态**。
+
+### 对"零 GPU"的两条实质威胁
+
+**⑦ `run_inference`(`server_cosmos_base.py:156-162`)无条件创建 `torch.cuda.Event()`** ——
+"让 Task 跑完"**不是纯 CPU 默认路径**;no-driver/CUDA 异常**不得**写成 released execution,
+而 monkeypatch CUDA 会破坏"发布代码执行"的归属。
+
+**⑧ import 链被我低估:** `gen3c_persistent.py:1-19` **模块级**导入 MoGe、torch、Gen3cPipeline;
+`server_cosmos_base.py` 的 torch 是方法内导入但仍需装包;`api_types.py:16-28` → `encoding.py:16-22` 需要 cv2。
+**故"零 GPU"成立,但"零环境搭建"不成立。**
+
+### Q6:值不值得跑
+
+**当前版本不值得跑。** 即便"成功",主要观测也只是"harness 自己决定抛异常后 outer flag 没被清掉"。
+**修正并重新 seal 后价值有限**:可作为低成本的 server/API lifecycle witness,
+把静态可达性变成发布版 validation branch 的可复现执行证据,并明确区分 admission-only 与实际下游失败。
+**若资源只能二选一,应先做冻结权重下的实际 consequence;修正版 E1 不能替代生成质量或冻结权重结论。**
+
+### 方法论价值
+
+**这是本项目第一次在"改还合法"的时刻抓住实验设计缺陷。**
+若照原 spec 执行,产出会被"你证明的是自己桩的行为"一击打穿,而那时 spec 已冻结、无法补救。
+**执行前对抗审查的成本是一次 codex 调用,收益是避免一个注定被驳回的结果。** 应固化为常规。
