@@ -2054,3 +2054,51 @@ C5 未测量;单个 reviewer 极易把结构信号写成结论。
 - 已撤回:CausVid、我的构造器等价 oracle、跨层近名字段 oracle、后继实现声明 oracle。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;C6 未松开;全天零 GPU。
+
+## 2026-09-19 VMem oracle 的最强候选:公开的会话边界控件不能隔离 pipeline
+
+R15-E 判 VMem 为 INTENT-ORACLE-UNRESOLVED,并指出唯一出路是**事前注册的公共 metamorphic relation**,
+且 relation 必须来自**公开合同或产品语义**,不能是审计者觉得应该等价。我在 pinned 源码中找到了候选来源。
+
+### 已核实的源码事实
+
+| 位置 | 内容 |
+|---|---|
+| `app.py:22` | `MODEL = VMemPipeline(CONFIG, DEVICE)` —— **模块级单例,导入时创建一次** |
+| `app.py:23` | `NAVIGATORS = []` |
+| `app.py:181` | `NAVIGATORS.append(Navigator(MODEL, ...))` —— Navigator **包的是同一个 MODEL** |
+| `app.py:190` | `NAVIGATORS[0].initialize(...)` |
+| `app.py:694` | `gr.Button("Choose New Image", variant="secondary").click(...)` —— **用户可见的新会话控件** |
+| `app.py:369-370` | 处理器注释 `# Clear any existing navigators`,随后 `global NAVIGATORS; NAVIGATORS = []` |
+| `app.py:363` | 注释 **`# Clear visualization directory to prevent users from seeing each other's generated images`** |
+
+**"Choose New Image" 清的是 `NAVIGATORS`;新建的 `Navigator` 仍包着同一个 `MODEL`。pipeline 对象从不重建。**
+而 `initialize()` → `reset()`(`pipeline.py:135-147`)**不清 `initial_threshold`**。
+故**用户可见的新会话控件不能把 pipeline 恢复到初始状态**。
+
+### 为什么这比之前所有候选都强
+
+这和 GEN3C 的形态**完全平行**:**一个被代码库自己声明的会话边界,没有覆盖后续路径读取的全部状态。**
+而且这里的声明是**双重的**:一个带标签的用户可见按钮 + 处理器自身关于"清理"与"防止跨会话泄漏"的注释。
+**它不依赖"某字段没出现在 reset 里"这种已被判定为不充分的论证。**
+
+### 必须守住的边界(否则重蹈今日两次覆辙)
+
+1. `:363` 那条"防止用户看到彼此生成图像"的注释针对的是**可视化目录**,不是 pipeline 状态。
+   **把它当作 pipeline 状态隔离意图的证据是外推**,必须标明。
+2. 按钮标签 "Choose New Image" 蕴含"新会话"仍是**从标签推断**,不是 API 文档陈述。
+3. R15-E 的警告依然适用:**若等价关系只是审计者认为应当等价,问题只是从"字段意图"换成"relation 意图"。**
+
+**故当前状态:oracle 候选显著增强,但未成立。** 需要的是把 R 事前写定并执行,
+且 R 的语义来源必须在执行前声明清楚,不得事后挑选最有利的解释。
+
+### 与 GEN3C 的结构对比(两个 HIT 的共同形态)
+
+| | 声明的会话边界 | 未被覆盖的读取 |
+|---|---|---|
+| GEN3C | `seed_model` 清 cache/histories;`clear_cache()` 清内层 `model_was_seeded` | **外层 `model_seeded`**(`server_base.py:122` 读) |
+| VMem | "Choose New Image" 清 `NAVIGATORS`;`initialize()` 调 `reset()` 清 11+ 字段 | **`initial_threshold`**(`pipeline.py:708` 读) |
+
+**共同形态:被声明的重置覆盖了大部分状态,漏掉一个仍被后续读取的字段;
+且漏掉的那个都位于与重置动作不同的所有权层级(GEN3C 是外层 wrapper,VMem 是被共享的单例 pipeline)。**
+这比"reset 不完整"更精确,也可被证伪——只要找到一个漏掉字段与重置同层的反例即可。
