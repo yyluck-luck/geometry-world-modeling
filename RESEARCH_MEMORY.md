@@ -1256,3 +1256,53 @@ Q4 **拒绝编造门槛**:"我不伪造一个训练门槛来给已经被占用�
 **这把该发现从"我们自建 harness 里的一个怪癖"提升为"公开发布系统在普通用户路径上可达的状态依赖缺陷"。**
 但下述两点尚未确认,不得先行断言:(i) 当前 public main 是否仍如此;(ii) 论文 benchmark 的评测脚本是否走这条混合路径
 ——若评测每个对象只用单一 NMS 设置,则影响范围是**交互/导航用户**,不是论文表格。已交由独立核查(R13-A)。
+
+## 2026-09-19 R13-A 公开可达性核查:缺陷在**当前公开发布版**中,上游无人报告;但不得声称论文数字受影响
+
+### 更正我上一条的夸大
+
+我写"触发条件是**任意一次** move,随后一次 turn"。**过头了,撤回。**
+启用分支的赋值守卫是 `is_second_step = len(self.pil_frames) == 5`(`pipeline.py:674`),
+**恰好在 5 帧时转向,阈值会被重新赋值**,不读脏值。另有 `pipeline.py:631-633`:
+`len(self.pil_frames) == 1` 时提前返回,先于阈值分支。
+
+**精确的触发序列是"点两次移动,再转向"**(静态控制流推导,`target_num_frames: 4`):
+① 第一次 Forward/Backward —— 仅 1 帧,`:631-633` 提前返回,不写阈值;生成后 1→5 帧。
+② 第二次 Forward/Backward —— `len>1`,`:704-705` 无条件写 `1e8`;生成后 5→9 帧。
+③ 点 Turn —— `_turn` 不传参 → 配置 `true`;帧库为 9,**不满足 `is_second_step`**,
+   启用分支不重写,`:708` 读到上一步留下的 `1e8`。
+
+### 已核实(我独立复算了最要害的一条)
+
+**公开 HEAD = `39291e4f272f6b4f270691d930926ab5930f942e`(2025-07-25)。
+从该 commit 下载的 `modeling/pipeline.py` 为 1431 行,SHA-256 `90a45f452a4f734b…`,
+与本项目三份 pinned 副本逐字节相同。**(我自己 `git ls-remote` + `curl` + `shasum` 复核通过。)
+**即:我们分析的就是当前公开发布版本,缺陷仍在。**
+
+- README 的 Usage 只有 `python app.py`;`app.py:19-23` 是**模块级全局 `MODEL = VMemPipeline(...)`**,
+  所有 GUI 操作共享同一对象。`app.py:204-219` 把 `y_angle≠0` 分派到 `turn_left/right`,否则 `move_forward/backward`。
+- `reset()` 不是用户可见操作(README 全文无 `reset`),但经 `initialize()` 内部调用;
+  它**不清 `initial_threshold`**,且该属性**在 `__init__` 中根本没有初始化**。
+- **上游无人报告或修复**:GitHub API 对 `initial_threshold` / `get_context_info` /
+  `non_maximum_suppression` / `reset` 四个精确词的 issue+PR 搜索 `total_count = 0`;
+  仓库共 16 issues、1 PR(#15)、7 commits;`modeling/pipeline.py` 路径历史只有初始 commit。
+
+### 不得声称的事(R13-A 明确否定)
+
+**不能推出"论文 benchmark 数字已被污染"。** 公开树里**没有 VMem 自己的 evaluation driver**
+(`eval` 路径都在 `extern/CUT3R/eval` 下,属 CUT3R);唯一通用入口 `VMemPipeline.__call__`
+(`:1408-1429`)先 `initialize()` 再生成且**不传 NMS 参数**,沿配置单一设置运行,**不是混合序列**。
+故当前可建立的范围是:**交互/导航用户路径**,不是论文表格。
+作者未随仓库发布的评测脚本、HF Space 的实际调用顺序,本轮无证据。
+
+### finding type 的先例(9/9 引用已核实为真)
+
+严格等价的先例**未检出**(search-bounded,非"不存在")。最接近的:
+- **2607.21686 Persistent Computational State: A Session-Centric Runtime for Generative World Models**
+  ——同领域最近,把 serving 丢弃 world-model 运行时状态作为可测失效,在 Cosmos3 / WorldMem / Matrix-Game 2.0 上做恢复实验。
+- **2405.03672 Cutting through buggy adversarial example defenses: fixing 1 line of code breaks Sabre**
+  ——"读已发布代码→定位 bug→量化修复前后效应"的方法论先例。
+- 旁证:2609.04748(LLM serving 的 cache 状态未 reset 导致 16-bit 36.2% / 4-bit 75.0% 轨迹改变)、
+  2609.04875、2606.20545、2606.00793、2606.27537、2207.07048、1911.07698。
+
+R13-A 自列 5 条不可验证项(未运行 demo、未取得作者评测脚本、未审计 HF Space、检索有界、未复算本项目 14-window 数值)。
