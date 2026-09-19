@@ -36,7 +36,12 @@ if [ -n "$BIG" ]; then
   exit 3
 fi
 
-git add -A
+# --ignore-removal is deliberate.  The laptop and the SuperPOD login node hold
+# overlapping but NOT identical working trees: each has files the other has never
+# had.  A plain `git add -A` on one machine would stage the other machine's files
+# as deletions and erase them on the next sync.  New and modified files sync in
+# both directions; removals must be done explicitly with `git rm`.
+git add --ignore-removal -A
 if git diff --cached --quiet; then
   echo "[${HOST}] nothing local to commit"
 else
