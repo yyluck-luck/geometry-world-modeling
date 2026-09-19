@@ -932,3 +932,46 @@ Falsify if the effect adds no held-out future value beyond pose/coverage/confide
 新 predictor 先拼接全部八个 C2W，再调用官方 `get_translation_scaling_factor`，并运行时验证全部成对相对平移在共同中心化前后保持不变。predictor SHA `75af8cad...`，12/12 静态检查通过。runtime v3 SHA `7b635f37...`；精确隔离 job 591500 在 dgx-21/H800 以 `COMPLETED|0:0|00:00:30` 通过，回执 SHA `d3152f12...`，无模型加载/forward/未来 outcome 访问。
 
 同时加固 Gate0：适配器与 protocol 审查必须包含不同作者身份、非空 findings 和明确 limitations；先绑定 adapter review 再计算最终 protocol SHA，任何预先批准的 base SHA 都会被拒绝。v6 base contract SHA `f866ce3d...`、base protocol SHA `b2ca7239...`，验证 217 个非审查 artifact 后仍只缺两项真实独立审查。正式 bundle v3 的负控制正确拒绝创建。若审查者立即可用且无新问题，预计 60–120 分钟可到 `sbatch`；Slurm 排队时间另计。没有真实审查者时启动日期未知，不得自签。
+
+## 2026-09-19 源码核查：T1-5 的原生记忆版本在可行性上已关闭；位姿指标归属需更正
+
+外部研究简报返回后，两条可在固定源码上直接核查的主张已核实。**两条都不利于本方。**
+
+### 一、不存在合法的相机重标注接口——T1-5 的原生版本无需 GPU 即被关闭
+
+固定源码中对 `self.c2ws` 的**全部写入**只有两处：`initialize` 的 `self.c2ws = [c2w]`（180 行），
+以及生成循环里的 `self.c2ws.append(target_c2ws[j])`（1297 行）。**没有任何 setter、mutator 或公开方法
+可以修改已存储的相机**；类名下以 `set|update|relabel|replace|correct|edit|assign` 命名的方法一个都没有。
+另核实 `reset()` 不清除 `self.c2ws`——与 `initial_threshold` 泄漏同一模式。
+
+后果：把"用支持的估计位姿替换已存生成帧的命令标签"送进**原生**的 surfel 构建与检索路径，
+在不修改上游源码的前提下**无法实现**，而"不修改上游源码"是本项目的 FIXED 约束。
+
+因此 **T1-5 的原生记忆反馈版本按可行性关闭，零 GPU 成本**。仍可实现的是绕过版本：在自建 harness 里
+给同一组四张图供不同相机。但按外部审查的明确措辞，该版本只能证明**上下文相机元数据效应**，
+**不能证明原生 surfel 累积或检索是因果中介**。原提案的机制主张不被绕过版本继承。
+
+### 二、`pose_metric_cameractrl.py` 的协议归属写错了
+
+该文件声称遵循 CameraCtrl（arXiv 2404.02101），并实现 `normalize_by_furthest`（最远帧归一化）。
+但经核实的协议分布是：**CameraCtrl 用首两帧位移定标**；**CamCo（arXiv:2406.02509）与 CamI2V
+（arXiv:2410.15957）才用最远相机归一化**；CameraCtrl II（arXiv:2503.10592）用拟合轨迹对齐；
+SANA-WM（arXiv:2605.15178）与 Matrix-Game 3.5（arXiv:2608.29910）用 Umeyama Sim(3) 对齐。
+
+所以本方实现的是 **CamCo/CamI2V 约定，不是 CameraCtrl 约定**，文件名与 docstring 均属误标。
+"CameraCtrl-style" 只能作族标签，不能作可复现规格。该评价器从未产出任何数字，故无需撤回结果，
+但在使用前必须改正归属并写明完整约定（位姿表示、参考来源、规范消除方式、误差单位与聚合、
+支持集、失败处理、退化条件）。
+
+### 三、该指标族的占据结论
+
+位姿评价器本身是既有族的**标准实例**，非新颖：MotionCtrl、CameraCtrl、CamCo、CamI2V、Cavia、
+CameraCtrl II、WorldScore、CamVerse、SANA-WM、Matrix-Game 3.5，以及被借用的 TUM ATE/RPE、
+Zhang & Scaramuzza 对齐理论、KITTI 分段漂移。
+
+原 Part 3 的四个门问题中，**三个已被占据**：生成域重建资格审查（PDI-Bench、SysCON3D）、
+失败率保留在分母（CamCo、Cavia、CameraCtrl II、SysCON3D 的 attempted-set）、
+生成静态区是否容许单一刚体相机（**SGC arXiv:2603.19048 直接对应**）。
+仅"经校准的、生成图特定的位姿可识别性契约"仍为 `UNVERIFIED`——**这是检索限制，不是已确立的开放缺口**。
+
+`new_method_validated=false`；`novelty_authorization=NONE`。
