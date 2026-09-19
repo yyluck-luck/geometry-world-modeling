@@ -1983,3 +1983,74 @@ Cosmos 覆写加入了真实 seeding,**保留了闩锁语义**,但它所守卫�
 VMem:陈旧读取真实(`pipeline.py:708` 无条件读),**oracle 未决**,且有已测效应 `+0.245 dB`。
 CausVid、PlayGen:已撤回。
 CLEAN 判定需按"显式重置不足以判 CLEAN"重审(R18-J 进行中)。
+
+## 2026-09-19 R18-J 系统性重审:**该方法学不能支撑 prevalence 主张**
+
+### 更正后的计数(分母必须逐字照抄,不得简写)
+
+**主分母 N=20** = R15-F 中已完成 commit 锁定、公开调用边界与条件 1–4 审计的 video/world-model 候选,
+去掉 10 个 OUT-OF-PREDICATE 与 2 个 modality exclusion(32 行审计框中的非 OUT 部分)。
+
+| 类别 | 计数 |
+|---|---|
+| **静态 HIT** | **2/20 —— VMem、GEN3C** |
+| NEAR | 2/20 —— MagicWorld v1、PlayGen |
+| CLEAN | 15/20 |
+| SUSPECT-UNTRACED | 1/20 —— Matrix-Game 1 |
+| **冻结权重下已测行为 HIT** | **0/20 measured** |
+
+敏感性:若把 class-level 状态与公开 API 配置不匹配纳入条件 1–3,Matrix-Game 1 成为第三个 HIT,即 3/20。
+**这只是谓词边界敏感性,不得与主结果混写。** 机械按 32 行相加得 2/32,但该分母混合了 OUT 与 modality,**不是 prevalence 估计**。
+
+### 我的两条撤回被独立确认
+
+**CausVid HIT → CLEAN**:与我的追踪一致——cache 字典只有 `k,v`,仓库无 index 字段,
+每次 `inference()` 重算 `block_index/current_start/current_end`,写 `[:,current_start:current_end]`、只读 `[:, :current_end]`。
+**"旧结论把 reset 分支不对称误当成消费证据。"**
+**PlayGen 未升级**,并指出:若严格要求 `self.x` 实例字段,该行**甚至应为 OUT**。
+
+### 我没发现的新情况:Matrix-Game 1
+
+`inference_bench.py:88-97` 写的是 **class-level** TeaCache(`cnt, num_steps, previous_modulated_input, previous_residual`),
+不是每次调用的实例 reset;consumer `teacache_forward.py:101-121` 在非起点/终点**先读旧 input/residual**,
+计算分支 `:123-233` 才写回。而 `--inference_steps` 与 `--num_steps` 是 CLI 上**分别暴露**的公开参数,
+故 call A=40、call B=50 时 B 确实读到 A 的 class-level 值。
+固定 benchmark 的 50/50 包络会让 `cnt` 完整回绕,故主表保守标 SUSPECT-UNTRACED。
+
+### Q3:谓词本身确有问题,已给出替换版本
+
+旧条件把"有字段""某分支没 reset""同一对象可再次调用"近似当成 stale read —— **这正是 CausVid 假阳性的来源**;
+而 GEN3C 反向证明**单层 reset 不能推出 CLEAN**。替换为三条:跨层所有权识别 → 跟到实际 consumer 并证明无先行重算/覆盖 → 检查所有外层 gate、别名与失败路径。
+**条件 3 必须允许 `SUSPECT-UNTRACED`,不得在"未找到 reset"与"HIT"之间跳跃。**
+
+**强制的最小证据四元组(这是真正可交付的审计产物):**
+```
+(writer on call A, public sequence A→B, exact consumer on B,
+ dominance check showing no recompute/overwrite/reset covers it)
+```
+缺任一项最多 `SUSPECT-UNTRACED`;有意的 history/AR 状态另标 `INTENDED-CONTINUATION`,**不得用来填补缺口**。
+
+### Q4 裁定(原文)
+
+> **This methodology cannot support a prevalence claim.**
+
+理由:CausJid 方向的假阳性与 GEN3C 方向的假阴性**都能通过一次代码复核**;候选集是
+**启发式/便利取源的样本,不是抽样框**;各项目的公开 API、配置包络与 intended continuation 不同;
+C5 未测量;单个 reviewer 极易把结构信号写成结论。
+
+**故 2/20 只能称"本便利审计框中静态代码路径满足新规则的计数",不得称
+"world models 中 stale-state defect 的发生率"。**
+
+要支撑 prevalence,至少需要:预注册总体与纳入规则、**独立双人逐 consumer 复核**、
+把 OUT/未检查明确分层、对每个 HIT 做冻结权重的失败/干净 reset 对照。
+**即便全部做到,也只能支撑一个定义清楚的审计框内的 prevalence,不能外推到所有公开或闭源系统。**
+
+### 诚实的资产盘点(今日收盘)
+
+- **GEN3C**:oracle 干净(公共准入不变量 + 单向闩锁守卫可清空资源),消费端已追,**但无实测后果**;范围限 `gpu_count==1`。
+- **VMem**:消费端已追(`:707-708` 读,`:716-750` 续用),**有实测效应 `+0.245 dB`**,但 **oracle 未决**。
+- **两者互补而不重叠:一个有 oracle 没后果,一个有后果没 oracle。**
+- **审计四元组**是本方向唯一明确成形、且已被实战检验(正确重分类 CausVid)的可交付产物。
+- 已撤回:CausVid、我的构造器等价 oracle、跨层近名字段 oracle、后继实现声明 oracle。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;C6 未松开;全天零 GPU。

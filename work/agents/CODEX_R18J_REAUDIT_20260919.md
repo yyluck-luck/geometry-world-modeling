@@ -49,7 +49,7 @@ R15-F 的全审计框是 32 行：20 个非 OUT、非 modality 的 video/world-m
 | **Oasis**；`etched-ai/open-oasis@f59deef2c019c212bd0c5a3a5b986a51f3701847` | **OUT → OUT** | rotary cache `rotary_embedding_torch.py:242-260,288-301` 是同一次 autoregressive loop 的 cache；公开 `generate.py:23-45,86-123` 是一次性 CLI，README `:31-42` 没有用户跨调用 API。 |
 | **ForgeWM**；`asdfo123/ForgeWM@a922c6b42d2e1dcfdc367a27a07c0148cb8ed6d8` | **OUT → OUT** | lazy cache/consumer 在 `pipeline/causal_inference.py:87-90,166-200,308-320`；公开 `inference.py:270-296,397-421` 是 one-shot CLI，README `:353-366` 明确 interactive demo 尚未完成。 |
 | **Voyager**；`MineDojo/Voyager@55e45a880755d0c8c66ca7fb5fe7962ac8974f89` | **modality exclusion → modality exclusion** | `voyager/agents/action.py:40-74` 的 chest memory 可能是 agent state，`voyager/voyager.py:165-198,287-293` 有 rollout reset/step；但它是 LLM Minecraft agent，不是本审计目标的视频 world model，不能计入 M/N。 |
-| **NVIDIA GR00T**；R15-F 记录的固定 commit | **modality exclusion → modality exclusion** | 机器人/VLA 模态，未把其 agent state 当作视频 world-model stale-read 样本；保持排除，不进入 N=20。 |
+| **NVIDIA GR00T**；R15-F 只把它列为 robotics/VLA exclusion，未提供本轮可复核的 commit/path | **modality exclusion → modality exclusion** | 没有把未锁定的 GR00T 源码当作证据；它按采样模态政策排除，不进入 N=20，也不作源码 verdict。 |
 
 ## Priority 2 的“跨层是否还有漏读字段”结论
 
@@ -91,3 +91,15 @@ R15-F 的全审计框是 32 行：20 个非 OUT、非 modality 的 video/world-m
 ## 可复核性记录
 
 本轮没有改动任何既有文件；唯一应新增的是本报告。项目要求的外部 Codex/Astra 复核命令已尝试，但当前环境对 Responses WebSocket 返回 `401 Unauthorized`，没有可引用的外部裁定；本文件只采用仓库固定 commit、项目 pinned copy 和独立源码复核结果，不把失败的外部调用当作证据。
+
+## 附录：R14-D 中未进入 R15-F 主 N=32 的 OUT/未检查边界
+
+这些行不改变主分母，但为“每个既有 verdict”保留 old→new：
+
+| 系统；commit | old → new | 重新检查结论 |
+|---|---|---|
+| Matrix-Game 2/3；`SkyworkAI/Matrix-Game@71c3cd7f741311f8100f6cf9cde942b6c1378d11` | **OUT-OF-PREDICATE → OUT-OF-PREDICATE** | MG2 normal/streaming 在 `Matrix-Game-2/pipeline/causal_inference.py:216-234`、`inference_streaming.py:517-535` 先清并重建 cache；MG3 的 lists 在 `Matrix-Game-3/pipeline/inference_interactive_pipeline.py:382-475,561-623,755-809` 属于一次 generate 调用局部。没有 corrected-rule 会推翻的跨调用 stale consumer。 |
+| Cosmos-Predict2.5；`nvidia-cosmos/cosmos-predict2.5@a2c298b0a3df3778b973fe65e9e58877b292d8a7` | **OUT-OF-PREDICATE → OUT-OF-PREDICATE** | `cosmos_predict2/_src/predict2/inference/video2world.py:250-376,473-895` 的 chunks 显式局部传递；action stream `action_video2world_streaming.py:91-145,180-300,311-401` 与 `action_video2world_self_forcing.py:303-330` 重建 KV。没有隐藏 later read。 |
+| StreamingT2V main；`Picsart-AI-Research/StreamingT2V@411f00d554c8561352854330621b2ac2b83bd4f0` | **OUT-OF-PREDICATE → OUT-OF-PREDICATE** | `code/inference_i2v.py:51-80,164-190` 与 `code/diffusion_trainer/streaming_svd.py:293-356` 把 chunk 状态留在调用内；Modelscope 分支未检查，不能外推。 |
+| FantasyWorld；`Fantasy-AMAP/fantasy-world@2645441c706f122033cbbb7be9af245d6a91b658` | **OUT-OF-PREDICATE → OUT-OF-PREDICATE** | `inference_wan22.py:40-162,164-283,285-378` 每次从参数构造 noise/pose 和生成状态，没有跨调用 scene history；新规则不会把 stateless call 变成 HIT。 |
+| Cosmos umbrella；`NVIDIA/Cosmos@b0e54e88c322695dab188e6ed160c4d6d071c39c4` | **NOT-INSPECTED → NOT-INSPECTED** | R14-D 已记录该 umbrella revision 没有可单独审计的完整统一 inference implementation；不能把 Predict2 或 Predict2.5 的结果转移给 umbrella。 |
