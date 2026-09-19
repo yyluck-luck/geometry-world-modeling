@@ -84,12 +84,12 @@ STATE_DIR="$(printf '%s\n' "$LAUNCH_OUTPUT" | sed -n 's/^receipt_directory://p' 
 [[ -n "$STATE_DIR" ]] || { echo 'generic launcher did not return receipt directory' >&2; exit 4; }
 mkdir -p "$(dirname "$FORMAL_GUARD_RECEIPT")"
 TMP_GUARD="${FORMAL_GUARD_RECEIPT}.tmp.$$"
-"$PYTHON_BIN" - "$TMP_GUARD" "$RECEIPT" "$PREFLIGHT" "$CONTRACT" "$MANIFEST" "$SESSION" "$REMOTE_LOG" "$STATE_DIR" <<'PY'
+"$PYTHON_BIN" - "$TMP_GUARD" "$RECEIPT" "$PREFLIGHT" "$CONTRACT" "$MANIFEST" "$SESSION" "$REMOTE_LOG" "$STATE_DIR" "$SBATCH_SCRIPT" "$GENERIC_LAUNCHER" <<'PY'
 import datetime as dt,hashlib,json,pathlib,sys
-out,receipt,preflight,contract,manifest=map(pathlib.Path,sys.argv[1:6]); session,remote_log,state_dir=sys.argv[6:9]
+out,receipt,preflight,contract,manifest=map(pathlib.Path,sys.argv[1:6]); session,remote_log,state_dir,sbatch,generic=sys.argv[6:11]
 def sha(p): h=hashlib.sha256(); h.update(p.read_bytes()); return h.hexdigest()
-r=json.loads(receipt.read_text()); f=json.loads(preflight.read_text()); m=json.loads(manifest.read_text())
-obj={"schema":"gwm-formal-launch-guard-receipt-v1","status":"PASS","recorded_at_utc":dt.datetime.now(dt.timezone.utc).isoformat(),"session":session,"remote_log":remote_log,"state_dir":state_dir,"bundle_root":f['bundle_root'],"validator_receipt_sha256":sha(receipt),"validator_receipt":r,"manifest_sha256":sha(manifest),"contract_sha256":sha(contract),"protocol_sha256":m['protocol_sha256'],"run_id":m['run_id'],"scope":m['scope'],"execution_boundary_id":m['execution_boundary_id']}
+r=json.loads(receipt.read_text()); raw=receipt.read_text(); f=json.loads(preflight.read_text()); m=json.loads(manifest.read_text())
+obj={"schema":"gwm-formal-launch-guard-receipt-v1","status":"PASS","recorded_at_utc":dt.datetime.now(dt.timezone.utc).isoformat(),"session":session,"remote_log":remote_log,"state_dir":state_dir,"bundle_root":f['bundle_root'],"exact_command":f"bash {generic} {session} {sbatch} {remote_log}","validator_receipt_sha256":hashlib.sha256(raw.encode()).hexdigest(),"validator_receipt_raw":raw,"validator_receipt":r,"manifest_sha256":sha(manifest),"contract_sha256":sha(contract),"protocol_sha256":m['protocol_sha256'],"run_id":m['run_id'],"scope":m['scope'],"execution_boundary_id":m['execution_boundary_id']}
 for key in ('validator_sha256','predictor_wrapper_sha256','prediction_sealer_sha256','sbatch_script_sha256','formal_bundle_preparer_sha256','launch_guard_sha256','generic_launcher_sha256','formal_chain_regression_receipt_sha256'): obj[key]=f[key]
 out.write_text(json.dumps(obj,indent=2,sort_keys=True)+"\n")
 PY
