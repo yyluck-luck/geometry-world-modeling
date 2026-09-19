@@ -2157,3 +2157,31 @@ R15-E 判 VMem 为 INTENT-ORACLE-UNRESOLVED,并指出唯一出路是**事前注�
 VMem 应记录为**有实测效应的 worked example,不附带缺陷主张**。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;C6 未松开;全天零 GPU。
+
+## 2026-09-19 GEN3C 上游披露检查:同样零报告;并标明一条我不得越过的约束
+
+R13-A 对 VMem 做过上游检查(四个精确词 issue+PR `total_count = 0`),**但从未对 GEN3C 做过**。现补上。
+
+我自查(GitHub Search API,`repo:nv-tlabs/GEN3C`):
+
+| 检索词 | issue + PR `total_count` |
+|---|---|
+| `model_seeded` | **0** |
+| `seed_model` | **0** |
+| `clear_cache` | **0** |
+
+仓库规模作对照:`open_issues_count`(含 PR)= **33**,stars = **1424**。
+故**该条件在上游同样未被报告**——与 VMem 情形一致。
+边界:这是"截至本日公开可见的 issue/PR 搜索结果",不是"作者从未私下讨论过",
+也不排除 GitHub 搜索索引的延迟或范围限制。
+
+### 我不得越过的约束(主动标明)
+
+`AGENTS.md` 明载:**"No messages to the advisor or others are authorized."**
+**向上游提交 issue、发邮件或以任何方式联系 maintainer,都属于"对外发消息",没有授权。**
+我不会执行,也不在 owner 明确决定前建议执行。
+
+同时记录一个需要 owner 判断的事实性问题:本条件位于**已发布研究代码的服务端准入门**。
+它的性质是**鲁棒性缺陷**(需要运维者自己的服务被按特定序列驱动,后果是内部状态不一致),
+**不是权限提升或数据泄露**。研究代码的惯例处置通常是提 GitHub issue 而非安全通告。
+**该判断与是否披露、何时披露,均属 owner 决定,不由本记录代为决定。**
