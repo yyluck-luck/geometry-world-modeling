@@ -1365,3 +1365,47 @@ PLAID 2404.14989、TREC 2301.10493、contamination 2310.17589/2311.09783/2407.07
 占据风险必须先查。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+
+## 2026-09-19 R14-C 占据核查:重构框架**未被占据**,但最强反对意见是"跨域改名"+"缺少语义 oracle"
+
+13 篇引用已核实为真(含 2607.21686、DeepCruiser 1812.05339、DL bug studies 1906.01388/2307.13777/2401.03069、
+ML testing survey 1906.10742、MIND 2602.08025、2602.23152、2609.03673)。
+
+### Q1/Q2:未被占据
+
+**最危险的邻居 2607.21686 Persistent Computational State 被逐节读完(arXiv HTML + 29 页 PDF)**,判定为**不占据**:
+- §1.2–§2 把失效写成 **runtime 在 request boundary 丢弃**状态,§3 边界明确把 model code/RNG 留在 framework ——**是 serving/runtime 层,不是对已发布模型实现内部写读路径的源码审计**;
+- §4 的 `Fingerprint(M,D,ε,probe)` 是对可寻址 runtime buffer 做 necessity/sufficiency/redundancy **动态消融**,不是静态 reset 完备性检查;
+- **全文未出现对模型类 `reset()` 的审计**;"initialize" 仅在 §7.2 作为重新初始化 CUDA 的进程语境出现;
+- 未报告任何"分支 A 写属性 → 分支 B 有守卫地读 → reset 未清除"的实例。
+**其 `snapshot completeness`(§3, I4)不能改称 `reset completeness`;其 return-consistency test(§6)不能改称 reset audit。**
+
+五条件 predicate 作为**组合**未被占据,但各部件都有强邻居:软工的 test pollution / order-dependence
+(PolDet、PRADET、ODRepair、NIO)已有成熟的动态检测与修复,并报告真实项目的 prevalence 与修复结果。
+
+### Q4:最强结构性反对意见(这是真正要解决的智力问题)
+
+**① 审稿人会视为 test-pollution / order-dependence 的跨域改名**,除非证明模型生命周期语义带来不可约的新对象。
+**② 更尖锐的语义问题:在没有明确 reset/initialize contract 时,"该字段没被清除"并不自动等于 defect——它可能是有意的持久化状态。**
+审计必须证明该字段**按公开生命周期语义应当被清除**,而不仅仅是"它没出现在某个函数体里"。
+
+**这条我接受,并认为它是本方向能否成立的枢纽。** 没有 defect 的语义 oracle,整个 audit 退化为风格检查。
+
+### 源码边界更正(重要)
+
+**真正满足五条件静态链的字段是 `initial_threshold`,不是 `c2ws`。**
+`reset()` 确实不清 `self.c2ws`,但 `initialize()` 随后在 `:180` 用 `self.c2ws = [c2w]` **重建**它,故 `c2ws` 不构成 reset omission。
+另:条件 5(冻结权重行为后果)在**公开 demo 路径上仍是 UNVERIFIED** ——
+我们有静态可达性 + 自建 harness 上的 `+0.245 dB`,但**没有运行公开 demo**。二者不可混写。
+
+### 我自己动手的第二系统审计:Self-Forcing = **NEAR**,不是 HIT
+
+浅克隆 `guandeh17/Self-Forcing` HEAD `33593df3e81fa3ec10239271dd2c100facac6de1`:
+- **相同的结构性风险模式**:`demo.py:136` 模块级全局 `pipeline`(与 VMem 的全局 `MODEL` 同构);
+  `causal_inference.py:36` 只初始化 `self.kv_cache1 = None`,**`self.crossattn_cache` 在 `__init__` 中未初始化**;
+  **没有 `reset()` 方法**,靠 `:110-133` 的 `else` 分支手工部分重置;
+  `demo.py:309-310` 还**绕过守卫直接调用** `_initialize_kv_cache/_initialize_crossattn_cache`。
+- **但**:`else` 分支对 `kv_cache1` 的 `global/local_end_index` 与 `crossattn_cache` 的 `is_init` 都做了重置,
+  `causal_diffusion_inference.py:110-124` 对 pos/neg 两路也都重置。
+**我没能证明存在可达的脏读,故诚实归类为 NEAR 而非 HIT。** 这本身是有用的数据点——
+说明该缺陷类**不是**这类代码库的普遍现象,`M/N` 里的 `M` 可能很小。
