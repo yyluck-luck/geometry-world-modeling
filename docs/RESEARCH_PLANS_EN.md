@@ -302,3 +302,46 @@ FGB-SI estimates the signed effect of retaining versus replacing one named histo
 ### Launch guard regression strengthening — 2026-09-16
 
 The software-only guard regression now passes 9/9. The successful fixture checks required receipt field presence plus exact run/scope/session/log/state/command values, manifest/contract/validator/Slurm/generic/wrapper SHA relationships, execution-boundary ID, and embedded `PRE_RUN_READY` validator status with empty errors. A wrapper-file tamper case is also rejected. This remains dispatch accounting only; no remote formal launch or scientific execution occurred.
+
+
+---
+
+## Plan status, 2026-09-18 close (backfilled 2026-09-19)
+
+**The duplicate-context-slot repair line is closed.** It executed its prospectively specified test
+and measured −0.016 dB against a +0.20 dB retention threshold fixed before any repair output was
+scored. The threshold was not lowered, the replacement policy was not changed, and no favourable
+subgroup was elevated.
+
+**No plan item currently requires GPU.** The queue is empty and no generation is requested.
+
+### What the plan produced
+
+A finalised technical report with a self-verifying artefact bundle; a corrected statement of the
+released system's call graph (three call sites, turning enables NMS, so the cross-arm leak is
+natively reachable — stated as static reachability only, with no claim about the published
+evaluation); a leak-effect decomposition showing the whole effect is carried by frame selection
+rather than slot order; and a qualified, and consequently demoted, geometry evaluator.
+
+### What the plan explicitly abandoned
+
+SOCF-A, FGB-SI and GRC were stopped before or during execution. The bounded question search returned
+zero survivors and was ratified twice. Candidate A is recorded as **untested, not falsified**: its
+specified recent/spread policies were never supplied to the executing agent and have never been
+generated. S112 is `UNTESTABLE` under its own frozen qualification rule.
+
+### The single open path
+
+T1-5, pose-label feedback in self-generated history. The pinned source stores each generated frame
+paired with its **commanded** camera; whether any generated image deviates from that camera is
+untested. Its gate is pose identifiability on generated frames — a generated image need not admit a
+well-defined rigid camera at all, and an estimator will fit one regardless. The gate needs GPU
+inference without diffusion and is **not yet authorised**. It may kill the lead, which is why it runs
+first.
+
+Prerequisite in progress: the pose evaluator has never been run and never compared to its literature
+family. Brief at `work/agents/PROMPT_RESEARCH_POSE_FAMILY_AND_LEADS_20260918.md`. This follows
+`RESEARCH_PRINCIPLES` v2.13, whose second and third triggering instances were recorded this day after
+TSED, GeCo, PDI-Bench and SGC were all found to predate a self-built geometry evaluator.
+
+`new_method_validated=false`; `novelty_authorization=NONE`.
