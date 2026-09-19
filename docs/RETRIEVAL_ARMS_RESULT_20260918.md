@@ -90,6 +90,14 @@ before the threshold loop and never reads the threshold).
 | PERMUTATION (same multiset, different order) | 4 | **−0.015 dB** | 0.015 |
 | CONTENT (different multiset) | 8 | +0.436 dB | 0.917 |
 
+**Which contrast these strata decompose — read this before quoting them.** Weighted by the stated
+window counts, `(2×0.000 + 4×(−0.015) + 8×0.436)/14 = 0.24486 → **+0.245 dB**`, which is row 4 of
+§2, `memory_nms_on_clean − memory_nms_on (leaked)`. It is **not** a decomposition of the primary
+contrast `memory_nms_off − static = +0.242 dB` in row 1. The two differ by 0.003 dB, so quoting
+these strata next to the primary contrast without naming the estimand produces a false
+decomposition that no magnitude check will catch. An external review made exactly that
+reconciliation attempt on 2026-09-19 and reported a 0.0029 dB "discrepancy"; there is none.
+
 The NULL stratum is exactly zero because the two arms received byte-identical consumer input and
 produced byte-identical output — verified by sha256 on all four runs. That is the validity gate
 for reusing sealed outputs instead of regenerating them, and it passed.
