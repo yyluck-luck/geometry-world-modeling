@@ -5,7 +5,8 @@
     "baseline_acceptance_ref": null,
     "budget": {
       "candidate_count": 4,
-      "dtype": "fp16_cuda_model_fp32_saved_outputs",
+      "dtype": "fp32_params_cuda_autocast_fp32_saved_outputs",
+      "dtype_basis": "Matches the pinned official reference: VMemPipeline.__init__ defaults to torch.float32, app.py does not override it, and utils.do_sample applies torch.autocast(device_type=cuda, enabled=True) during sampling. Manual fp16 parameters were a divergence and are not used.",
       "metric_definition_ref": {
         "bytes": 1413,
         "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/METRIC_DEFINITION_v1.json",
@@ -131,14 +132,14 @@
         "sha256": "bf1745616c6136adc2836e5128ac1e7e55337f85e78c8efa42a0edabc1f6cb73"
       },
       "predictor_ref": {
-        "bytes": 15043,
+        "bytes": 15574,
         "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/predictor_s103.py",
-        "sha256": "d98569c667067b2375b819d5205753f1bc284a5e2dd3239b58047c90d0fa43ed"
+        "sha256": "5e95d79ae192bdcb3313d5f452a23a72501fb90c5f97acf42046f76ee1d1cbe9"
       },
       "sbatch_ref": {
-        "bytes": 2373,
+        "bytes": 2906,
         "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/run_s103_vmem_base.slurm",
-        "sha256": "581517dce0f4db7e7dbe75297e89e5ccc9264983df52497a6a5ca34ace882fc9"
+        "sha256": "4dcc304c8b9d018e479e24e8cd737276f79fe30eef93fe344df084dfc84b1eaa"
       },
       "sealer_ref": {
         "bytes": 10711,
@@ -167,12 +168,12 @@
     },
     "heldout_exposure_review_ref": null,
     "isolation": {
-      "execution_boundary_id": "s103-scene13-w001-vmem-base-v4-measured-access-and-disclosure",
+      "execution_boundary_id": "s103-scene13-w001-vmem-base-v5-official-fp32-alignment",
       "predictor_root": "/home/yliutz/gwm_stages/S103_SCENE13_W001_20260916",
       "receipt_ref": {
-        "bytes": 3271,
-        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/EXACT_ISOLATION_RECEIPT_v4_593971.json",
-        "sha256": "cbee07d22d3be0d67b64bed8b0e77d230ed486e244283109b8b6d0e4c3c73124"
+        "bytes": 3264,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/EXACT_ISOLATION_RECEIPT_v5_594089.json",
+        "sha256": "4cb8991a13096689c15ea590e55ddee92715c413fc8ab501c330f566a6b24261"
       }
     },
     "predictor_inputs_ref": {
@@ -181,16 +182,16 @@
       "sha256": "4bda6d3ded1b228567f291c1b7973a1e529220c8562abb276a5af2c7bca7b11e"
     },
     "predictor_wrapper_ref": {
-      "bytes": 15043,
+      "bytes": 15574,
       "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/predictor_s103.py",
-      "sha256": "d98569c667067b2375b819d5205753f1bc284a5e2dd3239b58047c90d0fa43ed"
+      "sha256": "5e95d79ae192bdcb3313d5f452a23a72501fb90c5f97acf42046f76ee1d1cbe9"
     },
     "reviewer_identity_policy_id": "s103-canonical-reviewers-v1",
     "run_id": "S103-VMemBase-scene13-w001-v1",
     "runtime_binding_ref": {
-      "bytes": 4242,
-      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/RUNTIME_BINDING_v4.json",
-      "sha256": "2fae800dcb3d00014453484918addbbca893ec16afc4482f082bde044d0227c4"
+      "bytes": 4235,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/RUNTIME_BINDING_v5.json",
+      "sha256": "456f5ec4ddb31c5f295368817aaeec4ff75420eab09ac416cefd74c8ea5b0328"
     },
     "scope": "development_baseline",
     "scorer_inputs_ref": {

@@ -58,6 +58,11 @@ def main():
         protocol = {
             "status": "FROZEN", "run_id": "S103_SYNTHETIC_TEST", "author": "test-author",
             "scorer_ref": ref(SCORER), "scorer_inputs_ref": ref(manifest_path),
+            "future_modality_disclosure": {
+                "target_pose_gt_provided_as_command": True,
+                "future_modalities_withheld": ["future_rgb", "future_depth"],
+                "basis": "fixture mirrors the real contract disclosure required by the scorer",
+            },
             "scope": "development_baseline",
             "runtime_binding_ref": {"sha256": "1" * 64},
             "isolation": {"execution_boundary_id": "synthetic-boundary-v1",
@@ -119,6 +124,15 @@ def main():
             "execution_boundary_id": "synthetic-boundary-v1", "prediction_complete": True,
             "future_scoring_permitted": True, "future_outcome_files_opened": False,
             "future_gt_opened": False, "predictor_exit_code": 0, "unauthorized_input_reads": 0,
+            # The scorer requires a seal to declare a measured access method and to
+            # report measured, not assumed, access fields.  The fixture must therefore
+            # look like a valid seal rather than a pre-2026-09-17 one.
+            "access_accounting_method": ("CPython sys.addaudithook over the full PEP 578 event "
+                                         "stream; counts are exact and never truncated"),
+            "forbidden_root_opens": [],
+            "withheld_future_modality_files_opened": False,
+            "target_pose_gt_provided_as_command": True,
+            "withheld_future_modalities": ["future_rgb", "future_depth"],
             "predictor_completed_at_utc": completed_time.isoformat(),
             "sealed_at_utc": (datetime.now(timezone.utc) - timedelta(seconds=1)).isoformat(),
             "files": [ref(prediction_path)]
@@ -136,6 +150,13 @@ def main():
                                  "--launch-guard-receipt-sha256", sha(guard_path),
                                  "--output-dir", str(score_dir)], capture_output=True, text=True)
         checks.append(["valid sealed fixture scores", scored.returncode == 0])
+        if scored.returncode != 0:
+            # Without this the test reports only a missing receipt downstream and
+            # hides why the scorer refused, which cost real debugging time on
+            # 2026-09-17.  Surface the scorer's own message.
+            print("SCORER_REFUSED rc=%d" % scored.returncode)
+            print((scored.stderr or "")[-1200:])
+            print((scored.stdout or "")[-400:])
         receipt_path = score_dir / "SCORING_RECEIPT.json"
         verified_path = root / "verification.json"
         verified = subprocess.run([sys.executable, str(VERIFIER), "--contract", str(contract_path),

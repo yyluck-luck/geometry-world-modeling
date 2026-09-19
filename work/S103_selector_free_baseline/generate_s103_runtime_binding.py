@@ -14,7 +14,7 @@ WEIGHTS = Path("/home/yliutz/gwm_weights_20260915")
 STAGE = Path("/home/yliutz/gwm_stages/S103_SCENE13_W001_20260916")
 IMAGE = Path("/home/yliutz/gwm-images/nvidia-cuda-12.6.3-runtime-ubuntu22.04.sif")
 OUT = ROOT / "work/S103_selector_free_baseline/window_scene13_w001_20260916"
-BOUNDARY_ID = "s103-scene13-w001-vmem-base-v3-k-and-camera-frame-consistent"
+BOUNDARY_ID = "s103-scene13-w001-vmemcode-noretrieval-v7-selfcontained-recorder"
 
 
 def sha(path: Path) -> str:
@@ -70,7 +70,7 @@ def main() -> None:
     scorer = ROOT / "work/S103_selector_free_baseline/scorer_s103.py"
     verifier = ROOT / "work/S103_selector_free_baseline/verify_s103_scores.py"
     runtime = {
-        "schema": "gwm-s103-runtime-binding-v3",
+        "schema": "gwm-s103-runtime-binding-v7",
         "generated_utc": generated,
         "execution_boundary_id": BOUNDARY_ID,
         "predictor_root": str(STAGE),
@@ -93,7 +93,7 @@ def main() -> None:
         "container_policy": ["--nv", "--containall", "--no-home", "--cleanenv"],
         "claim_boundary": "runtime identity only; no model forward and no scientific result",
     }
-    runtime_path = OUT / "RUNTIME_BINDING_v3.json"
+    runtime_path = OUT / "RUNTIME_BINDING_v7.json"
     dump(runtime_path, runtime)
     print(json.dumps({"source_manifest": ref(source_path), "runtime_binding": ref(runtime_path)}, indent=2))
 

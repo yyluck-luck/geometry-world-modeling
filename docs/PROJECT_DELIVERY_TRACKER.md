@@ -1,44 +1,6 @@
 
 > **实验编号说明（给新读者）**：本文保留项目内部编号以便追溯；首次出现时应写成“编号（具体试验名称）”。统一名称见 [`work/S90_proxy_resumable_index/EXPERIMENT_NAME_LEGEND.md`](../work/S90_proxy_resumable_index/EXPERIMENT_NAME_LEGEND.md)：S86（单场景四目标几何条件注入基线实验）、S87（末端引导强度控制与多步引导必要性反例实验）、S88（RTMV相机JSON元数据与静态投影数据资格检查）、S89（RTMV配对数据TLS接续失败审查）、S90（RTMV归档配对数据恢复与索引协议审查）。S88–S90是数据资格、传输和协议审查，不是模型性能实验；编号也不表示实验成功。
 
-<!-- S110_S113_CURRENT_BEGIN -->
-## 当前交付状态（UTC 2026-09-18 收尾，2026-09-19 补记）
-
-本条为交付追踪的最新状态，覆盖 09-11 之后未记录的全部进展。**交付物已封版；研究分支已关闭。**
-
-### 已交付
-
-| 交付物 | 位置 | 状态 |
-|---|---|---|
-| 技术报告（正文八节 + 六附录） | `docs/report/TECHNICAL_REPORT_20260918.md` | ✅ 封版 |
-| LaTeX 源与 PDF（11 页 A4，零 overfull，8 个可点 arXiv 链接） | `docs/report/latex/` | ✅ 封版 |
-| 自校验交付包（11 文件 + `MANIFEST.sha256`） | `docs/report/bundle/` | ✅ 与集群原件逐字节核对 |
-| 评价器资格审查（四部分，Part 4 权威） | `work/S110_evaluator_qualification/` | ✅ |
-| 选题搜索决定与证据 | `docs/question_search/` | ✅ 零存活，STOP |
-| 私有仓库首次版本化（15,237 文件） | `github.com/yyluck-luck/geometry-world-modeling` | ✅ |
-
-### 主结果（窗口级，种子先在窗口内折叠；有限面板，不报推断统计）
-
-`memory_nms_off − static` = **+0.242 dB**（sd 1.270，8/14 为正）；`memory_nms_on_clean − static` =
-−0.485 dB；`memory_nms_on_clean − memory_nms_off` = −0.726 dB。泄漏效应按预先普查分层：
-NULL **+0.000**（逐字节相同）/ PERMUTATION **−0.015** / CONTENT **+0.436**。
-
-**重复槽位修复：实测 −0.016 dB，未达预声明的 +0.20 dB 阈值，按规则丢弃，分支关闭。**
-
-### 未交付且不再投入
-
-SOCF-A、FGB-SI、GRC 均在执行前或执行中停止；S112 重访在自身资格规则下判 `UNTESTABLE`（独立闭环
-2/3）；选题搜索候选 A 记为**未测试**而非已证伪，候选 B 未形成有价值的具体命题。
-
-### 唯一在关键路径上的开口
-
-位姿评价器与几何评价器此前处于同一状态——建好、单元测试过、从未运行、从未与文献族比较。其族枚举
-简报见 `work/agents/PROMPT_RESEARCH_POSE_FAMILY_AND_LEADS_20260918.md`。T1-5（自生成历史的相机标签
-反馈）是唯一存活线索，其门禁是生成帧上的位姿可识别性，需 GPU 推理（无扩散），**尚未授权**。
-
-`new_method_validated=false`；`novelty_authorization=NONE`。
-<!-- S110_S113_CURRENT_END -->
-
 <!-- S89_CURRENT_BEGIN -->
 ## S89当前：两次数据接续受TLS阻断；8页教学增补及176页连续版已核验（UTC 2026-09-11T01:41:37.711993+00:00）
 

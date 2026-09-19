@@ -20,19 +20,11 @@ ENVROOT=/home/yliutz/.conda/envs/gwm-cut3r-py311-20260915
 SOURCE=/home/yliutz/gwm_source_transport_20260915
 WEIGHTS=/home/yliutz/gwm_weights_20260915
 STAGE=/home/yliutz/gwm_stages/S103_SCENE13_W001_20260916
-# Slurm copies the batch script into a spool directory before executing it, so
-# BASH_SOURCE cannot locate the bundle.  Use the absolute bundle_root declared in
-# protocol.formal_execution.bundle_root, and refuse to run if it is not the
-# frozen bundle (job 594034 failed because the spool copy was mounted instead).
-FORMAL_BUNDLE=/home/yliutz/gwm_formal_bundle_s103_scene13_w001_v6
-for required in contract.json dispatch_manifest.json predictor_s103.py seal_predictions_s103.py; do
-  [ -f "$FORMAL_BUNDLE/$required" ] || { echo "formal bundle incomplete: missing $required" >&2; exit 2; }
-done
+FORMAL_BUNDLE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN_PARENT=/home/yliutz/gwm_prediction_runs/S103_VMEMBASE_SCENE13_W001
 JOB_ROOT="$RUN_PARENT/job-${SLURM_JOB_ID}"
 PREDICTOR_OUT="$JOB_ROOT/predictions"
 
-mkdir -p "$RUN_PARENT"
 mkdir "$JOB_ROOT"
 mkdir "$PREDICTOR_OUT"
 set +e
