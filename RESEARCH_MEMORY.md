@@ -1561,3 +1561,76 @@ R15-E 说该 relation "可由 `initialize()` docstring 的 'Reset internal state
 才可能超出已有测试污染工作。
 
 **当前 M/N 因此从 2 个 HIT 降为 1 个可辩护 HIT。**
+
+## 2026-09-19 R15-F/G + 我的复核:新 HIT **CausVid**,并找到**最强的 oracle 实例**
+
+15/15 新引用核实为真。审计总数升至约 20 个系统。
+
+### 新 HIT:CausVid ——我独立复核,且比报告描述的更强
+
+`tianweiy/CausVid` HEAD `adb6a5ecd07666b4d0290042915c8406e6d5ce22`(arXiv:2412.07772):
+`causvid/models/wan/causal_inference.py:37` `self.kv_cache1 = None`;`:100` `if self.kv_cache1 is None:` 守卫初始化;
+`else` 分支(`:113-115`)**只重置 crossattn**:
+```python
+# reset cross attn cache
+for block_index in range(self.num_transformer_blocks):
+    self.crossattn_cache[block_index]["is_init"] = False
+```
+**KV cache 索引完全未重置**,随后直接进入去噪循环。全仓库 grep:`kv_cache1` 只出现在 `:37` 与 `:100`,**没有任何 reset 路径**。
+公开入口 `minimal_inference/longvideo_autoregressive_inference.py:61-71` 以 `--num_rollout` 在同一 pipeline 上**重复调用 `inference()`**(README:42-46)。
+
+### **最强 oracle 实例:后继实现自己补上了那段重置**
+
+对照 `guandeh17/Self-Forcing` `33593df3` 的同名文件 `pipeline/causal_inference.py:123-132`:
+
+| | `else` 分支 |
+|---|---|
+| CausVid | `# reset cross attn cache` → 重置 `is_init`,**完** |
+| Self-Forcing | 同样的 crossattn 重置,**再加** `# reset kv cache` → 重置 `kv_cache1[...]["global_end_index"]` 与 `["local_end_index"]` |
+
+Self-Forcing 是 CausVid 代码的**直接后继**(同名文件、同类结构、同样的 `_initialize_kv_cache` /
+`_initialize_crossattn_cache`、连 `# reset cross attn cache` 注释都相同),补上的那段带着自己的注释 `# reset kv cache`。
+
+**这是本项目迄今最强的意图证据:不是审计者的判断、不是风格规则、不是构造函数论证,
+而是生态中最接近该代码的后继实现明确声明了那个重置是必须的。**
+按 R15-E 的 oracle 排序,这属于第 1–3 档(公开合同 / 事前关系 / 文档化生命周期),**远高于我此前提出的第 4、6 档论证。**
+
+### 三个 HIT 的 oracle 状态各不相同(必须分开写)
+
+| 系统 | oracle 类型 | 状态 |
+|---|---|---|
+| **CausVid** | **后继实现声明**(Self-Forcing 补上同一重置) | ✅ 最强 |
+| **GEN3C** | **公共准入安全不变量**(`model_seeded ⇒ usable cache`) | ✅ 成立(R15-E 裁定) |
+| **VMem** | 无同类声明 | ⏸ **INTENT-ORACLE-UNRESOLVED** |
+
+**注意:CausVid 没有 reset 方法,故"reset 漏清"论证对它不适用;它靠的是后继实现的对比。
+三者的 oracle 依据互不相同,不能在论文里当作同质证据聚合。**
+
+### 扩展审计结果(约 20 系统)
+
+**HIT 3**:VMem(oracle 未决)、GEN3C、**CausVid**。
+**NEAR 2**:MagicWorld v1;**PlayGen**(`app.py:194-207` 的 `disconnect()` 清了 command/queue/config/online_player,**漏了 `user_zeta[user_id]`**;C4 按"文档化公开路径"严格解释保守判为 NEAR)。
+**CLEAN 12+**:Self-Forcing、LongLive v1/v2、Matrix-Game 1、**Matrix-Game 2.0**(`:517` 每次公开 `inference()` 开头把四个 cache 全置 `None` ——**正确范式,极佳对照**)、FramePack、MemFlow、Pyramid Flow、HunyuanVideo、DIAMOND、CogVideoX、AlayaWorld、ViewCrafter。
+**OUT-OF-PREDICATE**:Open-Sora、Yume、Hunyuan-GameCraft、HunyuanWorld、Wan 2.1/2.2、Oasis、**WorldMem**(已实核:`app.py:305-325` 有 `reset()` 清 memory latent/actions/poses/c2w/frame index,`:563` 接线;状态经 Gradio State 显式传递)、Cosmos-Predict2。
+
+### R15-G:零 GPU 能走多远
+
+**严格意义上条件 5 仍不能零 GPU 完成**——它要求冻结权重下的行为后果。但:
+
+**E1(GEN3C,0 GPU,已核可行):** seam 存在且**不需改发布源码**。我逐条复核:
+`server_base.py:30` `class InferenceModel():` ——**普通类,未继承 `ABC`**(只 import 了 `abstractmethod`),Python 不阻止构造;
+`server_cosmos_base.py:32-38` `CosmosBaseModel.__init__` **只调 `super()`,不构造内层模型**;
+官方 debug seam(`GEN3C_API_DEBUG=1`)**复现不了该 HIT** ——`server_debug.py:30` 在 `__init__` 就把 `self.model_seeded = True`。
+桩只需 4 个小方法 + 小 NumPy 数组,**无 torch 权重**。断言链:seed A 成功 → seed B 清 cache 后抛错、外层 flag 仍 true → `request_inference` 仍放行(202/task)且 inner cache 为 None。
+**含 clean-control**:让失败路径显式清外层 flag,则 inference 必须被拒(400)——证明不是"任何失败都能排队"。
+成本 **0 GPU-hours**,< 1 wall-clock day。成功后标 `MEASURED_SERVER_CONTRACT_CONSEQUENCE`,同时保留 `frozen_weight_generation_consequence=UNMEASURED`。
+**诚实边界**:HTTP route 层需 test-time monkeypatch,**不是由公开配置选出的**;若要求"不改 harness、纯公开配置即可选中桩",答案是**否**。
+
+**E2(VMem,0 新增 GPU):** 复用已封存的 zero-diffusion census ——14 窗口中 **12/14 的 padded retrieval IDs 发生变化**,slot 0 在 14/14 相同。
+支持一个**限定的**条件 5:**selector 输出改变**。不支持"生成帧改变"或跨场景外部效度;后者由已有的真实生成结果 `+0.245 dB` 支撑,且属暴露面板。
+**从 JSON 读回是档案审计,不能称为重新执行了 selector。**
+
+**总结:最小可审证据包 = GEN3C wrapper 后果 + VMem selector 后果,新增 GPU-hours = 0;
+但把两者写成同一层面的"冻结模型行为",审稿人很可能拒绝。**
+
+`new_method_validated=false`;`novelty_authorization=NONE`;本轮零 GPU。

@@ -173,6 +173,7 @@ SHA-256 都是 `90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e
 ### E3：若 reviewer 坚持两个真实 generator 都要 frozen-weight downstream consequence
 
 - VMem：本项目已有真实 frozen generator panel，因此新增 GPU-hours=0；若 reviewer 要求新鲜重测，最低是一个窄窗口的 clean/leaked paired run，至少两个 seed，四个 forwards，再加 deterministic/order control。项目没有在本轮核出这一组新鲜 H800 wall-time，所以不报伪造的 GPU-hour。
+- 作为已有运行量的实证参照，`docs/report/bundle/NMS_ON_CLEAN_RECEIPT.json:1-24` 记录 28 个 clean-NMS runs 的 555.8 s（单 H800、generation-only，约 0.154 H800-GPU-hours），`NMS_RECEIPT.json:1-8` 记录 88 个 runs 的 1113.5 s（约 0.309 H800-GPU-hours）。按前者的粗略平均，四个 forward 的窄窗口配对约 0.022 GPU-hours 的 generation-only 下界；它不包括评分、审计、启动开销，也不能冒充新的最低成本保证。
 - GEN3C：需要真实 `CosmosModel`/persistent cache 和至少一次正常 seed + 一次失败 seed + inference attempt；README 只证明 43 GB 级显存需求和单 GPU 命令，不提供 runtime。最低是一个符合 48 GB 级别条件的 GPU allocation；**精确 GPU-hours 在已核对证据中是 UNKNOWN**。若只观察真实 cache failure 而不生成视频，仍应写成 runtime fault consequence；若要 image/quality，需要完整有效 seed 和真实 frame generation。
 - CPU fallback 不能替代 E3：VMem 的 CPU 历史数值属于 declared component variant，GEN3C unmodified CPU route 不成立。
 
@@ -196,7 +197,6 @@ SHA-256 都是 `90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e
 - GEN3C commit [db2ffe12ced12ddafcec5e0422ee46ce8520746b](https://github.com/nv-tlabs/GEN3C/tree/db2ffe12ced12ddafcec5e0422ee46ce8520746b); `gui/api/server.py`, `server_base.py`, `server_cosmos_base.py`, `server_cosmos.py`, `server_debug.py`, `gui/README.md`, and `cosmos_predict1/diffusion/inference/gen3c_persistent.py` at the line ranges linked above. `README.md:56-69,84-95,142-155,274-281` gives the 7B checkpoint, single-GPU command, 43 GB full-offload observation, Apache-2.0 source license and NVIDIA Open Model License.
 - Local VMem result report: `docs/report/TECHNICAL_REPORT_20260918.md:186-189,202-224,254-275`.
 - Local census artifact: `docs/report/bundle/LEAK_REGIME_CENSUS.json:1-42`.
-- Local feasibility and runtime evidence: `docs/S17_FULL_VIDEO_BASELINE_FEASIBILITY.md:15-20,34-57`; `docs/S76_RELATIVE_CAMERA_RESPONSE_RESULT.md:5-7`; `work/S70_fixed_context_generation/PROTOCOL.md:13-27`; `work/S70_fixed_context_generation/generation_verification_01/receipt.json:1769-1984`.
+- Local feasibility and runtime evidence: `docs/S17_FULL_VIDEO_BASELINE_FEASIBILITY.md:15-20,34-57`; `docs/S76_RELATIVE_CAMERA_RESPONSE_RESULT.md:5-7`; `work/S70_fixed_context_generation/PROTOCOL.md:13-27`; `work/S70_fixed_context_generation/generation_verification_01/receipt.json:1769-1984`; `docs/report/bundle/NMS_ON_CLEAN_RECEIPT.json:1-24`; `docs/report/bundle/NMS_RECEIPT.json:1-8`.
 
 No claim in this file upgrades `new_method_validated=false` or `novelty_authorization=NONE`.
-
