@@ -14414,3 +14414,23 @@ Local read-through of AGENTS.md/RESEARCH_PRINCIPLES.md v2.12/RESEARCH_MEMORY.md/
 证据：`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json; work/S103_selector_free_baseline/run_receipts_594155/PREDICTION_SEAL.json; work/S103_selector_free_baseline/baseline_score_594155/SCORING_RECEIPT.json; proposal_alignment_20260919.md; work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`
 
 下一步：完成 Round 11 文献占据/退化/低成本测量门；若无新的人工授权，不提交新的 GPU 生成、训练或候选搜索
+
+## 2026-09-19T21:57:48+08:00 · Round 11 占据门闭合并裁定 END-LINE；冻结后续 GPU/训练边界
+
+Steady-Forcing 与 Internal-DW 的记录被用作轴(e)三条件合取的占据证据；不再启动清洁重测、训练、新候选搜索或额外 GPU 花费，项目转入冻结生成器案例研究的证据整理
+
+时间依据：current clock；记录写入于 2026-09-19T13:57:48+00:00。
+
+证据：`RESEARCH_MEMORY.md; proposal_alignment_20260919.md; work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`
+
+下一步：整理正式 S103 基线、状态泄漏更正、开发级诊断与失败机制的最终报告边界；保持 new_method_validated=false、novelty_authorization=NONE
+
+## 2026-09-19T21:59:18+08:00 · 更正 S103 结果命名与评分证据边界
+
+594155 只能称签批启动/隔离链下的固定上下文视频生成前向；predictor 绕过 VMemPipeline.__init__、surfel 构建与 context retrieval。16.026 dB 是开发级 RGB 分数且待独立重算，不是 VMem 记忆系统基线或方法结果
+
+时间依据：current clock；记录写入于 2026-09-19T13:59:18+00:00。
+
+证据：`RESEARCH_LOG.md:14148-14156; work/S103_selector_free_baseline/run_receipts_594155/PREDICTION_SEAL.json; work/S103_selector_free_baseline/baseline_score_594155/SCORING_RECEIPT.json; proposal_alignment_20260919.md`
+
+下一步：最终报告继续使用固定上下文视频生成器案例研究命名，明确已暴露数据、RGB-only、待独立重算和无方法验证边界

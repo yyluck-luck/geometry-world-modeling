@@ -41,7 +41,7 @@
 
 这些是 09-15 版本没有的：
 
-1. **Gate 0 通过，首次封存 VMem 前向**，此后 116+ 次封存生成（jobs 594957、595887、595891、595902）。
+1. **签批的 S103 启动/隔离链在单窗口 job 594155 通过并封存固定上下文视频生成前向**。其后 116+ 次属于另列的开发级诊断/修复生成（jobs 594957、595887、595891、595902），不继承 594155 的正式链或 held-out/method 证据等级。594155 绕过 `VMemPipeline.__init__`、surfel 构建与 context retrieval，不能称 VMem 记忆系统基线；其 RGB 评分回执仍标记 `RGB_SCORE_COMPLETE_PENDING_INDEPENDENT_RECOMPUTE`。
 2. **窗口级主对照**（种子先在窗口内折叠；有限面板，不报推断统计）：
    `memory_nms_off − static` **+0.242 dB**（sd 1.270，8/14 为正）；`nms_on_clean − static` −0.485；
    `nms_on_clean − nms_off` −0.726。

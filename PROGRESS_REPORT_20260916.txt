@@ -1,9 +1,9 @@
 ================================================================================
 当前执行更正（2026-09-19 21:54 Asia/Shanghai）
 ================================================================================
-主账较早的“Gate 0 尚未运行/卡在镜像”摘要已被后续实测记录 supersede：正式 S103 VMem 开发基线 job 594155 已通过签批链并封存，预测与评分材料位于 `work/S103_selector_free_baseline/run_receipts_594155/` 与 `work/S103_selector_free_baseline/baseline_score_594155/`，评分回执为 16.026 dB。该结果只属于已暴露 scene_13/scene_14 的开发级 RGB 基线，不是 held-out 结果，也不验证新方法。
+主账较早的“Gate 0 尚未运行/卡在镜像”摘要已被后续实测记录 supersede：签批的 S103 启动/隔离链在 job 594155 完成了固定上下文视频生成前向；代码绕过 `VMemPipeline.__init__`、surfel 构建与 context retrieval，历史帧由 0/15/30/45 清单固定。预测已封存，材料位于 `work/S103_selector_free_baseline/run_receipts_594155/` 与 `work/S103_selector_free_baseline/baseline_score_594155/`，评分回执为 16.026 dB，但状态仍是 `RGB_SCORE_COMPLETE_PENDING_INDEPENDENT_RECOMPUTE`。该结果只属于已暴露 scene_13/scene_14 的开发级 RGB 固定上下文结果，不是 VMem 记忆系统基线、held-out 结果，也不验证新方法。
 
-随后诊断实验发现并记录了跨臂状态泄漏，相关 NMS-on 解释已收回；当前项目决定暂不再提交新的 GPU 生成或训练，等待 proposal alignment 与创新占据门裁定。`new_method_validated=false`；`novelty_authorization=NONE`。
+随后诊断实验发现并记录了跨臂状态泄漏，相关 NMS-on 解释已收回；最新创新占据核查已将唯一幸存的轴-(e) 方向裁定为 END-LINE。当前不再提交新的 GPU 生成、训练或候选搜索；800 GPU-hour 额度维持撤回。`new_method_validated=false`；`novelty_authorization=NONE`。
 
 软件派发护栏最新回归为 9/9 PASS（仅本地合成软件检查）：`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`。
 ================================================================================

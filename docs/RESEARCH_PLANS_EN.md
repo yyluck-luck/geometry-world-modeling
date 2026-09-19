@@ -1,12 +1,12 @@
 # CURRENT EXECUTION OVERRIDE — 2026-09-19 21:54 Asia/Shanghai
 
-This override supersedes the older 2026-09-16 image-blocker paragraphs below. The repository ledger now records that the formal S103 VMem development baseline passed its signed Gate0 chain and completed: job 594155 produced `PREDICTION_SEALED`, with the bound prediction/scoring artifacts at `work/S103_selector_free_baseline/run_receipts_594155/` and `work/S103_selector_free_baseline/baseline_score_594155/`. The baseline score receipt reports 16.026 dB. This is a development-scope RGB result on already exposed scene_13/scene_14 data; it is not a held-out or method-validation result.
+This override supersedes the older 2026-09-16 image-blocker paragraphs below. The repository ledger records that the signed S103 launch/isolation chain completed a **fixed-context video-generation forward** in job 594155: the predictor bypassed `VMemPipeline.__init__`, surfel construction, and context retrieval, and used the manually fixed history frames 0/15/30/45. It produced `PREDICTION_SEALED`; the bound artifacts are at `work/S103_selector_free_baseline/run_receipts_594155/` and `work/S103_selector_free_baseline/baseline_score_594155/`. The score receipt reports 16.026 dB but remains `RGB_SCORE_COMPLETE_PENDING_INDEPENDENT_RECOMPUTE`. This is a development-scope RGB result on already exposed scene_13/scene_14 data; it is not a VMem memory-system baseline, held-out result, or method-validation result.
 
 The later S105–S111 diagnostics are also development-scope and their interpretation is constrained by the state-leak correction recorded in the ledger. The current software-only dispatch-guard regression is **9/9 PASS** after the raw validator-receipt hash and bundled-fixture fixes (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`); this receipt proves only local dispatch accounting.
 
-The latest project decision is to stop new GPU generation and training while the proposal-alignment/innovation gate is reviewed. Do not submit the previously discussed clean re-test or any new method run without a fresh explicit owner decision. `new_method_validated=false` and `novelty_authorization=NONE` remain unchanged.
+The latest project decision is **END-LINE for the proposed new mechanism**: the axis-(e) occupancy gate is closed by the recorded Steady-Forcing/Internal-DW evidence. Do not submit the previously discussed clean re-test, training, or any new method run. `new_method_validated=false` and `novelty_authorization=NONE` remain unchanged; the withdrawn 800 GPU-hour tranche stays withdrawn.
 
-The remaining work is evidence/reporting and the literature occupancy gate in `work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`, not another smoke test. Gemini remains advisory only.
+The remaining work is evidence/reporting for the reproducible frozen-generator case study, not another smoke test or candidate search. Gemini remains advisory only.
 
 ## Dispatch guard implementation update — 2026-09-16 05:15 Asia/Shanghai
 
