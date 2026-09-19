@@ -2102,3 +2102,58 @@ R15-E 判 VMem 为 INTENT-ORACLE-UNRESOLVED,并指出唯一出路是**事前注�
 **共同形态:被声明的重置覆盖了大部分状态,漏掉一个仍被后续读取的字段;
 且漏掉的那个都位于与重置动作不同的所有权层级(GEN3C 是外层 wrapper,VMem 是被共享的单例 pipeline)。**
 这比"reset 不完整"更精确,也可被证伪——只要找到一个漏掉字段与重置同层的反例即可。
+
+## 2026-09-19 R19-K 裁定:**VMem = `NO-DEFENSIBLE-ORACLE`。我的最强候选被否决,我接受。**
+
+外部复核读到了我刚推送的候选(引用 `RESEARCH_MEMORY.md:2048-2056, local c1c8eb6`)并**否决**了它。
+否决理由正是我自己标出的那条边界——但它判定该边界是**致命的,不是可以带着走的**。
+
+### 否决理由(逐条,我接受)
+
+**(a) `initialize()` 的 docstring/签名不足。** 它只说用一张图与相机参数建立内部状态、不额外生成帧
+(`pipeline.py:149-161`),**没有**任何关于历史无关性、跨复用对象确定性、或等价于新构造的陈述。
+签名本身不能补上这个承诺。README 只给安装/演示用法(`README.md:42-57`),无生命周期等价陈述。
+
+**(b) `initialize()` 调 `reset()` 并重建 `c2ws` 不构成合同。** `reset()` 无 docstring;
+`:162` 的 `# Reset internal state` 是**实现注释,不是完整公开合同**。
+另:因为 `initialize()` 在 `:180` 重新赋值 `c2ws`,**c2ws 的不对称只是归因证据,不是 oracle**。
+
+**(c) "Choose New Image" 被否决。**
+> "A user-facing session boundary is a plausible intent, but the source does not state the needed
+> observable relation 'same image/camera/intrinsics produce the same retrieval selection regardless
+> of prior pipeline history.' Treating the label as that exact contract would be an **auditor's inference**."
+
+并且 `:362-363` 那条注释关心的是**防止用户看到彼此的文件**,不是 pipeline 选择输出的相等性
+——**正是我自己标注为"外推"的那一点**。
+
+### 它纠正了我一个从 R15-G 一直带着的错误假设
+
+我一直以为 VMem 的"retrieval-set-differs"路线是**零 GPU**的。**不是。**
+构造器加载 VMem/VAE/CLIP/CUT3R(`pipeline.py:47-90`);`initialize` 执行 VAE 与图像编码(`:173-177`);
+非平凡的上下文选择使用 surfel 渲染(`:631-647`);公开轨迹准备要跑扩散(`:1269-1298`)。
+**选择身份只有在"等价的 bank 已经存在"之后才能避开最终扩散**;
+而复用已封存 JSON 或手工预填字段**就离开了公开序列,因而根本没有检验 R**。
+
+我已复核:三个档案脚本**都硬编码 `device = 'cuda'`**
+(`nms_off_threshold_independence.py:77`、`arm_state_isolation_test.py:82`、`leak_regime_census.py:93`)。
+
+### Q2:已封存材料不构成该检验
+
+`isolate_arm_state` 调了公开 `reset()`,但**随后直接**清空可变列表、字典、`global_step` 并
+`delattr(initial_threshold)`(`:68-80`),回执自身也把它标为"reset 加清除每个可变检索字段加删除 initial_threshold"
+并记录 `reset_alone_is_insufficient`(`:181-186`)。
+**这证明的是 harness 为使两臂可比所需要的东西,不证明 VMem 的公开 reset 合同承诺了某种跨历史可观察结果。**
+`delattr` 是关于 harness 隔离需求的证据,也很可能是所测效应的来源,但**其本身不是公开合同违反**。
+
+三个档案各自只授权更窄的陈述(595599 顺序不变性门 / 595614 零扩散普查 / 595625 阈值独立性),
+**没有任何一个比较"新构造 pipeline" vs "已使用 pipeline + 仅公开 `initialize(...)`" 然后做同一公开观测。**
+
+### 最终盘点(今日诚实结论)
+
+> **GEN3C 是唯一可辩护的 HIT,但没有实测后果;
+> VMem 是唯一的实测效应,但没有可辩护的缺陷 oracle。**
+
+`+0.245 dB` 作为**已执行两臂的测量**依然真实,但**在没有 oracle 的情况下不能被提升为生命周期缺陷**。
+VMem 应记录为**有实测效应的 worked example,不附带缺陷主张**。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;C6 未松开;全天零 GPU。
