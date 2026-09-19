@@ -1,5 +1,10 @@
 # New proposal draft: lineage-aware memory fusion
 
+> **STATUS CHANGED 2026-09-19: NO-GO AS WRITTEN.** The 800-GPU-hour tranche is **withdrawn** by the
+> reviewer and **not** requested. The mechanism as specified has an algebraic weakness that this
+> project verified numerically; see the appended section "Algebraic finding". The remaining
+> question is far narrower than the draft claims. **Nothing below is authorised.**
+
 2026-09-19. **Status: DRAFT AWAITING OWNER AND SUPERVISOR APPROVAL. Nothing is authorised.**
 `new_method_validated=false`; `novelty_authorization=NONE`.
 
@@ -163,3 +168,82 @@ its novelty automatically.** The recommended decision is therefore bounded: fund
 premise-and-novelty phase; do not acquire the full corpus or commit a semester until it passes; if
 ancestry carries no incremental information, or ordinary learned fusion explains the gain, **close the
 proposal rather than rename it**.
+
+---
+
+# Algebraic finding (2026-09-19): the proposed matrix is not four independent unknowns
+
+The reviewer identified a weakness deeper than the three structural risks this project raised.
+**Every identity below was verified numerically here, not accepted on assertion.**
+
+With `e_i = f_i − f*`, `M_ij = e_i·e_j/d`, `q_i = ‖f_i − f*‖²/d`, `D_ij = ‖f_i − f_j‖²/d`:
+
+| identity | verified |
+|---|---|
+| `M_ij = (q_i + q_j − D_ij) / 2` | max error **4.4e-16** |
+| `wᵀMw = qᵀw − ½ wᵀDw` on the simplex | max error **1.1e-15** over 2000 random points |
+| `M + c·11ᵀ` leaves the optimal weights **unchanged**, shifting risk by exactly `c` | weights identical; shift exact |
+| `−½ vᵀDv = ‖Σ vᵢfᵢ‖²/d` for `1ᵀv = 0` (convexity) | max error **7.1e-15** |
+
+The reviewer's own worked example also reproduced exactly: with 0.9 correlation between sources 1–2,
+diagonal-only weights `1/4` give risk **0.3625**; the full-matrix optimum is
+`(0.1724, 0.1724, 0.3276, 0.3276)` with risk **0.3276**.
+
+## What this does to the proposal
+
+**The target cancels.** `e_i − e_j = f_i − f_j`, so the off-diagonal entries are determined by the
+four individual expected errors plus the pairwise feature distances — and **`D` is computable from
+source features the fusion system already holds.** The "cross-source error interactions" are not
+independently unknown quantities.
+
+**Therefore the draft's B7 (diagonal-only) is an insufficient comparator.** The decisive baseline is
+**analytic completion**: predict the four `q_i`, compute `D` from the available aligned features, and
+optimise `qᵀw − ½wᵀDw`. Beating diagonal-only would only show the value of using source differences
+that were already available.
+
+**Common-mode shared error is unactionable.** The most intuitive reading of "these views share an
+error" is a `c·11ᵀ` component — and that provably does not change the weights. A model can predict
+shared error more accurately while having no useful control action. If all four sources are
+identical, reweighting cannot change the fused feature at all.
+
+**The surviving question is much narrower than the draft claims:** does generation ancestry improve
+prediction of the **four individual risks** `q_i`, or supply a useful inductive bias — beyond age,
+observed feature dispersion and marginal confidence? That is a four-number prediction problem, not a
+matrix-learning contribution.
+
+## Additional Phase-0 stop conditions the reviewer supplied
+
+1. **Block-level ancestry is deterministic, not merely chain-like.** If every call writes back and
+   includes the newest frame, then `B_s ∈ Ancestors(B_t)` for **every** `s < t` by induction. So
+   "has a shared generated ancestor" and transitive-set membership are constant or functions of birth
+   time. The actual lineage *representation* must be specified and shown non-recoverable from B8's
+   inputs — raw graph entropy is the wrong gate.
+2. **Native DFoT does not rescue it.** Its `_predict_sequence` uses the last `c` tokens, which is
+   recoverable from sequence position and context length. Only a memory-augmented wrapper could
+   differ, and that needs its own audit.
+3. **DFoT's own Appendix A.3 already derives covariance-aware linear aggregation** of multiple score
+   estimates and inverse-variance weighting under independence. "Account for correlations when
+   combining evidence" is therefore discussed by the proposed second consumer's own paper.
+4. **A pose-only replay cannot settle native retrieval**, because VMem's future surfels depend on
+   CUT3R reconstruction from stored images, not on poses alone. A surrogate simulation is labelled
+   as such; a negative surrogate does not prove generated rollouts lack variation.
+5. **Matched RGB marginals ≠ matched feature marginals.** If geometry or normalisation is rerun per
+   group, the same image acquires different features. The manipulation must be defined at the fusion
+   input.
+6. **Support may be too thin.** Four selected images do not imply four valid observations per target
+   location; locations with ≤1 supported source cannot benefit from reweighting at all.
+7. **Adapter reachability.** If raw source latents still enter the backbone unchanged, the generator
+   can ignore the fused map, and any gain may be adapter capacity rather than weighting.
+8. **Cost feasibility moves to Phase 0**, but the QP is not obviously expensive: at K=4 there are only
+   `2⁴−1 = 15` active sets, each at most a 4×4 solve, and the matrix depends on neither the noisy
+   latent nor the timestep, so it can be computed **once per call** rather than at all 50 steps.
+
+## Current status
+
+**The appropriate next artefact is a source-and-algebra decision memo, optionally with a capped
+synthetic microbenchmark of roughly two GPU-hours. Not 800 hours, and no corpus generation.**
+
+If that memo cannot state **what ancestry adds beyond age** and **what the learned matrix adds beyond
+analytic completion**, the proposal closes before Phase 1.
+
+`new_method_validated=false`; `novelty_authorization=NONE`.
