@@ -1694,3 +1694,45 @@ probe 的 `clear_cache` 也应绑定**发布版** `Gen3cPersistentModel.clear_ca
 **这是本项目第一次在"改还合法"的时刻抓住实验设计缺陷。**
 若照原 spec 执行,产出会被"你证明的是自己桩的行为"一击打穿,而那时 spec 已冻结、无法补救。
 **执行前对抗审查的成本是一次 codex 调用,收益是避免一个注定被驳回的结果。** 应固化为常规。
+
+## 2026-09-19 Preflight(非实验):依赖分层实测 + 审查者预测被动态证实
+
+**这不是 E1,不产生任何关于缺陷的主张。** 它只做两件事:测依赖分层,核审查者的断言。
+
+### 依赖分层(实测,非假设)
+
+在干净 venv 中只装 `numpy` + `loguru` + `opencv-python-headless`,从 `G3/gui/api` 导入:
+
+| 模块 | 结果 |
+|---|---|
+| `encoding` | IMPORT-OK |
+| `api_types` | IMPORT-OK |
+| `server_base` | IMPORT-OK |
+| `server_cosmos_base` | IMPORT-OK |
+
+**Tier A 无需 torch / CUDA / 权重**——因为 `server_cosmos_base.py` 的 torch 是**方法内导入**(`:46-47`、`:98-100`)。
+**Tier B(发布版 `:208` 的 raise)需要重链**:`gen3c_persistent.py:1-19` 模块级导入
+`moge.model.v1.MoGeModel`、`torch`、`Gen3cPipeline`、`cosmos_predict1.utils`、`cache_3d`。
+故"零 GPU"成立,**"零环境搭建"不成立**。
+
+### 审查者 assumption #1 被动态证实
+
+```
+CosmosBaseModel()                     → 无参构造成功
+  model_seeded        = False         ← 发布版默认
+  model               = <ABSENT>
+  pose_history_w2c    = <ABSENT>      ← 审查者预测
+  intrinsics_history  = <ABSENT>      ← 审查者预测
+  aabb_min / aabb_max = <ABSENT>
+  InferenceModel.__bases__ = ['object']
+  is ABC subclass          = False
+```
+
+两条结论:
+1. **`InferenceModel` 确实不是 ABC**(`__bases__ == ['object']`),我此前的静态判断由动态确认;
+2. **`pose_history_w2c` / `intrinsics_history` 在构造后确实不存在** →
+   按我原 sealed spec 的 S0 执行,`seed_model:51` 会在桩被调用前 `AttributeError`。
+   **审查抓到的是真缺陷,不是假想缺陷。**
+
+这条记录支持一条更一般的判断:**执行前审查的价值可以被事后独立验证,不必只凭信任。**
+本例中它的三条反对里,至少这一条已由实测确认。
