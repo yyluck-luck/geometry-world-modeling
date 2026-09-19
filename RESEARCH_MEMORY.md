@@ -1902,3 +1902,39 @@ Stream F 的审计也同样:它的 C2 理由是"`else` 只重置 cross-attention
 两次都是把"结构不对称"当成"存在缺陷"。**
 外部复核在第一次纠正了我,但第二次它自己也漏了 —— 说明该错误不是我个人的疏忽,
 而是这类审计的**系统性失效模式**,必须用规程(追消费端)而不是靠警觉来防。
+
+## 2026-09-19 第二个假阳性:PlayGen 的 `user_zeta` 是内存泄漏,不是陈旧读取
+
+`GreatX3/Playable-Game-Generation` HEAD `c3e541987f1d99a3e263db3f6f0b77d74a41b602`(arXiv:2412.00887)。
+原判 NEAR,理由是 `disconnect()`(`app.py:194-207`)清了 `user_cmd` / `user_queues` / `user_config` /
+`online_player`,**漏了 `user_zeta[user_id]`**。结构属实,但按新规程追消费端后**不成立**。
+
+**键是 Socket.IO 会话 id。** `user_id = request.sid` 出现在全部入口(`app.py:81, 87, 107, 176, 196`);
+`request.sid` 每次连接新生成。写入在 `:126` 与 `:149`,读取在 `:136`(守卫 `user_id in user_zeta.keys()`)
+与 `:146`,全部发生在 `model_inference(user_id, stop_event)`(`:120`)的 per-user 线程内。
+`disconnect()` 设 `stop_event` 并 `inference_thread.join()` / `result_thread.join()`,**读取循环终止**。
+
+**重连获得新 sid → 不同字典键 → 残留的 `user_zeta[旧sid]` 永远不会被任何后续路径读取。**
+故漏掉的 `pop` 是**内存泄漏**,不满足"在后续公开调用上被真实读取"这一条件。**降级,不计 HIT/NEAR。**
+
+### 目前为止我自己按新规程复核的结果
+
+| 系统 | 原判 | 新判 | 消费端为何不成立 |
+|---|---|---|---|
+| **CausVid** | HIT | **CLEAN** | 位置每次调用重算,缓存从头覆写,`current_end` 之外从不读 |
+| **PlayGen** | NEAR | **降级** | 键是每连接新生成的 sid,残留条目无路径可读 |
+| GEN3C | HIT | **仍成立** | 陈旧 `model_seeded` 被 `server_base.py:122` 直接读,且不重算 |
+| VMem | HIT | 陈旧读取真实(`:708` 无条件读),但 **oracle 未决** |
+
+**四个非 CLEAN 判定里,我自己已找出两个假阳性。** 这不是个别疏漏,是该谓词在实际使用中的
+**高假阳性率**。两次的共同形态都是:**观察到 reset 路径的结构性不对称,未追消费端。**
+
+### 对方向可行性的直接影响
+
+若一次仔细的审计在 4 个阳性里出 2 个假阳性,那么**基于这种方法的跨系统 prevalence 主张不可信**,
+除非每一个阳性都带消费端追踪证据。这正是交给 R18-J 的 Q4 问题,本方先行给出自己的判断:
+**当前证据只支持"逐例追踪过的个案",不支持任何 `M/N` 形式的普遍性陈述。**
+
+并且我此前写的"CLEAN 判定普遍安全"**也是错的**:GEN3C 恰恰有显式 `clear_cache()`
+(`gen3c_persistent.py:551-553`,清了内层 `model_was_seeded`),缺陷却因**外层另一个字段**未清而存在。
+**"存在显式重置"同样不能判 CLEAN;必须证明后续路径读到的每个字段都被重置或重算,包括其他层。**
