@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 # gwm-sync — reconcile this working tree with the private GitHub record.
 #
-# Safe to run from EITHER side (laptop or SuperPOD login node).  It commits local
-# changes, rebases onto whatever the other side pushed, then pushes.  Because it
-# is git rather than rsync, concurrent edits on both sides merge instead of one
-# side silently clobbering the other -- which is what the project's old
-# push-only rsync rule existed to prevent.
+# Runs from EITHER side: the laptop or the SuperPOD login node.  It stages local
+# additions and modifications, rebases onto whatever the other side pushed, then
+# pushes.  Because it is git rather than rsync, concurrent edits on both sides
+# merge instead of one side silently clobbering the other — which is what the
+# project's old push-only rsync rule existed to prevent.
+#
+# Two flag details that cost real debugging time, recorded so they are not undone:
+#
+#   * `git add --ignore-removal .` is deliberate.  The laptop and the cluster hold
+#     overlapping but NOT identical trees; each has files the other has never had.
+#     A plain `git add -A` on one machine stages the other machine's files as
+#     deletions and erases them on the next sync.  Real deletions must be done
+#     explicitly with `git rm`.
+#   * It must be `--ignore-removal .` and NOT `-A --ignore-removal`.  The two flags
+#     are mutually exclusive and the later one wins; with `-A` last, removals are
+#     staged anyway, and with `--ignore-removal` last and no pathspec git prints
+#     "Nothing specified, nothing added" and stages NOTHING — a silent no-op.
 #
 # Usage:  scripts/gwm-sync ["commit message"]
 set -uo pipefail
@@ -13,40 +25,34 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || { echo "not inside a git repo"; exit 1; }
 HOST="$(hostname -s)"
 MSG="${1:-sync from ${HOST}: $(date -u +%FT%TZ)}"
+STAGE=(git add --ignore-removal .)
 
 # ---- refuse to stage anything that must never leave the machine -------------
 BLOCK='(\.credentials|credentials\.(yaml|json)|^\.env$|\.pem$|\.key$|id_rsa|id_ed25519|node_modules/|^data/|^results/)'
-git add -A -n 2>/dev/null | sed 's/^add //;s/^remove //' | tr -d "'" \
-  | grep -E "$BLOCK" > /tmp/gwm_sync_blocked.$$ 2>/dev/null
-if [ -s /tmp/gwm_sync_blocked.$$ ]; then
+"${STAGE[@]}" -n 2>/dev/null | sed "s/^add //;s/^remove //" | tr -d "'" \
+  | grep -E "$BLOCK" > "/tmp/gwm_sync_blocked.$$" 2>/dev/null
+if [ -s "/tmp/gwm_sync_blocked.$$" ]; then
   echo "REFUSING TO SYNC: these paths match the never-commit list:"
-  sed 's/^/  /' /tmp/gwm_sync_blocked.$$
+  sed 's/^/  /' "/tmp/gwm_sync_blocked.$$"
   echo "Fix .gitignore first."
-  rm -f /tmp/gwm_sync_blocked.$$
-  exit 2
+  rm -f "/tmp/gwm_sync_blocked.$$"; exit 2
 fi
-rm -f /tmp/gwm_sync_blocked.$$
+rm -f "/tmp/gwm_sync_blocked.$$"
 
 # ---- refuse oversized blobs -------------------------------------------------
-BIG=$(git add -A -n 2>/dev/null | sed 's/^add //' | tr -d "'" \
+BIG=$("${STAGE[@]}" -n 2>/dev/null | sed "s/^add //" | tr -d "'" \
       | while read -r f; do [ -f "$f" ] && [ "$(wc -c <"$f")" -gt 20971520 ] && echo "$f"; done)
 if [ -n "$BIG" ]; then
   echo "REFUSING TO SYNC: files larger than 20 MB would be committed:"
-  echo "$BIG" | sed 's/^/  /'
-  exit 3
+  echo "$BIG" | sed 's/^/  /'; exit 3
 fi
 
-# --ignore-removal is deliberate.  The laptop and the SuperPOD login node hold
-# overlapping but NOT identical working trees: each has files the other has never
-# had.  A plain `git add -A` on one machine would stage the other machine's files
-# as deletions and erase them on the next sync.  New and modified files sync in
-# both directions; removals must be done explicitly with `git rm`.
-git add --ignore-removal -A
+"${STAGE[@]}"
 if git diff --cached --quiet; then
   echo "[${HOST}] nothing local to commit"
 else
-  git commit -q -m "$MSG"
-  echo "[${HOST}] committed: $MSG"
+  echo "[${HOST}] staging $(git diff --cached --name-only | wc -l | tr -d ' ') file(s)"
+  git commit -q -m "$MSG" && echo "[${HOST}] committed: $MSG"
 fi
 
 echo "[${HOST}] rebasing onto origin/main ..."
