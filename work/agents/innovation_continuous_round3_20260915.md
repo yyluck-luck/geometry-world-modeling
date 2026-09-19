@@ -24,7 +24,7 @@ Only after Gate 0, no-data model-load smoke, and the frozen VMem baseline: use t
 
 ## Kill criterion
 
-Retire this direction immediately if the source/path residual is non-finite, requires future answers, changes the budget, has exact rank equivalence with recency/pose/coverage/confidence/utility/SOCF-A, or shows no out-of-sample signed predictive information and paired future-loss improvement. Also retire it if no auditable multi-view path with independent future scoring exists. A pass would authorize only a larger held-out experiment; it would not establish novelty or method validity.
+Retire this direction immediately if the source/path residual is non-finite, requires future answers, changes the budget, has exact rank equivalence with recency/pose/coverage/confidence/utility/SOCF-A, or shows no out-of-sample signed predictive information and paired future-loss improvement. Also retire it if no auditable multi-view path with held-out future scoring exists. A pass would authorize only a larger held-out experiment; it would not establish novelty or method validity.
 
 ## Evidence boundary
 

@@ -1,20 +1,20 @@
 {
   "schema": "gate0-v2-launch-regression-v1",
-  "recorded_at_utc": "2026-09-19T13:47:56.207985+00:00",
-  "guard_sha256": "bf1745616c6136adc2836e5128ac1e7e55337f85e78c8efa42a0edabc1f6cb73",
-  "test_sha256": "a63e48b2ddc46ad27695e273aa0211a9113ebf6ecd54b74e61d5f3f346cfb3bf",
+  "recorded_at_utc": "2026-09-19T13:55:28.353708+00:00",
+  "guard_sha256": "5520cccd751eb69a8a0b0df2be0df290037294caa93068cb7ce9cabc7f6065db",
+  "test_sha256": "91cb470b286d528307f8b372d8a5e7eace5e2e9c16ffa866ab3c75e866097aa4",
   "scope": "Software-only stub validator/tmux checks; no remote deployment or job submission.",
-  "status": "FAIL",
+  "status": "PASS",
   "cases": [
     {
       "name": "valid v2 receipt dispatches once; duplicate state is rejected",
-      "passed": false,
-      "first_exit": 1,
-      "second_exit": 1,
-      "tmux_dispatches": 0,
-      "formal_receipt": false,
-      "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "passed": true,
+      "first_exit": 0,
+      "second_exit": 3,
+      "tmux_dispatches": 1,
+      "formal_receipt": true,
+      "stdout": "tmux_session:test-v2\nreceipt_directory:/var/folders/xq/c5f0p5c10z1dcyg8qf780f_m0000gn/T/gate0-v2-launch-test-1905kh_b/formal.log.state\nformal_launch_guard_receipt:/var/folders/xq/c5f0p5c10z1dcyg8qf780f_m0000gn/T/gate0-v2-launch-test-1905kh_b/formal.log.formal_launch_guard_receipt.json\n",
+      "stderr": ""
     },
     {
       "name": "blocked v2 receipt rejects before tmux",
@@ -24,7 +24,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "embedded validator receipt is not ready\n"
     },
     {
       "name": "legacy validator schema rejects despite zero exit",
@@ -34,7 +34,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "embedded validator receipt is not ready\n"
     },
     {
       "name": "changed validator rejects before execution",
@@ -44,7 +44,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "validator_ref: descriptor mismatch\n"
     },
     {
       "name": "changed sbatch rejects before execution",
@@ -54,7 +54,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "sbatch_ref: descriptor mismatch\n"
     },
     {
       "name": "changed contract rejects before execution",
@@ -64,7 +64,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "dispatch binding mismatch: contract_sha256\n"
     },
     {
       "name": "manifest scope mismatch rejects before execution",
@@ -74,7 +74,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "dispatch identity mismatch\n"
     },
     {
       "name": "wrapper binding mismatch rejects before execution",
@@ -84,7 +84,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "dispatch binding mismatch: predictor_wrapper_sha256\n"
     },
     {
       "name": "wrapper file tamper rejects before execution",
@@ -94,7 +94,7 @@
       "tmux_dispatches": 0,
       "formal_receipt": false,
       "stdout": "",
-      "stderr": "cross-bundle dispatch refused\n"
+      "stderr": "predictor_ref: descriptor mismatch\n"
     }
   ]
 }

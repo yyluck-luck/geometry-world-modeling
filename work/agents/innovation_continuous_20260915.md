@@ -42,7 +42,7 @@ Status: literature-grounded hypotheses only. `new_method_validated=false`; `nove
 
 **Nearest work.** Geometry-guided Online 3D Video Synthesis with Multi-View Temporal Consistency (CVPR 2025) accumulates depth in TSDF-like image-space representations and uses it to guide blending. WorldPlay and the long-term-memory papers above evaluate long-horizon consistency/retrieval, while CUE-R (arXiv:2604.05467) supplies an analogous source-level remove/replace intervention idea in evidence selection.
 
-**Mechanism-level difference.** FGB-Future is an evaluation contract: freeze history-only inputs and a real memory budget, intervene on one source item, and score the *signed* change in future RGB-D/pose loss after prediction sealing. It does not assert a new memory module. The key unit is a source intervention paired with an independent future state, rather than current geometry consistency or video appearance alone.
+**Mechanism-level difference.** FGB-Future is an evaluation contract: freeze history-only inputs and a real memory budget, intervene on one source item, and score the *signed* change in future RGB-D/pose loss after prediction sealing. It does not assert a new memory module. The key unit is a source intervention paired with an externally supplied, held-out future RGB-D/pose reference, rather than current geometry consistency or video appearance alone.
 
 **Falsifiable prediction.** At fixed consumer, candidate pool and intervention budget, history-only conflict/risk should predict the sign and tail of future geometric loss better than current RGB MSE, coverage, or confidence. If no selector beats recent/random, the benchmark still yields a negative diagnostic but no method claim.
 

@@ -1,3 +1,13 @@
+# CURRENT EXECUTION OVERRIDE — 2026-09-19 21:54 Asia/Shanghai
+
+This override supersedes the older 2026-09-16 image-blocker paragraphs below. The repository ledger now records that the formal S103 VMem development baseline passed its signed Gate0 chain and completed: job 594155 produced `PREDICTION_SEALED`, with the bound prediction/scoring artifacts at `work/S103_selector_free_baseline/run_receipts_594155/` and `work/S103_selector_free_baseline/baseline_score_594155/`. The baseline score receipt reports 16.026 dB. This is a development-scope RGB result on already exposed scene_13/scene_14 data; it is not a held-out or method-validation result.
+
+The later S105–S111 diagnostics are also development-scope and their interpretation is constrained by the state-leak correction recorded in the ledger. The current software-only dispatch-guard regression is **9/9 PASS** after the raw validator-receipt hash and bundled-fixture fixes (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`); this receipt proves only local dispatch accounting.
+
+The latest project decision is to stop new GPU generation and training while the proposal-alignment/innovation gate is reviewed. Do not submit the previously discussed clean re-test or any new method run without a fresh explicit owner decision. `new_method_validated=false` and `novelty_authorization=NONE` remain unchanged.
+
+The remaining work is evidence/reporting and the literature occupancy gate in `work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`, not another smoke test. Gemini remains advisory only.
+
 # CURRENT HANDOFF OVERRIDE — 2026-09-16 13:07 Asia/Shanghai
 
 **Local and remote are verified identical (records included).** Receipt: `work/LOCAL_REMOTE_SYNC_RECEIPT_20260916.json`.
@@ -28,7 +38,7 @@ Execution-channel state, read directly from the Codex app data (`~/.codex`), not
 
 # CURRENT HANDOFF OVERRIDE — 2026-09-16 05:15 Asia/Shanghai
 
-Local dispatch guard implementation is now hardened and regression-tested 8/8. It persists an atomic `gwm-formal-launch-guard-receipt-v1` after tmux creation and binds validator receipt SHA/status, dispatch manifest, contract/protocol, Slurm/generic launcher, predictor-wrapper SHA, execution-boundary ID, run ID/scope, session, state/log paths, and exact command. Receipt: `work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`. This is software-only; no remote formal launch occurred.
+Local dispatch guard implementation is now hardened and regression-tested 9/9. It persists an atomic `gwm-formal-launch-guard-receipt-v1` after tmux creation and binds validator receipt SHA/status, dispatch manifest, contract/protocol, Slurm/generic launcher, predictor-wrapper SHA, execution-boundary ID, run ID/scope, session, state/log paths, and exact command. Receipt: `work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`. This is software-only; no remote formal launch occurred.
 
 The critical blocker remains `BLOCKED_GPU_ISOLATION_IMAGE`: no approved digest-pinned executable image or compute-node isolation receipt exists. Gate0 remains `formal_gate0_status=BLOCKED`; do not submit S103.
 

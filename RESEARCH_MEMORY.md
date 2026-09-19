@@ -1061,3 +1061,44 @@ T1-5（无重标注接口，源码）· lineage 融合（代数退化，外审�
 owner 的资金选择是:**在可训练递归转移上做一次明确不确定的方法发现**,还是**结束这条线**。不是在 lineage 融合与另一个已合格的顶会点子之间选。
 
 `new_method_validated=false`;`novelty_authorization=NONE`。
+
+## 2026-09-19 轴 (e) 占据核查:唯一幸存方向的门关上了
+
+Astra 把"选择性有限视界误差增益训练"的占据状态标为 UNVERIFIED,并指出唯一可能的区分是三者合取:
+(i) **选择性**方向衰减(压某些方向、**刻意保留**另一些) (ii) 在**模型自身自回归 rollout 的有限视界**上度量
+(iii) **场景判别敏感性被保留且被验证**。我自己先跑了这个检索,**结果是负的**。
+
+### 关门证据(摘要已全文读过,逐条对 (i)/(ii)/(iii) 判定)
+
+**2606.14732 Steady-Forcing(训练型)——单这一篇就足以关门。**
+> "mechanisms that improve spatial stability **tend to suppress motion**... we study this **stability–motion trade-off**... preserve background identity **while sustaining** plausible fluid dynamics over multi-minute autoregressive rollouts"
+
+(i) ✅ 这个 trade-off **就是**选择性,且被当作核心问题陈述 (ii) ✅ 多分钟自回归 rollout
+(iii) ✅ **且配了专门的测量**:他们指出 VBench "rewards drift-induced optical flow as Dynamic Degree while not directly penalizing texture hardening or flow stagnation"——即他们造了能抓住**假的**保留敏感性的评价。
+
+**2609.12890 Internal-DW(训练型)——数学形式上最接近,且**预先堵死了我的 Q2 抗辩**。**
+> "amplifying predictable signal and unpredictable noise **together**... bounded Wiener gains that **balance preserving predictable learning signal against suppressing unpredictable variation**... **outperforms gradient clipping and Jacobian regularization on all four**"
+
+"这不只是 Jacobian 正则"这个论证,已经有人在长视界自回归设定下**做过并实证了**。
+
+**2607.27110 FreqForcing(免训练)** low-freq 稳定 / **high-freq 保留动态**,并给出误差累积的频域刻画("低频带能量漂移"),Self-Forcing 上 24× 外推。(i)(ii)(iii) 齐。
+**2602.14027 FLEX(免训练)** 低频内插 / 高频外推以 "preserve multi-scale temporal **discriminability**"。
+**2512.12080 BAgger(训练型)** 从自身 rollout 构造纠正轨迹,标准 score/flow matching——就是"让缺陷在后续若干次调用衰减"的具体损失。
+**2606.13035 TetherCache** TAME 把漂移记忆 token 统计对齐到可信分布,GRAB 保留时间多样性——带刻意保留的选择性纠正。
+旁证:2605.14487 Head Forcing、2607.15849 TANGO、2601.21868(采样轨迹上的收缩,Lyapunov drift + Doeblin)、2602.04608(Jacobian 正则稳定长期积分,即那个退化本身)。
+
+### 裁定:轴 (e) **END-LINE**
+
+仍未被占的只剩一条极薄的缝:*在**状态空间方向**(而非频带、而非梯度路由)上陈述的误差增益目标,且在**固定的相机条件化证据边界**上*。我判定**不可辩护**,三条理由:
+1. **频带就是一种方向分解**——"状态空间方向" vs "谱方向"是**重参数化**,不是不同机制;
+2. FreqForcing 的频域刻画是正面证据,说明谱参数化**已经够用**来描述该现象;
+3. 我在 pinned 消费者上**没有任何测量**显示存在谱账本抓不住的状态空间方向结构——而要拿到这个测量,本身就是我想论证的那个实验。**循环。**
+
+### 方法论记录(v2.16)
+
+**"占据性检索必须在提交方案之前跑,而不是在被质疑之后跑。"**
+Astra 标 UNVERIFIED 的东西我本可以早三轮自己查。这次是我在**发出 prompt 之前**先跑检索、
+并得到对本方不利的结论——这是正确顺序。同时:**"占据"是正面主张,单一反例即可证伪**,
+故我的检索本身有系统性偏向"确认关门"的风险,已在 round-11 prompt 的 Q2 里请对方审计我的查询族。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。

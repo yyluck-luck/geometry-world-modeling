@@ -29,53 +29,81 @@ def write(path, value):
 def setup(mode='ready'):
     root = Path(tempfile.mkdtemp(prefix='gate0-v2-launch-test-'))
     remote = root / 'remote_tmux'
+    bundle = root / 'bundle'
     remote.mkdir()
+    bundle.mkdir()
     shutil.copy2(GUARD, remote / GUARD.name)
     shutil.copy2(GENERIC, remote / GENERIC.name)
     shutil.copy2(MONITOR, remote / MONITOR.name)
     (remote / GUARD.name).chmod(0o755)
     tmux_log = root / 'tmux.calls'
-    tmux = write(root / 'bin/tmux', '''#!/bin/sh
+    tmux = write(root / 'bin/tmux', """#!/bin/sh
 set -eu
 if [ "$1" = has-session ]; then exit 1; fi
 if [ "$1" = new-session ]; then echo "$*" >> "$TMUX_LOG"; exit 0; fi
 exit 1
-''')
+""")
     tmux.chmod(0o755)
     # The validator is a controlled software stub, never a scientific runner.
-    stub = write(root / 'validator_stub.py', '''#!/usr/bin/env python3
+    stub = write(bundle / 'validate_gate0_v2.py', """#!/usr/bin/env python3
 import json, os, sys
 mode = os.environ.get("STUB_MODE", "ready")
 out = {"schema": "gwm-gate0-staged-v2", "stage": "pre-run",
        "scope": "development_baseline", "run_id": "TEST_RUN_V2",
        "protocol_sha256": os.environ["PROTO_SHA"], "pre_run_ready": mode == "ready",
        "status": "PRE_RUN_READY" if mode == "ready" else "BLOCKED",
-       "errors": [] if mode == "ready" else ["synthetic blocked fixture"]}
+       "errors": [] if mode == "ready" else ["synthetic blocked fixture"],
+       "opens_future_outcome_files": False}
 print(json.dumps(out))
 raise SystemExit(0 if mode in {"ready", "legacy"} else 2)
-''')
+""")
     stub.chmod(0o755)
+    preparer = write(bundle / 'formal_bundle_preparer.py', '# synthetic bundle preparer; never executed\n')
+    predictor = write(bundle / 'predictor_s103.py', '# synthetic predictor wrapper; never executed\n')
+    sealer = write(bundle / 'seal_predictions_s103.py', '# synthetic prediction sealer; never executed\n')
+    sbatch = write(bundle / 'run_s103_vmem_base.slurm', '# synthetic sbatch; never submitted\n')
+    regression = write(bundle / 'formal_chain_regression_receipt.json', '{"schema":"synthetic-regression-receipt-v1"}\n')
     protocol = {"status": "FROZEN", "run_id": "TEST_RUN_V2",
                 "scope": "development_baseline", "author": "test_author",
-                "predictor_wrapper_ref": None,
-                "isolation": {"execution_boundary_id": "synthetic-boundary-v1"}}
-    wrapper = write(root / 'predictor_wrapper.py', '# synthetic guarded wrapper; never executed\n')
-    protocol["predictor_wrapper_ref"] = {"path": str(wrapper), "sha256": sha(wrapper), "bytes": wrapper.stat().st_size}
-    contract = write(root / 'contract.json', {"schema": "gwm-gate0-staged-v2", "protocol": protocol})
-    sbatch = write(root / 'run.slurm', "# synthetic sbatch; never submitted\n")
+                "isolation": {"execution_boundary_id": "synthetic-boundary-v1"},
+                "formal_execution": {"bundle_root": str(bundle.resolve())}}
+    refs = {
+        "bundle_preparer_ref": preparer,
+        "validator_ref": stub,
+        "predictor_ref": predictor,
+        "sealer_ref": sealer,
+        "sbatch_ref": sbatch,
+        "launch_guard_ref": remote / GUARD.name,
+        "generic_launcher_ref": remote / GENERIC.name,
+        "formal_chain_regression_receipt_ref": regression,
+    }
+    for key, path in refs.items():
+        protocol["formal_execution"][key] = {"path": str(path), "sha256": sha(path), "bytes": path.stat().st_size}
+    contract = write(bundle / 'contract.json', {"schema": "gwm-gate0-staged-v2", "protocol": protocol})
     validator = stub
-    manifest = write(root / 'dispatch.json', {
+    embedded = {"schema": "gwm-gate0-staged-v2", "stage": "pre-run",
+                 "scope": protocol["scope"], "run_id": protocol["run_id"],
+                 "protocol_sha256": protocol_sha(protocol), "pre_run_ready": mode == "ready",
+                 "status": "PRE_RUN_READY" if mode == "ready" else "BLOCKED",
+                 "errors": [] if mode == "ready" else ["synthetic blocked fixture"],
+                 "opens_future_outcome_files": False}
+    manifest_obj = {
         "schema": "gwm-gate0-v2-dispatch-manifest-v1", "status": "FROZEN", "stage": "pre-run",
         "run_id": protocol["run_id"], "scope": protocol["scope"], "protocol_sha256": protocol_sha(protocol),
         "contract_sha256": sha(contract), "sbatch_script_sha256": sha(sbatch),
-        "validator_sha256": sha(validator), "predictor_wrapper_sha256": sha(wrapper),
-        "execution_boundary_id": "synthetic-boundary-v1"})
+        "validator_sha256": sha(validator), "predictor_wrapper_sha256": sha(predictor),
+        "prediction_sealer_sha256": sha(sealer), "formal_bundle_preparer_sha256": sha(preparer),
+        "launch_guard_sha256": sha(remote / GUARD.name), "generic_launcher_sha256": sha(remote / GENERIC.name),
+        "formal_chain_regression_receipt_sha256": sha(regression),
+        "bundle_root": str(bundle.resolve()), "execution_boundary_id": "synthetic-boundary-v1",
+        "validator_receipt_sha256": protocol_sha(embedded), "validator_receipt": embedded}
+    manifest = write(bundle / 'dispatch_manifest.json', manifest_obj)
     env = os.environ.copy()
     env.update({"PATH": str(root / "bin") + os.pathsep + env["PATH"],
                 "TMUX_LOG": str(tmux_log), "GWM_GATE0_PYTHON": sys.executable,
                 "GWM_GATE0_V2_VALIDATOR": str(validator), "PROTO_SHA": protocol_sha(protocol),
                 "STUB_MODE": mode})
-    args = [str(remote / GUARD.name), "test-v2", str(contract), str(manifest), str(sbatch), str(root / "formal.log")]
+    args = [str(remote / GUARD.name), "test-v2", str(contract), str(manifest), str(sbatch), str(root / 'formal.log')]
     return root, args, env, contract, manifest, sbatch, validator, tmux_log
 
 def run_case(name, mutate=None, mode='ready', expect_ok=False, repeat=False):
@@ -113,7 +141,7 @@ def run_case(name, mutate=None, mode='ready', expect_ok=False, repeat=False):
                 and guard.get('sbatch_script_sha256') == sha(sbatch) \
                 and guard.get('generic_launcher_sha256') == sha(generic) \
                 and guard.get('protocol_sha256') == json.loads(manifest.read_text())['protocol_sha256'] \
-                and guard.get('predictor_wrapper_sha256') == sha(root / 'predictor_wrapper.py') \
+                and guard.get('predictor_wrapper_sha256') == sha(root / 'bundle' / 'predictor_s103.py') \
                 and guard.get('execution_boundary_id') == 'synthetic-boundary-v1' \
                 and guard.get('exact_command') == f'bash {generic} test-v2 {sbatch} {root / "formal.log"}' \
                 and embedded.get('schema') == 'gwm-gate0-staged-v2' \
@@ -150,7 +178,7 @@ def mutate_wrapper_binding(root, contract, manifest, sbatch, validator):
     obj = json.loads(manifest.read_text()); obj["predictor_wrapper_sha256"] = "0" * 64; manifest.write_text(json.dumps(obj))
 
 def mutate_wrapper_file(root, contract, manifest, sbatch, validator):
-    wrapper = root / 'predictor_wrapper.py'; wrapper.write_text(wrapper.read_text() + '# tampered\n')
+    wrapper = root / 'bundle' / 'predictor_s103.py'; wrapper.write_text(wrapper.read_text() + '# tampered\n')
 
 def main():
     cases = [

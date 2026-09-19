@@ -1,6 +1,16 @@
+# CURRENT EXECUTION OVERRIDE — 2026-09-19 21:54 Asia/Shanghai
+
+This override supersedes the older 2026-09-16 image-blocker paragraphs below. The repository ledger now records that the formal S103 VMem development baseline passed its signed Gate0 chain and completed: job 594155 produced `PREDICTION_SEALED`, with the bound prediction/scoring artifacts at `work/S103_selector_free_baseline/run_receipts_594155/` and `work/S103_selector_free_baseline/baseline_score_594155/`. The baseline score receipt reports 16.026 dB. This is a development-scope RGB result on already exposed scene_13/scene_14 data; it is not a held-out or method-validation result.
+
+The later S105–S111 diagnostics are also development-scope and their interpretation is constrained by the state-leak correction recorded in the ledger. The current software-only dispatch-guard regression is **9/9 PASS** after the raw validator-receipt hash and bundled-fixture fixes (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`); this receipt proves only local dispatch accounting.
+
+The latest project decision is to stop new GPU generation and training while the proposal-alignment/innovation gate is reviewed. Do not submit the previously discussed clean re-test or any new method run without a fresh explicit owner decision. `new_method_validated=false` and `novelty_authorization=NONE` remain unchanged.
+
+The remaining work is evidence/reporting and the literature occupancy gate in `work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`, not another smoke test. Gemini remains advisory only.
+
 ## Dispatch guard implementation update — 2026-09-16 05:15 Asia/Shanghai
 
-The local formal dispatch guard now persists an atomic `gwm-formal-launch-guard-receipt-v1` after successful tmux creation. It binds the validator receipt SHA and `PRE_RUN_READY` result, sealed dispatch-manifest SHA, contract/protocol/validator/Slurm/generic-launcher hashes, predictor-wrapper SHA, execution-boundary ID, run ID, scope, session, state directory, remote log, and exact command. The software-only regression suite now passes 8/8, including receipt persistence and wrapper-binding tamper rejection (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`).
+The local formal dispatch guard now persists an atomic `gwm-formal-launch-guard-receipt-v1` after successful tmux creation. It binds the validator receipt SHA and `PRE_RUN_READY` result, sealed dispatch-manifest SHA, contract/protocol/validator/Slurm/generic-launcher hashes, predictor-wrapper SHA, execution-boundary ID, run ID, scope, session, state directory, remote log, and exact command. The software-only regression suite now passes 9/9, including receipt persistence and wrapper-binding tamper rejection (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`).
 
 This closes a local dispatch-accounting gap only. It does not provide a GPU image, compute-node isolation receipt, Gate0 `PRE_RUN_READY`, or scientific evidence. No remote formal launch was made.
 

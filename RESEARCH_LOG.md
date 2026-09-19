@@ -14404,3 +14404,13 @@ Local read-through of AGENTS.md/RESEARCH_PRINCIPLES.md v2.12/RESEARCH_MEMORY.md/
 证据：`remote:/home/yliutz/gwm_probe_receipts/XOVER/job-595584 (28/28 byte-identical to sealed S111)`；`pinned pipeline.py: NMS-off branch sets self.initial_threshold=1e8; NMS-on assigns only at the five-frame stage; reset() does not clear it`；`work/agents/PROMPT_FOR_GPT6PRO_GATE4_20260918.md`
 
 下一步：实现并运行零扩散的顺序不变性回归测试（干净 NMS-on 单独执行 vs NMS-off 先行后经真实隔离再执行，要求有效阈值、有序帧 ID、补齐重数与消费者输入包全部相等）；通过后跑 14 窗口 x 2 臂 x 2 原始 seed 共 56 次干净原生对照。
+
+## 2026-09-19T21:55:28+08:00 · 修复并复核 Gate0 本地派发护栏回归；同步最新正式基线状态与提案停止新生成边界
+
+9/9 software-only launch-guard cases PASS；正式 S103 job 594155 的既有封存/评分证据保持可追溯；当前不新增 GPU 生成或训练
+
+时间依据：current clock；记录写入于 2026-09-19T13:55:28+00:00。
+
+证据：`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json; work/S103_selector_free_baseline/run_receipts_594155/PREDICTION_SEAL.json; work/S103_selector_free_baseline/baseline_score_594155/SCORING_RECEIPT.json; proposal_alignment_20260919.md; work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`
+
+下一步：完成 Round 11 文献占据/退化/低成本测量门；若无新的人工授权，不提交新的 GPU 生成、训练或候选搜索

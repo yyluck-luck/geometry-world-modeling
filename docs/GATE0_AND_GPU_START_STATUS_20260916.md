@@ -1,3 +1,13 @@
+# CURRENT EXECUTION OVERRIDE — 2026-09-19 21:54 Asia/Shanghai
+
+This override supersedes the older 2026-09-16 image-blocker paragraphs below. The repository ledger now records that the formal S103 VMem development baseline passed its signed Gate0 chain and completed: job 594155 produced `PREDICTION_SEALED`, with the bound prediction/scoring artifacts at `work/S103_selector_free_baseline/run_receipts_594155/` and `work/S103_selector_free_baseline/baseline_score_594155/`. The baseline score receipt reports 16.026 dB. This is a development-scope RGB result on already exposed scene_13/scene_14 data; it is not a held-out or method-validation result.
+
+The later S105–S111 diagnostics are also development-scope and their interpretation is constrained by the state-leak correction recorded in the ledger. The current software-only dispatch-guard regression is **9/9 PASS** after the raw validator-receipt hash and bundled-fixture fixes (`work/remote_tmux/LAUNCH_GATE0_V2_REGRESSION_RECEIPT.json`); this receipt proves only local dispatch accounting.
+
+The latest project decision is to stop new GPU generation and training while the proposal-alignment/innovation gate is reviewed. Do not submit the previously discussed clean re-test or any new method run without a fresh explicit owner decision. `new_method_validated=false` and `novelty_authorization=NONE` remain unchanged.
+
+The remaining work is evidence/reporting and the literature occupancy gate in `work/agents/PROMPT_FOR_GPT6ASTRA_ROUND11_OCCUPANCY_GATE_20260919.md`, not another smoke test. Gemini remains advisory only.
+
 # Gate 0 and GPU start status (2026-09-16)
 
 ## Current decision
@@ -10,7 +20,7 @@ The next GPU inference work package is **S103-VMemBase (selector-free VMem devel
 
 Gemini is being used through the user-opened in-app browser as an independent implementation and leakage review. Its role is limited to reviewing the frozen contract questions and proposing falsifiable checks; it does not receive credentials or private files, does not change the repository, and its advice is not a Gate0 PASS. The current Gemini review confirms four immediate actions: separate pre-run from post-run checks, disambiguate S103 identifiers, enforce runtime input isolation rather than keyword scanning, and recompute staged artifact hashes before dispatch.
 
-The old formal launcher remains preserved. A new fail-closed v2 guard, `work/remote_tmux/launch_gate0_v2_in_tmux.sh`, now requires the v2 validator to return `PRE_RUN_READY` with no errors and binds the contract, protocol, validator, Slurm script, run ID and scope before creating tmux. Its 7/7 dispatch regressions are software checks only; no remote job was submitted through it.
+The old formal launcher remains preserved. A new fail-closed v2 guard, `work/remote_tmux/launch_gate0_v2_in_tmux.sh`, now requires the v2 validator to return `PRE_RUN_READY` with no errors and binds the contract, protocol, validator, Slurm script, run ID and scope before creating tmux. Its 9/9 dispatch regressions are software checks only; no remote job was submitted through it.
 
 ## GPU work already started
 
@@ -71,7 +81,7 @@ Apptainer/Enroot/Pyxis expose image interfaces, but registry pull permission, ne
 
 ## Dispatch guard implementation (2026-09-16 05:15 Asia/Shanghai)
 
-The local Gate0 dispatch guard now writes an atomic `gwm-formal-launch-guard-receipt-v1` after successful tmux creation and binds the validator receipt, dispatch manifest, contract/protocol, predictor wrapper, execution boundary, Slurm/generic launcher, run ID, scope, state/log paths, and exact command. The software-only regression is 8/8 PASS. This is dispatch accounting only; it does not mean Slurm, predictor execution, isolation, or scientific validation succeeded.
+The local Gate0 dispatch guard now writes an atomic `gwm-formal-launch-guard-receipt-v1` after successful tmux creation and binds the validator receipt, dispatch manifest, contract/protocol, predictor wrapper, execution boundary, Slurm/generic launcher, run ID, scope, state/log paths, and exact command. The software-only regression is 9/9 PASS. This is dispatch accounting only; it does not mean Slurm, predictor execution, isolation, or scientific validation succeeded.
 
 ## GPU image isolation resolved at probe level (2026-09-16 12:49 Asia/Shanghai)
 

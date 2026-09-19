@@ -130,7 +130,7 @@ Stop or downgrade this direction to a benchmark/negative result if any one of th
 
 ## Decision
 
-This rotation yields one useful, falsifiable contribution candidate: a cross-scene *geometry–appearance interaction benchmark* for diagnosing long-horizon ghosting under a fixed world-model consumer. It does not authorize training or a new method before Gate 0. After Gate 0, run the 2x2 diagnostic only if its data contract and appearance operation can be frozen without future leakage. If it fails the kill criteria, preserve the negative mechanism result and return to FGB-Future or SOCF-A only when their independent future-state contracts are available.
+This rotation yields one useful, falsifiable contribution candidate: a cross-scene *geometry–appearance interaction benchmark* for diagnosing long-horizon ghosting under a fixed world-model consumer. It does not authorize training or a new method before Gate 0. After Gate 0, run the 2x2 diagnostic only if its data contract and appearance operation can be frozen without future leakage. If it fails the kill criteria, preserve the negative mechanism result and return to FGB-Future or SOCF-A only when their externally supplied, held-out future RGB-D/pose contracts are available.
 
 ## Evidence boundary
 
