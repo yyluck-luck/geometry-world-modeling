@@ -1306,3 +1306,62 @@ Q4 **拒绝编造门槛**:"我不伪造一个训练门槛来给已经被占用�
   2609.04875、2606.20545、2606.00793、2606.27537、2207.07048、1911.07698。
 
 R13-A 自列 5 条不可验证项(未运行 demo、未取得作者评测脚本、未审计 HF Space、检索有界、未复算本项目 14-window 数值)。
+
+## 2026-09-19 R13-B 发表先例调研:诊断类工作能进主会,但本项目材料未达门槛
+
+25/25 引用已核实为真(Henderson 1709.06560、Engstrom 2005.12729、Agarwal 2108.13264、
+Dacrema 1911.07698、BLEU 2006.06264、resize 2104.11222、MIL unit tests 2310.17867、
+PLAID 2404.14989、TREC 2301.10493、contamination 2310.17589/2311.09783/2407.07565 等)。
+
+### 先给负面答案(R13-B 的 Q5 置顶)
+
+**即便放宽"贡献必须是 method"这条约束,现有材料也还没达到可发表的 diagnostic contribution 门槛。**
+它足以支撑"一个冻结 VMem consumer 中存在可复现跨调用状态依赖,并在一个暴露开发 panel 上量化了影响"
+这一**单系统 forensic case study**;未达到已发表先例反复出现的更高门槛。
+
+### 真正区分"已发表诊断论文"与"没人发的技术报告"的三项(观察性,非定理)
+
+**① 结论影响** —— 不只发现 bug,而是证明读者会得出不同结论
+(Engstrom 改写 PPO/TRPO 归因;Dacrema 11/12 被简单方法超过;TREC gap 18%→5%;Agarwal 显示 point estimates 可反转)。
+**② 跨独立单元的外部效度** —— 让发现脱离单一 code path 后仍可检验。
+**③ 可被他人采用的 test / protocol / artifact** —— rliable、MIL algorithmic unit tests、held-out contamination benchmark。
+
+**明确不是区分项:** 样本量绝对阈值(先例从单系统复现到 294 篇不等);effect 很大(不充分);
+负结果(ReScience C / MLRC / NeurIPS E&D 明确容纳)。**"有一个 bug"本身也不够** ——
+门槛接近 `bug + consequence + scope + reusable audit`。
+
+### 逐项对照本项目
+
+**已有:** 真实 defect 与后果、较严谨的因果门(11/11、pre-scoring census、NULL 字节同一性、预声明后如实丢弃的修复)。
+**缺口(结构性,加 seeds 补不上):**
+1. 无第二个 released consumer / 版本 / 任务 / dataset family → 无法估计该系统家族中的普遍性;
+2. 无 held-out —— 两条 sequence 已被用作 exposed development data;
+3. **未证明该 defect 改写了 VMem 原论文的已发表结论或 ranking**;
+4. audit artifact 尚未被独立作者采用或跨系统复核,"可迁移 protocol"目前是设计意图而非外部验证过的产物;
+5. 14-window RGB PSNR 多数 effect < 0.5 dB 且异质性大,无 SE / CI / 检验 / bootstrap;
+6. 只有单一 pixel metric。
+
+### venue 现实
+
+**"诊断工作不能进主会"是错的** —— AAAI / ICLR / NeurIPS / ACL / CVPR 都有先例;
+但主会先例的共同条件是跨越单一 codebase、或改变 benchmark/metric/algorithm comparison、并交付可复用工具。
+更现实的窄路线:**TMLR**(editorial policies 明确收 reproducibility studies 与揭示 strengths/weaknesses 的实验研究)、
+**NeurIPS 2026 Evaluations & Datasets track**(evaluation 为核心智力贡献,收 rigorous reproduction/auditing/stress-testing 与 negative analyses)、
+**MLRC**(已整合为 NeurIPS 2026 官方路线,但需先被 TMLR 接收)、**ReScience C**、SIGIR/ECIR reproducibility track。
+**Registered report 不适用** —— 两条 sequence 已作为 exposed development data 用过,不能事后改写成预注册。
+
+### 我的判断:成本结构与方法路线根本不同,但最强的那项可能拿不到
+
+缺口 2/5/6 便宜(封存 held-out、不确定性分析、加一个非 PSNR 评价维度)。
+缺口 1/3 需要放宽 **C5**(one dependency group, one frozen consumer)——
+但**不需要 C1/C2/C3**:全是冻结模型的推理,没有训练、微调或新权重。
+**缺口"结论影响"是三项强区分项里最强的一项,而 R13-A 已确认对 VMem 论文表格拿不到**
+(公开树无 VMem evaluation driver,`__call__` 单一设置运行)。
+
+若要走这条路,可能的重构框架是:把贡献从"VMem 有个 bug"改成
+**"有状态记忆/检索类视频系统的 reset 语义不完整;这是一个能检出它的审计协议;在 N 个已发布系统上应用发现 M 例"**,
+把现有材料降级为其中一个 worked example。**这只是一个待检验的框架假设,不是已验证方向**;
+且 **2607.21686 Persistent Computational State 已在 Cosmos3 / WorldMem / Matrix-Game 2.0 上做多系统运行时状态工作**,
+占据风险必须先查。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。

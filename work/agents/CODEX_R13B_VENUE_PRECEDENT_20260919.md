@@ -155,7 +155,7 @@ AAAI、ICLR、NeurIPS、ACL、CVPR 都有诊断论文先例，但主会先例的
 
 SIGIR 2024 的 [Resource & Reproducibility call](https://sigir-2024.github.io/call_for_res_rep_papers.html) 是另一种现实范例：论文进入主 proceedings 的专门 track，但要求 generalizability 或 new insight，而不是只证明代码能运行。ECIR 的 reproducibility session 和 ICML 2017 的 RML workshop 则显示，较窄的 reproduction/protocol diagnosis 确实有专门落点。
 
-在 health/ML 等垂直领域，ML4H 一类 symposium/findings track 会显式征集 negative results、reproducibility studies 和 critique；这种 route 的 audience 与要求都比通用 main track 更聚焦。
+在 health/ML 等垂直领域，[ML4H 2025 official call](https://ahli.cc/ml4h/2025/call-for-papers/) 显式征集 negative results、reproducibility studies 和 critique；这种 route 的 audience 与要求都比通用 main track 更聚焦。这里引用的是 2025 call，不把它扩写成一个未经核对的 2026 deadline 或 acceptance rate。
 
 ### Registered reports
 
