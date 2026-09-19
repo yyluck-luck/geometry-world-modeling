@@ -1938,3 +1938,48 @@ Stream F 的审计也同样:它的 C2 理由是"`else` 只重置 cross-attention
 并且我此前写的"CLEAN 判定普遍安全"**也是错的**:GEN3C 恰恰有显式 `clear_cache()`
 (`gen3c_persistent.py:551-553`,清了内层 `model_was_seeded`),缺陷却因**外层另一个字段**未清而存在。
 **"存在显式重置"同样不能判 CLEAN;必须证明后续路径读到的每个字段都被重置或重算,包括其他层。**
+
+## 2026-09-19 GEN3C 通过严格检验,并得到一个更干净的缺陷陈述
+
+用杀死 CausVid 与 PlayGen 的同一把尺子重检 GEN3C,**它通过,且证据比原判更强。**
+
+### 外层 `model_seeded` 的完整赋值/读取清单(全仓库 grep,已排除 `model_was_seeded`)
+
+| 位置 | 操作 |
+|---|---|
+| `gui/api/server_base.py:60` | `= False` —— **全代码库唯一赋 False 处,且在 `__init__` 内** |
+| `gui/api/server_base.py:73` | `= True` —— 基类默认 `seed_model`,docstring:"By default, no seeding is required so the default implementation just returns." |
+| `gui/api/server_cosmos_base.py:71` | `= True` —— 成功 seed 后 |
+| `gui/api/server_debug.py:30, :50` | `= True` |
+| `gui/api/server_base.py:122` | **读取**(准入门) |
+
+**`model_seeded = False` 在 `__init__` 之外零结果。一旦置 True,发布代码中没有任何路径把它改回 False。**
+
+### 与两个假阳性的对照(这正是新规程的判别力)
+
+| 系统 | 消费端的值 | 结论 |
+|---|---|---|
+| CausVid | `current_start` **每次调用重算** | CLEAN |
+| PlayGen | 键 `request.sid` **每次连接重生成** | 降级 |
+| **GEN3C** | **写入后永不重置** | **HIT 成立** |
+
+三者形态互不相同,而同一条规则把它们正确分开。**这说明规则本身有判别力,不是事后合理化。**
+
+### 更干净的缺陷陈述(取代我此前所有表述)
+
+> **一个单向(monotone)的就绪标志,守卫着一个生命周期可清空(non-monotone)的资源。**
+
+基类把该标志设计成**一次性闩锁**(默认实现直接置 True 并返回,因为"默认无需 seeding");
+Cosmos 覆写加入了真实 seeding,**保留了闩锁语义**,但它所守卫的 3D cache 是**可清空的**
+(`gen3c_persistent.py:551-553` `clear_cache()` 把 `cache=None`、`model_was_seeded=False`)。
+两者生命周期不匹配,故存在"资源已清空而闩锁仍闭合"的状态。
+
+**这不是风格判断,而是可陈述的结构性质:守卫者单调、被守卫资源非单调。**
+它也自然解释了为什么内层 `model_was_seeded` 被清而外层没有——内层跟随资源,外层是闩锁。
+
+### 当前可辩护资产(按新规程)
+
+**HIT:GEN3C(1 个,消费端已追,范围限于 `gpu_count==1` 且 `model_name ∈ {cosmos, cosmos-predict1}`)。**
+VMem:陈旧读取真实(`pipeline.py:708` 无条件读),**oracle 未决**,且有已测效应 `+0.245 dB`。
+CausVid、PlayGen:已撤回。
+CLEAN 判定需按"显式重置不足以判 CLEAN"重审(R18-J 进行中)。
