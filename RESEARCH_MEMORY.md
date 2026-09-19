@@ -1184,3 +1184,49 @@ Koopman / 各向异性收缩(2608.25879)· camera-conditioned(2606.09507 Prisma-
 它只会在有人做精确对账时暴露,而大多数读者不会做。
 若无人对账,一个错误的分解关系就会随报告流出,并在他人引用时固化。
 
+
+## 2026-09-19 第十二轮:逐条放宽 C1–C5 的审查 → END-LINE-STANDS
+
+owner 选择"松掉某条 FIXED 约束"。约束原文(`TECHNICAL_REPORT_20260918.md:98`):
+> Frozen: no training(C1), no fine-tuning(C2), no new weights(C3), no modification of the upstream source(C4)。
+另加 `:67` 的 C5:one dependency group, one frozen consumer。
+
+### 结论:没有任何放宽到达"已建立为未占、非退化、且允许作为方法贡献"的方向
+
+| 放宽 | 到达什么 | 为何不 admissible |
+|---|---|---|
+| C1 / C2 单放 | **空操作**——C1 单放仍被 C2/C3 挡住,C2 单放本身就是 training 仍被 C1 挡 | 没有可持久化干预,无可达轴 |
+| C3 单放 | 接入外部已训练 checkpoint 做重排/固定特征 | 轴 (a)/(b)/(f),被 2606.02479、2504.06672、2406.10126、2503.03751、2506.04225 占 |
+| C1+C2 | 微调现有 `model_wrapper`/`denoiser`(62/72 行,采样 1270–1278) | 轴 (e)/(h),被 Self Forcing、BAgger、Steady-Forcing、Stable Video Infinity、2602.04608 占 |
+| C1+C3 | 在 `get_cond`(1267 行)外训练 selector/adapter/geometry branch | 被 FantasyWorld、LongLive-RAG、RAGME 占 |
+| C1+C2+C3 | 完整可训练 | 绕过了 common-target 单步代数陷阱,**没绕过占据** |
+| **C4** | **最便宜**:fork 里加 retained-frame camera relabel setter(还须同步重建 surfel,否则 stale geometry),并可显式清 `initial_threshold` 泄漏 | 轴 (b)/(f),被 EscherNet、PRoPE、2605.15182、2603.16871、GEN3C、Voyager、FantasyWorld 占。**买到的是"接口可用",不是 admissible direction** |
+| C5 | 跨 consumer 复制同一冻结干预 | 首先落在 owner 已排除的轴 (g);包装成 consumer-agnostic method 则被 2406.10126、2606.02553 占 |
+
+**成本账(事前估计):** C1+C2+C3 最小 pilot 约 800 GPU-hours,原型级约 3,000,且需要
+训练数据 + 独立 held-out(ScanNet++ v2 申请 lead time 2–6 周,尚未开始)+ supervisor scope 批准。
+**至少 6 周,本学期不可稳妥完成。** C4 只需 0 GPU(纯 CPU 不变量门),1–3 天,但只得可行性。
+
+Q3 **拒绝排名**:"C4 最便宜但预期 admissible contribution 为零,把它排第一会把 feasibility 错写成 novelty。"
+Q4 **拒绝编造门槛**:"我不伪造一个训练门槛来给已经被占用的方向制造授权。"
+
+### 核查
+
+9/9 新引用全部为真、标题吻合。4/4 代码行逐字命中:
+62 `self.model_wrapper = VMemWrapper(self.model)`、72 `DiscreteDenoiser(...)`、
+1267 `cond = self.get_cond(...)`、1270 `do_sample(...)`。三份 pinned 副本 SHA 复核一致。
+
+### 两条彼此独立的 END-LINE 理由(重要)
+
+1. **占据**——依赖文献判断,可被单一反例推翻;
+2. **日程与算力**——即便占据判断全错,C1+C2+C3 在本学期也执行不完,且 tranche 已撤回、数据申请未启动。
+**理由 2 不依赖任何文献判断,因而比理由 1 更稳健。**
+
+### 我的盲区(自陈)
+
+第十二轮 prompt 的 Part 3 里,**是我明令"axis (g) measurement/evaluation 被排除,不许往那边引"**。
+因此本轮从未评估**第六条约束 C6:"贡献必须是 method"**。
+在所有方法轴关闭之后,C6 才是真正的 binding constraint,而它恰恰是**唯一零成本**的放宽。
+这一条必须交回 owner,不能由我或评审代为排除或代为恢复。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
