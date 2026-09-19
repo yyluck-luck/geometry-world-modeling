@@ -1409,3 +1409,65 @@ ML testing survey 1906.10742、MIND 2602.08025、2602.23152、2609.03673)。
   `causal_diffusion_inference.py:110-124` 对 pos/neg 两路也都重置。
 **我没能证明存在可达的脏读,故诚实归类为 NEAR 而非 HIT。** 这本身是有用的数据点——
 说明该缺陷类**不是**这类代码库的普遍现象,`M/N` 里的 `M` 可能很小。
+
+## 2026-09-19 R14-D 跨系统可行性:**零 GPU 足以关闭广度缺口的静态部分**;发现第二个 HIT(GEN3C)
+
+8/8 新引用已核实为真。**它正确区分了两个同名 Voyager**:
+`2305.16291`(MineDojo LLM Minecraft agent,按模态排除)vs `2506.04225`(视频扩散),我此前差点混用。
+
+### 审计结果(固定五条件谓词,10+ 系统,均带 commit SHA 与行号)
+
+| 系统 | C1 | C2 | C3 | C4 | 判定 |
+|---|---|---|---|---|---|
+| VMem `39291e4f` | ✓ | ✓ | ✓ | ✓ | **HIT**(参照系统) |
+| **GEN3C `db2ffe12`** | ✓ | ✓ | ✓ | ✓ | **HIT** |
+| MagicWorld v1 `a378d67d` | ✓ | ✗ | 不确定 | ✓ | NEAR |
+| Self-Forcing `33593df3` | ✓ | ✓ | ✗ | ✓ | CLEAN |
+| LongLive v1 / v2.0 | ✓ | ✓ | ✗ | ✓ | CLEAN |
+| Matrix-Game 1 `71c3cd7f` | ✓ | ✓ | ✗ | ✓ | CLEAN |
+| FramePack `97fe5dbe` | ✓ | ✓ | ✗ | ✓ | CLEAN |
+| MemFlow `7ed51477` | ✓ | ✓ | ✗ | ✓ | CLEAN |
+| Cosmos umbrella | — | — | — | — | NOT-INSPECTED(无单一完整实现) |
+| Voyager(MineDojo) | ✓ | ✓ | ✓ | ✓ | `chest_memory` 是 HIT 但**按模态排除** |
+
+**它对 Self-Forcing 的判定(CLEAN)比我自己的 NEAR 更有依据**:C3 失败,因为公开调用路径上的重置是显式的。我采纳其判定。
+**CLEAN 是诚实的负例**,恰恰是这份 survey 可信的原因——不是把每个系统都说成阳性。
+
+### GEN3C HIT:我自己逐行复核通过
+
+`nv-tlabs/GEN3C` HEAD `db2ffe12ced12ddafcec5e0422ee46ce8520746b`(CVPR 2025 Highlight,NVIDIA Toronto AI Lab):
+
+```python
+# gui/api/server_cosmos_base.py:46-71
+async def seed_model(self, req):
+    if self.pose_history_w2c:
+        self.model.clear_cache()          # :53  缓存已清
+        self.pose_history_w2c.clear()     # :54
+        self.intrinsics_history.clear()   # :55
+    ...
+    model_result = seeding_method(...)    # :62-70  可抛异常
+    self.model_seeded = True              # :71  仅成功后才写
+```
+异常源已核:`gen3c_persistent.py:208` `raise NotImplementedError("Seeding from multiple frames requires providing depth values.")`。
+`server.py` 捕获并返回 **HTTP 400**,服务存活、客户端看到干净错误,**内部状态已不一致**。
+`server_base.py:60` `self.model_seeded = False` 初始化,`:122` `if not self.model_seeded: raise` 读取 → 放行 → 对着空缓存推理。
+
+**最有说服力的细节:同一概念在两层各有一个名字几乎相同的标志,只有一个被清。**
+`clear_cache()`(`gen3c_persistent.py:551-553`)把**模型自己的** `self.model_was_seeded = False` 清了;
+**服务端**的 `self.model_seeded` 没清。**重复的生命周期状态跨层不同步——这正是该缺陷类存在的机理。**
+
+### Q5 可行性裁定(关键)
+
+- **零 GPU 足以关闭条件 1–4 的广度缺口。** 两周内一人可审 **9 个模型家族(约 13 个发布变体)**。
+  限制因素不是读代码的速度,而是确认混合序列确实从文档化 API 可达、区分 UI 状态与实例状态、跟踪分支漂移、逐一核对许可。边界案例(如 MagicWorld)还需第二名复核者。
+- **零 GPU 不足以支撑行为影响主张。** "条件 5 不是'代码抛错'" ——
+  可发表的行为主张必须在冻结权重下展示可复现的输出/质量/状态差异,并把陈旧状态路径与干净重置、与普通生成失败区分开。
+  **审稿人很可能把纯静态的跨系统表格视为 code-risk 证据,而非已证明的外部效度。**
+
+### 我的判断:两个 HIT 的**后果类型不同**,这是必须处理的问题
+
+VMem 的是**陈旧阈值 → 细微行为改变**(我们自建 panel 上测得 `+0.245 dB`);
+GEN3C 的是**陈旧标志 → 非法状态被放行**(静态预测的 error/invalid-state 后果,未运行)。
+二者不是同一种"后果",不能在同一张表里当作同质证据聚合。这一点在写作时必须显式处理,不得模糊。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回;本轮零 GPU。
