@@ -1,0 +1,30 @@
+--- build_four_history_geometry.py
++++ build_four_history_geometry_v2.py
+@@ -24,8 +24,8 @@
+ from datetime import datetime, timezone
+ 
+ HERE = Path(__file__).resolve().parent
+-CONTRACT = HERE / "FOUR_HISTORY_CONTRACT.json"
+-OUT = HERE / "execution_geometry_01"
++CONTRACT = HERE / "FOUR_HISTORY_CONTRACT_V2.json"
++OUT = HERE / "execution_geometry_02"
+ sys.dont_write_bytecode = True
+ 
+ 
+@@ -255,13 +255,14 @@
+         cp_after = cp.stat()
+         assert [cp_before.st_size, cp_before.st_mtime_ns] == [cp_after.st_size, cp_after.st_mtime_ns]
+         assert "All keys matched successfully" in (OUT / "CHECKPOINT_LOAD.txt").read_text()
+-        assert model.config.head_type == "dpt"
++        assert model.head_type == "dpt"
+         assert not model.training
+         assert all(not m.training for m in model.modules())
+         assert all(p.dtype == torch.float32 and p.device.type == "cpu" for p in model.parameters())
+         r.update(model_load_seconds=time.perf_counter() - load_start,
+                  parameters=sum(p.numel() for p in model.parameters()), model_training=False,
+-                 full_model_config=config_json(model.config.to_dict()), weights_only=True,
++                 backbone_config=config_json(model.config.to_dict()), weights_only=True,
++                 model_head_type=model.head_type, downstream_head_class=type(model.downstream_head).__name__,
+                  torch_threads=torch.get_num_threads(),
+                  opencv_threads=cv2.getNumThreads(),
+                  precision_scope="CPU float32 parameters/inputs, official internals plus frozen signed RoPE")

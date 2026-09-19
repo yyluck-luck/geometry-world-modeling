@@ -1,0 +1,4274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+<head>
+                  
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> <!-- IE8 und IE9 Kompartibilitätsmodus deaktivieren -->
+    <!--  from old main template, needs modifications: language ...  -->
+    
+    
+        
+        
+        
+        
+        
+    
+
+
+<title>Computer Vision Group - Useful tools for the RGB-D benchmark</title>
+
+
+    
+                               
+
+    
+
+
+    <!-- style sheets for screen and print etc. -->
+    <style type="text/css" media="screen"> @import url(https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/layout-tablet-landscape.css);</style>
+    <style type="text/css" media="screen and (min-width:1025px)"> @import url(https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/layout.css);</style>
+    <style type="text/css" media="print"> @import url(https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/print.css);</style>
+
+<link rel="apple-touch-icon" sizes="57x57" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="https://cvg.cit.tum.de/lib/tpl/inf9v4/favicon/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="home" href="/" title="Front Page" />
+
+    <!-- CSS SLOT -->
+    
+        
+    	<style type="text/css" media="screen"> @import url(https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/corporatedesign/cdstyle.cssx);</style>
+	
+    
+    <!-- HEAD SLOT -->
+<!-- Array -->
+	<meta name="generator" content="DokuWiki"/>
+<meta name="robots" content="index,follow"/>
+<meta name="keywords" content="data,datasets,rgbd-dataset,tools,Useful tools for the RGB-D benchmark"/>
+<meta name="description" content="Useful tools for the RGB-D benchmark
+Useful tools for the RGB-D benchmark
+
+We provide a set of tools that can be used to pre-process the datasets and to evaluate the SLAM/tracking results. The scripts can be [downloaded here].
+
+To checkout the repository using subversion, run
+
+
+svn checkout https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools"/>
+<link rel="search" type="application/opensearchdescription+xml" href="https://cvg.cit.tum.de/lib/exe/opensearch.php" title="Computer Vision Group"/>
+<link rel="start" href="https://cvg.cit.tum.de/"/>
+<link rel="contents" href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools?do=index" title="Sitemap"/>
+<link rel="manifest" href="https://cvg.cit.tum.de/lib/exe/manifest.php"/>
+<link rel="alternate" type="application/rss+xml" title="Recent Changes" href="https://cvg.cit.tum.de/feed.php"/>
+<link rel="alternate" type="application/rss+xml" title="Current namespace" href="https://cvg.cit.tum.de/feed.php?mode=list&amp;ns=data:datasets:rgbd-dataset"/>
+<link rel="canonical" href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools"/>
+<link rel="stylesheet" href="https://cvg.cit.tum.de/lib/exe/css.php?t=inf9v4&amp;tseed=404f5235931f43b35aa07fd6b26b3400"/>
+<!--[if gte IE 9]><!-->
+<script >/*<![CDATA[*/var NS='data:datasets:rgbd-dataset';var JSINFO = {"move_renameokay":false,"id":"data:datasets:rgbd-dataset:tools","namespace":"data:datasets:rgbd-dataset","ACT":"show","useHeadingNavigation":1,"useHeadingContent":1};
+/*!]]>*/</script>
+<script charset="utf-8" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script charset="utf-8" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script charset="utf-8" src="https://cvg.cit.tum.de/lib/exe/js.php?t=inf9v4&amp;tseed=404f5235931f43b35aa07fd6b26b3400"></script>
+<script type="text/javascript">/*<![CDATA[*/var hostnames = [ 'https:.cs.tum.edu','https:.informatik.tu-muenchen.de','https:','cvg.cit.tum.de','cvpr.cs.tum.edu','cvpr.informatik.tu-muenchen.de','cvpr' ];
+/*!]]>*/</script>
+<script type="text/javascript" src="https://cvg.cit.tum.de/lib/plugins/inf9/ddwindowlinks.js"></script>
+<!--<![endif]-->
+
+<script type='text/javascript'>var NS='data:datasets:rgbd-dataset:tools';</script>
+<link rel='stylesheet' media='screen' type='text/css' href='https://cvg.cit.tum.de/lib/tpl/inf9v4/css.php' />
+<script src='https://cvg.cit.tum.de/lib/tpl/inf9v4/js.php' type='text/javascript' />
+<script type='text/javascript'>var NS='data:datasets:rgbd-dataset:tools';</script>
+<link rel='shortcut icon' href='https://cvg.cit.tum.de/lib/tpl/inf9v4/images/favicon.ico' />
+
+    
+    <!-- JS Slot -->
+    
+        
+    <script type="text/javascript" src="/lib/scripts/qsearch.js"></script>
+				
+
+    
+    <!-- Formtabs Slot -->
+    
+        
+    
+    <!-- Define dynamic server-side variables for javascripts in this one  -->
+    <script type="text/javascript" src="https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/plone_javascript_variables.js"></script>
+    <script type="text/javascript" src="https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/plone_javascripts.js"></script>
+
+    <!-- set varnish statistic headers -->
+    
+
+    <!-- switchabel stylesheets -->
+            <link rel="alternate stylesheet" alternate="true" type="text/css" href="https://cvg.cit.tum.de/lib/tpl/inf9v4/stylesheets/daniel_zoomed_profilepics.css">
+            <script>
+    var defaultstyles=[
+        "darker_level2_nav.css",
+        "hide-breadcrumbs.css",
+        "laura_daniel_highlight_group_names.css",
+        "memberpage-hover-highlight.css",
+        "right-content-box.css",
+        ];
+    </script>
+
+</head>
+<body>
+<a href="#hereistthecontent" id="takemetothecontent" class="access_aural">Direkt zum Inhalt springen</a>
+<div id="visual-portal-wrapper">
+<!--stoerer-->
+<!--/stoerer-->
+<div id="portal-personaltools">
+    <div>
+                    <span><a href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools?do=login&amp;sectok="  class="action login" rel="nofollow" title="Log In"><b><img src='https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/login.png' alt='login.png' height='16' border='0'> Login</b></a></span>
+                        <!-- language selector  We need to replace this later and set it by method -->
+        
+        
+        <div id="search">
+            <form id="search-box" method="post" action="/" name="search-box"><input type="hidden" name="do" value="search"><input type="text" id="search-field" name="q" value="" placeholder="Search"><button><img id="cse_sbgray" src="https://cvg.cit.tum.de/lib/tpl/inf9v4/portal/search-icon.png" alt="Suche"></button></form>
+        </div>
+    </div>
+</div>
+<div id="portal-top">
+    
+        <a href="http://portal.mytum.de" alt="Startseite MyTUM" title="Startseite MyTUM"></a>
+        <span><h5 id="claim_en" class="claim"><a href="/">Computer Vision Group</a></br><a href="https://www.cit.tum.de">TUM School of Computation, Information and Technology</a><br><a href="https://www.tum.de">Technical University of Munich</a></h5></span>
+    
+        
+	        <h1 style="">
+				<a href="http://www.tum.de" alt="Home tum.de" title="Home tum.de">Technical University of Munich</a>
+	        </h1>     
+<div id="smallmenu" class="portlet" style="padding-top: 110px; position: relative; transition: all 1s ease 0s; display: none;">
+<style>
+@media only screen and (max-width: 799px) {
+nav  {
+    border-bottom: none;
+    border-top: 1px solid #e6e6e6 !important;
+    margin-bottom: 1em;
+    margin-top: 0;
+    background-color: white !important;
+}
+
+
+
+nav ul#navigationlist  {
+    list-style-type: none;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+nav ul#navigationlist  li {
+
+
+    float: none;
+
+ }
+
+nav ul#navigationlist  li span control {
+    width: 3em;
+}
+
+nav ul#navigationlist  li span {
+         border-bottom: 1px solid #e6e6e6;
+ }
+
+nav ul#navigationlist  li a {
+        background-color: white !important;
+    font-size: 16px;
+    height: auto;
+    padding-bottom: 1em;
+    padding-left: 20px;
+    padding-right: 0;
+    padding-top: 1em;
+    text-transform: none;
+    border: none;
+    line-height: 2em;
+}
+}
+</style>
+
+
+
+<nav>
+<ul id="navigationlist" class="nav_depth01">
+<h3 id="navigationheading" class="access_aural">Navigation</h3>
+<li class="nav_depth02 _bordered children current dwid_data_datasets_rgbd-dataset_tools id_home tag_block expanded">
+<span class="entry"><a href="/home">Home</a>
+<control>
+</control>
+</span>
+<ul>
+<!--submenu: Array-->
+<li class="nav_depth03 external dwid_data_datasets_rgbd-dataset_tools id_ tag_link">
+<span class="entry">
+<a href="https://cvai.in.tum.de/application">Application Form</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_tum-ai-lecture-series tag_link">
+<span class="entry">
+<a href="/tum-ai-lecture-series">TUM AI Lecture Series</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_members tag_link">
+<span class="entry">
+<a href="/members">Members</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:cremers tag_link">
+<span class="entry"><a href="/members/cremers">Prof. Dr. Daniel Cremers</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:collaborators tag_link">
+<span class="entry"><a href="/members/cremers/collaborators">Collaborators</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:cv tag_link">
+<span class="entry"><a href="/members/cremers/cv">CV</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:publications tag_link">
+<span class="entry"><a href="/members/cremers/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:research tag_link">
+<span class="entry"><a href="/members/cremers/research">Research</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:talks tag_link">
+<span class="entry"><a href="/members/cremers/talks">Talks</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:aran tag_link">
+<span class="entry"><a href="/members/aran">Dr. Nikita Araslanov</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:koepa tag_link">
+<span class="entry"><a href="/members/koepa">Dr. Almut Sophia Koepke</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:lhao tag_link">
+<span class="entry"><a href="/members/lhao">Dr. Haoang Li</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:andh tag_link">
+<span class="entry"><a href="/members/andh">Dr. Hector Andrade Loarca</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_members:andh:news tag_link">
+<span class="entry"><a href="/members/andh/news">News</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:andh:news:input tag_link">
+<span class="entry"><a href="/members/andh/news/input">Input</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:andh:news:template tag_link">
+<span class="entry"><a href="/members/andh/news/template">Template</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:andh:publications tag_link">
+<span class="entry"><a href="/members/andh/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mricc tag_link">
+<span class="entry"><a href="/members/mricc">Dr. Riccardo Marin</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:pfl tag_link">
+<span class="entry"><a href="/members/pfl">Dr. Roman Pflugfelder</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:salex tag_link">
+<span class="entry"><a href="/members/salex">Dr. Alexandra Stang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wang tag_link">
+<span class="entry"><a href="/members/wang">Dr. Xi Wang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:xiya tag_link">
+<span class="entry"><a href="/members/xiya">Dr. Yan Xia</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news tag_link">
+<span class="entry"><a href="/members/xiya/news">News</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news:input tag_link">
+<span class="entry"><a href="/members/xiya/news/input">Input</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news:template tag_link">
+<span class="entry"><a href="/members/xiya/news/template">Template</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:publications tag_link">
+<span class="entry"><a href="/members/xiya/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wagnersa tag_link">
+<span class="entry"><a href="/members/wagnersa">Sabine Wagner</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:lohr tag_link">
+<span class="entry"><a href="/members/lohr">Quirin Lohr</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:akid tag_link">
+<span class="entry"><a href="/members/akid">Ido Akov</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:brahimi tag_link">
+<span class="entry"><a href="/members/brahimi">Mohammed Brahimi</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:cheq tag_link">
+<span class="entry"><a href="/members/cheq">Qing Cheng</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:chui tag_link">
+<span class="entry"><a href="/members/chui">Jason Chui</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:chwe tag_link">
+<span class="entry"><a href="/members/chwe">Weirong Chen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:curreli tag_link">
+<span class="entry"><a href="/members/curreli">Cecilia Curreli</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:cze tag_link">
+<span class="entry"><a href="/members/cze">Zehranaz Canfes</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:dagt tag_link">
+<span class="entry"><a href="/members/dagt">Dr. Thomas Dages</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:delu tag_link">
+<span class="entry"><a href="/members/delu">Luis Denninger</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:dhou tag_link">
+<span class="entry"><a href="/members/dhou">Oussema Dhaouadi</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:dhou:publications tag_link">
+<span class="entry"><a href="/members/dhou/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ehm tag_link">
+<span class="entry"><a href="/members/ehm">Viktoria Ehm</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:eicj tag_link">
+<span class="entry"><a href="/members/eicj">Jonathan Eichhorn</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:eisenber tag_link">
+<span class="entry"><a href="/members/eisenber">Marvin Eisenberger</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:gaom tag_link">
+<span class="entry"><a href="/members/gaom">Maolin Gao</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:gladkova tag_link">
+<span class="entry"><a href="/members/gladkova">Mariia Gladkova</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:grmar tag_link">
+<span class="entry"><a href="/members/grmar">Markus Gross</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hael tag_link">
+<span class="entry"><a href="/members/hael">Linus Härenstam-Nielsen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hofherrf tag_link">
+<span class="entry"><a href="/members/hofherrf">Florian Hofherr</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hreg tag_link">
+<span class="entry"><a href="/members/hreg">Regine Hartwig</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:kchr tag_link">
+<span class="entry"><a href="/members/kchr">Christian Koke</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:khamuham tag_link">
+<span class="entry"><a href="/members/khamuham">Qadeer Khan</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:komorowi tag_link">
+<span class="entry"><a href="/members/komorowi">Dávid Komorowicz</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ljia tag_link">
+<span class="entry"><a href="/members/ljia">Jianzhe Liu</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mayom tag_link">
+<span class="entry"><a href="/members/mayom">Mateo de Mayo</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mejo tag_link">
+<span class="entry"><a href="/members/mejo">Johannes Meier</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:muhled tag_link">
+<span class="entry"><a href="/members/muhled">Dominik Muhle</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:qis tag_link">
+<span class="entry"><a href="/members/qis">Shenhan Qian</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ramk tag_link">
+<span class="entry"><a href="/members/ramk">Karnik Ram</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:rchri tag_link">
+<span class="entry"><a href="/members/rchri">Christoph Reich</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sang tag_link">
+<span class="entry"><a href="/members/sang">Lu Sang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:saroha tag_link">
+<span class="entry"><a href="/members/saroha">Abhishek Saroha</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:schjulia tag_link">
+<span class="entry"><a href="/members/schjulia">Julian Philipp Schmitt</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:schnaus tag_link">
+<span class="entry"><a href="/members/schnaus">Dominik Schnaus</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sheny tag_link">
+<span class="entry"><a href="/members/sheny">Yuesong Shen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sida tag_link">
+<span class="entry"><a href="/members/sida">Daniil Sinitsyn</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sols tag_link">
+<span class="entry"><a href="/members/sols">Sergei Solonets</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:tomani tag_link">
+<span class="entry"><a href="/members/tomani">Christian Tomani</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wamel tag_link">
+<span class="entry"><a href="/members/wamel">Ellia Wamese</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:webermark tag_link">
+<span class="entry"><a href="/members/webermark">Mark Weber</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:webersi tag_link">
+<span class="entry"><a href="/members/webersi">Simon Weber</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wimbauer tag_link">
+<span class="entry"><a href="/members/wimbauer">Felix Wimbauer</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wxu tag_link">
+<span class="entry"><a href="/members/wxu">Xuqin Wang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:yez tag_link">
+<span class="entry"><a href="/members/yez">Zhenzhang Ye</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:zga tag_link">
+<span class="entry"><a href="/members/zga">Ganlin Zhang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_research tag_link">
+<span class="entry">
+<a href="/research">Research Areas</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:vslam tag_link">
+<span class="entry"><a href="/research/vslam">Visual SLAM</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:ps_reconstruction tag_link">
+<span class="entry"><a href="/research/ps_reconstruction">Photometry-Based Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_research:geometry tag_link">
+<span class="entry"><a href="/research/geometry">Geometry Processing</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_research:geometry:fire tag_link">
+<span class="entry"><a href="/research/geometry/fire">FIRe🔥: Fast Inverse Rendering using Directional and Signed Distance Functions</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_research:deeplearning tag_link">
+<span class="entry"><a href="/research/deeplearning">Deep Learning</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_research:deeplearning:multiagent tag_link">
+<span class="entry"><a href="/research/deeplearning/multiagent">Multiagent</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:biomed tag_link">
+<span class="entry"><a href="/research/biomed">Biomedicine</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_publications tag_link">
+<span class="entry">
+<a href="/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_teaching tag_link">
+<span class="entry">
+<a href="/teaching">Teaching</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026 tag_link">
+<span class="entry"><a href="/teaching/ws2026">Winter Semester 2026/2027</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ws2026/4d-vision">Master Seminar - 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:dl-dynamics tag_link">
+<span class="entry"><a href="/teaching/ws2026/dl-dynamics">Seminar: Deep Learning for Dynamical Simulations (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:f3dv tag_link">
+<span class="entry"><a href="/teaching/ws2026/f3dv">Master Seminar: Feedforward 3D Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:fwai tag_link">
+<span class="entry"><a href="/teaching/ws2026/fwai">Practical Course: One-Way Ticket to the Finsler World: Into the Future of Geometric AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:g3r tag_link">
+<span class="entry"><a href="/teaching/ws2026/g3r">Master Seminar: Generative 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:models tag_link">
+<span class="entry"><a href="/teaching/ws2026/models">Seminar: Neural Network Models in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:sq3d tag_link">
+<span class="entry"><a href="/teaching/ws2026/sq3d">Practical Course: Shape Quest: Learning to Explore the 3D World (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:visnav_ws2026 tag_link">
+<span class="entry"><a href="/teaching/ws2026/visnav_ws2026">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026 tag_link">
+<span class="entry"><a href="/teaching/ss2026">Summer Semester 2026</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:3dcv tag_link">
+<span class="entry"><a href="/teaching/ss2026/3dcv">3D Computer Vision (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:afm tag_link">
+<span class="entry"><a href="/teaching/ss2026/afm">3rd Practical Course: Applied Foundation Models (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ss2026/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ss2026/4d-vision/internal">Schedule</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl4sai tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl4sai">Practical Course: Deep Learning for Spatial AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:sma tag_link">
+<span class="entry"><a href="/teaching/ss2026/sma">Practical Course: Shape and Manifold Analysis (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:visnav_ss2026 tag_link">
+<span class="entry"><a href="/teaching/ss2026/visnav_ss2026">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:visnav_ss2026:material tag_link">
+<span class="entry"><a href="/teaching/ss2026/visnav_ss2026/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl-dynamics tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl-dynamics">Seminar: Deep Learning for Dynamical Simulations (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl-dynamics:papers tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl-dynamics/papers">Papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:fundamentals tag_link">
+<span class="entry"><a href="/teaching/ss2026/fundamentals">Seminar: Fundamentals and Models of Neural Networks in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025 tag_link">
+<span class="entry"><a href="/teaching/ws2025">Winter Semester 2025/26</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ws2025/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ws2025/4d-vision/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2025/cv3">Computer Vision III: Detection, Segmentation and Tracking (IN2375)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:dl-equi-dynam tag_link">
+<span class="entry"><a href="/teaching/ws2025/dl-equi-dynam">Seminar: Selected Topics in Deep Learning -- Equivariance & Dynamics (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:dl-equi-dynam:papers tag_link">
+<span class="entry"><a href="/teaching/ws2025/dl-equi-dynam/papers">Papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:graph_learning_ws25 tag_link">
+<span class="entry"><a href="/teaching/ws2025/graph_learning_ws25">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:graph_learning_ws25:material tag_link">
+<span class="entry"><a href="/teaching/ws2025/graph_learning_ws25/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:patterns tag_link">
+<span class="entry"><a href="/teaching/ws2025/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:savha tag_link">
+<span class="entry"><a href="/teaching/ws2025/savha">Practical Course: 3D Shape Analysis and Virtual Humans Applications (10ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_3dvfm tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_3dvfm">Master Seminar - 3D Vision Foundation Models</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_mm3dr tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_mm3dr">Master Seminar - Modern Methods for 3D Representation and Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_modern3d tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_modern3d">Seminar: Modern Methods for 3D Reconstruction and Representation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:ulcv tag_link">
+<span class="entry"><a href="/teaching/ws2025/ulcv">Seminar: Unsupervised Learning in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:visnav_ws2025 tag_link">
+<span class="entry"><a href="/teaching/ws2025/visnav_ws2025">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:visnav_ws2025:material tag_link">
+<span class="entry"><a href="/teaching/ws2025/visnav_ws2025/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025 tag_link">
+<span class="entry"><a href="/teaching/ss2025">Summer Semester 2025</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ss2025/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ss2025/4d-vision/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:afm tag_link">
+<span class="entry"><a href="/teaching/ss2025/afm">2nd Practical Course: Applied Foundation Models (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:dl-equi-dynam tag_link">
+<span class="entry"><a href="/teaching/ss2025/dl-equi-dynam">Seminar: Selected Topics in Deep Learning -- Equivariance & Dynamics (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:dl4sai tag_link">
+<span class="entry"><a href="/teaching/ss2025/dl4sai">Practical Course: Deep Learning for Spatial AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:graph_learning_ss25 tag_link">
+<span class="entry"><a href="/teaching/ss2025/graph_learning_ss25">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:graph_learning_ss25:material tag_link">
+<span class="entry"><a href="/teaching/ss2025/graph_learning_ss25/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:modern3d tag_link">
+<span class="entry"><a href="/teaching/ss2025/modern3d">Seminar: Modern Methods for 3D Reconstruction and Representation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:mvg tag_link">
+<span class="entry"><a href="/teaching/ss2025/mvg">Multiple View Geometry (3D Computer Vision) (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:patterns tag_link">
+<span class="entry"><a href="/teaching/ss2025/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:savha tag_link">
+<span class="entry"><a href="/teaching/ss2025/savha">Practical Course: 3D Shape Analysis and Virtual Humans Applications (10ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:visnav_ss2025 tag_link">
+<span class="entry"><a href="/teaching/ss2025/visnav_ss2025">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:visnav_ss2025:material tag_link">
+<span class="entry"><a href="/teaching/ss2025/visnav_ss2025/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024 tag_link">
+<span class="entry"><a href="/teaching/ws2024">Winter Semester 2024/25</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2024/cv3">Computer Vision III: Detection, Segmentation and Tracking (IN2375)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:i2dl tag_link">
+<span class="entry"><a href="/teaching/ws2024/i2dl">Introduction to Deep Learning (IN2346)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:i2dl:tutorial-and-exercises tag_link">
+<span class="entry"><a href="/teaching/ws2024/i2dl/tutorial-and-exercises">Introduction to Deep Learning (IN2346)</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:bdl tag_link">
+<span class="entry"><a href="/teaching/ws2024/bdl">Master Seminar - Beyond Deep Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:4d_vision_ws24 tag_link">
+<span class="entry"><a href="/teaching/ws2024/4d_vision_ws24">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:4d_vision_ws24:internal tag_link">
+<span class="entry"><a href="/teaching/ws2024/4d_vision_ws24/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:3d4d_recon tag_link">
+<span class="entry"><a href="/teaching/ws2024/3d4d_recon">Master Seminar - Visual-based 3D/4D Reconstruction (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:3dsm tag_link">
+<span class="entry"><a href="/teaching/ws2024/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:create_dl tag_link">
+<span class="entry"><a href="/teaching/ws2024/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ws2024/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:graph_learning_ws24 tag_link">
+<span class="entry"><a href="/teaching/ws2024/graph_learning_ws24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:graph_learning_ws24:material tag_link">
+<span class="entry"><a href="/teaching/ws2024/graph_learning_ws24/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dl4science tag_link">
+<span class="entry"><a href="/teaching/ws2024/dl4science">Seminar: Deep Learning for the Natural Sciences (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dl4science:papers tag_link">
+<span class="entry"><a href="/teaching/ws2024/dl4science/papers">List of potential papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:fmcv tag_link">
+<span class="entry"><a href="/teaching/ws2024/fmcv">Seminar: Foundation Models for Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:fmcv:materials tag_link">
+<span class="entry"><a href="/teaching/ws2024/fmcv/materials">Materials for Foundational Models in 2D and 3D Computer Vision</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:seminar_realtime3d tag_link">
+<span class="entry"><a href="/teaching/ws2024/seminar_realtime3d">Seminar: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:seminar_realtime3d:material tag_link">
+<span class="entry"><a href="/teaching/ws2024/seminar_realtime3d/material">Material Page: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:continual_learning tag_link">
+<span class="entry"><a href="/teaching/ws2024/continual_learning">Seminar: Transfer Learning and Continual Learning in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024 tag_link">
+<span class="entry"><a href="/teaching/ss2024">Summer Semester 2024</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:cv2 tag_link">
+<span class="entry"><a href="/teaching/ss2024/cv2">Computer Vision II: Multiple View Geometry (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:humans tag_link">
+<span class="entry"><a href="/teaching/ss2024/humans">Master Seminar - HuMANS: 3D Human Motion Analysis (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:humans:internal tag_link">
+<span class="entry"><a href="/teaching/ss2024/humans/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:3dsm tag_link">
+<span class="entry"><a href="/teaching/ss2024/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:afm tag_link">
+<span class="entry"><a href="/teaching/ss2024/afm">Practical Course: Applied Foundation Models in Computer Vision (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:create_dl tag_link">
+<span class="entry"><a href="/teaching/ss2024/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ss2024/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:gsu tag_link">
+<span class="entry"><a href="/teaching/ss2024/gsu">Practical Course: Geometric Scene Understanding (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:visnav_ss2024 tag_link">
+<span class="entry"><a href="/teaching/ss2024/visnav_ss2024">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:visnav_ss2024:material tag_link">
+<span class="entry"><a href="/teaching/ss2024/visnav_ss2024/material">teaching:ss2024:visnav_ss2024:material</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:graph_learning_ss24 tag_link">
+<span class="entry"><a href="/teaching/ss2024/graph_learning_ss24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:graph_learning_ws24 tag_link">
+<span class="entry"><a href="/teaching/ss2024/graph_learning_ws24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science">Seminar: Deep Learning for the Natural Sciences (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science:papers tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science/papers">List of potential papers</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science:summaries tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science/summaries">Summaries</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:patterns tag_link">
+<span class="entry"><a href="/teaching/ss2024/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023 tag_link">
+<span class="entry"><a href="/teaching/ws2023">Winter Semester 2023/24</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2023/cv3">Computer Vision III: Detection, Segmentation and Tracking</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:3dsm tag_link">
+<span class="entry"><a href="/teaching/ws2023/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:create_dl tag_link">
+<span class="entry"><a href="/teaching/ws2023/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ws2023/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:graphlearning_ws2023 tag_link">
+<span class="entry"><a href="/teaching/ws2023/graphlearning_ws2023">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:graphlearning_ws2023:material tag_link">
+<span class="entry"><a href="/teaching/ws2023/graphlearning_ws2023/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:fmcv tag_link">
+<span class="entry"><a href="/teaching/ws2023/fmcv">Seminar: Foundational Models for 2D and 3D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:fmcv:materials tag_link">
+<span class="entry"><a href="/teaching/ws2023/fmcv/materials">Materials for Foundational Models in 2D and 3D Computer Vision</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_design_patterns tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_design_patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_realtime3d tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_realtime3d">Seminar: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_realtime3d:material tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_realtime3d/material">teaching:ws2023:seminar_realtime3d:material</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023">Summer Semester 2023</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:cv2 tag_link">
+<span class="entry"><a href="/teaching/ss2023/cv2">Computer Vision II: Multiple View Geometry (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:create_dl tag_link">
+<span class="entry"><a href="/teaching/ss2023/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:gsu tag_link">
+<span class="entry"><a href="/teaching/ss2023/gsu">Practical Course: Geometric Scene Understanding (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:gsu:files tag_link">
+<span class="entry"><a href="/teaching/ss2023/gsu/files">GSU-SS23: Download</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ss2023/dlpractice">Practical Course: Hands-on Deep Learning for Computer Vision and Biomedicine (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:intellisys_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/intellisys_ss2023">Practical Course: Learning For Self-Driving Cars and Intelligent Systems (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:srmcv tag_link">
+<span class="entry"><a href="/teaching/ss2023/srmcv">Practical Course: Shape Reconstruction and Matching in Computer Vision (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:visnav_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/visnav_ss2023">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:visnav_ss2023:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/visnav_ss2023/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:graphlearning_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/graphlearning_ss2023">Seminar Course: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:graphlearning_ss2023:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/graphlearning_ss2023/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:bdl tag_link">
+<span class="entry"><a href="/teaching/ss2023/bdl">Seminar: Beyond Deep Learning: Selected Topics on Novel Challenges (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:3dcv tag_link">
+<span class="entry"><a href="/teaching/ss2023/3dcv">Seminar: Recent Advances in 3D Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:3dcv:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/3dcv/material">Material for </a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_teaching:archive tag_link">
+<span class="entry"><a href="/teaching/archive">Archive</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:online tag_link">
+<span class="entry"><a href="/teaching/online">Online Courses</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:cvvm tag_link">
+<span class="entry"><a href="/teaching/online/cvvm">Computer Vision I: Variational Methods</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:ml4cv tag_link">
+<span class="entry"><a href="/teaching/online/ml4cv">Machine Learning for Robotics and Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:mvg tag_link">
+<span class="entry"><a href="/teaching/online/mvg">Computer Vision II: Multiple View Geometry</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:visnavfly tag_link">
+<span class="entry"><a href="/teaching/online/visnavfly">Visual Navigation for Flying Robots</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_teaching:visnav tag_link">
+<span class="entry"><a href="/teaching/visnav">VISNAV: Vision Based Navigation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_awards tag_link">
+<span class="entry">
+<a href="/awards">Awards</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children current dwid_data_datasets_rgbd-dataset_tools id_data tag_link expanded">
+<span class="entry">
+<a href="/data">Datasets & Software</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_data:datasets tag_link">
+<span class="entry"><a href="/data/datasets">Datasets</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_data:software tag_link">
+<span class="entry"><a href="/data/software">Software</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_workshops tag_link">
+<span class="entry">
+<a href="/workshops">Workshops & Tutorials</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+<span class="main-nav-toggle js-main-nav-toggle" style="color: initial;border-bottom: none;line-height: inherit;padding-bottom: 0;transition: none;-webkit-transition: none;bottom: 4px;cursor: pointer;color: #333;/*! display: none; */font-size: 16px;font-weight: bold;position: absolute;right: 20px;text-transform: uppercase;top: 50px;" onclick="jQuery('#smallmenu').toggle();">Menu</span>
+		
+       	
+		           
+    </div>
+                <!-- Breadcrumbs aus Unter-Template -->    
+<table id="layouttable">
+        <tbody>
+	<tr>
+            <!-- linker Portlet-Bereich Start -->
+            <td id="portal-column-one">
+                <!-- sticky portlets left-->
+                <!-- standard portlets -->
+<span>
+<div class="portlet_no_box">
+<!--
+<div tal:define="utool python:here.portal_url;">
+<form id="search-box" action="/search_document_results" method="post">
+<input id="search-field" type="text" name="searchterm" size="25" value="" />
+<input type="hidden" name="doctype" value="doctype_common" />
+<input type="hidden" name="qsmode" value="yes" />
+<input id="search-button" type=submit i18n:domain="slc" i18n:attributes="value" value="Search" />   
+</form>
+<a id="advancedsearchlink" href="#" tal:attributes="href python:utool.getPortalObject().absolute_url()+'/search_document_form'">
+<span i18n:translate="action_advanced_search" i18n:domain="slc" tal:omit-tag="">Advanced Search</span>
+</a>
+</div>
+-->
+</div>
+</span>
+<span>
+<div class="portlet_no_box">
+<!--
+<div class="portletBox" style="background-color: #ffffff; height: 27px; width: 14.3em;">     
+&nbsp;
+</div>
+-->
+</div>
+</span>
+<span>
+<div class="portlet">
+<h3>Links</h3>
+<div id="leftportlet">
+
+<p>
+
+<div itemscope itemtype="http://schema.org/Organization">
+<h4 itemprop="name">Informatik IX<br>
+Computer Vision Group</h4>
+<p itemtype="http://schema.org/PostalAddress">
+<span itemprop="streetAddress">Boltzmannstrasse 3</span><br>
+<span itemprop="postalCode">85748</span> <span itemprop="addressLocality">Garching</span>
+<span itemprop="email">info@vision.in.tum.de</span>
+</p>
+<p>Follow us on:<br><br>
+<socialmedia style='display: table'>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://www.youtube.com/playlist?list=PLTBdjV_4f-EJnwIMsY1T0LwylRM7s_HcL"><b>YouTube</b> <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" height=16></a>
+
+</cvg>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://x.com/tumcvg"><b>X / Twitter</b> <img height=16 src="https://upload.wikimedia.org/wikipedia/commons/c/cc/X_icon.svg"></a>
+
+</cvg>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://www.facebook.com/vision.in.tum.de"><b>Facebook</b> <img height=16 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg"></a>
+
+</cvg>
+</socialmedia>
+
+</p>
+</div>
+<div id="c3161" class="content-box content-box--heavy content-box--red">
+	<div class="csc-header csc-header-n1"><h4 class="csc-firstHeader">News</h4></div>
+
+
+<div class="news-header-list-container date abstract"><div class="news-header-list-time">18.06.2026</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2026&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:1,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2026">
+
+<p>
+We have 11 papers accepted to ECCV 2026. Check our publication page for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2026&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:2,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">26.02.2025</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:cvpr_2025&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:3,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:cvpr_2025">
+
+<p>
+We have <strong><a href="https://cvg.cit.tum.de/_media/news/cvpr_2025/cvpr_2025_overview.pdf" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/_media/news/cvpr_2025/cvpr_2025_overview.pdf" rel="ugc nofollow noopener">twelve papers</a></strong> accepted to <strong>CVPR 2025</strong>. Check our <a href="https://cvg.cit.tum.de/publications" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/publications" rel="ugc nofollow noopener">publication page</a> for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:cvpr_2025&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:4,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">24.10.2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2024_test_of_time_award&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:5,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2024_test_of_time_award">
+
+<p>
+LSD SLAM received the ECCV 2024 Koenderink Award for standing the Test of Time.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2024_test_of_time_award&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:6,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">03.07.2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:7,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2024">
+
+<p>
+We have <strong><a href="https://cvg.cit.tum.de/_media/news/eccv_2024/eccv_2024_overview.pdf" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/_media/news/eccv_2024/eccv_2024_overview.pdf" rel="ugc nofollow noopener">seven papers</a></strong> accepted to <strong>ECCV 2024</strong>. Check our <a href="https://cvg.cit.tum.de/publications" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/publications" rel="ugc nofollow noopener">publication page</a> for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:8,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">09.06.2024</div><div class="news-header-list-title">GCPR / VMV 2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:gcpr:vmv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:9,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:gcpr:vmv_2024">
+
+<h1 id="gcprvmv_2024">GCPR / VMV 2024</h1>
+<div class="level1">
+
+<p>
+We are organizing <a href="https://www.gcpr-vmv.de/year/2024" class="urlextern" target="_blank" title="https://www.gcpr-vmv.de/year/2024" rel="ugc nofollow noopener">GCPR / VMV 2024</a> this fall.
+</p>
+
+</div>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:gcpr:vmv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:10,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><a class='news-list-more' href='https://cvg.cit.tum.de/news'>More</a>
+
+</div>
+
+</p>
+
+</div>
+<div id="sidenav">
+<style>
+div#sidenav li.bordered {
+    border: 1px lightgray solid;
+}
+
+div#dw__toc a,
+div#sidenav a {
+  white-space: normal;
+}
+
+ul#navigationlist.nav_depth01 {
+    background-color: white;
+}
+
+ul#navigationlist.nav_depth01 > li {
+    background-color: white;
+    margin-bottom: 1em;
+}
+
+ul#navigationlist.nav_depth01 > li > a {
+    text-transform: uppercase;
+    font-weight: bold;
+    background-color: white;
+    display: block;
+}
+
+
+ul#navigationlist.nav_depth01 > li.access_aural > a {
+    display: none;
+}
+
+
+
+.menublock {
+    padding-top: 10px;
+}
+
+.menublock > li:first-child {
+    font-weight: bold;
+    margin-left: -10px;
+}
+ul#navigationlist > li > a {
+    display: none;
+}
+ul#navigationlist > li > span.entry > control {
+    display: none;
+}
+ul#navigationlist li.current > span > a {
+    border-left: 4px solid #3070b3;
+    font-weight: bold;
+    padding: .4em 2.33em .5em 1em;
+}
+ul#navigationlist > li > ul > li > ul {
+    display: none;
+}
+ul#navigationlist > li > ul > li > ul > li > ul {
+    display: none;
+padding-left: 0px;
+}
+
+ul#navigationlist li.nav_depth05 > ul {
+    display: none;
+padding-left: 0px;
+}
+
+
+ul#navigationlist > li > ul > li > ul > li._current > ul ,
+ul#navigationlist > li > ul > li > ul > li.expanded > ul {
+    display: block;
+}
+ul#navigationlist > li > ul > li > ul > li  a {
+background-color: #f7f7f7;
+}
+ul#navigationlist > li > ul > li > ul > li > ul > li  a {
+background-color: #ffffff;
+}
+ul#navigationlist li.nav_depth06 {
+    padding-left: 1em;
+}
+ul#navigationlist li.nav_depth06 a {
+background-color: #ffffff;
+font-size: smaller;
+}
+
+ul#navigationlist > li > ul > li._current > ul,
+ul#navigationlist > li > ul > li.expanded > ul {
+    display: block;
+}
+
+ul#navigationlist li.nav_depth05.expanded > ul {
+    display: block;
+}
+
+control {
+    width: 25px;
+    right: 0px;
+    top: 0px;
+    z-index: 5;
+    position: absolute;
+	display: block;
+	padding-right: 5px;
+    height: 100%;
+}
+
+li > span.entry {
+    display: block;
+    position: relative;
+}
+
+li.children > span.entry > control{
+    border-left: 1px solid lightgray;
+}
+
+nav > ul > li li.children,
+li.children > span.entry > control{
+    background: url(/_media/ico/icn_tum_plus.svg) no-repeat center center;
+}
+nav > ul > li li._current.children.expanded,
+li.expanded.children > span.entry > control,
+li.expanded.current.children > span.entry > control{
+    background: url(/_media/ico/icn_tum_minus.svg) no-repeat center center;
+}
+
+ul#navigationlist li.nav_depth06 > span.entry > control {
+    background: none;
+    border-left: none;
+background-color: #ffffff;
+}
+
+</style>
+
+<ul id="navigationlist" class="nav_depth01">
+<h3 id="navigationheading" class="access_aural">Navigation</h3>
+<li class="nav_depth02 _bordered children current dwid_data_datasets_rgbd-dataset_tools id_home tag_block expanded">
+<span class="entry"><a href="/home">Home</a>
+<control>
+</control>
+</span>
+<ul>
+<!--submenu: Array-->
+<li class="nav_depth03 external dwid_data_datasets_rgbd-dataset_tools id_ tag_link">
+<span class="entry">
+<a href="https://cvai.in.tum.de/application">Application Form</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_tum-ai-lecture-series tag_link">
+<span class="entry">
+<a href="/tum-ai-lecture-series">TUM AI Lecture Series</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_members tag_link">
+<span class="entry">
+<a href="/members">Members</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:cremers tag_link">
+<span class="entry"><a href="/members/cremers">Prof. Dr. Daniel Cremers</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:collaborators tag_link">
+<span class="entry"><a href="/members/cremers/collaborators">Collaborators</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:cv tag_link">
+<span class="entry"><a href="/members/cremers/cv">CV</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:publications tag_link">
+<span class="entry"><a href="/members/cremers/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:research tag_link">
+<span class="entry"><a href="/members/cremers/research">Research</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:cremers:talks tag_link">
+<span class="entry"><a href="/members/cremers/talks">Talks</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:aran tag_link">
+<span class="entry"><a href="/members/aran">Dr. Nikita Araslanov</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:koepa tag_link">
+<span class="entry"><a href="/members/koepa">Dr. Almut Sophia Koepke</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:lhao tag_link">
+<span class="entry"><a href="/members/lhao">Dr. Haoang Li</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:andh tag_link">
+<span class="entry"><a href="/members/andh">Dr. Hector Andrade Loarca</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_members:andh:news tag_link">
+<span class="entry"><a href="/members/andh/news">News</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:andh:news:input tag_link">
+<span class="entry"><a href="/members/andh/news/input">Input</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:andh:news:template tag_link">
+<span class="entry"><a href="/members/andh/news/template">Template</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:andh:publications tag_link">
+<span class="entry"><a href="/members/andh/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mricc tag_link">
+<span class="entry"><a href="/members/mricc">Dr. Riccardo Marin</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:pfl tag_link">
+<span class="entry"><a href="/members/pfl">Dr. Roman Pflugfelder</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:salex tag_link">
+<span class="entry"><a href="/members/salex">Dr. Alexandra Stang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wang tag_link">
+<span class="entry"><a href="/members/wang">Dr. Xi Wang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:xiya tag_link">
+<span class="entry"><a href="/members/xiya">Dr. Yan Xia</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news tag_link">
+<span class="entry"><a href="/members/xiya/news">News</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news:input tag_link">
+<span class="entry"><a href="/members/xiya/news/input">Input</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:news:template tag_link">
+<span class="entry"><a href="/members/xiya/news/template">Template</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:xiya:publications tag_link">
+<span class="entry"><a href="/members/xiya/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wagnersa tag_link">
+<span class="entry"><a href="/members/wagnersa">Sabine Wagner</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:lohr tag_link">
+<span class="entry"><a href="/members/lohr">Quirin Lohr</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:akid tag_link">
+<span class="entry"><a href="/members/akid">Ido Akov</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:brahimi tag_link">
+<span class="entry"><a href="/members/brahimi">Mohammed Brahimi</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:cheq tag_link">
+<span class="entry"><a href="/members/cheq">Qing Cheng</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:chui tag_link">
+<span class="entry"><a href="/members/chui">Jason Chui</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:chwe tag_link">
+<span class="entry"><a href="/members/chwe">Weirong Chen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:curreli tag_link">
+<span class="entry"><a href="/members/curreli">Cecilia Curreli</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:cze tag_link">
+<span class="entry"><a href="/members/cze">Zehranaz Canfes</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:dagt tag_link">
+<span class="entry"><a href="/members/dagt">Dr. Thomas Dages</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:delu tag_link">
+<span class="entry"><a href="/members/delu">Luis Denninger</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_members:dhou tag_link">
+<span class="entry"><a href="/members/dhou">Oussema Dhaouadi</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_members:dhou:publications tag_link">
+<span class="entry"><a href="/members/dhou/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ehm tag_link">
+<span class="entry"><a href="/members/ehm">Viktoria Ehm</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:eicj tag_link">
+<span class="entry"><a href="/members/eicj">Jonathan Eichhorn</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:eisenber tag_link">
+<span class="entry"><a href="/members/eisenber">Marvin Eisenberger</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:gaom tag_link">
+<span class="entry"><a href="/members/gaom">Maolin Gao</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:gladkova tag_link">
+<span class="entry"><a href="/members/gladkova">Mariia Gladkova</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:grmar tag_link">
+<span class="entry"><a href="/members/grmar">Markus Gross</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hael tag_link">
+<span class="entry"><a href="/members/hael">Linus Härenstam-Nielsen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hofherrf tag_link">
+<span class="entry"><a href="/members/hofherrf">Florian Hofherr</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:hreg tag_link">
+<span class="entry"><a href="/members/hreg">Regine Hartwig</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:kchr tag_link">
+<span class="entry"><a href="/members/kchr">Christian Koke</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:khamuham tag_link">
+<span class="entry"><a href="/members/khamuham">Qadeer Khan</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:komorowi tag_link">
+<span class="entry"><a href="/members/komorowi">Dávid Komorowicz</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ljia tag_link">
+<span class="entry"><a href="/members/ljia">Jianzhe Liu</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mayom tag_link">
+<span class="entry"><a href="/members/mayom">Mateo de Mayo</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:mejo tag_link">
+<span class="entry"><a href="/members/mejo">Johannes Meier</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:muhled tag_link">
+<span class="entry"><a href="/members/muhled">Dominik Muhle</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:qis tag_link">
+<span class="entry"><a href="/members/qis">Shenhan Qian</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:ramk tag_link">
+<span class="entry"><a href="/members/ramk">Karnik Ram</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:rchri tag_link">
+<span class="entry"><a href="/members/rchri">Christoph Reich</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sang tag_link">
+<span class="entry"><a href="/members/sang">Lu Sang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:saroha tag_link">
+<span class="entry"><a href="/members/saroha">Abhishek Saroha</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:schjulia tag_link">
+<span class="entry"><a href="/members/schjulia">Julian Philipp Schmitt</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:schnaus tag_link">
+<span class="entry"><a href="/members/schnaus">Dominik Schnaus</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sheny tag_link">
+<span class="entry"><a href="/members/sheny">Yuesong Shen</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sida tag_link">
+<span class="entry"><a href="/members/sida">Daniil Sinitsyn</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:sols tag_link">
+<span class="entry"><a href="/members/sols">Sergei Solonets</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:tomani tag_link">
+<span class="entry"><a href="/members/tomani">Christian Tomani</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wamel tag_link">
+<span class="entry"><a href="/members/wamel">Ellia Wamese</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:webermark tag_link">
+<span class="entry"><a href="/members/webermark">Mark Weber</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:webersi tag_link">
+<span class="entry"><a href="/members/webersi">Simon Weber</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wimbauer tag_link">
+<span class="entry"><a href="/members/wimbauer">Felix Wimbauer</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:wxu tag_link">
+<span class="entry"><a href="/members/wxu">Xuqin Wang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:yez tag_link">
+<span class="entry"><a href="/members/yez">Zhenzhang Ye</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_members:zga tag_link">
+<span class="entry"><a href="/members/zga">Ganlin Zhang</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_research tag_link">
+<span class="entry">
+<a href="/research">Research Areas</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:vslam tag_link">
+<span class="entry"><a href="/research/vslam">Visual SLAM</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:ps_reconstruction tag_link">
+<span class="entry"><a href="/research/ps_reconstruction">Photometry-Based Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_research:geometry tag_link">
+<span class="entry"><a href="/research/geometry">Geometry Processing</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_research:geometry:fire tag_link">
+<span class="entry"><a href="/research/geometry/fire">FIRe🔥: Fast Inverse Rendering using Directional and Signed Distance Functions</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_research:deeplearning tag_link">
+<span class="entry"><a href="/research/deeplearning">Deep Learning</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_research:deeplearning:multiagent tag_link">
+<span class="entry"><a href="/research/deeplearning/multiagent">Multiagent</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_research:biomed tag_link">
+<span class="entry"><a href="/research/biomed">Biomedicine</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_publications tag_link">
+<span class="entry">
+<a href="/publications">Publications</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children dwid_data_datasets_rgbd-dataset_tools id_teaching tag_link">
+<span class="entry">
+<a href="/teaching">Teaching</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026 tag_link">
+<span class="entry"><a href="/teaching/ws2026">Winter Semester 2026/2027</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ws2026/4d-vision">Master Seminar - 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:dl-dynamics tag_link">
+<span class="entry"><a href="/teaching/ws2026/dl-dynamics">Seminar: Deep Learning for Dynamical Simulations (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:f3dv tag_link">
+<span class="entry"><a href="/teaching/ws2026/f3dv">Master Seminar: Feedforward 3D Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:fwai tag_link">
+<span class="entry"><a href="/teaching/ws2026/fwai">Practical Course: One-Way Ticket to the Finsler World: Into the Future of Geometric AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:g3r tag_link">
+<span class="entry"><a href="/teaching/ws2026/g3r">Master Seminar: Generative 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:models tag_link">
+<span class="entry"><a href="/teaching/ws2026/models">Seminar: Neural Network Models in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:sq3d tag_link">
+<span class="entry"><a href="/teaching/ws2026/sq3d">Practical Course: Shape Quest: Learning to Explore the 3D World (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2026:visnav_ws2026 tag_link">
+<span class="entry"><a href="/teaching/ws2026/visnav_ws2026">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026 tag_link">
+<span class="entry"><a href="/teaching/ss2026">Summer Semester 2026</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:3dcv tag_link">
+<span class="entry"><a href="/teaching/ss2026/3dcv">3D Computer Vision (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:afm tag_link">
+<span class="entry"><a href="/teaching/ss2026/afm">3rd Practical Course: Applied Foundation Models (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ss2026/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ss2026/4d-vision/internal">Schedule</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl4sai tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl4sai">Practical Course: Deep Learning for Spatial AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:sma tag_link">
+<span class="entry"><a href="/teaching/ss2026/sma">Practical Course: Shape and Manifold Analysis (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:visnav_ss2026 tag_link">
+<span class="entry"><a href="/teaching/ss2026/visnav_ss2026">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:visnav_ss2026:material tag_link">
+<span class="entry"><a href="/teaching/ss2026/visnav_ss2026/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl-dynamics tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl-dynamics">Seminar: Deep Learning for Dynamical Simulations (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:dl-dynamics:papers tag_link">
+<span class="entry"><a href="/teaching/ss2026/dl-dynamics/papers">Papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2026:fundamentals tag_link">
+<span class="entry"><a href="/teaching/ss2026/fundamentals">Seminar: Fundamentals and Models of Neural Networks in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025 tag_link">
+<span class="entry"><a href="/teaching/ws2025">Winter Semester 2025/26</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ws2025/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ws2025/4d-vision/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2025/cv3">Computer Vision III: Detection, Segmentation and Tracking (IN2375)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:dl-equi-dynam tag_link">
+<span class="entry"><a href="/teaching/ws2025/dl-equi-dynam">Seminar: Selected Topics in Deep Learning -- Equivariance & Dynamics (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:dl-equi-dynam:papers tag_link">
+<span class="entry"><a href="/teaching/ws2025/dl-equi-dynam/papers">Papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:graph_learning_ws25 tag_link">
+<span class="entry"><a href="/teaching/ws2025/graph_learning_ws25">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:graph_learning_ws25:material tag_link">
+<span class="entry"><a href="/teaching/ws2025/graph_learning_ws25/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:patterns tag_link">
+<span class="entry"><a href="/teaching/ws2025/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:savha tag_link">
+<span class="entry"><a href="/teaching/ws2025/savha">Practical Course: 3D Shape Analysis and Virtual Humans Applications (10ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_3dvfm tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_3dvfm">Master Seminar - 3D Vision Foundation Models</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_mm3dr tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_mm3dr">Master Seminar - Modern Methods for 3D Representation and Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:seminar_modern3d tag_link">
+<span class="entry"><a href="/teaching/ws2025/seminar_modern3d">Seminar: Modern Methods for 3D Reconstruction and Representation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:ulcv tag_link">
+<span class="entry"><a href="/teaching/ws2025/ulcv">Seminar: Unsupervised Learning in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:visnav_ws2025 tag_link">
+<span class="entry"><a href="/teaching/ws2025/visnav_ws2025">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2025:visnav_ws2025:material tag_link">
+<span class="entry"><a href="/teaching/ws2025/visnav_ws2025/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025 tag_link">
+<span class="entry"><a href="/teaching/ss2025">Summer Semester 2025</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:4d-vision tag_link">
+<span class="entry"><a href="/teaching/ss2025/4d-vision">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:4d-vision:internal tag_link">
+<span class="entry"><a href="/teaching/ss2025/4d-vision/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:afm tag_link">
+<span class="entry"><a href="/teaching/ss2025/afm">2nd Practical Course: Applied Foundation Models (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:dl-equi-dynam tag_link">
+<span class="entry"><a href="/teaching/ss2025/dl-equi-dynam">Seminar: Selected Topics in Deep Learning -- Equivariance & Dynamics (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:dl4sai tag_link">
+<span class="entry"><a href="/teaching/ss2025/dl4sai">Practical Course: Deep Learning for Spatial AI (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:graph_learning_ss25 tag_link">
+<span class="entry"><a href="/teaching/ss2025/graph_learning_ss25">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:graph_learning_ss25:material tag_link">
+<span class="entry"><a href="/teaching/ss2025/graph_learning_ss25/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:modern3d tag_link">
+<span class="entry"><a href="/teaching/ss2025/modern3d">Seminar: Modern Methods for 3D Reconstruction and Representation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:mvg tag_link">
+<span class="entry"><a href="/teaching/ss2025/mvg">Multiple View Geometry (3D Computer Vision) (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:patterns tag_link">
+<span class="entry"><a href="/teaching/ss2025/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:savha tag_link">
+<span class="entry"><a href="/teaching/ss2025/savha">Practical Course: 3D Shape Analysis and Virtual Humans Applications (10ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:visnav_ss2025 tag_link">
+<span class="entry"><a href="/teaching/ss2025/visnav_ss2025">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2025:visnav_ss2025:material tag_link">
+<span class="entry"><a href="/teaching/ss2025/visnav_ss2025/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024 tag_link">
+<span class="entry"><a href="/teaching/ws2024">Winter Semester 2024/25</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2024/cv3">Computer Vision III: Detection, Segmentation and Tracking (IN2375)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:i2dl tag_link">
+<span class="entry"><a href="/teaching/ws2024/i2dl">Introduction to Deep Learning (IN2346)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:i2dl:tutorial-and-exercises tag_link">
+<span class="entry"><a href="/teaching/ws2024/i2dl/tutorial-and-exercises">Introduction to Deep Learning (IN2346)</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:bdl tag_link">
+<span class="entry"><a href="/teaching/ws2024/bdl">Master Seminar - Beyond Deep Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:4d_vision_ws24 tag_link">
+<span class="entry"><a href="/teaching/ws2024/4d_vision_ws24">Master Seminar - Recent Advances in 4D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:4d_vision_ws24:internal tag_link">
+<span class="entry"><a href="/teaching/ws2024/4d_vision_ws24/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:3d4d_recon tag_link">
+<span class="entry"><a href="/teaching/ws2024/3d4d_recon">Master Seminar - Visual-based 3D/4D Reconstruction (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:3dsm tag_link">
+<span class="entry"><a href="/teaching/ws2024/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:create_dl tag_link">
+<span class="entry"><a href="/teaching/ws2024/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ws2024/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:graph_learning_ws24 tag_link">
+<span class="entry"><a href="/teaching/ws2024/graph_learning_ws24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:graph_learning_ws24:material tag_link">
+<span class="entry"><a href="/teaching/ws2024/graph_learning_ws24/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dl4science tag_link">
+<span class="entry"><a href="/teaching/ws2024/dl4science">Seminar: Deep Learning for the Natural Sciences (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:dl4science:papers tag_link">
+<span class="entry"><a href="/teaching/ws2024/dl4science/papers">List of potential papers</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:fmcv tag_link">
+<span class="entry"><a href="/teaching/ws2024/fmcv">Seminar: Foundation Models for Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:fmcv:materials tag_link">
+<span class="entry"><a href="/teaching/ws2024/fmcv/materials">Materials for Foundational Models in 2D and 3D Computer Vision</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:seminar_realtime3d tag_link">
+<span class="entry"><a href="/teaching/ws2024/seminar_realtime3d">Seminar: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:seminar_realtime3d:material tag_link">
+<span class="entry"><a href="/teaching/ws2024/seminar_realtime3d/material">Material Page: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2024:continual_learning tag_link">
+<span class="entry"><a href="/teaching/ws2024/continual_learning">Seminar: Transfer Learning and Continual Learning in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024 tag_link">
+<span class="entry"><a href="/teaching/ss2024">Summer Semester 2024</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:cv2 tag_link">
+<span class="entry"><a href="/teaching/ss2024/cv2">Computer Vision II: Multiple View Geometry (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:humans tag_link">
+<span class="entry"><a href="/teaching/ss2024/humans">Master Seminar - HuMANS: 3D Human Motion Analysis (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:humans:internal tag_link">
+<span class="entry"><a href="/teaching/ss2024/humans/internal">Internal</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:3dsm tag_link">
+<span class="entry"><a href="/teaching/ss2024/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:afm tag_link">
+<span class="entry"><a href="/teaching/ss2024/afm">Practical Course: Applied Foundation Models in Computer Vision (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:create_dl tag_link">
+<span class="entry"><a href="/teaching/ss2024/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ss2024/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:gsu tag_link">
+<span class="entry"><a href="/teaching/ss2024/gsu">Practical Course: Geometric Scene Understanding (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:visnav_ss2024 tag_link">
+<span class="entry"><a href="/teaching/ss2024/visnav_ss2024">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:visnav_ss2024:material tag_link">
+<span class="entry"><a href="/teaching/ss2024/visnav_ss2024/material">teaching:ss2024:visnav_ss2024:material</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:graph_learning_ss24 tag_link">
+<span class="entry"><a href="/teaching/ss2024/graph_learning_ss24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:graph_learning_ws24 tag_link">
+<span class="entry"><a href="/teaching/ss2024/graph_learning_ws24">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science">Seminar: Deep Learning for the Natural Sciences (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science:papers tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science/papers">List of potential papers</a>
+<control>
+</control>
+</span>
+</li>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:dl4science:summaries tag_link">
+<span class="entry"><a href="/teaching/ss2024/dl4science/summaries">Summaries</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2024:patterns tag_link">
+<span class="entry"><a href="/teaching/ss2024/patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023 tag_link">
+<span class="entry"><a href="/teaching/ws2023">Winter Semester 2023/24</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:cv3 tag_link">
+<span class="entry"><a href="/teaching/ws2023/cv3">Computer Vision III: Detection, Segmentation and Tracking</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:3dsm tag_link">
+<span class="entry"><a href="/teaching/ws2023/3dsm">Master Seminar: 3D Shape Matching and Application in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:create_dl tag_link">
+<span class="entry"><a href="/teaching/ws2023/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ws2023/dlpractice">Practical Course: Expert-Level Deep Learning (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:graphlearning_ws2023 tag_link">
+<span class="entry"><a href="/teaching/ws2023/graphlearning_ws2023">Seminar: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:graphlearning_ws2023:material tag_link">
+<span class="entry"><a href="/teaching/ws2023/graphlearning_ws2023/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:fmcv tag_link">
+<span class="entry"><a href="/teaching/ws2023/fmcv">Seminar: Foundational Models for 2D and 3D Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:fmcv:materials tag_link">
+<span class="entry"><a href="/teaching/ws2023/fmcv/materials">Materials for Foundational Models in 2D and 3D Computer Vision</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_design_patterns tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_design_patterns">Seminar: Neural Network Design Patterns in Computer Vision (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_realtime3d tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_realtime3d">Seminar: The Evolution of Motion Estimation and Real-time 3D Reconstruction</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ws2023:seminar_realtime3d:material tag_link">
+<span class="entry"><a href="/teaching/ws2023/seminar_realtime3d/material">teaching:ws2023:seminar_realtime3d:material</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023">Summer Semester 2023</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:cv2 tag_link">
+<span class="entry"><a href="/teaching/ss2023/cv2">Computer Vision II: Multiple View Geometry (IN2228)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:create_dl tag_link">
+<span class="entry"><a href="/teaching/ss2023/create_dl">Practical Course: Creation of Deep Learning Methods (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:gsu tag_link">
+<span class="entry"><a href="/teaching/ss2023/gsu">Practical Course: Geometric Scene Understanding (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:gsu:files tag_link">
+<span class="entry"><a href="/teaching/ss2023/gsu/files">GSU-SS23: Download</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:dlpractice tag_link">
+<span class="entry"><a href="/teaching/ss2023/dlpractice">Practical Course: Hands-on Deep Learning for Computer Vision and Biomedicine (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:intellisys_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/intellisys_ss2023">Practical Course: Learning For Self-Driving Cars and Intelligent Systems (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:srmcv tag_link">
+<span class="entry"><a href="/teaching/ss2023/srmcv">Practical Course: Shape Reconstruction and Matching in Computer Vision (10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:visnav_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/visnav_ss2023">Practical Course: Vision-based Navigation IN2106 (6h SWS / 10 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:visnav_ss2023:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/visnav_ss2023/material">Materials / Links</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:graphlearning_ss2023 tag_link">
+<span class="entry"><a href="/teaching/ss2023/graphlearning_ss2023">Seminar Course: Advanced topics in Graph Learning (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:graphlearning_ss2023:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/graphlearning_ss2023/material">Potential Topics</a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:bdl tag_link">
+<span class="entry"><a href="/teaching/ss2023/bdl">Seminar: Beyond Deep Learning: Selected Topics on Novel Challenges (5 ECTS)</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 children dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:3dcv tag_link">
+<span class="entry"><a href="/teaching/ss2023/3dcv">Seminar: Recent Advances in 3D Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth06 dwid_data_datasets_rgbd-dataset_tools id_teaching:ss2023:3dcv:material tag_link">
+<span class="entry"><a href="/teaching/ss2023/3dcv/material">Material for </a>
+<control>
+</control>
+</span>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_teaching:archive tag_link">
+<span class="entry"><a href="/teaching/archive">Archive</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 children dwid_data_datasets_rgbd-dataset_tools id_teaching:online tag_link">
+<span class="entry"><a href="/teaching/online">Online Courses</a>
+<control>
+</control>
+</span>
+<ul>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:cvvm tag_link">
+<span class="entry"><a href="/teaching/online/cvvm">Computer Vision I: Variational Methods</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:ml4cv tag_link">
+<span class="entry"><a href="/teaching/online/ml4cv">Machine Learning for Robotics and Computer Vision</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:mvg tag_link">
+<span class="entry"><a href="/teaching/online/mvg">Computer Vision II: Multiple View Geometry</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth05 dwid_data_datasets_rgbd-dataset_tools id_teaching:online:visnavfly tag_link">
+<span class="entry"><a href="/teaching/online/visnavfly">Visual Navigation for Flying Robots</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_teaching:visnav tag_link">
+<span class="entry"><a href="/teaching/visnav">VISNAV: Vision Based Navigation</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_awards tag_link">
+<span class="entry">
+<a href="/awards">Awards</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+<li class="nav_depth03 children current dwid_data_datasets_rgbd-dataset_tools id_data tag_link expanded">
+<span class="entry">
+<a href="/data">Datasets & Software</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_data:datasets tag_link">
+<span class="entry"><a href="/data/datasets">Datasets</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+<li class="nav_depth04 dwid_data_datasets_rgbd-dataset_tools id_data:software tag_link">
+<span class="entry"><a href="/data/software">Software</a>
+<control>
+</control>
+</span>
+<ul>
+</ul>
+</li>
+</ul>
+</li>
+<li class="nav_depth03 dwid_data_datasets_rgbd-dataset_tools id_workshops tag_link">
+<span class="entry">
+<a href="/workshops">Workshops & Tutorials</a>
+<control>
+</control>
+</span>
+<ul>
+<!--subsubmenu: Array-->
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<script>
+jQuery('control').unbind('click').on('click',function(ev){control(this,ev);})
+function control(ele,ev) {
+e=jQuery(ele);
+e.parentsUntil('ul').last().toggleClass('expanded');
+}
+</script>
+
+</div>
+</div>
+</div>
+<br>
+            </td>
+            <!-- linker Portlet-Bereich Ende -->
+           
+            <!-- Inhalts-Bereich Start -->
+            <td id="portal-column-content">
+<style>
+</style>
+
+<nav id="nav-breadcrumbs">
+<ol>
+<li class="item"><a class="breadcrumb_link" href="/home">
+Home</a>
+<li class="item-last">Datasets & Software</li>
+</li>
+</ol>
+</nav>
+
+                <div class="contentBox" id="content">
+
+                                  
+                <!-- slot for content navigation -->
+                
+                                                                                 
+                <!-- actions -->
+                
+
+                <!-- Eigentlicher Inhalt: Start -->
+                <div class="document">
+
+                    <!-- portal message -->
+                    
+                        
+                     
+
+                    <a id="hereistthecontent" name="hereistthecontent"></a>
+                
+                    <!-- THE CONTENT -->
+                    <div id="maincontentwrapper">
+                                                                                 
+
+ 
+                                                                                                                                  
+                                                                                                                              
+                                                                                                                                  
+   
+	<div class="documentBody">                                                                                                    
+		<div class="documentBody">
+<div class="page">
+<!-- wikipage start -->
+<div class='dokuwiki'>
+
+
+<h1 id="useful_tools_for_the_rgb-d_benchmark">Useful tools for the RGB-D benchmark</h1>
+<div class="level1">
+
+<p>
+We provide a set of tools that can be used to pre-process the datasets and to evaluate the SLAM/tracking results. The scripts can be <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=e5c8e1&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fsrc%2Frgbd_benchmark_tools" class="media mediafile mf_de_cvpr-ros-pkg_trunk_rgbd_benchmark_rgbd_benchmark_tools_src_rgbd_benchmark_tools" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools">downloaded here</a>.
+</p>
+
+<p>
+To checkout the repository using subversion, run
+</p>
+<pre class="code">svn checkout https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools</pre>
+
+</div>
+
+<h2 id="associating_color_and_depth_images">Associating color and depth images</h2>
+<div class="level2">
+
+<p>
+The Kinect provides the color and depth images in an un-synchronized way. This means that the set of time stamps from the color images do not intersect with those of the depth images. Therefore, we need some way of associating color images to depth images. 
+</p>
+
+<p>
+For this purpose, you can use the <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=5ec47e&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fsrc%2Frgbd_benchmark_tools%2Fassociate.py" class="media mediafile mf_py" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/associate.py">&#039;&#039;associate.py&#039;&#039;</a> script. It reads the time stamps from the <code>rgb.txt</code> file and the <code>depth.txt</code> file, and joins them by finding the best matches.
+</p>
+
+<p>
+<pre class="code">usage: associate.py [-h] [--first_only] [--offset OFFSET]
+                    [--max_difference MAX_DIFFERENCE]
+                    first_file second_file
+
+This script takes two data files with timestamps and associates them
+
+positional arguments:
+  first_file            first text file (format: timestamp data)
+  second_file           second text file (format: timestamp data)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --first_only          only output associated lines from first file
+  --offset OFFSET       time offset added to the timestamps of the second file
+                        (default: 0.0)
+  --max_difference MAX_DIFFERENCE
+                        maximally allowed time difference for matching entries
+                        (default: 0.02)
+</pre>
+</p>
+
+</div>
+
+<h2 id="evaluation">Evaluation</h2>
+<div class="level2">
+
+<p>
+After estimating the camera trajectory of the Kinect and saving it to a file, we need to evaluate the error in the estimated trajectory by comparing it with the ground-truth. There are different error metrics. Two prominent methods is the <strong>absolute trajectory error (ATE)</strong> and the <strong>relative pose error (RPE)</strong>. The ATE is well-suited for measuring the performance of visual SLAM systems. In contrast, the RPE is well-suited for measuring the drift of a visual odometry system, for example the drift per second.
+</p>
+
+<p>
+For both metrics, we provide automated evaluation scripts that can be downloaded <a href="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/" class="urlextern" target="_blank" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/" rel="ugc nofollow noopener">here</a>. Note that there is also an <a href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/online_evaluation" class="wikilink1" title="data:datasets:rgbd-dataset:online_evaluation" data-wiki-id="data:datasets:rgbd-dataset:online_evaluation">online</a> version available on our website. 
+Both trajectories have to be stored in a text file (format: &#039;timestamp tx ty tz qx qy qz qw&#039;, <a href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats" class="wikilink1" title="data:datasets:rgbd-dataset:file_formats" data-wiki-id="data:datasets:rgbd-dataset:file_formats">more information</a>). For comparison, we offer a set of <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=78909d&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fdata%2Frgbdslam" class="media mediafile mf_de_cvpr-ros-pkg_trunk_rgbd_benchmark_rgbd_benchmark_tools_data_rgbdslam" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/data/rgbdslam">trajectories</a> from <a href="http://www.ros.org/wiki/rgbdslam_electric/evaluation" class="urlextern" target="_blank" title="http://www.ros.org/wiki/rgbdslam_electric/evaluation" rel="ugc nofollow noopener">RGBD-SLAM</a>.
+</p>
+
+</div>
+
+<h3 id="absolute_trajectory_error_ate">Absolute Trajectory Error (ATE)</h3>
+<div class="level3">
+
+<p>
+The absolute trajectory error directly measures the difference between points of the true and the estimated trajectory. As a pre-processing step, we associate the estimated poses with ground truth poses using the timestamps. Based on this association, we align the true and the estimated trajectory using singular value decomposition. Finally, we compute the difference between each pair of poses, and output the mean/median/standard deviation of these differences. Optionally, the script can plot both trajectories to a png or pdf file.
+</p>
+
+<p>
+<pre class="code">usage: evaluate_ate.py [-h] [--offset OFFSET] [--scale SCALE]
+                       [--max_difference MAX_DIFFERENCE] [--save SAVE]
+                       [--save_associations SAVE_ASSOCIATIONS] [--plot PLOT]
+                       [--verbose]
+                       first_file second_file
+
+This script computes the absolute trajectory error from the ground truth
+trajectory and the estimated trajectory.
+
+positional arguments:
+  first_file            first text file (format: timestamp tx ty tz qx qy qz
+                        qw)
+  second_file           second text file (format: timestamp tx ty tz qx qy qz
+                        qw)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --offset OFFSET       time offset added to the timestamps of the second file
+                        (default: 0.0)
+  --scale SCALE         scaling factor for the second trajectory (default:
+                        1.0)
+  --max_difference MAX_DIFFERENCE
+                        maximally allowed time difference for matching entries
+                        (default: 0.02)
+  --save SAVE           save aligned second trajectory to disk (format: stamp2
+                        x2 y2 z2)
+  --save_associations SAVE_ASSOCIATIONS
+                        save associated first and aligned second trajectory to
+                        disk (format: stamp1 x1 y1 z1 stamp2 x2 y2 z2)
+  --plot PLOT           plot the first and the aligned second trajectory to an
+                        image (format: png)
+  --verbose             print all evaluation data (otherwise, only the RMSE
+                        absolute translational error in meters after alignment
+                        will be printed)
+</pre>
+</p>
+
+</div>
+
+<h3 id="relative_pose_error_rpe">Relative Pose Error (RPE)</h3>
+<div class="level3">
+
+<p>
+For computing the relative pose error, we provide a script <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=886234&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fsrc%2Frgbd_benchmark_tools%2Fevaluate_rpe.py" class="media mediafile mf_py" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/evaluate_rpe.py">&#039;&#039;evaluate_rpe.py&#039;&#039;</a>. This script computes the error in the relative motion between pairs of timestamps. By default, the script computes the error between all pairs of timestamps in the estimated trajectory file. As the number of timestamp pairs in the estimated trajectory is quadratic in the length of the trajectory, it can make sense to downsample this set to a fixed number (–max_pairs). Alternatively, one can choose to use a fixed window size (–fixed_delta). In this case, each pose in the estimated trajectory is associated with a later pose according to the window size (–delta) and unit (–delta_unit). This evaluation technique is useful for estimating the drift. 
+</p>
+
+<p>
+<pre class="code">usage: evaluate_rpe.py [-h] [--max_pairs MAX_PAIRS] [--fixed_delta]
+                       [--delta DELTA] [--delta_unit DELTA_UNIT]
+                       [--offset OFFSET] [--scale SCALE] [--save SAVE]
+                       [--plot PLOT] [--verbose]
+                       groundtruth_file estimated_file
+
+This script computes the relative pose error from the ground truth trajectory
+and the estimated trajectory.
+
+positional arguments:
+  groundtruth_file      ground-truth trajectory file (format: "timestamp tx ty
+                        tz qx qy qz qw")
+  estimated_file        estimated trajectory file (format: "timestamp tx ty tz
+                        qx qy qz qw")
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --max_pairs MAX_PAIRS
+                        maximum number of pose comparisons (default: 10000,
+                        set to zero to disable downsampling)
+  --fixed_delta         only consider pose pairs that have a distance of delta
+                        delta_unit (e.g., for evaluating the drift per
+                        second/meter/radian)
+  --delta DELTA         delta for evaluation (default: 1.0)
+  --delta_unit DELTA_UNIT
+                        unit of delta (options: 's' for seconds, 'm' for
+                        meters, 'rad' for radians, 'f' for frames; default:
+                        's')
+  --offset OFFSET       time offset between ground-truth and estimated
+                        trajectory (default: 0.0)
+  --scale SCALE         scaling factor for the estimated trajectory (default:
+                        1.0)
+  --save SAVE           text file to which the evaluation will be saved
+                        (format: stamp_est0 stamp_est1 stamp_gt0 stamp_gt1
+                        trans_error rot_error)
+  --plot PLOT           plot the result to a file (requires --fixed_delta,
+                        output format: png)
+  --verbose             print all evaluation data (otherwise, only the mean
+                        translational error measured in meters will be
+                        printed)
+</pre>
+</p>
+
+</div>
+
+<h2 id="generating_a_point_cloud_from_images">Generating a point cloud from images</h2>
+<div class="level2">
+
+<p>
+The depth images are already registered to the color images, so the pixels in the depth image already correspond one-to-one to the pixels in the color image. Therefore, generating colored point clouds is straight-forward. An example script is available in <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=c42fdc&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fsrc%2Frgbd_benchmark_tools%2Fgenerate_pointcloud.py" class="media mediafile mf_py" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/generate_pointcloud.py">&#039;&#039;generate_pointcloud.py&#039;&#039;</a>, that takes a color image and a depth map as input, and generates a point cloud file in the PLY format. This format can be read by many 3D modelling programs, for example meshlab. You can download meshlab for Windows, Mac and Linux.
+</p>
+
+<p>
+<pre class="code">usage: generate_pointcloud.py [-h] rgb_file depth_file ply_file
+
+This script reads a registered pair of color and depth images and generates a
+colored 3D point cloud in the PLY format.
+
+positional arguments:
+  rgb_file    input color image (format: png)
+  depth_file  input depth image (format: png)
+  ply_file    output PLY file (format: ply)
+
+optional arguments:
+  -h, --help  show this help message and exit
+</pre>
+</p>
+
+<p>
+<div class='csc-textpic-imagewrap media'>
+			<dl class='csc-textpic-image csc-textpic-last'>
+			<img src="https://cvg.cit.tum.de/_media/data/datasets/rgbd-dataset/tools/screenshot-meshlab_v1.2.2_-_test.ply_.png" class="media" alt="" />
+			<dd class='csc-textpic-caption'></dd>
+			</dl>
+			</div>
+</p>
+
+</div>
+
+<h2 id="adding_point_clouds_to_ros_bag_files">Adding point clouds to ROS bag files</h2>
+<div class="level2">
+
+<p>
+On the <a href="https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download" class="wikilink1" title="data:datasets:rgbd-dataset:download" data-wiki-id="data:datasets:rgbd-dataset:download">download page</a>, we already provide ROS bag files with added point clouds for the datasets for visual inspection in RVIZ. Because of the large size of the resulting files, we downsampled these bag files to 2 Hz. In case that you want to generate ROS bag files that contain the point clouds for all images (at 30 Hz), you can use the <a href="https://cvg.cit.tum.de/lib/exe/fetch.php?tok=61662f&amp;media=https%3A%2F%2Fsvncvpr.in.tum.de%2Fcvpr-ros-pkg%2Ftrunk%2Frgbd_benchmark%2Frgbd_benchmark_tools%2Fsrc%2Frgbd_benchmark_tools%2Fadd_pointclouds_to_bagfile.py" class="media mediafile mf_py" title="https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/add_pointclouds_to_bagfile.py">&#039;&#039;add_pointclouds_to_bagfile.py&#039;&#039;</a> script.
+</p>
+
+<p>
+<pre class="code">usage: add_pointclouds_to_bagfile.py [-h] [--start START]
+                                     [--duration DURATION] [--nth NTH]
+                                     [--skip SKIP] [--compress]
+                                     inputbag [outputbag]
+
+This scripts reads a bag file containing RGBD data, adds the corresponding
+PointCloud2 messages, and saves it again into a bag file. Optional arguments
+allow to select only a portion of the original bag file.
+
+positional arguments:
+  inputbag             input bag file
+  outputbag            output bag file
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --start START        skip the first N seconds of input bag file (default:
+                       0.0)
+  --duration DURATION  only process N seconds of input bag file (default: off)
+  --nth NTH            only process every N-th frame of input bag file
+                       (default: 15)
+  --skip SKIP          skip N blocks in the beginning (default: 1)
+  --compress           compress output bag file
+</pre>
+</p>
+
+</div>
+
+<h2 id="visualizing_the_datasets_in_rviz">Visualizing the datasets in RVIZ</h2>
+<div class="level2">
+
+<p>
+RVIZ is the standard visualization tool in ROS. It can be easily adapted to display many different messages. In particular, it can be used to display the point clouds from a ROS bag file. For this, run (in three different consoles)
+</p>
+<pre class="code">roscore</pre>
+<pre class="code">rosrun rviz rviz</pre>
+<pre class="code">rosbag play rgbd_dataset_freiburg1_xyz-2hz-with-pointclouds.bag</pre>
+
+<p>
+If this is the first launch, you will have to enable the built-in displays (Menu –&gt; Plugins –&gt; Check &quot;Loaded&quot; for the builtin plugins). In the displays tab, set the &quot;fixed frame&quot; to &quot;/world&quot;. Click on &quot;Add&quot;, and select the PointCloud2 display, and set topic to &quot;/camera/rgb/points&quot;. To show the colors, change &quot;color transformer&quot; to &quot;RGB8&quot; in the point cloud display and the &quot;style&quot; to &quot;points&quot;. If you want, you can set the decay time to a suitable value, for example 5 seconds, to accumulate the points in the viewer as they come in. The result should then look as follows:
+</p>
+
+<p>
+<a href="https://cvg.cit.tum.de/_detail/data/datasets/rgbd-dataset/tools/screenshot-rviz.png?id=data%3Adatasets%3Argbd-dataset%3Atools" class="media" title="data:datasets:rgbd-dataset:tools:screenshot-rviz.png"><div class='csc-textpic-imagewrap media'>
+			<dl class='csc-textpic-image csc-textpic-last'>
+			<img src="https://cvg.cit.tum.de/_media/data/datasets/rgbd-dataset/tools/screenshot-rviz.png?w=1280&amp;tok=4c258c" class="media" alt="" width="640" />
+			<dd class='csc-textpic-caption'></dd>
+			</dl>
+			</div></a>
+</p>
+
+</div>
+
+</div>
+<!-- wikipage stop -->
+</div>
+</div>
+    </div>                                                                                                                        
+                                                                                                                                  
+                    <!-- workflow actions -->
+                    
+                         
+                    <!-- document actions, can be modified by template -->
+                    <div class="documentActions">
+                        <div style="float: right;!important;">
+                    	</div>
+                    </div>
+                    </div>
+                </div>                   
+                <!-- threads at bottom -->
+                <span>
+    
+
+
+</span>
+            
+                
+                    
+                
+                
+                </div> 
+            </td>
+            <!-- Inhalts-Bereich Ende -->
+
+            <!-- rechter Portlet-Bereich Start -->
+            <td id="portal-column-two">
+                <!-- sticky portlets -->
+                <!-- standard portlets -->
+                
+                    <span>
+                        
+
+  
+
+  
+    <div class="portlet">
+				        <h3>Rechte Seite</h3>
+<div class="portlet box">
+
+<p>
+
+<div itemscope itemtype="http://schema.org/Organization">
+<h4 itemprop="name">Informatik IX<br>
+Computer Vision Group</h4>
+<p itemtype="http://schema.org/PostalAddress">
+<span itemprop="streetAddress">Boltzmannstrasse 3</span><br>
+<span itemprop="postalCode">85748</span> <span itemprop="addressLocality">Garching</span>
+<span itemprop="email">info@vision.in.tum.de</span>
+</p>
+<p>Follow us on:<br><br>
+<socialmedia style='display: table'>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://www.youtube.com/playlist?list=PLTBdjV_4f-EJnwIMsY1T0LwylRM7s_HcL"><b>YouTube</b> <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" height=16></a>
+
+</cvg>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://x.com/tumcvg"><b>X / Twitter</b> <img height=16 src="https://upload.wikimedia.org/wikipedia/commons/c/cc/X_icon.svg"></a>
+
+</cvg>
+<cvg style='display: table-row'>
+
+<a style='display:table-cell;width=100%' href="https://www.facebook.com/vision.in.tum.de"><b>Facebook</b> <img height=16 src="https://upload.wikimedia.org/wikipedia/commons/c/c2/F_icon.svg"></a>
+
+</cvg>
+</socialmedia>
+
+</p>
+</div>
+<div id="c3161" class="content-box content-box--heavy content-box--red">
+	<div class="csc-header csc-header-n1"><h4 class="csc-firstHeader">News</h4></div>
+
+
+<div class="news-header-list-container date abstract"><div class="news-header-list-time">18.06.2026</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2026&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:1,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2026">
+
+<p>
+We have 11 papers accepted to ECCV 2026. Check our publication page for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2026&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:2,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">26.02.2025</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:cvpr_2025&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:3,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:cvpr_2025">
+
+<p>
+We have <strong><a href="https://cvg.cit.tum.de/_media/news/cvpr_2025/cvpr_2025_overview.pdf" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/_media/news/cvpr_2025/cvpr_2025_overview.pdf" rel="ugc nofollow noopener">twelve papers</a></strong> accepted to <strong>CVPR 2025</strong>. Check our <a href="https://cvg.cit.tum.de/publications" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/publications" rel="ugc nofollow noopener">publication page</a> for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:cvpr_2025&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:4,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">24.10.2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2024_test_of_time_award&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:5,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2024_test_of_time_award">
+
+<p>
+LSD SLAM received the ECCV 2024 Koenderink Award for standing the Test of Time.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2024_test_of_time_award&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:6,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">03.07.2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:eccv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:7,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:eccv_2024">
+
+<p>
+We have <strong><a href="https://cvg.cit.tum.de/_media/news/eccv_2024/eccv_2024_overview.pdf" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/_media/news/eccv_2024/eccv_2024_overview.pdf" rel="ugc nofollow noopener">seven papers</a></strong> accepted to <strong>ECCV 2024</strong>. Check our <a href="https://cvg.cit.tum.de/publications" class="urlextern" target="_blank" title="https://cvg.cit.tum.de/publications" rel="ugc nofollow noopener">publication page</a> for more details.
+</p>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:eccv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:8,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><div class="news-header-list-container date abstract"><div class="news-header-list-time">09.06.2024</div><div class="news-header-list-title">GCPR / VMV 2024</div><div class="news-list-content"><!-- EDIT{&quot;target&quot;:&quot;plugin_include_start_noredirect&quot;,&quot;name&quot;:&quot;news:gcpr:vmv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:9,&quot;range&quot;:&quot;0-&quot;} --><div class="plugin_include_content plugin_include__news:gcpr:vmv_2024">
+
+<h1 id="gcprvmv_2024">GCPR / VMV 2024</h1>
+<div class="level1">
+
+<p>
+We are organizing <a href="https://www.gcpr-vmv.de/year/2024" class="urlextern" target="_blank" title="https://www.gcpr-vmv.de/year/2024" rel="ugc nofollow noopener">GCPR / VMV 2024</a> this fall.
+</p>
+
+</div>
+<!-- EDIT{&quot;target&quot;:&quot;plugin_include_end&quot;,&quot;name&quot;:&quot;news:gcpr:vmv_2024&quot;,&quot;hid&quot;:&quot;&quot;,&quot;secid&quot;:10,&quot;range&quot;:&quot;0-&quot;} --></div>
+</div></div><a class='news-list-more' href='https://cvg.cit.tum.de/news'>More</a>
+
+</div>
+
+</p>
+
+
+</div>
+</div>
+</span>
+         
+         
+              
+              
+        
+		            
+				 
+				        
+				        
+                
+				 
+        
+		          
+          
+         
+        
+		     
+          
+    
+                
+                
+                
+                
+                
+            </td>
+           <!-- rechter Portlet-Bereich Ende -->
+            
+        </tr>
+    </tbody></table>
+<div id="globalnavfooter">
+    	<div class="headfooter">
+    		
+    		
+    			Find more topics on the central web site of the Technical University of Munich: www.tum.de
+    		    		
+    	</div>
+        
+        <div class="navi"><ul class="level_1"><li class="first"><span class="pagetitle"><a href="https://www.tum.de/en/about-tum/">About TUM</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/about-tum/our-university/">Our University</a></li><li><a href="https://www.tum.de/en/about-tum/news/">News</a></li><li><a href="https://www.tum.de/en/about-tum/news/coronavirus/">Coronavirus</a></li><li><a href="https://www.tum.de/en/about-tum/publications/">Publications</a></li><li><a href="https://www.tum.de/en/about-tum/departments/">Departments</a></li><li><a href="https://www.tum.de/en/about-tum/awards-and-honors/">Awards and Honors</a></li><li><a href="https://www.tum.de/en/about-tum/university-hospitals/">University Hospitals</a></li><li><a href="http://www.lehren.tum.de/nc/en/">Teaching and QMS</a></li><li><a href="https://www.tum.de/en/about-tum/working-at-tum/">Working at TUM</a></li><li><a href="https://www.tum.de/en/about-tum/giving/">Giving</a></li><li><a href="https://www.tum.de/en/about-tum/tum-fan/">TUM Fan?</a></li><li><a href="https://www.tum.de/en/about-tum/contact-directions/">Contact&nbsp;&amp;&nbsp;Directions</a></li></ul></li><li><span class="pagetitle"><a href="https://www.tum.de/en/research/">Research</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/research/departments/">Departments</a></li><li><a href="https://www.tum.de/en/research/research-centers/">Research Centers</a></li><li><a href="https://www.exzellenz.tum.de/en/">Excellence Strategy</a></li><li><a href="https://www.tum.de/en/research/research-projects/">Research projects</a></li><li><a href="https://www.tum.de/en/research/research-partners/">Research Partners</a></li><li><a href="https://www.forte.tum.de/en/">Research promotion</a></li><li><a href="http://www.gs.tum.de/en/doctorate-at-tum/">Doctorate (Ph.D.)</a></li><li><a href="https://www.tum.de/en/research/postdocs/">Postdocs</a></li><li><a href="https://www.tum.de/en/about-tum/working-at-tum/open-positions/">Career openings</a></li></ul></li><li><span class="pagetitle"><a href="https://www.tum.de/en/innovation/">Innovation</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/innovation/entrepreneurship/">Entrepre­neurship</a></li><li><a href="https://www.tum.de/en/innovation/technology-transfer/">Technology transfer</a></li><li><a href="https://www.tum.de/en/innovation/industry-liaison-office/">Industry Liaison Office</a></li><li><a href="https://www.tum.de/en/innovation/contacts/">Contacts</a></li></ul></li><li><span class="pagetitle"><a href="https://www.tum.de/en/studies/">Studies</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/studies/lifelong-learning/">Lifelong learning</a></li><li><a href="https://www.tum.de/en/studies/degree-programs/">Degree programs</a></li><li><a href="https://www.tum.de/en/studies/international-students/">International Students</a></li><li><a href="https://www.tum.de/en/studies/advising/">Advising</a></li><li><a href="https://www.tum.de/en/studies/application-and-acceptance/">Application</a></li><li><a href="https://www.tum.de/en/studies/fees-and-financial-aid/">Fees and Financial Aid</a></li><li><a href="https://www.tum.de/en/studies/during-your-studies/">During your Studies</a></li><li><a href="https://www.tum.de/en/studies/graduation/">Completing your Studies</a></li><li><a href="https://www.tum.de/en/studies/advising/student-information/">Contacts</a></li></ul></li><li><span class="pagetitle"><a href="https://www.tum.de/en/university-life/">University Life</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/university-life/student-life/">Student Life</a></li><li><a href="https://www.tum.de/en/university-life/accommodations/">Accommo­dation</a></li><li><a href="https://www.tum.de/en/university-life/sports/">Sports</a></li><li><a href="https://www.tum.de/en/university-life/music-and-arts/">Music and Arts</a></li><li><a href="https://www.tum.de/en/university-life/events/">Events</a></li><li><a href="http://www.alumni.tum.de/">Alumni Services</a></li><li><a href="https://www.together.tum.de/en/career/">Career Service</a></li><li><a href="http://www.mentoring.tum.de/">Mentoring</a></li><li><a href="http://www.schueler.tum.de/">TUM for schools</a></li><li><a href="https://shop.tum.de/en">TUM Shop</a></li></ul></li><li><span class="pagetitle"><a href="https://www.tum.de/en/global/">Global</a></span><ul class="level_2"><li><a href="https://www.tum.de/en/global/international-locations/">International Locations</a></li><li><a href="https://www.tum.de/en/global/tum-asia/">TUM Asia</a></li><li><a href="https://www.tum.de/en/studies/international-students/">International Students</a></li><li><a href="http://www.international.tum.de/en/go-international/">Exchange</a></li><li><a href="http://www.international.tum.de/en/international-alliances/">International Alliances</a></li><li><a href="http://www.sprachenzentrum.tum.de/en/homepage/">Language Center</a></li><li><a href="https://www.tum.de/en/global/contacts/">Contacts</a></li></ul></li></ul><div style="clear: both;"></div></div>
+    </div>
+<div id="footer">
+    	<span class="footer_left">
+			<b><a href="http://www.tum.de/die-tum/arbeiten-an-der-tum/stellenangebote/">Jobs</a></b>
+			<b><a href="http://www.tum.de/die-tum/kontakt-und-anfahrt/feedback/">Feedback</a></b>
+			<b><a href="http://www.tum.de/presse/">Presse</a></b>
+			<b><a href="https://www.tum.de/spezialseiten/datenschutz/">Datenschutz</a></b>
+			<b><a href="/impressum">Impressum</a></b>
+			<!-- <b><a href=".">About</a></b> -->
+		</span>
+
+        <span class="footer_right">
+        <a href="https://www.facebook.com/TU.Muenchen"><img src="/_media/ico/icn_tum_tum_facebook.png"></a>
+        <a href="https://twitter.com/TU_Muenchen"><img src="/_media/ico/icn_tum_twitter.png"></a>
+        <a href="http://www.youtube.com/TUMuenchen1"><img src="/_media/ico/icn_tum_youtube.png"></a></span>
+    </div>
+</div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = "https://adm9.in.tum.de/piwik/";
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script>
+<noscript>
+<img src="http://adm9.in.tum.de/piwik/piwik.php?idsite=1" style="border:0" alt="" />
+</noscript>
+<!-- End Piwik Tracking Code -->
+<div class="no"><img src="https://cvg.cit.tum.de/lib/exe/taskrunner.php?id=data%3Adatasets%3Argbd-dataset%3Atools&amp;1788684649" width="2" height="1" alt="" /></div>
+</body>
+</html>

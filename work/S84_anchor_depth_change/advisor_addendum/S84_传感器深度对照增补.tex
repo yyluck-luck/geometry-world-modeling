@@ -1,0 +1,81 @@
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+\usepackage[margin=1.9cm,headheight=15pt]{geometry}
+\usepackage{amsmath,booktabs,array,tikz,pgfplots,xcolor,hyperref,xurl,fancyhdr,enumitem}
+\pgfplotsset{compat=1.18}
+\setmainfont{Arial}\setmonofont{Menlo}
+\setCJKmainfont{Songti SC}\setCJKsansfont{Heiti SC}
+\definecolor{ink}{HTML}{163C50}\definecolor{accent}{HTML}{007C91}
+\hypersetup{colorlinks=true,urlcolor=accent,linkcolor=ink,pdftitle={S84：传感器深度对照增补},pdfauthor={Yiyang Liu -- AI辅助整理}}
+\setlength{\parskip}{.35em}\linespread{1.04}\setlength{\emergencystretch}{2em}
+\setlist{nosep,leftmargin=1.7em}\renewcommand{\arraystretch}{1.12}
+\pagestyle{fancy}\fancyhf{}\lhead{\small CSIT 6910：S84 传感器深度对照}\rhead{\small 2026-09-11}\cfoot{\small\thepage}
+\ctexset{section={format=\large\bfseries\sffamily\color{ink},beforeskip=.7em,afterskip=.35em}}
+\begin{document}
+\begin{center}{\LARGE\bfseries 拟合损失大降，真实参考误差怎样变？}\par\vspace{.3em}{\large S84：只看历史19的传感器光轴深度对照}\end{center}
+
+\noindent\textbf{实际评分记录：平均绝对误差从0.356166738米变为0.354967852米，平均差约1.20毫米。}S83拟合模型预测的损失从1.761725降到0.028219；但这里的新指标用传感器深度作参考，变化很小。两个量回答不同问题，不能把前者的大幅下降称作真实几何同比改善。本次是一个已见场景的一个时刻，尚不能声称稳健物理收益。
+
+\section{ 看完整尺度，不把很小的均值变化放大}
+下图只画S84的深度平均绝对误差（MAE），横轴从0开始，以米为单位；两点几乎对齐。图旁给出精确读数，不用截断坐标把约0.337\%的相对变化画成巨大进步。
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[width=14cm,height=4.0cm,xmin=0,xmax=.4,ymin=.5,ymax=2.5,
+xtick={0,.1,.2,.3,.4},xticklabel style={font=\small},
+ytick={1,2},yticklabels={100步之后,S83初始化后},yticklabel style={font=\small},
+xlabel={传感器参考深度 MAE（米；越小越好）},xlabel style={font=\small},
+axis y line=left,axis x line=bottom,xmajorgrids=true,grid style={gray!20},
+enlarge x limits=false,clip=false]
+\addplot[only marks,mark=o,mark size=3pt,thick,color=ink] coordinates {(.35616673817357597,2)};
+\addplot[only marks,mark=*,mark size=3pt,color=accent] coordinates {(.3549678521511166,1)};
+\node[font=\small,anchor=south east] at (axis cs:.354,2.1) {0.356166738 m};
+\node[font=\small,anchor=south east] at (axis cs:.354,1.1) {0.354967852 m};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\noindent\small 图源：本次真实保存的\texttt{execution\_01/SUMMARY.json}；PGFPlots直接使用其两个MAE数值。图中没有虚构误差条、显著性或新的深度图像。\normalsize
+
+\section{ 先固定哪些位置能评分，再比较前后}
+总网格为$512\times384=196608$个像素。按预先固定的传感器有效规则得到$V=125708$个位置，前后共用该集合，占63.9384\%；其余70900个均为传感器零深度缺测。\textbf{缺测没有被填为0误差，也没有当作正确或错误。}本次没有域外点，前后预测在$V$上均为有限正数。
+
+\begin{center}\small
+\begin{tabular}{lrrrr}\toprule
+同一$V$内的逐像素误差变化&变小&变大&完全相同&合计\\\midrule
+实际个数&87663&37035&1010&125708\\\bottomrule
+\end{tabular}\end{center}
+每个像素先求绝对误差，再看前后差。87663个位置变小不表示其他位置都没问题；37035个位置变大也完整保留。\textbf{“平均差约1.20毫米”不是每点都改善1.20毫米}，更不是误差已降到毫米级：最终MAE仍约0.355米。
+
+真实评分于\textbf{北京时间03:03:01.524392至03:03:02.943122}完成，程序内1.418739秒。读取已封存的初始和最终清理前预测，解码一张已有传感器深度；只评分历史19。\textbf{0模型调用、0优化器更新、0新生成}，没有根据评分回调S83。
+\clearpage
+
+\section{ MAE究竟在量什么？}
+对每个有效像素$p$，预测光轴深度为$\hat Z_p$，传感器参考为$Z_p$，主指标为
+\[
+\operatorname{MAE}=\frac{1}{125708}\sum_{p\in V}|\hat Z_p-Z_p|,
+\quad \Delta\operatorname{MAE}=-0.001198886\ \mathrm{m}.
+\]
+$Z$是沿相机光轴的深度，\textbf{不是到相机中心的欧氏距离}。两阶段使用同一个$V$，不按预测置信值、误差大小或深度范围筛点，也没有事后拟合尺度或偏移。传感器原码除5000转为米，零值只作缺测。
+
+\begin{center}\small
+\begin{tabular}{p{3.6cm}p{3.0cm}p{3.0cm}p{5.0cm}}\toprule
+指标&初始&100步之后&怎样解释\\\midrule
+S83预测拟合损失&1.761725187&0.028218685&拟合模型点图的目标值，无传感器答案。\\
+S84深度MAE（米）&0.356166738&0.354967852&主指标：同一有效集合的平均绝对深度误差。\\
+绝对误差中位（米）&0.182994626&0.168128155&二级描述：误差分布的中间位置，不是均值。\\
+平均相对绝对误差&0.111113695&0.103395520&二级描述：每点绝对误差先除以该点参考深度，再取均值。\\\bottomrule
+\end{tabular}\end{center}
+这些量单位、加权或聚合方式不同，不能放在同一条纵轴上比较降幅。深度MAE也不是S80/S81的像素几何误差，更不是生成视频的内容或时序质量。
+
+\section{ 为什么只能说这一次参考评分小幅下降？}
+\begin{enumerate}
+\item \textbf{只是一张已见参考。}传感器深度晚于RGB 17.126毫秒，沿用旧关联，未作时间补偿。像素已注册不等于同时曝光，也不能把125708个相关像素当成独立场景。
+\item \textbf{坐标与相机仍有近似。}本次从512网格映回原640网格：$(u,v)\mapsto(1.25u,1.25v)$，再用$\lfloor x+0.5\rfloor$取最近邻；不插值、不找更有利的邻点。近似K、未额外去畸变和深度边界误差仍在。
+\item \textbf{差值不是物理精度保证。}约1.20毫米是条件性平均差；没有独立场景重复、同步误差或标定不确定性评估，不能称统计显著或稳健物理收益。算术判别容差也不是传感器精度。
+\end{enumerate}
+
+\section{ 下一步仍要看目标视角和生成对照}
+先把合法历史几何与颜色投到请求目标视角，检查warp（投影图）和mask（有历史来源支持的区域）。再用同一warp/mask比较$G_0$原生成、$G_{\rm paste}$末端像素合成、$G_{\rm guide}$采样内引导；覆盖区、洞和边界都要保留。这些是\textbf{后续任务，不是本次已完成结果}。当前没有已验证新方法；单锚点深度均值下降不能替代生成收益。
+
+\input{review_status.tex}
+\noindent\small\textbf{一手记录：}\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S84_anchor_depth_change/CONTRACT.json}{冻结评分合同}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S84_anchor_depth_change/execution_01/RECEIPT.json}{实际回执}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S84_anchor_depth_change/execution_01/SUMMARY.json}{全量摘要}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/S83_RESULTS.md}{S83结果解释}。原五页增补保持原截点和字节。\normalsize
+\end{document}

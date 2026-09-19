@@ -1,0 +1,55 @@
+--- previous_observer
++++ S34_observer
+@@ -37,7 +37,7 @@
+                         self.extra_forwards += 1
+                         decoded = dict(depth=np.stack(list_before), point_cloud=np.stack([b.array(x) for x in scene.get_pts3d()]), focal=b.array(scene.get_focals()), pp=b.array(scene.get_principal_points()), c2w=b.array(scene.get_im_poses()), pw_scale=b.array(scene.get_pw_scale()), pw_poses=b.array(scene.get_pw_poses()), adaptors=b.array(scene.get_adaptors()), objective=loss_before)
+                     np.savez_compressed(self.out / 'initial_decoded.npz', **decoded)
+-                    verify_s29_initial_state(self, c, arm, loss_before, np)
++                    initial_gate(self, c, arm, loss_before, np)
+                     self.patch(opt.PointCloudOptimizer, 'get_depthmaps', lambda old_getter: patched_getter)
+                     with torch.no_grad():
+                         depth_after = b.array(scene.get_depthmaps(raw=True))
+@@ -50,8 +50,8 @@
+                     after_arrays, after_meta, after_objects = snapshot(scene, np)
+                     assert_same_objects(self.initial_objects, after_objects)
+                     require(after_meta == self.initial_meta, 'Getter must not change raw parameters/buffers/flags')
+-                    self.report['s30_initialization'] = dict(arm=arm, s29_initialization_path_preserved=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), reference_S29_raw_exact=True, getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=True, extra_no_update_objective_forwards=self.extra_forwards)
+-                    self.checkpoint('S30_first_step_gate_passed')
++                    self.report['s34_initialization'] = dict(arm=arm, common_C2a_initialization_path=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), matched_current_eight_frame_initial_state=True, getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=True, extra_no_update_objective_forwards=self.extra_forwards)
++                    self.checkpoint('S34_first_step_gate_passed')
+                     return answer
+                 return call
+             self.patch(init, 'init_minimum_spanning_tree', initial_after_mst)
+@@ -63,8 +63,8 @@
+                     for name, p in self.scene.named_parameters():
+                         if p.grad is not None:
+                             require(bool(torch.isfinite(p.grad).all()), 'Nonfinite gradient before Adam: ' + name)
+-                    for p in self.scene.im_depthmaps:
+-                        require((p.grad is None) == False, 'Depth gradient route must hold before Adam')
++                    for index, p in enumerate(self.scene.im_depthmaps):
++                        require((p.grad is None) == (index < 4), 'Mixed old4 frozen/new4 connected before Adam')
+                     return old(optimizer, *args, **kw)
+                 return call
+             self.patch(torch.optim.Adam, 'step', validate_before_step)
+@@ -100,8 +100,8 @@
+                         require(torch.equal(p, self.frozen[name]), 'Frozen parameter changed: ' + name)
+                     gs = {n: grad(p) for n, p in scene.named_parameters() if n.startswith('im_depthmaps.') or n in ('im_focals', 'pw_poses')}
+                     require(all((v['finite'] is not False for v in gs.values())), 'Nonfinite diagnostic gradient')
+-                    depth_grad = [gs['im_depthmaps.' + str(i)] for i in range(4)]
+-                    require(all((v['grad_is_none'] == False for v in depth_grad)), 'Registered depth connectivity differs from arm contract')
++                    depth_grad = [gs['im_depthmaps.' + str(i)] for i in range(8)]
++                    require(all((v['grad_is_none'] == (i < 4) for i, v in enumerate(depth_grad))), 'All8 mixed-depth gradient route')
+                     optimizer_ids = {id(p) for group in self.optimizer.param_groups for p in group['params']}
+                     require(optimizer_ids == {id(p) for p in scene.parameters() if p.requires_grad}, 'Original optimizer parameter membership')
+                     self.gradient_steps += 1
+@@ -113,8 +113,8 @@
+                         final_arrays, final_meta, _ = snapshot(scene, np)
+                         np.savez_compressed(self.out / 'final_raw_before_clean.npz', **final_arrays)
+                         write(self.out / 'final_raw_metadata.json', final_meta)
+-                        self.report['s30_gradient_steps'] = self.gradient_steps
+-                        self.report['s30_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
++                        self.report['s34_gradient_steps'] = self.gradient_steps
++                        self.report['s34_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
+                     return result
+                 return call
+             self.patch(base, 'global_alignment_iter', trace_iter)

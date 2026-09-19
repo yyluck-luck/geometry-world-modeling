@@ -1,0 +1,85 @@
+% SOURCE-ONLY TEMPLATE: not a result and not intended for direct compilation.
+% Named fields must be populated from root-bound accepted real metadata.
+\documentclass[UTF8,10pt,a4paper]{ctexart}
+\usepackage[margin=1.7cm,headheight=14pt]{geometry}
+\usepackage{amsmath,booktabs,array,graphicx,xcolor,hyperref,xurl,fancyhdr}
+\setmainfont{Arial}\setsansfont{Arial}\setmonofont{Menlo}
+\setCJKmainfont{Songti SC}\setCJKsansfont{Heiti SC}
+\definecolor{ink}{HTML}{163C50}\definecolor{accent}{HTML}{007C91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={S86固定历史投影：四种生成对照实际结果},pdfauthor={AI辅助整理；依据已接受本地证据}}
+\setlength{\parskip}{.45em}\setlength{\parindent}{1.5em}\linespread{1.05}
+\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.12}
+\pagestyle{fancy}\fancyhf{}\lhead{\small S86：四种生成对照实际结果}\rhead{\small @@CUTOFF_SHORT@@}\cfoot{\thepage}
+\ctexset{section={format=\Large\bfseries\sffamily\color{ink},beforeskip=0pt,afterskip=.55em}}
+\newcommand{\important}[1]{\begin{center}\fcolorbox{accent}{accent!5}{\parbox{.92\linewidth}{#1}}\end{center}}
+\begin{document}
+\section*{1. 实际完成了什么，主结果是什么？}
+\important{\textbf{科学证据截点：@@CUTOFF_FULL@@。}@@ACCEPTED_STATE@@}
+
+本报告接续已交付的10页《从投影到生成强对照》原理补充，只报告本轮真实结果。四种方式共用四张历史图、四个目标20--23、相同投影参考和条件。G0与Gguide各跑一条50步完整链；Gpaste从G0做末端RGB合成，Gterminal从G0真实末步融合并解码。它们不是四条完整生成链，也不是每个目标单独跑50步。
+
+@@MAIN_FINDING@@
+
+\begin{center}\small
+\begin{tabular}{lrr}\toprule
+方式 & 全四帧SSE整数总和 & 主MSE：四帧等权均值\\\midrule
+@@ARM_TABLE@@
+\bottomrule\end{tabular}
+\end{center}
+\begin{center}\small
+\begin{tabular}{lrr}\toprule
+固定对比 & 全四帧SSE有符号差 & 主MSE差（负号表示Gguide更低）\\\midrule
+@@CONTRAST_TABLE@@
+\bottomrule\end{tabular}
+\end{center}
+主指标是最终发图uint8 RGB按255归一化后的全图MSE；每帧995328个颜色标量、全部四帧3981312个标量，每帧权重1/4。数字降低只说明这一像素指标降低，不能直接等同感知更真实或几何更准确。
+
+\textbf{真实成本与运行状态。}@@RUN_INTERVAL@@
+\begin{center}\small\begin{tabular}{lrlr}\toprule
+阶段 & 实际秒数 & 阶段 & 实际秒数\\\midrule
+@@COST_TABLE@@
+\bottomrule\end{tabular}\end{center}
+@@COST_NOTE@@
+
+\clearpage
+\section*{2. 全部16行与完整区域分母}
+四个目标全部保留。support是S85预测有历史投影候选的像素集合，hole是其补集；它们不是正确/错误或真实可见/遮挡标签。下表不按结果重新裁剪、配准、调曝光或选区。
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+方式/目标 & 全图SSE & 全图MSE & 支持区MSE & 孔洞区MSE\\\midrule
+@@FRAME_TABLE@@
+\bottomrule\end{tabular}\end{center}
+\begin{center}\small\begin{tabular}{rrrrr}\toprule
+目标 & 支持像素 & 孔洞像素 & 支持通道 & 孔洞通道\\\midrule
+@@DENOM_TABLE@@
+\bottomrule\end{tabular}\end{center}
+每帧全图331776像素、995328通道。区域空集写NA，不能写0误差；任何一帧某区域为空时，完整四帧的该区域等权均值也为NA。另报的pooled按全部区域通道汇总，权重与等帧均值不同。完整区域均值和全部逐目标有符号对比保存在原ARM\_SUMMARY与CONTRASTS文件，未以pooled替换主结果。
+
+\textbf{不同作者核验到哪里？}@@REVIEW_RESULT@@
+整数平方误差用不同算法核算，分数与均值另用精确有理数复核；保存量一致不等于世界真值。G0的50步透明性依据运行时对象/字节摘要和实际末步数据，未谎称存有50份G0完整raw数组。模型/VAE没有为复核另跑一遍。
+
+\clearpage
+\section*{3. 四目标、六列实际比较总览}
+顺序固定为：真实参考、历史投影、G0、Gpaste、Gterminal、Gguide；四行依次为目标20、21、22、23。参考来自已保存实拍，投影使用历史颜色和预测几何；灰格只标无投影支持。四种方法列都是本轮已发出的生成/派生图。
+\begin{center}\includegraphics[width=\linewidth]{images/overview_4targets_6columns.png}\end{center}
+\textbf{读图限制。}此处缩小整张总览用于同页定位，不能只凭缩略图判断精细对应。原导出保留全部32张576像素原图和1张3540×2720总览，共33张；比较没有只挑好看的目标。原图入口与文件SHA见绑定的EXPORT\_RECEIPT和IMAGE\_INDEX。孔洞区也可能经VAE与后续网络传播受影响，不能把直接mask保护当作最终RGB绝对隔离。
+
+\textbf{本页图源身份。}@@IMAGE_IDENTITY@@
+
+\clearpage
+\section*{4. 该怎样解释，导师追问怎样答？}
+@@INTERPRETATION@@
+
+\textbf{为什么必须保留Gterminal？}Gguide如果只胜末端RGB贴图，差别还包括latent域融合与解码本身。Gterminal提供同一G0真实末步、同warp/mask/强度的对照。即便Gguide胜过它，也仍有累计50次与1次干预强度不同的解释；相同0.25不等于相同RGB变化剂量。本轮没有用结果重选强度或日程。
+
+\textbf{这是proposal推进还是新方法？}这轮真正把历史投影交给原生成过程使用，并完成固定四臂的收益比较，属于普通基线与机制区分证据。\textbf{new\_method\_validated=false，novelty\_authorization=NONE。}一条已见序列、四个相关目标、一份共同随机流，不能验证长时程、动态场景或跨场景泛化。像素、通道、保存字段和检查次数都不是独立实验样本数。
+
+\textbf{原始系统是否被精确复现？}原VMem采样与权重保留，VAE使用已声明的stabilityai/sd-vae-ft-mse变体；原SD2.1 VAE身份尚未确认，因此不声称完整原始系统的精确复现。CPU FP32、8线程、50步、576×576为固定设置；G0与旧S70的兼容性证据另列，不能替代VAE身份核实。
+
+\textbf{结果不好该怎样汇报？}@@NEGATIVE_ANSWER@@
+
+\textbf{下一步怎样决定？}先根据本轮真实优劣和失败保留/停止相应假说。另一个强度、晚区间或等预算方案必须另立未来协议；不能补跑后挑最好结果冒称本轮成功。仅当普通解释仍不足、未见场景复现与消融支持时，才讨论方法贡献。
+
+\textbf{证据导航。}@@EVIDENCE_NAV@@
+
+\vfill\noindent\small\textcolor{accent}{这是已接受科研结果的报告整理；编译/页面检查是文档验收，不是新实验。全页视觉核与root最终报告验收另存。}
+\end{document}

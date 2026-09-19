@@ -1,0 +1,612 @@
+--- v11/supervise_camera_guard.py
+
++++ v12/supervise_camera_guard.py
+
+@@ -40,11 +40,11 @@
+
+ FORMAL_OUT = HERE / "execution_01"
+ LOCK = HERE / ".c1_numeric_camera_guard.lock"
+ LOCK_STAGING = HERE / ".c1_numeric_camera_guard.lock.staging"
+-BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V11.json"
+-BINDING_REVIEW = HERE / "BINDING_REVIEW_V11.json"
+-PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V11.json"
+-ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V11.json"
+-GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V11.json"
++BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V12.json"
++BINDING_REVIEW = HERE / "BINDING_REVIEW_V12.json"
++PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V12.json"
++ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V12.json"
++GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V12.json"
+ 
+ REPORT_NAME = "report.json"
+ WORKER_RECEIPT_NAME = "worker_receipt.json"
+@@ -68,7 +68,7 @@
+
+ RUSAGE_INFO_V4 = 4
+ MEMORY_SAMPLE_INTERVAL_SECONDS = 0.02
+ CAPABILITY_PROBE_BYTES = 8 * 1024 * 1024
+-ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V11-PREBOUND-ARTIFACT"
++ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V12-PREBOUND-ARTIFACT"
+ 
+ 
+ class SupervisorTermination(RuntimeError):
+@@ -136,7 +136,7 @@
+
+ 
+ def darwin_process_usage(pid):
+     """Read kernel process memory/accounting for one exact live Darwin PID."""
+-    require(platform.system() == "Darwin", "V11 requires the reviewed Darwin containment path")
++    require(platform.system() == "Darwin", "V12 requires the reviewed Darwin containment path")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pid_rusage
+     function.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+@@ -792,10 +792,10 @@
+
+             and parsed.get("passed") is False
+             and parsed.get("terminal_authority") is False
+             and parsed.get("authority_conditions", {}).get("canonical_path_alone_is_authoritative") is False,
+-            "Held final candidate does not have the full exact V11 pending document",
++            "Held final candidate does not have the full exact V12 pending document",
+         )
+         returned_observation = {
+-            "schema": "s45b-v11-held-terminal-candidate-observation-v3",
++            "schema": "s45b-v12-held-terminal-candidate-observation-v3",
+             "status": "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL",
+             "passed": False,
+             "terminal_authority": False,
+@@ -831,7 +831,7 @@
+
+     if not isinstance(observation, dict):
+         return False
+     if (
+-        observation.get("schema") != "s45b-v11-held-terminal-candidate-observation-v3"
++        observation.get("schema") != "s45b-v12-held-terminal-candidate-observation-v3"
+         or observation.get("status") != "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL"
+         or observation.get("passed") is not False
+         or observation.get("terminal_authority") is not False
+@@ -887,7 +887,7 @@
+
+     require(
+         isinstance(terminal_observation, dict)
+         and terminal_observation.get("schema")
+-        == "s45b-v11-held-terminal-candidate-observation-v3"
++        == "s45b-v12-held-terminal-candidate-observation-v3"
+         and terminal_observation.get("status")
+         == "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL"
+         and terminal_observation.get("passed") is False
+@@ -920,6 +920,53 @@
+
+     }
+ 
+ 
++def emit_external_pass_seal(
++    worker, terminal_observation, supervisor_sha256, worker_sha256,
++    attempt_lock_sha256, governance_attestation_sha256, stream=None,
++):
++    """The shared final production write/flush/return path, after required closes."""
++    if stream is None:
++        stream = sys.stdout
++    external_authority = build_external_pass_seal(
++        terminal_observation, supervisor_sha256, worker_sha256,
++        attempt_lock_sha256, governance_attestation_sha256,
++    )
++    external_body = encoded_json(external_authority)
++    require(0 < len(external_body) <= MAX_STDOUT_BYTES,
++            "External terminal record exceeds the existing stdout bound")
++    worker.write_all(stream.fileno(), external_body)
++    stream.flush()
++    return 0
++
++
++def emit_supervisor_failure_diagnostic(phase, error):
++    """Best-effort bounded stderr for failures even after all result FDs close."""
++    try:
++        value = {
++            "schema": "s45b-c1-supervisor-stderr-failure-v1",
++            "status": "FAILED_SUPERVISOR_NO_VALID_EXIT_GATED_SEAL",
++            "failed_phase": str(phase)[:64],
++            "error_type": type(error).__name__[:64],
++            "error": str(error)[:256],
++            "passed": False,
++            "terminal_authority": False,
++        }
++        body = encoded_json(value)
++        require(len(body) <= 4096, "Failure diagnostic exceeds its byte bound")
++        fd = sys.stderr.fileno()
++        offset = 0
++        while offset < len(body):
++            written = os.write(fd, body[offset:])
++            if written <= 0:
++                return False
++            offset += written
++        sys.stderr.flush()
++        return True
++    except BaseException:
++        # An unavailable stderr never upgrades failure to a valid terminal seal.
++        return False
++
++
+ def _entry_absent(directory_fd, name):
+     try:
+         os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+@@ -953,7 +1000,7 @@
+
+ 
+ 
+ def spawn_contained(inner, pass_fds=()):
+-    """Synthetic subprocess helper; the V11 formal worker never uses this path."""
++    """Synthetic subprocess helper; the V12 formal worker never uses this path."""
+     return subprocess.Popen(
+         contained_command(inner),
+         stdin=subprocess.DEVNULL,
+@@ -978,7 +1025,7 @@
+
+ 
+ def apply_darwin_no_fork_sandbox():
+     """Apply Seatbelt inside the already-forked interpreter, without exec."""
+-    require(platform.system() == "Darwin", "V11 formal containment requires Darwin")
++    require(platform.system() == "Darwin", "V12 formal containment requires Darwin")
+     library = ctypes.CDLL(None, use_errno=True)
+     function = library.sandbox_init
+     function.argtypes = [ctypes.c_char_p, ctypes.c_uint64,
+@@ -1063,7 +1110,7 @@
+
+ 
+ 
+ def _execute_loaded_worker(source_code, namespace):
+-    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v11")
++    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v12")
+     module.__file__ = str(WORKER)
+     exec(source_code, module.__dict__)
+     require(module.SELF == WORKER and module.formal_worker_run.__module__
+@@ -1084,7 +1131,7 @@
+
+     require(namespace.worker_source_fd == lease["fd"],
+             "Formal namespace does not carry the retained worker source FD")
+     execution_binding = {
+-        "schema": "s45b-v11-fork-bound-worker-execution-v1",
++        "schema": "s45b-v12-fork-bound-worker-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1234,7 +1281,7 @@
+
+ 
+ 
+ def darwin_process_path(pid):
+-    require(platform.system() == "Darwin", "V11 process-image binding requires Darwin")
++    require(platform.system() == "Darwin", "V12 process-image binding requires Darwin")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pidpath
+     function.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+@@ -1256,7 +1303,7 @@
+
+     kernel_snapshot = executable_snapshot(kernel_path)
+     launcher_snapshot = executable_snapshot(executable_path)
+     value = {
+-        "schema": "s45b-v11-running-interpreter-binding-v1",
++        "schema": "s45b-v12-running-interpreter-binding-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_NO_EXEC",
+         "supervisor_pid": os.getpid(),
+         "kernel_process_path": str(kernel_path),
+@@ -1390,7 +1437,7 @@
+
+         allocation[offset] = 1
+     time.sleep(0.10)
+     value = {
+-        "schema": "s45b-v11-darwin-fork-bound-capability-probe-v1",
++        "schema": "s45b-v12-darwin-fork-bound-capability-probe-v1",
+         "status": "PASS_CAPABILITY_PROBE_ONLY",
+         "pid": os.getpid(),
+         "cpu_limit": list(cpu),
+@@ -1410,10 +1457,10 @@
+
+ 
+ def runtime_capability_preflight(worker_source_record):
+     """Exercise the exact fork-without-exec production mechanism pre-attempt."""
+-    require(platform.system() == "Darwin", "V11 formal execution supports reviewed macOS only")
++    require(platform.system() == "Darwin", "V12 formal execution supports reviewed macOS only")
+     interpreter_binding, interpreter_binding_sha256 = current_interpreter_binding()
+     execution_binding = {
+-        "schema": "s45b-v11-fork-bound-capability-execution-v1",
++        "schema": "s45b-v12-fork-bound-capability-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1448,7 +1495,7 @@
+
+         "POSIX_SPAWN_SETSID",
+     }
+     require(
+-        payload.get("schema") == "s45b-v11-darwin-fork-bound-capability-probe-v1"
++        payload.get("schema") == "s45b-v12-darwin-fork-bound-capability-probe-v1"
+         and payload.get("status") == "PASS_CAPABILITY_PROBE_ONLY"
+         and payload.get("cpu_limit") == [CPU_LIMIT_SECONDS, CPU_LIMIT_SECONDS]
+         and payload.get("file_size_limit") == [MAX_ARTIFACT_BYTES, MAX_ARTIFACT_BYTES]
+@@ -1467,7 +1514,7 @@
+
+             and binding_after_sha256 == interpreter_binding_sha256,
+             "Running interpreter binding changed across capability probe")
+     return {
+-        "schema": "s45b-v11-runtime-capability-preflight-v1",
++        "schema": "s45b-v12-runtime-capability-preflight-v1",
+         "status": "PASS_BEFORE_ATTEMPT_COMMIT",
+         "started_utc": started_utc,
+         "completed_utc": completed_utc,
+@@ -1874,8 +1921,8 @@
+
+                 "supervise_camera_guard.py": args.self_sha256,
+                 "primary_source_review": args.primary_source_review_sha256,
+                 "adversarial_source_review": args.adversarial_source_review_sha256,
+-                "C1_CAMERA_GUARD_BINDING_V11.json": args.binding_sha256,
+-                "BINDING_REVIEW_V11.json": args.binding_review_sha256,
++                "C1_CAMERA_GUARD_BINDING_V12.json": args.binding_sha256,
++                "BINDING_REVIEW_V12.json": args.binding_review_sha256,
+                 "governance_attestation": args.governance_attestation_sha256,
+             },
+             "capability_sha256": capability_sha256,
+@@ -2179,15 +2226,12 @@
+
+         lock_fd = None
+         parent_fd = None
+         phase = "EXTERNAL_HELD_FD_AUTHORITY_EMISSION"
+-        external_authority = build_external_pass_seal(
+-            terminal_observation, args.self_sha256, args.worker_sha256,
++        return emit_external_pass_seal(
++            worker, terminal_observation, args.self_sha256, args.worker_sha256,
+             lock_sha256, args.governance_attestation_sha256,
+         )
+-        external_body = encoded_json(external_authority)
+-        write_all(sys.stdout.fileno(), external_body)
+-        sys.stdout.flush()
+-        return 0
+     except BaseException as error:
++        emit_supervisor_failure_diagnostic(phase, error)
+         if process is not None and process.returncode is None:
+             terminate_exact_process(process.pid)
+             try:
+@@ -2232,7 +2276,7 @@
+
+ 
+ 
+ def synthetic_loaded_code_entry(code, output_fd):
+-    module = types.ModuleType("_s45b_v11_synthetic_exact_loaded_code")
++    module = types.ModuleType("_s45b_v12_synthetic_exact_loaded_code")
+     module.__file__ = "/synthetic/held/source.py"
+     exec(code, module.__dict__)
+     return module.entry(output_fd)
+@@ -2387,7 +2431,7 @@
+
+     fcntl.flock(parent_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+     parent_identity = worker.inode_identity(os.fstat(parent_fd))
+     lock_doc = {
+-        "schema": "synthetic-v11-attempt-lock-v1",
++        "schema": "synthetic-v12-attempt-lock-v1",
+         "status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
+         "passed": False,
+     }
+@@ -2431,8 +2475,8 @@
+
+     }
+ 
+ 
+-def synthetic_prebound_full_success_path():
+-    """Run the ordinary V11 artifact-to-terminal functions on disposable bytes.
++def synthetic_prebound_full_success_path(emission_mode=None):
++    """Run the ordinary V12 artifact-to-terminal functions on disposable bytes.
+ 
+     This intentionally uses a fresh held worker-source FD and real prebound
+     report/receipt inodes.  The fixture contains synthetic matrices and tensor
+@@ -2440,7 +2484,7 @@
+
+     """
+     worker, worker_record = load_worker_same_fd()
+     state = {"leases": {}}
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_prebound_full_success_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_prebound_full_success_") as raw:
+         root = Path(raw).resolve()
+         parent_fd = lock_fd = output_fd = -1
+         try:
+@@ -2452,7 +2496,7 @@
+
+             fcntl.flock(parent_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+             parent_identity = worker.inode_identity(os.fstat(parent_fd))
+             lock_doc = {
+-                "schema": "synthetic-v11-full-success-attempt-lock-v1",
++                "schema": "synthetic-v12-full-success-attempt-lock-v1",
+                 "status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
+                 "passed": False,
+             }
+@@ -2529,7 +2573,7 @@
+
+ 
+             supervisor_sha = worker.write_new_at(
+                 output_fd, SUPERVISOR_RECEIPT_NAME,
+-                {"schema": "synthetic-v11-supervisor", "passed": False},
++                {"schema": "synthetic-v12-supervisor", "passed": False},
+             )
+             state["leases"][SUPERVISOR_RECEIPT_NAME] = open_regular_lease(
+                 output_fd, root / "execution", SUPERVISOR_RECEIPT_NAME,
+@@ -2543,7 +2587,7 @@
+
+             )
+             barrier_sha = worker.write_new_at(
+                 output_fd, BARRIER_NAME,
+-                {"schema": "synthetic-v11-barrier", "passed": False,
++                {"schema": "synthetic-v12-barrier", "passed": False,
+                  "before_evidence_sha256": sha256_bytes(canonical(before_barrier))},
+             )
+             state["leases"][BARRIER_NAME] = open_regular_lease(
+@@ -2585,6 +2629,11 @@
+
+                     "Synthetic held worker source did not close before PASS")
+             close_terminal_control_fds(output_fd, lock_fd, parent_fd)
+             output_fd = lock_fd = parent_fd = -1
++            if emission_mode is not None:
++                return synthetic_controlled_emission(
++                    worker, observation, worker_record["sha256"], lock_sha,
++                    emission_mode,
++                )
+             external = build_external_pass_seal(
+                 observation, "c" * 64, worker_record["sha256"],
+                 lock_sha, "2" * 64,
+@@ -2601,7 +2650,7 @@
+
+                 "Full-path external exit-success document is malformed",
+             )
+             return {
+-                "status": "PASS_V11_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH",
++                "status": "PASS_V12_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH",
+                 "complete_worker_schema_validation": complete,
+                 "initial_prebound_records": sorted(initial["artifacts"]),
+                 "terminal_candidate_status": observation["status"],
+@@ -2628,6 +2677,124 @@
+
+                         pass
+ 
+ 
++def synthetic_controlled_emission(worker, observation, worker_sha, lock_sha, mode):
++    """Inject only finite ordinary stdout faults in a disposable child process."""
++    require(mode in ("NORMAL", "SHORT_WRITE", "WRITE_ERROR",
++                     "PARTIAL_WRITE_ERROR", "FLUSH_ERROR"),
++            "Unknown synthetic emission mode")
++    stdout_fd = sys.stdout.fileno()
++    original_write = os.write
++    writes = 0
++
++    def controlled_write(fd, body):
++        nonlocal writes
++        if fd != stdout_fd:
++            return original_write(fd, body)
++        writes += 1
++        if mode == "WRITE_ERROR" or (mode == "PARTIAL_WRITE_ERROR" and writes > 1):
++            raise OSError(errno.EIO, "synthetic stdout write failure")
++        if mode == "SHORT_WRITE":
++            return original_write(fd, body[:17])
++        if mode == "PARTIAL_WRITE_ERROR":
++            return original_write(fd, body[:7])
++        return original_write(fd, body)
++
++    def failed_flush():
++        raise OSError(errno.EIO, "synthetic stdout flush failure")
++
++    stream = (
++        types.SimpleNamespace(fileno=sys.stdout.fileno, flush=failed_flush)
++        if mode == "FLUSH_ERROR" else sys.stdout
++    )
++    try:
++        os.write = controlled_write
++        result = emit_external_pass_seal(
++            worker, observation, "c" * 64, worker_sha, lock_sha, "2" * 64,
++            stream=stream,
++        )
++        if mode == "SHORT_WRITE":
++            require(writes > 1, "Short-write case did not exercise repeated writes")
++        return result
++    finally:
++        os.write = original_write
++
++
++def synthetic_emission_child(mode):
++    try:
++        return synthetic_prebound_full_success_path(emission_mode=mode)
++    except BaseException as error:
++        emit_supervisor_failure_diagnostic("EXTERNAL_HELD_FD_AUTHORITY_EMISSION", error)
++        return 2
++
++
++def synthetic_emission_roundtrip():
++    """Observe the actual shared emitter's complete JSON and OS exit from outside."""
++    records = []
++    worker_sha = sha256_bytes(WORKER.read_bytes())
++    for mode in ("NORMAL", "SHORT_WRITE", "WRITE_ERROR",
++                 "PARTIAL_WRITE_ERROR", "FLUSH_ERROR"):
++        result = subprocess.run(
++            [str(PYTHON_EXECUTABLE), "-I", "-B", "-S", str(SELF),
++             "--synthetic-emission-child", mode],
++            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10,
++            check=False,
++        )
++        require(len(result.stdout) <= MAX_STDOUT_BYTES
++                and len(result.stderr) <= 4096,
++                "Synthetic emission exceeded its bounded output")
++        try:
++            parsed = json.loads(result.stdout)
++        except (ValueError, UnicodeDecodeError):
++            parsed = None
++        exact = False
++        if isinstance(parsed, dict):
++            expected = build_external_pass_seal(
++                parsed.get("held_candidate_observation"), "c" * 64,
++                worker_sha, parsed.get("attempt_lock_sha256"), "2" * 64,
++            )
++            exact = parsed == expected and encoded_json(expected) == result.stdout
++        accepted = result.returncode == 0 and result.stderr == b"" and exact
++        if mode in ("NORMAL", "SHORT_WRITE"):
++            require(accepted, "Shared production emitter failed ordinary " + mode)
++        else:
++            require(result.returncode == 2 and not accepted,
++                    "A writer/flush failure was accepted as success")
++            failure = json.loads(result.stderr)
++            require(encoded_json(failure) == result.stderr
++                    and failure.get("schema") == "s45b-c1-supervisor-stderr-failure-v1"
++                    and failure.get("failed_phase") == "EXTERNAL_HELD_FD_AUTHORITY_EMISSION"
++                    and failure.get("error_type") == "OSError"
++                    and failure.get("passed") is False
++                    and failure.get("terminal_authority") is False,
++                    "Post-close failure did not emit its bounded original-error diagnostic")
++            if mode == "WRITE_ERROR":
++                require(result.stdout == b"", "Initial write failure emitted bytes")
++            if mode == "PARTIAL_WRITE_ERROR":
++                require(result.stdout and not exact,
++                        "Partial-write failure did not leave an invalid prefix")
++            if mode == "FLUSH_ERROR":
++                require(exact,
++                        "Flush-error control must show full JSON still fails without exit zero")
++        records.append({
++            "mode": mode,
++            "returncode": result.returncode,
++            "stdout_bytes": len(result.stdout),
++            "stderr_bytes": len(result.stderr),
++            "stdout_sha256": sha256_bytes(result.stdout),
++            "stderr_sha256": sha256_bytes(result.stderr),
++            "stdout_text": result.stdout.decode("utf-8"),
++            "stderr_text": result.stderr.decode("utf-8"),
++            "complete_exact_external_json": exact,
++            "accepted_only_with_external_exit_zero": accepted,
++        })
++    return {
++        "status": "PASS_SHARED_PRODUCTION_EMIT_FLUSH_AND_EXTERNAL_EXIT_ROUNDTRIP",
++        "cases": records,
++        "formal_supervision_calls": 0,
++        "real_camera_or_image_body_bytes_read": 0,
++    }
++
++
+ def synthetic_close(state):
+     try:
+         close_leases(state.get("leases", {}))
+@@ -2770,7 +2937,7 @@
+
+     # V6's missing acquisition-window attack: the parent creates both inodes
+     # before fork, the child writes only inherited FDs, and the parent never
+     # reopens either pathname to acquire authority.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_prebound_nominal_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_prebound_nominal_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(
+@@ -2789,7 +2956,7 @@
+
+             synthetic_prebound_writer,
+             (worker, output_fd, report_bound, receipt_bound, secret),
+             (output_fd, report_bound["fd"], receipt_bound["fd"]),
+-            {"schema": "synthetic-v11-prebound-writer",
++            {"schema": "synthetic-v12-prebound-writer",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         observation = bounded_process_wait(
+@@ -2814,7 +2981,7 @@
+
+     checks["prespawn_create_only_pair_child_inherited_fd_publication"] = "PASS"
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v11_prelaunch_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v12_prelaunch_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2842,7 +3009,7 @@
+
+             os.close(output_fd)
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v11_preacquire_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v12_preacquire_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2876,7 +3043,7 @@
+
+             close_leases({"report": report_bound, "receipt": receipt_bound})
+             os.close(output_fd)
+ 
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_same_inode_tamper_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_same_inode_tamper_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2910,7 +3077,7 @@
+
+     # Force the exact V6 race on a disposable source: replace its pathname
+     # after compilation but before fork.  The child still executes ORIGINAL
+     # because the code object and interpreter image are inherited, not reopened.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_source_exec_binding_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_source_exec_binding_") as raw:
+         source_path = Path(raw) / "probe.py"
+         original = b"import os\ndef entry(fd):\n os.write(fd, b'ORIGINAL')\n return 0\n"
+         source_path.write_bytes(original)
+@@ -2928,7 +3095,7 @@
+
+         interpreter, interpreter_sha = current_interpreter_binding()
+         process = _fork_loaded_entry(
+             synthetic_loaded_code_entry, (code, write_fd), (write_fd,),
+-            {"schema": "synthetic-v11-loaded-code-race",
++            {"schema": "synthetic-v12-loaded-code-race",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         os.close(write_fd)
+@@ -3365,13 +3532,16 @@
+
+     full_path = synthetic_prebound_full_success_path()
+     require(
+         full_path["status"]
+-        == "PASS_V11_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH"
++        == "PASS_V12_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH"
+         and full_path["real_c1_tensor_body_bytes_read"] == 0
+         and full_path["pixels_decoded"] == 0
+         and full_path["formal_paths_created"] == 0,
+         "Disposable prebound full production-function path failed",
+     )
+     checks["prebound_creator_writer_held_reader_collect_terminal_exit_success"] = "PASS"
++
++    emission_roundtrip = synthetic_emission_roundtrip()
++    checks["shared_actual_stdout_write_flush_external_exit"] = "PASS"
+ 
+     close_loaded_worker_lease(worker)
+     return {
+@@ -3380,6 +3550,7 @@
+
+         "worker_source": worker_record,
+         "runtime_capability_preflight": runtime,
+         "full_prebound_production_function_path": full_path,
++        "full_emission_process_roundtrip": emission_roundtrip,
+         "checks": checks,
+         "formal_runner_calls": 0,
+         "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,
+@@ -3394,6 +3565,9 @@
+
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--synthetic-emission-child", choices=(
++        "NORMAL", "SHORT_WRITE", "WRITE_ERROR", "PARTIAL_WRITE_ERROR", "FLUSH_ERROR",
++    ))
+     parser.add_argument("--synthetic-self-test", action="store_true")
+     parser.add_argument("--synthetic-capability-child", action="store_true")
+     parser.add_argument("--synthetic-fault-child", choices=(
+@@ -3418,6 +3592,13 @@
+
+         "adversarial_source_review_sha256", "binding_sha256",
+         "binding_review_sha256", "governance_attestation_sha256", "out",
+     )
++    if args.synthetic_emission_child is not None:
++        require(not args.synthetic_self_test and not args.synthetic_capability_child
++                and args.synthetic_fault_child is None and args.synthetic_resource_child is None
++                and args.synthetic_root is None
++                and all(getattr(args, name) is None for name in formal_names),
++                "Synthetic emission child accepts only its fixed mode")
++        return synthetic_emission_child(args.synthetic_emission_child)
+     if args.synthetic_self_test:
+         require(not args.synthetic_capability_child
+                 and args.synthetic_fault_child is None and args.synthetic_resource_child is None

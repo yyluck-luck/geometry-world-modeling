@@ -1,0 +1,47 @@
+{
+  "experiment_id": "S0b_vmem_merge_recovery_single_leaf_control",
+  "evidence_type": "synthetic_post_filter_memory_kernel_diagnostic",
+  "scenes": [
+    "plane",
+    "depth_step"
+  ],
+  "corruptions": [
+    "depth_scale",
+    "pose_translation_x"
+  ],
+  "levels": [
+    "clean",
+    "small",
+    "large"
+  ],
+  "depth_scale": {
+    "clean": 0.0,
+    "small": 0.005,
+    "large": 0.025
+  },
+  "pose_translation_x": {
+    "clean": 0.0,
+    "small": 0.02,
+    "large": 0.1
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "orders": [
+    "noisy_first",
+    "clean_first"
+  ],
+  "extra_clean_reobservations": [
+    1,
+    4,
+    12
+  ],
+  "surfel_radius_m": 0.045,
+  "normal_threshold": 0.6,
+  "error_threshold_m": 0.01,
+  "seed_jitter_fraction": 0.1,
+  "notes": "All inputs are synthetic candidates AFTER the upstream confidence/depth/point-cleaning filters. Original automatic merge threshold is retained. No confidence model, generated video, memory-budget constraint, top-K retrieval, or dynamic objects are evaluated. Orders have identical observation multisets. S0b diagnostic follow-up: the original max_points_per_node argument disables subdivision for these small scenes. No upstream method body is changed; linear search is a correctness control, not a scalable baseline.",
+  "max_points_per_node": 100000
+}

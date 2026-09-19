@@ -1,0 +1,30 @@
+--- before/validate_s29.py
++++ after/validate_s29.py
+@@ -47,6 +47,27 @@
+         checks['same_original_alignment_inputs_and_returns']=all(exact(at[k],aa[k]) for k in ['source_c2w','target_c2w','raw_registered_scale','s0','R0','T0'])
+         checks['R0_unmodified']=exact(at['R0'],at['R_used']) and exact(aa['R0'],aa['R_used'])
+         checks['scale_conditions_exact']=exact(at['s0'],at['s_used']) and float(aa['s_used'])==1.0
++        # These are the actual consumed targets/weights, not all six saved heads.
++        # B supplies a saved post-MST identity reference, not a historical prefix.
++        families=('pred_i','pred_j','conf_i','conf_j')
++        expected_consumed={f'parameter::{family}.0_{j}':(384,512,3) if family.startswith('pred_') else (384,512)
++                           for family in families for j in range(1,4)}
++        expected_consumed.update({'buffer::_stacked_pred_i':(3,196608,3),'buffer::_stacked_pred_j':(3,196608,3),
++                                  'buffer::_weight_i':(3,196608),'buffer::_weight_j':(3,196608)})
++        r.require(len(expected_consumed)==16,'Fixed complete set of sixteen consumed tensors')
++        prefixes=tuple('parameter::'+family+'.' for family in families)+('buffer::_stacked_pred_','buffer::_weight_')
++        raw_states={arm:data[arm]['initial_raw.npz'] for arm in ['C2t','C2a','B']}
++        names={arm:sorted(key for key in raw if key.startswith(prefixes)) for arm,raw in raw_states.items()}
++        checks['consumed_C2t_C2a_B_fixed_names_exact']=all(set(found)==set(expected_consumed) for found in names.values())
++        tensor_checks={}
++        for key,shape in expected_consumed.items():
++            schema_ok=all(key in raw and raw[key].shape==shape and raw[key].dtype==np.float32 for raw in raw_states.values())
++            tensor_checks[key]=dict(expected_shape=list(shape),expected_dtype='float32',schema_exact=schema_ok,
++                bytes_exact=schema_ok and exact(raw_states['C2t'][key],raw_states['C2a'][key]) and exact(raw_states['C2t'][key],raw_states['B'][key]))
++        checks['consumed_C2t_C2a_B_schema_exact']=all(item['schema_exact'] for item in tensor_checks.values())
++        checks['consumed_C2t_C2a_B_tensor_bytes_exact']=all(item['bytes_exact'] for item in tensor_checks.values())
++        r.write(out/'consumed_identity_checks.json',dict(expected_tensor_count=16,actual_names=names,tensors=tensor_checks,
++            gate_kind='Input identity, not scientific outcome',historical_B_scope='Saved post-MST consumed tensors only'))
+         # A mismatched common prefix is an execution/input failure, not a result
+         # supporting or rejecting the scale model. Persist it before rejecting.
+         r.write(out/'prefix_identity_checks.json',checks)

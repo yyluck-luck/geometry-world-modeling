@@ -1,0 +1,42 @@
+--- FILT3R/model.py::forward_recurrent_lighter (AST-normalized)
++++ S25/derived_forward.py (AST-normalized)
+@@ -1,4 +1,4 @@
+-def forward_recurrent_lighter(self, views, device='cuda', ret_state=False):
++def _s25_forward_recurrent_lighter(self, views, device='cuda', ret_state=False, *, _s25=None):
+     ress = []
+     all_state_args = []
+     prev_reset = False
+@@ -8,8 +8,14 @@
+     kalman_stats = None
+     update_type = self._resolve_model_update_type()
+     need_attn_for_update = self._requires_attn_for_update()
+-    for i, _view in enumerate(views):
++    if _s25 is not None:
++        _s25.start(self, views, device, update_type, need_attn_for_update)
++        if _s25.resume is not None:
++            state_feat, state_pos, init_state_feat, mem, init_mem, prev_reset, prev_candidate_state_feat, prev_feat_i, state_cov, kalman_stats, device = _s25.restore_values()
++    for i, _view in enumerate(views, start=_s25.start_index if _s25 is not None else 0):
+         view = to_gpu(_view, device)
++        if _s25 is not None:
++            _s25.before_frame(i, view)
+         device = view['img'].device
+         batch_size = view['img'].shape[0]
+         img_mask = view['img_mask'].reshape(-1, batch_size)
+@@ -70,6 +76,8 @@
+         res = self._downstream_head(head_input, shape, pos=pos_i)
+         res_cpu = to_cpu(res)
+         ress.append(res_cpu)
++        if _s25 is not None and i == _s25.fork_index:
++            _s25.before_write(i, {'state_feat': state_feat, 'state_pos': state_pos, 'init_state_feat': init_state_feat, 'mem': mem, 'init_mem': init_mem, 'prev_reset': prev_reset, 'prev_candidate_state_feat': prev_candidate_state_feat, 'prev_feat_i': prev_feat_i, 'state_cov': state_cov, 'kalman_stats': kalman_stats, 'device': device})
+         img_mask = view['img_mask']
+         update = view.get('update', None)
+         if update is not None:
+@@ -99,6 +107,8 @@
+             kalman_stats = None
+         else:
+             prev_candidate_state_feat, prev_feat_i = self._advance_prev_buffers(prev_candidate_state_feat, prev_feat_i, new_state_feat, feat_i, update_mask)
++        if _s25 is not None and i == _s25.final_index:
++            _s25.after_write(i, {'state_feat': state_feat, 'state_pos': state_pos, 'init_state_feat': init_state_feat, 'mem': mem, 'init_mem': init_mem, 'prev_reset': prev_reset, 'prev_candidate_state_feat': prev_candidate_state_feat, 'prev_feat_i': prev_feat_i, 'state_cov': state_cov, 'kalman_stats': kalman_stats, 'device': device})
+     if ret_state:
+         return (ress, views, all_state_args)
+     return (ress, views)

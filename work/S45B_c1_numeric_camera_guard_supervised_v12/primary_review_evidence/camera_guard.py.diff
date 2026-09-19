@@ -1,0 +1,121 @@
+--- v11/camera_guard.py
+
++++ v12/camera_guard.py
+
+@@ -33,17 +33,17 @@
+
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ PROTOCOL = HERE / "PROTOCOL.md"
+-PROTOCOL_SHA256 = "c198fdae8cbbb5c6a6bba278f753a8208dfc8c85ac8271c837e4f16eb46f055d"
++PROTOCOL_SHA256 = "25f30e22fa14a745135393744b1d969ed1ffecc0378ba344efd4b72b45bec739"
+ BINDING_TEMPLATE = HERE / "C1_CAMERA_GUARD_BINDING_TEMPLATE.json"
+-BINDING_TEMPLATE_SHA256 = "a55d4a62ecc1fd151167b2ed76289a660255bbefae6cd3a5f313e7d05eb3e593"
++BINDING_TEMPLATE_SHA256 = "b5eee02b5aadc9339feb0f618ee8c6ab565074f101b413b23fb5a729f4da6bfe"
+ SELFTEST = HERE / "synthetic_selftest.py"
+-SELFTEST_SHA256 = "d65a6ed11dba59237d8d82e70e6bbb6e6ef914e5ed918bd7af775a36cbdf02b4"
++SELFTEST_SHA256 = "ab04c655c2bfdd385befda30e24417baac35c2bb327de2785f161ed84fe05666"
+ SUPERVISOR = HERE / "supervise_camera_guard.py"
+-BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V11.json"
+-BINDING_REVIEW = HERE / "BINDING_REVIEW_V11.json"
+-SOURCE_REVIEW_PRIMARY = HERE / "SOURCE_REVIEW_PRIMARY_V11.json"
+-SOURCE_REVIEW_ADVERSARIAL = HERE / "SOURCE_REVIEW_ADVERSARIAL_V11.json"
+-GOVERNANCE_ATTESTATION = HERE / "GOVERNANCE_ATTESTATION_V11.json"
++BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V12.json"
++BINDING_REVIEW = HERE / "BINDING_REVIEW_V12.json"
++SOURCE_REVIEW_PRIMARY = HERE / "SOURCE_REVIEW_PRIMARY_V12.json"
++SOURCE_REVIEW_ADVERSARIAL = HERE / "SOURCE_REVIEW_ADVERSARIAL_V12.json"
++GOVERNANCE_ATTESTATION = HERE / "GOVERNANCE_ATTESTATION_V12.json"
+ FORMAL_OUT = HERE / "execution_01"
+ LOCK = HERE / ".c1_numeric_camera_guard.lock"
+ LOCK_STAGING = HERE / ".c1_numeric_camera_guard.lock.staging"
+@@ -98,7 +98,7 @@
+
+ HEX = re.compile(r"^[0-9a-f]{64}$")
+ AUTHOR_ROLE = "/root/execution_resumption_audit"
+ WIDTHS = {"float32": 4, "float64": 8}
+-ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V11-PREBOUND-ARTIFACT"
++ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V12-PREBOUND-ARTIFACT"
+ 
+ 
+ class GuardInvalid(ValueError):
+@@ -440,7 +440,7 @@
+
+         require(
+             review.get("schema") == "s45b-c1-numeric-camera-guard-source-review-v4"
+             and review.get("review_kind") == kind
+-            and review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V11"
++            and review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V12"
+             and review.get("verdict") == "PASS_SUPERVISED_SOURCE_NOT_EXECUTED"
+             and review.get("reviewed_identities") == expected
+             and review.get("author_role") == AUTHOR_ROLE
+@@ -494,7 +494,7 @@
+
+     }
+     require(
+         binding.get("schema") == "s45b-c1-numeric-camera-guard-binding-v4"
+-        and binding.get("status") == "FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V11"
++        and binding.get("status") == "FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V12"
+         and binding.get("row") == "C1"
+         and binding.get("placeholder_hashes") == 0
+         and binding.get("source_set") == expected_source_set
+@@ -534,12 +534,12 @@
+
+         "synthetic_selftest.py": SELFTEST_SHA256,
+         "primary_source_review": args.primary_source_review_sha256,
+         "adversarial_source_review": args.adversarial_source_review_sha256,
+-        "C1_CAMERA_GUARD_BINDING_V11.json": args.binding_sha256,
++        "C1_CAMERA_GUARD_BINDING_V12.json": args.binding_sha256,
+         **{name: item["sha256"] for name, item in upstream.items()},
+     }
+     require(
+         binding_review.get("schema") == "s45b-c1-numeric-camera-guard-binding-review-v4"
+-        and binding_review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V11"
++        and binding_review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V12"
+         and binding_review.get("verdict") == "PASS_SUPERVISED_BINDING_ONLY_NO_TENSOR_BODIES"
+         and binding_review.get("reviewed_identities") == expected_reviewed
+         and binding_review.get("author_role") == binding["author_role"]
+@@ -581,18 +581,18 @@
+
+ 
+     The Python source validates exact cross-document consistency.  Trust in the
+     named orchestration task remains external and is stated as such; unequal
+-    self-declared role strings alone never authorize V11.
++    self-declared role strings alone never authorize V12.
+     """
+     receipt, record = read_json(
+         GOVERNANCE_ATTESTATION, args.governance_attestation_sha256,
+-        "external V11 governance attestation", deadline,
++        "external V12 governance attestation", deadline,
+     )
+     artifacts = {
+         **expected_source_review_identities(args.self_sha256, args.supervisor_sha256),
+         "primary_source_review": args.primary_source_review_sha256,
+         "adversarial_source_review": args.adversarial_source_review_sha256,
+-        "C1_CAMERA_GUARD_BINDING_V11.json": args.binding_sha256,
+-        "BINDING_REVIEW_V11.json": args.binding_review_sha256,
++        "C1_CAMERA_GUARD_BINDING_V12.json": args.binding_sha256,
++        "BINDING_REVIEW_V12.json": args.binding_review_sha256,
+         "v6_primary_blocked_review":
+         "0b30345a8546cd2e89036b118b12b75825cf7662b133d2bac380b4f9904aeb16",
+     }
+@@ -633,7 +633,7 @@
+
+     issuer = receipt.get("issuer")
+     require(
+         receipt.get("schema") == "s45b-c1-numeric-camera-guard-governance-attestation-v1"
+-        and receipt.get("status") == "PASS_EXTERNAL_ORCHESTRATOR_PROVENANCE_GATE_V11"
++        and receipt.get("status") == "PASS_EXTERNAL_ORCHESTRATOR_PROVENANCE_GATE_V12"
+         and receipt.get("trust_boundary")
+         == "EXTERNAL_ORCHESTRATOR_PROVENANCE_NOT_SELF_AUTHENTICATED_BY_CANDIDATE"
+         and receipt.get("artifact_identities") == artifacts
+@@ -1945,7 +1945,7 @@
+
+         print(json.dumps(synthetic_selftest(), sort_keys=True, allow_nan=False))
+         return 0
+     require(False,
+-            "V11 worker has no formal pathname CLI: the reviewed supervisor forks its "
++            "V12 worker has no formal pathname CLI: the reviewed supervisor forks its "
+             "already-running interpreter and invokes held-source code in memory")
+ 
+ 

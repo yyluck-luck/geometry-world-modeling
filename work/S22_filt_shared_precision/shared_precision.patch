@@ -1,0 +1,11 @@
+--- FILT3R original CPU dispatch
++++ FILT3R shared original CUT3R precision
+@@ -37,7 +37,7 @@
+ 
+ 
+ def _rope_cast_context(tensor):
+-    rope_dtype = torch.float16 if tensor.device.type == "cuda" else torch.float32
++    rope_dtype = torch.float16  # S22: match original CUT3R/TTT3R RoPE precision on CPU
+     if tensor.device.type == "cuda":
+         ctx = torch.autocast(device_type="cuda", enabled=False)
+     else:

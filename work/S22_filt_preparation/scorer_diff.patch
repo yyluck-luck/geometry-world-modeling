@@ -1,0 +1,65 @@
+--- S21 scoring
++++ S22 scoring
+@@ -1,27 +1,15 @@
+-"""Post-prediction S21 compatibility, official evo scoring, independent matrix check."""
++"""S22 FILT scoring with the same frozen metric definitions as S21."""
+ from pathlib import Path
+ from datetime import datetime,timezone
+ import argparse,copy,csv,hashlib,importlib.util,json,sys
+ ROOT=Path(__file__).resolve().parents[1]
+-W=ROOT/'work/S21_baseline_preparation'
+-B=ROOT/'results/S21_baseline'
+-R=W/'ttt3r_original'
++W=ROOT/'work/S22_filt_preparation'
++B=ROOT/'results/S22_filt_baseline'
++R=ROOT/'work/S21_baseline_preparation/ttt3r_original'
+ def utc():return datetime.now(timezone.utc).isoformat()
+ def sha(p):
+     with Path(p).open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
+ def write(p,x):Path(p).write_text(json.dumps(x,indent=2,ensure_ascii=False,allow_nan=False)+'\n')
+-def compatible():
+-    import numpy as np
+-    output=B/'compatibility.json';assert not output.exists()
+-    checks=[]
+-    for i in range(4):
+-        with np.load(B/'original4'/f'frame_{i:04d}.npz')as a,np.load(B/'cut3r'/f'frame_{i:04d}.npz')as b:
+-            assert set(a.files)==set(b.files)
+-            for k in a.files:
+-                atol=1e-4 if k=='camera_pose'else 5e-4
+-                checks.append(dict(frame=i,head=k,atol=atol,rtol=1e-4,max_abs=float(np.max(np.abs(a[k].astype('float64')-b[k]))),passed=bool(np.allclose(a[k],b[k],atol=atol,rtol=1e-4)),count=int(a[k].size)))
+-    report=dict(utc=utc(),passed=all(x['passed']for x in checks),checks=checks,scope='four real frame numerical compatibility, not full-sequence identity',gt_read=False)
+-    write(output,report);print(json.dumps(dict(passed=report['passed'],checks=len(checks),max_abs=max(x['max_abs']for x in checks))))
+ def matrix_metrics(P,G):
+     import numpy as np
+     X=P[:,:3,3];Y=G[:,:3,3];xc=X-X.mean(0);yc=Y-Y.mean(0)
+@@ -45,7 +33,7 @@
+     m=json.loads((W/'run_manifest.json').read_text())
+     seals={}
+     for name in m['methods']:
+-        report=B/name/'receipt.json';s=json.loads(report.read_text());c=json.loads((ROOT/'work/S21_execution'/name/'receipt.json').read_text())
++        report=B/name/'receipt.json';s=json.loads(report.read_text());c=json.loads((ROOT/'work/S22_execution'/name/'receipt.json').read_text())
+         assert s['status']==c['status']=='PASS'and s['frames_completed']==300 and s['manifest_sha256']==sha(W/'run_manifest.json')
+         assert sha(B/name/'poses.npy')==s['poses_sha256']
+         for f in s['outputs']:assert sha(B/name/f['file'])==f['sha256']
+@@ -53,7 +41,7 @@
+     out=B/'scoring';assert not out.exists();out.mkdir()
+     write(out/'pre_score_seal.json',dict(utc=utc(),methods=seals,script_sha256=sha(__file__),gt_coordinates_read=False))
+     assert sha(m['gt_file'])==m['gt_sha256']
+-    # First numerical coordinate parsing for this S21 evaluation follows both output seals.
++    # S22 coordinate scoring follows its output seal; S21 has already used this known scene.
+     gtraw={float(s.split()[0]):s.split()for s in Path(m['gt_file']).read_text().splitlines()if s.strip()and not s.startswith('#')}
+     chosen=[gtraw[f['gt_time']]for f in m['frames']]
+     (out/'groundtruth_300.txt').write_text('\n'.join(' '.join(r)for r in chosen)+'\n')
+@@ -79,9 +67,9 @@
+             writer=csv.writer(f);writer.writerow(['index','rgb_timestamp','gt_timestamp','ate_m','rpe_to_next_translation_m','rpe_to_next_rotation_deg'])
+             for i,frame in enumerate(m['frames']):writer.writerow([i,frame['rgb_time'],frame['gt_time'],ate[i],et[i]if i<299 else '',er[i]if i<299 else ''])
+     report.update(completed_utc=utc(),passed=all(x['metric_check_passed']for x in report['methods'].values()),
+-                  prediction_and_score_order='both outputs sealed before S21 GT coordinate parsing',compatibility_sha256=sha(B/'compatibility.json'))
++                  prediction_and_score_order='FILT output sealed before S22 scoring; public configuration frozen before S21 scoring; previously seen scene',compatibility_sha256=sha(B/'compatibility.json'))
+     write(out/'metrics.json',report);print(json.dumps(report,ensure_ascii=False))
+     assert report['passed'],'Keep mismatch; do not change frozen metric tolerance'
+ if __name__=='__main__':
+-    p=argparse.ArgumentParser();p.add_argument('action',choices=['compatibility','score']);a=p.parse_args()
+-    compatible()if a.action=='compatibility'else score()
++    p=argparse.ArgumentParser();p.add_argument('action',choices=['score']);a=p.parse_args()
++    score()

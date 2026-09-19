@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# gwm-sync — reconcile this working tree with the private GitHub record.
+#
+# Safe to run from EITHER side (laptop or SuperPOD login node).  It commits local
+# changes, rebases onto whatever the other side pushed, then pushes.  Because it
+# is git rather than rsync, concurrent edits on both sides merge instead of one
+# side silently clobbering the other -- which is what the project's old
+# push-only rsync rule existed to prevent.
+#
+# Usage:  scripts/gwm-sync ["commit message"]
+set -uo pipefail
+
+cd "$(git rev-parse --show-toplevel)" || { echo "not inside a git repo"; exit 1; }
+HOST="$(hostname -s)"
+MSG="${1:-sync from ${HOST}: $(date -u +%FT%TZ)}"
+
+# ---- refuse to stage anything that must never leave the machine -------------
+BLOCK='(\.credentials|credentials\.(yaml|json)|^\.env$|\.pem$|\.key$|id_rsa|id_ed25519|node_modules/|^data/|^results/)'
+git add -A -n 2>/dev/null | sed 's/^add //;s/^remove //' | tr -d "'" \
+  | grep -E "$BLOCK" > /tmp/gwm_sync_blocked.$$ 2>/dev/null
+if [ -s /tmp/gwm_sync_blocked.$$ ]; then
+  echo "REFUSING TO SYNC: these paths match the never-commit list:"
+  sed 's/^/  /' /tmp/gwm_sync_blocked.$$
+  echo "Fix .gitignore first."
+  rm -f /tmp/gwm_sync_blocked.$$
+  exit 2
+fi
+rm -f /tmp/gwm_sync_blocked.$$
+
+# ---- refuse oversized blobs -------------------------------------------------
+BIG=$(git add -A -n 2>/dev/null | sed 's/^add //' | tr -d "'" \
+      | while read -r f; do [ -f "$f" ] && [ "$(wc -c <"$f")" -gt 20971520 ] && echo "$f"; done)
+if [ -n "$BIG" ]; then
+  echo "REFUSING TO SYNC: files larger than 20 MB would be committed:"
+  echo "$BIG" | sed 's/^/  /'
+  exit 3
+fi
+
+git add -A
+if git diff --cached --quiet; then
+  echo "[${HOST}] nothing local to commit"
+else
+  git commit -q -m "$MSG"
+  echo "[${HOST}] committed: $MSG"
+fi
+
+echo "[${HOST}] rebasing onto origin/main ..."
+if ! git pull --rebase --autostash origin main; then
+  echo "[${HOST}] REBASE CONFLICT. Resolve, then: git rebase --continue && git push origin main"
+  exit 4
+fi
+
+git push origin main && echo "[${HOST}] pushed. $(git rev-parse --short HEAD)"

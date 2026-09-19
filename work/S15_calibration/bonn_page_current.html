@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://www.ipb.uni-bonn.de/xmlrpc.php">
+
+
+        <!--noptimize-->
+        <script type = "text/javascript">
+
+            // 
+            // Get screen dimensions, device pixel ration and set in a cookie.
+            // 
+            
+                            var screen_width = screen.width;
+            
+            var devicePixelRatio = window.devicePixelRatio ? window.devicePixelRatio : 1;
+
+            document.cookie = 'resolution=' + screen_width + ',' + devicePixelRatio + '; SameSite=Strict; path=/';
+
+        </script> 
+        <!--/noptimize--> <title>Bonn RGB-D Dynamic Dataset &#8211; StachnissLab</title>
+<meta name='robots' content='max-image-preview:large' />
+<link rel='dns-prefetch' href='https://s.w.org/' />
+<link rel="alternate" type="application/rss+xml" title="StachnissLab &raquo; Feed" href="../../feed/index.html" />
+<link rel='stylesheet' id='papercite_css-css'  href='../../wp-content/plugins/papercite/papercite.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='wp-block-library-css'  href='../../wp-includes/css/dist/block-library/style.min.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='tesseract-style-css'  href='../../wp-content/themes/TESSERACT/style.css%3Fver=1.0.0.css' type='text/css' media='all' />
+<link rel='stylesheet' id='tesseract-icons-css'  href='../../wp-content/themes/TESSERACT/css/typicons.css%3Fver=1.0.0.css' type='text/css' media='all' />
+<link rel='stylesheet' id='fontawesome-css'  href='../../wp-content/themes/TESSERACT/css/font-awesome.min.css%3Fver=4.4.0.css' type='text/css' media='all' />
+<link rel='stylesheet' id='tesseract-site-banner-css'  href='../../wp-content/themes/TESSERACT/css/site-banner.css%3Fver=1.0.0.css' type='text/css' media='all' />
+<style id='tesseract-site-banner-inline-css' type='text/css'>
+.site-header,
+	.main-navigation ul ul a,
+	#header-right-menu ul ul a,
+	.site-header .cart-content-details { background-color: rgb(0, 0, 0); }
+	.site-header .cart-content-details:after { border-bottom-color: rgb(0, 0, 0); }
+
+	.home .site-header,
+	.home .main-navigation ul ul a,
+	.home #header-right ul ul a,
+	.home .site-header .cart-content-details { background-color: rgba(0, 0, 0, 0.5); }
+	.home .site-header .cart-content-details:after { border-bottom-color: rgba(0, 0, 0, 0.5); }
+
+	.site-header,
+	.site-header h1,
+	.site-header h2,
+	.site-header h3,
+	.site-header h4,
+	.site-header h5,
+	.site-header h6 { color: #ffffff!important; }
+
+	#masthead .search-field { color: #ffffff; }
+	#masthead .search-field.watermark { color: #ccc; }
+
+	.site-header a,
+	.main-navigation ul ul a,
+	#header-right-menu ul ul a,
+	.menu-open,
+	.dashicons.menu-open,
+	.menu-close,
+	.dashicons.menu-close { color: #ffffff; }
+
+	.site-header a:hover,
+	.main-navigation ul ul a:hover,
+	#header-right-menu ul ul a:hover,
+	.menu-open:hover,
+	.dashicons.menu-open:hover,
+	.menu-close:hover,
+	.dashicons.menu-open:hover { color: #aaaaaa; }
+
+	/* Header logo height */
+
+	#site-banner .site-logo img {
+		height: 30px;
+		}
+
+	#masthead {
+		padding-top: 15px;
+		padding-bottom: 15px;
+		}
+
+	/* Header width props */
+
+	#site-banner-left {
+		width: 60%;
+		}
+
+	#site-banner-right {
+		width: 40%;
+		}
+	#site-banner-left {
+				width: 100%;
+			}
+
+			#site-banner-right {
+				display: none;
+				padding: 0;
+				margin: 0;
+			}
+		#site-banner {
+			max-width: 100%;
+			padding-left: 0;
+			padding-right: 0;
+		}
+		
+		.icon-shopping-cart, .woocart-header .cart-arrow, .woocart-header .cart-contents {
+			color: #fff;
+		}
+	
+</style>
+<link rel='stylesheet' id='tesseract-footer-banner-css'  href='../../wp-content/themes/TESSERACT/css/footer-banner.css%3Fver=1.0.0.css' type='text/css' media='all' />
+<style id='tesseract-footer-banner-inline-css' type='text/css'>
+#colophon {
+		background-color: #000000;
+		color: #ffffff
+	}
+
+	#colophon .search-field { color: #ffffff; }
+	#colophon .search-field.watermark { color: #ccc; }
+
+	#colophon h1,
+	#colophon h2,
+	#colophon h3,
+	#colophon h4,
+	#colophon h5,
+	#colophon h6 { color: #ffffff; }
+
+	#colophon a { color: #ffffff; }
+
+	#colophon a:hover { color: #aaaaaa; }
+
+	#horizontal-menu-before,
+	#horizontal-menu-after { border-color: rgba(255, 255, 255, 0.25); }
+
+	#footer-banner.footbar-active { border-color: rgba(255, 255, 255, 0.15); }
+
+	#footer-banner .site-logo img { height: 50px; }
+
+	#colophon {
+		padding-top: 5px;
+		padding-bottom: 5px;
+		}
+
+	#horizontal-menu-wrap {
+		width: 60%;
+		}
+
+	#footer-banner-right	{
+		width: 40%;
+		}
+
+	#footer-banner {
+			max-width: 100%;
+			padding: 0 20px;
+		}
+</style>
+<link rel='stylesheet' id='dashicons-css'  href='../../wp-includes/css/dashicons.min.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='tesseract-sidr-style-css'  href='../../wp-content/themes/TESSERACT/css/jquery.sidr.css%3Fver=1.0.0.css' type='text/css' media='all' />
+<style id='tesseract-sidr-style-inline-css' type='text/css'>
+.sidr {
+		background-color: #0a0000;
+		}
+
+	.sidr .sidr-class-menu-item a,
+	.sidr .sidr-class-menu-item span { color: #fff; }
+
+
+	.sidr .sidr-class-menu-item ul li a,
+	.sidr .sidr-class-menu-item ul li span {
+		color: rgba(255, 15, , 0.8);
+	}
+
+	.sidr .sidr-class-menu-item a:hover,
+	.sidr .sidr-class-menu-item span:hover,
+	.sidr .sidr-class-menu-item:first-child a:hover,
+	.sidr .sidr-class-menu-item:first-child span:hover { color: #fff; }
+
+	.sidr .sidr-class-menu-item ul li a:hover,
+	.sidr .sidr-class-menu-item ul li span:hover,
+	.sidr .sidr-class-menu-item ul li:first-child a:hover,
+	.sidr .sidr-class-menu-item ul li:first-child span:hover { color: rgba(255, 15, , 0.8); }
+
+	.sidr ul li > a:hover,
+	.sidr ul li > span:hover,
+	.sidr > div > ul > li:first-child > a:hover,
+	.sidr > div > ul > li:first-child > span:hover,
+	.sidr ul li ul li:hover > a,
+	.sidr ul li ul li:hover > span {
+		background: rgba(0, 0, 0, 0.2);
+
+		}
+
+	/* Shadows and Separators */
+
+	.sidr ul li > a,
+	.sidr ul li > span,
+	#sidr-id-header-button-container-inner > * {
+		-webkit-box-shadow: inset 0 -1px rgba( 0 ,0 ,0 , 0.2);
+		-moz-box-shadow: inset 0 -1px rgba( 0 ,0 ,0 , 0.2);
+		box-shadow: inset 0 -1px rgba( 0 ,0 ,0 , 0.2);
+	}
+
+	.sidr > div > ul > li:last-of-type > a,
+	.sidr > div > ul > li:last-of-type > span,
+	#sidr-id-header-button-container-inner > *:last-of-type {
+		box-shadow: none;
+		}
+
+	.sidr ul.sidr-class-hr-social li a,
+	.sidr ul.sidr-class-hr-social li a:first-child {
+		-webkit-box-shadow: 0 1px 0 0px rgba( 0 ,0 ,0, .25);
+		-moz-box-shadow: 0 1px 0 0px rgba( 0 ,0 ,0, .25);
+		box-shadow: 0 1px 0 0px rgba( 0 ,0 ,0, .25);
+	}
+
+	/* Header Right side content */
+
+	.sidr-class-search-field,
+	.sidr-class-search-form input[type='search'] {
+		background: rgba(255, 255, 255, 0.15);
+		color: ;
+	}
+
+	.sidr-class-hr-social {
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	#sidr-id-header-button-container-inner,
+	#sidr-id-header-button-container-inner > h1,
+	#sidr-id-header-button-container-inner > h2,
+	#sidr-id-header-button-container-inner > h3,
+	#sidr-id-header-button-container-inner > h4,
+	#sidr-id-header-button-container-inner > h5,
+	#sidr-id-header-button-container-inner > h6 {
+		background: rgba(0, 0, 0, 0.2);
+		color: ;
+	}
+
+	#sidr-id-header-button-container-inner a,
+	#sidr-id-header-button-container-inner button {
+		color: ;
+	}
+
+	#sidr-id-header-button-container-inner a:hover,
+	#sidr-id-header-button-container-inner button:hover {
+		color: ;
+	}
+
+	/*
+	.sidr ul li > a,
+	.sidr ul li > span,
+	#header-button-container *,
+	#sidr-id-header-button-container-inner button {
+		-webkit-box-shadow: inset 0 -1px rgba(255, 255, 255, 0.1);
+		-moz-box-shadow: inset 0 -1px rgba(255, 255, 255, 0.1);
+		box-shadow: inset 0 -1px rgba(255, 255, 255, 0.1);
+	}
+	*/
+	
+</style>
+<link rel='stylesheet' id='youtube-channel-gallery-css'  href='../../wp-content/plugins/youtube-channel-gallery/styles.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='jquery.magnific-popup-css'  href='../../wp-content/plugins/youtube-channel-gallery/magnific-popup.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='tmm-css'  href='../../wp-content/plugins/team-members/inc/css/tmm_style.css%3Fver=5.8.15.css' type='text/css' media='all' />
+<script type='text/javascript' src='../../wp-includes/js/jquery/jquery.min.js%3Fver=3.6.0' id='jquery-core-js'></script>
+<script type='text/javascript' src='../../wp-includes/js/jquery/jquery-migrate.min.js%3Fver=3.3.2' id='jquery-migrate-js'></script>
+<script type='text/javascript' src='../../wp-content/plugins/papercite/js/papercite.js%3Fver=5.8.15' id='papercite-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/modernizr.custom.min.js%3Fver=1.0.0' id='tesseract-modernizr-js'></script>
+<script type='text/javascript' id='tesseract_helpers-js-extra'>
+/* <![CDATA[ */
+var tesseract_vars = {"hpad":"15","fpad":"5"};
+/* ]]> */
+</script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/helpers.js%3Fver=5.8.15' id='tesseract_helpers-js'></script>
+<link rel="https://api.w.org/" href="../../wp-json/index.html" /><link rel="alternate" type="application/json" href="../../wp-json/wp/v2/pages/2544" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="../../xmlrpc.php%3Frsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="../../wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 5.8.15" />
+<link rel="canonical" href="index.html" />
+<link rel='shortlink' href='index.html' />
+<link rel="alternate" type="application/json+oembed" href="../../wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fwww.ipb.uni-bonn.de%252Fdata%252Frgbd-dynamic-dataset%252F" />
+<link rel="alternate" type="text/xml+oembed" href="../../wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fwww.ipb.uni-bonn.de%252Fdata%252Frgbd-dynamic-dataset%252F&amp;format=xml" />
+<noscript><style>#sidebar-footer aside {border: none!important;}</style></noscript><style>
+	span.oe_textdirection { unicode-bidi: bidi-override; direction: rtl; }
+	span.oe_displaynone { display: none; }
+</style>
+<style type="text/css" id="custom-background-css">
+body.custom-background { background-color: #ffffff; }
+</style>
+	<meta name="msvalidate.01" content="7EED9DAE1EAAE861E22CFF3CF728E2B2" /><link rel="icon" href="../../wp-content/uploads/2016/02/ubn-150x150.png" sizes="32x32" />
+<link rel="icon" href="../../wp-content/uploads/2016/02/ubn-299x300.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="../../wp-content/uploads/2016/02/ubn-299x300.png" />
+<meta name="msapplication-TileImage" content="https://www.ipb.uni-bonn.de/wp-content/uploads/2016/02/ubn-299x300.png" />
+		<style type="text/css" id="wp-custom-css">
+			nav#site-navigation {
+    text-align: center;
+}		</style>
+		<style id="sccss">/* Enter Your Custom CSS Here */
+/* 
+.ytthumb {
+		width: 480px;  
+	  height: 268px;
+    overflow: hidden;
+}
+
+.ytthumb img {
+    margin: -46px 0 0 0;
+} */
+
+/* Center Title Menu Bar in the Header */
+
+/* nav#site-navigation */
+nav#site-navigation {
+    text-align: center;
+	  font-size: 14pt;
+}
+
+/*
+body {
+	font-family: "Source Sans Pro";
+ 	font-size: 18px;
+}
+*/
+/*
+#masthead {
+		background-color:  rgba(0,0,0,.2);
+		}
+*/
+/* STicky menu  */
+ /*
+.home .site-header.no-header-image {
+  left: auto;
+  position: fixed;
+  top: auto;
+}
+
+.home .site-content {
+  padding-top: 60px;
+}
+*/</style>
+<!--[if gte IE 9]>
+  <style type="text/css">
+    .gradient {
+       filter: none;
+    }
+  </style>
+<![endif]-->
+
+</head>
+
+
+<body class="page-template page-template-full-width-page page-template-full-width-page-php page page-id-2544 page-child parent-pageid-1593 custom-background frontend tesseract-featured beaver-on fl-builder-lite-2-8-6-1 group-blog full-width-page">
+
+
+<div id="page" class="hfeed site">
+
+	<a class="skip-link screen-reader-text" href="index.html#content">Skip to content</a>
+
+	
+    <header id="masthead" class="site-header pos-relative menusize-fullwidth no-header-image" role="banner">
+
+        <div id="site-banner" class="cf nothing blogname">
+
+            <div id="site-banner-main" class="no-right">
+
+                <div id="mobile-menu-trigger-wrap" class="cf"><a class="menu-open dashicons dashicons-menu" href="index.html#" id="mobile-menu-trigger"></a></div>
+
+                <div id="site-banner-left">
+					<div id="site-banner-left-inner">
+
+						                            <div class="site-branding hide-header-text">
+                                                                    <h1 class="site-title"><a href="../../index.html" rel="home">StachnissLab</a></h1>
+                                                            </div><!-- .site-branding -->
+                        
+                        
+                                <nav id="site-navigation" class="hideit main-navigation top-navigation fullwidth" role="navigation">
+                                    <ul id="menu-mymenu" class="nav-menu"><li id="menu-item-10" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-10"><a href="../../index.html">Home</a></li>
+<li id="menu-item-3908" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3908"><a href="../../videos/index.html">Videos</a></li>
+<li id="menu-item-2534" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-2534"><a href="../../people/index.html">Team</a></li>
+<li id="menu-item-25" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-25"><a href="../../publications/index.html">Publications</a></li>
+<li id="menu-item-819" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-819"><a href="../../research/index.html">Research</a></li>
+<li id="menu-item-23" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-23"><a href="../../projects/index.html">Projects</a></li>
+<li id="menu-item-555" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-555"><a href="../../teaching/index.html">Teaching</a></li>
+<li id="menu-item-294" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-294"><a href="../../data-software/index.html">Resources</a></li>
+<li id="menu-item-2109" class="menu-item menu-item-type-post_type menu-item-object-page current-page-ancestor menu-item-2109"><a href="../index.html">Data</a></li>
+<li id="menu-item-93" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-93"><a href="../../contact/index.html">Contact</a></li>
+</ul>                                </nav><!-- #site-navigation -->
+
+                      	
+            		</div>
+            	</div>
+
+                
+<div id="site-banner-right" class="banner-right nothing">
+
+            
+
+	                    
+			
+   
+
+	 
+
+</div>
+            </div>
+
+        </div>
+
+    </header><!-- #masthead -->
+
+
+    <div id="content" class="cf site-content">
+	<div id="primary" class="full-width-page no-sidebar">
+		<main id="main" class="site-main" role="main">
+
+		
+						
+				
+<article id="post-2544" class="post-2544 page type-page status-publish has-post-thumbnail hentry">
+
+	        <div class="entry-background" style="background-image: url(../../wp-content/uploads/2016/02/ww_kinect1-h400-1580x400.jpg)">
+                            <header class="entry-header">
+                    <h1 class="entry-title">Bonn RGB-D Dynamic Dataset</h1>                </header><!-- .entry-header -->
+          	        </div><!-- .entry-background -->
+    
+	
+	<div class="entry-content">
+		<p><script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+</script><br />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script></p>
+<h3 align="center">The Bonn RGB-D Dynamic Dataset</h3>
+<div class="su-spacer" style="height:20px"></div>
+<p><strong>Abstract:</strong> This is a dataset for RGB-D SLAM, containing highly dynamic sequences. We provide 24 dynamic sequences, where people perform different tasks, such as manipulating boxes or playing with balloons, plus 2 static sequences. For each scene we provide the ground truth pose of the sensor, recorded with an Optitrack Prime 13 motion capture system. The sequences are in the same format as the <a href="https://vision.in.tum.de/data/datasets/rgbd-dataset">TUM RGB-D Dataset</a>, so that the same evaluation tools can be used. Furthermore, we provide a ground truth 3D point cloud of the static environment recorded using a Leica BLK360 terrestrial laser scanner.</p>
+<div class="su-spacer" style="height:20px"></div>
+<p><strong>Related publication</strong><br />
+<div class="su-spacer" style="height:10px"></div>
+If you use this dataset for your research, please cite:<br />
+<div class="su-spacer" style="height:10px"></div>
+Emanuele Palazzolo, Jens Behley, Philipp Lottes, Philippe Giguère, Cyrill Stachniss, &#8220;ReFusion: 3D Reconstruction in Dynamic Environments for RGB-D Cameras Exploiting Residuals&#8221;, <em>arXiv</em>, 2019. <a href="https://arxiv.org/pdf/1905.02082.pdf">PDF</a><br />
+<div class="su-spacer" style="height:10px"></div>
+BibTeX:<br />
+<code>@InProceedings{palazzolo2019iros,<br />
+author = {E. Palazzolo and J. Behley and P. Lottes and P. Gigu\`ere and C. Stachniss},<br />
+title = {{ReFusion: 3D Reconstruction in Dynamic Environments for RGB-D Cameras Exploiting Residuals}},<br />
+booktitle = iros,<br />
+year = {2019},<br />
+url = {https://www.ipb.uni-bonn.de/pdfs/palazzolo2019iros.pdf},<br />
+codeurl = {https://github.com/PRBonn/refusion},<br />
+videourl = {https://youtu.be/1P9ZfIS5-p4},<br />
+}</code></p>
+<div class="su-spacer" style="height:20px"></div>
+<p><strong>Ground truth model</strong><br />
+<a href="../../wp-content/uploads/2019/03/lab_groundtruth.png"><img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/lab_groundtruth-e1552568627999.png" alt="groundtruth_preview" width="390" height="289" /></a><br />
+<div class="su-spacer" style="height:10px"></div>
+We provide the full ground truth point cloud of 394109339 points, as well as a subsampled section of 54676774 points, more convenient for evaluation. The point clouds are in PLY ASCII format. To convert a model from the reference frame of the RGB-D sensor to the one of the ground truth model, refer to the Evaluation section below.<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_groundtruth.zip">Download Full Point Cloud</a> (4.0 GB).<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_groundtruth_1mm_section.zip">Download Subsampled Section</a> (676.0 MB).</p>
+<div class="su-spacer" style="height:20px"></div>
+<p><strong>Evaluation</strong><br />
+<div class="su-spacer" style="height:10px"></div>
+Since the dataset is in the same format as the TUM RGB-D Dataset, for evaluating the trajectory error it is possible to use <a href="https://vision.in.tum.de/data/datasets/rgbd-dataset/tools#evaluation">the same Python tools</a>.<br />
+<div class="su-spacer" style="height:10px"></div>
+For evaluating the reconstructed model w.r.t. the ground truth, it is first necessary to transform them to the same coordinate frame. To convert a model from the reference frame of the sensor to the one of the ground truth, one can use the following transformation:<br />
+<div class="su-spacer" style="height:10px"></div>
+$\mathbf{T}_\mathrm{g}=\mathbf{T}_\mathrm{ROS}^{-1}\mathbf{T}_0\mathbf{T}_\mathrm{ROS}\mathbf{T}_\mathrm{m}$,<br />
+<div class="su-spacer" style="height:10px"></div>
+where $\mathbf{T}_\mathrm{m}$ is the transformation between the reference frame of the RGB-D sensor and the one of the markers used by the motion capture system, $\mathbf{T}_\mathrm{ROS}$ transforms the coordinate frame of the motion capture system to the one used to write the file groundtruth.txt in the sequences, $\mathbf{T}_0$ is the first pose read from the file groundtruth.txt.<br />
+The value of $\mathbf{T}_\mathrm{m}$ obtained from our calibration is the following:<br />
+<div class="su-spacer" style="height:10px"></div>
+$ \mathbf{T}_\mathrm{m} =<br />
+\begin{pmatrix}<br />
+1.0157 &#038; 0.1828 &#038; -0.2389 &#038; 0.0113 \\<br />
+0.0009 &#038; -0.8431 &#038; -0.6413 &#038; -0.0098 \\<br />
+-0.3009 &#038; 0.6147 &#038; -0.8085 &#038; 0.0111 \\<br />
+0 &#038; 0 &#038; 0 &#038; 1.0000<br />
+\end{pmatrix}<br />
+$.<br />
+<div class="su-spacer" style="height:10px"></div>
+$\mathbf{T}_\mathrm{ROS}$ is needed due to a bug in the ROS node that interfaces the framework to the motion capture system, and its value is:<br />
+<div class="su-spacer" style="height:10px"></div>
+$\mathbf{T}_\mathrm{ROS}=<br />
+\begin{pmatrix}<br />
+-1 &#038; 0 &#038; 0 &#038; 0 \\<br />
+ 0 &#038; 0 &#038; 1 &#038; 0 \\<br />
+ 0 &#038; 1 &#038; 0 &#038; 0 \\<br />
+ 0 &#038; 0 &#038; 0 &#038; 1<br />
+\end{pmatrix}<br />
+$.<br />
+<div class="su-spacer" style="height:10px"></div>
+Finally, $\mathbf{T}_0$ has to be read from the file groundtruth.txt included in the sequence that has to be evaluated.<br />
+<div class="su-spacer" style="height:10px"></div>
+To simplify this process, we provide a <a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/compute_global_transformation.py">Python script</a> that will compute $\mathbf{T}_\mathrm{g}$ given $\mathbf{T}_0$. The script requires numpy, numpy-quaternion and numba. The three packages can be easily installed with pip.<br />
+<div class="su-spacer" style="height:20px"></div>
+<p><strong>RGB-D Sequences</strong><br />
+<div class="su-spacer" style="height:20px"></div>
+<div class="su-row">
+<div class="su-column su-column-size-1-4"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_dataset_example1.png" alt="rgbd_dataset_example1" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-1-4"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_dataset_example2.png" alt="rgbd_dataset_example2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-1-4"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_dataset_example3.png" alt="rgbd_dataset_example3" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-1-4"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_dataset_example4.png" alt="rgbd_dataset_example4" width="320" height="240" /><br />
+</div></div>
+</div>
+The format of the RGB-D sequences is the same as the TUM RGB-D Dataset and it is described <a href="https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats">here</a>. The depth images are already registered w.r.t. the corresponding RGB images. The calibration of the RGB camera is the following:<br />
+fx = 542.822841<br />
+fy = 542.576870<br />
+cx = 315.593520<br />
+cy = 237.756098<br />
+<div class="su-spacer" style="height:10px"></div>
+d0 = 0.039903<br />
+d1 = -0.099343<br />
+d2 = -0.000730<br />
+d3 = -0.000144<br />
+d4 = 0.000000</p>
+<div class="su-spacer" style="height:30px"></div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/ubn.png" alt="uni_bonn_logo" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+All Sequences<br />
+Size: 16.4 GB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_dataset.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_balloon.png" alt="rgbd_bonn_balloon" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_balloon<br />
+Size: 243.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_balloon.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_balloon2.png" alt="rgbd_bonn_balloon2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_balloon2<br />
+Size: 267.0 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_balloon2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_balloon_tracking.png" alt="rgbd_bonn_balloon_tracking" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_balloon_tracking<br />
+Size: 325.9 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_balloon_tracking.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_balloon_tracking2.png" alt="rgbd_bonn_balloon_tracking2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_balloon_tracking2<br />
+Size: 236.4 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_balloon_tracking2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_crowd.png" alt="rgbd_bonn_crowd" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_crowd<br />
+Size: 515.9 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_crowd.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_crowd2.png" alt="rgbd_bonn_crowd2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_crowd2<br />
+Size: 498.4 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_crowd2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_crowd3.png" alt="rgbd_bonn_crowd3" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_crowd3<br />
+Size: 482.0 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_crowd3.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_kidnapping_box.png" alt="rgbd_bonn_kidnapping_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_kidnapping_box<br />
+Size: 619.0 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_kidnapping_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_kidnapping_box2.png" alt="rgbd_bonn_kidnapping_box2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_kidnapping_box2<br />
+Size: 723.9 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_kidnapping_box2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_moving_nonobstructing_box.png" alt="rgbd_bonn_moving_nonobstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_moving_nonobstructing_box<br />
+Size: 436.2 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_moving_nonobstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_moving_nonobstructing_box2.png" alt="rgbd_bonn_moving_nonobstructing_box2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_moving_nonobstructing_box2<br />
+Size: 513.1 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_moving_nonobstructing_box2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_moving_obstructing_box.png" alt="rgbd_bonn_moving_obstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_moving_obstructing_box<br />
+Size: 320.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_moving_obstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_moving_obstructing_box2.png" alt="rgbd_bonn_moving_obstructing_box2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_moving_obstructing_box2<br />
+Size: 422.1 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_moving_obstructing_box2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_person_tracking.png" alt="rgbd_bonn_person_tracking" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_person_tracking<br />
+Size: 329.5 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_person_tracking.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_person_tracking2.png" alt="rgbd_bonn_person_tracking2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_person_tracking2<br />
+Size: 324.3 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_person_tracking2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_placing_nonobstructing_box.png" alt="rgbd_bonn_placing_nonobstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_placing_nonobstructing_box<br />
+Size: 400.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_placing_nonobstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_placing_nonobstructing_box2.png" alt="rgbd_bonn_placing_nonobstructing_box2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_placing_nonobstructing_box2<br />
+Size: 372.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_placing_nonobstructing_box2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_placing_nonobstructing_box3.png" alt="rgbd_bonn_placing_nonobstructing_box3" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_placing_nonobstructing_box3<br />
+Size: 369.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_placing_nonobstructing_box3.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_placing_obstructing_box.png" alt="rgbd_bonn_placing_obstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_placing_obstructing_box<br />
+Size: 508.9 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_placing_obstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_removing_nonobstructing_box.png" alt="rgbd_bonn_removing_nonobstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_removing_nonobstructing_box<br />
+Size: 271.7 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_removing_nonobstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_removing_nonobstructing_box2.png" alt="rgbd_bonn_removing_nonobstructing_box2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_removing_nonobstructing_box2<br />
+Size: 501.3 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_removing_nonobstructing_box2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_removing_obstructing_box.png" alt="rgbd_bonn_removing_obstructing_box" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_removing_obstructing_box<br />
+Size: 509.9 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_removing_obstructing_box.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_synchronous.png" alt="rgbd_bonn_synchronous" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_synchronous<br />
+Size: 182.8 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_synchronous.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_synchronous2.png" alt="rgbd_bonn_synchronous2" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_synchronous2<br />
+Size: 203.5 MB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_synchronous2.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_static.png" alt="rgbd_bonn_static" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_static<br />
+Size: 5.8 GB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_static.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-row">
+<div class="su-column su-column-size-1-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+<img loading="lazy" class="alignleft size-large" src="../../wp-content/uploads/2019/03/rgbd_bonn_static_close_far.png" alt="rgbd_bonn_static_close_far" width="320" height="240" /><br />
+</div></div>
+<div class="su-column su-column-size-5-6"><div class="su-column-inner su-u-clearfix su-u-trim">
+Name: rgbd_bonn_static_close_far<br />
+Size:  1.0 GB<br />
+<a href="https://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/rgbd_bonn_static_close_far.zip">Download</a><br />
+</div></div>
+</div>
+<div class="su-spacer" style="height:40px"></div>
+<!---
+[su_spacer size="50"]
+<strong>
+[su_row]
+[su_column size="1/3"]
+<center><a href="http://www.igg.uni-bonn.de"><img src="https://www.ipb.uni-bonn.de/wp-content/uploads/2016/02/igg-150-1.png" alt="igg" width="200" height="70" /></a><br>
+Institute of Geodesy<br>and Geoinformation</center>
+[/su_column]
+[su_column size="1/3"]
+<center><a href="http://www.lwf.uni-bonn.de"><img src="https://www.ipb.uni-bonn.de/wp-content/uploads/2016/02/lwf-150-1.jpg" alt="lwf" width="200" height="70" /></a><br>
+Faculty of Agriculture</center>
+[/su_column]
+[su_column size="1/3"]
+<center><a href="http://www.uni-bonn.de"><img src="https://www.ipb.uni-bonn.de/wp-content/uploads/2016/02/ubn-150.png" alt="ubn" width="200" height="70"  /></a><br>
+University of Bonn</center>
+[/su_column]
+[/su_row]
+</strong>
+--->			</div><!-- .entry-content -->
+
+</article><!-- #post-## -->
+
+			
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+    
+
+	</div><!-- #content -->
+
+	<footer id="colophon" class="site-footer" role="contentinfo">
+
+		
+    	<div id="footer-banner" class="cf menu-is-additional mother-branding footer-fullwidth">
+            <div id="horizontal-menu-wrap" class="is-additional none-before">
+
+                
+                
+					<section id="footer-horizontal-menu" class="cf none-before"><ul id="menu-footer-menu" class="nav-menu"><li id="menu-item-477" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-477"><a href="../../index.html">Home</a></li>
+<li id="menu-item-478" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-478"><a href="../../contact/index.html">Contact</a></li>
+<li id="menu-item-257" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-257"><a href="../../impressum/index.html">Impressum &#038; Privacy Policy (Datenschutzerklärung)</a></li>
+</ul></section>
+              	
+            </div><!-- EOF horizontal-menu-wrap -->
+
+            		
+      	</div><!-- EOF footer-banner -->
+
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+<link rel='stylesheet' id='su-shortcodes-css'  href='../../wp-content/plugins/shortcodes-ultimate/includes/css/shortcodes.css%3Fver=7.3.4.css' type='text/css' media='all' />
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/jquery.fittext.js%3Fver=1.0.0' id='tesseract-fittext-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/jquery.sidr.min.js%3Fver=1.0.0' id='tesseract-sidr-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/helpers-functions.js%3Fver=1.0.0' id='tesseract-helpers-functions-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/helpers.js%3Fver=1.0.0' id='tesseract-helpers-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/helpers-beaver.js%3Fver=1.0.0' id='tesseract-helpers-beaver-js'></script>
+<script type='text/javascript' src='../../wp-content/themes/TESSERACT/js/skip-link-focus-fix.js%3Fver=1.0.0' id='tesseract-skip-link-focus-fix-js'></script>
+<script type='text/javascript' src='../../wp-includes/js/wp-embed.min.js%3Fver=5.8.15' id='wp-embed-js'></script>
+
+</body>
+</html>

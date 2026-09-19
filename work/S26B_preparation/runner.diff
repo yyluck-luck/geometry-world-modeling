@@ -1,0 +1,116 @@
+--- /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s26_consumer_baseline.py
++++ /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s26b_consumer_baseline.py
+@@ -21,9 +21,10 @@
+ import traceback
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+-PREP = ROOT / 'work/S26_consumer_baseline_preparation'
+-WORK = ROOT / 'work/S26_execution'
+-OUT = ROOT / 'results/S26_consumer_baseline'
++PREP = ROOT / 'work/S26B_preparation'
++ADAPTER_PREP = ROOT / 'work/S26_consumer_baseline_preparation'
++WORK = ROOT / 'work/S26B_execution'
++OUT = ROOT / 'results/S26B_consumer_baseline'
+ MANIFEST = PREP / 'run_manifest.json'
+ MODES = ('common_old', 'cut3r', 'ttt3r', 'filt3r')
+ 
+@@ -53,8 +54,14 @@
+ 
+ 
+ def adapter():
+-    sys.path.insert(0, str(PREP))
++    sys.path.insert(0, str(ADAPTER_PREP))
+     return importlib.import_module('saved_heads_adapter')
++
++
++def import_worker(m):
++    spec=importlib.util.spec_from_file_location('s26b_import_previous', PREP/'import_previous.py')
++    helper=importlib.util.module_from_spec(spec);spec.loader.exec_module(helper)
++    helper.import_previous(m, MANIFEST, WORK, OUT)
+ 
+ 
+ def numeric_setup():
+@@ -222,6 +229,7 @@
+                 self.check_fixed(s)
+                 for name,p in self.params(s).items(): require(self.T.equal(p,self.frozen[name]), 'Fixed parameter changed: '+name)
+                 self.report['returned_pre_last_step_loss']=float(result)
++                self.checkpoint('post_GA_constraints')
+                 return result
+             return call
+         self.patch(base.BasePCOptimizer,'compute_global_alignment',wrap_compute)
+@@ -231,6 +239,7 @@
+                 result=old(s,*args,**kw)
+                 self.check_fixed(s)
+                 for name,p in self.params(s).items(): require(self.T.equal(p,self.frozen[name]), 'MST changed fixed parameter '+name)
++                self.checkpoint('post_MST_constraints')
+                 return result
+             return call
+         self.patch(init,'init_minimum_spanning_tree',wrap_mst)
+@@ -284,14 +293,29 @@
+                 np.savez_compressed(self.out/'pairwise_state.npz',pw_poses=array(s.get_pw_poses()),adaptors=array(s.get_adaptors()))
+                 self.report['clean_changed_pixels']=[int(np.count_nonzero(x!=y)) for x,y in zip(before['conf'],after['conf'])]
+                 self.snapshot=after; self.clean_calls+=1
++                self.checkpoint('post_clean_constraints')
+                 return result
+             return call
+         self.patch(base.BasePCOptimizer,'clean_pointcloud',wrap_clean)
++    def checkpoint(self, stage):
++        origins={}
++        for name,module in list(sys.modules.items()):
++            if name.startswith(('cloud_opt.','dust3r.','src.dust3r.','models.','croco.')):
++                origin=getattr(module,'__file__',None)
++                if origin:origins[name]=str(Path(origin).resolve())
++        event=dict(status='OBSERVED_NOT_FINAL_PASS',stage=stage,utc=utc(),
++            iterations=self.steps,adam_steps=self.adam_steps,mst_calls=self.mst_calls,
++            clean_calls=self.clean_calls,report=self.report,loaded_geometry_modules_observed=origins)
++        with (self.out/'observer_events.jsonl').open('a') as handle:
++            handle.write(json.dumps(event,ensure_ascii=False,allow_nan=False)+'\n')
++        write(self.out/'observer_checkpoint.json',event)
++
+     def restore(self):
+         for obj,name,old in reversed(self.patches): setattr(obj,name,old)
+ 
+ 
+ def ga_worker(m, mode):
++    require(mode in ('cut3r','ttt3r','filt3r'),'S26B never reruns common_old GA')
+     out=OUT/mode
+     require(not out.exists(),'Never overwrite or repeat an existing GA run')
+     out.mkdir(parents=True)
+@@ -331,7 +355,9 @@
+         try:
+             result=a.run_original_ga(ns,output,control_c2ws=cameras,
+                 old_depth=None if old is None else a.CommonOldDepth(old,common_seal,common_tensor_sha,common_pose_sha),output_dir=out)
+-        finally: observer.restore()
++        finally:
++            observer.restore()
++            observer.checkpoint('GA_call_exit')
+         require(observer.steps==observer.adam_steps==400 and observer.clean_calls==observer.mst_calls==1,'Complete original GA/Adam/MST/clean')
+         points,colors,depths,confs,cam=result
+         original_colors=np.clip(np.concatenate([array(v['img']) for v in views[:n]]).transpose(0,2,3,1)*.5+.5,0,1)
+@@ -441,13 +467,12 @@
+     r=dict(status='RUNNING',started_utc=utc(),manifest_sha256=expected,phases=[])
+     write(WORK/'dispatch_receipt.json',r)
+     try:
+-        phases=[('control',180,2),*((f'views_{v}',180,2) for v in m['preprocess_repos']),('compat',240,4),
+-                ('common_old',600,16),('cut3r',1200,16),('ttt3r',1200,16),('filt3r',1200,16)]
++        phases=[('import',120,2),('cut3r',1200,16),('ttt3r',1200,16),('filt3r',1200,16)]
+         for phase,seconds,gib in phases:
+             command=[sys.executable,str(Path(__file__).resolve()),'worker','--phase',phase,'--manifest-sha256',expected]
+             supervised(command,phase,seconds,gib*1024**3)
+             r['phases'].append(phase);write(WORK/'dispatch_receipt.json',r)
+-        command=[sys.executable,str(ROOT/'scripts/score_s26_consumer.py'),'score','--manifest',str(MANIFEST),'--manifest-sha256',expected]
++        command=[sys.executable,str(ROOT/'scripts/score_s26b_consumer.py'),'score','--manifest',str(MANIFEST),'--manifest-sha256',expected]
+         supervised(command,'scoring',180,2*1024**3)
+         r.update(status='PASS',completed_utc=utc());write(WORK/'dispatch_receipt.json',r)
+     except BaseException as e:
+@@ -460,8 +485,6 @@
+     p.add_argument('--manifest-sha256',required=True);args=p.parse_args()
+     m=manifest(args.manifest_sha256)
+     if args.command=='dispatch':dispatch(m,args.manifest_sha256)
+-    elif args.phase=='control':control_input(m)
+-    elif args.phase=='compat':compatibility(m)
+-    elif args.phase.startswith('views_'):source_views(m,args.phase[6:])
+-    elif args.phase in MODES:ga_worker(m,args.phase)
++    elif args.phase=='import':import_worker(m)
++    elif args.phase in ('cut3r','ttt3r','filt3r'):ga_worker(m,args.phase)
+     else:raise ValueError('Unknown phase')

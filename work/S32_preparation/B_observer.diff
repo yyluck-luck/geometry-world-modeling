@@ -1,0 +1,33 @@
+--- frozen_parent_observer
++++ S32_B_observer
+@@ -37,7 +37,7 @@
+                         self.extra_forwards += 1
+                         decoded = dict(depth=np.stack(list_before), point_cloud=np.stack([b.array(x) for x in scene.get_pts3d()]), focal=b.array(scene.get_focals()), pp=b.array(scene.get_principal_points()), c2w=b.array(scene.get_im_poses()), pw_scale=b.array(scene.get_pw_scale()), pw_poses=b.array(scene.get_pw_poses()), adaptors=b.array(scene.get_adaptors()), objective=loss_before)
+                     np.savez_compressed(self.out / 'initial_decoded.npz', **decoded)
+-                    verify_s29_initial_state(self, c, arm, loss_before, np)
++                    verify_window_initial_state(self, c, arm, loss_before, np)
+                     self.patch(opt.PointCloudOptimizer, 'get_depthmaps', lambda old_getter: patched_getter)
+                     with torch.no_grad():
+                         depth_after = b.array(scene.get_depthmaps(raw=True))
+@@ -50,8 +50,8 @@
+                     after_arrays, after_meta, after_objects = snapshot(scene, np)
+                     assert_same_objects(self.initial_objects, after_objects)
+                     require(after_meta == self.initial_meta, 'Getter must not change raw parameters/buffers/flags')
+-                    self.report['s30_initialization'] = dict(arm=arm, s29_initialization_path_preserved=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), reference_S29_raw_exact=True, getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=True, extra_no_update_objective_forwards=self.extra_forwards)
+-                    self.checkpoint('S30_first_step_gate_passed')
++                    self.report['s32_initialization'] = dict(arm=arm, C2a_initialization_path_preserved=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), same_window_initial_state_saved=True, getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=True, extra_no_update_objective_forwards=self.extra_forwards)
++                    self.checkpoint('S32_same_window_first_step_gate_passed')
+                     return answer
+                 return call
+             self.patch(init, 'init_minimum_spanning_tree', initial_after_mst)
+@@ -113,8 +113,8 @@
+                         final_arrays, final_meta, _ = snapshot(scene, np)
+                         np.savez_compressed(self.out / 'final_raw_before_clean.npz', **final_arrays)
+                         write(self.out / 'final_raw_metadata.json', final_meta)
+-                        self.report['s30_gradient_steps'] = self.gradient_steps
+-                        self.report['s30_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
++                        self.report['s32_gradient_steps'] = self.gradient_steps
++                        self.report['s32_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
+                     return result
+                 return call
+             self.patch(base, 'global_alignment_iter', trace_iter)

@@ -1,0 +1,68 @@
+--- score_b0_blind.py.sha256=f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de
++++ score_b0_blind.py.sha256=543f9fb4cdfd7009e4a5c8be83d99bcb0b83658549c2ea8964ed453f201e2738
+@@ -1080,20 +1080,16 @@
+             ],
+         )
+     except TechnicalInvalid as error:
+-        report = None
+         receipt.update(
+             status="INVALID_OR_UNINTERPRETABLE",
+-            technically_valid=False,
+             invalid_reason=str(error),
+             error_type=type(error).__name__,
+             error=str(error),
+             traceback=traceback.format_exc(),
+         )
+     except BaseException as error:
+-        report = None
+         receipt.update(
+             status="FAILED_OR_PARTIAL_B0_BLIND_SCORE" if receipt.get("score_executed") else "NOT_READY_BEFORE_B0_BLIND_SCORE",
+-            technically_valid=False,
+             error_type=type(error).__name__,
+             error=str(error),
+             traceback=traceback.format_exc(),
+@@ -1116,12 +1112,7 @@
+     receipt["deadline_seconds"] = SECONDS
+     receipt["human_viewing_now_allowed"] = receipt.get("status") == "PASS_B0_MACHINE_SCORE_SINGLE_ROW_COHORT_INCOMPLETE"
+     assert_attempt_lease(stage, out, attempt)
+-    success = (
+-        report is not None
+-        and receipt.get("status") == "PASS_B0_MACHINE_SCORE_SINGLE_ROW_COHORT_INCOMPLETE"
+-        and receipt.get("technically_valid") is True
+-    )
+-    if success:
++    if report is not None:
+         report_payload = json_bytes(report)
+         report_sha = hashlib.sha256(report_payload).hexdigest()
+         receipt["report_path"] = str(out / "report.json")
+@@ -1130,9 +1121,6 @@
+         require(sha256(stage / "report.json", deadline=deadline) == report_sha,
+                 "Staged B0 report differs before terminal receipt seal")
+     else:
+-        report = None
+-        receipt["technically_valid"] = False
+-        receipt["human_viewing_now_allowed"] = False
+         require(not (stage / "report.json").exists(),
+                 "A technically invalid B0 staging attempt may not expose a report")
+     assert_attempt_lease(stage, out, attempt)
+@@
+     except BaseException as error:
+-        report = None
+         receipt.update(
+             status="FAILED_OR_PARTIAL_B0_BLIND_SCORE" if receipt.get("score_executed") else "NOT_READY_BEFORE_B0_BLIND_SCORE",
+-            technically_valid=False,
+             error_type=type(error).__name__,
+@@
+-    success = (
+-        report is not None
+-        and receipt.get("status") == "PASS_B0_MACHINE_SCORE_SINGLE_ROW_COHORT_INCOMPLETE"
+-        and receipt.get("technically_valid") is True
+-    )
+-    if success:
++    if report is not None:
+@@
+     else:
+-        report = None
+-        receipt["technically_valid"] = False
+-        receipt["human_viewing_now_allowed"] = False
+         require(not (stage / "report.json").exists(),

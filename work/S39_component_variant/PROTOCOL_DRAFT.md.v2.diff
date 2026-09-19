@@ -1,0 +1,14 @@
+--- v1/PROTOCOL_DRAFT.md
++++ v2/PROTOCOL_DRAFT.md
+@@ -22,9 +22,9 @@
+ 
+ 1. `s39_variant_gate.py`只导入固定SHA的S35标准库辅助函数，沿用原三大权重身份、科学controls、stat/core SHA和原source domain。新variant schema明确区别于S35 schema。新增绑定两文件入口、本文、S38/S36来源报告及3个相关Diffusers源码。先验全组件路径/大小/固定身份、源码域、YAML/初图身份元数据与两份真正审查回执；任何缺件在大权重哈希和科学导入之前停止。
+ 2. root先补实际路径、初图SHA，完成源码审阅及加载冻结。`source_review`必须为`PASS_S39_SOURCE_REVIEW`；`runtime_freeze`必须为`READY_TO_ATTEMPT_DECLARED_VARIANT_LOADING`。两回执都绑定`variant`与整个manifest除`review_receipts`外的规范JSON SHA（沿用S35 core函数）。不能在草案里填写假的PASS。本地full SHA匹配本身不需要假装恢复原VAE来源链。
+-3. `load_components.py`父进程先metadata check，再启动一次fresh原venv子进程。子进程做一次完整组件内容SHA，随后调用一次从S35工厂派生的构造函数。派生仅改1处gate import与4处日志/证据标签，反向还原AST须与固定原工厂全AST相同。构造、原VAE本地载入参数、严格state_dict/eval/CPU/FP32检查、原初图读取和576裁剪均复用。输入照片只作为原runtime准备，不提交给模型前向。
++3. `load_components.py`父进程先metadata check，再启动一次fresh原venv子进程。子进程做一次完整组件内容SHA，随后调用一次从S35工厂派生的构造函数。派生仅改1处gate import与4处日志/证据标签，反向还原AST须与固定原工厂全AST相同。构造、原VAE本地载入参数、state_dict记录/eval/CPU/FP32检查、原初图读取和576裁剪均复用。输入照片只作为原runtime准备，不提交给模型前向。
+ 4. 禁止网络由复用工厂的offline环境与socket拒绝实现；没有额外重新编码、随机采样、模型前向、Navigator初始化/转向、MST、GA或生成调用。模型构造仍会正常分配和初始化参数，不能把“无前向”说成无张量计算。准备阶段没有执行这些构造。
+-5. 加载结束核VAE路径属性和全部参数载入回执，再重绑组件stat、源码与小输入SHA；不重复哈希GB权重。最终外控状态最多为`VARIANT_LOADING_RETURNED_PENDING_INDEPENDENT_REVIEW`。内部`PASS_DECLARED_VARIANT_COMPONENT_LOADING_ONLY`仅说明加载/属性检查完成；不等于codec已数值验收、生成通过、exact-original或新方法。
++5. 加载结束核VAE路径属性和全部参数载入回执，再重绑组件stat、源码与小输入SHA；不重复哈希GB权重。v2在写通过状态前另验`state_dict_loads`为非空列表，每条记录的`missing_keys`和`unexpected_keys`必须均为空，完整保留每次`strict_requested`。原因是原CUT3R的broad except可能吞掉S35逐次记录器抛出的拒绝，再过滤checkpoint重试；最终只看工厂返回不足够。任何早先不完整记录都拒绝，不只看最后一次。原CUT的`strict=False`保持，不能说所有调用均`strict=True`。最终外控状态最多为`VARIANT_LOADING_RETURNED_PENDING_INDEPENDENT_REVIEW`。内部`PASS_DECLARED_VARIANT_COMPONENT_LOADING_ONLY`仅说明加载/属性与上述实际记录检查完成；不等于codec已数值验收、生成通过、exact-original或新方法。
+ 
+ 加载草案预算：CPU8、每0.5秒采样全进程树RSS，单次1800秒（包括完整哈希、加载和属性检查）、45GiB，磁盘持续至少10GiB。采用S35已有`kill_tree`处理整会话与已跟踪后代，记录实际signal/exit/survivors；不复制两批trace调度，也不允许超限后自动扩额/重试。此为未实测预算，不保证本机完成。载荷和外控各用新目录，失败/超限保留前缀。不同作者随后按实际风险验收即可，不重跑S35旧人工套件。
+ 

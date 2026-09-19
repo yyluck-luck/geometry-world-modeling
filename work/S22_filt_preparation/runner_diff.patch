@@ -1,0 +1,139 @@
+--- frozen scripts/s21_baseline.py
++++ scripts/s22_filt_baseline.py
+@@ -1,10 +1,10 @@
+-"""S21 frozen local CUT3R/TTT3R trajectory probe; source functions remain intact."""
++"""S22 official FILT3R baseline; derived from frozen S21 runner with recorded diff."""
+ from pathlib import Path
+ from datetime import datetime, timezone
+ import argparse, ast, contextlib, copy, hashlib, io, json, os, resource, subprocess, sys, time, traceback
+ ROOT=Path(__file__).resolve().parents[1]
+-W=ROOT/'work/S21_baseline_preparation'
+-REPO=W/'ttt3r_original'
++W=ROOT/'work/S22_filt_preparation'
++REPO=W/'filt3r_original'
+ ORIGINAL=Path('/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/cut3r-local')
+ DATA=ROOT/'data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk'
+ def utc():return datetime.now(timezone.utc).isoformat()
+@@ -19,31 +19,17 @@
+     return namespace
+ def prepare():
+     target=W/'run_manifest.json';assert not target.exists()
+-    source=json.loads((W/'source_manifest_v3.json').read_text());assert source['passed']
++    old=json.loads((ROOT/'work/S21_baseline_preparation/run_manifest.json').read_text())
++    source=json.loads((W/'source_manifest_v2.json').read_text());assert source['passed']
+     for e in source['files']:assert sha(REPO/e['path'])==e['sha256']
+-    assert (REPO/'src/croco/models/pos_embed.py').read_bytes()==(ORIGINAL/'src/croco/models/pos_embed.py').read_bytes()
+-    def rows(p):return [s.split() for s in p.read_text().splitlines()if s.strip() and not s.startswith('#')]
+-    # Only timestamps and RGB paths are used here; GT coordinate strings are not parsed.
+-    rgb={float(r[0]):r[1]for r in rows(DATA/'rgb.txt')}
+-    gt={float(r[0]):None for r in rows(DATA/'groundtruth.txt')}
+-    f=definitions(REPO/'datasets_preprocess/long_prepare_tum.py',['associate'],{})['associate']
+-    pairs=f(rgb,gt,0.0,0.02)[:300];assert len(pairs)==300
+-    frames=[dict(index=i,rgb_time=a,gt_time=b,path=str(DATA/rgb[a]),sha256=sha(DATA/rgb[a]))for i,(a,b)in enumerate(pairs)]
+-    assert [e['path']for e in frames]==sorted(e['path']for e in frames)
+-    paths=[Path(__file__),ROOT/'scripts/cut3r_rope_compat.py',ROOT/'docs/S21_BASELINE_PROTOCOL.md',W/'source_manifest_v3.json']
++    tree=ast.parse((REPO/'eval/relpose/launch.py').read_text());hparams=None
++    for n in tree.body:
++        if isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)and t.id=='FILT3R_DEFAULT_HPARAMS'for t in n.targets):hparams=ast.literal_eval(n.value)
++    assert hparams and hparams['kalman_tau_q']==3.0
++    paths=[Path(__file__),ROOT/'scripts/cut3r_rope_compat.py',ROOT/'docs/S22_FILT_BASELINE_PROTOCOL_DRAFT.md',W/'source_manifest_v2.json',ROOT/'work/S21_baseline_preparation/run_manifest.json']
+     paths += [REPO/e['path']for e in source['files']]
+-    paths += list((ORIGINAL/'src').rglob('*.py'))
+-    checkpoint=ROOT/'data/cut3r/cut3r_512_dpt_4_64.pth'
+-    assert checkpoint.stat().st_size==3173761006
+-    m=dict(schema='s21-baseline-v1',frozen_utc=utc(),frames=frames,methods=['cut3r','ttt3r'],original_prefix=4,
+-           checkpoint=str(checkpoint),checkpoint_sha256='45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103',
+-           checkpoint_identity_basis='S17 verified SHA; size and stat recorded here; no redundant multi-GB hash',
+-           checkpoint_stat=[checkpoint.stat().st_size,checkpoint.stat().st_mtime_ns],
+-           gt_file=str(DATA/'groundtruth.txt'),gt_sha256=sha(DATA/'groundtruth.txt'),
+-           identities={str(p.resolve()):sha(p)for p in paths},
+-           contract=dict(size=512,crop=True,frames=300,threads=8,seed=0,device='cpu',dtype='float32',revisit=1,solve_pose=False,
+-                         max_seconds=1800,max_rss_bytes=32*1024**3,gt_numeric_scoring_after_both_sealed=True))
+-    write(target,m);print(json.dumps(dict(manifest=str(target),sha256=sha(target),frames=len(frames),frozen=m['frozen_utc'])))
++    m=copy.deepcopy(old);m.update(schema='s22-official-filt-v1',frozen_utc=utc(),methods=['filt3r'],compatibility_prefix=4,hparams=hparams,identities={str(p.resolve()):sha(p)for p in paths})
++    write(target,m);print(json.dumps(dict(manifest=str(target),sha256=sha(target),frames=len(m['frames']),frozen=m['frozen_utc'])))
+ def run(mode,out):
+     assert not out.exists();out.mkdir(parents=True)
+     m=json.loads((W/'run_manifest.json').read_text());r=dict(started_utc=utc(),status='RUNNING',mode=mode,frames_completed=0,manifest_sha256=sha(W/'run_manifest.json'))
+@@ -51,7 +37,7 @@
+     try:
+         for p,h in m['identities'].items():assert sha(p)==h,p
+         cp=Path(m['checkpoint']);assert [cp.stat().st_size,cp.stat().st_mtime_ns]==m['checkpoint_stat']
+-        repo=ORIGINAL if mode=='original4' else REPO
++        repo=REPO
+         sys.path[:0]=[str(repo/'src'),str(repo/'src/croco'),str(ROOT/'scripts')]
+         import numpy as np,torch
+         from typing import Any
+@@ -66,7 +52,7 @@
+         import cut3r_rope_compat
+         cut3r_rope_compat.install(RoPE2D)
+         torch.set_num_threads(8);torch.manual_seed(0);np.random.seed(0)
+-        frames=m['frames'][:4]if mode=='original4'else m['frames']
++        frames=m['frames'][:4]if mode=='cut3r4'else m['frames']
+         for e in frames:assert sha(e['path'])==e['sha256']
+         ns=definitions(REPO/'eval/relpose/launch.py',['prepare_input'],dict(torch=torch,np=np,load_images=load_images_for_eval,deepcopy=copy.deepcopy))
+         views=ns['prepare_input']([e['path']for e in frames],[True]*len(frames),size=512,crop=True,revisit=1,update=True)
+@@ -77,7 +63,13 @@
+         log=io.StringIO();start=time.perf_counter()
+         with contextlib.redirect_stdout(log),torch.serialization.safe_globals(allowed):model=ARCroco3DStereo.from_pretrained(str(cp)).float().to('cpu')
+         (out/'checkpoint_load.txt').write_text(log.getvalue());assert 'All keys matched successfully'in log.getvalue()
+-        if mode!='original4':model.config.model_update_type=mode
++        model.config.model_update_type='cut3r'if mode=='cut3r4'else 'filt3r'
++        if mode=='filt3r':
++            if not hasattr(model,'hparams')or not isinstance(model.hparams,dict):model.hparams={}
++            model.hparams.update(m['hparams'])
++            for key,value in m['hparams'].items():
++                if hasattr(model.config,key):setattr(model.config,key,value)
++            r['official_hparam_overrides']=m['hparams']
+         r.update(model_load_seconds=time.perf_counter()-start,training_flag=model.training,parameters=sum(p.numel()for p in model.parameters()),
+                  stochastic_modules=[dict(name=n,type=type(x).__name__,p=float(getattr(x,'p',getattr(x,'drop_prob',0))))for n,x in model.named_modules()if isinstance(x,torch.nn.Dropout)and x.p>0],
+                  batchnorm_modules=[n for n,x in model.named_modules()if isinstance(x,torch.nn.modules.batchnorm._BatchNorm)],
+@@ -94,12 +86,8 @@
+             write(out/'receipt.json',r)
+             if len(saved)%25==0 or len(saved)==len(frames):print(json.dumps(dict(mode=mode,frames=len(saved),seconds=r['elapsed_forward_with_archival_seconds'])),flush=True)
+         h=model.downstream_head.register_forward_hook(hook)
+-        if mode=='original4':
+-            from dust3r.inference import inference_recurrent
+-            outputs,_=inference_recurrent(views,model,'cpu',verbose=False)
+-        else:
+-            from dust3r.inference import inference_recurrent_lighter
+-            outputs,_=inference_recurrent_lighter(views,model,'cpu',verbose=False)
++        from dust3r.inference import inference_recurrent_lighter
++        outputs,_=inference_recurrent_lighter(views,model,'cpu',verbose=False)
+         h.remove();assert len(saved)==len(frames)==len(outputs['pred'])
+         np.save(out/'poses.npy',np.stack(poses))
+         r.update(status='PASS',completed_utc=utc(),peakrss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,outputs=saved,
+@@ -112,10 +100,10 @@
+     sys.path.append(str(ROOT/'work/S17C_environment/site-packages'))
+     import psutil
+     m=json.loads((W/'run_manifest.json').read_text())
+-    for mode in ['original4','cut3r','ttt3r']:
+-        out=ROOT/'results/S21_baseline'/mode;out.parent.mkdir(parents=True,exist_ok=True)
++    for mode in ['cut3r4','filt3r']:
++        out=ROOT/'results/S22_filt_baseline'/mode;out.parent.mkdir(parents=True,exist_ok=True)
+         assert not out.exists()
+-        control=ROOT/'work/S21_execution'/mode;control.mkdir(parents=True,exist_ok=False)
++        control=ROOT/'work/S22_execution'/mode;control.mkdir(parents=True,exist_ok=False)
+         cmd=[sys.executable,str(Path(__file__).resolve()),'run','--mode',mode,'--output',str(out)]
+         r=dict(started_utc=utc(),command=cmd,status='RUNNING',peak_tree_rss=0,limits=m['contract'])
+         start=time.monotonic()
+@@ -132,6 +120,19 @@
+         r['status']='PASS'if r['returncode']==0 and 'failure'not in r else 'FAILED';write(control/'receipt.json',r)
+         print(json.dumps(dict(mode=mode,status=r['status'],elapsed_seconds=r['elapsed_seconds'])),flush=True)
+         if r['status']!='PASS':raise RuntimeError(mode+' failed; retained output, no automatic rerun')
++        if mode=='cut3r4':
++            import numpy as np
++            checks=[]
++            for i in range(4):
++                with np.load(ROOT/'results/S21_baseline/original4'/f'frame_{i:04d}.npz')as x,np.load(out/f'frame_{i:04d}.npz')as y:
++                    assert set(x.files)==set(y.files)
++                    for key in x.files:
++                        atol=1e-4 if key=='camera_pose'else 5e-4
++                        checks.append(dict(frame=i,head=key,atol=atol,rtol=1e-4,max_abs=float(np.max(np.abs(x[key]-y[key]))),passed=bool(np.allclose(x[key],y[key],atol=atol,rtol=1e-4))))
++            verdict=dict(utc=utc(),passed=all(c['passed']for c in checks),checks=checks,gt_coordinates_read=False)
++            write(out.parent/'compatibility.json',verdict)
++            assert verdict['passed'],'Keep incompatibility; do not run 300-frame FILT3R yet'
++
+ if __name__=='__main__':
+     p=argparse.ArgumentParser();p.add_argument('action',choices=['prepare','run','dispatch']);p.add_argument('--mode');p.add_argument('--output',type=Path);a=p.parse_args()
+     if a.action=='prepare':prepare()

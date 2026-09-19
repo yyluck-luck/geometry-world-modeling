@@ -1,0 +1,9 @@
+--- previous_getter
++++ S34_getter
+@@ -1,5 +1,5 @@
+ def get_depthmaps(self, raw=False):
+-    res = ParameterStack(self.im_depthmaps, is_param=False).exp()
++    res = torch.stack(list(self.im_depthmaps)).float().exp()
+     if not raw:
+         res = [dm[:h * w].view(h, w) for dm, (h, w) in zip(res, self.imshapes)]
+     return res

@@ -1,0 +1,122 @@
+% SOURCE-ONLY TEMPLATE: not a result and not intended for direct compilation.
+% Named fields must be populated from root-bound accepted real metadata.
+\documentclass[UTF8,10pt,a4paper]{ctexart}
+\usepackage[margin=1.7cm,headheight=14pt]{geometry}
+\usepackage{amsmath,booktabs,array,graphicx,xcolor,hyperref,xurl,fancyhdr}
+\setmainfont{Arial}\setsansfont{Arial}\setmonofont{Menlo}
+\setCJKmainfont{Songti SC}\setCJKsansfont{Heiti SC}
+\definecolor{ink}{HTML}{163C50}\definecolor{accent}{HTML}{007C91}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,pdftitle={S86固定历史投影：四种生成对照实际结果},pdfauthor={AI辅助整理；依据已接受本地证据}}
+\setlength{\parskip}{.45em}\setlength{\parindent}{1.5em}\linespread{1.05}
+\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.12}
+\pagestyle{fancy}\fancyhf{}\lhead{\small S86：四种生成对照实际结果}\rhead{\small 09-11 06:26 北京时间}\cfoot{\thepage}
+\ctexset{section={format=\Large\bfseries\sffamily\color{ink},beforeskip=0pt,afterskip=.55em}}
+\newcommand{\important}[1]{\begin{center}\fcolorbox{accent}{accent!5}{\parbox{.92\linewidth}{#1}}\end{center}}
+\begin{document}
+\section*{1. 实际完成了什么，主结果是什么？}
+\important{\textbf{科学证据截点：2026-09-11 06:26:15 北京时间。}真实四臂生成、完整固定评分和团队内不同作者消费/统计复核已完成，结果经root有限范围接受；本报告版面验收另行记录。}
+
+本报告接续已交付的10页《从投影到生成强对照》原理补充，只报告本轮真实结果。四种方式共用四张历史图、四个目标20--23、相同投影参考和条件。G0与Gguide各跑一条50步完整链；Gpaste从G0做末端RGB合成，Gterminal从G0真实末步融合并解码。它们不是四条完整生成链，也不是每个目标单独跑50步。
+
+Gguide的完整四帧主MSE低于G0，低于Gterminal，低于Gpaste。判断依据完整有符号SSE差，而非只看某一张图或某一区域。
+
+\begin{center}\small
+\begin{tabular}{lrr}\toprule
+方式 & 全四帧SSE整数总和 & 主MSE：四帧等权均值\\\midrule
+G0 & 33,957,058,231 & 0.131166667769\\
+Gpaste & 23,550,236,893 & 0.0909680125238\\
+Gterminal & 25,420,314,605 & 0.0981916023967\\
+Gguide & 13,571,317,266 & 0.0524222225291\\
+\bottomrule\end{tabular}
+\end{center}
+\begin{center}\small
+\begin{tabular}{lrr}\toprule
+固定对比 & 全四帧SSE有符号差 & 主MSE差（负号表示Gguide更低）\\\midrule
+Gguide-Gterminal & -11,848,997,339 & -0.0457693798676\\
+Gguide-G0 & -20,385,740,965 & -0.07874444524\\
+Gguide-Gpaste & -9,978,919,627 & -0.0385457899947\\
+\bottomrule\end{tabular}
+\end{center}
+主指标是最终发图uint8 RGB按255归一化后的全图MSE；每帧995328个颜色标量、全部四帧3981312个标量，每帧权重1/4。数字降低只说明这一像素指标降低，不能直接等同感知更真实或几何更准确。
+
+\textbf{真实成本与运行状态。}2026-09-11 05:30:08 至 2026-09-11 06:14:05（北京时间）。
+\begin{center}\small\begin{tabular}{lrlr}\toprule
+阶段 & 实际秒数 & 阶段 & 实际秒数\\\midrule
+G0完整链 & 1289.864942 & Gguide完整链 & 1309.15384942\\
+Gpaste派生 & 0.0410767080029 & Gterminal派生 & 16.73506\\
+共同warp编码 & 3.88279325 & 科学进程总计 & 2636.98146204\\
+外层监督总计 & 2640.52364471 & 固定评分 & 0.256122708\\
+\bottomrule\end{tabular}\end{center}
+监督采样进程树峰值 17.1673126221 GiB。消费复核 0.712728708 秒，统计复核 0.139090084005 秒。各阶段是包含/重叠关系，不能把编码、臂耗时与进程总计再相加。耗时是本机实际动作，不是学生本人投入工时。
+
+\clearpage
+\section*{2. 全部16行与完整区域分母}
+四个目标全部保留。support是S85预测有历史投影候选的像素集合，hole是其补集；它们不是正确/错误或真实可见/遮挡标签。下表不按结果重新裁剪、配准、调曝光或选区。
+\begin{center}\small\begin{tabular}{lrrrr}\toprule
+方式/目标 & 全图SSE & 全图MSE & 支持区MSE & 孔洞区MSE\\\midrule
+G0/20 & 5,462,648,366 & 0.0844027628646 & 0.0874142457493 & 0.0358591505186\\
+G0/21 & 9,599,808,888 & 0.148325562773 & 0.151427043097 & 0.125415345735\\
+G0/22 & 10,667,301,487 & 0.164819270341 & 0.172531084362 & 0.132680065599\\
+G0/23 & 8,227,299,490 & 0.127119075098 & 0.134892198004 & 0.097067909696\\
+Gpaste/20 & 3,513,237,547 & 0.0542826364977 & 0.0554255677717 & 0.0358591505186\\
+Gpaste/21 & 6,335,724,467 & 0.097892563082 & 0.0941666547366 & 0.125415345735\\
+Gpaste/22 & 7,670,639,750 & 0.118518188333 & 0.115120040665 & 0.132680065599\\
+Gpaste/23 & 6,030,635,129 & 0.0931786621822 & 0.0921726579713 & 0.097067909696\\
+Gterminal/20 & 3,844,552,482 & 0.0594017461344 & 0.0613386516291 & 0.0281797890177\\
+Gterminal/21 & 6,976,719,026 & 0.107796497609 & 0.106245371853 & 0.11925445446\\
+Gterminal/22 & 8,308,455,225 & 0.128373003192 & 0.126961520406 & 0.134255397937\\
+Gterminal/23 & 6,290,587,872 & 0.0971951626511 & 0.0982000886647 & 0.0933100834863\\
+Gguide/20 & 2,389,044,673 & 0.0369128593858 & 0.0381986485287 & 0.0161865753255\\
+Gguide/21 & 2,938,400,655 & 0.0454008966106 & 0.0414775036189 & 0.0743824717232\\
+Gguide/22 & 4,418,153,307 & 0.0682643876899 & 0.0615616805436 & 0.0961981107685\\
+Gguide/23 & 3,825,718,631 & 0.05911074643 & 0.0523532601634 & 0.0852354250102\\
+\bottomrule\end{tabular}\end{center}
+\begin{center}\small\begin{tabular}{rrrrr}\toprule
+目标 & 支持像素 & 孔洞像素 & 支持通道 & 孔洞通道\\\midrule
+20 & 312,396 & 19,380 & 937,188 & 58,140\\
+21 & 292,217 & 39,559 & 876,651 & 118,677\\
+22 & 267,572 & 64,204 & 802,716 & 192,612\\
+23 & 263,594 & 68,182 & 790,782 & 204,546\\
+\bottomrule\end{tabular}\end{center}
+每帧全图331776像素、995328通道。区域空集写NA，不能写0误差；任何一帧某区域为空时，完整四帧的该区域等权均值也为NA。另报的pooled按全部区域通道汇总，权重与等帧均值不同。完整区域均值和全部逐目标有符号对比保存在原ARM\_SUMMARY与CONTRASTS文件，未以pooled替换主结果。
+
+\textbf{不同作者核验到哪里？}全部50步Gguide融合及真实末步/派生保存量核验通过，所记录浮点算术比较最大绝对差为 0；保护位置按字节核。统计复核覆盖16行/48区域及全部对比，浮点展示相对精确分数的最大绝对差为 1.38777878078e-17。这两项差属于各自的计算核验量，不能跨单位当视觉精度。
+整数平方误差用不同算法核算，分数与均值另用精确有理数复核；保存量一致不等于世界真值。G0的50步透明性依据运行时对象/字节摘要和实际末步数据，未谎称存有50份G0完整raw数组。模型/VAE没有为复核另跑一遍。
+
+\clearpage
+\section*{3. 四目标、六列实际比较总览}
+顺序固定为：真实参考、历史投影、G0、Gpaste、Gterminal、Gguide；四行依次为目标20、21、22、23。参考来自已保存实拍，投影使用历史颜色和预测几何；灰格只标无投影支持。四种方法列都是本轮已发出的生成/派生图。
+\begin{center}\includegraphics[width=\linewidth]{images/overview_4targets_6columns.png}\end{center}
+\textbf{读图限制。}此处缩小整张总览用于同页定位，不能只凭缩略图判断精细对应。原导出保留全部32张576像素原图和1张3540×2720总览，共33张；比较没有只挑好看的目标。原图入口与文件SHA见绑定的EXPORT\_RECEIPT和IMAGE\_INDEX。孔洞区也可能经VAE与后续网络传播受影响，不能把直接mask保护当作最终RGB绝对隔离。
+
+\textbf{本页图源身份。}总览文件SHA256：\par\noindent\path{90721f7da92fef99c07e212ec9d62fc0e74df3e9836fb43bb735e75559e5e287}
+
+\clearpage
+\section*{4. 该怎样解释，导师追问怎样答？}
+在这一固定已见设置中，Gguide主MSE低于G0与Gterminal。它仍不足以把收益唯一归因于引导时机：额外前49步干预及后续传播也增加了累计干预量，且原参考、单场景和组件变体限制仍在。相对Gpaste的方向以上表为准，不删掉不利对比。
+
+\textbf{可见画质缺陷（root非盲人工观察）。}root查看全部四行六列总览后指出：Gguide在目标21--23出现明显重影、涂抹和模糊，边缘与物体形状不清；目标20也有双影。即使本轮MSE均较低，也不能说全面画质改善。这不是盲评或量化感知评分，也不作为物理真值。
+
+\textbf{为什么必须保留Gterminal？}Gguide如果只胜末端RGB贴图，差别还包括latent域融合与解码本身。Gterminal提供同一G0真实末步、同warp/mask/强度的对照。即便Gguide胜过它，也仍有累计50次与1次干预强度不同的解释；相同0.25不等于相同RGB变化剂量。本轮没有用结果重选强度或日程。
+
+\textbf{这是proposal推进还是新方法？}这轮真正把历史投影交给原生成过程使用，并完成固定四臂的收益比较，属于普通基线与机制区分证据。\textbf{new\_method\_validated=false，novelty\_authorization=NONE。}一条已见序列、四个相关目标、一份共同随机流，不能验证长时程、动态场景或跨场景泛化。像素、通道、保存字段和检查次数都不是独立实验样本数。
+
+\textbf{原始系统是否被精确复现？}原VMem采样与权重保留，VAE使用已声明的stabilityai/sd-vae-ft-mse变体；原SD2.1 VAE身份尚未确认，因此不声称完整原始系统的精确复现。CPU FP32、8线程、50步、576×576为固定设置；G0与旧S70的兼容性证据另列，不能替代VAE身份核实。
+
+\textbf{结果不好该怎样汇报？}即使主指标有收益，也要同时讲所有对照与失败目标；当前没有未见场景验证，不能将一次描述性收益写成新方法成立。
+
+\textbf{下一步怎样决定？}先根据本轮真实优劣和失败保留/停止相应假说。另一个强度、晚区间或等预算方案必须另立未来协议；不能补跑后挑最好结果冒称本轮成功。仅当普通解释仍不足、未见场景复现与消融支持时，才讨论方法贡献。
+
+\textbf{证据导航。}\noindent\path{execution_01/RECEIPT.json}\par
+\noindent\path{supervision_01/SUPERVISION.json}\par
+\noindent\path{scoring_01/RECEIPT.json}\par
+\noindent\path{INDEPENDENT_CONSUMPTION_REVIEW.json}\par
+\noindent\path{INDEPENDENT_SCORE_REVIEW.json}\par
+\noindent\path{visuals_01/EXPORT_RECEIPT.json}\par
+\noindent\path{scoring_01/FRAME_SCORES.csv}\par
+\noindent\path{scoring_01/ARM_SUMMARY.json}\par
+\noindent\path{scoring_01/CONTRASTS.json}\par
+\noindent\path{visuals_01/IMAGE_INDEX.json}\par
+
+\vfill\noindent\small\textcolor{accent}{这是已接受科研结果的报告整理；编译/页面检查是文档验收，不是新实验。全页视觉核与root最终报告验收另存。}
+\end{document}

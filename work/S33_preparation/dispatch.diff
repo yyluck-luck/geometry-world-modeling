@@ -1,0 +1,15 @@
+--- frozen_S32_dispatch
++++ S33_dispatch
+@@ -17,10 +17,10 @@
+             file = out / 'receipt.json'
+             old = read(file) if file.exists() else {}
+             if old.get('status') not in ('FAILED', 'UNAVAILABLE'):
+-                write(file, dict(status='FAILED', window_id=name, contract_sha256=c['_sha'], selection_sha256=c['selection_sha256'], completed_utc=utc(), reason='External worker failure: ' + repr(error), outputs={}, all_three_endpoints_available=False, partial_artifacts_retained=True, previous_nonterminal_receipt=old))
++                write(file, dict(status='FAILED', window_id=name, contract_sha256=c['_sha'], selection_sha256=c['selection_sha256'], completed_utc=utc(), reason='External worker failure: ' + repr(error), outputs={}, candidate_available=False, partial_artifacts_retained=True, previous_nonterminal_receipt=old))
+         actual = read(Path(c['output_root']) / name / 'receipt.json')
+         require(actual['status'] in ('PASS', 'FAILED', 'UNAVAILABLE'), 'Terminal whole-window state required')
+         receipt['windows'][name] = dict(status=actual['status'], receipt_sha256=sha(Path(c['output_root']) / name / 'receipt.json'))
+         write(target, receipt)
+-    receipt.update(status='COMPLETE_FIXED_WINDOW_MATRIX_SEALED', completed_utc=utc(), sensor_depth_read=False, success_windows=sum((x['status'] == 'PASS' for x in receipt['windows'].values())), next='Separate frozen scorer now eligible; all four windows and all three endpoints retained')
++    receipt.update(status='COMPLETE_FIXED_WINDOW_MATRIX_SEALED', completed_utc=utc(), sensor_depth_read=False, success_windows=sum((x['status'] == 'PASS' for x in receipt['windows'].values())), next='Separate frozen scorer now eligible; all four windows and the one new candidate retained; old48 rows unchanged')
+     write(target, receipt)

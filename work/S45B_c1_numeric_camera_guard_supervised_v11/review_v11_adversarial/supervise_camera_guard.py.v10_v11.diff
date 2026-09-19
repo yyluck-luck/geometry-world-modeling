@@ -1,0 +1,613 @@
+--- V10/supervise_camera_guard.py
++++ V11/supervise_camera_guard.py
+@@ -40,11 +40,11 @@
+ FORMAL_OUT = HERE / "execution_01"
+ LOCK = HERE / ".c1_numeric_camera_guard.lock"
+ LOCK_STAGING = HERE / ".c1_numeric_camera_guard.lock.staging"
+-BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V10.json"
+-BINDING_REVIEW = HERE / "BINDING_REVIEW_V10.json"
+-PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V10.json"
+-ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V10.json"
+-GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V10.json"
++BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V11.json"
++BINDING_REVIEW = HERE / "BINDING_REVIEW_V11.json"
++PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V11.json"
++ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V11.json"
++GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V11.json"
+ 
+ REPORT_NAME = "report.json"
+ WORKER_RECEIPT_NAME = "worker_receipt.json"
+@@ -68,7 +68,7 @@
+ RUSAGE_INFO_V4 = 4
+ MEMORY_SAMPLE_INTERVAL_SECONDS = 0.02
+ CAPABILITY_PROBE_BYTES = 8 * 1024 * 1024
+-ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V10-PREBOUND-ARTIFACT"
++ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V11-PREBOUND-ARTIFACT"
+ 
+ 
+ class SupervisorTermination(RuntimeError):
+@@ -136,7 +136,7 @@
+ 
+ def darwin_process_usage(pid):
+     """Read kernel process memory/accounting for one exact live Darwin PID."""
+-    require(platform.system() == "Darwin", "V10 requires the reviewed Darwin containment path")
++    require(platform.system() == "Darwin", "V11 requires the reviewed Darwin containment path")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pid_rusage
+     function.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+@@ -372,6 +372,30 @@
+ 
+ 
+ def verify_regular_lease(directory_fd, directory_path, lease, nlink=1):
++    # Worker report/receipt leases originate from create_prebound_worker_artifact
++    # and must keep using that parent-held FD reader.  Their records deliberately
++    # carry the pre-spawn inode and read-channel evidence, which is a strict
++    # superset of a normal regular_record_at record.
++    if "identity" in lease or "created_lstat" in lease:
++        require(
++            set(("fd", "name", "path", "identity", "created_lstat", "record", "body"))
++            .issubset(lease)
++            and lease["name"] == lease["record"]["name"]
++            and lease["path"] == lease["record"]["path"]
++            and lease["record"].get("prebound_identity") == list(lease["identity"])
++            and lease["record"].get("read_channel")
++            == "SUPERVISOR_HELD_PRESPAWN_FD_NO_PATH_REOPEN"
++            and nlink == 1,
++            "Prebound artifact lease record is incomplete: "
++            + lease.get("name", "<unknown>"),
++        )
++        record, body = verify_prebound_worker_artifact(
++            directory_fd, directory_path, lease,
++            expected_sha256=lease["record"]["sha256"],
++        )
++        require(record == lease["record"] and body == lease["body"],
++                "Held prebound artifact lease changed: " + lease["name"])
++        return record
+     record, body = regular_record_at(
+         directory_fd, directory_path, lease["record"]["name"], lease["fd"],
+         lease["record"]["sha256"], nlink,
+@@ -768,10 +792,10 @@
+             and parsed.get("passed") is False
+             and parsed.get("terminal_authority") is False
+             and parsed.get("authority_conditions", {}).get("canonical_path_alone_is_authoritative") is False,
+-            "Held final candidate does not have the full exact V10 pending document",
++            "Held final candidate does not have the full exact V11 pending document",
+         )
+         returned_observation = {
+-            "schema": "s45b-v10-held-terminal-candidate-observation-v3",
++            "schema": "s45b-v11-held-terminal-candidate-observation-v3",
+             "status": "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL",
+             "passed": False,
+             "terminal_authority": False,
+@@ -807,7 +831,7 @@
+     if not isinstance(observation, dict):
+         return False
+     if (
+-        observation.get("schema") != "s45b-v10-held-terminal-candidate-observation-v3"
++        observation.get("schema") != "s45b-v11-held-terminal-candidate-observation-v3"
+         or observation.get("status") != "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL"
+         or observation.get("passed") is not False
+         or observation.get("terminal_authority") is not False
+@@ -850,6 +874,52 @@
+         os.close(fd)
+ 
+ 
++def build_external_pass_seal(
++    terminal_observation, supervisor_sha256, worker_sha256,
++    attempt_lock_sha256, governance_attestation_sha256,
++):
++    """Construct PASS only from the exact post-publication held-FD observation.
++
++    The caller must already have closed the worker-source and filesystem control
++    FDs.  Keeping this final constructor separate lets the disposable integration
++    regression execute the same production function without opening C1 bodies.
++    """
++    require(
++        isinstance(terminal_observation, dict)
++        and terminal_observation.get("schema")
++        == "s45b-v11-held-terminal-candidate-observation-v3"
++        and terminal_observation.get("status")
++        == "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL"
++        and terminal_observation.get("passed") is False
++        and terminal_observation.get("terminal_authority") is False
++        and terminal_observation.get("canonical_path_alone_is_authoritative") is False
++        and terminal_observation.get("observed_while_all_core_evidence_fds_held") is True
++        and valid_sha(terminal_observation.get("candidate_sha256"))
++        and all(valid_sha(value) for value in (
++            supervisor_sha256, worker_sha256, attempt_lock_sha256,
++            governance_attestation_sha256,
++        )),
++        "External PASS constructor lacks the exact held-FD candidate bindings",
++    )
++    return {
++        "schema": "s45b-c1-numeric-camera-guard-terminal-pass-seal-v4",
++        "status": "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
++        "passed": True,
++        "terminal_authority": True,
++        "held_candidate_observation": terminal_observation,
++        "supervisor_sha256": supervisor_sha256,
++        "worker_sha256": worker_sha256,
++        "attempt_lock_sha256": attempt_lock_sha256,
++        "governance_attestation_sha256": governance_attestation_sha256,
++        "canonical_path_alone_is_authoritative": False,
++        "all_filesystem_control_fds_closed_before_pass_construction": True,
++        "held_worker_source_fd_verified_and_closed_before_pass_construction": True,
++        "requires_complete_exact_stdout_json": True,
++        "requires_supervisor_process_exit_zero": True,
++        "independent_result_review_required": True,
++    }
++
++
+ def _entry_absent(directory_fd, name):
+     try:
+         os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+@@ -883,7 +953,7 @@
+ 
+ 
+ def spawn_contained(inner, pass_fds=()):
+-    """Synthetic subprocess helper; the V10 formal worker never uses this path."""
++    """Synthetic subprocess helper; the V11 formal worker never uses this path."""
+     return subprocess.Popen(
+         contained_command(inner),
+         stdin=subprocess.DEVNULL,
+@@ -908,7 +978,7 @@
+ 
+ def apply_darwin_no_fork_sandbox():
+     """Apply Seatbelt inside the already-forked interpreter, without exec."""
+-    require(platform.system() == "Darwin", "V10 formal containment requires Darwin")
++    require(platform.system() == "Darwin", "V11 formal containment requires Darwin")
+     library = ctypes.CDLL(None, use_errno=True)
+     function = library.sandbox_init
+     function.argtypes = [ctypes.c_char_p, ctypes.c_uint64,
+@@ -993,7 +1063,7 @@
+ 
+ 
+ def _execute_loaded_worker(source_code, namespace):
+-    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v10")
++    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v11")
+     module.__file__ = str(WORKER)
+     exec(source_code, module.__dict__)
+     require(module.SELF == WORKER and module.formal_worker_run.__module__
+@@ -1014,7 +1084,7 @@
+     require(namespace.worker_source_fd == lease["fd"],
+             "Formal namespace does not carry the retained worker source FD")
+     execution_binding = {
+-        "schema": "s45b-v10-fork-bound-worker-execution-v1",
++        "schema": "s45b-v11-fork-bound-worker-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1164,7 +1234,7 @@
+ 
+ 
+ def darwin_process_path(pid):
+-    require(platform.system() == "Darwin", "V10 process-image binding requires Darwin")
++    require(platform.system() == "Darwin", "V11 process-image binding requires Darwin")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pidpath
+     function.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+@@ -1186,7 +1256,7 @@
+     kernel_snapshot = executable_snapshot(kernel_path)
+     launcher_snapshot = executable_snapshot(executable_path)
+     value = {
+-        "schema": "s45b-v10-running-interpreter-binding-v1",
++        "schema": "s45b-v11-running-interpreter-binding-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_NO_EXEC",
+         "supervisor_pid": os.getpid(),
+         "kernel_process_path": str(kernel_path),
+@@ -1320,7 +1390,7 @@
+         allocation[offset] = 1
+     time.sleep(0.10)
+     value = {
+-        "schema": "s45b-v10-darwin-fork-bound-capability-probe-v1",
++        "schema": "s45b-v11-darwin-fork-bound-capability-probe-v1",
+         "status": "PASS_CAPABILITY_PROBE_ONLY",
+         "pid": os.getpid(),
+         "cpu_limit": list(cpu),
+@@ -1340,10 +1410,10 @@
+ 
+ def runtime_capability_preflight(worker_source_record):
+     """Exercise the exact fork-without-exec production mechanism pre-attempt."""
+-    require(platform.system() == "Darwin", "V10 formal execution supports reviewed macOS only")
++    require(platform.system() == "Darwin", "V11 formal execution supports reviewed macOS only")
+     interpreter_binding, interpreter_binding_sha256 = current_interpreter_binding()
+     execution_binding = {
+-        "schema": "s45b-v10-fork-bound-capability-execution-v1",
++        "schema": "s45b-v11-fork-bound-capability-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1378,7 +1448,7 @@
+         "POSIX_SPAWN_SETSID",
+     }
+     require(
+-        payload.get("schema") == "s45b-v10-darwin-fork-bound-capability-probe-v1"
++        payload.get("schema") == "s45b-v11-darwin-fork-bound-capability-probe-v1"
+         and payload.get("status") == "PASS_CAPABILITY_PROBE_ONLY"
+         and payload.get("cpu_limit") == [CPU_LIMIT_SECONDS, CPU_LIMIT_SECONDS]
+         and payload.get("file_size_limit") == [MAX_ARTIFACT_BYTES, MAX_ARTIFACT_BYTES]
+@@ -1397,7 +1467,7 @@
+             and binding_after_sha256 == interpreter_binding_sha256,
+             "Running interpreter binding changed across capability probe")
+     return {
+-        "schema": "s45b-v10-runtime-capability-preflight-v1",
++        "schema": "s45b-v11-runtime-capability-preflight-v1",
+         "status": "PASS_BEFORE_ATTEMPT_COMMIT",
+         "started_utc": started_utc,
+         "completed_utc": completed_utc,
+@@ -1804,8 +1874,8 @@
+                 "supervise_camera_guard.py": args.self_sha256,
+                 "primary_source_review": args.primary_source_review_sha256,
+                 "adversarial_source_review": args.adversarial_source_review_sha256,
+-                "C1_CAMERA_GUARD_BINDING_V10.json": args.binding_sha256,
+-                "BINDING_REVIEW_V10.json": args.binding_review_sha256,
++                "C1_CAMERA_GUARD_BINDING_V11.json": args.binding_sha256,
++                "BINDING_REVIEW_V11.json": args.binding_review_sha256,
+                 "governance_attestation": args.governance_attestation_sha256,
+             },
+             "capability_sha256": capability_sha256,
+@@ -2109,23 +2179,10 @@
+         lock_fd = None
+         parent_fd = None
+         phase = "EXTERNAL_HELD_FD_AUTHORITY_EMISSION"
+-        external_authority = {
+-            "schema": "s45b-c1-numeric-camera-guard-terminal-pass-seal-v4",
+-            "status": "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
+-            "passed": True,
+-            "terminal_authority": True,
+-            "held_candidate_observation": terminal_observation,
+-            "supervisor_sha256": args.self_sha256,
+-            "worker_sha256": args.worker_sha256,
+-            "attempt_lock_sha256": lock_sha256,
+-            "governance_attestation_sha256": args.governance_attestation_sha256,
+-            "canonical_path_alone_is_authoritative": False,
+-            "all_filesystem_control_fds_closed_before_pass_construction": True,
+-            "held_worker_source_fd_verified_and_closed_before_pass_construction": True,
+-            "requires_complete_exact_stdout_json": True,
+-            "requires_supervisor_process_exit_zero": True,
+-            "independent_result_review_required": True,
+-        }
++        external_authority = build_external_pass_seal(
++            terminal_observation, args.self_sha256, args.worker_sha256,
++            lock_sha256, args.governance_attestation_sha256,
++        )
+         external_body = encoded_json(external_authority)
+         write_all(sys.stdout.fileno(), external_body)
+         sys.stdout.flush()
+@@ -2175,7 +2232,7 @@
+ 
+ 
+ def synthetic_loaded_code_entry(code, output_fd):
+-    module = types.ModuleType("_s45b_v10_synthetic_exact_loaded_code")
++    module = types.ModuleType("_s45b_v11_synthetic_exact_loaded_code")
+     module.__file__ = "/synthetic/held/source.py"
+     exec(code, module.__dict__)
+     return module.entry(output_fd)
+@@ -2210,14 +2267,23 @@
+     return result, encoded_json(result)
+ 
+ 
+-def complete_synthetic_worker_fixture(worker, secret):
++def complete_synthetic_worker_fixture(
++    worker, secret, report_identity=None, receipt_identity=None,
++):
+     result = synthetic_numeric_result(worker)
+     verdict = result.pop("status")
+     dummy = "a" * 64
+     source_binding = verify_loaded_worker_lease(worker)
+     event_chain = {"event_count": 1, "last_event_sha256": "b" * 64}
+-    report_identity = (41, 43, stat.S_IFREG | 0o400)
+-    receipt_identity = (41, 47, stat.S_IFREG | 0o400)
++    if report_identity is None:
++        report_identity = (41, 43, stat.S_IFREG | 0o400)
++    if receipt_identity is None:
++        receipt_identity = (41, 47, stat.S_IFREG | 0o400)
++    require(
++        type(report_identity) is tuple and len(report_identity) == 3
++        and type(receipt_identity) is tuple and len(receipt_identity) == 3,
++        "Synthetic prebound identities are malformed",
++    )
+     report = dict(result)
+     report.update(
+         schema="s45b-c1-numeric-camera-guard-worker-report-v3",
+@@ -2321,7 +2387,7 @@
+     fcntl.flock(parent_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+     parent_identity = worker.inode_identity(os.fstat(parent_fd))
+     lock_doc = {
+-        "schema": "synthetic-v10-attempt-lock-v1",
++        "schema": "synthetic-v11-attempt-lock-v1",
+         "status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
+         "passed": False,
+     }
+@@ -2365,6 +2431,203 @@
+     }
+ 
+ 
++def synthetic_prebound_full_success_path():
++    """Run the ordinary V11 artifact-to-terminal functions on disposable bytes.
++
++    This intentionally uses a fresh held worker-source FD and real prebound
++    report/receipt inodes.  The fixture contains synthetic matrices and tensor
++    descriptors only; it never opens any archived tensor body or image.
++    """
++    worker, worker_record = load_worker_same_fd()
++    state = {"leases": {}}
++    with tempfile.TemporaryDirectory(prefix="s45b_v11_prebound_full_success_") as raw:
++        root = Path(raw).resolve()
++        parent_fd = lock_fd = output_fd = -1
++        try:
++            parent_fd = os.open(
++                root,
++                os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
++                | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
++            )
++            fcntl.flock(parent_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
++            parent_identity = worker.inode_identity(os.fstat(parent_fd))
++            lock_doc = {
++                "schema": "synthetic-v11-full-success-attempt-lock-v1",
++                "status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
++                "passed": False,
++            }
++            lock_fd, lock_identity, lock_sha, lock_bytes = worker.commit_attempt_lease(
++                parent_fd, root, parent_identity,
++                "attempt.lock", "attempt.lock.staging", lock_doc,
++            )
++            os.mkdir("execution", 0o700, dir_fd=parent_fd)
++            output_fd = os.open(
++                "execution",
++                os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
++                | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
++                dir_fd=parent_fd,
++            )
++            output_identity = worker.inode_identity(os.fstat(output_fd))
++            report_bound = create_prebound_worker_artifact(
++                output_fd, root / "execution", REPORT_NAME,
++            )
++            receipt_bound = create_prebound_worker_artifact(
++                output_fd, root / "execution", WORKER_RECEIPT_NAME,
++            )
++            state["leases"] = {
++                REPORT_NAME: report_bound,
++                WORKER_RECEIPT_NAME: receipt_bound,
++            }
++            secret = secrets.token_bytes(32)
++            fixture = complete_synthetic_worker_fixture(
++                worker, secret,
++                report_identity=report_bound["identity"],
++                receipt_identity=receipt_bound["identity"],
++            )
++            for name, lease, document, expected_body in (
++                (REPORT_NAME, report_bound, fixture["report"], fixture["report_body"]),
++                (WORKER_RECEIPT_NAME, receipt_bound,
++                 fixture["receipt"], fixture["receipt_body"]),
++            ):
++                unsigned = {
++                    key: value for key, value in document.items()
++                    if key != "artifact_authentication_hmac_sha256"
++                }
++                digest, written = worker.write_prebound_json(
++                    output_fd, name, lease["fd"], lease["identity"],
++                    unsigned, secret,
++                )
++                require(written == expected_body and digest == sha256_bytes(expected_body),
++                        "Synthetic worker writer bytes differ: " + name)
++                record, observed = verify_prebound_worker_artifact(
++                    output_fd, root / "execution", lease, expected_sha256=digest,
++                )
++                require(observed == expected_body,
++                        "Synthetic held reader bytes differ: " + name)
++                lease["record"] = record
++                lease["body"] = observed
++
++            complete = validate_complete_worker_artifacts(
++                worker, fixture["report"], fixture["receipt"],
++                report_bound["body"], receipt_bound["body"], secret,
++                fixture["args"], fixture["preflight"], fixture["worker_pid"],
++                report_bound, receipt_bound,
++                fixture["interpreter_binding_sha256"],
++            )
++            initial = collect_evidence_bundle(
++                worker, parent_fd, root, parent_identity,
++                lock_fd, "attempt.lock", lock_identity, lock_sha, lock_bytes,
++                output_fd, "execution", output_identity,
++                state["leases"], sorted(state["leases"]),
++            )
++            require(
++                all(record.get("read_channel")
++                    == "SUPERVISOR_HELD_PRESPAWN_FD_NO_PATH_REOPEN"
++                    for record in initial["artifacts"].values()),
++                "Full-path collection dropped a prebound held-FD record",
++            )
++
++            supervisor_sha = worker.write_new_at(
++                output_fd, SUPERVISOR_RECEIPT_NAME,
++                {"schema": "synthetic-v11-supervisor", "passed": False},
++            )
++            state["leases"][SUPERVISOR_RECEIPT_NAME] = open_regular_lease(
++                output_fd, root / "execution", SUPERVISOR_RECEIPT_NAME,
++                supervisor_sha,
++            )
++            before_barrier = collect_evidence_bundle(
++                worker, parent_fd, root, parent_identity,
++                lock_fd, "attempt.lock", lock_identity, lock_sha, lock_bytes,
++                output_fd, "execution", output_identity,
++                state["leases"], sorted(state["leases"]),
++            )
++            barrier_sha = worker.write_new_at(
++                output_fd, BARRIER_NAME,
++                {"schema": "synthetic-v11-barrier", "passed": False,
++                 "before_evidence_sha256": sha256_bytes(canonical(before_barrier))},
++            )
++            state["leases"][BARRIER_NAME] = open_regular_lease(
++                output_fd, root / "execution", BARRIER_NAME, barrier_sha,
++            )
++            after_barrier = collect_evidence_bundle(
++                worker, parent_fd, root, parent_identity,
++                lock_fd, "attempt.lock", lock_identity, lock_sha, lock_bytes,
++                output_fd, "execution", output_identity,
++                state["leases"], sorted(state["leases"]),
++            )
++            require(
++                all(after_barrier["artifacts"][name]
++                    == before_barrier["artifacts"][name]
++                    for name in before_barrier["artifacts"]),
++                "Full-path evidence changed across the ordinary barrier",
++            )
++            seal = {
++                "schema": "s45b-c1-numeric-camera-guard-terminal-candidate-v4",
++                "status": "NUMERIC_WORKER_PASS_PENDING_HELD_FD_CLOSE_AND_EXTERNAL_EXIT_ZERO",
++                "passed": False,
++                "terminal_authority": False,
++                "row": "C1",
++                "numeric_worker_verdict":
++                    "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
++                "synthetic_only": True,
++            }
++            observation = publish_terminal_seal(
++                worker, parent_fd, root, parent_identity,
++                lock_fd, "attempt.lock", lock_identity, lock_sha, lock_bytes,
++                output_fd, "execution", output_identity,
++                state["leases"], seal,
++            )
++            require(canonical_seal_matches_held_observation(output_fd, observation),
++                    "Full-path terminal candidate lost its held-FD binding")
++            verify_loaded_worker_lease(worker, worker_record["sha256"])
++            close_loaded_worker_lease(worker)
++            require(worker._held_source_lease["fd"] == -1,
++                    "Synthetic held worker source did not close before PASS")
++            close_terminal_control_fds(output_fd, lock_fd, parent_fd)
++            output_fd = lock_fd = parent_fd = -1
++            external = build_external_pass_seal(
++                observation, "c" * 64, worker_record["sha256"],
++                lock_sha, "2" * 64,
++            )
++            external_body = encoded_json(external)
++            require(
++                json.loads(external_body) == external
++                and external["status"]
++                == "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY"
++                and external["passed"] is True
++                and external["terminal_authority"] is True
++                and external["all_filesystem_control_fds_closed_before_pass_construction"]
++                is True,
++                "Full-path external exit-success document is malformed",
++            )
++            return {
++                "status": "PASS_V11_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH",
++                "complete_worker_schema_validation": complete,
++                "initial_prebound_records": sorted(initial["artifacts"]),
++                "terminal_candidate_status": observation["status"],
++                "external_exit_success_status": external["status"],
++                "external_exit_success_bytes": len(external_body),
++                "real_c1_tensor_body_bytes_read": 0,
++                "pixels_decoded": 0,
++                "formal_paths_created": 0,
++            }
++        finally:
++            try:
++                close_leases(state.get("leases", {}))
++            except BaseException:
++                pass
++            try:
++                close_loaded_worker_lease(worker)
++            except BaseException:
++                pass
++            for fd in (output_fd, lock_fd, parent_fd):
++                if type(fd) is int and fd >= 0:
++                    try:
++                        os.close(fd)
++                    except OSError:
++                        pass
++
++
+ def synthetic_close(state):
+     try:
+         close_leases(state.get("leases", {}))
+@@ -2507,7 +2770,7 @@
+     # V6's missing acquisition-window attack: the parent creates both inodes
+     # before fork, the child writes only inherited FDs, and the parent never
+     # reopens either pathname to acquire authority.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v10_prebound_nominal_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v11_prebound_nominal_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(
+@@ -2526,7 +2789,7 @@
+             synthetic_prebound_writer,
+             (worker, output_fd, report_bound, receipt_bound, secret),
+             (output_fd, report_bound["fd"], receipt_bound["fd"]),
+-            {"schema": "synthetic-v10-prebound-writer",
++            {"schema": "synthetic-v11-prebound-writer",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         observation = bounded_process_wait(
+@@ -2551,7 +2814,7 @@
+     checks["prespawn_create_only_pair_child_inherited_fd_publication"] = "PASS"
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v10_prelaunch_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v11_prelaunch_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2579,7 +2842,7 @@
+             os.close(output_fd)
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v10_preacquire_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v11_preacquire_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2613,7 +2876,7 @@
+             close_leases({"report": report_bound, "receipt": receipt_bound})
+             os.close(output_fd)
+ 
+-    with tempfile.TemporaryDirectory(prefix="s45b_v10_same_inode_tamper_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v11_same_inode_tamper_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2647,7 +2910,7 @@
+     # Force the exact V6 race on a disposable source: replace its pathname
+     # after compilation but before fork.  The child still executes ORIGINAL
+     # because the code object and interpreter image are inherited, not reopened.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v10_source_exec_binding_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v11_source_exec_binding_") as raw:
+         source_path = Path(raw) / "probe.py"
+         original = b"import os\ndef entry(fd):\n os.write(fd, b'ORIGINAL')\n return 0\n"
+         source_path.write_bytes(original)
+@@ -2665,7 +2928,7 @@
+         interpreter, interpreter_sha = current_interpreter_binding()
+         process = _fork_loaded_entry(
+             synthetic_loaded_code_entry, (code, write_fd), (write_fd,),
+-            {"schema": "synthetic-v10-loaded-code-race",
++            {"schema": "synthetic-v11-loaded-code-race",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         os.close(write_fd)
+@@ -3099,12 +3362,24 @@
+             "Exact-PID memory high-water gate did not fail closed")
+     checks["darwin_exact_pid_memory_high_water_gate"] = "PASS_TERMINATED_FAIL_CLOSED"
+ 
++    full_path = synthetic_prebound_full_success_path()
++    require(
++        full_path["status"]
++        == "PASS_V11_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH"
++        and full_path["real_c1_tensor_body_bytes_read"] == 0
++        and full_path["pixels_decoded"] == 0
++        and full_path["formal_paths_created"] == 0,
++        "Disposable prebound full production-function path failed",
++    )
++    checks["prebound_creator_writer_held_reader_collect_terminal_exit_success"] = "PASS"
++
+     close_loaded_worker_lease(worker)
+     return {
+         "schema": "s45b-c1-numeric-camera-guard-supervisor-synthetic-selftest-v3",
+         "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+         "worker_source": worker_record,
+         "runtime_capability_preflight": runtime,
++        "full_prebound_production_function_path": full_path,
+         "checks": checks,
+         "formal_runner_calls": 0,
+         "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,

@@ -1,0 +1,228 @@
+--- V11/PROTOCOL.md
++++ V12/PROTOCOL.md
+@@ -1,20 +1,33 @@
+-# S45B supervised C1 numeric requested-camera guard protocol, V11.0.0
++# S45B supervised C1 numeric requested-camera guard protocol, V12.0.0
+ 
+ Status: `SOURCE_ONLY_UNBOUND_REQUIRES_FRESH_DUAL_REVIEW_NOT_EXECUTABLE`.
+ 
+-Authorship continuity recorded at 2026-09-08T14:12:54.362976+00:00: the interrupted, unfrozen V11
+-candidate was written by `/root/c2_v5_lifecycle_review`. The finishing author
+-`/root/execution_resumption_audit` preserved the original five WIP files under
+-`pre_resume_20260908T141021590483Z`, reran the existing finite dual-Python
+-acceptance suite, and is responsible for the final V11 freeze and handoff.
+-The runtime `AUTHOR_ROLE` names this finishing author so future fresh reviews
+-and binding documents reflect the actual resumed execution provenance. This
+-administrative identity change grants no scientific or formal-run authority.
+-Both authors remain authors of the candidate, and neither may count as an
+-independent source reviewer of it. The original author did not provide a final
+-freeze or author-test handoff before interruption.
+-
+-V11 minimally repairs the consumed V10 supervisor failure recorded by
++V12 inherits the V11 prebound record compatibility repair. V11 failed after a pending
++terminal candidate existed: its formal tail called an undefined `write_all`, while
++the old positive test stopped at construction/serialization. The exact historical
++exception was not captured; the missing writer is a deterministic source defect
++and a strong explanation, not an observed historical traceback. Independent
++diagnosis `../S45B_c1_numeric_camera_guard_supervised_v11/ACTUAL_EXECUTION_FAILURE_DIAGNOSIS_V11.json`
++has SHA-256 `de304196f0d715bf158bfd9149472293c145638c8cedabd40307413a67789377`.
++
++The finishing author remains `/root/execution_resumption_audit`; prior functional
++author `/root/c2_v5_lifecycle_review` is retained in provenance. Neither counts as
++an independent source reviewer. All consumed V11 files, reviews and failed attempt
++remain unchanged and grant no V12 authority.
++
++V12 repairs only the actual stdout tail: formal and synthetic processes share
++`emit_external_pass_seal`, which constructs the existing exact record, caps it
++within the existing stdout bound, calls the already loaded `worker.write_all`,
++flushes the stream, and returns zero only afterward. Unexpected exceptions in
++formal supervision emit a bounded, best-effort stderr diagnostic before cleanup,
++including phase and original error type/text; no closed result path is reopened.
++A failed stderr descriptor may prevent the diagnostic, but can never authorize
++PASS. The finite disposable child checks actual NORMAL and SHORT_WRITE success,
++WRITE_ERROR/PARTIAL_WRITE_ERROR/FLUSH_ERROR nonzero failure, complete JSON bytes,
++and externally observed process exit. No camera math/resource/role/attempt gate
++is widened.
++
++The inherited compatibility repair addresses the consumed V10 supervisor failure recorded by
+ `ACTUAL_EXECUTION_FAILURE_DIAGNOSIS_V10.json` SHA-256
+ `0938cd8561a6d1f60a1d5396eb84aebec881bf8e3415ad7a4a4b7a04fd8386c6`.
+ The V10 worker returned 0 and read 11 camera bodies (1584 bytes), and complete
+@@ -23,17 +36,17 @@
+ contains `prebound_identity` and `read_channel`, while `verify_regular_lease`
+ reconstructed a smaller ordinary-record dictionary and required whole-dict
+ equality. The bytes, SHA-256, device, inode, mode, link count, size, and pathname
+-were unchanged. V11 dispatches a prebound lease back through
++were unchanged. V12 dispatches a prebound lease back through
+ `verify_prebound_worker_artifact` on its existing parent-held descriptor and
+ retains full equality against the original superset record. Ordinary regular
+ leases keep the original `regular_record_at` path unchanged.
+ 
+-V11 preserves V10's legitimate single-K `[3,3]` fix, every numeric equation,
++V12 preserves V10's legitimate single-K `[3,3]` fix, every numeric equation,
+ threshold, dtype/shape/size bound, source/upstream requirement, and terminal
+ field. The external PASS dictionary is factored without field changes into one
+ production constructor so a disposable integration case can execute the actual
+ post-close construction. V9 and V10 source, locks, executions, failure records,
+-and diagnoses remain unchanged and confer no V11 authority. V8's earlier
++and diagnoses remain unchanged and confer no V12 authority. V8's earlier
+ non-consuming schema diagnosis also remains preserved.
+ The older V6 primary BLOCKED review
+ `0b30345a8546cd2e89036b118b12b75825cf7662b133d2bac380b4f9904aeb16`
+@@ -43,14 +56,14 @@
+ does read and hash the already frozen C1/S45 JSON and event metadata, using the
+ preserved V8 binding only as an exact non-authorizing path/hash fixture. It stops
+ before `CameraTensorStore` construction and reads zero camera tensor bytes. No
+-test creates a V11 binding, governance attestation, permanent lock, or
++test creates a V12 binding, governance attestation, permanent lock, or
+ `execution_01`; no test imports or runs a model or decodes pixels. All other
+ dynamic tests use generated matrices and disposable operating-system temporary
+ directories.
+ 
+ ## 1. Threat model fixed before implementation
+ 
+-V11 must fail closed against these source-level and same-user concurrent faults:
++V12 must fail closed against these source-level and same-user concurrent faults:
+ 
+ 1. a nonportable `preexec_fn` fails only after the permanent one-use lock;
+ 2. report, receipt, lock, output directory, staging candidate, or final candidate is
+@@ -77,12 +90,12 @@
+ pathname. Before a permanent attempt exists, that exact fork/sandbox mechanism
+ actually attempts fork→setsid with stdio kept open, fork→setsid with stdio
+ closed, and `posix_spawn(..., setsid=True)`; all must fail with `EPERM`.
+-V11 does not claim to discover every descendant after allowing forks.
++V12 does not claim to discover every descendant after allowing forks.
+ 
+ The candidate cannot authenticate Codex task identity inside one Unix account.
+ Therefore unequal role strings and ordered timestamps are structural checks,
+ not identity proof. Formal launch additionally requires a separate exact
+-`GOVERNANCE_ATTESTATION_V11.json`, created after both source reviews, binding, and
++`GOVERNANCE_ATTESTATION_V12.json`, created after both source reviews, binding, and
+ binding review by the external orchestration layer. The candidate validates its
+ cross-document artifact, task, turn, role, and UTC consistency. Trust in that
+ external issuer remains an explicit governance boundary.
+@@ -166,7 +179,7 @@
+ 
+ ## 4. Source, binding, and governance gates
+ 
+-The reviewed V11 source set is exactly:
++The reviewed V12 source set is exactly:
+ 
+ 1. `camera_guard.py`;
+ 2. `supervise_camera_guard.py`;
+@@ -177,23 +190,23 @@
+ Two fresh reviews use schema
+ `s45b-c1-numeric-camera-guard-source-review-v4`, kinds `primary` and
+ `adversarial`, status
+-`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V11`, exact five-file
++`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V12`, exact five-file
+ identities, zero real C1/model/formal counters, and empty blockers. They also
+ record externally matchable reviewer task and turn IDs. Review files are not
+ formal attempt paths, so the canonical full synthetic suite remains runnable
+ after a primary review exists.
+ 
+-The later binding is `C1_CAMERA_GUARD_BINDING_V11.json`, schema
++The later binding is `C1_CAMERA_GUARD_BINDING_V12.json`, schema
+ `s45b-c1-numeric-camera-guard-binding-v4`, status
+-`FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V11`. Its independent
+-review is `BINDING_REVIEW_V11.json`, schema
++`FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V12`. Its independent
++review is `BINDING_REVIEW_V12.json`, schema
+ `s45b-c1-numeric-camera-guard-binding-review-v4`, status
+-`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V11`. Both include
++`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V12`. Both include
+ task/turn provenance fields. The unbound template has 15 future source/upstream
+ hash nulls. Null is never a wildcard.
+ 
+ After binding review, external orchestration creates
+-`GOVERNANCE_ATTESTATION_V11.json`. It binds the five sources, both source reviews,
++`GOVERNANCE_ATTESTATION_V12.json`. It binds the five sources, both source reviews,
+ binding, binding review, V6 BLOCKED evidence, role/task/turn/UTC events, and its
+ issuer task/turn. Its SHA is supplied separately to the formal command. This
+ extra receipt avoids treating each artifact's own role/time fields as sole
+@@ -204,7 +217,7 @@
+ with `requested_pose_K_guard_pass=false`. Identity propagation is not numeric
+ pose/K PASS.
+ 
+-V11 preserves the V10 upstream adapters, numeric guard, and single-camera
++V12 preserves the V10 upstream adapters, numeric guard, and single-camera
+ `[3,3]` K support. Its only functional repair routes the two prebound worker
+ leases through their original held-FD verifier during later evidence collection;
+ normal regular leases retain their original verifier. The terminal binding's
+@@ -213,7 +226,7 @@
+ `saved_quantity_consumption_status=VERIFIED_BY_IDENTITY_BOUND_ARCHIVED_ARRAY_CHAIN_IF_THIS_REPORT_PASSES`
+ and
+ `pixel_identity_status=ARCHIVED_PIL_PIXEL_TENSORS_AND_ARCHIVE_FILE_BYTES_IDENTITY_ONLY`,
+-along with the unchanged row, manifest, cache count and no-quality checks. V11
++along with the unchanged row, manifest, cache count and no-quality checks. V12
+ does not invent or require report `schema/status`; those fields remain required
+ on the independently bound worker receipt where they actually exist.
+ 
+@@ -236,7 +249,7 @@
+ swap can therefore cause a canonical identity rejection but cannot change the
+ bytes or executable image that run.
+ 
+-Darwin rejects the V5 `RLIMIT_AS=2 GiB` preexec call. V11 never calls
++Darwin rejects the V5 `RLIMIT_AS=2 GiB` preexec call. V12 never calls
+ `RLIMIT_AS`, `RLIMIT_RSS`, or `RLIMIT_DATA`. The forked child sets only the
+ successfully probed `RLIMIT_CPU=120 s` and `RLIMIT_FSIZE=64 MiB`. Memory uses the
+ exact child PID: `proc_pid_rusage(RUSAGE_INFO_V4)` is sampled every 20 ms and the
+@@ -305,7 +318,7 @@
+ 
+ This closes the V5 setsid+stdio-closure escape by preventing descendant creation.
+ If a future worker needs subprocesses, it requires a new containment design,
+-new source version, and two new reviews; V11 cannot simply relax the sandbox.
++new source version, and two new reviews; V12 cannot simply relax the sandbox.
+ 
+ ## 8. Held-FD candidate and exit-gated terminal authority
+ 
+@@ -317,7 +330,7 @@
+ yaw order, cache/batch relation, closure, tensor identity/byte/count, event/source
+ identity, timing, and explicit non-goal sentinel. Only then does it write the
+ pending-only supervisor receipt and barrier. It stages the full
+-V11 **pending terminal candidate**, fsyncs it, hard-links the same inode to
++V12 **pending terminal candidate**, fsyncs it, hard-links the same inode to
+ `terminal_pass_candidate.json`, and verifies the invalid two-link state. Both
+ candidate names contain `passed=false` and `terminal_authority=false`; no
+ filesystem path written by the publication routine contains a truthy PASS.
+@@ -330,7 +343,7 @@
+ 3. rechecks canonical final pathname against that held inode and exact bytes;
+ 4. rechecks the permanent lock, canonical execution directory, and every held
+    evidence FD/path/SHA;
+-5. parses the complete expected V11 pending candidate, not selected fields;
++5. parses the complete expected V12 pending candidate, not selected fields;
+ 6. creates an in-memory candidate observation containing candidate SHA, byte count,
+    inode identity, and evidence-projection SHA while all core FDs are held;
+ 7. performs required evidence/candidate closes and a final output-directory
+@@ -374,13 +387,13 @@
+ - V6 five sources, frozen manifest, final receipt, and two-CRITICAL/two-MAJOR
+   BLOCKED primary review immutability;
+ - tensor list/tuple/scalar provenance and pixel-shape pre-open rejection.
+-- the exact preserved V8 terminal/report mismatch is reproduced, then the V11
++- the exact preserved V8 terminal/report mismatch is reproduced, then the V12
+   production `verify_upstream` and `selected_event_captures` functions pass the
+   frozen upstream documents and 102-event chain to the descriptor boundary;
+   no tensor body is opened.
+ - the exact preserved V9 `report.json` is read as JSON only: V9's single-K
+-  rejection is reproduced, V11 accepts the legitimate `[3,3]` descriptor set,
+-  and V11 still rejects an ordinary `[2,2]` shape; no `.bin` is opened.
++  rejection is reproduced, V12 accepts the legitimate `[3,3]` descriptor set,
++  and V12 still rejects an ordinary `[2,2]` shape; no `.bin` is opened.
+ - the exact preserved V10 report and diagnosis JSON are read without any `.bin`:
+   V10's smaller ordinary record is shown equal on every shared field and byte
+   but still reproduces the two-extra-key whole-dict rejection.
+@@ -390,7 +403,7 @@
+   control/source FD closes, and external exit-success constructor in order. It
+   uses generated matrices/descriptors and opens zero real C1 tensor/image bodies.
+ 
+-Known platform limit: V11 formal containment is macOS-specific and depends on
++Known platform limit: V12 formal containment is macOS-specific and depends on
+ the in-process Seatbelt `sandbox_init` API and libproc behavior proven at runtime.
+ Missing or changed behavior blocks before attempt; there is no fallback. Memory is a fail-closed acceptance
+ and kill monitor, not a kernel allocation reservation. The external governance
+@@ -400,3 +413,5 @@
+ Passing every synthetic test freezes source behavior only. It does not create a
+ C1 pose/K result or authorize a binding, formal attempt, score, image inspection,
+ method claim, or novelty claim.
++
++V12 additionally uses the actual production emitter inside a disposable child; its parent parses the full stdout JSON and accepts it only with observed exit 0 and empty stderr. Short writes must finish completely; write errors, partial-then-error and flush errors must be nonzero and yield the bounded diagnostic, even when a flush failure left a full JSON document on stdout. These are finite ordinary I/O cases, not a new security matrix.

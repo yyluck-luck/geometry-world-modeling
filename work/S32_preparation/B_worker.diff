@@ -1,0 +1,23 @@
+--- frozen_parent_worker
++++ S32_B_worker
+@@ -1,9 +1,9 @@
+ def ga_worker(m, mode):
+-    require(mode in ('cut3r', 'ttt3r', 'filt3r'), 'S26B never reruns common_old GA')
++    require(mode == 'C2a', 'S32 one same-window unit-scale control')
+     out = OUT / mode
+     require(not out.exists(), 'Never overwrite or repeat an existing GA run')
+     out.mkdir(parents=True)
+-    n = 4 if mode == 'common_old' else 8
++    n = 4
+     r = dict(status='RUNNING', started_utc=utc(), mode=mode, frame_count=n, manifest_sha256=sha(MANIFEST), sensor_depth_used=False, model_forwards=0)
+     write(out / 'receipt.json', r)
+     try:
+@@ -14,7 +14,7 @@
+         require(sha(WORK / 'control_c2w.npy') == cr['output_sha256'], 'Camera input seal')
+         np, torch, a, ns, views, proof = original_context(m)
+         cameras = torch.from_numpy(np.load(WORK / 'control_c2w.npy', allow_pickle=False)[:n].copy())
+-        name = 'common_old_depth_original4' if mode == 'common_old' else mode
++        name = 'selected_window_cut3r'
+         records = m['candidate']['archives'][name]
+         predictions = a.load_saved_predictions(records)
+         output = a.assemble_saved_output(ns, views[:n], predictions)

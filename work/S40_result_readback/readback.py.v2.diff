@@ -1,0 +1,119 @@
+--- preserved_v1/readback.py
++++ v2/readback.py
+@@ -133,6 +133,50 @@
+                 'mode':'FP64_to_FP32_then_bitwise' if converted else 'same_dtype_bitwise'}
+     def same_desc(self,a,b,label,ad,cast=False):
+         return self.equal(self.array(a,ad),self.array(b,ad),label,cast)
++    def same_scalar(self,a,b,label,ad):
++        if isinstance(a,dict) or isinstance(b,dict):
++            require(isinstance(a,dict) and isinstance(b,dict) and
++                    a.get('kind')==b.get('kind')=='tensor' and
++                    math.prod(a['shape'])==math.prod(b['shape'])==1,'Scalar descriptor differs: '+label)
++            return self.same_desc(a,b,label,ad)
++        require(type(a) is type(b) and type(a) in (float,int),'Scalar type differs: '+label)
++        require(struct.pack('<d',a)==struct.pack('<d',b) if type(a) is float else a==b,'Scalar bits differ: '+label)
++        return {'comparison':label,'mode':'same_python_scalar_bits','type':type(a).__name__}
++
++
++def trace_states(rows):
++    """Saved-event semantics only; do not import/execute the original verifier."""
++    order=('batch_begin','sample_call','sampler_enter','sampler_return','sample_return',
++           'cache_commit','map_commit','batch_complete')
++    batches={};active=None;closed=False
++    for i,row in enumerate(rows):
++        require(not closed,'Trace event follows session closure')
++        ev,bid,p=row['event'],row['batch_id'],row['payload']
++        if ev=='session':
++            require(i==0 and bid is None,'Duplicate/misplaced trace session');continue
++        require(i>0,'Trace must begin with its single session')
++        if ev=='batch_begin':
++            require(active is None and isinstance(bid,str) and bid and bid not in batches
++                    and len(batches)<2,'Duplicate/overlapping trace batch')
++            active=bid;batches[bid]={'state':ev,'callbacks':0,'event_sequences':{ev:row['seq']}}
++        elif ev=='denoiser_call':
++            require(bid==active and batches[bid]['state']=='sampler_enter','Callback outside its active sampler')
++            require(p['callback_index']==batches[bid]['callbacks'],'Denoiser callback index differs')
++            batches[bid]['callbacks']+=1
++        elif ev in order[1:]:
++            require(bid==active and batches[bid]['state']==order[order.index(ev)-1],'Wrong per-batch event transition')
++            if ev=='sampler_return':require(p['denoiser_calls']==batches[bid]['callbacks'],'Denoiser callback total differs')
++            batches[bid]['state']=ev;batches[bid]['event_sequences'][ev]=row['seq']
++            if ev=='batch_complete':active=None
++        elif ev=='observation':
++            require(bid is None or bid==active,'Observation refers to inactive/unknown batch')
++        elif ev=='session_end':
++            require(i==len(rows)-1 and bid is None and active is None and p['batches']==len(batches)==2
++                    and all(x['state']=='batch_complete' for x in batches.values()),'Incomplete/duplicate trace closure')
++            closed=True
++        else:raise ValueError('Unexpected failed/unknown trace event: '+str(ev))
++    require(closed and len(batches)==2,'Two closed distinct trace batches required')
++    return batches
+ 
+ 
+ def run(a,r):
+@@ -198,6 +242,7 @@
+             and tr[0]['payload']['source_identities']==m['source_identities'] and tr[-1]['event']=='session_end','Wrong trace session')
+     for row in tr:
+         require(row['event'] not in ('failure','operation_failure'),'Trace recorded failure');r.tree(row['payload'],td,False)
++    states=trace_states(tr)
+     blobset={str(Path(p).relative_to(td)) for p in r.tensor_files if Path(p).is_relative_to(td)}
+     require(blobset=={str(p.relative_to(td)) for p in (td/'blobs').rglob('*') if p.is_file()},'Unreferenced trace blob')
+     def groups(name,n):
+@@ -206,12 +251,24 @@
+     contexts=groups('context_output',2);commits=groups('cache_commit',2);maps=groups('map_commit',2)
+     samples=groups('sample_output',2);batches=groups('batch_input',2)
+     condin=groups('condition_input',2);condout=groups('condition_output',2);samplers=groups('sampler_input',2)
++    samplerouts=groups('sampler_output',2)
+     translations_in=groups('translation_input',2);translations_out=groups('translation_output',2)
+     begin=[x for x in tr if x['event']=='batch_begin'];end=[x for x in tr if x['event']=='batch_complete']
+     tc=[x for x in tr if x['event']=='cache_commit'];require(len(begin)==len(end)==len(tc)==2,'Trace needs two complete batches')
++    require(list(states)==[x['batch_id'] for x in begin]==[x['batch_id'] for x in end]
++            ==[x['batch_id'] for x in tc],'Trace batch identity order differs')
++    def batch_capture(name,bid):
++        found=[item for item in r.groups[name] if item[1].get('metadata',{}).get('batch_id')==bid]
++        require(len(found)==1,'Expected one actual '+name+' in '+bid);return found[0]
+     require(len(init['pil_frames'])==1,'Initial cache is not one frame')
+     checks=[];selected=[]
+     for j in range(2):
++        bid=begin[j]['batch_id']
++        for name,items in [('batch_input',batches),('cache_commit',commits),('map_commit',maps),
++                ('sample_output',samples),('condition_input',condin),('condition_output',condout),
++                ('sampler_input',samplers),('sampler_output',samplerouts),
++                ('translation_input',translations_in),('translation_output',translations_out)]:
++            require(items[j][0]==batch_capture(name,bid)[0],'Archive/trace batch correspondence differs: '+name)
+         c=contexts[j][1];cc=commits[j][1];mc=maps[j][1];sample=samples[j][1]
+         info=c['context_info'];idarr=r.array(info['context_time_indices'],ad)
+         require(idarr.ndim==1 and idarr.dtype.kind in 'iu','Context IDs are not integer vector')
+@@ -228,6 +285,12 @@
+                 'Not original full-size all-eight outputs')
+         require(cc['target_encoder_embeddings']['shape'][0]==8-len(ids) and cc['padding_size']==4-len(ids),
+                 'Padding/all-target CLIP rows differ')
++        ei,eo=batch_capture('encode_image_input',bid),batch_capture('encode_image_output',bid)
++        require(samplers[j][0]<samplerouts[j][0]<samples[j][0]<ei[0]<eo[0]<commits[j][0],
++                'Sampler/sample/actual target encoding/commit order differs')
++        checks.append(r.same_desc(samplerouts[j][1]['output'],sample['samples_z'],f'{bid}:sampler_output->all_samples_z',ad))
++        checks.append(r.equal(r.array(sample['samples'],ad)[len(ids):],r.array(ei[1]['image'],ad),f'{bid}:all_target_samples->actual_encode_image_input'))
++        checks.append(r.same_desc(eo[1]['result'],cc['target_encoder_embeddings'],f'{bid}:actual_encode_image_output->all_commit_embeddings',ad))
+         for key,field in FIELDS.items():
+             context_array=r.array(info[field],ad);require(context_array.shape[0]==len(ids),'Context row count differs')
+             require(info[field]['sha256']==begin[j]['payload']['context_tensors'][field]['sha256'],'Trace/archive context identity differs')
+@@ -247,8 +310,11 @@
+         tin=translations_in[j][1];tout=translations_out[j][1]
+         require(translations_in[j][0]<translations_out[j][0]<condin[j][0],'Translation/get_cond ordering differs')
+         checks.append(r.equal(r.array(info['context_c2ws'],ad),r.array(tin['args'][0],ad)[:len(ids)],f'b{j+1}:context_cameras->translation_input'))
++        checks.append(r.equal(r.array(batches[j][1]['target_c2ws'],ad),r.array(tin['args'][0],ad)[len(ids):],f'b{j+1}:all_target_cameras->translation_input'))
+         checks.append(r.same_desc(tout['result'][1],args[1],f'b{j+1}:translated_cameras->get_cond',ad))
++        checks.append(r.same_scalar(tout['result'][0],args[3],f'b{j+1}:translation_scalar->get_cond',ad))
+         checks.append(r.equal(r.array(info['context_Ks'],ad),r.array(args[2],ad)[:len(ids)],f'b{j+1}:context_Ks->get_cond'))
++        checks.append(r.equal(r.array(batches[j][1]['target_Ks'],ad),r.array(args[2],ad)[len(ids):],f'b{j+1}:all_target_Ks->get_cond'))
+         mask=r.array(args[5],ad);require(mask.dtype.kind=='b' and mask.tolist()==[True]*len(ids)+[False]*(8-len(ids)),'get_cond mask differs')
+         finalcond=condout[j][1]['result'];sampler=samplers[j][1]['inputs']
+         for name in ('c','uc'):
+@@ -282,6 +348,7 @@
+             'archive_bytes':sum(x['bytes'] for x in am['files'].values()),'trace_events':len(tr),'archive_events':len(ar),
+             'actual_selected_context_ids':selected,'verified_generated_ids_in_second_context':[i for i in selected[1] if i>0],
+             'comparisons':checks,'actual_call_counts':dict(counters),'euler_steps_by_batch':dict(batch_euler),
++            'trace_batch_states':states,'actual_archive_capture_counts':{k:len(v) for k,v in r.groups.items()},
+             'trace_descriptors_without_saved_blob':r.trace_descriptors_without_blob,
+             'scope':'Saved complete archive identities and actual first-output/cache/second-condition/sampler latent chain; no model, rendering or video quality recomputation'}
+ 

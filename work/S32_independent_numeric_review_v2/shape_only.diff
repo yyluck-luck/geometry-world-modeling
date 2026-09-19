@@ -1,0 +1,11 @@
+--- failed_v1
++++ v2_actual_2D_raw_shape
+@@ -112,7 +112,7 @@
+     links=[]
+     for i in range(4):
+         key='parameter::im_depthmaps.'+str(i);a=initial[key];z=final[key]
+-        require(a.shape==z.shape==(GRID,) and a.dtype==z.dtype==np.float32 and im[key]['requires_grad'] is True,'All four raw registered depth leaves')
++        require(a.shape==z.shape==(384,512) and a.dtype==z.dtype==np.float32 and im[key]['requires_grad'] is True,'All four raw registered depth leaves')
+         for values,depth in ((a,initial_depth[i]),(z,final_depth[i])):
+             reference=np.exp(values.astype(np.float64)).reshape(384,512)
+             require(np.allclose(reference,depth,atol=1e-6,rtol=1e-6),'All raw log-depth pixels match decoded endpoint via independent FP64 exp')

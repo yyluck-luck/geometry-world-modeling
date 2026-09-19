@@ -1,0 +1,786 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">  
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
+	
+		<title>3DMatch: Learning Local Geometric Descriptors from RGB-D Reconstructions</title>
+			
+			
+		<!-- CSS -->
+        <link href='http://fonts.googleapis.com/css?family=Quicksand:300,400' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Oxygen:400,300' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
+		<!-- ENDS CSS -->
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-89797207-1', 'auto');
+          ga('send', 'pageview');
+
+        </script>
+
+        <!-- ENDS JS -->  
+	</head>	
+	<body>
+		<!-- MAIN -->
+		<div id="main">
+
+            <div id="match-nav-wrapper">
+                <div id="match-nav-bar">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="11%"><a href="#">Home</a></th>
+                                <th width="28%"><a href="#keypoint-matching-benchmark">Keypoint Matching Benchmark</a></th>
+                                <th width="31%"><a href="#geometric-registration-benchmark">Geometric Registration Benchmark</a></th>
+                                <th width="30%"><a href="#rgbd-reconstruction-datasets">RGB-D Reconstruction Datasets</a></th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                </div>
+            </div>
+
+			<!-- HEADER -->
+			<div id="home-header">
+				<!-- <div id="logo-gif"><a href="index"><img width=114 height=76 src="img/layout/bubblegum.gif"></a></div>
+				<div id="logo-wrapper"><a href="home"><font color = "0088ff">Andy Zeng</font></a></div>
+				<div id="logo-subtitle">I build cool things.</div>
+				<div id="menu-icons">
+					<div class="menu-item"><a href="#"><img width=40 height=40 src="img/icons/business-contact.png"><br>contact</a></div>
+					<div class="menu-item"><a href="#"><img width=40 height=40 src="img/icons/documents.png"><br>archives</a></div>
+					<div class="menu-item"><a href="#" class="js__p_start"><img width=40 height=40 src="img/icons/user.png"><br>about</a></div>
+					<div class="menu-item"><a href="index"><img width=40 height=40 src="img/icons/folder.png"><br>projects</a></div>
+				</div>-->
+        <!-- <div id="name"><a href="index"><font color = "666666">MIT-Princeton APC 2016 Vision Dataset</font></a></div> -->
+
+
+
+
+            <div id="match-wrapper">
+
+                <h5><a href="http://3dvision.princeton.edu/"><img src="img/PrincetonVisionRobotics_logo.svg"></a></h5>
+
+                <br><br>
+
+                <h2>3DMatch: Learning Local Geometric Descriptors from RGB-D Reconstructions</h2>
+                
+
+                <br>Matching local geometric features on real-world depth images is a challenging task due to the noisy, low-resolution, and incomplete nature of 3D scan data. These difficulties limit the performance of current state-of-art methods, which are typically based on histograms over geometric properties. In this paper, we present 3DMatch, a data-driven model that learns a local volumetric patch descriptor for establishing correspondences between partial 3D data. To amass training data for our model, we propose an unsupervised feature learning method that leverages the millions of correspondence labels found in existing RGB-D reconstructions. Experiments show that our descriptor is not only able to match local geometry in new scenes for reconstruction, but also generalize to different tasks and spatial scales (e.g. instance-level object model alignment for the Amazon Picking Challenge, and mesh surface correspondence). Results show that 3DMatch consistently outperforms other state-of-the-art approaches by a significant margin. 
+
+                <br><br>
+
+                <h1>Overview</h1>
+                <div id="match-teaser-img"><img src="img/overview.jpg"></div>
+                From existing RGB-D reconstructions (a), we extract local 3D patches and correspondence labels from scans of different views (b). We collect pairs of matching and non-matching local 3D patches converted into a volumetric representation (c) to train a 3D ConvNet-based descriptor (d). This geometric descriptor can be used to establish correspondences for matching 3D geometry in various applications (e) such as reconstruction, model alignment, and surface correspondence.
+
+                <br><br>
+                <h1>Paper</h1>
+                <div id="match-paper-view"><a href="https://arxiv.org/pdf/1603.08182.pdf"><img src="img/paper-view.jpg"></a></div>
+                Latest version (5 Dec 2016): <a href="https://arxiv.org/abs/1603.08182">arXiv:1603.08182 [cs.CV]</a> or <a href="paper_v2.pdf">here</a>
+                <br>Older version (27 Mar 2016): <a href="paper_v1.pdf">3DMatch: Learning the Matching of Local 3D Geometry in Range Scans</a>
+
+                <br><br>
+
+                <div id="section" style="height: 160px">
+                    <div class="match-author"><a href="http://andyzeng.github.io/"><img src="img/andy-thumbnail.jpg"><br><p>Andy Zeng</p></a></div>
+                    <div class="match-author"><a href="http://3dvision.princeton.edu/people/shurans/"><img src="img/shuran-thumbnail.jpg"><br><p>Shuran Song</p></a></div>
+                    <div class="match-author"><a href="http://www.niessnerlab.org/members/matthias_niessner/profile.html"><img src="img/matthias-thumbnail.jpg"><br><p>Matthias Nießner</p></a></div>
+                    <div class="match-author"><a href="https://research.adobe.com/person/matt-fisher/"><img src="img/matthew-thumbnail.jpg"><br><p>Matthew Fisher</p></a></div>
+                    <div class="match-author"><a href="http://3dvision.princeton.edu/people/xj/"><img src="img/jianxiong-thumbnail.jpg"><br><p>Jianxiong Xiao</p></a></div>
+                    <div class="match-author"><a href="http://www.cs.princeton.edu/~funk/"><img src="img/thomas-thumbnail.jpg"><br><p>Thomas Funkhouser</p></a></div>
+                </div>
+
+                <h4>To appear at IEEE Conference on Computer Vision and Pattern Recognition (CVPR) 2017 <strong><a href="https://www.youtube.com/watch?v=qNVZl7bCjsU&list=PL_bDvITUYucADb15njRd7geem8vxOyo6N&index=3">Oral Presentation</a></strong></h4>
+
+                <br><h3>Bibtex</h3>
+
+                <div id="match-citation-text">
+                @inproceedings{zeng20163dmatch,
+                  <br>&nbsp;&nbsp;&nbsp;&nbsp;title={3DMatch: Learning Local Geometric Descriptors from RGB-D Reconstructions},
+                  <br>&nbsp;&nbsp;&nbsp;&nbsp;author={Zeng, Andy and Song, Shuran and Nie{\ss}ner, Matthias and Fisher, Matthew and Xiao, Jianxiong and <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Funkhouser, Thomas},
+                  <br>&nbsp;&nbsp;&nbsp;&nbsp;booktitle={CVPR},
+                  <br>&nbsp;&nbsp;&nbsp;&nbsp;year={2017}
+                <br>}
+                </div>
+                
+                <br><h3>Video</h3>
+                <iframe id="match-video" width="880" height="495" src="https://www.youtube.com/embed/gZrsJJtDvvA" frameborder="0" allowfullscreen></iframe>
+
+                <br><br><h1>Code</h1>
+                All 3DMatch code (for training and testing) can be found in our Github repository <a href="https://github.com/andyzeng/3dmatch-toolbox">here</a>.
+
+                <br><br><br><div id="keypoint-matching-benchmark"></div><br><br>
+
+                <h1>Keypoint Matching Benchmark</h1>
+
+                <div id="keypoint-matching-teaser-img"><img src="img/patch-rgb.jpg" style="margin-right:10px"><img src="img/patch-depth.jpg"></div>
+
+                This benchmark evaluates how well descriptors (both 2D and 3D) can establish correspondences between RGB-D frames of different views. The dataset contains 2D RGB-D patches and 3D patches (local TDF voxel grid volumes) of wide-baselined correspondences, which are sampled from our testing split of the <a href="#rgbd-reconstruction-datasets">RGB-D reconstruction datasets</a>. The pixel size of each 2D patch is determined by the projection of the 0.3m<sup>3</sup> local 3D patch around the interest point onto the image plane. We provide Matlab code for generating similar correspondence datasets <a href="https://github.com/andyzeng/3dmatch-toolbox#generate-your-own-correspondence-dataset-from-rgb-d-reconstructions">here</a>. Although our baselines are 3D approaches that use depth information only, we are also looking for descriptor algorithms (2D or 3D) that leverage color information or both modalities. 
+
+                <br><br><div id="match-registration-benchmark-table" style="width: 880px;">
+                    <h3>Benchmark Leaderboard</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="25%">Method</th>
+                                <th width="15%">Error</th>
+                                <th width="15%">2D-Based</th>
+                                <th width="15%">3D-Based</th>
+                                <th width="15%">Uses Color</th>
+                                <th width="15%">Uses Depth</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>3DMatch [1]</td>
+                                <td><strong>35.3%</strong></td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                            </tr>
+                            <tr>
+                                <td>FPFH [3]</td>
+                                <td>61.3%</td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                            </tr>
+                            <tr>
+                                <td>Spin-Images [2]</td>
+                                <td>83.7%</td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                                <td style="text-align: center; color: #ff0000;">no</td>
+                                <td style="text-align: center; color: #00aa00;">yes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>
+                <div id="match-registration-benchmark-citations">
+                    To add your results to the leaderboard, please email us your algorithm's .log file for the test set to andyz[at]princeton[dot]edu
+                    <br><br>[1] A. Zeng, S. Song, M. Nießner, M. Fisher, J. Xiao, T. Funkhouser. <a href="https://arxiv.org/pdf/1603.08182.pdf">3DMatch: Learning Local Geometric Descriptors from 3D Reconstructions.</a>
+                    <br>[2] A.E. Johnson, M. Hebert. <a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=765655">Using spin images for efficient object recognition in cluttered 3D scenes.</a> PAMI 1999.
+                    <br>[3] R.B. Rusu, N. Blodow, M. Beetz. <a href="http://ieeexplore.ieee.org/document/5152473/">Fast point feature histograms (FPFH) for 3D registration.</a> ICRA 2009.
+                </div>
+
+                <br><h3>Download and Description</h3>
+                There are two Matlab .mat files, one for the validation set and one for the test set. Download links:
+
+                <br><div id="match-rgbd-dataset-table" style="margin-top: 10px">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td width="40%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/keypoint-matching/validation-set.mat"><img src="img/download.jpg"> validation-set.mat (1.8 GB)</a></td>
+                                <td width="60%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/keypoint-matching/test-set.mat"><img src="img/download.jpg"> test-set.mat (1.8 GB)</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>The validation set contains 10,000 pairs of RGB-D patches and their ground truth correspondence labels (binary 1 for match and 0 for non-match). The test dataset contains similar data for another 10,000 pairs, except the ground truth correspondence labels have been left out. Each Matlab .mat file contains the variables:
+
+                <br><br><strong>data</strong> - a 10,000x2 cell array of structs. Each struct contains the 2D/3D patch data of an interest point, with the variables:
+                  <div id="text-tab">&bull;&nbsp;<strong>framePath</strong> - path to the scene, sequence, and RGB-D frame from which the patch data was extracted</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>pixelCoords</strong> - 1x2 array with the pixel coordinates of the interest point on the RGB-D frame</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>camCoords</strong> - 3x1 array with the 3D camera coordinates of the interest point</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>bboxCornersCam</strong> - 3x8 matrix with the 3D camera coordinates of the 0.3m<sup>3</sup> bounding box around the interest point</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>bboxRangePixels</strong> - 2x2 matrix where each row is the pixel corner of the projected bounding box on the image plane</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>camK</strong> - 3x3 matrix of the camera intrinsics</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>colorPatch</strong> - HxWx3 uint8 matrix of the RGB patch around the interest point</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>depthPatch</strong> - HxW matrix of the depth patch (in meters) around the interest point</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>voxelGridTDF</strong> - 30x30x30 matrix of TDF voxel grid values (voxel size is 0.01m) around the interest point</div>
+
+                <strong>labels</strong> - (in validation-set.mat only) a 10,000x1 cell array of binary correspondence labels (1 for match, 0 for non-match) for each pair (row) of interest points saved in data.
+
+                <br><br><strong>Update (as of Mar 2018)</strong>: for convenience, feel free to download the labels for the test set <a href="https://github.com/andyzeng/3dmatch-toolbox/blob/master/evaluation/keypoint-matching/test-set-gt.log">here</a>.
+
+                <br><br>We do not provide a fixed training set, however we do provide the C++/CUDA code <a href="https://github.com/andyzeng/3dmatch-toolbox#training-3dmatch-from-rgb-d-reconstructions">here</a> that we used to sample training correspondences on-the-fly to train 3DMatch. You can also generate your own fixed training set by following the instructions <a href="https://github.com/andyzeng/3dmatch-toolbox#generate-your-own-correspondence-dataset-from-rgb-d-reconstructions">here</a> (see makeCorresDataset.m) with the training scenes instead of the testing scenes.
+
+                <br><br><h3>Evaluation</h3>
+                To evaluate on this benchmark, your descriptor algorithm should output a .log file where each row is the descriptor distance (or for some algorithms, the confidence of non-correspondence) between each pair of patches. Our <a href="https://github.com/andyzeng/3dmatch-toolbox#keypoint-matching-benchmark">Github toolbox</a> contains an <a href="https://github.com/andyzeng/3dmatch-toolbox/blob/master/evaluation/keypoint-matching/3dmatch.log">example .log file</a> (for 3DMatch), as well as an <a href="https://github.com/andyzeng/3dmatch-toolbox#evaluation-example">example evaluation script</a> for the validation set. Error is computed as false positive rate at 95% recall.
+
+                
+
+
+                <br><br><br><div id="geometric-registration-benchmark"></div><br><br>
+
+                <h1>Geometric Registration Benchmark</h1>
+
+                <div id="reconstruction-datasets-img"><img src="img/geometric-registration.jpg"></div>
+
+                Similar in spirit to the registration benchmark from <a href="http://redwood-data.org/indoor/regbasic.html">Robust Reconstruction of Indoor Scenes</a>, this benchmark evaluates the performance of geometric registration algorithms in the context of scene reconstruction. However, in contrast to prior work, this benchmark uses real-world RGB-D scanning data instead of synthetic data, in order to promote registration algorithms that are robust to depth data from modern commodity range sensors (e.g. Microsoft Kinect, Intel RealSense). 
+
+                <br><br>
+
+                
+                
+                <div id="match-registration-benchmark-table">
+                    <h3>Benchmark Leaderboard</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="60%">Method</th>
+                                <th width="20%">Recall</th>
+                                <th width="20%">Precision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>3DMatch [1]</td>
+                                <td><strong>66.8%</strong></td>
+                                <td><strong>40.1%</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Spin-Images [2]</td>
+                                <td>51.8%</td>
+                                <td>31.6%</td>
+                            </tr>
+                            <tr>
+                                <td>FPFH [3]</td>
+                                <td>44.2%</td>
+                                <td>30.7%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>
+                <div id="match-registration-benchmark-citations">
+                    To add your results to the leaderboard, please email us at andyz[at]princeton[dot]edu
+                    <br><br>[1] A. Zeng, S. Song, M. Nießner, M. Fisher, J. Xiao, T. Funkhouser. <a href="https://arxiv.org/pdf/1603.08182.pdf">3DMatch: Learning Local Geometric Descriptors from 3D Reconstructions.</a>
+                    <br>[2] A.E. Johnson, M. Hebert. <a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=765655">Using spin images for efficient object recognition in cluttered 3D scenes.</a> PAMI 1999.
+                    <br>[3] R.B. Rusu, N. Blodow, M. Beetz. <a href="http://ieeexplore.ieee.org/document/5152473/">Fast point feature histograms (FPFH) for 3D registration.</a> ICRA 2009.
+                </div>
+
+                <br><h3>Downloads</h3>
+
+                This benchmark contains eight sets of scene fragments created from our testing split of the RGB-D reconstruction datasets. These fragments are available for download in the links below. Each fragment is a 3D point cloud of a surface, integrated from 50 depth frames using TSDF volumetric fusion, and saved to a .ply file. We also provide the fusion code to generate these fragments <a href="https://github.com/andyzeng/3dmatch-toolbox#multi-frame-depth-tsdf-fusion">here</a>.
+
+                <br><br><div id="match-rgbd-dataset-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="15%">Dataset</th>
+                                <th width="45%">Scene</th>
+                                <th width="20%">Fragments</th>
+                                <th width="20%">Evaluation Files</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>redkitchen</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/7-scenes-redkitchen.zip"><img src="img/download.jpg"> .zip (40 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/7-scenes-redkitchen-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>home_at/home_at_scan1_2013_jan_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-home_at-home_at_scan1_2013_jan_1.zip"><img src="img/download.jpg"> .zip (44 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-home_at-home_at_scan1_2013_jan_1-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>home_md/home_md_scan9_2012_sep_30</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-home_md-home_md_scan9_2012_sep_30.zip"><img src="img/download.jpg"> .zip (36 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-home_md-home_md_scan9_2012_sep_30-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_uc/scan3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_uc-scan3.zip"><img src="img/download.jpg"> .zip (55 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_uc-scan3-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_umd/maryland_hotel1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_umd-maryland_hotel1.zip"><img src="img/download.jpg"> .zip (51 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_umd-maryland_hotel1-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_umd/maryland_hotel3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_umd-maryland_hotel3.zip"><img src="img/download.jpg"> .zip (33 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-hotel_umd-maryland_hotel3-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_76_studyroom/76-1studyroom2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-mit_76_studyroom-76-1studyroom2.zip"><img src="img/download.jpg"> .zip (82 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-mit_76_studyroom-76-1studyroom2-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_lab_hj/lab_hj_tea_nov_2_2012_scan1_erika</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-mit_lab_hj-lab_hj_tea_nov_2_2012_scan1_erika.zip"><img src="img/download.jpg"> .zip (42 MB)</a></td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/sun3d-mit_lab_hj-lab_hj_tea_nov_2_2012_scan1_erika-evaluation.zip"><img src="img/download.jpg"> .zip (1 MB)</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br><h3>Evaluation</h3>
+
+                For evaluation, your geometric registration algorithm should determine whether each non-consecutive pair of fragments can be aligned, and if so, output the predicted rigid transformation to a log file. The format of this log file, and more information about the evaluation protocol, are described <a href="http://redwood-data.org/indoor/regbasic.html">here</a>. To compute precision and recall from your algorithm's log files, use the evaluation code <a href="https://github.com/andyzeng/3dmatch-toolbox#geometric-registration-benchmark">here</a> (see Matlab script <a href="https://github.com/andyzeng/3dmatch-toolbox/blob/master/evaluation/geometric-registration/evaluate.m">evaluation/geometric-registration/evaluate.m</a>), or refer to <a href="https://github.com/qianyizh/ElasticReconstruction/blob/master/Matlab_Toolbox/Example/demo_mrRegistrationEvaluation.m">this</a>. We particularly seek registration methods that align fragments without requiring an intial alignment.
+
+                <div id="geometric-registration-synthetic-data"></div><br><br><h3>Geometric Registration on Synthetic Data</h3>
+                <div id="match-registration-benchmark-citations" style="margin-bottom: 10px">
+                    From: S. Choi, Q.Y. Zhou, V. Koltun. <a href="http://redwood-data.org/indoor/index.html">Robust Reconstruction of Indoor Scenes.</a> CVPR 2015.
+                </div>
+                In our <a href="https://arxiv.org/pdf/1603.08182.pdf">paper</a>, we also report the results of 3DMatch's performance over the original synthetic benchmark from <a href="http://redwood-data.org/indoor/regbasic.html">Robust Reconstruction of Indoor Scenes</a>, where we achieve 65.1% recall and 25.2% precision. To reproduce our results, you can download the evaluation files for that here:
+
+                <br><div id="match-rgbd-dataset-table" style="margin-top: 10px">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td width="25%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/iclnuim-livingroom1-evaluation.zip"><img src="img/download.jpg"> livingroom1 (1 MB)</a></td>
+                                <td width="25%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/iclnuim-livingroom2-evaluation.zip"><img src="img/download.jpg"> livingroom2 (1 MB)</a></td>
+                                <td width="25%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/iclnuim-office1-evaluation.zip"><img src="img/download.jpg"> office1 (1 MB)</a></td>
+                                <td width="25%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/iclnuim-office2-evaluation.zip"><img src="img/download.jpg"> office2 (1 MB)</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>
+                Code to run 3DMatch on both benchmarks can be found <a href="https://github.com/andyzeng/3dmatch-toolbox#geometric-registration-benchmark">here</a>. We also provide several files with intermediate data generated by our geometric registration pipeline for 3DMatch (as well as the other descriptors we compared to), such as TDF voxel grids for all fragments, keypoints, and descriptor vectors. This can be useful if you wish to improve geometric registration results by designing better search algorithms (RANSAC variants). You can download them here:
+
+                <br><div id="match-rgbd-dataset-table" style="margin-top: 10px">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td width="50%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/intermediate-files-real.zip"><img src="img/download.jpg"> intermediate files for real data benchmark (2.9 GB)</a></td>
+                                <td width="50%" style="text-align:center;"><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/scene-fragments/intermediate-files-synth.zip"><img src="img/download.jpg"> intermediate files for synthetic data benchmark (2.5 GB)</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+                <br><br><br><div id="rgbd-reconstruction-datasets"></div><br><br>
+
+                <h1>RGB-D Reconstruction Datasets</h1>
+
+                <div id="reconstruction-datasets-img"><img src="img/reconstruction-datasets.jpg"></div>
+
+                We use several existing RGB-D reconstruction datasets to train 3DMatch and generate evaluation benchmarks. For ease-of-use and compatibility with our code (see <a href="https://github.com/andyzeng/3dmatch-toolbox#training-3dmatch-from-rgb-d-reconstructions">Github</a>), we've converted these datasets into a unified file structure and format, available for download in the links below. If you find any of these datasets useful, please cite their original paper(s):
+
+                <br><br><div id="match-registration-benchmark-citations">
+                    <a href="http://sun3d.cs.princeton.edu/">SUN3D</a>: Xiao et al. <a href="http://sun3d.cs.princeton.edu/">SUN3D: A Database of Big Spaces Reconstructed using SfM and Object Labels.</a>
+                    <br><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a>: J. Shotton et al. <a href="https://www.microsoft.com/en-us/research/publication/scene-coordinate-regression-forests-for-camera-relocalization-in-rgb-d-images/">Scene Coordinate Regression Forests for Camera Relocalization in RGB-D Images.</a>
+                    <br><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a>: Lai et al. <a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">Unsupervised Feature Learning for 3D Scene Labeling.</a>
+                    <br><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a>: Dai et al. <a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion: Real-time Globally Consistent 3D Reconstruction using Online Surface Re-integration.</a> 
+                    <br><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a>: Valentin et al. <a href="http://graphics.stanford.edu/projects/reloc/">Learning to Navigate the Energy Landscape.</a> 
+                    <br>Reconstruction algorithm for SUN3D: Halber et al. <a href="http://scanregistration.cs.princeton.edu/">Fine-To-Coarse Global Registration of RGB-D Scans.</a>
+                </div>
+
+                <br>Bash script to download all scenes: <a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/download.sh">download.sh</a>
+                <br>Training and testing scenes split: <a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/split.txt">split.txt</a>
+
+                <br><br>
+                <div id="match-rgbd-dataset-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="20%">Dataset</th>
+                                <th width="55%">Scene</th>
+                                <!-- <th width="20%" colspan="2">Scene</th> -->
+                                <th width="25%">RGB-D Data &amp; Poses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>brown_bm_1/brown_bm_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-brown_bm_1-brown_bm_1.zip"><img src="img/download.jpg"> .zip (3.1 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>brown_bm_4/brown_bm_4</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-brown_bm_4-brown_bm_4.zip"><img src="img/download.jpg"> .zip (1.5 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>brown_cogsci_1/brown_cogsci_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-brown_cogsci_1-brown_cogsci_1.zip"><img src="img/download.jpg"> .zip (1.3 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>brown_cs_2/brown_cs2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-brown_cs_2-brown_cs2.zip"><img src="img/download.jpg"> .zip (2.4 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>brown_cs_3/brown_cs3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-brown_cs_3-brown_cs3.zip"><img src="img/download.jpg"> .zip (1.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>harvard_c3/hv_c3_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-harvard_c3-hv_c3_1.zip"><img src="img/download.jpg"> .zip (928 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>harvard_c5/hv_c5_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-harvard_c5-hv_c5_1.zip"><img src="img/download.jpg"> .zip (939 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>harvard_c6/hv_c6_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-harvard_c6-hv_c6_1.zip"><img src="img/download.jpg"> .zip (698 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>harvard_c8/hv_c8_3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-harvard_c8-hv_c8_3.zip"><img src="img/download.jpg"> .zip (462 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>harvard_c11/hv_c11_2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-harvard_c11-hv_c11_2.zip"><img src="img/download.jpg"> .zip (416 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>home_at/home_at_scan1_2013_jan_1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-home_at-home_at_scan1_2013_jan_1.zip"><img src="img/download.jpg"> .zip (7.2 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>home_bksh/home_bksh_oct_30_2012_scan2_erika</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-home_bksh-home_bksh_oct_30_2012_scan2_erika.zip"><img src="img/download.jpg"> .zip (7.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>home_md/home_md_scan9_2012_sep_30</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-home_md-home_md_scan9_2012_sep_30.zip"><img src="img/download.jpg"> .zip (6.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_nips2012/nips_4</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-hotel_nips2012-nips_4.zip"><img src="img/download.jpg"> .zip (3.2 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_sf/scan1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-hotel_sf-scan1.zip"><img src="img/download.jpg"> .zip (4.9 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_uc/scan3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-hotel_uc-scan3.zip"><img src="img/download.jpg"> .zip (4.9 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_umd/maryland_hotel1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-hotel_umd-maryland_hotel1.zip"><img src="img/download.jpg"> .zip (2.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>hotel_umd/maryland_hotel3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-hotel_umd-maryland_hotel3.zip"><img src="img/download.jpg"> .zip (853 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_32_d507/d507_2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_32_d507-d507_2.zip"><img src="img/download.jpg"> .zip (2.8 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_46_ted_lab1/ted_lab_2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_46_ted_lab1-ted_lab_2.zip"><img src="img/download.jpg"> .zip (4.7 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_76_417/76-417b</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_76_417-76-417b.zip"><img src="img/download.jpg"> .zip (5.7 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_76_studyroom/76-1studyroom2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_76_studyroom-76-1studyroom2.zip"><img src="img/download.jpg"> .zip (1.5 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_dorm_next_sj/dorm_next_sj_oct_30_2012_scan1_erika</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_dorm_next_sj-dorm_next_sj_oct_30_2012_scan1_erika.zip"><img src="img/download.jpg"> .zip (1.4 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_lab_hj/lab_hj_tea_nov_2_2012_scan1_erika</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_lab_hj-lab_hj_tea_nov_2_2012_scan1_erika.zip"><img src="img/download.jpg"> .zip (888 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://sun3d.cs.princeton.edu/">SUN3D</a></td>
+                                <td>mit_w20_athena/sc_athena_oct_29_2012_scan1_erika</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/sun3d-mit_w20_athena-sc_athena_oct_29_2012_scan1_erika.zip"><img src="img/download.jpg"> .zip (4.5 GB)</a></td>
+                            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>chess</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-chess.zip"><img src="img/download.jpg"> .zip (3.1 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>fire</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-fire.zip"><img src="img/download.jpg"> .zip (2.3 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>heads</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-heads.zip"><img src="img/download.jpg"> .zip (956 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>office</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-office.zip"><img src="img/download.jpg"> .zip (4.7 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>pumpkin</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-pumpkin.zip"><img src="img/download.jpg"> .zip (2.9 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>redkitchen</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-redkitchen.zip"><img src="img/download.jpg"> .zip (6.1 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a></td>
+                                <td>stairs</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/7-scenes-stairs.zip"><img src="img/download.jpg"> .zip (1.7 GB)</a></td>
+                            </tr>
+
+
+
+
+
+
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_01</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_01.zip"><img src="img/download.jpg"> .zip (349 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_02</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_02.zip"><img src="img/download.jpg"> .zip (335 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_03</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_03.zip"><img src="img/download.jpg"> .zip (341 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_04</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_04.zip"><img src="img/download.jpg"> .zip (350 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_05</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_05.zip"><img src="img/download.jpg"> .zip (534 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_06</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_06.zip"><img src="img/download.jpg"> .zip (481 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_07</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_07.zip"><img src="img/download.jpg"> .zip (439 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_08</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_08.zip"><img src="img/download.jpg"> .zip (423 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_09</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_09.zip"><img src="img/download.jpg"> .zip (334 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_10</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_10.zip"><img src="img/download.jpg"> .zip (316 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_11</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_11.zip"><img src="img/download.jpg"> .zip (281 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_12</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_12.zip"><img src="img/download.jpg"> .zip (324 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_13</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_13.zip"><img src="img/download.jpg"> .zip (188 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/">RGB-D Scenes v2</a></td>
+                                <td>scene_14</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_14.zip"><img src="img/download.jpg"> .zip (239 MB)</a></td>
+                            </tr>
+
+
+
+
+
+
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>apt0</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-apt0.zip"><img src="img/download.jpg"> .zip (3.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>apt1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-apt1.zip"><img src="img/download.jpg"> .zip (3.7 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>apt2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-apt2.zip"><img src="img/download.jpg"> .zip (1.8 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>copyroom</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-copyroom.zip"><img src="img/download.jpg"> .zip (1.5 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>office0</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-office0.zip"><img src="img/download.jpg"> .zip (2.6 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>office1</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-office1.zip"><img src="img/download.jpg"> .zip (3.0 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>office2</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-office2.zip"><img src="img/download.jpg"> .zip (1.8 GB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a></td>
+                                <td>office3</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/bundlefusion-office3.zip"><img src="img/download.jpg"> .zip (1.4 GB)</a></td>
+                            </tr>
+
+
+
+
+
+
+
+
+
+
+
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt1-kitchen (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt1-kitchen.zip"><img src="img/download.jpg"> .zip (88 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt1-living (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt1-living.zip"><img src="img/download.jpg"> .zip (116 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt2-bed (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt2-bed.zip"><img src="img/download.jpg"> .zip (75 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt2-kitchen (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt2-kitchen.zip"><img src="img/download.jpg"> .zip (72 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt2-living (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt2-living.zip"><img src="img/download.jpg"> .zip (78 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>apt2-luke (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-apt2-luke.zip"><img src="img/download.jpg"> .zip (154 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>office2-5a (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-office2-5a.zip"><img src="img/download.jpg"> .zip (110 MB)</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a></td>
+                                <td>office2-5b (depth)</td>
+                                <td><a href="http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/analysis-by-synthesis-office2-5b.zip"><img src="img/download.jpg"> .zip (127 MB)</a></td>
+                            </tr>
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <br>Note: SUN3D scenes were reconstructed with <a href="http://scanregistration.cs.princeton.edu/">Halber et al.</a> Please also cite their paper if you use the SUN3D scenes.
+
+                <br><br><h3>Dataset Format</h3>
+                Each scene is a folder containing one or more RGB-D video sequences. The folder contents are as follows:
+
+                <br><br><strong>camera-intrinsics.txt</strong> - a text file with depth camera intrinsics (3x3 matrix in homogeneous coordinates)
+                <br><strong>seq-XX</strong>
+                  <div id="text-tab">&bull;&nbsp;<strong>frame-XXXXXX.color.png</strong> - a 24-bit PNG RGB color image.</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>frame-XXXXXX.depth.png</strong> - a 16-bit PNG depth image, aligned to its corresponding color image. Depth is saved in millimeters (mm). Invalid depth is set to 0.</div>
+                  <div id="text-tab">&bull;&nbsp;<strong>frame-XXXXXX.pose.txt</strong> - a text file with the camera pose of the frame (camera-to-world, 4x4 matrix in homogeneous coordinates and in meters)</div>
+
+                <br><h3>License Agreements</h3>
+                <a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">7-Scenes</a>: The data is provided for non-commercial use only. <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/7-scenes-msr-la-dataset-7-scenes.rtf">License Agreement</a>
+                <br><a href="http://graphics.stanford.edu/projects/bundlefusion/">BundleFusion</a>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"> Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License</a> 
+                <br><a href="http://graphics.stanford.edu/projects/reloc/">Analysis by Synthesis</a>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"> Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License</a> 
+
+                <br><br><br><br>Page last updated: 10-Mar-2017<br>Posted by: <a href="http://andyzeng.github.io/">Andy Zeng</a>
+
+			<!-- ENDS Footer -->
+		</div>	
+		
+				
+		<!-- ENDS MAIN -->	
+		
+  
+  
+
+	</body>
+</html>

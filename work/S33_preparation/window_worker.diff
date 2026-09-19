@@ -1,0 +1,50 @@
+--- frozen_S32_window_worker
++++ S33_window_worker
+@@ -5,11 +5,11 @@
+     out = Path(c['output_root']) / window_id
+     require(not out.exists(), 'Never repeat or overwrite a B window')
+     out.mkdir(parents=True)
+-    record = dict(status='RUNNING', started_utc=utc(), window_id=window_id, contract_sha256=c['_sha'], selection_sha256=c['selection_sha256'], outputs={}, sensor_depth_bytes_read=0, new_model_forwards=0, all_three_endpoints_available=False)
++    record = dict(status='RUNNING', started_utc=utc(), window_id=window_id, contract_sha256=c['_sha'], selection_sha256=c['selection_sha256'], outputs={}, sensor_depth_bytes_read=0, new_model_forwards=0, candidate_available=False)
+     write(out / 'receipt.json', record)
+     missing = [f['index'] for f in window['frames'] if f['gt_time'] is None]
+     if missing:
+-        record.update(status='UNAVAILABLE', completed_utc=utc(), reason='MISSING_GIVEN_CAMERA_ASSOCIATION', missing_pose_frame_indices=missing, all_three_endpoints_available=False, GT_pose_bytes_read=0, new_MST=0, new_Adam=0)
++        record.update(status='UNAVAILABLE', completed_utc=utc(), reason='MISSING_GIVEN_CAMERA_ASSOCIATION', missing_pose_frame_indices=missing, candidate_available=False, GT_pose_bytes_read=0, new_MST=0, new_Adam=0)
+         write(out / 'receipt.json', record)
+         return
+     try:
+@@ -43,30 +43,15 @@
+         require(producer['status'] == 'PASS' and producer['manifest_sha256'] == c['_sha'], 'Complete inherited producer seal')
+         require(producer['iterations'] == producer['adam_steps'] == 400 and producer['clean_calls'] == 1, 'Original full400 and clean')
+         require(producer['observer']['s32_gradient_steps'] == 400 and producer['observer']['s32_alignment_calls'] == 1 and (len(producer['observer']['pnp_calls']) == 3), 'Actual same-window original counts')
+-        endpoints = []
+-        for filename in ('initial_decoded.npz', 'output.npz'):
+-            p = b.OUT / 'C2a' / filename
+-            require(sha(p) == producer['outputs'][filename], 'Complete initial/final sealed file')
+-            with np.load(p, allow_pickle=False) as archive:
+-                depth = archive['depth'].copy()
+-            require(depth.shape == (4, 384, 512) and depth.dtype == np.float32 and np.isfinite(depth).all() and (depth > 0).all(), 'Complete positive FP32 endpoint')
+-            endpoints.append(depth)
+-        normalizer = module(c['s31_normalizer'], 's32_B_original_S31_normalizer')
+-        decomposition, arrays = normalizer.decompose(*endpoints)
+-        require(arrays['depth'].shape == (4, 384, 512) and arrays['depth'].dtype == np.float64, 'Full FP64 normalized endpoint')
+-        np.savez_compressed(out / 'initial_0step.npz', depth=endpoints[0])
+-        np.savez_compressed(out / 'corrected_getter_400.npz', depth=endpoints[1])
+-        np.savez_compressed(out / 'global_rescaled_400.npz', depth=arrays['depth'])
+-        np.savez_compressed(out / 'normalization_arrays.npz', **arrays)
+-        write(out / 'decomposition.json', decomposition)
++        save_candidate(out, b, np, producer)
+         for p, h in c['identities'].items():
+             require(sha(p) == h, 'B source/input metadata changed')
+         require(sha(A_path) == c['A_receipts'][window_id]['sha256'], 'A receipt changed during B')
+         require(sha(window['given_pose_condition']['source']) == window['given_pose_condition']['expected_sha256'], 'Given camera source unchanged during B')
+-        record.update(status='PASS', completed_utc=utc(), all_three_endpoints_available=True, new_MST=1, new_PnP=3, new_Adam=400, new_backward=400, original_clean_calls=1, endpoint_files={name: name + '.npz' for name in ENDPOINTS}, outputs={str(p.relative_to(out)): sha(p) for p in out.rglob('*') if p.is_file() and p != out / 'receipt.json'}, raw_initial_state_count=33, normalization=dict(k=decomposition['k'], source='original S31, own complete initial/final predictions only; no GT/pose/conf selection'), evidence_scope='Whole-window ordinary three-control producer; output normalization is depth only, not new world/optimizer state')
++        record.update(status='PASS', completed_utc=utc(), candidate_available=True, new_MST=1, new_PnP=3, new_Adam=400, new_backward=400, original_clean_calls=1, endpoint_files={name: name + '.npz' for name in ENDPOINTS}, outputs={str(p.relative_to(out)): sha(p) for p in out.rglob('*') if p.is_file() and p != out / 'receipt.json'}, raw_initial_state_count=33, evidence_scope='One new ordinary common-pair-scale constrained400 producer; old S32 endpoints remain separately sealed')
+         write(out / 'receipt.json', record)
+     except BaseException as error:
+-        record.update(status='FAILED', failed_utc=utc(), reason=repr(error), all_three_endpoints_available=False, endpoint_policy='All three unavailable to scoring; partial GA files retained without upgrading zero-step to PASS')
++        record.update(status='FAILED', failed_utc=utc(), reason=repr(error), candidate_available=False, endpoint_policy='New candidate unavailable to scoring; old S32 endpoints retain their original seals')
+         write(out / 'receipt.json', record)
+         (out / 'traceback.txt').write_text(traceback.format_exc())
+         raise

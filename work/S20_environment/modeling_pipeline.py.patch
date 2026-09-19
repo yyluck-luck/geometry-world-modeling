@@ -1,0 +1,19 @@
+--- original/modeling/pipeline.py
++++ S20/modeling/pipeline.py
+@@ -959,7 +959,7 @@
+             time_indices,
+             niter = 1000,
+             lr = 0.01,
+-            device = 'cuda',
++            device = None,
+             ):
+         """
+         Constructs a scene from input images and stores the resulting surfels.
+@@ -972,6 +972,7 @@
+             device: Device to run inference on
+             only_last_frame: Whether to only process the last frame
+         """
++        device = self.device if device is None else device
+         # Flip Y and Z components of camera poses to match dataset convention
+         c2ws_transformed = self.get_transformed_c2ws()
+         

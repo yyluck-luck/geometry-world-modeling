@@ -1,0 +1,19 @@
+# 科研 harness：已采用的工具与边界
+
+更新UTC：2026-09-09T09:08:23.214141+00:00。用户明确要求参考OpenAI文章并运行官方DeepSeek Harness；这两者分别是工程方法资料和可执行软件。
+
+[OpenAI文章离线阅读版](</Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/Harness_Engineering_2026-09-09/Harness_Engineering_离线阅读.html>)与[本项目应用审阅](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/references/openai_harness_engineering_20260909/RESEARCH_APPLICATION_REVIEW.md>)已保存。直接HTML下载403，网页正文经官方读取接口归档，未下载图片；不是安装包。
+
+**科研主流程仍从短AGENTS入口、RESEARCH_PRINCIPLES、RESEARCH_MEMORY和追加主账开始。** 实验合同/源码/实际运行/独立算术/图像检查服务于具体研究问题。失败、未知与未验证都是有效结果，不自动重跑直到通过。工具整理不得挤占算法创新；检查器当前仍有长串历史分支，下一次确有维护需要时再抽取一处当前阶段定义，不宣称已经重构。
+
+DeepSeek官方来源：[官网](https://www.deepseek.com/harness/)、[官方仓库](https://github.com/deepseek-ai/deepseek-harness)、[模型配置说明](https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart)。本机安装 @deepseek-ai/dsh **0.1.2-rc.1**，锁文件固定实际依赖。原默认Node22.14不满足部分依赖的22.19要求；实际启动使用已有Node24.19，未更改全局Node。
+
+- 安装：`tools/deepseek-harness/runtime/`。
+- 独立配置与私有日志：`tools/deepseek-harness/state/`；已排除出Git，含启动认证信息的日志不进研究交付包。
+- 实际命令：在runtime目录、上述Node与DSH_HOME环境中运行 `npx @deepseek-ai/dsh web`。
+- 已验证：版本/帮助返回0，09:00:01Z启动，09:01:25Z认证后HTTP200，浏览器实际显示DeepSeek Harness；界面已打开Settings→Models。
+- 尚未完成：模型API Key为空，工作区尚未选中，0次DeepSeek模型调用。添加/选择工作区按钮本次未打开菜单，设置页可正常打开；不伪称项目已接通。配置后再核模型调用与工作区能力。
+
+团队分工使用本会话的最多3个子agent槽：创新检索、实验实现、架构/独立审查，root实际运行与整合。任务完成后有界接力，不将休眠算持续工作，也不将多份agent意见算外部独立复现。DeepSeek若配置成功可辅助后续任务，其输出仍须同样验证；当前没有把它算作已工作的额外agent。
+
+具体启动和核验回执在 [DeepSeek设置记录](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S75_vae_history_roundtrip/deepseek_harness_setup>)。原模型与科研协议没有因采用新工具而改变。

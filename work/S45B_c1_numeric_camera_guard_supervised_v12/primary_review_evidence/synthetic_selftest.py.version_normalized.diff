@@ -1,0 +1,49 @@
+--- v11/synthetic_selftest.py
+
++++ v12/synthetic_selftest.py
+
+@@ -685,8 +685,9 @@
+
+             "canonical pathname can be accepted without a held-FD observation")
+     terminal_call_lines = call_lines(formal, name_call("publish_terminal_seal"))
+     control_close_lines = call_lines(formal, name_call("close_terminal_control_fds"))
+-    external_constructor_lines = call_lines(formal, name_call("build_external_pass_seal"))
++    external_emitter_lines = call_lines(formal, name_call("emit_external_pass_seal"))
+     external_constructor = named_function(supervisor_tree, "build_external_pass_seal")
++    external_emitter = named_function(supervisor_tree, "emit_external_pass_seal")
+     truth_lines = sorted(
+         node.lineno for node in ast.walk(external_constructor)
+         if isinstance(node, ast.Dict)
+@@ -698,14 +699,17 @@
+
+     )
+     external_segment = ast.get_source_segment(supervisor_text, external_constructor)
+     require(len(terminal_call_lines) == len(control_close_lines)
+-            == len(external_constructor_lines) == len(truth_lines) == 1
++            == len(external_emitter_lines) == len(truth_lines) == 1
+             and terminal_call_lines[0] < control_close_lines[0]
+-            < external_constructor_lines[0]
++            < external_emitter_lines[0]
+             and "requires_supervisor_process_exit_zero" in external_segment
+             and "all_filesystem_control_fds_closed_before_pass_construction"
+             in external_segment
+-            and "write_all(sys.stdout.fileno(), external_body)" in formal_segment
+-            and "sys.stdout.flush" in formal_segment,
++            and "worker.write_all(stream.fileno(), external_body)"
++            in ast.get_source_segment(supervisor_text, external_emitter)
++            and "stream.flush()"
++            in ast.get_source_segment(supervisor_text, external_emitter)
++            and "emit_supervisor_failure_diagnostic(phase, error)" in formal_segment,
+             "terminal PASS is not restricted to post-close exact stdout plus exit-zero")
+ 
+     worker_formal = ast.get_source_segment(
+@@ -773,6 +777,8 @@
+
+                 actual_v10_record_regression,
+             "disposable_full_prebound_production_function_path":
+                 supervised["full_prebound_production_function_path"],
++            "actual_shared_emitter_flush_external_exit_process_roundtrip":
++                supervised["full_emission_process_roundtrip"],
+             "final_cache_anchor_twelve_boundary_cases": anchor_regression,
+             "worker_pending_only_supervisor_terminal_constructor": "PASS",
+             "exact_protocol_template_selftest_binding": "PASS",

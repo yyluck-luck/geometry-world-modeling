@@ -1,0 +1,252 @@
+--- v11/synthetic_selftest.py
+
++++ v12/synthetic_selftest.py
+
+@@ -1,9 +1,9 @@
+
+ #!/usr/bin/env python3
+-"""Source, synthetic, and read-only metadata integration suite for S45B V11.
++"""Source, synthetic, and read-only metadata integration suite for S45B V12.
+ 
+ The integration case opens the ten exact frozen C1/S45 upstream metadata paths
+ and parses the 102-event chain to selected tensor descriptors.  It stops before
+-any tensor-body open.  No image or pixel is opened, and no V11 binding, permanent
++any tensor-body open.  No image or pixel is opened, and no V12 binding, permanent
+ lock, or execution directory is created.
+ """
+ from __future__ import annotations
+@@ -44,9 +44,9 @@
+
+     "execution_01",
+     ".c1_numeric_camera_guard.lock",
+     ".c1_numeric_camera_guard.lock.staging",
+-    "C1_CAMERA_GUARD_BINDING_V11.json",
+-    "BINDING_REVIEW_V11.json",
+-    "GOVERNANCE_ATTESTATION_V11.json",
++    "C1_CAMERA_GUARD_BINDING_V12.json",
++    "BINDING_REVIEW_V12.json",
++    "GOVERNANCE_ATTESTATION_V12.json",
+ )
+ 
+ EXPECTED_V6_HISTORY = {
+@@ -179,14 +179,14 @@
+
+ 
+ def assert_formal_paths_absent():
+     present = formal_paths_present(HERE)
+-    require(not present, "formal V11 path unexpectedly exists: " + repr(present))
++    require(not present, "formal V12 path unexpectedly exists: " + repr(present))
+ 
+ 
+ def review_files_do_not_break_source_suite():
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_review_phase_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_review_phase_") as raw:
+         root = Path(raw)
+-        (root / "SOURCE_REVIEW_PRIMARY_V11.json").write_text("{}\n")
+-        (root / "SOURCE_REVIEW_ADVERSARIAL_V11.json").write_text("{}\n")
++        (root / "SOURCE_REVIEW_PRIMARY_V12.json").write_text("{}\n")
++        (root / "SOURCE_REVIEW_ADVERSARIAL_V12.json").write_text("{}\n")
+         require(not formal_paths_present(root),
+                 "Completed source reviews were confused with formal attempt paths")
+ 
+@@ -251,7 +251,7 @@
+
+ 
+ 
+ def final_cache_anchor_regression(worker):
+-    """Compare actual V7/V11 functions on opposing and aligned tolerance bands."""
++    """Compare actual V7/V12 functions on opposing and aligned tolerance bands."""
+     import copy
+     legacy_path = HERE.parent / "S45B_c1_numeric_camera_guard_supervised_v7/camera_guard.py"
+     require(sha256(legacy_path) == "6f60c290888dd3ee66aabf570d87136c8026f25d09372d3d1e42f4ba9c0bc34c",
+@@ -287,7 +287,7 @@
+
+                     {"c2ws": poses[5:9], "Ks": ks[5:9]},
+                 ])
+                 outcomes = {}
+-                for name, module in (("v7", legacy), ("v11", worker)):
++                for name, module in (("v7", legacy), ("v12", worker)):
+                     try:
+                         result = module.evaluate_numeric_guard(batches, commits)
+                     except module.GuardInvalid:
+@@ -296,8 +296,8 @@
+
+                         require(result["status"] == "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
+                                 "numeric guard returned an unexpected result")
+                         outcomes[name] = True
+-                require(outcomes["v11"] is valid_at_final,
+-                        "V11 disagrees with the final-anchor tolerance band")
++                require(outcomes["v12"] is valid_at_final,
++                        "V12 disagrees with the final-anchor tolerance band")
+                 require(outcomes["v7"] is (not valid_at_final),
+                         "preserved V7 failed to reproduce the first-anchor discrepancy")
+                 records.append({"field": field, "direction": direction,
+@@ -376,7 +376,7 @@
+
+         "capture_counts": {name: len(items) for name, items in captures.items()},
+         "selected_camera_tensor_descriptors": descriptor_count,
+         "legacy_v8_failure_reproduced": True,
+-        "v11_two_schema_adapters_passed": True,
++        "v12_two_schema_adapters_passed": True,
+         "camera_tensor_store_constructed": False,
+         "camera_tensor_body_bytes_read": 0,
+         "image_body_files_opened": 0,
+@@ -427,9 +427,9 @@
+
+         supervisor.validate_camera_tensor_identities(bad, 11, 1584)
+     except ValueError as error:
+         require(str(error) == "Camera tensor shape is outside c2w/K scope",
+-                "V11 bad-shape rejection changed reason")
++                "V12 bad-shape rejection changed reason")
+     else:
+-        raise AssertionError("V11 accepted an ordinary non-camera [2,2] shape")
++        raise AssertionError("V12 accepted an ordinary non-camera [2,2] shape")
+     return {
+         "status": "PASS_ACTUAL_V9_REPORT_TEXT_ONLY_SHAPE_REGRESSION",
+         "actual_report_sha256": V9_REPORT_SHA256,
+@@ -437,8 +437,8 @@
+
+         "actual_metadata_body_bytes": 1584,
+         "single_K_3x3_count": 1,
+         "v9_rejection_reproduced": True,
+-        "v11_accepts_legitimate_single_K_3x3": True,
+-        "v11_rejects_ordinary_bad_shape_2x2": True,
++        "v12_accepts_legitimate_single_K_3x3": True,
++        "v12_rejects_ordinary_bad_shape_2x2": True,
+         "camera_tensor_body_bytes_read_by_regression": 0,
+         "pixels_decoded": 0,
+     }
+@@ -470,7 +470,7 @@
+
+         supervisor_path, "_s45b_v10_prebound_record_domain_witness",
+     )
+     report_body = report_path.read_bytes()
+-    with tempfile.TemporaryDirectory(prefix="s45b_v11_v10_record_repro_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v12_v10_record_repro_") as raw:
+         output_path = Path(raw).resolve()
+         output_fd = os.open(
+             output_path,
+@@ -527,9 +527,9 @@
+
+ def main():
+     assert_formal_paths_absent()
+     review_files_do_not_break_source_suite()
+-    worker_raw, worker_text, worker_tree, worker = load_exact_source(WORKER, "_s45b_v11_worker")
++    worker_raw, worker_text, worker_tree, worker = load_exact_source(WORKER, "_s45b_v12_worker")
+     supervisor_raw, supervisor_text, supervisor_tree, supervisor = load_exact_source(
+-        SUPERVISOR, "_s45b_v11_supervisor",
++        SUPERVISOR, "_s45b_v12_supervisor",
+     )
+ 
+     forbidden = {"numpy", "torch", "PIL", "cv2", "diffusers"}
+@@ -568,7 +568,7 @@
+
+     supervised = supervisor.synthetic_selftest()
+     require(supervised["status"] == "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+             "supervisor attack suite failed")
+-    required_v11_attacks = {
++    required_v12_attacks = {
+         "prespawn_create_only_pair_child_inherited_fd_publication",
+         "prespawn_report.json_substitution",
+         "prespawn_worker_receipt.json_substitution",
+@@ -584,12 +584,12 @@
+
+         "complete_schema_rejects_not_evaluated_sentinel",
+         "prebound_creator_writer_held_reader_collect_terminal_exit_success",
+     }
+-    require(required_v11_attacks.issubset(supervised["checks"])
++    require(required_v12_attacks.issubset(supervised["checks"])
+             and supervised["checks"]["complete_report_top_level_deletion_matrix"]
+             == len(supervisor.REPORT_KEYS)
+             and supervised["checks"]["complete_worker_receipt_top_level_deletion_matrix"]
+             == len(supervisor.WORKER_RECEIPT_KEYS),
+-            "V11 pre-acquisition or complete-schema attack matrix is incomplete")
++            "V12 pre-acquisition or complete-schema attack matrix is incomplete")
+ 
+     base = [
+         [0.0, -1.0, 0.0, 1.0], [1.0, 0.0, 0.0, -2.0],
+@@ -621,7 +621,7 @@
+
+             and "spawn_contained" not in formal_segment
+             and "open_regular_lease(output_fd, FORMAL_OUT, REPORT_NAME)" not in formal_segment
+             and "open_regular_lease(output_fd, FORMAL_OUT, WORKER_RECEIPT_NAME)" not in formal_segment,
+-            "formal supervisor bypasses V11 containment/capability binding")
++            "formal supervisor bypasses V12 containment/capability binding")
+ 
+     fork_segment = ast.get_source_segment(
+         supervisor_text, named_function(supervisor_tree, "_fork_loaded_entry"),
+@@ -685,8 +685,9 @@
+
+             "canonical pathname can be accepted without a held-FD observation")
+     terminal_call_lines = call_lines(formal, name_call("publish_terminal_seal"))
+     control_close_lines = call_lines(formal, name_call("close_terminal_control_fds"))
+-    external_constructor_lines = call_lines(formal, name_call("build_external_pass_seal"))
++    external_emitter_lines = call_lines(formal, name_call("emit_external_pass_seal"))
+     external_constructor = named_function(supervisor_tree, "build_external_pass_seal")
++    external_emitter = named_function(supervisor_tree, "emit_external_pass_seal")
+     truth_lines = sorted(
+         node.lineno for node in ast.walk(external_constructor)
+         if isinstance(node, ast.Dict)
+@@ -698,14 +699,17 @@
+
+     )
+     external_segment = ast.get_source_segment(supervisor_text, external_constructor)
+     require(len(terminal_call_lines) == len(control_close_lines)
+-            == len(external_constructor_lines) == len(truth_lines) == 1
++            == len(external_emitter_lines) == len(truth_lines) == 1
+             and terminal_call_lines[0] < control_close_lines[0]
+-            < external_constructor_lines[0]
++            < external_emitter_lines[0]
+             and "requires_supervisor_process_exit_zero" in external_segment
+             and "all_filesystem_control_fds_closed_before_pass_construction"
+             in external_segment
+-            and "write_all(sys.stdout.fileno(), external_body)" in formal_segment
+-            and "sys.stdout.flush" in formal_segment,
++            and "worker.write_all(stream.fileno(), external_body)"
++            in ast.get_source_segment(supervisor_text, external_emitter)
++            and "stream.flush()"
++            in ast.get_source_segment(supervisor_text, external_emitter)
++            and "emit_supervisor_failure_diagnostic(phase, error)" in formal_segment,
+             "terminal PASS is not restricted to post-close exact stdout plus exit-zero")
+ 
+     worker_formal = ast.get_source_segment(
+@@ -721,13 +725,13 @@
+
+ 
+     template = json.loads(TEMPLATE.read_text())
+     require(template.get("schema") == "s45b-c1-numeric-camera-guard-binding-template-v4"
+-            and template.get("status") == "UNBOUND_SUPERVISED_V11_TEMPLATE_NOT_EXECUTABLE"
++            and template.get("status") == "UNBOUND_SUPERVISED_V12_TEMPLATE_NOT_EXECUTABLE"
+             and template.get("placeholder_hashes") == 15,
+-            "V11 binding template is not explicitly unbound")
++            "V12 binding template is not explicitly unbound")
+     nulls = sum(value is None for value in template["source_set"].values())
+     nulls += sum(item["sha256"] is None for item in template["upstream"].values())
+     require(nulls == 15 and template["governance_attestation_requirement"]["sha256"] is None,
+-            "V11 template null/governance boundary differs")
++            "V12 template null/governance boundary differs")
+ 
+     history = {name: sha256(V6 / name) for name in EXPECTED_V6_HISTORY}
+     require(history == EXPECTED_V6_HISTORY, "V6 source/review history changed")
+@@ -748,8 +752,8 @@
+
+     assert_formal_paths_absent()
+     output = {
+         "schema": "s45b-c1-numeric-camera-guard-source-metadata-test-v6",
+-        "status": "PASS_V11_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+-        "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v11.0.0",
++        "status": "PASS_V12_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
++        "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v12.0.0",
+         "python": sys.version,
+         "identities": {
+             "camera_guard.py": hashlib.sha256(worker_raw).hexdigest(),
+@@ -773,6 +777,8 @@
+
+                 actual_v10_record_regression,
+             "disposable_full_prebound_production_function_path":
+                 supervised["full_prebound_production_function_path"],
++            "actual_shared_emitter_flush_external_exit_process_roundtrip":
++                supervised["full_emission_process_roundtrip"],
+             "final_cache_anchor_twelve_boundary_cases": anchor_regression,
+             "worker_pending_only_supervisor_terminal_constructor": "PASS",
+             "exact_protocol_template_selftest_binding": "PASS",

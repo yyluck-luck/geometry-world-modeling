@@ -1,0 +1,96 @@
+--- frozen_package/scripts/verify_s8_results.py
++++ path_adapter/verify_s8_results.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Independent S8 audit, gated on completed replay before reading new data.
++"""Package-contained S8 audit with explicit path relocation; no original-project reads.
+ 
+ Rebuild measurements from raw RGB/depth PNGs and GT, then replay saved events,
+ recompute saved-render voting and decisions, and score independent projections.
+@@ -30,7 +30,8 @@
+ from verify_s7_replay import (reconstruct_paths, votes_from_render, independently_select,
+     Checks, ARMS, READOUTS, ATOL, RTOL, contrasts, aggregate, now, sha, save)
+ 
+-ROOT = Path(__file__).resolve().parents[1]
++from portable_paths import mapped_path, historical_path, OLD_ROOT
++ROOT = Path('/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/S8_package_independent_audit/run_04/extracted')
+ S6_HELPER_SHA = 'bd6bd1d88c3297e89cd556fd6d6c4b3517f2828562aea272f23ce0069ce159a2'
+ S7_HELPER_SHA = '506ad1e33a053b2d9d0fabe69fd2a611f48ce4b7201e860fa98c2f60e5fd42e0'
+ RUNNER_SHA = 'cc3ae6fd6243ce3531e540dc8c70ef61af0e868c919c7232a16616cf750ba292'
+@@ -75,8 +76,7 @@
+ 
+ 
+ def source_path(name):
+-    path=Path(name)
+-    return (path if path.is_absolute() else ROOT/path).resolve(strict=True)
++    return mapped_path(name)
+ 
+ 
+ def valid_sha(value): return isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value) is not None
+@@ -203,7 +203,7 @@
+ class Reader:
+     def __init__(self, check): self.check=check; self.before={}
+     def track(self,p):
+-        p=Path(p).resolve(strict=True); digest=sha(p)
++        p=mapped_path(p); digest=sha(p)
+         if str(p) in self.before: self.check('read_stable/'+str(p),self.before[str(p)]==digest,'integrity')
+         self.before[str(p)]=digest; return p
+     def integrity(self,p,digest,label=None):
+@@ -267,10 +267,10 @@
+     check(tag+'/RGB_order',raw['images']==expected_images,'metadata')
+     check(tag+'/process_identity',raw['repo']==sequence['repo'] and
+         raw['python_executable']==sequence['python_executable'],'metadata')
+-    modules=raw['loaded_modules']; repo=Path(sequence['repo']).resolve(strict=True)
++    modules=raw['loaded_modules']; repo=Path(sequence['repo'])
+     check(tag+'/loaded_module_coverage',set(modules)=={'dust3r.model','dust3r.inference','dust3r.utils.image','models.pos_embed'},'metadata')
+     for name,path in modules.items():
+-        path=Path(path).resolve(strict=True)
++        path=Path(path)
+         check(tag+'/loaded_module_path/'+name,path.is_relative_to(repo),'integrity')
+         reader.integrity(path,sequence['upstream_python_sha256'][str(path.relative_to(repo))])
+     compat=raw['runtime_compatibility']
+@@ -302,10 +302,10 @@
+     check(tag+'/resources',type(entry['process_peak_rss_bytes']) is int and
+         0<entry['process_peak_rss_bytes']<=16*1024**3 and entry['monitored_seconds']<=900 and
+         raw['peak_process_rss_bytes']==entry['process_peak_rss_bytes'] and not entry.get('stop_reason'),'metadata')
+-    expected_command=[sequence['python_executable'],str(ROOT/'scripts/run_s6_cut3r.py'),
++    expected_command=[sequence['python_executable'],str(OLD_ROOT/'scripts/run_s6_cut3r.py'),
+         '--repo',sequence['repo'],'--checkpoint',sequence['checkpoint']['path'],
+         '--images',*[x['path'] for x in expected_images], '--device','cpu','--threads','8',
+-        '--history-count','20','--output',str(directory),'--input-source',
++        '--history-count','20','--output',str(historical_path(directory)),'--input-source',
+         f"S8 block{b}; RGB only; history20/query4; manifest {sequence['manifest_sha256']}",
+         '--signed-rope-check']
+     command=entry['command']
+@@ -349,10 +349,10 @@
+         check('source_archive_members',len(archive.namelist())==len(set(archive.namelist())) and
+               set(archive.namelist())==set(meta['source_sha256'])==set(meta['source_original_paths']),'integrity')
+         for name,digest in meta['source_sha256'].items():
+-            original=Path(meta['source_original_paths'][name]).resolve(strict=True)
+-            reader.integrity(original,digest,'original/'+name)
++            original=mapped_path(meta['source_original_paths'][name])
++            reader.integrity(original,digest,'packaged_source/'+name)
+             check('archived/'+name,hashlib.sha256(archive.read(name)).hexdigest()==digest,'integrity')
+-        reverse={str(Path(p).resolve()):name for name,p in meta['source_original_paths'].items()}
++        reverse={str(mapped_path(p)):name for name,p in meta['source_original_paths'].items()}
+         check('all_frozen_sources_archived',all(str(p) in reverse for p in sources),'integrity')
+         code=archive.read(reverse[str((ROOT/'scripts/run_s8_replay.py').resolve())]).decode()
+     tree=ast.parse(code); assignments={}
+@@ -384,6 +384,8 @@
+             torch_default_dtype=str(torch.get_default_dtype())),
+         limitations=[
+             'No model inference is repeated; 504 saved model arrays are authenticated and checked, not regenerated.',
++            'Full original dataset and pre-amendment GT are absent. The historical 23803-check derivation audit is authenticated but not repeated.',
++            'Source and loaded-module hashes below compare package/nested-archive bytes to historical records, not current original checkout files.',
+             'Raw latent-state tensors are absent. Query-state isolation is a complete schema/hash/flag metadata audit, not a fresh tensor comparison.',
+             'Surfel polygon rendering is not rerun. Votes, allocation, float32 sorting and NMS are independently recomputed conditional on authenticated saved render buffers.',
+             'Timing/sealing order is authenticated metadata plus static executed-source order, not a recovered historical file-access trace.',
+@@ -515,7 +517,7 @@
+                     stat=path.stat(); facts=dict(path=str(path),inode=(stat.st_dev,stat.st_ino),sha=digest,time=f[kind]['timestamp'])
+                     for key,value in facts.items():
+                         check(qtag+'/'+kind+'/unique_'+key,value not in seen[kind][key],'integrity'); seen[kind][key].add(value)
+-                    identity[kind]=dict(path=str(path),relative_path=f[kind]['path'],timestamp=f[kind]['timestamp'],sha256=digest,bytes=stat.st_size)
++                    identity[kind]=dict(path=str(historical_path(path)),relative_path=f[kind]['path'],timestamp=f[kind]['timestamp'],sha256=digest,bytes=stat.st_size)
+                 identities.append(identity)
+                 with Image.open(safe_under(args.data,f['rgb']['path'])) as image:
+                     check(qtag+'/RGB_native_shape',image.size==(640,480))

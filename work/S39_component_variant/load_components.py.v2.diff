@@ -1,0 +1,17 @@
+--- v1/load_components.py
++++ v2/load_components.py
+@@ -116,6 +116,14 @@
+         gate_api.validate_gate(gate)
+         loading = json.loads(loading_path.read_text())
+         require(loading['status'] == 'LOADED_PENDING_VARIANT_INVARIANT_CHECKS', 'Factory did not finish loading')
++        # Original CUT3R may catch a checked_state_load rejection and retry a
++        # filtered checkpoint. Inspect every recorded attempt after it returns.
++        state_loads = loading.get('state_dict_loads')
++        record['state_dict_loads'] = state_loads  # Preserve all strict_requested values.
++        require(isinstance(state_loads, list) and bool(state_loads), 'No actual state_dict load records')
++        require(all(isinstance(item, dict) and item.get('missing_keys') == [] and
++                    item.get('unexpected_keys') == [] and 'strict_requested' in item
++                    for item in state_loads), 'At least one recorded state_dict load was incomplete')
+         loading.update(status='PASS_DECLARED_VARIANT_COMPONENT_LOADING_ONLY', variant=gate_api.VARIANT,
+                        variant_invariants=checks, codec_numerics_verified=False,
+                        original_sd21_equivalence_verified=False, generation_completed=False)

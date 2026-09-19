@@ -1,0 +1,144 @@
+\documentclass[11pt,a4paper,fontset=none]{ctexart}
+\usepackage{hypothesis_generation}
+\usepackage{amsmath,tabularx}
+\geometry{left=18mm,right=18mm,top=20mm,bottom=19mm,headsep=6mm}
+\setmainfont{Helvetica Neue}\setsansfont{Helvetica Neue}
+\setCJKmainfont{PingFang SC}\setCJKsansfont{PingFang SC}\setCJKmonofont{PingFang SC}
+\definecolor{hypothesis1}{HTML}{0072B2}
+\hypersetup{pdftitle={新场景独立复验报告},pdfauthor={本地研究结果记录},urlcolor=hypothesis1}
+\fancyhead[L]{\small\color{hypothesis1}新场景独立复验报告}
+\fancyhead[R]{\small S8 · TUM freiburg2/desk}
+\fancyfoot[C]{\small 2026年9月6日\quad ·\quad \thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}\linespread{1.10}
+\setlist{nosep,topsep=3pt,leftmargin=1.4em}
+\newcommand{\subhead}[1]{\par\vspace{3pt}{\large\bfseries\color{hypothesis1}#1}\par}
+\newcommand{\source}[1]{\par{\small\color{darkgray}依据：#1。}}
+\begin{document}
+{\LARGE\bfseries\color{hypothesis1}新场景复验：换图仍会发生，旧模式未重现}\par
+{\large 72张真实照片 · 一个新增物理环境 · 12张相关查询}\par
+\begin{summarybox}[已完成实验与独立核算]
+\textbf{14,253项独立结果检查通过。}主设置中，固定A0关联只平均位置，12张查询全部不换图；固定A1关联平均位置，4张换图，\textbf{2张支持上升、2张下降、8张不变}，均值仅增加0.019个百分点。
+
+位置仍可能影响选图。但上轮主设置的“A0内负、A1内正”组合没有重现；预定稀疏路径的精确抵消为\textbf{0/12}。这批结果不支持把位置平均称为稳定改进。
+\end{summarybox}
+\subhead{四张地图的平均参考支持}
+\includegraphics[width=\linewidth]{figures/external_scene_support.png}
+\vspace{-4mm}
+\par\noindent\begin{tabularx}{\linewidth}{@{}lXXXX@{}}\toprule
+步长 & A0P0 & A0P1 & A1P0 & A1P1 \\\midrule
+8 & 80.281\% & 80.281\% & 80.799\% & 80.818\% \\
+12 & 80.281\% & 80.264\% & 80.419\% & 82.191\% \\\bottomrule\end{tabularx}\par
+{\small 步长8为主设置，12仅为敏感性；两档不能替换。本表先逐查询计算，再对12张等权平均。}
+\subhead{这个数字表示什么？}
+模型只选4张旧照片。参考支持衡量这些照片的\textbf{实测几何}能支持多少有效查询点；一致阈值为50毫米。它不是生成视频质量，也不是覆盖整个房间的精度。
+
+A表示哪些观测归到同一个地图点，P表示点最后放在哪里。A0为首写在线关联，A1为在线均值关联；P0取出生位置，P1取贡献帧质心的等帧递推平均。相同A内只换P；跨A还改变点分区、点数、出生属性和来源，不能称纯来源标签因果。
+\source{冻结V2规则；384条原读出与独立结果；完整说明S8\_RESULTS}
+
+\newpage
+{\LARGE\bfseries\color{hypothesis1}1｜按规则取图，再封存、评分}\par
+\textbf{三段全部test。}每段前20张历史用于记忆，后4张查询不更新历史状态。三段属于一个新增房间，不是三个独立场景；384读出条件仍只有12张不同查询。
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{24mm}XXX@{}}\toprule
+步骤 & 固定内容 & 允许访问 & 实际结果 \\\midrule
+取样 & 8.840秒 / 24等时目标 & 时间戳与文件字节 & 6窗取0/2/5 \\
+图片核验 & 不因画面换样 & 72张RGB & 原字节复制 \\
+预测选图 & 四图 × 四读出 & 预测几何/姿态 & 6案例全部封存 \\
+测量评分 & 同目标与50mm阈值 & depth与GT位姿 & 独立PNG重算 \\\bottomrule\end{tabularx}\par
+\subhead{全部三段的首图与末图}
+{\small 以下是按序号固定展示的缩小示意；全部72张原PNG另存，不用这六张替代完整样本。}\par
+\begin{tabularx}{\linewidth}{@{}XXX@{}}
+\centering B0首图 & \centering B1首图 & \centering\arraybackslash B2首图\\
+\includegraphics[width=\linewidth]{figures/B0_F0.png}&\includegraphics[width=\linewidth]{figures/B1_F0.png}&\includegraphics[width=\linewidth]{figures/B2_F0.png}\\
+\centering B0末图 & \centering B1末图 & \centering\arraybackslash B2末图\\
+\includegraphics[width=\linewidth]{figures/B0_F23.png}&\includegraphics[width=\linewidth]{figures/B1_F23.png}&\includegraphics[width=\linewidth]{figures/B2_F23.png}\\
+\end{tabularx}
+{\small 照片：TUM RGB-D Benchmark，当前官网CC BY 4.0；仅在本页缩小显示，原照片内容没有修改。}
+\subhead{一次透明的输入修订}
+V1因GT时间键重复停止；此时未看新像素或解析位姿数值。随后先冻结V2，再统一排除重复时间前后各51ms内的31条位置记录。其余5,932文件独立复制、字节不变；原始树和失败全部保留。屏障间隔106.7ms大于原100ms插值上限，禁止跨越。\textbf{这不是宣称已修复官方真值。}
+
+模型为CUT3R 224 linear中间权重，CPU三进程共504输出数组通过核验。使用已有signed-RoPE适配；输入/输出FP32，encoder内部RoPE有FP16。没有完整VMem视频生成。
+\source{独立派生23,803检查；独立取样1,554检查；72RGB核验与三总览视觉回执}
+
+\newpage
+{\LARGE\bfseries\color{hypothesis1}2｜完整逐查询结果，保留零变化}\par
+\includegraphics[width=\linewidth]{figures/per_query_position_effects.png}
+{\small Q20--Q23对应各块尾4张查询；虚线分开三个块。\textbf{两图纵轴范围不同，按数字读幅度。}主设置A1的四个非零值在不同查询之间有正有负，不是同一查询内的机制精确抵消。}
+\subhead{所有预定主比较：百分点与换集合数}
+\par\noindent\begin{tabularx}{\linewidth}{@{}lp{39mm}XXX@{}}\toprule
+步长 & 比较 & 平均变化 & 换集合 & 升/降/同 \\\midrule
+8 & A0内改位置 & 0.000000 & 0/12 & 0/0/12 \\
+8 & A1内改位置 & 0.018962 & 4/12 & 2/2/8 \\
+8 & P0下改关联 & 0.517650 & 4/12 & 3/1/8 \\
+8 & P1下改关联 & 0.536612 & 4/12 & 2/2/8 \\
+8 & 首写到在线均值 & 0.536612 & 4/12 & 2/2/8 \\
+12 & A0内改位置 & -0.017043 & 1/12 & 0/1/11 \\
+12 & A1内改位置 & 1.771952 & 4/12 & 3/1/8 \\
+12 & P0下改关联 & 0.137379 & 7/12 & 2/5/5 \\
+12 & P1下改关联 & 1.926374 & 8/12 & 6/2/4 \\
+12 & 首写到在线均值 & 1.909331 & 8/12 & 5/3/4 \\\bottomrule\end{tabularx}\par
+{\small 上表各比较的“仅顺序变而集合不变”均为0。差中之差：主+0.018962pp（2/2/8），稀疏+1.788995pp（4/0/8）。}
+\subhead{变化集中在哪里？}
+主设置B0与B2四图都不换图；B1承担全部主变化。B1在A1内改位置，四张依次为−0.511、+0.109、−0.526、+1.155pp，块均值+0.057pp。稀疏设置B2仍四图不变。
+
+旧S7主位置效应为−0.433 / +2.632pp，新主为0 / +0.019pp，因此原具体符号未重现。稀疏新结果出现负/正也不能替代预定主检验。固定路径$A0P0\to A1P0\to A1P1$在stride12中，ID与支持联合抵消\textbf{0/12}，没有改挑其他路径。
+\source{原24条查询条件、全部384读出、独立聚合；旧S7主8查询单独对照}
+
+\newpage
+{\LARGE\bfseries\color{hypothesis1}3｜取消NMS不保证支持改善，位置更新也未必更准}\par
+NMS按相机位置与朝向排除过近的视角。下表只去掉NMS，展开候选与最终4图预算相同；不使用会额外强塞末帧的官方关闭分支。
+\par\noindent\begin{tabularx}{\linewidth}{@{}llXXX@{}}\toprule
+步长 & 图 & 原+NMS \% & 同候选去NMS \% & 变化 pp \\\midrule
+8 & A0P0 & 80.281 & 79.126 & -1.155 \\
+8 & A0P1 & 80.281 & 80.440 & 0.159 \\
+8 & A1P0 & 80.799 & 77.012 & -3.787 \\
+8 & A1P1 & 80.818 & 76.585 & -4.233 \\
+12 & A0P0 & 80.281 & 76.001 & -4.280 \\
+12 & A0P1 & 80.264 & 79.492 & -0.772 \\
+12 & A1P0 & 80.419 & 79.158 & -1.261 \\
+12 & A1P1 & 82.191 & 81.140 & -1.051 \\\bottomrule\end{tabularx}\par
+\textbf{主A1P1去NMS平均下降4.233pp，2升10降。}主A0P1平均上升0.159pp，仍有3升5降4同。全20候选加NMS为76.235\%，去NMS为75.298\%，两档/四图完全相同，仍只选4张。不能说取消筛选或扩大候选就必然更好。
+\subhead{四图共同区域误差与各图自身覆盖}
+\par\noindent\begin{tabularx}{\linewidth}{@{}llXXXX@{}}\toprule
+步长 & 图 & MAE mm & 中位差 mm & p90 mm & 自身覆盖 \% \\\midrule
+8 & A0P0 & 620.618 & 167.890 & 1827.049 & 8.633 \\
+8 & A0P1 & 650.077 & 184.927 & 1830.591 & 8.728 \\
+8 & A1P0 & 628.258 & 176.523 & 1841.654 & 8.175 \\
+8 & A1P1 & 647.849 & 193.660 & 1860.264 & 8.179 \\
+12 & A0P0 & 742.341 & 502.525 & 1977.808 & 3.615 \\
+12 & A0P1 & 746.482 & 494.612 & 1988.741 & 3.672 \\
+12 & A1P0 & 740.755 & 493.660 & 1976.312 & 3.417 \\
+12 & A1P1 & 742.257 & 486.914 & 1980.804 & 3.461 \\\bottomrule\end{tabularx}\par
+{\small 三类误差均先逐查询计算，再平均12张；当前各均值有效N=12、零共同/自身查询=0。}
+
+四图共同区域只有\textbf{2.209\%}（主，86--330像素）与\textbf{0.692\%}（稀疏，36--89像素）有效目标。主A0改位置后支持完全不变，共同MAE却从620.618升到650.077mm；不能把“换位置”当“更准”。
+
+共同投影格不保证同物理表面，遮挡、位姿和稀疏中心投影可能影响残差；本轮未区分这些原因的贡献。两图对角共同mask另存补充表，不混入四图比较；未覆盖区域不能当正确。
+\source{原PNG/GT独立重建、保存地图的中心点投影、逐查询几何与读出补充表}
+
+\newpage
+{\LARGE\bfseries\color{hypothesis1}4｜证据到哪里，结论就写到哪里}\par
+\subhead{实际时间：北京时间2026年9月6日}
+\par\noindent\begin{tabularx}{\linewidth}{@{}p{43mm}X@{}}\toprule
+节点 & 记录 \\\midrule
+V2设计冻结 & 03:38:23.939；V1失败后，看图和派生前 \\
+输入/照片核验 & 03:41:11 / 03:41:38 \\
+执行冻结 / CPU完成 & 03:43:00.567 / 03:44:16.148 \\
+六案例重放 & 03:44:47.150--03:46:37.731 \\
+全选择封存 & 03:46:35.740 \\
+首次GT位姿 / depth解码 & 03:46:35.742 / 03:46:35.766 \\
+独立数值审计 & 03:47:23.729--03:47:34.554；一次通过 \\\bottomrule\end{tabularx}\par
+{\small 时点来自冻结/运行/独立核验元数据，不是学生工时或导师会议记录。}
+\subhead{14,253项检查究竟核了什么？}
+\textbf{11,607复算 + 2,046完整性 + 597元数据 + 3源码顺序。}从72份原深度PNG与派生GT重建测量和支持，核504个保存模型数组、6观测集、12条关联路径、24幅地图，从96份保存渲染独立重算投票，并核对384条排序/NMS读出决定。
+
+没有重跑神经模型或surfel多边形光栅化，也没有重新取得内部状态原张量；状态核验基于完整hash/flag记录。时序证据为保存元数据及执行源码，不是恢复历史文件访问轨迹。
+\subhead{为什么还不能称完整创新成果？}
+\begin{itemize}
+\item 两个真实物理环境的组件证据已有进展，但一个新环境中的12张相关查询仍不足以证明普遍结论，无显著性或独立样本置信区间。
+\item 同数据集、同类另一台相机，场景、设备、运动及重叠共同改变。训练资料与权重静态信息无法证明模型训练未见该数据。
+\item 参考支持和稀疏投影不是视频质量；GT及标定也不是无噪真值。完整VMem、生成消费者验证及课程真实活动尚未完成。
+\end{itemize}
+\textbf{值得继续的是可审计的条件作用诊断，不能把简单平均包装成新算法。}下一阶段应检验诊断能否指导具体改进，并补消费者验证；保持未重复结果，不追加筛选使旧故事成立。
+\subhead{来源与完整材料}
+{\small 原始来源：\href{https://cvg.cit.tum.de/_media/spezial/bib/sturm12iros.pdf}{Sturm等，IROS 2012}；\href{https://github.com/CUT3R/CUT3R}{CUT3R官方代码}；\href{https://github.com/CUT3R/CUT3R/blob/8bc15dc92a6d7fd92920b4ec81540d3dec7d3ecf/docs/train.md}{训练流程公开边界}。当前官网CC BY 4.0与原论文CC BY 3.0许可历史差异保留。交付目录附完整中文结果、原384读出CSV、逐查询几何、冻结规则、独立核验与72张原照片。旧S0--S7和原proposal不覆盖。}
+\end{document}

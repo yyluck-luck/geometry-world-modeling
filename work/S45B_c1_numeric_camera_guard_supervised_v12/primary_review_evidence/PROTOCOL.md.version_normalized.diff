@@ -1,0 +1,58 @@
+--- v11/PROTOCOL.md
+
++++ v12/PROTOCOL.md
+
+@@ -2,19 +2,32 @@
+
+ 
+ Status: `SOURCE_ONLY_UNBOUND_REQUIRES_FRESH_DUAL_REVIEW_NOT_EXECUTABLE`.
+ 
+-Authorship continuity recorded at 2026-09-08T14:12:54.362976+00:00: the interrupted, unfrozen VERSION
+-candidate was written by `/root/c2_v5_lifecycle_review`. The finishing author
+-`/root/execution_resumption_audit` preserved the original five WIP files under
+-`pre_resume_20260908T141021590483Z`, reran the existing finite dual-Python
+-acceptance suite, and is responsible for the final VERSION freeze and handoff.
+-The runtime `AUTHOR_ROLE` names this finishing author so future fresh reviews
+-and binding documents reflect the actual resumed execution provenance. This
+-administrative identity change grants no scientific or formal-run authority.
+-Both authors remain authors of the candidate, and neither may count as an
+-independent source reviewer of it. The original author did not provide a final
+-freeze or author-test handoff before interruption.
+-
+-VERSION minimally repairs the consumed V10 supervisor failure recorded by
++VERSION inherits the V11 prebound record compatibility repair. V11 failed after a pending
++terminal candidate existed: its formal tail called an undefined `write_all`, while
++the old positive test stopped at construction/serialization. The exact historical
++exception was not captured; the missing writer is a deterministic source defect
++and a strong explanation, not an observed historical traceback. Independent
++diagnosis `../S45B_c1_numeric_camera_guard_supervised_v11/ACTUAL_EXECUTION_FAILURE_DIAGNOSIS_V11.json`
++has SHA-256 `de304196f0d715bf158bfd9149472293c145638c8cedabd40307413a67789377`.
++
++The finishing author remains `/root/execution_resumption_audit`; prior functional
++author `/root/c2_v5_lifecycle_review` is retained in provenance. Neither counts as
++an independent source reviewer. All consumed V11 files, reviews and failed attempt
++remain unchanged and grant no VERSION authority.
++
++VERSION repairs only the actual stdout tail: formal and synthetic processes share
++`emit_external_pass_seal`, which constructs the existing exact record, caps it
++within the existing stdout bound, calls the already loaded `worker.write_all`,
++flushes the stream, and returns zero only afterward. Unexpected exceptions in
++formal supervision emit a bounded, best-effort stderr diagnostic before cleanup,
++including phase and original error type/text; no closed result path is reopened.
++A failed stderr descriptor may prevent the diagnostic, but can never authorize
++PASS. The finite disposable child checks actual NORMAL and SHORT_WRITE success,
++WRITE_ERROR/PARTIAL_WRITE_ERROR/FLUSH_ERROR nonzero failure, complete JSON bytes,
++and externally observed process exit. No camera math/resource/role/attempt gate
++is widened.
++
++The inherited compatibility repair addresses the consumed V10 supervisor failure recorded by
+ `ACTUAL_EXECUTION_FAILURE_DIAGNOSIS_V10.json` SHA-256
+ `0938cd8561a6d1f60a1d5396eb84aebec881bf8e3415ad7a4a4b7a04fd8386c6`.
+ The V10 worker returned 0 and read 11 camera bodies (1584 bytes), and complete
+@@ -400,3 +413,5 @@
+
+ Passing every synthetic test freezes source behavior only. It does not create a
+ C1 pose/K result or authorize a binding, formal attempt, score, image inspection,
+ method claim, or novelty claim.
++
++VERSION additionally uses the actual production emitter inside a disposable child; its parent parses the full stdout JSON and accepts it only with observed exit 0 and empty stderr. Short writes must finish completely; write errors, partial-then-error and flush errors must be nonzero and yield the bounded diagnostic, even when a flush failure left a full JSON document on stdout. These are finite ordinary I/O cases, not a new security matrix.

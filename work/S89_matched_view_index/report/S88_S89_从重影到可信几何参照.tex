@@ -1,0 +1,202 @@
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+\usepackage[margin=1.9cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,graphicx,tikz,xcolor,hyperref,xurl,fancyhdr,enumitem}
+\usetikzlibrary{arrows.meta,positioning}
+\setmainfont{Arial}\setsansfont{Arial}\setmonofont{Menlo}
+\setCJKmainfont{Songti SC}\setCJKsansfont{Heiti SC}
+\definecolor{ink}{HTML}{163C50}\definecolor{accent}{HTML}{007C91}
+\hypersetup{colorlinks=true,urlcolor=accent,linkcolor=ink,pdftitle={S88与S89：从重影到可信几何参照},pdfauthor={AI辅助整理；依据项目实际记录}}
+\renewcommand{\UrlFont}{\fontspec{Arial Unicode MS}\footnotesize}
+\setlength{\parskip}{.5em}\setlength{\parindent}{1.5em}\linespread{1.06}
+\setlength{\emergencystretch}{2em}\renewcommand{\arraystretch}{1.15}
+\pagestyle{fancy}\fancyhf{}\lhead{\small S88 / S89：零基础科研增补}\rhead{\small 实际截点 09-11 09:32}\cfoot{\small\thepage}
+\ctexset{section={format=\Large\bfseries\sffamily\color{ink},beforeskip=0pt,afterskip=.7em},subsection={format=\bfseries\sffamily\color{ink}}}
+\newcommand{\note}[1]{\begin{center}\fcolorbox{accent}{accent!5}{\parbox{.91\linewidth}{\small #1}}\end{center}}
+\newcommand{\src}[1]{\par\noindent{\footnotesize\color{accent}证据：#1}\par}
+\begin{document}
+\section*{1. 为什么已经降了分数，还要继续查数据？}
+\begin{center}{\large\bfseries 从“图像数值更接近”，走向“物体真的在正确位置”}\end{center}
+\note{\textbf{本文科学状态截点：北京时间2026-09-11 09:32:50（UTC 01:32:50）。}S86/S87实际结果和S88元数据核验已接受。S89两次有界索引访问均因TLS连接错误停止，新增正文与成员头均为0，同视角三件套尚未取得。没有新图像、深度评分或模型结果；旧168页报告保留，本稿单独阅读。}
+
+设想相机再次看到同一张桌子。我们希望桌沿、显示器和杯子出现在与相机位置相符的地方，物体不要忽然多出一套。模型曾看过桌子的历史照片，能否把这些信息用到正确位置，是proposal主线的一部分。
+
+S86已经让生成过程实际使用历史投影，并核了保存量和像素误差；S87进一步问：一个更简单的末步处理，能否达到同样的分数？答案是在当前单例的平均MSE上可以。可是可见的桌沿和显示器仍可能重叠。因此下一步需要更可信的相机与几何参照，分开追查投影位置和混合方式。
+
+\begin{center}\begin{tikzpicture}[>=Latex,font=\small,box/.style={draw=accent,fill=accent!5,rounded corners,align=center,text width=3cm,minimum height=1.25cm}]
+\node[box](a){S86：真实使用历史\\分数降，仍有重影};
+\node[box,right=6mm of a](b){S87：加强普通对照\\末步已能达到该分数};
+\node[box,right=6mm of b](c){S88/S89：补几何参照\\先核来源，再配文件};
+\draw[->](a)--(b);\draw[->](b)--(c);
+\end{tikzpicture}\end{center}
+\noindent{\small\textcolor{accent}{研究逻辑示意；最后一框是分阶段推进，不表示新几何实验已完成。}}
+
+这里有四种不同的“完成”：程序跑完、保存结果能复算、某个指标改善、科学主张成立。它们不能互相代替。S88访问成功仅解决了“能否取得并理解一份相机元数据”的具体依赖。
+
+阅读建议：第2页理解低MSE为何可能伴随模糊；第3页看真实结果和失败；第4、5页看S88实际取得什么；第6页理解同视角三件套；第7页看proposal位置；第8页练习向老师解释。
+\src{S86/ROOT\_RESULT\_ACCEPTANCE.json；S87/S87\_RESULTS.md及ROOT\_VISUAL\_ACCEPTANCE.json；S88/S88\_RESULTS.md。完整目录名见第8页。}
+\clearpage
+\section*{2. 两个像素，就能看懂“低误差但边缘变糊”}
+
+\textbf{MSE是均方误差。}先把每个位置的预测值减去参考值，再平方，最后平均。真实实验对RGB三个通道都做这个计算。它关心数值逐位置接近程度，并没有直接数出“图里有几个杯子”或“桌沿是否清晰”。
+
+\note{\textbf{以下是纸面教学例，不是新实验，也不是RTMV或旧视频的像素。}两个灰度像素代表一条清晰黑白边界：参考是$[1,0]$；错位预测是$[0,1]$；均匀模糊预测是$[0.5,0.5]$。}
+\begin{center}\begin{tikzpicture}[x=1.25cm,y=1.1cm]
+\foreach \x/\lab in {0/参考,3/错位,6/模糊}{\node at (\x+.8,1.6){\lab};}
+\fill[white] (0,0) rectangle (1,1);\fill[black](1,0)rectangle(2,1);
+\fill[black] (3,0) rectangle (4,1);\fill[white](4,0)rectangle(5,1);
+\fill[gray] (6,0) rectangle (8,1);
+\foreach \x in {0,1,3,4,6,7}{\draw[accent](\x,0)rectangle(\x+1,1);}
+\node at (1,-.4){$[1,0]$};\node at(4,-.4){$[0,1]$};\node at(7,-.4){$[0.5,0.5]$};
+\end{tikzpicture}\end{center}
+\[
+\mathrm{MSE}_{\text{错位}}=\frac{(0-1)^2+(1-0)^2}{2}=1,
+\qquad
+\mathrm{MSE}_{\text{模糊}}=\frac{(0.5-1)^2+(0.5-0)^2}{2}=0.25.
+\]
+
+模糊图的误差只有错位图的四分之一，却没有恢复那条清晰边界。原因很具体：每个像素都“折中”了一点，避免单个位置犯非常大的平方误差。\textbf{这说明一个反例：MSE降低，不能保证清晰结构恢复；它并不证明所有低MSE结果都模糊。}
+
+重影也可以由位置冲突产生。若原生成把杯子放在左边，历史投影把杯子放在右边，直接按比例混合可能同时留下两个轮廓。这里\textbf{warp}是按几何搬到目标视角的历史参考图；\textbf{latent}是编码器压缩图像后的中间表示，不是物体坐标表。latent混合再解码，其作用不等同于逐像素贴图。
+
+本例不能确定旧实验的唯一病因。历史深度或相机转换不对、遮挡处理不足、原生成布局偏移、混合本身和解码传播，都可能贡献可见残影；它们可能同时存在。下一步要用能分开这些解释的对照，而不是继续只找更低分数。
+\src{本页公式是人工构造。相关解释边界见\nolinkurl{S87/SHAPE_FAILURE_MECHANISM_REVIEW.md}、\nolinkurl{S88/INNOVATION_COMPETING_EXPLANATIONS.md}；固定融合不直接称“后验均值”。}
+\clearpage
+\section*{3. 真实结果告诉了我们什么，也否决了什么？}
+
+S86固定强度$\lambda=0.25$：G0为原生成；Gpaste在RGB末端混合；Gterminal只在最后一步融合latent；Gguide在全部50步融合。四种做法都比较同一场景四个相关目标。下表为\textbf{完整四目标全图平均MSE}，数值越小只是该项像素误差越低。
+\begin{center}\small\begin{tabular}{lrlr}\toprule
+S86做法 & MSE & S87末端做法 & MSE\\\midrule
+G0 & 0.131166668 & Gpaste(0.50) & 0.065033358\\
+Gpaste(0.25) & 0.090968013 & Gterminal(0.50) & 0.067557769\\
+Gterminal(0.25) & 0.098191602 & Gpaste(0.75) & 0.053360667\\
+Gguide(0.25,50步) & 0.052422223 & Gterminal(0.75) & \textbf{0.051167582}\\
+ & & Gpaste(1.00) & 0.056059791\\
+ & & Gterminal(1.00) & 0.052532046\\\bottomrule
+\end{tabular}\end{center}
+
+S87的普通末步0.75已低于旧Gguide，平均差为$-0.001254640867$。所以“达到当前平均MSE必须在50步持续注入warp”的说法不成立。它仍使用旧G0完整链留下的缓存，并不表示可以不要原有去噪过程。一次派生53.741317秒也不等于整段生成只花53秒。
+
+\begin{center}\includegraphics[width=.96\linewidth]{images/target_22_comparison.png}\end{center}
+\noindent{\footnotesize S87已有真实产物，目标22完整10格对照，原PNG为2952×1400；只是复用旧图，没有新RTMV图像。可放大阅读。此前团队非盲观察记录了双层桌面、显示器轮廓和前景模糊，不是感知量化评分。}
+
+目标22在S87全部六策略下都比Gguide更差：末步0.75从0.068264388升到0.074832433。末步0.75的四帧孔洞等权MSE也比Gguide高0.021002566154。\textbf{平均获胜不代表每帧、每个区域或物体形状都改善。}
+\src{S86与S87的scoring\_01/ARM\_SUMMARY.json、逐帧CSV、接受回执；S87/ROOT\_VISUAL\_ACCEPTANCE.json。每帧995328通道、四帧3981312通道；像素不是独立场景。}
+\clearpage
+\section*{4. S88真的拿到了什么？先把“元数据”讲清楚}
+
+\textbf{元数据}是描述文件如何产生、怎样解释的资料。例如一张照片旁边的小表告诉我们图像宽高、焦距、相机位置和朝向。它不是照片本身，更不能凭它看出生成图里是否多了一个物体。
+
+RTMV是用NViSII渲染器生成的多视角模拟场景。它可能使用扫描得到的物体模型，但输出图像和相机仍属于模拟过程。相比从照片反推相机的SfM估计，模拟器可以直接导出相机参数；这不代表文件格式、版本、单位和图像配对可以不核查。
+
+S88面对的是12,064,450,560字节的\nolinkurl{abc.tar}。\textbf{HTTP Range}允许指定“只取文件第几字节到第几字节”；\textbf{tar成员头}类似包裹清单，记录下个文件名和长度。因此可以跳过大图像正文，先找小JSON。JSON只是以键和值组织的文本文件。
+\begin{center}\begin{tabular}{p{6cm}r}\toprule
+S88真实完成的动作 & 实际量\\\midrule
+读取tar成员头 & 7个，每个512 B\\
+读取完整JSON & 1个，189899 B\\
+合计所取正文 & 193483 B\\
+逻辑Range请求 & 8次\\
+v2元数据探针耗时 & 16.344068秒\\
+RGB/深度解码；新模型运行 & 0；0\\\bottomrule
+\end{tabular}\end{center}
+
+首份常规JSON是\nolinkurl{00000/00108.json}，来自事先固定的“首JSON”规则。其完整字节包含\nolinkurl{camera_data}和\nolinkurl{objects}；本阶段只分析相机字段，但不能说从未接触任何对象标注字节。7个成员头里出现EXR名称，也不代表已经读了对应图像。
+
+第一次v1失败必须保留：服务器302重定向说明正文声明1032字节，本机设置的512字节上限拒绝了它，返回码56；没有读取tar正文。它不是“RTMV不支持Range”，也不是TLS失败。v2只修传输余量，最终仍严格检查206与请求偏移、长度。
+
+来源固定为作者重发布仓库\nolinkurl{TontonTremblay/RTMV}。数据卡列CC BY-NC 4.0；整包内容标识来自发布元数据，没有伪称完整下载后重新计算SHA。
+\src{S88/S88\_RESULTS.md、rtmv\_range\_01与02/RECEIPT.json、ROOT\_METADATA\_ACCEPTANCE.json；\url{https://huggingface.co/datasets/TontonTremblay/RTMV}。}
+\clearpage
+\section*{5. 相机检查通过，为什么还不是几何正确？}
+
+本次JSON实际给出1600×1600、焦距$f_x=f_y=1931.371337890625$、主点$c_x=c_y=800$。\textbf{内参K}描述从相机射线到图像位置的关系；\textbf{位姿C}描述相机在世界中的位置和朝向。相机到世界记作C，逆方向记作V。
+
+该文件把矩阵各列逐项写进外层列表。若直接把JSON当普通二维数组A，列向量代码需用$C=A^{\mathsf T}$，不是看到4×4就直接乘。S88用look-at、相机位置、四元数、C/V多个表示交叉检查，不同作者另写标量公式和tar解析复算，106项通过。
+
+$VC-I$残差最大约$7.64\times10^{-8}$，look-at旋转残差约$1.40\times10^{-7}$。\textbf{这些数说明同一份相机记录内部相容，不是桌子或杯子的定位误差。}同样，由相机自身look-at算出的主点偏差约0.000212像素，不是对真实图像物体做过定位评分。
+
+\note{\textbf{人工深度教学例，不是RTMV读数。}若单位射线为$(0.6,0,0.8)$，相机到表面的直线距离range为5单位，则三维点是$(3,0,4)$；它的光轴深度Z为4。把range=5误当Z=5，会沿同一射线放到更远的$(3.75,0,5)$。投到另一相机时位置就可能错。}
+\[
+\mathbf X=\rho\,\frac{\mathbf d}{\|\mathbf d\|}\quad\text{（range为}\rho\text{）},
+\qquad \mathbf X=Z\,\frac{\mathbf d}{d_z}\quad\text{（光轴深度）}.
+\]
+\noindent{\small 上式教学取前向Z为正；若用OpenGL后向Z轴，须按实际轴约定转换，不能机械套符号。}
+
+作者公开生成源码明确depth的bounce=0、在像素中心采样；RGB则最终恢复整像素采样。所以RGB边缘可混合多个表面，而中心深度仍只对应一条射线。当前源码提交未与归档的实际构建版本绑定。
+
+真实EXR的通道、行顺序、背景未命中值、运行配置仍待核。相机字段中的巨大scene包围盒也不能直接解释为归一化场景大小或米。\textbf{元数据内部一致支持继续加载，不授权省掉数据含义的检查。}
+\src{\nolinkurl{S88/CAMERA_METADATA_CHECK.json}、\nolinkurl{review/RANGE_ACTUAL_REVIEW.json}、\nolinkurl{RTMV_EXPORT_SEMANTICS.md}；\url{https://github.com/TontonTremblay/nvisii_mvs}。}
+\clearpage
+\section*{6. 为什么下一步要同视角的RGB、depth、camera？}
+
+把三个文件看成三份相互配合的说明：\textbf{RGB}说“像素是什么颜色”；\textbf{depth}说“射线碰到哪里”；\textbf{camera}说“射线从哪里出发、朝哪里走”。在本轮拟做的稠密反投影中，缺一项或配错视角，计算即使能运行也失去原定含义。
+\begin{center}\begin{tikzpicture}[>=Latex,font=\small,box/.style={draw=accent,fill=accent!5,align=center,text width=3.05cm,minimum height=1.25cm}]
+\node[box](a){同一scene / view\\RGB：表面颜色};\node[box,right=5mm of a](b){同一scene / view\\depth：射线距离};\node[box,right=5mm of b](c){同一scene / view\\camera：K与位姿};
+\node[box,below=8mm of b,text width=8cm](d){含义与身份核对后，才能把同一表面点移到另一相机视角};
+\draw[->](a)--(d);\draw[->](b)--(d);\draw[->](c)--(d);
+\end{tikzpicture}\end{center}
+\noindent{\small\textcolor{accent}{结构教学示意；没有使用或生成新的RTMV图像。}}
+
+\textbf{同名还不是终点。}假设错误地把view A的RGB、view B的depth和view C的相机拼起来，数组宽高可能都相同，计算仍能运行。只有来源、帧号、尺寸、坐标和状态配对一致，这个点才有明确含义。找到相同basename的三个成员，只完成索引层的配对，尚未检验其正文与静态性。
+
+S89实际从偏移11460608尝试续读下一个512字节成员头，两批均在得到新头前停止。旧7头只从本地核对，没有重新下载旧JSON。下表时间均为北京时间2026-09-11；耗时是各批进程的真实记录。
+\begin{center}\small\begin{tabular}{p{2.2cm}p{5.8cm}p{5.9cm}}\toprule
+批次 & 开始至结束；耗时 & 实际结果\\\midrule
+index\_01 & 09:22:31.427至32.888；1.460404秒 & 1逻辑请求，302后LibreSSL连接失败，curl返回35\\
+index\_02 & 09:29:25.479至26.012；0.533428秒 & 1逻辑请求，OpenSSL连接提前结束；无HTTP响应记录，证书核验启用\\\bottomrule
+\end{tabular}\end{center}
+两批各自新增正文0 B、新头0个，保留旧7头中的6个不完整view ID；已扫前缀的完整三件套0组，selected为null。\textbf{这只表示尚未取得，不证明RTMV中不存在配齐文件。}没有到达新场景边界，也没有查完场景；下一步先恢复数据连接，再按同一身份规则配齐。
+
+\textbf{源几何与目标答案用途不同。}未来若用外部源深度产生投影，它是额外输入的诊断，不能冒充普通RGB-only模型。目标答案应在输出与规则封存后评分，不能用它试翻转、改符号或选场景。
+
+支持mask只表示“有投影来源”，不保证真实可见或正确。后续须保留出视野、孔洞、遮挡不确定和无法定位，不删掉难点再报好分数。
+\src{S89/index\_01与index\_02/RECEIPT.json、MATCHED\_VIEWS.json；S88/DATA\_GATE\_DRAFT.md。TLS是连接协议，失败原因未被进一步定位。}
+\clearpage
+\section*{7. 这与proposal主线有什么关系？}
+
+proposal关心的是：历史视觉信息怎样帮助未来生成保持几何和场景一致。现在的数据工作服务于这个问题，因为没有可信参照时，很难判断“使用了历史”和“用对了历史”之间的差别。
+\begin{center}\small\begin{tabular}{p{3.4cm}p{5.7cm}p{5.6cm}}\toprule
+链条 & 当前证据 & 不能自动推出\\\midrule
+存下与选择历史 & 已有固定历史来源、检索和干预记录 & 选中就有用\\
+定位历史内容 & 已有预测几何和S85投影；16对全保留 & 投影支持就是几何正确\\
+实际影响生成 & S86真实消费与保存量复算 & 影响就是改善\\
+与普通对照比较 & S87末步0.75达到旧Gguide平均MSE & 新方法成立或全面画质改善\\
+建立可信参照 & S88真实相机元数据可得且内部一致 & 完整RGB/depth样例已可评分\\\bottomrule
+\end{tabular}\end{center}
+
+\textbf{当前保留的是研究问题，不是已经选定的新模块。}错误可能来自几何放错位置，也可能来自两个位置被混合保留，还可能两者都有。应先让普通强对照和可信参照区分解释，再决定有没有必要设计新的历史可靠性或冲突处理机制。
+
+一种未来有限诊断是：保持参考与规则明确，比较预测源几何和外部源几何，再比较普通末端混合与整像素复制。外部几何的额外信息要单独标明。若普通可信几何复制已经消除主要问题，就应收束本例的复杂融合设想；若仍失败，也只提供下一假设的线索，不自动产生创新。
+
+\note{\textbf{S89的实质进展目前属于工程与证据记录。}源码审查修正了两处问题：越过整包末端的成员须隔离，不能进入已核配对；恢复程序须显式限制重定向，避免隐式读取其正文。修正后分别冻结版本再实际访问，两批失败均保留。这些修复使记录更可靠，但没有新增图像、几何评分或创新验证。两批的失败、身份与配对记录已由不同作者核验；通过的是记录一致性，不是索引成功。}
+
+这仍是单一旧场景反例之后的数据与诊断准备。跨场景确认、生成物体身份、位置与形状测量、动态或长期重访，以及和最近工作的实质差别，都未完成。现在不报完成百分比，不承诺CCF-A录用或PhD达标。
+\src{S88/S88\_RESULTS.md、INNOVATION\_COMPETING\_EXPLANATIONS.md；项目RESEARCH\_PRINCIPLES.md v2.11。未来诊断未运行，不是新实验结论。}
+\clearpage
+\section*{8. 老师可能问的五个问题，怎样诚实回答？}
+
+\textbf{1. 你到底取得了什么，而不只是准备了什么？}
+
+已完成旧场景的真实生成消费、评分及普通末端反例；新一轮实际取得7个tar头和1份完整相机JSON，并通过不同作者复算。S89又做了两次真实索引访问，均因连接失败停止，新正文和新头为0，仍未配齐同视角RGB/depth/camera；这不是几何方法失败的证据。
+
+\textbf{2. MSE明显降低，为什么不能说效果更好了？}
+
+可以说这项像素误差更低，但不能把它扩大为清晰度、物体位置和几何都更好。旧图仍有重影；两像素教学例说明模糊折中也能降低平方误差。S87平均获胜时，目标22仍更差。
+
+\textbf{3. 106项检查都通过，是否证明RTMV就是精确真值？}
+
+没有。这些是访问偏移、文件身份和同一相机多种表示的算术核验。它们不是106个场景，也不是独立物理精度测量；模拟器标签仍要核正文配对、range含义、无效值与坐标。
+
+\textbf{4. 为什么不直接把深度作为额外输入，让结果更好？}
+
+可以把外部源深度用于诊断“预测几何是否是问题来源”，但额外信息必须公开。这样的对照不能直接称为RGB-only方法的公平胜利；目标答案也不能在生成前用于选图和调参数。
+
+\textbf{5. 创新在哪里，接下来如何判断值不值得做？}
+
+当前没有验收新方法。先完成可信同视角样例，再用普通强对照检验位置错误与混合冲突。如果简单方法已解决问题，就停止包装新模块；若有稳定、跨场景可复现的剩余失败，才形成可被推翻的新假设。
+
+\note{\textbf{一句话口述：}“我们已经用真实运行发现，低像素误差不保证物体清楚且位置正确；普通末步处理也能达到此前多步引导的平均分数。因此现在补齐可解释的独立相机与几何参照，先确认问题出在哪里，再判断是否需要新方法。”}
+
+\textbf{证据怎么找。}所有目录相对项目\nolinkurl{geometry-world-modeling/work/}：S86为\nolinkurl{S86_fixed_warp_consumer}；S87为\nolinkurl{S87_terminal_strength_audit}；S88为\nolinkurl{S88_independent_geometry_data}；S89为\nolinkurl{S89_matched_view_index}。接受回执、原评分JSON、原图身份及本文读入文件SHA均保存在本报告的\nolinkurl{SOURCE_BUILD_INPUTS.json}中。本文是AI辅助整理，不能替代学生实际理解；建议不看答案复述“元数据通过为什么不是几何正确”。
+
+\noindent{\footnotesize 原始资料：\url{https://arxiv.org/abs/2205.07058}；\url{https://nvisii.com/visii.html}；\url{https://github.com/TontonTremblay/nvisii_mvs}。本稿未新增外部检索、模型调用或科学评分。}
+\end{document}

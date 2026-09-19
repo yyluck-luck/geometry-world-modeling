@@ -1,0 +1,23 @@
+--- /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26_consumer.py
++++ /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26b_consumer.py
+@@ -19,9 +19,9 @@
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ SELF = Path(__file__).resolve()
+-PROTOCOL = ROOT / "docs/S26_CONSUMER_SCORING_PROTOCOL.md"
++PROTOCOL = ROOT / "docs/S26B_CONSUMER_SCORING_PROTOCOL.md"
+ PREP = ROOT / "work/S26_scoring_preparation"
+-BASE = ROOT / "results/S26_consumer_baseline"
++BASE = ROOT / "results/S26B_consumer_baseline"
+ OUTPUT = BASE / "scoring"
+ COUNTS = {"common_old": 4, "cut3r": 8, "ttt3r": 8, "filt3r": 8}
+ METHODS = ("cut3r", "ttt3r", "filt3r")
+@@ -304,7 +304,7 @@
+     receipt = {"status": "RUNNING", "started_utc": utc(), "manifest_sha256": expected_sha,
+                "schema": SCHEMA, "sensor_gt_byte_reads_started": False,
+                "prediction_decode_started": False, "model_runs": 0, "ga_runs": 0,
+-               "evidence_scope": "Scoring previously seen sensor data after four new GA producer seals; not novel-method, memory-mechanism, or video-generation evidence."}
++               "evidence_scope": "Scoring previously seen sensor data after one IMPORT_VALIDATED saved producer and three newly completed GA producer seals; not novel-method, memory-mechanism, or video-generation evidence."}
+     write_json(OUTPUT / "receipt.json", receipt)
+     try:
+         buffers, producer_ids = seal_producers(config, expected_sha)

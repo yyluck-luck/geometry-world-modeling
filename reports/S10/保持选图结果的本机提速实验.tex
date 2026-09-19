@@ -1,0 +1,72 @@
+\documentclass[11pt,a4paper,fontset=none]{ctexart}
+\usepackage{geometry,graphicx,booktabs,tabularx,xcolor,hyperref,fancyhdr,tcolorbox,enumitem}
+\geometry{left=18mm,right=18mm,top=20mm,bottom=18mm,headsep=6mm}
+\setmainfont{Helvetica Neue}\setsansfont{Helvetica Neue}
+\setCJKmainfont{PingFang SC}\setCJKsansfont{PingFang SC}\setCJKmonofont{PingFang SC}
+\definecolor{accent}{HTML}{0072B2}\definecolor{ink}{HTML}{17354A}
+\hypersetup{pdftitle={保持选图结果的本机提速实验},pdfauthor={本地研究记录},colorlinks=true,urlcolor=accent}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\color{accent}几何世界模型 · S10工程实验}\fancyhead[R]{\small 2026年9月6日}\fancyfoot[C]{\small\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}\linespread{1.12}
+\setlist{nosep,topsep=3pt,leftmargin=1.5em}
+\newcommand{\topic}[1]{\par\vspace{4pt}{\large\bfseries\color{accent}#1}\par}
+\newcommand{\note}[1]{{\small\color{ink}#1}\par}
+\begin{document}
+{\LARGE\bfseries\color{ink}照片选得一样，\par 本机选图组件约快7.78倍}\par
+{\large 24个已见相机查询 · 336次调用 · 全部输出检查通过}
+\begin{tcolorbox}[colback=accent!5,colframe=accent,boxrule=.6pt,arc=1mm]
+\textbf{平均每次：1.336秒 $\longrightarrow$ 0.172秒}\par
+正式120个配对中，原版总时间 / 新版总时间 = \textbf{7.776863}，耗时减少\textbf{87.141\%}。这轮改进是把逐像素计算改为批量计算；原选图规则和保存结果完全不变。
+\end{tcolorbox}
+\topic{这一步在整个项目里做什么？}
+系统要生成接下来的画面时，需要从旧照片里挑出4张作参考。我们优化的是这一步的三维投影和遮挡计算，再测\textbf{完整选图组件}的时间。\textbf{完整视频生成尚未完成}，这里的7.78倍不代表整个视频模型也快7.78倍。
+\topic{五个预定分组，全部照实列出}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrr@{}}\toprule
+分组 & 配对数 & 原版均值ms & 新版均值ms & 总时间比 \\\midrule
+合并 & 120 & 1335.811 & 171.767 & 7.777 \\
+S7 & 60 & 1439.955 & 195.182 & 7.377 \\
+S8 & 60 & 1231.667 & 148.352 & 8.302 \\
+AB & 60 & 1339.314 & 171.942 & 7.789 \\
+BA & 60 & 1332.308 & 171.593 & 7.764 \\
+\bottomrule\end{tabular*}
+\note{S7为freiburg1/xyz，S8为freiburg2/desk，各12查询。AB先原版后新版，BA相反。合并使用全部正式计时的整数纳秒总和之比，不取最快轮。}
+\topic{结果相同，检查到了哪里？}
+\begin{itemize}
+\item 三数组：面片编号、深度、视角余弦；形状、类型和每个字节都相同，含正零与负零。
+\item 完整选图过程：票权、配额、姿态排序、NMS筛选与最后4张照片的顺序都相同。
+\item 先做48次正确性，再48次预热、240次正式测量；每次都保存实际结果并核验。
+\end{itemize}
+\note{336次不是336张独立照片：本轮只有24个不同查询、2个已见场景和6张地图，含S7原开发段。每查询的5次正式重复互相关联。普通向量化按工程优化报告，尚不构成论文创新。}
+\newpage
+{\LARGE\bfseries\color{ink}全部24个查询，都显示出来}\par
+\includegraphics[width=\linewidth]{figures/all_queries.pdf}
+\note{新版在全部24查询的测量中位数上都更短；两版中位数之比为6.583至9.131。灰圆为原版，蓝方为批量实现；点为5次中位数，误差线为最小至最大，\textbf{不是置信区间}。两面板同一纵轴且从0起；B为段序号，Q20--Q23为各段尾4个保存相机查询。纵轴单位为毫秒。}
+\topic{公平比较的关键}
+双方在同一进程重测，地图和查询相同、各自持有独立状态，只替换渲染器。正式120对中AB/BA各60；每查询因5轮为奇数，只能3/2或2/3。每对两次调用完成后才保存和验证，计时不含文件读写。
+
+完整选图入口保持原代码，两方套相同观察包装；使用小型占位上下文，包含其开销。CPU与版本固定；原版S9旧时间只用于找瓶颈，没有拿来充当本轮对照。
+\topic{为什么不能直接说“所有场景都快7.78倍”？}
+这两处场景已用于先前研究，S7还含开发段。只测160×160、stride8与原A0P0地图，没有测全分辨率、所有输入形状或真实视频调用。其他本机进程仍可能带来噪声；顺序分组相近也不等于完全消除它。
+\newpage
+{\LARGE\bfseries\color{ink}证据、时间和下一步}\par
+\topic{两层正确性检查}
+\begin{tabularx}{\linewidth}{@{}p{29mm}X@{}}\toprule
+人工边界 & 执行前独立设计60例，逐字节全过；5个故意改错版本均被拒绝。覆盖深度并列、像素边界、近远裁剪等。不是实拍数据，也不是所有输入的证明。\\
+真实保存结果 & 执行后不同作者重新打开336份NPZ和336份trace；1008个实际数组逐字节比对24份旧参考，完整trace比对106050叶值。12,738项独立检查通过。\\\bottomrule
+\end{tabularx}
+\topic{保留了一个容易改错的细节}
+原程序把平均深度作为Python float与float32缓冲比较。固定NumPy2.3.5下，强行换成“更高精度”会改变部分遮挡胜负。新版保留原语义，独立负对照能发现该错误。其他投影、16边形、像素坐标、面片顺序和NMS规则都保持。
+\note{规则原文：\href{https://numpy.org/neps/nep-0050-scalar-promotion.html}{NumPy NEP 50}；本机探针与源文件SHA见同目录浮点审查。未验证跨NumPy版本等价。}
+\topic{实际时间 · 北京时间2026年9月6日}
+\begin{tabularx}{\linewidth}{@{}p{33mm}X@{}}\toprule
+05:08:55.879 & 冻结候选设计，随后人工边界检查通过。\\
+05:18:19.794 & 真实对照冻结12源码、52输入，随后开始运行。\\
+05:18:56.836 & 48次初始正确性全部通过，才进入预热。\\
+05:19:32.904 & 正式配对计时开始。\\
+05:22:37.828 & 全336次调用完成，总墙钟257.936秒。\\\bottomrule
+\end{tabularx}
+\note{峰值内存296,910,848字节为全进程峰值，没有单独比较两版。机器M3 Max，CPU；Python3.12.14、NumPy2.3.5、Torch2.7.0、SciPy1.16.2，Torch intra/inter各8线程。自动程序时间不等于学生工时或导师会议。}
+\topic{下一步已经明确}
+先另冻更宽的软件回归，覆盖已有地图变体、两档密度及来源变化，检验这版工程候选的适用范围。后续若探索真正的省计算新方法，要与这个更强的普通工程基线比较，并重新审查创新点。
+
+完整VMem生成基线、视频质量与真实课程活动仍待完成。旧实验、失败记录与报告全部保留；完整规则、逐次CSV、审查和本地记忆在本次成果目录中。
+\end{document}

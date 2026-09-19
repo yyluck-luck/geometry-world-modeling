@@ -1,0 +1,24 @@
+--- original/utils/util.py
++++ S20/utils/util.py
+@@ -694,14 +694,17 @@
+     **_,
+ ):
+ 
++    device = torch.device(device)
++    if device.type not in ("cpu", "cuda"):
++        raise ValueError("This candidate supports CPU or CUDA; other devices are unvalidated")
+     num_samples = [1, T]
+-    with torch.inference_mode(), torch.autocast("cuda"):
++    with torch.inference_mode(), torch.autocast(device_type=device.type, enabled=device.type == "cuda"):
+ 
+         additional_model_inputs = {"num_frames": T}
+         additional_sampler_inputs = {
+-            "c2w": c2w.to("cuda"),
+-            "K": K.to("cuda"),
+-            "input_frame_mask": cond_frames_mask.to("cuda"),
++            "c2w": c2w.to(device),
++            "K": K.to(device),
++            "input_frame_mask": cond_frames_mask.to(device),
+         }
+         if global_pbar is not None:
+             additional_sampler_inputs["global_pbar"] = global_pbar

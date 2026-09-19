@@ -1,0 +1,424 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>已有对应点的视觉检查</title><style>
+:root { color-scheme: light; font-family: system-ui, sans-serif; color: #182630; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #eef2f4; }
+header, main { max-width: 1280px; margin: auto; padding: 22px; }
+header p { line-height: 1.6; max-width: 88ch; }
+h1 { margin: 0 0 12px; font-size: 25px; } h2 { font-size: 19px; }
+.notice { border-left: 4px solid #a76716; padding: 8px 12px; background: #fff3db; }
+.pair { background: white; padding: 20px; border: 1px solid #ccd6dd;
+  border-radius: 10px; margin-bottom: 24px; break-inside: avoid; }
+.sides { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.side { min-width: 0; overflow-x: auto; }
+.side h3 { font-size: 15px; margin: 0 0 8px; }
+.full { position: relative; width: 576px; height: 576px;
+  overflow: hidden; background: #d9e0e5; }
+.full img { display: block; width: 100%; height: 100%; }
+.context { display: flex; align-items: start; gap: 15px; margin-top: 14px; }
+.local { position: relative; flex: 0 0 128px; width: 128px; height: 128px;
+  overflow: hidden; background: #d9e0e5; }
+.local img { position: absolute; display: block; width: 1152px;
+  height: 1152px; max-width: none; image-rendering: pixelated; }
+.marker { position: absolute; width: 18px; height: 18px;
+  transform: translate(-50%, -50%); border: 2px solid #ffcc00;
+  border-radius: 50%; box-shadow: 0 0 0 1px #172126;
+  pointer-events: none; }
+.coords { margin: 8px 0 0; font-variant-numeric: tabular-nums; font-size: 13px; }
+.legend { font-size: 12px; line-height: 1.55; color: #3d505e; }
+img { image-rendering: auto; }
+footer { max-width: 1280px; margin: auto; padding: 0 22px 25px; line-height: 1.6; }
+@media (max-width: 1220px) { .sides { grid-template-columns: 1fr; } }
+</style></head><body>
+<header><h1>已有对应点的视觉检查</h1>
+<p>共有 18 项，按固定组编号与匿名目标编号排列，全部保留。S00 是共同来源图。
+圆环标示保存坐标，局部窗口按同一规则显示；图像沿用原文件。</p>
+<p class="notice">本团队已经见过旧全图、标签与数值结果。本页隐藏当次标签提示，
+不能称为从未见结果的盲审。图像内容可能让人识别条件，文件系统也能追踪原路径。
+本页只用于检查对应点是否容易解释，不提供相机或方法验收结论。</p>
+<p>本页没有评级、保存、统计或自动判定功能。不能凭一个圆环认定真实三维对应。
+若图像缺失或尺寸异常，应停止使用并记录问题。</p></header><main><section class="pair" id="P001"><h2>P001 · G01 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:23.5896295971341%;top:44.5176124572754%"></span></div>
+<p class="coords">坐标 x=135.876266, y=256.421448 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-208px;top:-448px">
+<span class="marker" style="left:63.7525329589844px;top:64.8428955078125px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (136, 256)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:26.7690791024102%;top:46.4570310380724%"></span></div>
+<p class="coords">坐标 x=154.189896, y=267.592499 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-244px;top:-472px">
+<span class="marker" style="left:64.3797912597656px;top:63.1849975585938px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (154, 268)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P002"><h2>P002 · G01 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:23.5896295971341%;top:44.5176124572754%"></span></div>
+<p class="coords">坐标 x=135.876266, y=256.421448 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-208px;top:-448px">
+<span class="marker" style="left:63.7525329589844px;top:64.8428955078125px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (136, 256)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:12.5142918692695%;top:15.4119451840719%"></span></div>
+<p class="coords">坐标 x=72.082321, y=88.772804 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-80px;top:-114px">
+<span class="marker" style="left:64.1646423339844px;top:63.5456085205078px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (72, 89)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P003"><h2>P003 · G01 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:23.5896295971341%;top:44.5176124572754%"></span></div>
+<p class="coords">坐标 x=135.876266, y=256.421448 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-208px;top:-448px">
+<span class="marker" style="left:63.7525329589844px;top:64.8428955078125px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (136, 256)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:20.9318253729078%;top:49.2043760087755%"></span></div>
+<p class="coords">坐标 x=120.567314, y=283.417206 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-178px;top:-502px">
+<span class="marker" style="left:63.1346282958984px;top:64.8344116210938px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (121, 283)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P004"><h2>P004 · G02 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:31.1321179072062%;top:40.922212600708%"></span></div>
+<p class="coords">坐标 x=179.320999, y=235.711945 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-294px;top:-408px">
+<span class="marker" style="left:64.6419982910156px;top:63.4238891601562px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (179, 236)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:33.2596752378676%;top:43.1862990061442%"></span></div>
+<p class="coords">坐标 x=191.575729, y=248.753082 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-320px;top:-434px">
+<span class="marker" style="left:63.1514587402344px;top:63.5061645507812px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (192, 249)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P005"><h2>P005 · G02 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:31.1321179072062%;top:40.922212600708%"></span></div>
+<p class="coords">坐标 x=179.320999, y=235.711945 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-294px;top:-408px">
+<span class="marker" style="left:64.6419982910156px;top:63.4238891601562px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (179, 236)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:18.8590447107951%;top:10.4325638877021%"></span></div>
+<p class="coords">坐标 x=108.628098, y=60.091568 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-154px;top:-56px">
+<span class="marker" style="left:63.2561950683594px;top:64.1831359863281px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (109, 60)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P006"><h2>P006 · G02 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:31.1321179072062%;top:40.922212600708%"></span></div>
+<p class="coords">坐标 x=179.320999, y=235.711945 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-294px;top:-408px">
+<span class="marker" style="left:64.6419982910156px;top:63.4238891601562px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (179, 236)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:26.9353177812364%;top:45.5480681525336%"></span></div>
+<p class="coords">坐标 x=155.147430, y=262.356873 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-246px;top:-460px">
+<span class="marker" style="left:64.2948608398438px;top:64.7137451171875px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (155, 262)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P007"><h2>P007 · G03 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:36.1361742019653%;top:43.0694580078125%"></span></div>
+<p class="coords">坐标 x=208.144363, y=248.080078 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-352px;top:-432px">
+<span class="marker" style="left:64.2887268066406px;top:64.16015625px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (208, 248)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:38.1921079423692%;top:44.9021657307943%"></span></div>
+<p class="coords">坐标 x=219.986542, y=258.636475 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-376px;top:-454px">
+<span class="marker" style="left:63.9730834960938px;top:63.27294921875px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (220, 259)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P008"><h2>P008 · G03 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:36.1361742019653%;top:43.0694580078125%"></span></div>
+<p class="coords">坐标 x=208.144363, y=248.080078 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-352px;top:-432px">
+<span class="marker" style="left:64.2887268066406px;top:64.16015625px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (208, 248)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:25.0709825091892%;top:13.448781437344%"></span></div>
+<p class="coords">坐标 x=144.408859, y=77.464981 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-224px;top:-90px">
+<span class="marker" style="left:64.8177185058594px;top:64.9299621582031px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (144, 77)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P009"><h2>P009 · G03 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:36.1361742019653%;top:43.0694580078125%"></span></div>
+<p class="coords">坐标 x=208.144363, y=248.080078 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-352px;top:-432px">
+<span class="marker" style="left:64.2887268066406px;top:64.16015625px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (208, 248)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:32.3218769497342%;top:47.7852238549127%"></span></div>
+<p class="coords">坐标 x=186.174011, y=275.242889 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-308px;top:-486px">
+<span class="marker" style="left:64.3480224609375px;top:64.4857788085938px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (186, 275)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P010"><h2>P010 · G04 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:45.2785438961453%;top:47.1491389804416%"></span></div>
+<p class="coords">坐标 x=260.804413, y=271.579041 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-458px;top:-480px">
+<span class="marker" style="left:63.6088256835938px;top:63.1580810546875px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (261, 272)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:47.2524907853868%;top:49.9576727549235%"></span></div>
+<p class="coords">坐标 x=272.174347, y=287.756195 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-480px;top:-512px">
+<span class="marker" style="left:64.3486938476562px;top:63.5123901367188px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (272, 288)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P011"><h2>P011 · G04 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:45.2785438961453%;top:47.1491389804416%"></span></div>
+<p class="coords">坐标 x=260.804413, y=271.579041 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-458px;top:-480px">
+<span class="marker" style="left:63.6088256835938px;top:63.1580810546875px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (261, 272)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:34.0712626775106%;top:18.3173841900296%"></span></div>
+<p class="coords">坐标 x=196.250473, y=105.508133 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-328px;top:-148px">
+<span class="marker" style="left:64.5009460449219px;top:63.0162658691406px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (196, 106)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P012"><h2>P012 · G04 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:45.2785438961453%;top:47.1491389804416%"></span></div>
+<p class="coords">坐标 x=260.804413, y=271.579041 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-458px;top:-480px">
+<span class="marker" style="left:63.6088256835938px;top:63.1580810546875px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (261, 272)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:41.1632113986545%;top:52.7121755811903%"></span></div>
+<p class="coords">坐标 x=237.100098, y=303.622131 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-410px;top:-544px">
+<span class="marker" style="left:64.2001953125px;top:63.2442626953125px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (237, 304)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P013"><h2>P013 · G05 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:80.7461632622613%;top:40.5104398727417%"></span></div>
+<p class="coords">坐标 x=465.097900, y=233.340134 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-866px;top:-402px">
+<span class="marker" style="left:64.19580078125px;top:64.6802673339844px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (465, 233)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:82.3417504628499%;top:44.5566654205322%"></span></div>
+<p class="coords">坐标 x=474.288483, y=256.646393 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-884px;top:-450px">
+<span class="marker" style="left:64.5769653320312px;top:63.2927856445312px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (474, 257)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P014"><h2>P014 · G05 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:80.7461632622613%;top:40.5104398727417%"></span></div>
+<p class="coords">坐标 x=465.097900, y=233.340134 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-866px;top:-402px">
+<span class="marker" style="left:64.19580078125px;top:64.6802673339844px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (465, 233)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:73.4615325927734%;top:12.5699586338467%"></span></div>
+<p class="coords">坐标 x=423.138428, y=72.402962 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-782px;top:-80px">
+<span class="marker" style="left:64.27685546875px;top:64.8059234619141px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (423, 72)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P015"><h2>P015 · G05 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:80.7461632622613%;top:40.5104398727417%"></span></div>
+<p class="coords">坐标 x=465.097900, y=233.340134 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-866px;top:-402px">
+<span class="marker" style="left:64.19580078125px;top:64.6802673339844px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (465, 233)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:79.9651675754123%;top:46.1808257632785%"></span></div>
+<p class="coords">坐标 x=460.599365, y=266.001556 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-858px;top:-468px">
+<span class="marker" style="left:63.19873046875px;top:64.0031127929688px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (461, 266)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P016"><h2>P016 · G06 · C01</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:86.1284679836697%;top:43.4753815333049%"></span></div>
+<p class="coords">坐标 x=496.099976, y=250.418198 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-928px;top:-436px">
+<span class="marker" style="left:64.199951171875px;top:64.8363952636719px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (496, 250)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C01</h3>
+<div class="full"><img src="assets/C01.png" alt="C01 全图">
+<span class="marker" style="left:88.589440451728%;top:47.6665549808078%"></span></div>
+<p class="coords">坐标 x=510.275177, y=274.559357 px</p>
+<div class="context"><div class="local"><img src="assets/C01.png"
+alt="C01 局部邻域"
+style="left:-956px;top:-486px">
+<span class="marker" style="left:64.5503540039062px;top:63.1187133789062px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (510, 275)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P017"><h2>P017 · G06 · C02</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:86.1284679836697%;top:43.4753815333049%"></span></div>
+<p class="coords">坐标 x=496.099976, y=250.418198 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-928px;top:-436px">
+<span class="marker" style="left:64.199951171875px;top:64.8363952636719px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (496, 250)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C02</h3>
+<div class="full"><img src="assets/C02.png" alt="C02 全图">
+<span class="marker" style="left:78.9149019453261%;top:16.2377489937676%"></span></div>
+<p class="coords">坐标 x=454.549835, y=93.529434 px</p>
+<div class="context"><div class="local"><img src="assets/C02.png"
+alt="C02 局部邻域"
+style="left:-846px;top:-124px">
+<span class="marker" style="left:63.0996704101562px;top:63.0588684082031px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (455, 94)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section>
+<section class="pair" id="P018"><h2>P018 · G06 · C03</h2><div class="sides"><div class="side"><h3>S00</h3>
+<div class="full"><img src="assets/S00.png" alt="S00 全图">
+<span class="marker" style="left:86.1284679836697%;top:43.4753815333049%"></span></div>
+<p class="coords">坐标 x=496.099976, y=250.418198 px</p>
+<div class="context"><div class="local"><img src="assets/S00.png"
+alt="S00 局部邻域"
+style="left:-928px;top:-436px">
+<span class="marker" style="left:64.199951171875px;top:64.8363952636719px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (496, 250)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div><div class="side"><h3>C03</h3>
+<div class="full"><img src="assets/C03.png" alt="C03 全图">
+<span class="marker" style="left:85.4764461517334%;top:49.435642030504%"></span></div>
+<p class="coords">坐标 x=492.344330, y=284.749298 px</p>
+<div class="context"><div class="local"><img src="assets/C03.png"
+alt="C03 局部邻域"
+style="left:-920px;top:-506px">
+<span class="marker" style="left:64.6886596679688px;top:63.4985961914062px"></span></div>
+<p class="legend">邻域总边长 64 原图像素，半宽 32；中心 (492, 285)。
+统一以最近邻放大 2 倍；灰色为边界 padding，不拉伸或移窗。
+圆环仍标原小数坐标，中心透明。</p></div></div></div></section></main>
+<footer>显示参数：全图保持 576×576 CSS 像素，窄屏横向滚动，不缩小。
+局部中心按 floor(坐标+0.5) 四舍五入，边长 64 原图像素、半宽 32，
+统一最近邻放大 2 倍。越界为常量灰 padding，不移动中心、不拉伸。
+显示不修改原图像。无新增匹配或几何拟合。</footer>
+</body></html>

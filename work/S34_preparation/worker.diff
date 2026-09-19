@@ -1,0 +1,27 @@
+--- previous_worker
++++ S34_worker
+@@ -1,5 +1,5 @@
+ def ga_worker(m, mode):
+-    require(mode in ('cut3r', 'ttt3r', 'filt3r'), 'S26B never reruns common_old GA')
++    require(mode in ('old_fixed_free_400', 'old_fixed_common_scale_400'), 'S34 two new8 mixed-depth400 arms')
+     out = OUT / mode
+     require(not out.exists(), 'Never overwrite or repeat an existing GA run')
+     out.mkdir(parents=True)
+@@ -14,7 +14,7 @@
+         require(sha(WORK / 'control_c2w.npy') == cr['output_sha256'], 'Camera input seal')
+         np, torch, a, ns, views, proof = original_context(m)
+         cameras = torch.from_numpy(np.load(WORK / 'control_c2w.npy', allow_pickle=False)[:n].copy())
+-        name = 'common_old_depth_original4' if mode == 'common_old' else mode
++        name = 'cut3r'
+         records = m['candidate']['archives'][name]
+         predictions = a.load_saved_predictions(records)
+         output = a.assemble_saved_output(ns, views[:n], predictions)
+@@ -42,7 +42,7 @@
+         numeric_setup()
+         started = time.perf_counter()
+         try:
+-            result = a.run_original_ga(ns, output, control_c2ws=cameras, old_depth=None if old is None else a.CommonOldDepth(old, common_seal, common_tensor_sha, common_pose_sha), output_dir=out)
++            result = run_s34_ga(ns, output, control_c2ws=cameras, old_depth=old, output_dir=out)
+         finally:
+             observer.restore()
+             observer.checkpoint('GA_call_exit')

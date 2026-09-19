@@ -1,0 +1,11 @@
+--- frozen_S32_observer
++++ S33_observer
+@@ -37,7 +37,7 @@
+                         self.extra_forwards += 1
+                         decoded = dict(depth=np.stack(list_before), point_cloud=np.stack([b.array(x) for x in scene.get_pts3d()]), focal=b.array(scene.get_focals()), pp=b.array(scene.get_principal_points()), c2w=b.array(scene.get_im_poses()), pw_scale=b.array(scene.get_pw_scale()), pw_poses=b.array(scene.get_pw_poses()), adaptors=b.array(scene.get_adaptors()), objective=loss_before)
+                     np.savez_compressed(self.out / 'initial_decoded.npz', **decoded)
+-                    verify_window_initial_state(self, c, arm, loss_before, np)
++                    install_scale_constraint(self, c, arm, loss_before, np)
+                     self.patch(opt.PointCloudOptimizer, 'get_depthmaps', lambda old_getter: patched_getter)
+                     with torch.no_grad():
+                         depth_after = b.array(scene.get_depthmaps(raw=True))

@@ -1,0 +1,41 @@
+--- S22 native CPU runner
++++ S22 shared precision runner
+@@ -3,8 +3,8 @@
+ from datetime import datetime, timezone
+ import argparse, ast, contextlib, copy, hashlib, io, json, os, resource, subprocess, sys, time, traceback
+ ROOT=Path(__file__).resolve().parents[1]
+-W=ROOT/'work/S22_filt_preparation'
+-REPO=W/'filt3r_original'
++W=ROOT/'work/S22_filt_shared_precision'
++REPO=W/'filt3r_shared_precision'
+ ORIGINAL=Path('/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/cut3r-local')
+ DATA=ROOT/'data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk'
+ def utc():return datetime.now(timezone.utc).isoformat()
+@@ -26,11 +26,13 @@
+     for n in tree.body:
+         if isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)and t.id=='FILT3R_DEFAULT_HPARAMS'for t in n.targets):hparams=ast.literal_eval(n.value)
+     assert hparams and hparams['kalman_tau_q']==3.0
+-    paths=[Path(__file__),ROOT/'scripts/cut3r_rope_compat.py',ROOT/'docs/S22_FILT_BASELINE_PROTOCOL.md',W/'source_manifest_v2.json',ROOT/'work/S21_baseline_preparation/run_manifest.json']
++    paths=[Path(__file__),ROOT/'scripts/cut3r_rope_compat.py',ROOT/'docs/S22_FILT_SHARED_PRECISION_PROTOCOL.md',W/'source_manifest_v2.json',ROOT/'work/S21_baseline_preparation/run_manifest.json']
+     paths += [REPO/e['path']for e in source['files']]
+-    m=copy.deepcopy(old);m.update(schema='s22-official-filt-v1',frozen_utc=utc(),methods=['filt3r'],compatibility_prefix=4,hparams=hparams,identities={str(p.resolve()):sha(p)for p in paths})
++    m=copy.deepcopy(old);m.update(schema='s22-filt-shared-precision-v2',frozen_utc=utc(),methods=['filt3r'],compatibility_prefix=4,hparams=hparams,identities={str(p.resolve()):sha(p)for p in paths})
+     m['contract'].pop('gt_numeric_scoring_after_both_sealed',None)
+     m['contract']['gt_numeric_scoring_after_current_method_sealed']=True
++    m['contract']['rope_encoder_qk_dtype']='float16, matching original CUT3R/TTT3R; outer weights/inputs FP32'
++    m['S21_scoring_available_at_freeze']=True
+     write(target,m);print(json.dumps(dict(manifest=str(target),sha256=sha(target),frames=len(m['frames']),frozen=m['frozen_utc'])))
+ def run(mode,out):
+     assert mode in {'cut3r4','filt3r'}
+@@ -119,9 +121,9 @@
+     import psutil
+     m=json.loads((W/'run_manifest.json').read_text())
+     for mode in ['cut3r4','filt3r']:
+-        out=ROOT/'results/S22_filt_baseline'/mode;out.parent.mkdir(parents=True,exist_ok=True)
++        out=ROOT/'results/S22_filt_shared_precision'/mode;out.parent.mkdir(parents=True,exist_ok=True)
+         assert not out.exists()
+-        control=ROOT/'work/S22_execution'/mode;control.mkdir(parents=True,exist_ok=False)
++        control=ROOT/'work/S22_shared_execution'/mode;control.mkdir(parents=True,exist_ok=False)
+         cmd=[sys.executable,str(Path(__file__).resolve()),'run','--mode',mode,'--output',str(out)]
+         r=dict(started_utc=utc(),command=cmd,status='RUNNING',peak_tree_rss=0,limits=m['contract'])
+         start=time.monotonic()

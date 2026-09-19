@@ -1,0 +1,65 @@
+--- original_observer
++++ S30_observer
+@@ -37,20 +37,8 @@
+                         self.extra_forwards += 1
+                         decoded = dict(depth=np.stack(list_before), point_cloud=np.stack([b.array(x) for x in scene.get_pts3d()]), focal=b.array(scene.get_focals()), pp=b.array(scene.get_principal_points()), c2w=b.array(scene.get_im_poses()), pw_scale=b.array(scene.get_pw_scale()), pw_poses=b.array(scene.get_pw_poses()), adaptors=b.array(scene.get_adaptors()), objective=loss_before)
+                     np.savez_compressed(self.out / 'initial_decoded.npz', **decoded)
+-                    if arm == 'gradient_only':
+-                        prior = Path(c['output_root']) / 'original'
+-                        receipt = read(prior / 'receipt.json')
+-                        require(receipt['status'] == 'PASS' and receipt['s28_contract_sha256'] == c['_sha'], 'A must be fully sealed before B')
+-                        for name in ['initial_raw.npz', 'initial_raw_metadata.json', 'initial_decoded.npz']:
+-                            require(sha(prior / name) == receipt['outputs'][name], 'A initialization seal: ' + name)
+-                        require(read(prior / 'initial_raw_metadata.json') == self.initial_meta, 'Cross-arm names/shapes/dtypes/flags/raw tensor SHA exact')
+-                        with np.load(prior / 'initial_raw.npz', allow_pickle=False) as z:
+-                            require(set(z.files) == set(self.initial_arrays), 'Complete cross-arm initial tensor set')
+-                            for name, a in self.initial_arrays.items():
+-                                require(z[name].dtype == a.dtype and z[name].shape == a.shape and (z[name].tobytes() == a.tobytes()), 'Cross-arm tensor raw bytes: ' + name)
+-                        with np.load(prior / 'initial_decoded.npz', allow_pickle=False) as z:
+-                            require(z['objective'].tobytes() == loss_before.tobytes(), 'Cross-arm initial objective bytes')
+-                        self.patch(opt.PointCloudOptimizer, 'get_depthmaps', lambda old_getter: patched_getter)
++                    verify_s29_initial_state(self, c, arm, loss_before, np)
++                    self.patch(opt.PointCloudOptimizer, 'get_depthmaps', lambda old_getter: patched_getter)
+                     with torch.no_grad():
+                         depth_after = b.array(scene.get_depthmaps(raw=True))
+                         list_after = [b.array(x) for x in scene.get_depthmaps()]
+@@ -62,8 +50,8 @@
+                     after_arrays, after_meta, after_objects = snapshot(scene, np)
+                     assert_same_objects(self.initial_objects, after_objects)
+                     require(after_meta == self.initial_meta, 'Getter must not change raw parameters/buffers/flags')
+-                    self.report['s28_initialization'] = dict(arm=arm, original_mst_preserved=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), cross_arm_raw_exact=True if arm == 'gradient_only' else 'REFERENCE_ARM', getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=arm == 'gradient_only', extra_no_update_objective_forwards=self.extra_forwards)
+-                    self.checkpoint('S28_first_step_gate_passed')
++                    self.report['s30_initialization'] = dict(arm=arm, s29_initialization_path_preserved=True, initial_metadata_sha256=sha(self.out / 'initial_raw_metadata.json'), reference_S29_raw_exact=True, getter_forward_bytes_exact=True, initial_objective=float(loss_before), getter_repair_active=True, extra_no_update_objective_forwards=self.extra_forwards)
++                    self.checkpoint('S30_first_step_gate_passed')
+                     return answer
+                 return call
+             self.patch(init, 'init_minimum_spanning_tree', initial_after_mst)
+@@ -76,7 +64,7 @@
+                         if p.grad is not None:
+                             require(bool(torch.isfinite(p.grad).all()), 'Nonfinite gradient before Adam: ' + name)
+                     for p in self.scene.im_depthmaps:
+-                        require((p.grad is None) == (arm == 'original'), 'Depth gradient route must hold before Adam')
++                        require((p.grad is None) == False, 'Depth gradient route must hold before Adam')
+                     return old(optimizer, *args, **kw)
+                 return call
+             self.patch(torch.optim.Adam, 'step', validate_before_step)
+@@ -113,7 +101,7 @@
+                     gs = {n: grad(p) for n, p in scene.named_parameters() if n.startswith('im_depthmaps.') or n in ('im_focals', 'pw_poses')}
+                     require(all((v['finite'] is not False for v in gs.values())), 'Nonfinite diagnostic gradient')
+                     depth_grad = [gs['im_depthmaps.' + str(i)] for i in range(4)]
+-                    require(all((v['grad_is_none'] == (arm == 'original') for v in depth_grad)), 'Registered depth connectivity differs from arm contract')
++                    require(all((v['grad_is_none'] == False for v in depth_grad)), 'Registered depth connectivity differs from arm contract')
+                     optimizer_ids = {id(p) for group in self.optimizer.param_groups for p in group['params']}
+                     require(optimizer_ids == {id(p) for p in scene.parameters() if p.requires_grad}, 'Original optimizer parameter membership')
+                     self.gradient_steps += 1
+@@ -125,8 +113,8 @@
+                         final_arrays, final_meta, _ = snapshot(scene, np)
+                         np.savez_compressed(self.out / 'final_raw_before_clean.npz', **final_arrays)
+                         write(self.out / 'final_raw_metadata.json', final_meta)
+-                        self.report['s28_gradient_steps'] = self.gradient_steps
+-                        self.report['s28_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
++                        self.report['s30_gradient_steps'] = self.gradient_steps
++                        self.report['s30_objective_forward_counts'] = dict(optimization=400, patch_boundary_no_update=self.extra_forwards, postfinal_no_update=1, total=403)
+                     return result
+                 return call
+             self.patch(base, 'global_alignment_iter', trace_iter)

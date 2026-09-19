@@ -1,0 +1,122 @@
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+\usepackage[margin=1.9cm,headheight=15pt]{geometry}
+\usepackage{amsmath,booktabs,array,graphicx,tikz,xcolor,hyperref,xurl,fancyhdr,enumitem}
+\usetikzlibrary{arrows.meta,positioning}
+\setmainfont{Arial}\setmonofont{Menlo}
+\setCJKmainfont{Songti SC}\setCJKsansfont{Heiti SC}
+\definecolor{ink}{HTML}{163C50}\definecolor{accent}{HTML}{007C91}
+\hypersetup{colorlinks=true,urlcolor=accent,linkcolor=ink,pdftitle={S82与S83：历史几何与固定相机增补},pdfauthor={Yiyang Liu -- AI辅助整理}}
+\renewcommand{\UrlFont}{\fontspec{Arial Unicode MS}\small}
+\setlength{\parskip}{.38em}\linespread{1.05}\setlength{\emergencystretch}{2em}
+\setlist{nosep,leftmargin=1.7em}\renewcommand{\arraystretch}{1.16}
+\pagestyle{fancy}\fancyhf{}\lhead{\small CSIT 6910：S82 / S83 历史几何增补}\rhead{\small 2026-09-11}\cfoot{\small\thepage}
+\ctexset{section={format=\large\bfseries\sffamily\color{ink},beforeskip=.8em,afterskip=.4em}}
+\begin{document}
+\begin{center}{\LARGE\bfseries 把历史照片变成可投影的几何}\par\vspace{.4em}{\large S82 的真实预测与 S83 的固定相机诊断}\end{center}
+
+\noindent\textbf{本轮已完成历史几何预测及固定相机缓存计算。}S82真实运行一次四历史前向；S83完成100步拟合，并通过不同作者的保存数组检查和root接受。接受范围是计算与数据一致性，尚非几何准确性或新生成结果。此前评分发现既有生成图与请求几何之间的偏差；这两步为下一普通几何引导对照准备可回查的历史缓存。
+
+\section{ 从照片到点图，再到未来生成对照}
+照片上的一个像素只有颜色；\textbf{点图}则为每个像素附上一个三维坐标。CUT3R 根据历史照片预测点图。S83 接着在给定历史相机和内参下拟合深度，使这些预测尽量互相兼容。之后才可能把历史颜色投到目标视角，作为生成对照的输入。
+
+\begin{center}
+\begin{tikzpicture}[>=Latex,font=\small,node distance=5mm,
+box/.style={draw=accent,rounded corners=2pt,fill=accent!5,text width=13.8cm,align=center,minimum height=1.04cm}]
+\node[box] (a) {四张已有历史照片：12、13、18、19\\同一场景，按时间输入；不加目标照片};
+\node[box,below=of a] (b) {S82：已有 CUT3R 模型的一次真实前向\\保存原始点图、置信值、相机编码与实际预处理照片};
+\node[box,below=of b] (c) {S83：只消费保存数组，固定给定相机与内参\\优化深度与边的坐标对齐参数，不重新运行 CUT3R};
+\node[box,below=of c] (d) {未来：投影历史颜色，得到目标视角 warp 与支持区域 mask\\再比较原生成、末端像素合成和采样过程引导};
+\draw[->,thick] (a)--(b);\draw[->,thick] (b)--(c);\draw[->,thick] (c)--(d);
+\end{tikzpicture}
+\end{center}
+\noindent\textbf{流程教学图，不是实际点云或新视频。}最后一框仍是下一阶段计划；完成几何缓存不代表已经改善生成。
+
+\section{ 同样四张图，为什么有两个顺序？}
+几何模型按时间顺序$[12,13,18,19]$读取，便于连续更新状态；既有生成器的历史槽顺序仍是$[19,18,13,12]$。两者使用的是同一组照片，不能混淆数组中的位置与原帧ID。几何推理从空状态开始，每张更新一次，不带旧运行状态。
+
+\textbf{输入边界也有历史限制。}本次没有额外加入ID14、目标RGB、传感器深度或旧模型状态。但旧选图过程已看过目标信息，因此本次“四图输入隔离”不能反过来证明选图完全没有未来信息。四帧只属于一个场景，也不是四个独立实验。
+\clearpage
+
+\section{ S82 真正完成了什么：一次前向、两次记录程序失败}
+成功运行位于\texttt{execution\_geometry\_03}。四图实际预处理尺寸为$512\times384$，使用已有512 DPT权重、评估模式和空的循环状态；每张只更新一次。原始结果完整保存，没有根据几何好坏筛点。
+
+\begin{center}\small
+\begin{tabular}{p{1.1cm}p{3.0cm}p{10.7cm}}\toprule
+尝试&监督进程耗时&实际发生的事\\\midrule
+01&6.143705秒&4图解码、1次权重加载，记录不存在的配置属性时报错；0次前向。\\
+02&5.798268秒&4图解码、1次权重加载，配置无法转为JSON时报错；0次前向。\\
+03&11.618882秒&4图解码、1次权重加载、1次四历史前向，4组原始预测完整保存。\\\bottomrule
+\end{tabular}\end{center}
+
+成功尝试发生于\textbf{北京时间09-11 02:25:31.625至02:25:43.244}。前向加同步归档为5.833599秒，不能当作纯网络延迟。三次监督耗时合计23.560855秒；三次加载、12次图像解码、一次实际前向。最高采样进程树内存为6,780,796,928字节。前两次失败保留，不从成本中删掉。
+
+第二次旧回执还存在加载计数过时和退出原因误标，已用独立勘误记录纠正；原始文件未改。真正的成功输入来源只有03，失败目录不能当作可消费的几何缓存。
+
+\section{ 保存的两套点图和“置信值”，应该怎样理解？}
+每图有六个原始输出：自身视角点图、另一坐标系中的点图、对应的两套置信值、预测相机编码，以及模型RGB头。前两套点图来自\textbf{不同预测头}，不能预设它们由一个精确刚体变换互相得到。它们的差异也不能直接称为经过校准的不确定性；置信值不是“这个点有多少概率正确”。模型RGB头更不是新生成的视频。
+
+\textbf{另一作者的档案检查}核对了全部六份数组档案的字节身份、ID与顺序、尺寸、类型和有限性，并独立复算了相机四元数解码。与官方矩阵的最大元素差为$3.7706452\times10^{-8}$。这是解码算术的一致性，不是与真实相机的误差。
+
+\begin{center}
+\begin{tabular}{p{7.2cm}p{7.7cm}}\toprule
+目前可以说&仍不能说\\\midrule
+输入对应、档案完整、解码一致&点图已达到真实几何精度\\
+保存了近似内参K的元数据&原始网络输出已经被K约束为米制真值\\
+真实模型对四历史做了前向&完成了新视频生成或验证了新方法\\\bottomrule
+\end{tabular}\end{center}
+\clearpage
+
+\section{ S83 怎么做：相机不动，调整每个像素的深度}
+相机外参$P$说明相机的位置和朝向；内参$K$说明像素如何对应光线。固定两者以后，像素$(u,v)$只能沿确定的射线移动，未知量变为一个深度$Z$：
+\[
+X_{\rm world}=R\left[ZK^{-1}(u,v,1)^T\right]+c.
+\]
+这里$P=(R,c)$为相机到世界的变换；$Z$是沿光轴的深度，不是到相机中心的欧氏距离。S83采用已有TUM光学相机约定，保持原尺度，不额外加入生成器的坐标翻转或尺度变换。给定近似$K$在本尺寸下为$f_x=f_y=420$、主点$(255.6,191.6)$。
+
+\noindent\textbf{人工算例，不是本次数据：}若焦距100像素、主点$(50,40)$，像素$(60,40)$的光轴深度为2，则相机坐标为$(0.2,0,2)$。把深度改成3，点变为$(0.3,0,3)$：仍在同一条射线上。优化深度就是沿这些射线调整三维点。
+
+\section{ 拟合什么，固定什么？}
+采用原有实现的三条星形边：历史12分别连接13、18、19。每边配对使用首图的自身点图与另图的cross点图，再以原有置信权重拟合。优化器还保留每边的旋转、平移和尺度对齐参数，用于把网络预测放入可比较的坐标；\textbf{固定相机并不意味着只剩深度一种自由度}。
+
+实际给定相机来自已有共同S69光学相机档案，\textbf{不是把S82预测相机当作真实相机}。档案含更多ID，程序只取12、13、18、19；近似K与未额外去畸变的限制仍在。给定相机、焦距和主点在初始化前赋值并冻结，初始化后及每步检查。主点需要先启用可赋值接口，再冻结；不能把默认配置误当成已经成功写入内参。
+
+\begin{center}\small
+\begin{tabular}{p{3.0cm}p{11.9cm}}\toprule
+冻结的流程&含义\\\midrule
+1次MST初始化&用原实现构造初始几何；不按结果重新挑初始化。\\
+100次Adam更新&只做预定预算，记录每步损失、深度梯度和参数变化；100步不是收敛证明。\\
+固定P与K&相机、焦距和主点不能通过移动来吸收点图误差。\\
+一次原有清理&保存清理前后全部结果；不能只呈现筛选后的较好区域。\\\bottomrule
+\end{tabular}\end{center}
+
+\textbf{为什么先修梯度？}原fork的取深度路径切断了计算图，可能使注册的深度参数收不到梯度。局部适配器只恢复这条连接，不改原fork。人工小张量检查已验证梯度和一次更新；人工检查不是这批真实点图的质量结果。S83是否实际完成、更新了什么，必须以接下来一页的真实回执为准。
+\clearpage
+
+\input{S83_actual_results.tex}
+
+\clearpage
+\section{ 下一次生成对照，怎样避免“只是贴回历史像素”？}
+几何缓存是后续对照的公共输入。在真正用于生成前，还需另做固定的深度参考诊断；\textbf{该后续诊断的结果不在本增补截点内}。把历史颜色按几何投影到目标相机，就得到一张\textbf{warp}；能够由历史投影支持的区域用\textbf{mask}标记。遮罩之外可能没有历史信息，不能凭空称为正确的新内容。
+
+\begin{center}\small
+\begin{tabular}{p{2.1cm}p{7.2cm}p{5.7cm}}\toprule
+比较条件&具体做法&回答的问题\\\midrule
+$G_0$&原A0生成；若复用旧结果，须先确认输入与实际随机流一致。&没有几何引导时怎样？\\
+$G_{\rm paste}$&在同一mask内把同一warp与$G_0$作末端像素合成，洞内保留$G_0$。&只靠最后复制历史像素，能解释多少改善？\\
+$G_{\rm guide}$&在预定采样阶段，把同一warp内容融合到目标槽的干净预测，再继续去噪。&进入生成过程是否比末端合成更有帮助？\\\bottomrule
+\end{tabular}\end{center}
+
+上表是后续实验设计，\textbf{本增补没有把它写成已完成的生成结果}。三者需要一致的历史输入、请求相机、目标、生成预算和公共warp/mask；强度与作用时段应在看新结果前固定。原采样实现即使某个噪声强度为零仍可能消耗随机数，因此不能只说“种子相同”便认定随机流相同。
+
+\section{ 结果可能变好，为什么仍不能马上说创新成立？}
+如果末端合成已解释全部改善，就没有证据说明采样内引导带来额外价值。如果覆盖区变好但洞、遮挡边缘或内容变坏，也不能只展示成功区域。几何预处理、优化、渲染、编码与采样成本都要单列；额外计算不能隐藏为记忆方法收益。
+
+更根本的问题是\textbf{预测可能一致地出错}。两套点图互相接近，不保证接近真实表面；固定近似K后的拟合损失下降，也不保证真实投影更准。若给定几何warp本身偏了，引导越强可能越把生成拉向错误位置。因此S83的优化损失、后续像素几何指标和内容表现回答不同问题，不能互相替代。
+
+已有几何缓存、投影条件与采样纠正工作是后续方法比较的背景。本机先做普通强基线，不把局部梯度修复、缓存跑通或固定相机拟合命名为新算法。\textbf{当前仍为NO\_METHOD\_SELECTED，new\_method\_validated=false。}
+
+\section{ 可回查的证据与本增补范围}
+S82：\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/S82_RESULTS.md}{实际结果}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/ROOT_GEOMETRY_RESULT_ACCEPTANCE.json}{root接受记录}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/GEOMETRY_OUTPUT_REVIEW.json}{不同作者输出核验}。成功档案为03；前两次技术失败及勘误共同保留。
+
+S83：\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/S83_RESULTS.md}{实际结果}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/ROOT_RESULT_ACCEPTANCE.json}{root接受记录}、\href{/Users/rocket/Desktop/HKUST\%20IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/OUTPUT_REVIEW.json}{不同作者保存算术核验}；计算合同与源码在同目录。报告阅读保存摘要与原始接口，没有重新模型推理。本增补独立保存，原125页汇报、S80及S81文件不改。
+\end{document}

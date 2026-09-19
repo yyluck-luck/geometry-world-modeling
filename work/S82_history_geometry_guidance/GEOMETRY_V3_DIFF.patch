@@ -1,0 +1,40 @@
+--- build_four_history_geometry_v2.py
++++ build_four_history_geometry_v3.py
+@@ -24,8 +24,8 @@
+ from datetime import datetime, timezone
+ 
+ HERE = Path(__file__).resolve().parent
+-CONTRACT = HERE / "FOUR_HISTORY_CONTRACT_V2.json"
+-OUT = HERE / "execution_geometry_02"
++CONTRACT = HERE / "FOUR_HISTORY_CONTRACT_V3.json"
++OUT = HERE / "execution_geometry_03"
+ sys.dont_write_bytecode = True
+ 
+ 
+@@ -249,6 +249,7 @@
+         r["checkpoint_unsafe_globals"] = unsafe
+         load_start = time.perf_counter()
+         r["model_loads"] += 1
++        flush()  # persist the attempted load count before entering the model loader
+         with (OUT / "CHECKPOINT_LOAD.txt").open("x") as log:
+             with contextlib.redirect_stdout(log), torch.serialization.safe_globals(allowed):
+                 model = model_module.ARCroco3DStereo.from_pretrained(str(cp)).float().to("cpu").eval()
+@@ -261,7 +262,7 @@
+         assert all(p.dtype == torch.float32 and p.device.type == "cpu" for p in model.parameters())
+         r.update(model_load_seconds=time.perf_counter() - load_start,
+                  parameters=sum(p.numel() for p in model.parameters()), model_training=False,
+-                 backbone_config=config_json(model.config.to_dict()), weights_only=True,
++                 backbone_config_repr=repr(model.config.to_dict()), weights_only=True,
+                  model_head_type=model.head_type, downstream_head_class=type(model.downstream_head).__name__,
+                  torch_threads=torch.get_num_threads(),
+                  opencv_threads=cv2.getNumThreads(),
+@@ -369,7 +370,8 @@
+         success = s["returncode"] == 0 and "failure" not in s and s["worker_status"] == "RAW_FOUR_HISTORY_COMPLETE"
+         s["status"] = "COMPLETE" if success else "FAILED"
+         if not success and receipt is not None and receipt["status"] == "RUNNING":
+-            receipt.update(status="FAILED_TERMINATED", termination_by_supervisor=True, completed_utc=utc())
++            receipt.update(status="FAILED_NO_FINAL_RECEIPT", termination_by_supervisor=("failure" in s),
++                           worker_exit_code=s["returncode"], completed_utc=utc())
+             write_json(receipt_path, receipt)
+     except BaseException:
+         s.update(status="FAILED", traceback=traceback.format_exc())

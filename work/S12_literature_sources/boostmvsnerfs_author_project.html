@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>BoostMVSNeRFs</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:image" content="./static/images/teaser.jpg">
+    <meta property="og:image:type" content="image/jpg">
+    <meta property="og:image:width" content="1711">
+    <meta property="og:image:height" content="576">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://su-terry.github.io/BoostMVSNeRFs/"/>
+    <meta property="og:title" content="BoostMVSNeRFs: Boosting MVS-based NeRFs to Generalizable View Synthesis in Large-scale Scenes" />
+    <meta property="og:description" content="Our BoostMVSNeRFs enhances the novel view synthesis quality of MVS-based NeRFs in large-scale scenes. MVS-based NeRF methods often suffer from (a) limited viewport coverage from novel views or (b) artifacts due to limited input views for constructing cost volumes. (c) These drawbacks cannot be resolved even by per-scene fine-tuning. Our approach selects those cost volumes that contribute the most to the novel view and combines multiple selected cost volumes with volume rendering. (d, e) Our method does not require any training and is compatible with existing MVS-based NeRFs in a feed-forward fashion to improve the rendering quality. (f) The scene can be further fine-tuned as our method supports end-to-end fine-tuning."/>
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BoostMVSNeRFs: Boosting MVS-based NeRFs to Generalizable View Synthesis in Large-scale Scenes" />
+    <meta name="twitter:description" content="3D reconstruction methods such as Neural Radiance Fields (NeRFs) excel at rendering photorealistic novel views of complex scenes. However, recovering a high-quality NeRF typically requires tens to hundreds of input images, resulting in a time-consuming capture process. We present ReconFusion to reconstruct real-world scenes using only a few photos. Our approach leverages a diffusion prior for novel view synthesis, trained on synthetic and multiview datasets, which regularizes a NeRF-based 3D reconstruction pipeline at novel camera poses beyond those captured by the set of input images. Our method synthesizes realistic geometry and texture in underconstrained regions while preserving the appearance of observed regions. We perform an extensive evaluation across various real-world datasets, including forward-facing and 360-degree scenes, demonstrating significant performance improvements over previous few-view NeRF reconstruction approaches."/>
+    <meta name="twitter:image" content="./static/images/teaser.jpg" />
+
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+	<link rel="stylesheet" href="css/fontawesome.all.min.css">
+	<link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+	<!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8ZERS5BVPS"></script>
+  <script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'G-8ZERS5BVPS');
+  </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+	<script defer src="js/fontawesome.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/synced_video_selector.js"></script>
+
+</head>
+
+<body style="padding: 1%; width: 100%">
+    <div class="container-lg text-center" style="max-width: 1500px; margin: auto;" id="main">
+    <!-- <div class="container" id="main"> -->
+        <div class="row">
+            <h2 class="col-md-12 text-center">
+                <b>BoostMVSNeRFs</b><br>
+                Boosting MVS-based NeRFs to Generalizable View Synthesis in Large-scale Scenes
+            </h2>
+        </div>
+        <div class="row text-center">
+<div class="col-md-3">
+    </div>
+            <div class="col-md-6 text-center">
+                <ul class="list-inline">
+                    <li>
+                        <a href="https://su-terry.github.io/">
+                            Chih-Hai Su
+                        </a><sup>1</sup>*
+                    </li>
+                    <li>
+                        <a href="https://orcid.org/0009-0008-5968-6322">
+                            Chih-Yao Hu
+                        </a><sup>2</sup>*
+                    </li>
+                    <li>
+                        <a href="https://orcid.org/0009-0002-2707-0095">
+                            Shr-Ruei Tsai
+                        </a><sup>1</sup>*
+                    </li>
+                    <li>
+                        <a href="https://orcid.org/0009-0008-0826-4664">
+                            Jie-Ying Lee
+                        </a><sup>1</sup>*
+                    </li>
+                    <wbr>
+                    <li>
+                        <a href="https://orcid.org/0009-0007-1945-2014">
+                            Chin-Yang Lin
+                        </a><sup>1</sup>
+                    </li>
+                    <li>
+                        <a href="https://yulunalexliu.github.io/">
+                            Yu-Lun Liu
+                        </a><sup>1</sup>
+                    </li>
+                </ul>
+            </div>
+<div class="col-md-3">
+    </div>
+            <div class="col-md-12 text-center">
+                <sup>1</sup>National Yang Ming Chiao Tung University, &nbsp <sup>2</sup>National Taiwan University, &nbsp; * equal contribution
+
+            </div>
+            <div class="col-md-12 text-center">
+                SIGGRAPH 2024
+            </div> </div>
+
+
+        <div class="row text-center">
+			<span class="link-block">
+                <a href="http://arxiv.org/abs/2407.15848"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+                <a href="https://github.com/Su-Terry/BoostMVSNeRFs"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                        <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1u8njbeysuBgLihxmpGRY5vePm1aacfPi?usp=sharing"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Data</span>
+                </a>
+                <a href="https://colab.research.google.com/github/Su-Terry/BoostMVSNeRFs/blob/main/BoostMVSNeRFs_DEMO.ipynb"
+                   class="external-link button is-normal is-rounded is-dark">
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Colaboratory_SVG_Logo.svg" alt="Open in Colab" alt="Gradio Icon" width="13" height="13">
+                  <span>Colab Demo</span>
+                </a>
+            </span>
+		</div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <video id="teaser-video-ours" width="100%" autoplay loop muted controls>
+                  <source src="videos/Su2024Boost.mp4" type="video/mp4" />
+                </video>
+			</div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Abstract
+                </h3>
+                <p class="text-justify">
+                    While Neural Radiance Fields (NeRFs) have demonstrated exceptional quality, their protracted training duration remains a limitation. Generalizable and MVS-based NeRFs, although capable of mitigating training time, often incur tradeoffs in quality. This paper presents a novel approach called BoostMVSNeRFs to enhance the rendering quality of MVS-based NeRFs in large-scale scenes. We first identify limitations in MVS-based NeRF methods, such as restricted viewport coverage and artifacts due to limited input views. Then, we address these limitations by proposing a new method that selects and combines multiple cost volumes during volume rendering. Our method does not require training and can adapt to any MVS-based NeRF methods in a feed-forward fashion to improve rendering quality. Furthermore, our approach is also end-to-end trainable, allowing fine-tuning on specific scenes. We demonstrate the effectiveness of this method through experiments on large-scale datasets, showing significant improvements in rendering quality, particularly in large-scale scenes with free camera trajectories and unbounded outdoor scenarios.
+                </p>
+            </div>
+        </div>
+        <br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    <b>BoostMVSNeRFs</b>
+                </h3>
+                <image src="./static/images/teaser.jpg" width=90% style="display: block; margin: auto;"></image>
+                <p class="text-justify">
+                    <b>Our BoostMVSNeRFs enhances the novel view synthesis quality of MVS-based NeRFs in large-scale scenes.</b> MVS-based NeRF methods often suffer from (a) limited viewport coverage from novel views or (b) artifacts due to limited input views for constructing cost volumes. (c) These drawbacks cannot be resolved even by per-scene fine-tuning. Our approach selects those cost volumes that contribute the most to the novel view and combines multiple selected cost volumes with volume rendering. (d, e) Our method does not require any training and is compatible with existing MVS-based NeRFs in a feed-forward fashion to improve the rendering quality. (f) The scene can be further fine-tuned as our method supports end-to-end fine-tuning.
+                </p>
+            </div>
+        </div><br><br>
+        
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3> Video </h3><br>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/tX4EkFgm0ng" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3> BoostMVSNeRFs outperforms Generalizable and Per-scene Optimization NeRFs </h3><br>
+
+                <div class="text-center ">
+                    <ul class="nav nav-pills center-pills">
+                        <li class="method-pill" data-value="mvsnerf"
+                            onclick="selectCompVideo(this, activeScenePill)"><a>MVSNeRF</a></li>
+                        <li class="method-pill active" data-value="enerf"
+                            onclick="selectCompVideo(this, activeScenePill)"><a>ENeRF</a></li>
+                        <li class="method-pill" data-value="f2nerf"
+                            onclick="selectCompVideo(this, activeScenePill)"><a>F2-NeRF</a></li>
+                        <li class="method-pill" data-value="zipnerf"
+                            onclick="selectCompVideo(this, activeScenePill)"><a>Zip-NeRF</a></li>
+                    </ul>
+                </div>
+
+                <script>
+                    activeMethodPill = document.querySelector('.method-pill.active-pill');
+                    activeScenePill = document.querySelector('.scene-pill.active-pill');
+                    activeModePill = document.querySelector('.mode-pill.active-pill');
+                </script>
+                
+                <div class="text-center">
+                    <div class="video-container">
+                        <video class="video" style="height: 280px; max-width: 100%;" m id="compVideo0" loop playsinline autoplay muted>
+                            <source src="videos/comparison/free_road_enerf_vs_ours_rgb.mp4"/>
+                        </video>
+                        <video class="video" style="height: 280px; max-width: 100%;" id="compVideo1" loop playsinline autoplay muted hidden>
+                            <source src="videos/comparison/free_road_enerf_vs_ours_depth.mp4"/>
+                        </video>
+                    </div>
+                    <div class="text-center" style="color: black;" id="mode-pills">
+                        <div class="btn-group btn-group-sm">
+                            <span class="btn btn-primary mode-pill active" data-value="rgb"
+                                onclick="selectCompVideo(activeMethodPill, activeScenePill, null, this)">
+                                RGB
+                            </span>
+                            <span class="btn btn-primary mode-pill" data-value="depth"
+                                onclick="selectCompVideo(activeMethodPill, activeScenePill, null, this)">
+                                Depth
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <br>
+                    <p class="text-justify" style="text-align: center;">
+                        Baseline method (left) vs BoostMVSNeRFs (right).
+                    </p>
+                    <script>
+                        video0 = document.getElementById("compVideo0");
+                        video1 = document.getElementById("compVideo1");
+                        video0.addEventListener('loadedmetadata', function() {
+                            if (activeVidID == 0 && select){
+                                video0.play();
+                                // print video size
+                                console.log(video0.videoWidth, video0.videoHeight);
+                                video0.hidden = false;
+                                video1.hidden = true;
+                            }
+                        });
+                        video1.addEventListener('loadedmetadata', function() {
+                            if (activeVidID == 1 && select){
+                                video1.play();
+                                // print video size
+                                console.log(video1.videoWidth, video1.videoHeight);
+                                video0.hidden = true;
+                                video1.hidden = false;
+                            }
+                        });
+                    </script>
+
+                    <div class="pill-row scene-pills" id="scene-pills">
+                        <span class="pill scene-pill" data-value="free_grass" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_grass.jpg" alt="Free/grass" width="64">
+                        </span>
+                        <span class="pill scene-pill" data-value="free_hydrant" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_hydrant.jpg" alt="Free/hydrant" width="64">
+                        </span>
+                        <span class="pill scene-pill" data-value="free_lab" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_lab.jpg" alt="Free/lab" width="64">
+                        </span>
+                        <span class="pill scene-pill" data-value="free_pillar" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_pillar.jpg" alt="Free/pillar" width="64">
+                        </span>
+                        <span class="pill scene-pill active" data-value="free_road" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_road.jpg" alt="Free/road" width="64">
+                        </span>
+                        <span class="pill scene-pill" data-value="free_sky" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_sky.jpg" alt="Free/sky" width="64">
+                        </span>
+                        <span class="pill scene-pill" data-value="free_stair" onclick="selectCompVideo(activeMethodPill, this)">
+                            <img class="thumbnail-img" src="static/thumbnails/free_stair.jpg" alt="Free/stair" width="64">
+                        </span>
+                    </div>
+
+                    <script>
+                        activeMethodPill = document.querySelector('.method-pill.active-pill');
+                        activeScenePill = document.querySelector('.scene-pill.active-pill');
+                        activeModePill = document.querySelector('.mode-pill.active-pill');
+                    </script>
+                </div>
+            </div>
+        </div><br><br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+                <h3>
+                    Combined Rendering
+                </h3><br>
+                <image src="./static/images/combined_rendering.jpg" width=60% style="display: block; margin: auto;"></image>
+                <br>
+                <p class="text-justify" style="width:85%; margin:auto">
+                    Using a single cost volume, as in traditional MVS-based NeRFs, often introduces padding artifacts or incorrect geometry, as indicated by the <span style="color:red; font-weight:bold;">red</span> dashed circles. Our method warps selected cost volumes to the novel view's frustum and applies 3D visibility scores <em>m<sub>j</sub></em> as weights to blend multiple cost volumes during volume rendering. Combined rendering provides broader viewport coverage and combines information from multiple cost volumes, leading to improved image synthesis and alleviating artifacts.
+                </p>
+            </div>
+        </div><br><br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+                <h3>
+                    3D visibility scores and 2D visibility masks
+                </h3><br>
+                <image src="./static/images/visibility_mask.jpg" width=60% style="display: block; margin: auto;"></image>
+                <br>
+                <p class="text-justify" style="width:85%; margin:auto">
+                    For a novel view, depth distribution is estimated from three input views, from which 3D points are sampled and projected onto each view to determine visibility. These projections yield 3D visibility scores <em>m<sub>j</sub></em>, normalized across the views, and are subsequently volume rendered into a 2D visibility mask <strong>M<sup>2D</sup></strong>. This mask highlights the contribution of each input view to the cost volume and guides the rendering process, aiding in the selection of input views that optimize rendering quality and field of view coverage.
+                </p>
+            </div>
+        </div><br><br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+                <h3>
+                    BoostMVSNeRFs gains higher rendering quality with more cost volumes
+                </h3><br>
+                <image src="./static/images/progressive.jpg" width=70% style="display: block; margin: auto;"></image>
+                <br>
+                <p class="text-justify" style="width:85%; margin:auto">
+                    BoostMVSNeRFs boosts MVS-based NeRFs by selecting and combining multiple cost volumes during volume rendering. With more cost volumes, the rendering quality is improved, demonstrating the effectiveness of our method in enhancing the rendering quality of MVS-based NeRFs.
+                </p>
+            </div>
+        </div><br><br>
+
+        <!-- <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+                <h3>
+                    BoostMVSNeRFs gains higher rendering quality with more cost volumes.
+                </h3><br>
+
+                <p class="text-justify" style="color:red"> Find one example for different number of cost volumes </p>
+
+                <div class="video-compare-container" id="materialsDiv">
+                    <video class="video" id="sparsity" loop playsinline autoPlay muted src="videos/Su2024Boost.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="sparsityMerge"></canvas>
+                </div>
+                
+                <div class="slider-container" style="padding-left: 12%; padding-right: 11%;">
+                    <input type="range" class="styled-slider" id="sparsitySlider" min="0" max="3" step="1" value="0" list="slider-labels">
+                    <datalist id="slider-labels">
+                        <option value="0">1</option>
+                        <option value="1">2</option>
+                        <option value="2">3</option>
+                        <option value="3">4</option>
+                    </datalist>
+                </div>
+                <table style="text-align: left; padding-left: 0px; padding-right: 10%; width: 100%;">
+                    <tr>
+                        <th width="12.5%"></th>
+                        <th width="25%">1</th>
+                        <td width="25%">2</td>
+                        <td width="25%">3</td>
+                        <td width="25%">4</td>
+                    </tr>
+                </table><br>
+                <br>
+                <p class="text-justify" style="width:85%; margin:auto">
+                    BoostMVSNeRFs boosts MVS-based NeRFs by selecting and combining multiple cost volumes during volume rendering. With more cost volumes, the rendering quality is improved, demonstrating the effectiveness of our method in enhancing the rendering quality of MVS-based NeRFs.
+                </p>
+            </div>
+        </div><br><br> -->
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3> BoostMVSNeRFs is robust with sparse input views </h3><br>
+                <canvas id="sparsityChart" style="max-height: 300px; max-width: 500px; margin: auto;"></canvas>
+                <script src="js/sparsity_chart.js"></script>
+                <br>
+                <p class="text-center">
+                    With more sparse input views, the performance drop of our method is less severe than ENeRF, demonstrating the robustness of our method against sparse input views by combining multiple cost volumes in rendering.
+                </p>
+            </div>
+        </div><br><br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Citation
+                </h3>
+                <div class="form-group col-md-10 col-md-offset-1">
+				  <p class="text-justify">
+                    <textarea id="bibtex" class="form-control" readonly>
+@inproceedings{su2024boostmvsnerfs,
+    title={BoostMVSNeRFs: Boosting MVS-based NeRFs to Generalizable View 
+            Synthesis in Large-scale Scenes},
+    author={Su, Chih-Hai and Hu, Chih-Yao and Tsai, Shr-Ruei and 
+            Lee, Jie-Ying and Lin, Chin-Yang and Liu, Yu-Lun},
+    booktitle={SIGGRAPH 2024 Conference Papers},
+    year={2024}
+    }
+                    </textarea></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Acknowledgements
+                </h3>
+                <p class="text-justify">
+                  This research was funded by the National Science and Technology Council, Taiwan, under Grants NSTC 112-2222-E-A49-004-MY2.
+                  The authors are grateful to Google and NVIDIA for generous donations.
+                  Yu-Lun Liu acknowledges the Yushan Young Fellow Program by the MOE in Taiwan.
+                  The authors thank the anonymous reviewers for their valuable feedback.
+                    <br><br>
+                The website template was borrowed from <a href="http://mgharbi.com/">Michaël Gharbi</a> and <a href="https://dorverbin.github.io/refnerf">Ref-NeRF</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

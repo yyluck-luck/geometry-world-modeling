@@ -1,0 +1,587 @@
+--- V9/PROTOCOL.md
++++ S64/PROTOCOL.md
+@@ -1,74 +1,31 @@
+-# S47 C2 baseline-only confirmation generation protocol
++# S64 完整单位修复生成变体
+ 
+-Status: V9 source preparation only. No C2 model, image decode, generation, archive, score, or visual inspection is authorized until two fresh different-author reviews approve this exact V9 eight-file source set, the unique successful prepare bundle receives two different-author core reviews, the reviews are attached create-only, two later reviewers approve the published attachment, and the separately reviewed tool publishes the unique launch authorization. V6 is immutable withdrawn history: its eight exact sources and prior selftest are in `work/S47_c2_confirmation_generation/history/v6_blocked_exact/`; `FUNCTIONAL_BLOCKER_RECEIPT.json` SHA-256 `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` binds the reproduced parent-local-psutil/module-namespace mismatch, and the independent probe SHA-256 is `dc4875960f563f714408ce33b19938fdbf77992f4a5be8c6a1291eecd6856753`. V6 has no authority over V9. V5 and its BLOCKED primary lifecycle review remain immutable older withdrawal history: `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` and review-only probe SHA-256 `9e0c40872f478b5c655cfe1ad19158f08a5c16411392e0c1a7bd63968990b102`. V4 and both BLOCKED reviews remain preserved earlier withdrawal history.
++本候选从 C2 V9 有效生命周期实现派生，科学身份为 `row=C2_UNIT_REPAIRED_S64`、`retrieval_variant.id=s64_positive_camera_depth_median_units_v1`，输出固定 `results/S64_unit_repaired_generation`。原 V9 的 return1、部分档案与已消耗授权不变。S64 是看过 C2 失败后设计的工程恢复，`eligible_for_original_cohort=false`；不能补成原 cohort 的同条件 C2 行，也不能救回原至少2/3事件假设或称为创新。
+ 
+-## Scientific purpose and fixed differences
++已有 S60/S61/S62/S63 验收不再重跑。S63 原失败输入接线实际通过且独立结果票 SHA 为 `90c3eff57423f0360ada6bdfb3ebcbbdf428b707962568698634eae63528a426`，仅证明保存输入的 get_context_info 返回；S64 是否完成真实生成仍未知。
+ 
+-C2 is the third and final mandatory row of the already frozen S42 three-scene return-discrepancy screen. It is a strong-baseline confirmation run, not a method, ablation, or novelty experiment. It must use the same declared component variant and the same two-batch VMem path as B0/S40.
++## 唯一科学实现变化
+ 
+-Relative to the sealed S40/B0 generation manifest, only these run variables may change:
++原 S35 factory 和原 pipeline 保持字节不变。新 runtime_adapter 在原模型及 ft-mse VAE 不变量检查完成后、返回 runtime 前，只为该 pipeline 实例安装 unit_renderer_hook。原 bound renderer 被闭包保存，不回查已包装属性，不改类或其他实例。
+ 
+-- input: `living_room.jpg`, SHA-256 `e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278`, original size 1588 x 958;
+-- seed: 44 instead of 42, represented consistently in `controls.seed`, the Python/NumPy/Torch RNG calls, and a separately bound inference YAML equal to the sealed S40 bytes after the unique `seed: 42` to `seed: 44` substitution plus exactly one terminal LF byte;
+-- output root: `results/S47B_C2_confirmation_generation_v9`;
+-- row-specific schema/status text, row-specific gate/adapter/launcher/protocol source identities, review bindings, and timestamps needed to keep this execution separate and auditable.
++S61 固定 adapter 位于 `work/S61_unit_consistent_retrieval/unit_consistent_renderer.py`，SHA `a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c`。它以所有严格正相机 z 的中位数为长度单位，共同复制换算全部 surfel position/radius 与 render-camera translation，保持 R/focal/normal/source ID/缓存不变；仅向原 caller 返回 depth/index/cos maps，receipt 另存。返回 depth 为 `dimensionless_camera_depth_in_positive_median_units`，实际检索权重变为原 `cos/(1+z/m)`；这不是物理尺度标定，不保持原绝对深度语义。无新 fallback、筛帧、步数或生成数学变化。
+ 
+-All scientific controls remain fixed: CPU, float32, 8 threads, 576 x 576, T=8, context=4, target=4, 50 diffusion steps, default NMS, `initialize -> turn_left(5) -> turn_right(5)`, 1800 seconds per batch, 3600 seconds total, 45 GiB process-tree RSS, and at least 10 GiB free disk. One fresh worker loads once; both batches share the same pipeline and RNG without a reset. The history must be 1 -> 5 -> 9.
++gate 的 exact_retrieval_variant 对象记录上述行为、hook/adapter 实际路径与 SHA，并贯穿 manifest/core、metadata/full gate、runtime_loading、worker 和 supervisor 终态。原 ft-mse VAE 的 `variant` 对象独立保留。原 gate 原先仅允许相对 B0 的 input/seed 差异，现明确增加 retrieval_variant 科学差异；其余 controls/config/component/runtime/budget 等式保持。实际 required_sources 重建后必须包含本地 hook 与外部固定 S61 adapter；不把旧219项直接当完整新集合。新 hook/adapter 都由现有 execute_verified_module 从同一次核 SHA 的源码字节编译执行，不通过另一次路径重开或缓存 loader。原 renderer 源码也按 manifest 身份核验。
+ 
+-The exact frozen S42 primary comparison remains ID0 versus ID8 on `M_outer4`; the threshold remains strict unrounded float64 MSE greater than 0.01. This generation stage does not score or view C2.
++原 integration 在 create_runtime 之后安装观察器，所以外层顺序为：原坐标 render_input 归档 → 单位 hook → 原 renderer → 规范深度 render_output 归档。wraps 保留 inspect.unwrap 到原函数的来源链，只证明底层原 source，不能称科学行为未改。新 wrapper 与 adapter 的身份另列。
+ 
+-## Reuse boundary
++每次真实 hook 调用写一份 create-only `retrieval_unit_call_0001.json`（后续按序编号），记录实际时间、manifest SHA、新 row/variant、三份源码身份、原 adapter 单位票和成功/异常。安装记录不冒充调用。原两批路线第一次 history=1 跳过 renderer，第二次 history=5 调用，完整成功预期恰一份成功单位票。worker 和外层 supervisor 分别从实际输出读取票、核内容并绑定文件 SHA；两层绑定必须相同且完整，否则外层不能返回成功。所有失败和部分票保留。
+ 
+-The sealed S39 loading evidence is reused only as evidence that the five named component files and declared ft-mse variant loaded successfully under the S40 model/config structure before generation. The C2 gate proves that its YAML equals the sealed S40 YAML after the single `seed: 42` to `seed: 44` substitution plus one declared terminal LF; that newline is formatting only and is checked byte-for-byte. Image preprocessing is not part of model construction, so the prior `changi.jpg` identity is not reused as C2 input evidence. The C2 gate separately binds and hashes the exact `living_room.jpg` bytes before model construction. It must never claim that S39 loaded or generated the C2 image.
++## 原控制与从头运行
+ 
+-The C2 launcher wraps the reversibly AST-derived S35 supervisor inside one outer supervisor that first validates and retains the complete launch-control plane, claims canonical `execution_01`, and records the attempt. The transform replaces the external worker spawn with a private closure created only inside that active outer supervisor, replaces both worker ticket/receipt reads with same-directory-descriptor snapshots, and replaces execution/output creation with held-directory adoption; reversing every declared edit recovers the exact S35 AST. The public parser accepts exactly one split-form occurrence of each required option and rejects equals forms, abbreviations, repeats, unknowns, alternate execution directories, and every worker marker. It exposes no public or fresh-interpreter worker dispatch and returns no executable derived namespace. The S35 parent's early ticket write is retained only as a private pending request. No ticket file exists until the watchdog has reported its directly owned worker. The create-only V9 ticket then binds three separate identities, `supervisor_pid`, `watchdog_pid`, and `worker_pid`. The worker validates the exact record and receives a legacy view whose `parent_pid` is its actual watchdog PPID; the supervisor identity cannot satisfy that direct-parent predicate.
++固定原 `living_room.jpg`（SHA `e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278`）、seed44、CPU8/FP32、ft-mse VAE、576×576、T8/context4/target4、每批50 diffusion steps、400几何迭代。一个worker加载一次，依次 initialize→turn_left(5)→turn_right(5)，历史1→5→9，两批间不重置任何 RNG。
+ 
+-Only when the monitored derived parent reaches its single spawn site does the private closure create the opaque object token and 256-bit secret. It first forks an independent watchdog into a separate session; that watchdog then directly forks and owns the worker, waits until the worker has established its own process group, and reports the two PIDs to the supervisor. The worker inherits the token and secret only through this fork chain and remains blocked on a one-byte readiness pipe until the supervisor create-exclusively publishes the three-process ticket and a capability record binding supervisor PID, watchdog PID, worker PID, manifest, launcher, canonical execution inode, and the exact frozen output-root inode. The worker must consume that record once before its full gate.
++从原图重跑两批，不续接旧 cache：V9 最后 sampler RNG 快照后几何优化仍消耗随机数，没有同切点完整检查点。保留每批1800秒、总3600秒、进程树45GiB、空盘至少10GiB、0.5秒监控。约45–50分钟是历史外推，不是新运行保证或实测。本候选作者不执行 prepare/attach/authorization/模型/RGB；root 负责后续阶段与当前机器资源检查。
+ 
+-The outer supervisor keeps a liveness pipe open for the whole monitored run, while the direct-parent watchdog alone reaps the worker and relays its return code. The AST replacement explicitly passes the inherited parent's local `psutil` binding as the required `process_api` argument to the private spawn closure; both the normal watchdog call and exceptional cleanup use that same object, with no module-namespace lookup. The watchdog uses this already reviewed parent-imported implementation to discover the direct worker and recursively discover descendants while any registered ancestor remains live. It stores every PID together with process creation time in a durable in-memory ledger. Those identities remain targets after `setsid`, process-group changes, or reparenting. Normal completion and supervisor loss both require the worker group and every registered PID/create-time identity to be gone. Cleanup sends TERM and then KILL to both the original group and every matching registered identity; PID reuse is rejected. The receipt lists the complete ledger, discovery history, cleanup actions, and the all-registered-gone result. A process that appears and deliberately escapes between all observation points through an unreviewed native spawning route is outside this finite monitor; a fresh source review must reject such a route before launch authorization.
++## 复用既有生命周期
+ 
+-Before the derived parent runs, the supervisor publishes `supervisor_terminal_provisional.json` with a fixed non-success status. Terminal evidence uses a separately created and retained `supervisor_terminal_commit.json`. Its body is explicitly a commit candidate and never standalone success. The launcher retains that file descriptor through file sync, execution-directory sync, launch-control revalidation, full ancestor/execution/output path revalidation, and a second file-inode validation. Only then may the outer process return zero. Any exception, including a fault after file sync but before directory sync or a canonical execution-name swap after the earlier validation, makes zero return impossible and create-exclusively records `.execution_01.supervisor_failure.json` through the already-held project directory. A later reader may interpret a returned run only from the exact commit candidate, an externally observed zero return, absence of both fixed watchdog/supervisor failure receipts, and a fresh canonical identity revalidation. A leftover commit candidate alone is never PASS.
++保留 V9 的 source-review → 唯一 prepare → 两份不同作者 core review → attach → 两份最终 attachment/readiness review → 一次 authorization → 一次受监督 launch → 独立结果检查。固定路径均由 S64 新目录解析，不复制任何旧 formal review、授权或 consumed execution。新目录里的 `freeze_c2_manifest.py` 名称及 `s47-c2-*` schema/status 是兼容行政标签；实际科学身份以新 row、retrieval_variant、output 与 manifest SHA 为准。原固定 sentinels、same-descriptor 来源/资源核验、watchdog、进程树清理、终态 commit 与外部真实 return 要求复用；不新增权限状态机或攻击矩阵。
+ 
+-The C2 runtime adapter is an AST-derived copy of the exact S35 runtime factory. It changes the gate import, four evidence labels, the four exact seed literals used by `random.seed`, `numpy.random.seed`, `torch.manual_seed`, and the config guard from 42 to 44. Its reversible security edits use the detached manifest already carried by the live full gate, load the YAML and JPEG from duplicates of the exact descriptors hashed by that gate, route both Torch checkpoints through held descriptor-backed file objects, and route the two safetensors files through `/dev/fd` aliases of held verified descriptors. VAE JSON and other component opens are intercepted only for the exact frozen component paths and return duplicates of those same descriptors. The five components, config, input, output directory, prepare directory, attachment directory, authorization attempt, manifest, receipts, terminal reviews, authorization, and every ancestor directory remain held and revalidated through the worker terminal record.
++准备前两名不同作者只审本次明确差异及最终文件 SHA。局部作者检查仅验证 fake 实例安装/返回/观察器顺序/实际调用票、规范variant元数据与来源闭合、原 factory/launcher 派生编译；不重复 S60–S63 场景计算，不加载模型或图片。具体 prepare/attach 参数合同见 FREEZE_PROTOCOL.md。作者最终所有责任文件为0444后交付；正式消费后的纠正另存，不覆盖旧证据。
+ 
+-Runtime-loading evidence is an immutable create-only journal: each update creates `runtime_loading.event_NNNN.json`, while only the first terminal update may create `runtime_loading.json`. There is no temporary pathname and no replacement operation, so a late inode swap cannot overwrite prior evidence. Reversing every declared adapter edit must recover the complete S35 AST. Candidate-bound source and JSON parsing or execution uses bytes read, hashed, parsed or compiled from one no-follow regular-file descriptor snapshot with before/after identity checks; bound Python is compiled directly and never reopened through a cached loader. The freeze, authorization, and launcher sources embed the independently reviewed exact generation-gate SHA. The S35 integration, archive, trace, model, geometry, renderer, and navigation logic is otherwise reused through the declared reversible transform.
+-
+-## Freeze and review sequence
+-
+-0. Before the freeze tool may run, two fresh different non-root reviewers must independently bind the same eight V9 production-candidate hashes (`PROTOCOL.md`, `FREEZE_PROTOCOL.md`, `generation_gate.py`, `runtime_adapter.py`, `launch_generation.py`, `freeze_c2_manifest.py`, `create_launch_authorization.py`, and `inference_seed44.yaml`). They must reproduce the Python 3.12 and 3.13 isolated static/adversarial matrix, including the disposable actual derived-parent to private-spawn to watchdog dependency-injection path, the exact inherited worker parent predicate, pre-registered and late-registered detached closed-stdio descendants, post-file/pre-directory-sync failure, and post-commit canonical-path swap. Any edit invalidates both reviews. V3 through V6 receipts, probes, and reviews are preserved as superseded history and have zero authority for V9.
+-1. After both source reviews pass and root re-hashes all eight files, the standard-library freeze tool may run exactly one `prepare`. It completes all read-only checks first, then create-exclusively claims `.freeze_attempt_01.claimed` before creating fixed `.freeze_attempt_01.staging`. It holds the project and staging directory/ancestor descriptors throughout. Success publishes the still-held staging inode as `freeze_attempt_01` with `renameatx_np(..., RENAME_EXCL)` and leaves exactly read-only `manifest_core.json` and `receipt.json`. Any post-claim failure adds `failure_receipt.json` when possible and publishes or retains the same failed inode; the outer sentinel prevents rename-based retry.
+-2. A source-core reviewer and a runtime/freshness-core reviewer, both different from the core author and from each other, independently bind the actual core file SHA, review-excluded canonical core SHA, and the exact successful prepare-receipt SHA. They must reject every failed, partial, writable, redirected, extra-entry, or success-plus-failure prepare bundle.
+-3. Only after both core reviews pass may the tool run its unique `attach`. It revalidates the exact successful prepare terminal bundle, retains the prepare directory inode, checks both reviews, and validates the future manifest only at fixed `.review_attachment_01.preflight/manifest.json`. That dedicated route cannot emit PASS. A failed preflight remains occupied. On success the tool removes it, claims `.review_attachment_01.claimed`, creates fixed staging, and publishes the still-held staging inode with `RENAME_EXCL`. Only a directory containing exactly three read-only regular success files, `manifest.json`, `metadata_gate.json`, and `receipt.json`, may advance; every failure or extra entry closes the gate.
+-4. Two further non-root reviewers independently bind the same six-value object: final manifest SHA, frozen core file SHA, canonical core SHA, successful prepare-receipt SHA, successful attach-receipt SHA, and staged metadata-gate SHA. Each review uses schema `s47-c2-final-launch-review-v1`, the fixed kind and required status, a distinct non-root reviewer, `executed=false`, zero scientific imports/pixel decoding/generation, `quality_status=NOT_EVALUATED`, `method_or_novelty_status=NOT_EVALUATED`, and no blockers. Their UTC review times must be strictly later than attachment completion.
+-5. Only after both reviews exist may the separately reviewed standard-library authorization tool run once. It accepts all six exact bundle hashes and two review hashes, completes read-only validation, retains the prepare and attachment directory chains, and then claims fixed `launch_authorization_attempt_01`. It holds the attempt and project directory descriptors plus the staged authorization FD while publishing that exact inode as read-only `launch_authorization_01.json` with `renameatx_np(..., RENAME_EXCL)`. The sole successful terminal shape is exactly `attempt_started.json` plus `success_receipt.json`. Any failure, staging remnant, symlink, extra entry, or success-plus-failure state is rejected. Success reporting occurs after the failure-recording region so a broken output pipe cannot create contradictory terminal evidence.
+-6. `prepare` and `attach` never create authorization or execution state. Both canonical metadata and full resource gates reconstruct the authorization, the success-only attempt lease, two final reviews, and all six bindings before PASS. The launcher then retains those exact control-plane directories, files, sentinels, and ancestor identities through its terminal seal. The full gate additionally retains and hashes the exact five component files, YAML, JPEG, output directory, and all ancestors; scientific loaders receive duplicates of those held descriptors. Only the exact manifest SHA, manifest path, `execution_01`, and output root may enter the one monitored attempt.
+-
+-Review PASS is permission to attempt the frozen baseline once. It is not evidence that generation completed or that C2 supports a failure hypothesis.
+-
+-## Required terminal evidence and boundaries
+-
+-The launcher preserves actual start/end times, process-tree monitoring, trace boundary, return code, three-process ticket and capability issuance/consumption, watchdog descendant ledger and cleanup, provisional/commit/failure terminal state, worker receipt, live descriptor-consumption counts, resource gate, runtime loading, and partial evidence on failure. A returned process is still pending independent archive/readback review. Later work must independently verify the exact terminal commit plus externally observed return code and fixed fallback absence, full archive, second-batch consumption of first-batch generated history, camera-condition closure, authoritative nine-frame pixel identities, blind scoring, and all-nine visual QA before C2 becomes a technically valid row.
+-
+-The fail-closed threat model trusts the reviewed source bytes, the parent-imported psutil process identity API, OS kernel, filesystem semantics, and the invoking local account during one attempt. It detects ordinary path replacement, ancestor replacement, symlinks, conflicting terminal files, monitor SIGTERM/SIGINT, monitor SIGKILL while the independent watchdog survives, and registered descendants that change session, process group, standard descriptors, or parent. It does not claim protection against a hostile same-UID process using ptrace or direct descriptor/process injection, an unreviewed native process that is born and deliberately escapes between every observation point, deliberate simultaneous termination of both supervisor and watchdog, kernel compromise, storage corruption that defeats SHA-256, or host power loss. None of those events can be inferred as success from a commit-candidate file; it requires manual evidence review and never permits an automatic retry.
+-
+-C2 completes the mandatory generation queue only after later independent archive/readback, blind scoring, and visual-QA guards make B0, C1, and C2 technically valid. No infrastructure repair, successful run, metric difference, or visual impression is an innovation claim.
+-
+-## Frozen parents
+-
+-- S40 final manifest: `work/S40_declared_variant_generation/review_attachment_01/manifest.json`, SHA-256 `9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe`.
+-- S42 preregistration: `work/S42_baseline_failure_preregistration/PROTOCOL.md`; its actual SHA is bound by the freeze tool and final manifest.
+-- S39 loading manifest and all four loading evidence records remain exactly those bound by the sealed S40 manifest.
+-
+-## V9 interrupted-attempt recovery and separate administrative namespace
+-
+-Recovery source author: `/root/c2_v9_recovery_author`. The V8 implementation author remains `/root/c2_final_launch_readiness`; the future actual core/attachment orchestrator remains `/root`. V9 occupies only `work/S47B_c2_confirmation_generation_v9`, with scientific output `results/S47B_C2_confirmation_generation_v9`. No V8 formal artifact, review, authorization, consumed sentinel, failure, output or source is copied into a V9 formal location or grants V9 execution authority.
+-
+-V8 completed component loading and entered the first batch, then received signal 15 (SIGTERM) at 2026-09-08T14:01:04Z. The last completed sampling step was 23/50 and completed batches were zero. Its supervisor failure is `SUPERVISOR_TERMINAL_COMMIT_NOT_ACCEPTED`; the later cleanup/status-transfer error is `Watchdog closed before relaying worker status`. The signal sender and original cause are unknown. V8 is an interrupted attempt, not a completed generation or an algorithm-quality failure. Exact observations are preserved at `work/resumption_20260908/C2_V8_RESUMPTION_OBSERVATION.json` and its `_AMENDMENT_TERMINAL_PATHS.json` correction. Current scoped process absence must be observed before a fresh attempt; this does not retrospectively prove complete V8 cleanup.
+-
+-This candidate reuses V8 production functions without any scientific or lifecycle logic change. The sole production behavior adaptation is the V9 output path; module-relative administrative locations resolve under the new candidate directory. Updated protocol bytes require renewed hash pins. `runtime_adapter.py` and `inference_seed44.yaml` remain byte-identical to V8. The already passed V8 durable authorization identity normalization, actual-module gate path, read-only review preflight, existing watchdog and source/resource gates are reused. No new security framework or additional attack matrix is introduced. The existing source-only selftest receives version/path labels only and runs once per required Python 3.12/3.13 interpreter. These are disposable source/synthetic checks, not formal preparation, authorization, model loading or image reads.
+-
+-Scientific controls are unchanged: `living_room.jpg`, seed 44, CPU8/FP32, declared ft-mse VAE variant, 576 x 576, context4/target4/T8, original two batches with 50 diffusion steps each and 400 geometry iterations, original trajectory/NMS, once-loaded shared pipeline and unreset RNG, 1800 seconds per batch/3600 total, 45 GiB process-tree RSS and 10 GiB free disk minimum. It starts from the original input with the original seed; it does not resume an unsealed partial latent. B0 MSE 0.005278160708699555 and the independently recomputed C1 MSE 0.00464396063251803 are both below the frozen strict 0.01 threshold. The at-least-two-of-three hypothesis is already unreachable, but C2 remains mandatory under S42. C1 scores and all nine frames have been viewed; their historical pre-score blind state is not asserted anew. There is no new method or novelty authority.
+-
+-All existing source-review, unique prepare, two core reviews, attach, two published-attachment reviews, authorization, single monitored launch and later result-review stages remain required for fresh V9 bindings. Final review files must be mode 0444 before their hashes are handed off. The source package ends with an explicit read-only final SHA handoff; any later correction is a separate file or fresh candidate and invalidates affected prior votes.
+-
+-The external observer should stay attached to a live execution session until the real launcher returns, preserve the observed return code, and inspect provisional/commit/failure receipts. This is an observation requirement, not a diagnosed fix or guarantee against SIGTERM. The V8 external wrapper already waited with a 3900-second timeout, but its final external receipt is absent; the evidence does not establish that session detachment, sleep, timeout, or any named process caused the signal. Host interruption may still prevent an external receipt, and no leftover commit alone constitutes success.
++真实完整退出和两批档案之后，才对这个新变体重新绑定原读回/相机/九帧评分方法及全部图像QA。外部return0、hook调用、unit票、原observer档案均不自动成为画质或方法收益。`NO_METHOD_SELECTED`、`new_method_validated=false`、`novelty_authorization=NONE`。
+--- V9/FREEZE_PROTOCOL.md
++++ S64/FREEZE_PROTOCOL.md
+@@ -1,44 +1,15 @@
+-# C2 manifest freeze protocol (V9 source candidate)
++# S64 沿用的冻结与启动合同
+ 
+-The freeze tool is standard-library only. Before creating any protocol-compliant entry, it validates the mode/output pairing and all mode-specific arguments, verifies its pinned sources including `create_launch_authorization.py`, and compiles the exact independently pinned gate bytes read and hashed from one no-follow descriptor. It verifies the exact S40 and S42 parents, five row-specific runtime source hashes, the seed-44 YAML as exactly the S40 bytes after one unique `seed: 42` to `seed: 44` substitution plus one terminal LF, the complete C2 JPEG SHA without decoding it, and freshness of every reserved location. `lexists` treats a broken symlink as occupied. Authorization, authorization-attempt, execution, result, and fixed attach-preflight paths remain absent throughout both modes.
++此工具保留 V9 已有效的 prepare、attach、authorization 和监督实现；仅更新实际来源 SHA、新输出、新科学 row 和明确单位变体。参数名、行政 schema/status 兼容原工具，不新增流程。候选来源含新 unit_renderer_hook.py 和固定外部 S61 adapter，实际完整集合由 generation_gate.required_sources() 重建；不能只按旧219项验证。
+ 
+-After preflight, the tool first create-exclusively writes the mode-specific outer sentinel `.freeze_attempt_01.claimed` or `.review_attachment_01.claimed`, then creates only fixed staging `.freeze_attempt_01.staging` or `.review_attachment_01.staging`. It holds no-follow descriptors for the project directory, every ancestor, and the staging directory. Every child write is relative to the held descriptor. On macOS it publishes the still-held staging inode with `renameatx_np(..., RENAME_EXCL)`, then proves the published name refers to that inode. A post-claim failure writes a fixed failure receipt when possible and publishes or retains the same failed inode. The sentinel remains even if staging is renamed, so no alternate-name retry is possible.
++作者交付最终0444源码后，由两个不同作者核本次差异。root 随后执行唯一 prepare：检查固定代码/父证据、seed44 YAML、原 JPEG 完整 SHA（不解码）、资源路径与目录新鲜性；通过固定外部 sentinel、staging 和原 rename-exclusive 发布 `freeze_attempt_01/manifest_core.json` 与 `receipt.json`，不创建执行或授权。失败尝试保留，不能在已消费目录重试。
+ 
+-The only successful prepare terminal shape is exactly two read-only regular files: `freeze_attempt_01/manifest_core.json` and `freeze_attempt_01/receipt.json`. The receipt completely binds mode, status, core path, core file SHA, canonical core SHA, tool/protocol identities, source closure, zero-execution fields, ordered UTC times, outer sentinel, and `retry_permitted=false`. Attach and the canonical gate independently revalidate that exact success-only bundle. A coexisting failure receipt, staging file, symlink, writable file, partial receipt, or extra entry is terminal failure and cannot advance.
++core 使用新 `row=C2_UNIT_REPAIRED_S64`、完整 exact_retrieval_variant、原 ft-mse variant、原组件/输入/控制和独立 S64 输出；仅 review_receipts 排除在 canonical core hash 外。因此新增科学差异和 wrapper/adapter 身份都被 core hash 绑定。原输入/seed之外只有明确的 renderer 单位行为差异，其余科学控制保持等式核验。
+ 
+-The immutable core excludes only `review_receipts` from its canonical core hash. It carries the exact allowed-difference policy: input changes from `changi.jpg` to `living_room.jpg`; seed changes from 42 to 44 in the manifest, the uniquely substituted YAML with one declared terminal LF, and all three RNG calls; while the output path, row labels, source identities, review bindings, and timestamps are administrative isolation fields. Every other component, config field, runtime, generation budget, trajectory, sampler, geometry, archive, and trace condition must equal S40.
++两份 core review 沿用 `schema=s47-c2-generation-core-review-v1`，分别为 `PASS_S47_C2_GENERATION_SOURCE_REVIEW` 和 `READY_TO_ATTEMPT_S47_C2_BASELINE_GENERATION`；两者必须 `row=C2_UNIT_REPAIRED_S64`，保留原 ft-mse variant，并绑定同一 core path/file SHA/canonical SHA/prepare receipt SHA，独立 reviewer_role、author_role=/root、executed=false、model_or_scientific_imports=0、pixels_decoded=0、blocking_findings=[]。状态中的 C2/BASELINE 是兼容标签，不能据此回填原 cohort。
+ 
+-After preparation, two different-author JSON reviews must independently bind the same exact core hash:
++attach 重核成功 prepare 和两 review，保留原固定非PASS preflight及发布方式，仅增加 review_receipts，验证 core hash 不变，输出原合同的 manifest.json、metadata_gate.json、receipt.json 三个只读成功文件。再作两份不同作者的最终 review：`FINAL_ATTACHMENT_REVIEW.json`/`LAUNCH_READINESS_REVIEW.json`，沿用 `s47-c2-final-launch-review-v1` 及原 status，绑定最终 manifest、core file、canonical core、prepare receipt、attach receipt、metadata gate 六个 SHA。时间必须晚于 attachment，零执行/模型/像素/生成，空 blockers；manifest/core 已包含新单位变体。
+ 
+-- source review status `PASS_S47_C2_GENERATION_SOURCE_REVIEW`;
+-- runtime/freshness review status `READY_TO_ATTEMPT_S47_C2_BASELINE_GENERATION`.
++create_launch_authorization 复核这六项和两review的精确字节身份，沿用唯一 `launch_authorization_attempt_01` 和只读 `launch_authorization_01.json`；prepare/attach 不产生授权。新 row 和独立 output 均参与授权，旧 V9 票没有效力。launcher 保留一次公共入口、私有worker/watchdog、原资源限额和三方终态；root 必须保持外部 live exec，取得实际退出并检查完整终态及无 fallback failure，单独 commit 不算成功。
+ 
+-Both reviews must record `row=C2`, the exact variant object, core-file SHA, canonical core SHA, successful prepare-receipt SHA, `executed=false`, `model_or_scientific_imports=0`, `pixels_decoded=0`, and an empty `blocking_findings` list. Reviewers may execute the bundled source-only selftest, including its disposable temporary derived-parent to private-spawn to watchdog dependency-injection regression, and may statically execute the launcher's `compile_only=True` proof. They may not invoke `main`, use the candidate's canonical execution/result paths, load a model, or decode the C2 image.
+-
+-In `attach` mode the tool retains the exact prepare directory inode, verifies its success-only receipt and both core reviews, requires distinct non-root reviewer roles, rechecks all parents/sources/input and output freshness, inserts only `review_receipts`, and proves core-hash equality. It creates only fixed `.review_attachment_01.preflight/manifest.json` and invokes the dedicated non-PASS preflight. A successful preflight is removed before claiming the attach sentinel/staging; a failed preflight remains occupied. The tool writes metadata and terminal receipt before the canonical manifest, holds the staging inode throughout, and publishes it with relative `RENAME_EXCL`. The only successful attachment shape is exactly three read-only regular files: `manifest.json`, `metadata_gate.json`, and `receipt.json`.
+-
+-After atomic attachment, two new fixed-path reviews use schema `s47-c2-final-launch-review-v1` and independently bind six SHA values: final manifest, core file, canonical core, successful prepare receipt, successful attach receipt, and metadata gate. `FINAL_ATTACHMENT_REVIEW.json` has status `PASS_S47_C2_FINAL_ATTACHMENT_REVIEW`; `LAUNCH_READINESS_REVIEW.json` has status `READY_TO_LAUNCH_S47_C2_SINGLE_ATTEMPT`. They require different non-root reviewer roles, empty blockers, zero execution/scientific imports/pixel decoding/generation, and UTC review times strictly after attachment completion.
+-
+-The separately reviewed `create_launch_authorization.py` rechecks the attachment, successful prepare receipt, and both reviews from same-descriptor snapshots. After all read-only checks it retains the prepare/attachment directory chains, then claims fixed `launch_authorization_attempt_01` and holds that directory plus all ancestors. It creates `authorization.staging.json` with `O_EXCL|O_NOFOLLOW`, retains that FD through relative `renameatx_np(..., RENAME_EXCL)`, and proves the published authorization name is the same inode before writing success. The only accepted terminal attempt shape is exactly read-only `attempt_started.json` and `success_receipt.json`; success plus failure, a staging remnant, symlink, partial state, or any extra entry closes both metadata and full gates. Success reporting happens outside the failure-recording region.
+-
+-Every freeze post-claim failure is terminal at its fixed stage or output; no output is overwritten. The launcher separately accepts one exact public vector, claims and retains canonical execution/output inodes, and has no external worker route. Its private monitored closure mints one capability, first creates an independent watchdog, and lets that watchdog directly fork, own, and reap the separate-session worker. The S35 early ticket write becomes only a pending request. A readiness channel withholds capability release until the watchdog has reported both PIDs and the supervisor has published a create-only ticket with separate supervisor, watchdog, and worker identities. The worker validates the watchdog as its actual PPID before its full gate.
+-
+-The AST-derived spawn call passes the inherited parent's local reviewed `psutil` object through a required `process_api` keyword to the private closure. The normal watchdog and its exceptional cleanup both use that one injected binding and never fetch `psutil` from the derived module namespace. The watchdog recursively discovers the worker's process tree and durably retains each PID plus creation time. It keeps scanning every registered live ancestor, so already observed descendants remain authoritative after `setsid`, process-group changes, closed standard descriptors, or reparenting. Normal completion and monitor loss require both the original worker group and every matching registered identity to be gone; cleanup targets both sets with TERM then KILL and rejects PID reuse. A fresh source review must separately rule out unreviewed native spawn routes designed to appear and escape between every observation point.
+-
+-The supervisor writes a fixed non-success provisional record before parent entry. Its terminal commit is a separately create-only file whose body declares that it is never standalone success. The commit FD stays open through file sync, directory sync, complete canonical ancestor/control/output revalidation, and a second file/name identity check. A sync fault or path swap makes zero return impossible and records a fixed root-level supervisor failure through the held project descriptor. Later success interpretation requires the exact commit candidate, externally observed zero return, absence of both root-level watchdog and supervisor failures, and fresh canonical identity validation. The full gate holds the five component files, YAML, JPEG, control-plane files/directories, and all ancestor identities through worker terminal evidence. Runtime scientific loaders consume duplicate descriptors; immutable runtime journal entries use direct create-only writes and never rename over prior evidence. These controls assume reviewed source, reviewed psutil, a trusted kernel and invoking account and do not claim protection from hostile same-UID ptrace/FD injection, simultaneous destruction of monitor and watchdog, an unreviewed native process that deliberately escapes between every observation point, kernel/storage compromise, or host power loss. No lone commit-candidate file or such event permits success or automatic retry.
+-
+-A freeze or authorization PASS means only that its exact evidence bundle may advance to the next named review. It is not generation, readback, quality, method gain, novelty, or publication evidence. V6 is preserved at `work/S47_c2_confirmation_generation/history/v6_blocked_exact/`; its functional blocker receipt SHA-256 is `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` and has no authority over V9. V5 and `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` remain older BLOCKED history. V4 and earlier withdrawn reviews remain preserved.
+-
+-## V9 interrupted-attempt recovery and separate administrative namespace
+-
+-Recovery source author: `/root/c2_v9_recovery_author`. The V8 implementation author remains `/root/c2_final_launch_readiness`; the future actual core/attachment orchestrator remains `/root`. V9 occupies only `work/S47B_c2_confirmation_generation_v9`, with scientific output `results/S47B_C2_confirmation_generation_v9`. No V8 formal artifact, review, authorization, consumed sentinel, failure, output or source is copied into a V9 formal location or grants V9 execution authority.
+-
+-V8 completed component loading and entered the first batch, then received signal 15 (SIGTERM) at 2026-09-08T14:01:04Z. The last completed sampling step was 23/50 and completed batches were zero. Its supervisor failure is `SUPERVISOR_TERMINAL_COMMIT_NOT_ACCEPTED`; the later cleanup/status-transfer error is `Watchdog closed before relaying worker status`. The signal sender and original cause are unknown. V8 is an interrupted attempt, not a completed generation or an algorithm-quality failure. Exact observations are preserved at `work/resumption_20260908/C2_V8_RESUMPTION_OBSERVATION.json` and its `_AMENDMENT_TERMINAL_PATHS.json` correction. Current scoped process absence must be observed before a fresh attempt; this does not retrospectively prove complete V8 cleanup.
+-
+-This candidate reuses V8 production functions without any scientific or lifecycle logic change. The sole production behavior adaptation is the V9 output path; module-relative administrative locations resolve under the new candidate directory. Updated protocol bytes require renewed hash pins. `runtime_adapter.py` and `inference_seed44.yaml` remain byte-identical to V8. The already passed V8 durable authorization identity normalization, actual-module gate path, read-only review preflight, existing watchdog and source/resource gates are reused. No new security framework or additional attack matrix is introduced. The existing source-only selftest receives version/path labels only and runs once per required Python 3.12/3.13 interpreter. These are disposable source/synthetic checks, not formal preparation, authorization, model loading or image reads.
+-
+-Scientific controls are unchanged: `living_room.jpg`, seed 44, CPU8/FP32, declared ft-mse VAE variant, 576 x 576, context4/target4/T8, original two batches with 50 diffusion steps each and 400 geometry iterations, original trajectory/NMS, once-loaded shared pipeline and unreset RNG, 1800 seconds per batch/3600 total, 45 GiB process-tree RSS and 10 GiB free disk minimum. It starts from the original input with the original seed; it does not resume an unsealed partial latent. B0 MSE 0.005278160708699555 and the independently recomputed C1 MSE 0.00464396063251803 are both below the frozen strict 0.01 threshold. The at-least-two-of-three hypothesis is already unreachable, but C2 remains mandatory under S42. C1 scores and all nine frames have been viewed; their historical pre-score blind state is not asserted anew. There is no new method or novelty authority.
+-
+-All existing source-review, unique prepare, two core reviews, attach, two published-attachment reviews, authorization, single monitored launch and later result-review stages remain required for fresh V9 bindings. Final review files must be mode 0444 before their hashes are handed off. The source package ends with an explicit read-only final SHA handoff; any later correction is a separate file or fresh candidate and invalidates affected prior votes.
+-
+-The external observer should stay attached to a live execution session until the real launcher returns, preserve the observed return code, and inspect provisional/commit/failure receipts. This is an observation requirement, not a diagnosed fix or guarantee against SIGTERM. The V8 external wrapper already waited with a 3900-second timeout, but its final external receipt is absent; the evidence does not establish that session detachment, sleep, timeout, or any named process caused the signal. Host interruption may still prevent an external receipt, and no leftover commit alone constitutes success.
++新 hook 额外单位票从真实调用生成；正常两批只要求一次。worker 和 supervisor terminal 均核并绑定实际票 SHA/内容/variant；缺票、多票、失败票或两层绑定不同，不得返回完整成功。它是已有终态的必要科学输出字段，不是另加授权阶段。准备、核来源和安装不冒充执行；完整生成结果另行核读回/九帧评分/图像QA，原失败及新变体身份始终分开。
+--- V9/generation_gate.py
++++ S64/generation_gate.py
+@@ -1,4 +1,4 @@
+-"""C2 baseline-only generation gate derived from the sealed S40 resource path.
++"""S64 explicitly unit-repaired generation gate derived from the sealed S40 resource path.
+ 
+ This standard-library gate separates reusable component-loading evidence from
+ the new, independently hashed C2 input.  It never calls a model or decodes an
+@@ -27,16 +27,16 @@
+ S42_PROTOCOL = ROOT / "work/S42_baseline_failure_preregistration/PROTOCOL.md"
+ S42_PROTOCOL_SHA256 = "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+ C2_PROTOCOL = HERE / "PROTOCOL.md"
+-C2_PROTOCOL_SHA256 = "18c8a1ea3ce8f7c1b82195e3fc46adabc24488b6ce474d16a09cf79bbde17599"
++C2_PROTOCOL_SHA256 = "82f0882401bc7ac79b9f893973b076a3dfbbd570a8cafaf1e23a5f0c4ae71691"
+ FREEZE_PROTOCOL = HERE / "FREEZE_PROTOCOL.md"
+-FREEZE_PROTOCOL_SHA256 = "804f715cf9d217361f802723ecbc3c4427715074fa20ec776e90feb9def7b618"
++FREEZE_PROTOCOL_SHA256 = "ca0613794a87141c56e2ba5ab0141b3b19fe6fe5b4c22432061ef26796c01836"
+ C2_INPUT = Path("/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/living_room.jpg")
+ C2_INPUT_SHA256 = "e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278"
+ C2_INPUT_BYTES = 536341
+ C2_ORIGINAL_SIZE = [1588, 958]
+ C2_CONFIG = HERE / "inference_seed44.yaml"
+ C2_CONFIG_SHA256 = "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+-C2_OUTPUT = ROOT / "results/S47B_C2_confirmation_generation_v9"
++C2_OUTPUT = ROOT / "results/S64_unit_repaired_generation"
+ PREPARE_ROOT = HERE / "freeze_attempt_01"
+ PREPARE_CORE = PREPARE_ROOT / "manifest_core.json"
+ PREPARE_RECEIPT = PREPARE_ROOT / "receipt.json"
+@@ -72,7 +72,12 @@
+ }
+ SCHEMA = "s47-c2-confirmation-two-batch-v1"
+ FROZEN = "FROZEN_C2_BASELINE_CONFIRMATION_TWO_BATCH_EXECUTION"
++RUN_ROW = "C2_UNIT_REPAIRED_S64"
++UNIT_HOOK = HERE / "unit_renderer_hook.py"
++UNIT_ADAPTER = ROOT / "work/S61_unit_consistent_retrieval/unit_consistent_renderer.py"
++UNIT_ADAPTER_SHA256 = "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+ SOURCES = (
++    "unit_renderer_hook.py",
+     "generation_gate.py",
+     "runtime_adapter.py",
+     "launch_generation.py",
+@@ -550,7 +555,8 @@
+         "status": AUTHORIZATION_STATUS,
+         "created_utc": created_utc,
+         "author_role": "/root",
+-        "row": "C2",
++        "row": RUN_ROW,
++        "retrieval_variant": exact_retrieval_variant(),
+         "tool_source": {"path": str(AUTHORIZATION_TOOL), "sha256": tool_sha256},
+         "bindings": copy.deepcopy(bindings),
+         "attachment_completed_utc": attachment_completed_utc,
+@@ -565,7 +571,7 @@
+         "quality_status": "NOT_EVALUATED",
+         "method_or_novelty_status": "NOT_EVALUATED",
+         "blocking_findings": [],
+-        "authorization_effect": "Permit one separately monitored attempt of the exact attached C2 baseline; no completion or scientific claim",
++        "authorization_effect": "Permit one separately monitored S64 unit-repaired engineering variant; excluded from original cohort; no completion or scientific claim",
+     }
+ 
+ 
+@@ -922,7 +928,27 @@
+         path = HERE / name
+         require(path.is_file(), "Missing prepared C2 source: " + name)
+         identities[str(path)] = sha(path)
++    require(sha(UNIT_ADAPTER) == UNIT_ADAPTER_SHA256, "Fixed S61 adapter changed")
++    identities[str(UNIT_ADAPTER)] = UNIT_ADAPTER_SHA256
+     return identities
++
++
++def exact_retrieval_variant():
++    return {
++        "id": "s64_positive_camera_depth_median_units_v1",
++        "scope": "renderer_boundary_instance_hook",
++        "length_unit_rule": "median_of_all_strictly_positive_camera_z",
++        "scaled_fields": ["surfel.position", "surfel.radius", "pose.translation"],
++        "preserved_fields": ["rotation", "focal", "normal", "source_ID", "cache"],
++        "depth_unit": "dimensionless_camera_depth_in_positive_median_units",
++        "retrieval_weight": "original_cos_over_1_plus_dimensionless_depth",
++        "physical_length_unit": "UNKNOWN",
++        "hook": {"path": str(UNIT_HOOK), "sha256": sha(UNIT_HOOK)},
++        "adapter": {"path": str(UNIT_ADAPTER), "sha256": UNIT_ADAPTER_SHA256},
++        "designed_after_C2_failure": True,
++        "eligible_for_original_cohort": False,
++        "new_method_validated": False,
++    }
+ 
+ 
+ def exact_parent_bindings():
+@@ -970,9 +996,10 @@
+ 
+ def exact_derivation_policy():
+     return {
+-        "row": "C2",
++        "row": RUN_ROW,
+         "base_row": "B0/S40",
+         "allowed_scientific_differences": {
++            "retrieval_variant": exact_retrieval_variant(),
+             "input_image": {"from": "changi.jpg", "to": "living_room.jpg"},
+             "seed": {
+                 "from": 42,
+@@ -1006,7 +1033,9 @@
+         manifest.get("schema") == SCHEMA
+         and manifest.get("status") == FROZEN
+         and manifest.get("evidence_kind") == "recorded_execution"
+-        and manifest.get("variant") == VARIANT,
++        and manifest.get("variant") == VARIANT
++        and manifest.get("row") == RUN_ROW
++        and manifest.get("retrieval_variant") == exact_retrieval_variant(),
+         "A separately frozen C2 declared-variant manifest is required",
+     )
+     require(
+@@ -1972,7 +2001,7 @@
+             review.get("schema") == "s47-c2-generation-core-review-v1"
+             and review.get("status") == status
+             and review.get("variant") == VARIANT
+-            and review.get("row") == "C2"
++            and review.get("row") == RUN_ROW
+             and review.get("core_path") == str(core_path)
+             and review.get("core_file_sha256") == core_file_sha
+             and review.get("core_sha256") == core
+@@ -2007,7 +2036,8 @@
+                 else "PASS_METADATA_ONLY"
+             ),
+             "variant": VARIANT,
+-            "row": "C2",
++            "retrieval_variant": exact_retrieval_variant(),
++            "row": RUN_ROW,
+             "manifest_sha256": expected,
+             "execution_authorized": authorization is not None,
+             "unpublished_attachment_check": unpublished_preflight,
+@@ -2036,7 +2066,8 @@
+         "manifest_snapshot": copy.deepcopy(manifest),
+         "output_root": manifest["output_root"],
+         "variant": VARIANT,
+-        "row": "C2",
++        "retrieval_variant": exact_retrieval_variant(),
++        "row": RUN_ROW,
+         "components": full["components"],
+         "controls": manifest["controls"],
+         "source_identities": manifest["source_identities"],
+@@ -2107,7 +2138,8 @@
+         and gate.get("schema") == "s47-c2-generation-resource-gate-v1"
+         and gate.get("status") == "PASS_C2_DECLARED_GENERATION_RESOURCE_GATE"
+         and gate.get("variant") == VARIANT
+-        and gate.get("row") == "C2",
++        and gate.get("row") == RUN_ROW
++        and gate.get("retrieval_variant") == exact_retrieval_variant(),
+         "A completed C2 full resource gate is required",
+     )
+     manifest = read_frozen(gate["manifest_path"], gate["manifest_sha256"])
+--- V9/runtime_adapter.py
++++ S64/runtime_adapter.py
+@@ -77,6 +77,9 @@
+     require(not _RUNTIME_JOURNAL["terminal"],
+             "C2 runtime receipt was already terminally sealed")
+     directory_fd = gate_api.duplicate_output_dirfd(gate)
++    record = copy.deepcopy(record)
++    record["row"] = gate_api.RUN_ROW
++    record["retrieval_variant"] = gate_api.exact_retrieval_variant()
+     payload = (
+         json.dumps(record, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+     ).encode("utf-8")
+@@ -475,6 +478,37 @@
+     return namespace["create_runtime"]
+ 
+ 
++def install_verified_unit_hook(pipeline, gate, manifest):
++    identities = manifest["source_identities"]
++    variant = gate_api.exact_retrieval_variant()
++    require(manifest.get("retrieval_variant") == variant, "S64 retrieval variant changed")
++    hook = gate_api.execute_verified_module(
++        "_s64_unit_renderer_hook", gate_api.UNIT_HOOK, identities[str(gate_api.UNIT_HOOK)]
++    )
++    adapter = gate_api.execute_verified_module(
++        "_s64_canonical_unit_adapter", gate_api.UNIT_ADAPTER, identities[str(gate_api.UNIT_ADAPTER)]
++    )
++    original_path = gate_api.ROOT / "work/S20_environment/isolated_vmem_source/modeling/pipeline.py"
++    original_sha = identities[str(original_path)]
++    gate_api.verified_bytes(original_path, original_sha, "Original renderer source")
++    bindings = dict(hook=copy.deepcopy(variant["hook"]), adapter=copy.deepcopy(variant["adapter"]),
++                    original_renderer={"path": str(original_path), "sha256": original_sha})
++
++    def save_unit_call(sequence, record):
++        gate_api.validate_gate(gate)
++        descriptor = gate_api.duplicate_output_dirfd(gate)
++        try:
++            record = copy.deepcopy(record)
++            record.update(row=gate_api.RUN_ROW, manifest_sha256=gate["manifest_sha256"])
++            payload = (json.dumps(record, ensure_ascii=False, indent=2, allow_nan=False) + "\n").encode()
++            _write_create_only_at(descriptor, "retrieval_unit_call_%04d.json" % sequence, payload)
++        finally:
++            os.close(descriptor)
++
++    return hook.install_unit_renderer(pipeline, adapter.render_in_canonical_units,
++                                      save_unit_call, variant, bindings)
++
++
+ def create_runtime(gate):
+     gate_api.validate_gate(gate)
+     runtime = derive_factory()(gate)
+@@ -528,9 +562,12 @@
+             "One or more C2 state-dict attempts is incomplete",
+         )
+         gate_api.validate_gate(gate)
++        hook_installation = install_verified_unit_hook(runtime["pipeline"], gate, manifest)
+         loading.update(
++            retrieval_variant=gate_api.exact_retrieval_variant(),
++            retrieval_unit_hook=hook_installation,
+             status="PASS_S47_C2_DECLARED_VARIANT_COMPONENT_LOADING_ONLY",
+-            row="C2",
++            row=gate_api.RUN_ROW,
+             variant=gate_api.VARIANT,
+             variant_invariants=checks,
+             original_sd21_equivalence_verified=False,
+@@ -540,7 +577,7 @@
+     except BaseException as error:
+         loading.update(
+             status="FAILED_S47_C2_DECLARED_VARIANT_INVARIANTS",
+-            row="C2",
++            row=gate_api.RUN_ROW,
+             error_type=type(error).__name__,
+             error=str(error),
+         )
+--- V9/launch_generation.py
++++ S64/launch_generation.py
+@@ -6,6 +6,7 @@
+ from datetime import datetime, timezone
+ import hashlib
+ import json
++import math
+ import os
+ from pathlib import Path
+ import re
+@@ -26,7 +27,7 @@
+ PARENT = S35 / "launch_original.py"
+ PARENT_SHA256 = "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e"
+ GATE = HERE / "generation_gate.py"
+-GATE_SHA256 = "4cd5c2179d2eaf17b85890acb5198d8573d2525be3e787a7ce00a17e7f2473cd"
++GATE_SHA256 = "a7eba411cf9f34ea3324aa7bfd7260bfc811dac016d52ab446c43632eda2cac3"
+ PUBLISHED_MANIFEST = HERE / "review_attachment_01/manifest.json"
+ EXECUTION = HERE / "execution_01"
+ CAPABILITY_RECORD = "worker_capability.json"
+@@ -52,6 +53,44 @@
+ def require(condition, message):
+     if not condition:
+         raise RuntimeError(message)
++
++
++def collect_unit_receipts(output, manifest, manifest_sha256):
++    """Bind actual hook calls to worker and outer terminal evidence; never infer a call from installation."""
++    variant = manifest['retrieval_variant']
++    result = dict(row=manifest['row'], retrieval_variant=copy.deepcopy(variant),
++                  expected_calls_on_complete=1, calls=[], complete=False)
++    if output is None:
++        return result
++    output.validate()
++    names = sorted(name for name in os.listdir(output.fd) if name.startswith('retrieval_unit_call_'))
++    require(names == ['retrieval_unit_call_%04d.json' % i for i in range(1, len(names)+1)],
++            'Unit receipt sequence or filename differs')
++    original = str(ROOT / 'work/S20_environment/isolated_vmem_source/modeling/pipeline.py')
++    bindings = dict(hook=variant['hook'], adapter=variant['adapter'],
++                    original_renderer={'path': original, 'sha256': manifest['source_identities'][original]})
++    for sequence, name in enumerate(names, 1):
++        record, digest = read_json_at(output.fd, name, 'Actual renderer unit receipt')
++        require(record.get('schema') == 's64-renderer-unit-call-v1' and record.get('sequence') == sequence
++                and record.get('row') == manifest['row'] and record.get('retrieval_variant') == variant
++                and record.get('manifest_sha256') == manifest_sha256 and record.get('source_bindings') == bindings,
++                'Unit call does not bind this exact variant/source/manifest')
++        successful = record.get('status') == 'RENDERED_IN_CANONICAL_UNITS'
++        if successful:
++            unit = record.get('unit_receipt', {})
++            require(unit.get('renderer_calls') == 1 and unit.get('depth_unit') == variant['depth_unit']
++                    and unit.get('length_unit_rule') == variant['length_unit_rule']
++                    and unit.get('normalized_fields') == variant['scaled_fields']
++                    and math.isfinite(unit.get('length_unit_in_input_coordinates', float('nan')))
++                    and unit['length_unit_in_input_coordinates'] > 0
++                    and math.isfinite(unit.get('scale_factor', float('nan'))) and unit['scale_factor'] > 0,
++                    'Successful unit receipt lacks its actual normalization')
++        else:
++            require(record.get('status') == 'FAILED_UNIT_RENDERER_CALL', 'Unknown unit call status')
++        result['calls'].append(dict(path=str(Path(manifest['output_root']) / name), sha256=digest,
++                                    sequence=sequence, status=record['status']))
++    result['complete'] = len(result['calls']) == 1 and result['calls'][0]['status'] == 'RENDERED_IN_CANONICAL_UNITS'
++    return result
+ 
+ 
+ def canonical(value):
+@@ -1077,7 +1116,7 @@
+         "security_hardening_counts": hardening,
+         "reversible_full_AST_equal": True,
+         "original_budget_and_trace_boundary_math_unchanged": True,
+-        "row": "C2",
++        "row": "C2_UNIT_REPAIRED_S64",
+     }
+     if compile_only:
+         return proof
+@@ -1220,6 +1259,13 @@
+                     }
+                     return hashlib.sha256(canonical(pending_ticket)).hexdigest()
+                 if candidate.name == "worker_receipt.json":
++                    document["row"] = control.manifest["row"]
++                    document["retrieval_variant"] = copy.deepcopy(control.manifest["retrieval_variant"])
++                    unit_binding = collect_unit_receipts(output, control.manifest, args.manifest_sha256)
++                    document["retrieval_unit_binding"] = unit_binding
++                    if (document.get("status") == "C2_BASELINE_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW"
++                            and not unit_binding["complete"]):
++                        document["status"] = "FAILED_S64_UNIT_RECEIPT_BINDING"
+                     complete = (
+                         document.get("status")
+                         == "C2_BASELINE_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW"
+@@ -1639,8 +1685,13 @@
+             execution.fd, "worker_receipt.json", "Worker terminal receipt for outer seal"
+         )
+         consumption = worker_terminal.get("scientific_consumption_binding", {})
++        unit_binding = collect_unit_receipts(output, control.manifest, args.manifest_sha256)
+         success = (
+-            parent_returncode == 0
++            unit_binding["complete"] is True
++            and worker_terminal.get("retrieval_unit_binding") == unit_binding
++            and worker_terminal.get("row") == control.manifest["row"]
++            and worker_terminal.get("retrieval_variant") == control.manifest["retrieval_variant"]
++            and parent_returncode == 0
+             and parent_receipt.get("status")
+             == "C2_BASELINE_EXTERNAL_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW"
+             and watchdog_sha is not None
+@@ -1672,6 +1723,9 @@
+             "parent_receipt_sha256": parent_receipt_sha,
+             "worker_receipt_sha256": worker_terminal_sha,
+             "scientific_consumption_binding": consumption,
++            "row": control.manifest["row"],
++            "retrieval_variant": copy.deepcopy(control.manifest["retrieval_variant"]),
++            "retrieval_unit_binding": unit_binding,
+             "watchdog_receipt_sha256": watchdog_sha,
+             "retry_permitted": False,
+             "quality_status": "NOT_EVALUATED",
+--- V9/freeze_c2_manifest.py
++++ S64/freeze_c2_manifest.py
+@@ -20,14 +20,15 @@
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ FREEZE_PROTOCOL = HERE / "FREEZE_PROTOCOL.md"
+-FREEZE_PROTOCOL_SHA256 = "804f715cf9d217361f802723ecbc3c4427715074fa20ec776e90feb9def7b618"
++FREEZE_PROTOCOL_SHA256 = "ca0613794a87141c56e2ba5ab0141b3b19fe6fe5b4c22432061ef26796c01836"
+ GATE = HERE / "generation_gate.py"
+ SOURCE_HASHES = {
+-    "generation_gate.py": "4cd5c2179d2eaf17b85890acb5198d8573d2525be3e787a7ce00a17e7f2473cd",
+-    "runtime_adapter.py": "5e6f2e89c724cfc3f5b4eb486eb2a9384fde9b23fb12010576f5c7f3f98e8d7f",
+-    "launch_generation.py": "54c17a221e16b41c62b208cabe54895b0b0d8fc9c12528eb4d997408bb150693",
+-    "create_launch_authorization.py": "34666995d93a4e9a4629ac31b75b7c65e3fc989a0efe10732113c358284053a5",
+-    "PROTOCOL.md": "18c8a1ea3ce8f7c1b82195e3fc46adabc24488b6ce474d16a09cf79bbde17599",
++    "unit_renderer_hook.py": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d",
++    "generation_gate.py": "a7eba411cf9f34ea3324aa7bfd7260bfc811dac016d52ab446c43632eda2cac3",
++    "runtime_adapter.py": "711abdb32060b5aa1ba9213e810ca13ab6277db84a0d0984178baf163e836a70",
++    "launch_generation.py": "2998383f07bd9437440b24f465ef5624d7291890b8f750c9b6ce2795c33bfb35",
++    "create_launch_authorization.py": "907cf947158cb123e78b25d4f80f4f65f1f511e766f24df2675500dfc441d28a",
++    "PROTOCOL.md": "82f0882401bc7ac79b9f893973b076a3dfbbd570a8cafaf1e23a5f0c4ae71691",
+ }
+ PREPARE_OUTPUT = HERE / "freeze_attempt_01"
+ ATTACH_OUTPUT = HERE / "review_attachment_01"
+@@ -321,6 +322,8 @@
+         "schema": gate.SCHEMA,
+         "status": gate.FROZEN,
+         "evidence_kind": "recorded_execution",
++        "row": gate.RUN_ROW,
++        "retrieval_variant": gate.exact_retrieval_variant(),
+         "variant": copy.deepcopy(base["variant"]),
+         "created_utc": utc(),
+         "controls": copy.deepcopy(gate.CONTROLS),
+@@ -407,7 +410,7 @@
+         require(
+             review.get("schema") == "s47-c2-generation-core-review-v1"
+             and review.get("status") == gate.REVIEW_STATUSES[role]
+-            and review.get("row") == "C2"
++            and review.get("row") == gate.RUN_ROW
+             and review.get("variant") == gate.VARIANT
+             and review.get("core_path") == str(core_path)
+             and review.get("core_file_sha256") == args.core_file_sha256
+--- V9/create_launch_authorization.py
++++ S64/create_launch_authorization.py
+@@ -25,7 +25,7 @@
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ GATE = HERE / "generation_gate.py"
+-GATE_SHA256 = "4cd5c2179d2eaf17b85890acb5198d8573d2525be3e787a7ce00a17e7f2473cd"
++GATE_SHA256 = "a7eba411cf9f34ea3324aa7bfd7260bfc811dac016d52ab446c43632eda2cac3"
+ MANIFEST = HERE / "review_attachment_01/manifest.json"
+ AUTHORIZATION = HERE / "launch_authorization_01.json"
+ EXECUTION = HERE / "execution_01"
+--- V9/unit_renderer_hook.py
++++ S64/unit_renderer_hook.py
+@@ -0,0 +1,48 @@
++"""Instance-only renderer unit adapter; original observers are installed later."""
++from copy import deepcopy
++from datetime import datetime, timezone
++from functools import wraps
++import inspect
++from pathlib import Path
++
++
++def install_unit_renderer(pipeline, adapter, write_receipt, retrieval_variant, source_bindings):
++    original = pipeline.render_surfels_to_image
++    raw = inspect.unwrap(original)
++    if getattr(original, '__self__', None) is not pipeline:
++        raise RuntimeError('Expected the original renderer bound to this pipeline instance')
++    if str(Path(inspect.getsourcefile(raw)).resolve()) != source_bindings['original_renderer']['path']:
++        raise RuntimeError('Renderer source differs from the verified original binding')
++    if getattr(original, '_s64_unit_hook', False):
++        raise RuntimeError('Unit hook already installed')
++    variant, bindings = deepcopy(retrieval_variant), deepcopy(source_bindings)
++    sequence = 0
++
++    @wraps(original)
++    def renderer(*args, **kwargs):
++        nonlocal sequence
++        sequence += 1
++        record = dict(schema='s64-renderer-unit-call-v1', sequence=sequence,
++                      started_utc=datetime.now(timezone.utc).isoformat(),
++                      retrieval_variant=deepcopy(variant), source_bindings=deepcopy(bindings),
++                      observation_semantics='input_original_coordinates_output_canonical_depth')
++        try:
++            maps, unit = adapter(original, *args, **kwargs)
++        except BaseException as error:
++            record.update(status='FAILED_UNIT_RENDERER_CALL', error_type=type(error).__name__,
++                          error=str(error), completed_utc=datetime.now(timezone.utc).isoformat())
++            write_receipt(sequence, record)
++            raise
++        record.update(status='RENDERED_IN_CANONICAL_UNITS', unit_receipt=unit,
++                      completed_utc=datetime.now(timezone.utc).isoformat())
++        write_receipt(sequence, record)
++        return maps
++
++    renderer._s64_unit_hook = True
++    pipeline.render_surfels_to_image = renderer
++    return dict(installed=True, scope='pipeline_instance_only', retrieval_variant=variant,
++                source_bindings=bindings, installation_stage='runtime_return_before_original_observers',
++                observer_order=['original_input_archive', 'unit_hook', 'original_renderer',
++                                'canonical_output_archive'],
++                receipt_pattern='retrieval_unit_call_%04d.json', expected_calls_on_two_batch_completion=1,
++                inspect_unwrap_proves_original_source_only=True)

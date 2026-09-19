@@ -1,0 +1,88 @@
+--- a/extern/CUT3R/src/croco/models/pos_embed.py
++++ b/extern/CUT3R/src/croco/models/pos_embed.py
+@@ -114,15 +114,27 @@
+ # RoPE2D: RoPE implementation in 2D
+ # ----------------------------------------------------------
+ 
+-# Directly use PyTorch implementation due to CUDA compatibility issues
++# Isolated S17 CPU candidate: preserve the compiled path on CUDA.
++from models.rope_cpu import RoPE2DPyTorch
+ try:
+-    from models.curope import cuRoPE2D
+-    RoPE2D = cuRoPE2D
+-    print("Using CUDA-compiled version of RoPE2D")
++    from models.curope import cuRoPE2D as _CompiledRoPE2D
+ except ImportError:
+-    print(
+-        "Warning, cannot find cuda-compiled version of RoPE2D, using a slow pytorch version instead"
+-    )
++    _CompiledRoPE2D = None
++
++
++class RoPE2D(torch.nn.Module):
++    def __init__(self, freq=100.0, F0=1.0):
++        super().__init__()
++        self.base, self.F0 = freq, F0
++        self.cpu_impl = RoPE2DPyTorch(freq, F0)
++        self.compiled_impl = None if _CompiledRoPE2D is None else _CompiledRoPE2D(freq, F0)
++
++    def forward(self, tokens, positions):
++        if tokens.device.type == "cpu":
++            return self.cpu_impl(tokens, positions)
++        if tokens.device.type == "cuda" and self.compiled_impl is not None:
++            return self.compiled_impl(tokens, positions)
++        raise RuntimeError("No validated RoPE implementation for this device")
+ 
+ 
+ # class RoPE2D(torch.nn.Module):
+--- /dev/null
++++ b/extern/CUT3R/src/croco/models/rope_cpu.py
+@@ -0,0 +1,37 @@
++# S17 CPU candidate derived from NAVER curope.cpp mathematical layout.
++# Original cuRoPE code: Copyright (C) 2022-present NAVER Corporation.
++# Licensed under CC BY-NC-SA 4.0. See author checkout LICENSE.
++import math
++import torch
++
++
++class RoPE2DPyTorch(torch.nn.Module):
++    """Signed positions; B,H,N,D tokens and B,N,2 int64 (y,x) positions.
++
++    The official blocks cast q/k to float16 before RoPE even under FP32 inference.
++    This CPU candidate computes rotations in float32 and restores the input dtype.
++    It returns a new tensor; mutation/alias behavior and training are not validated.
++    """
++    def __init__(self, freq=100.0, F0=1.0):
++        super().__init__()
++        if not math.isfinite(freq) or freq <= 0 or not math.isfinite(F0):
++            raise ValueError("finite positive base and finite F0 required")
++        self.base, self.F0 = float(freq), float(F0)
++
++    def forward(self, tokens, positions):
++        if tokens.device.type != "cpu" or positions.device != tokens.device:
++            raise ValueError("CPU tokens and positions on the same device required")
++        if tokens.dtype not in (torch.float32, torch.float16):
++            raise ValueError("Only FP32 and the official FP16 RoPE input are validated")
++        if tokens.ndim != 4 or tokens.shape[-1] % 4:
++            raise ValueError("Expected B,H,N,D with D divisible by four")
++        if positions.shape != (tokens.shape[0], tokens.shape[2], 2) or positions.dtype != torch.int64:
++            raise ValueError("Expected B,N,2 int64 signed positions")
++        quarter = tokens.shape[-1] // 4
++        denominator = self.base ** (torch.arange(quarter, dtype=torch.float32) / quarter)
++        theta = self.F0 * positions.to(torch.float32)[..., None] / denominator
++        cost, sint = theta.cos()[:, None], theta.sin()[:, None]
++        pieces = tokens.float().reshape(*tokens.shape[:-1], 2, 2, quarter)
++        u, v = pieces[..., 0, :], pieces[..., 1, :]
++        result = torch.stack((u * cost - v * sint, v * cost + u * sint), dim=-2)
++        return result.flatten(-3).to(tokens.dtype)
+--- a/extern/CUT3R/src/dust3r/model.py
++++ b/extern/CUT3R/src/dust3r/model.py
+@@ -69,7 +69,7 @@
+ def load_model(model_path, device, verbose=True):
+     if verbose:
+         print("... loading model from", model_path)
+-    ckpt = torch.load(model_path, map_location="cpu", weights_only=False)
++    ckpt = torch.load(model_path, map_location="cpu", weights_only=True)
+     args = ckpt["args"].model.replace(
+         "ManyAR_PatchEmbed", "PatchEmbedDust3R"
+     )  # ManyAR only for aspect ratio not consistent

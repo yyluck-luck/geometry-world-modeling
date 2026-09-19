@@ -932,3 +932,53 @@ Falsify if the effect adds no held-out future value beyond pose/coverage/confide
 新 predictor 先拼接全部八个 C2W，再调用官方 `get_translation_scaling_factor`，并运行时验证全部成对相对平移在共同中心化前后保持不变。predictor SHA `75af8cad...`，12/12 静态检查通过。runtime v3 SHA `7b635f37...`；精确隔离 job 591500 在 dgx-21/H800 以 `COMPLETED|0:0|00:00:30` 通过，回执 SHA `d3152f12...`，无模型加载/forward/未来 outcome 访问。
 
 同时加固 Gate0：适配器与 protocol 审查必须包含不同作者身份、非空 findings 和明确 limitations；先绑定 adapter review 再计算最终 protocol SHA，任何预先批准的 base SHA 都会被拒绝。v6 base contract SHA `f866ce3d...`、base protocol SHA `b2ca7239...`，验证 217 个非审查 artifact 后仍只缺两项真实独立审查。正式 bundle v3 的负控制正确拒绝创建。若审查者立即可用且无新问题，预计 60–120 分钟可到 `sbatch`；Slurm 排队时间另计。没有真实审查者时启动日期未知，不得自签。
+
+## 2026-09-18 全天：修复分支跑完并关闭、报告封版、评价器资格审查、仓库首次版本化
+
+**集群位置**：`slogin-02:/home/yliutz/geometry-world-modeling`；回执在 `slogin-02:/home/yliutz/gwm_probe_receipts/`。
+
+### 一、重复槽位修复分支：跑完，未达标准，已关闭
+
+零扩散门禁 **595599** 顺序不变性 11/11（含非空洞性自检）→ **595614** 泄漏后果普查（NULL 2 / PERMUTATION 4 / CONTENT 8，**slot-0 在 14/14 窗口不变**）→ **595625** 禁用分支对 `initial_threshold` 免疫 6/6 → **595887** 干净 NMS-on 臂 28 次生成 → **595891** REFILL / **595902** INPLACE 修复臂。
+
+窗口级结果（种子先在窗口内折叠；有限面板，**不报任何推断统计**）：
+
+| 对照 | mean | sd | 为正 |
+|---|---|---|---|
+| `nms_off` − `static` | **+0.242** | 1.270 | 8/14 |
+| `nms_on_clean` − `static` | −0.485 | 1.489 | 6/14 |
+| `nms_on_clean` − `nms_off` | −0.726 | 1.210 | 5/14 |
+
+泄漏效应按预先普查分层：NULL **+0.000**（逐字节相同）/ PERMUTATION **−0.015** / CONTENT +0.436。**泄漏的全部效应由“选了哪几帧”承担，与槽位顺序无关。**
+
+**修复判定**：预声明阈值 +0.20 dB，实测 **−0.016 dB**（10 个受影响窗口中可实施的 8 个；另 2 个在预设候选政策下无第四个不同帧）。no-op 闸门 8/8 逐字节。**解释丢弃，分支关闭，阈值未降、政策未换、未抬举子组。**
+
+### 二、入口路径更正（推翻我自己当天上午的四条陈述）
+
+`navigation.py` 有**三个** `generate_trajectory_frames` 调用点：移动两处显式 `False`，**`_turn`（321 行，经 `app.py:208/210`）不传参 → config `true` → 启用**。所以发布 demo 在同一管线对象上混用两种设置，**泄漏原生可达**，不是只属于对照评测。仅静态可达性，未跑 demo；发布包无评测脚本，**不得据此推断论文配置**。
+
+### 三、技术报告封版
+
+`docs/report/TECHNICAL_REPORT_20260918.md` + LaTeX/PDF（11 页，8 个可点 arXiv 链接）+ `bundle/`（11 文件，自校验 MANIFEST）。核心口径修正：绝对均值统一到同一 14 窗口配对集（`static` = 14.395，相减精确复现四条配对差）。
+
+### 四、选题搜索：零存活
+
+`docs/question_search/`。候选 A（历史探针选策略）**未测试，非已证伪**——现有 oracle 对应的是另一组策略；候选 B 未形成有价值的具体命题。S112 重访在自身规则下 `UNTESTABLE`（独立闭环 2/3）。
+
+### 五、几何评价器资格审查（`work/S110_evaluator_qualification/`）
+
+真实参考残差 **6.807**、coverage 0.675（加 z-buffer + 前后向检验后）。**通道置换对照给出精确不变性**：`max|R(A)−R(D)| = 0.000000000000`——**较低的重投影不一致不蕴含更高保真度**。掩码内容无关性经哈希验证 PASS。
+
+**撤回**：“floor”一词、空间频率论证、B 作为“错误几何”对照（B 按构造继承参考几何）、遮挡占 1.1 MAE、27.5× 作为评价器属性、退役改用 TSED 的建议。**结论**：降级为“声明支持集上的光度相容性辅助诊断”，不作几何恢复精度的独立度量。
+
+### 六、当天的五次自我更正（全部留痕）
+
+符号写反（+0.242 被写成“打不过”）；按参数名而非函数名追调用点；逐帧 PSNR 平均当成 pooled PSNR；把 SSH 掉线后的本地检查当成集群检查、差点写下一条伪造交付物的指控；COVRAG 指标方向在跨文档搬运时写反。共同结构：**把正确陈述搬到另一份文档时搞坏**，以及**未验证执行环境就断言“不存在”**。
+
+原则升级：**v2.14**（复现单元、跨臂状态隔离、调用点按函数枚举）、**v2.15**（主张—证据回放交付门 + 可运行夹具 `test_score_aggregation_fixture.py`，7/7；适用范围含 prompt 与简报；absence 断言必须附执行环境证据）、**v2.13 第二、三触发实例**（自建评价器前未检索 TSED；进而漏掉 GeCo/PDI-Bench/SGC **整族**——“只找到一篇就停手等于没检索”）。
+
+### 七、仓库首次版本化
+
+此前**零 commit、791 项未跟踪**，11 个源文件只存在于集群。现已建私有仓库 `github.com/yyluck-luck/geometry-world-modeling`，15,237 文件；`data/`、`results/`、凭据、node_modules、>5MB 二进制均排除。集群 SSH 22 端口被墙，改走 `ssh.github.com:443`。
+
+`new_method_validated=false`；`novelty_authorization=NONE`。

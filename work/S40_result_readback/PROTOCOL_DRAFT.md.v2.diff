@@ -1,0 +1,29 @@
+--- preserved_v1/PROTOCOL_DRAFT.md
++++ v2/PROTOCOL_DRAFT.md
+@@ -8,14 +8,16 @@
+ 
+ 1. 新生成 manifest 必须是真实 S40 FROZEN、具名 ft-mse variant，218源域和四个新源码版本匹配；两份 S40 批准须绑定同 core。输入锚点是调用者给定的 manifest 文件 SHA 与真实外控 receipt SHA。核外控→worker→archive/trace/summary 的已有 SHA 链。runtime_loading 另纳入本次实际读回快照；它不是重新加载。没有重复原权重哈希、原照片/GT读取或运行 S40 gate（该门会读取原照片）。
+ 2. 全 archive 物理文件集合必须等于原 manifest 完整集合，每个文件的 size/SHA 与实际内容一致。Tensor 用同一流式读取同时重算正文 SHA 和包含 dtype/shape 的 canonical SHA；再核侧车、各事件引用和独立事件链。只读8MiB块；已经核过的相同文件只查 stat，终点全部再核 size/mtime/ctime/device/inode 未变。Trace 所有真正带 blob 的载荷也核完整内容；没有 blob 的 descriptor 只作元数据，不能说完整原值重建。
+-3. 不借用 producer 的 ID>0 断言替代实际值比较。每批核实际 `samples_z` 对应保留槽→cache latent、真实全部 target CLIP 行→cache embedding、原目标相机/K→cache；核原旧缓存保持、cache→map后相同，并将第一批完整5行的 latent/embedding/c2w/K/像素与第二批 context 当时的 cache 逐值比较。
++3. 不借用 producer 的 ID>0 断言替代实际值比较。每批核 `sampler_output.output`→全部 `sample_output.samples_z`→对应保留槽→cache latent；用捕获的真实 metadata.batch_id 选出同批目标 `encode_image_input/output`，核 samples 全部目标行（包括 padding）→实际 encoder 输入→实际 encoder 返回→commit 全部目标 embedding→cache。每批此调用按固定原目标代码应唯一，但初始化等 batch_id=None 编码另按真实记录计数，不写死全程共3次。原目标相机/K→cache；核原旧缓存保持、cache→map后相同，并将第一批完整5行的 latent/embedding/c2w/K/像素与第二批 context 当时的 cache 逐值比较。
+ 4. 第二批真实 `context_time_indices` 解码后，按其真实顺序核 cache 每个被选行→context_info 堆叠行，且至少有生成ID1–4。latent/embedding/像素等要求同 dtype、同 shape、原始 bits 完全相同。仅小相机/K允许原入口实际发生的 float64→float32：用 NumPy `astype('<f4')` 后再按 bits 比，不把这种转换冒充原 bytes 同一；不放宽误差容差。
+-5. 核 context latent/embedding→实际 get_cond 入参；context 相机→原 translation 输入→其原保存输出→get_cond相机入参；K同理。核 get_cond 真输出的 c/uc、相机、K、mask→实际 sampler_input；再核被选 latent 等于 sampler `cond.replace` 前4通道，原context标志通道为1。这样验证保存证据确实走到生成器入口，不只停在候选ID或context缓存。没有重算均值CLIP、Plücker、随机数或原模型；condition内部数学正确性不属于此核验。
+-6. 核两链顺序与闭合、每批各50个原Euler观察调用、真实shape、原5→14 K/5→9 depth计数、summary与实际事件一致。这里比较的是保存量和原调用记录，不能独立证明实际Gauss/renderer数学、视频质量、长程一致性或方法创新。
++5. 核 context latent/embedding→实际 get_cond 入参；context 相机及全部 batch target 相机分别对应原 translation 输入的前缀/后缀，其原保存相机输出→get_cond；全部K的context/target前后缀同理。另核 translation 输出标量→get_cond args[3]，Torch/NumPy单元素用原dtype原bits、Python float用64位打包比较，不重算缩放公式。核 get_cond 真输出的 c/uc、相机、K、mask→实际 sampler_input；再核被选 latent 等于 sampler `cond.replace` 前4通道，原context标志通道为1。没有重算均值CLIP、Plücker、随机数或原模型；condition内部数学正确性不属于此核验。
++6. 除两条hashchain，trace另核单一session、两个唯一非重叠batch、每批 batch_begin→sample_call→sampler_enter→sampler_return→sample_return→cache_commit→map_commit→batch_complete 顺序、denoiser callback归属/连续编号/返回计数、唯一最终session_end且之后无事件。所有批内archive关键capture的metadata.batch_id须对同一trace批；context_output在原batch创建前，其对应另由真实顺序/所选数组与trace描述符验证。每批各50个原Euler观察调用、真实shape、原5→14 K/5→9 depth计数、summary与实际事件一致。这里比较的是保存量和原调用记录，不能独立证明实际GA/renderer数学、视频质量、长程一致性或方法创新。
+ 
+ ## 资源与命令
+ 
+-建议根任务沿已有外控运行：CPU1、300秒、2GiB RSS、新out目录。脚本自身也检查300秒 deadline；父外控负责RSS与整树终止。实际容量尚未量测，超限只保留失败，不自动扩大或删载荷。NumPy1.26.4为既有科学环境工具，延迟到首个已校验保存数组才导入；不导入 Torch/模型/原codec/renderer。NumPy memmap只读，不改源数组或权重。
++执行前根任务必须另绑定并实际使用已有外控：CPU1、300秒、2GiB进程树RSS、新out目录。脚本的300秒只是协作tick，不能抢占JSON解析或阻塞I/O；CPU线程环境、总时间和整树RSS需由实际外控配置/观察/终止。NumPy memmap降低大数组复制，但JSON/事件列表驻留内存，峰值未实测，不能称静态预算已经通过。超限保留失败，不自动扩大或删载荷。NumPy1.26.4延迟到首个已校验保存数组才导入；不导入 Torch/模型/原codec/renderer。
++
++下面仅是交给外控的worker命令参数，不是已经实施RSS/整树时限的完整启动器；不得单独运行此示例后声称2GiB已经受控。
+ 
+ ```sh
+ S40_ROOT='/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling'
+@@ -29,3 +31,5 @@
+ 输出 `report.json` 是完整比较清单与实际选图/文件/事件统计，`receipt.json` 记录实际时点、输入SHA、失败或窄范围通过。成功名限定 `PASS_SAVED_S40_IDENTITIES_AND_CACHE_CONSUMPTION_ONLY`；不能称生成质量已过。失败目录和部分核验身份保留，不覆盖旧目录。当前这些实际输出均未生成。
+ 
+ 来源按固定 S35/S40 源码读取：S20 `_tensor_bytes` 与 trace `GenerationBatch`；S35 archive `_tree/_tensor/finalize`；integrator `_cache_tree/context_returned/commit_cache/condition/sampler`；原 VMem pipeline `get_context_info/get_cond/_generate_frames_for_trajectory` 和 util `do_sample`。具体SHA在准备回执；没有重读泛文献或重跑成功套件。
++
++v2修订依据：`source_review_v1.json` 的R1/R2与资源边界。原源码/协议/准备回执/独立初审完整留在 `history_v1_before_bridge_review/`；初审不是结果失败，本次修改没有执行任何保存数组或模拟case。

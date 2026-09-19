@@ -1,0 +1,562 @@
+--- V7/PROTOCOL.md
++++ V8/PROTOCOL.md
+@@ -1,6 +1,6 @@
+ # S47 C2 baseline-only confirmation generation protocol
+ 
+-Status: V7 source preparation only. No C2 model, image decode, generation, archive, score, or visual inspection is authorized until two fresh different-author reviews approve this exact V7 eight-file source set, the unique successful prepare bundle receives two different-author core reviews, the reviews are attached create-only, two later reviewers approve the published attachment, and the separately reviewed tool publishes the unique launch authorization. V6 is immutable withdrawn history: its eight exact sources and prior selftest are in `history/v6_blocked_exact/`; `FUNCTIONAL_BLOCKER_RECEIPT.json` SHA-256 `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` binds the reproduced parent-local-psutil/module-namespace mismatch, and the independent probe SHA-256 is `dc4875960f563f714408ce33b19938fdbf77992f4a5be8c6a1291eecd6856753`. V6 has no authority over V7. V5 and its BLOCKED primary lifecycle review remain immutable older withdrawal history: `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` and review-only probe SHA-256 `9e0c40872f478b5c655cfe1ad19158f08a5c16411392e0c1a7bd63968990b102`. V4 and both BLOCKED reviews remain preserved earlier withdrawal history.
++Status: V8 source preparation only. No C2 model, image decode, generation, archive, score, or visual inspection is authorized until two fresh different-author reviews approve this exact V8 eight-file source set, the unique successful prepare bundle receives two different-author core reviews, the reviews are attached create-only, two later reviewers approve the published attachment, and the separately reviewed tool publishes the unique launch authorization. V6 is immutable withdrawn history: its eight exact sources and prior selftest are in `work/S47_c2_confirmation_generation/history/v6_blocked_exact/`; `FUNCTIONAL_BLOCKER_RECEIPT.json` SHA-256 `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` binds the reproduced parent-local-psutil/module-namespace mismatch, and the independent probe SHA-256 is `dc4875960f563f714408ce33b19938fdbf77992f4a5be8c6a1291eecd6856753`. V6 has no authority over V8. V5 and its BLOCKED primary lifecycle review remain immutable older withdrawal history: `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` and review-only probe SHA-256 `9e0c40872f478b5c655cfe1ad19158f08a5c16411392e0c1a7bd63968990b102`. V4 and both BLOCKED reviews remain preserved earlier withdrawal history.
+ 
+ ## Scientific purpose and fixed differences
+ 
+@@ -10,7 +10,7 @@
+ 
+ - input: `living_room.jpg`, SHA-256 `e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278`, original size 1588 x 958;
+ - seed: 44 instead of 42, represented consistently in `controls.seed`, the Python/NumPy/Torch RNG calls, and a separately bound inference YAML equal to the sealed S40 bytes after the unique `seed: 42` to `seed: 44` substitution plus exactly one terminal LF byte;
+-- output root: `results/S47_C2_confirmation_generation`;
++- output root: `results/S47B_C2_confirmation_generation_v8`;
+ - row-specific schema/status text, row-specific gate/adapter/launcher/protocol source identities, review bindings, and timestamps needed to keep this execution separate and auditable.
+ 
+ All scientific controls remain fixed: CPU, float32, 8 threads, 576 x 576, T=8, context=4, target=4, 50 diffusion steps, default NMS, `initialize -> turn_left(5) -> turn_right(5)`, 1800 seconds per batch, 3600 seconds total, 45 GiB process-tree RSS, and at least 10 GiB free disk. One fresh worker loads once; both batches share the same pipeline and RNG without a reset. The history must be 1 -> 5 -> 9.
+@@ -21,7 +21,7 @@
+ 
+ The sealed S39 loading evidence is reused only as evidence that the five named component files and declared ft-mse variant loaded successfully under the S40 model/config structure before generation. The C2 gate proves that its YAML equals the sealed S40 YAML after the single `seed: 42` to `seed: 44` substitution plus one declared terminal LF; that newline is formatting only and is checked byte-for-byte. Image preprocessing is not part of model construction, so the prior `changi.jpg` identity is not reused as C2 input evidence. The C2 gate separately binds and hashes the exact `living_room.jpg` bytes before model construction. It must never claim that S39 loaded or generated the C2 image.
+ 
+-The C2 launcher wraps the reversibly AST-derived S35 supervisor inside one outer supervisor that first validates and retains the complete launch-control plane, claims canonical `execution_01`, and records the attempt. The transform replaces the external worker spawn with a private closure created only inside that active outer supervisor, replaces both worker ticket/receipt reads with same-directory-descriptor snapshots, and replaces execution/output creation with held-directory adoption; reversing every declared edit recovers the exact S35 AST. The public parser accepts exactly one split-form occurrence of each required option and rejects equals forms, abbreviations, repeats, unknowns, alternate execution directories, and every worker marker. It exposes no public or fresh-interpreter worker dispatch and returns no executable derived namespace. The S35 parent's early ticket write is retained only as a private pending request. No ticket file exists until the watchdog has reported its directly owned worker. The create-only V7 ticket then binds three separate identities, `supervisor_pid`, `watchdog_pid`, and `worker_pid`. The worker validates the exact record and receives a legacy view whose `parent_pid` is its actual watchdog PPID; the supervisor identity cannot satisfy that direct-parent predicate.
++The C2 launcher wraps the reversibly AST-derived S35 supervisor inside one outer supervisor that first validates and retains the complete launch-control plane, claims canonical `execution_01`, and records the attempt. The transform replaces the external worker spawn with a private closure created only inside that active outer supervisor, replaces both worker ticket/receipt reads with same-directory-descriptor snapshots, and replaces execution/output creation with held-directory adoption; reversing every declared edit recovers the exact S35 AST. The public parser accepts exactly one split-form occurrence of each required option and rejects equals forms, abbreviations, repeats, unknowns, alternate execution directories, and every worker marker. It exposes no public or fresh-interpreter worker dispatch and returns no executable derived namespace. The S35 parent's early ticket write is retained only as a private pending request. No ticket file exists until the watchdog has reported its directly owned worker. The create-only V8 ticket then binds three separate identities, `supervisor_pid`, `watchdog_pid`, and `worker_pid`. The worker validates the exact record and receives a legacy view whose `parent_pid` is its actual watchdog PPID; the supervisor identity cannot satisfy that direct-parent predicate.
+ 
+ Only when the monitored derived parent reaches its single spawn site does the private closure create the opaque object token and 256-bit secret. It first forks an independent watchdog into a separate session; that watchdog then directly forks and owns the worker, waits until the worker has established its own process group, and reports the two PIDs to the supervisor. The worker inherits the token and secret only through this fork chain and remains blocked on a one-byte readiness pipe until the supervisor create-exclusively publishes the three-process ticket and a capability record binding supervisor PID, watchdog PID, worker PID, manifest, launcher, canonical execution inode, and the exact frozen output-root inode. The worker must consume that record once before its full gate.
+ 
+@@ -35,7 +35,7 @@
+ 
+ ## Freeze and review sequence
+ 
+-0. Before the freeze tool may run, two fresh different non-root reviewers must independently bind the same eight V7 production-candidate hashes (`PROTOCOL.md`, `FREEZE_PROTOCOL.md`, `generation_gate.py`, `runtime_adapter.py`, `launch_generation.py`, `freeze_c2_manifest.py`, `create_launch_authorization.py`, and `inference_seed44.yaml`). They must reproduce the Python 3.12 and 3.13 isolated static/adversarial matrix, including the disposable actual derived-parent to private-spawn to watchdog dependency-injection path, the exact inherited worker parent predicate, pre-registered and late-registered detached closed-stdio descendants, post-file/pre-directory-sync failure, and post-commit canonical-path swap. Any edit invalidates both reviews. V3 through V6 receipts, probes, and reviews are preserved as superseded history and have zero authority for V7.
++0. Before the freeze tool may run, two fresh different non-root reviewers must independently bind the same eight V8 production-candidate hashes (`PROTOCOL.md`, `FREEZE_PROTOCOL.md`, `generation_gate.py`, `runtime_adapter.py`, `launch_generation.py`, `freeze_c2_manifest.py`, `create_launch_authorization.py`, and `inference_seed44.yaml`). They must reproduce the Python 3.12 and 3.13 isolated static/adversarial matrix, including the disposable actual derived-parent to private-spawn to watchdog dependency-injection path, the exact inherited worker parent predicate, pre-registered and late-registered detached closed-stdio descendants, post-file/pre-directory-sync failure, and post-commit canonical-path swap. Any edit invalidates both reviews. V3 through V6 receipts, probes, and reviews are preserved as superseded history and have zero authority for V8.
+ 1. After both source reviews pass and root re-hashes all eight files, the standard-library freeze tool may run exactly one `prepare`. It completes all read-only checks first, then create-exclusively claims `.freeze_attempt_01.claimed` before creating fixed `.freeze_attempt_01.staging`. It holds the project and staging directory/ancestor descriptors throughout. Success publishes the still-held staging inode as `freeze_attempt_01` with `renameatx_np(..., RENAME_EXCL)` and leaves exactly read-only `manifest_core.json` and `receipt.json`. Any post-claim failure adds `failure_receipt.json` when possible and publishes or retains the same failed inode; the outer sentinel prevents rename-based retry.
+ 2. A source-core reviewer and a runtime/freshness-core reviewer, both different from the core author and from each other, independently bind the actual core file SHA, review-excluded canonical core SHA, and the exact successful prepare-receipt SHA. They must reject every failed, partial, writable, redirected, extra-entry, or success-plus-failure prepare bundle.
+ 3. Only after both core reviews pass may the tool run its unique `attach`. It revalidates the exact successful prepare terminal bundle, retains the prepare directory inode, checks both reviews, and validates the future manifest only at fixed `.review_attachment_01.preflight/manifest.json`. That dedicated route cannot emit PASS. A failed preflight remains occupied. On success the tool removes it, claims `.review_attachment_01.claimed`, creates fixed staging, and publishes the still-held staging inode with `RENAME_EXCL`. Only a directory containing exactly three read-only regular success files, `manifest.json`, `metadata_gate.json`, and `receipt.json`, may advance; every failure or extra entry closes the gate.
+@@ -58,3 +58,13 @@
+ - S40 final manifest: `work/S40_declared_variant_generation/review_attachment_01/manifest.json`, SHA-256 `9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe`.
+ - S42 preregistration: `work/S42_baseline_failure_preregistration/PROTOCOL.md`; its actual SHA is bound by the freeze tool and final manifest.
+ - S39 loading manifest and all four loading evidence records remain exactly those bound by the sealed S40 manifest.
++
++## V8 finite repair and separate administrative namespace
++
++Implementation author: `/root/c2_final_launch_readiness`. This V8 candidate lives only in `work/S47B_c2_confirmation_generation_v8`; its scientific output is `results/S47B_C2_confirmation_generation_v8`. All prepare, attachment, authorization and execution locations remain relative to this new directory. Common C2 row/schema formats are retained because their scientific meaning and data layout do not change; this directory, exact source identities and V8 source-review receipt distinguish the version. Core/attachment author `/root` denotes the future actual orchestrator, separately from this source implementation author.
++
++The V7 sources and real published controls remain intact in `work/S47_c2_confirmation_generation`. Its unique authorization was published, but the real launcher returned 1 before any execution/output directory, model load or generation. The exact functional diagnosis is `work/S47_c2_confirmation_generation/FUNCTIONAL_AUTHORIZATION_DIAGNOSIS_V7.json` SHA-256 `f6a435474fe1aae45644e40ef5951e1dde577ea3d0f9ea9fa3150515281bb0ee`. This V8 is an explicit repair continuation, never a relabelled successful V7 attempt, and V7 approvals confer no V8 authority.
++
++Only three ordinary functional repairs are introduced: normalize the durable authorization identity once to the producer's four fields while retaining full six-field live descriptor checks; bind `GATE` to this module's actual frozen source path; and have the authorization tool check the already-required read-only final review mode during non-consuming preflight, before creating its unique attempt. Each final reviewer must publish their JSON with mode 0444 before handing its SHA to the orchestrator. Generation controls, inherited S35 logic, seed 44, input, limits and scientific resources are unchanged.
++
++A bounded regression reads the real V7 sealed metadata as fixture provenance and tests the actual producer identity expression, actual snapshot reader, durable comparison, retained control, metadata-only gate and `frozen_manifest` chain in disposable fixture scope. It does not call model, full-resource, formal prepare/attach/authorization/launcher entry points. Any synthetic administrative rebinding is explicitly reported and cannot authorize a real run. Existing finite Python 3.12/3.13 regressions remain required. Two new different non-author source reviews must approve the exact V8 source set before any formal V8 prepare.
+--- V7/FREEZE_PROTOCOL.md
++++ V8/FREEZE_PROTOCOL.md
+@@ -1,4 +1,4 @@
+-# C2 manifest freeze protocol (V7 source candidate)
++# C2 manifest freeze protocol (V8 source candidate)
+ 
+ The freeze tool is standard-library only. Before creating any protocol-compliant entry, it validates the mode/output pairing and all mode-specific arguments, verifies its pinned sources including `create_launch_authorization.py`, and compiles the exact independently pinned gate bytes read and hashed from one no-follow descriptor. It verifies the exact S40 and S42 parents, five row-specific runtime source hashes, the seed-44 YAML as exactly the S40 bytes after one unique `seed: 42` to `seed: 44` substitution plus one terminal LF, the complete C2 JPEG SHA without decoding it, and freshness of every reserved location. `lexists` treats a broken symlink as occupied. Authorization, authorization-attempt, execution, result, and fixed attach-preflight paths remain absent throughout both modes.
+ 
+@@ -27,4 +27,14 @@
+ 
+ The supervisor writes a fixed non-success provisional record before parent entry. Its terminal commit is a separately create-only file whose body declares that it is never standalone success. The commit FD stays open through file sync, directory sync, complete canonical ancestor/control/output revalidation, and a second file/name identity check. A sync fault or path swap makes zero return impossible and records a fixed root-level supervisor failure through the held project descriptor. Later success interpretation requires the exact commit candidate, externally observed zero return, absence of both root-level watchdog and supervisor failures, and fresh canonical identity validation. The full gate holds the five component files, YAML, JPEG, control-plane files/directories, and all ancestor identities through worker terminal evidence. Runtime scientific loaders consume duplicate descriptors; immutable runtime journal entries use direct create-only writes and never rename over prior evidence. These controls assume reviewed source, reviewed psutil, a trusted kernel and invoking account and do not claim protection from hostile same-UID ptrace/FD injection, simultaneous destruction of monitor and watchdog, an unreviewed native process that deliberately escapes between every observation point, kernel/storage compromise, or host power loss. No lone commit-candidate file or such event permits success or automatic retry.
+ 
+-A freeze or authorization PASS means only that its exact evidence bundle may advance to the next named review. It is not generation, readback, quality, method gain, novelty, or publication evidence. V6 is preserved at `history/v6_blocked_exact/`; its functional blocker receipt SHA-256 is `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` and has no authority over V7. V5 and `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` remain older BLOCKED history. V4 and earlier withdrawn reviews remain preserved.
++A freeze or authorization PASS means only that its exact evidence bundle may advance to the next named review. It is not generation, readback, quality, method gain, novelty, or publication evidence. V6 is preserved at `work/S47_c2_confirmation_generation/history/v6_blocked_exact/`; its functional blocker receipt SHA-256 is `71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c` and has no authority over V8. V5 and `SOURCE_REVIEW_PRIMARY_V5.json` SHA-256 `8eb990730be7c43b58668a6243fec92203dc07653c92e0b7cdacbcc651d447a7` remain older BLOCKED history. V4 and earlier withdrawn reviews remain preserved.
++
++## V8 finite repair and separate administrative namespace
++
++Implementation author: `/root/c2_final_launch_readiness`. This V8 candidate lives only in `work/S47B_c2_confirmation_generation_v8`; its scientific output is `results/S47B_C2_confirmation_generation_v8`. All prepare, attachment, authorization and execution locations remain relative to this new directory. Common C2 row/schema formats are retained because their scientific meaning and data layout do not change; this directory, exact source identities and V8 source-review receipt distinguish the version. Core/attachment author `/root` denotes the future actual orchestrator, separately from this source implementation author.
++
++The V7 sources and real published controls remain intact in `work/S47_c2_confirmation_generation`. Its unique authorization was published, but the real launcher returned 1 before any execution/output directory, model load or generation. The exact functional diagnosis is `work/S47_c2_confirmation_generation/FUNCTIONAL_AUTHORIZATION_DIAGNOSIS_V7.json` SHA-256 `f6a435474fe1aae45644e40ef5951e1dde577ea3d0f9ea9fa3150515281bb0ee`. This V8 is an explicit repair continuation, never a relabelled successful V7 attempt, and V7 approvals confer no V8 authority.
++
++Only three ordinary functional repairs are introduced: normalize the durable authorization identity once to the producer's four fields while retaining full six-field live descriptor checks; bind `GATE` to this module's actual frozen source path; and have the authorization tool check the already-required read-only final review mode during non-consuming preflight, before creating its unique attempt. Each final reviewer must publish their JSON with mode 0444 before handing its SHA to the orchestrator. Generation controls, inherited S35 logic, seed 44, input, limits and scientific resources are unchanged.
++
++A bounded regression reads the real V7 sealed metadata as fixture provenance and tests the actual producer identity expression, actual snapshot reader, durable comparison, retained control, metadata-only gate and `frozen_manifest` chain in disposable fixture scope. It does not call model, full-resource, formal prepare/attach/authorization/launcher entry points. Any synthetic administrative rebinding is explicitly reported and cannot authorize a real run. Existing finite Python 3.12/3.13 regressions remain required. Two new different non-author source reviews must approve the exact V8 source set before any formal V8 prepare.
+--- V7/generation_gate.py
++++ V8/generation_gate.py
+@@ -20,22 +20,23 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ ROOT = HERE.parents[1]
++GATE = HERE / "generation_gate.py"
+ S39 = ROOT / "work/S39_component_variant"
+ BASE_S40 = ROOT / "work/S40_declared_variant_generation/review_attachment_01/manifest.json"
+ BASE_S40_SHA256 = "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe"
+ S42_PROTOCOL = ROOT / "work/S42_baseline_failure_preregistration/PROTOCOL.md"
+ S42_PROTOCOL_SHA256 = "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+ C2_PROTOCOL = HERE / "PROTOCOL.md"
+-C2_PROTOCOL_SHA256 = "183ae19b30c28b224d631e0d1a06051322391dab10386de0169a98a4f1e952ef"
++C2_PROTOCOL_SHA256 = "f41813f59bc2bd383101f9e7f7793df2390794f2243556d7a20ddac8231d118c"
+ FREEZE_PROTOCOL = HERE / "FREEZE_PROTOCOL.md"
+-FREEZE_PROTOCOL_SHA256 = "122f840d3be68d813bb911445590e3b2c00a7428de92020fe1624933df4d9faf"
++FREEZE_PROTOCOL_SHA256 = "e81120a15f3b9edd55e364517b5be888fd3a011b4d554326085cc54e225964c7"
+ C2_INPUT = Path("/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/living_room.jpg")
+ C2_INPUT_SHA256 = "e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278"
+ C2_INPUT_BYTES = 536341
+ C2_ORIGINAL_SIZE = [1588, 958]
+ C2_CONFIG = HERE / "inference_seed44.yaml"
+ C2_CONFIG_SHA256 = "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+-C2_OUTPUT = ROOT / "results/S47_C2_confirmation_generation"
++C2_OUTPUT = ROOT / "results/S47B_C2_confirmation_generation_v8"
+ PREPARE_ROOT = HERE / "freeze_attempt_01"
+ PREPARE_CORE = PREPARE_ROOT / "manifest_core.json"
+ PREPARE_RECEIPT = PREPARE_ROOT / "receipt.json"
+@@ -1455,6 +1456,10 @@
+     document, authorization_sha, authorization_identity = read_json_snapshot(
+         LAUNCH_AUTHORIZATION, "Fixed read-only C2 launch authorization"
+     )
++    # Durable producer/consumer contract has four fields; snapshot/FD guards keep six.
++    authorization_identity = {
++        key: authorization_identity[key] for key in ("device", "inode", "size", "mode")
++    }
+     require(authorization_identity["mode"] & 0o222 == 0,
+             "Fixed C2 launch authorization is writable")
+     require(
+--- V7/launch_generation.py
++++ V8/launch_generation.py
+@@ -26,7 +26,7 @@
+ PARENT = S35 / "launch_original.py"
+ PARENT_SHA256 = "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e"
+ GATE = HERE / "generation_gate.py"
+-GATE_SHA256 = "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec"
++GATE_SHA256 = "6355a2ffd09a8c4aa91061749de47300239a2b9a55e448fbe066c48ffe5c2509"
+ PUBLISHED_MANIFEST = HERE / "review_attachment_01/manifest.json"
+ EXECUTION = HERE / "execution_01"
+ CAPABILITY_RECORD = "worker_capability.json"
+--- V7/freeze_c2_manifest.py
++++ V8/freeze_c2_manifest.py
+@@ -20,14 +20,14 @@
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ FREEZE_PROTOCOL = HERE / "FREEZE_PROTOCOL.md"
+-FREEZE_PROTOCOL_SHA256 = "122f840d3be68d813bb911445590e3b2c00a7428de92020fe1624933df4d9faf"
++FREEZE_PROTOCOL_SHA256 = "e81120a15f3b9edd55e364517b5be888fd3a011b4d554326085cc54e225964c7"
+ GATE = HERE / "generation_gate.py"
+ SOURCE_HASHES = {
+-    "generation_gate.py": "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec",
++    "generation_gate.py": "6355a2ffd09a8c4aa91061749de47300239a2b9a55e448fbe066c48ffe5c2509",
+     "runtime_adapter.py": "5e6f2e89c724cfc3f5b4eb486eb2a9384fde9b23fb12010576f5c7f3f98e8d7f",
+-    "launch_generation.py": "4a96ba1e49a8ce2dae4885f70cf3b55debcacde594425dbaae1d59268dafc974",
+-    "create_launch_authorization.py": "209d6b141e154574d8ddd59e252839c27c911e4ec6fba4b18da5a9aca16ec89e",
+-    "PROTOCOL.md": "183ae19b30c28b224d631e0d1a06051322391dab10386de0169a98a4f1e952ef",
++    "launch_generation.py": "b2a4fd97908f6302a6bcf812ca41733687f7f4418b3d31b1ca165e1150dbc1da",
++    "create_launch_authorization.py": "3438beea9e1160bd813cfd3eac558f922b850f41ae62c067f5a1c580c789b002",
++    "PROTOCOL.md": "f41813f59bc2bd383101f9e7f7793df2390794f2243556d7a20ddac8231d118c",
+ }
+ PREPARE_OUTPUT = HERE / "freeze_attempt_01"
+ ATTACH_OUTPUT = HERE / "review_attachment_01"
+--- V7/create_launch_authorization.py
++++ V8/create_launch_authorization.py
+@@ -25,7 +25,7 @@
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ GATE = HERE / "generation_gate.py"
+-GATE_SHA256 = "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec"
++GATE_SHA256 = "6355a2ffd09a8c4aa91061749de47300239a2b9a55e448fbe066c48ffe5c2509"
+ MANIFEST = HERE / "review_attachment_01/manifest.json"
+ AUTHORIZATION = HERE / "launch_authorization_01.json"
+ EXECUTION = HERE / "execution_01"
+@@ -284,6 +284,14 @@
+             del sys.modules[name]
+         raise
+     return module
++
++
++def read_review_json(path, expected, label):
++    """Consume a terminal review only when its publisher sealed it read-only."""
++    payload, identity = verified_bytes(Path(path).absolute(), expected, label)
++    require((stat.S_IMODE(identity.st_mode) & 0o222) == 0,
++            "Final launch review must be published read-only before authorization: " + str(path))
++    return json.loads(payload)
+ 
+ 
+ def require_formal_freshness(output_root):
+@@ -347,7 +355,7 @@
+             "launch_readiness": args.launch_readiness_review_sha256,
+         }
+         review_documents = {
+-            kind: read_json(
++            kind: read_review_json(
+                 gate.FINAL_REVIEW_PATHS[kind], review_hashes[kind], kind + " review"
+             )
+             for kind in gate.FINAL_REVIEW_STATUSES
+@@ -431,7 +439,7 @@
+             "C2 attachment changed before authorization",
+         )
+         for kind, path in gate.FINAL_REVIEW_PATHS.items():
+-            current_review = read_json(path, review_hashes[kind], kind + " review")
++            current_review = read_review_json(path, review_hashes[kind], kind + " review")
+             require(current_review == review_documents[kind],
+                     kind + " review snapshot changed before authorization")
+         for control in retained_controls:
+--- V7/static_selftest.py
++++ V8/static_selftest.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""V7 source-only adversarial checks; never invoke a formal C2 path or model."""
++"""V8 source-only adversarial checks; never invoke a formal C2 path or model."""
+ from __future__ import annotations
+ 
+ import ast
+@@ -17,6 +17,7 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ ROOT = HERE.parents[1]
++LEGACY = ROOT / "work/S47_c2_confirmation_generation"
+ PRODUCTION = (
+     HERE / "PROTOCOL.md",
+     HERE / "FREEZE_PROTOCOL.md",
+@@ -45,7 +46,7 @@
+     HERE / ".execution_01.watchdog_failure.json",
+     HERE / ".execution_01.supervisor_failure.json",
+     HERE / "execution_01",
+-    ROOT / "results/S47_C2_confirmation_generation",
++    ROOT / "results/S47B_C2_confirmation_generation_v8",
+ )
+ SCIENTIFIC_PREFIXES = (
+     "torch", "numpy", "PIL", "diffusers", "open_clip", "omegaconf",
+@@ -85,7 +86,7 @@
+     def find_spec(self, fullname, path=None, target=None):
+         if any(fullname == prefix or fullname.startswith(prefix + ".")
+                for prefix in SCIENTIFIC_PREFIXES):
+-            raise ImportError("V7 source-only test denied scientific import: " + fullname)
++            raise ImportError("V8 source-only test denied scientific import: " + fullname)
+         return None
+ 
+ 
+@@ -214,7 +215,7 @@
+         gate.FREEZE_PROTOCOL_SHA256 = sha(protocol)
+         root_stat = os.stat(root, follow_symlinks=False)
+         attempt_stat = os.stat(attempt, follow_symlinks=False)
+-        core = {"review_receipts": {}, "synthetic": "V7"}
++        core = {"review_receipts": {}, "synthetic": "V8"}
+         core_file_sha = write_json(gate.PREPARE_CORE, core)
+         core_sha = gate.core_sha256(core)
+         sentinel = {
+@@ -547,7 +548,7 @@
+         exact_inherited_predicate
+         and wrong_direct_parent_rejected
+         and supervisor_as_direct_parent_rejected,
+-        "V7 worker ticket does not close the inherited parent-PID predicate",
++        "V8 worker ticket does not close the inherited parent-PID predicate",
+     )
+     return {
+         "separate_supervisor_watchdog_worker_ids": True,
+@@ -941,7 +942,7 @@
+             os.kill(self.pid, current_signal)
+ 
+     process_api = ModuleType("psutil")
+-    process_api.__version__ = "s47-v7-source-only-process-api"
++    process_api.__version__ = "s47-v8-source-only-process-api"
+     process_api.STATUS_ZOMBIE = "zombie"
+     process_api.NoSuchProcess = NoSuchProcess
+     process_api.ZombieProcess = NoSuchProcess
+@@ -987,7 +988,7 @@
+             self.closed = True
+ 
+     control = ProbeControl()
+-    gate_module = ModuleType("_s47_v7_source_only_gate")
++    gate_module = ModuleType("_s47_v8_source_only_gate")
+     gate_module.C2_OUTPUT = output_path
+     gate_module.open_launch_control_lease = lambda path, expected: control
+ 
+@@ -996,7 +997,7 @@
+                 "Synthetic gate received another manifest")
+         if metadata_only:
+             return {"status": "PASS_METADATA_ONLY", "scope": "source-only stub"}
+-        raise RuntimeError("S47_V7_SYNTHETIC_STOP_BEFORE_SCIENTIFIC_IMPORT")
++        raise RuntimeError("S47_V8_SYNTHETIC_STOP_BEFORE_SCIENTIFIC_IMPORT")
+ 
+     def adopt_inherited_output_directory(path, chain, identity):
+         require(Path(path) == output_path and isinstance(identity, dict),
+@@ -1086,9 +1087,172 @@
+             sys.modules["psutil"] = original_psutil
+ 
+ 
++def actual_v7_metadata_consumer_regression(scratch, authorization):
++    """Use real V7 metadata provenance, rebound only into disposable test scope.
++
++    No formal entry is invoked. Fixture JSONs retain V7 scientific values and are
++    administratively rebound (paths/hashes/inodes) to disposable files. They have
++    no production authority and are deleted with the temporary test directory.
++    """
++    import copy
++    import stat
++    legacy_names = (
++        'freeze_attempt_01/manifest_core.json', 'freeze_attempt_01/receipt.json',
++        '.freeze_attempt_01.claimed', '.review_attachment_01.claimed',
++        'SOURCE_REVIEW.json', 'RUNTIME_FRESHNESS_REVIEW.json',
++        'review_attachment_01/manifest.json', 'review_attachment_01/metadata_gate.json',
++        'review_attachment_01/receipt.json', 'FINAL_ATTACHMENT_REVIEW.json',
++        'LAUNCH_READINESS_REVIEW.json', 'launch_authorization_01.json',
++        'launch_authorization_attempt_01/attempt_started.json',
++        'launch_authorization_attempt_01/success_receipt.json',
++    )
++    provenance = {name: {'sha256': sha(LEGACY/name),
++                        'mode': os.stat(LEGACY/name, follow_symlinks=False).st_mode & 0o7777}
++                  for name in legacy_names}
++    require(provenance['launch_authorization_01.json']['sha256']
++            == '3420b14eb7f1643de03b1a778a62645dce7ecbe688f4be99254598acc9ac6004'
++            and provenance['review_attachment_01/manifest.json']['sha256']
++            == '3b46f3016ac3755ac96bd8c955dee0a577f6a5b83ebf039343a799a6f55e2217',
++            'V7 actual metadata provenance differs')
++    oldgate = load_module_snapshot('_s47b_v8_legacy_real_edge', LEGACY/'generation_gate.py')
++    oldmanifest = json.loads((LEGACY/'review_attachment_01/manifest.json').read_text())
++    oldauth = json.loads((LEGACY/'launch_authorization_01.json').read_text())
++    require(rejected(oldgate.require_launch_authorization, oldmanifest,
++                     provenance['review_attachment_01/manifest.json']['sha256']),
++            'Unmodified actual V7 authorization edge did not reproduce its blocker')
++    require(rejected(authorization.read_review_json, LEGACY/'FINAL_ATTACHMENT_REVIEW.json',
++                     provenance['FINAL_ATTACHMENT_REVIEW.json']['sha256'], 'actual V7 final review'),
++            'V8 non-consuming preflight accepted actual writable V7 final review')
++    fixture = scratch/'actual_v7_rebound_metadata_fixture'; fixture.mkdir()
++    for name in ('freeze_attempt_01','review_attachment_01','launch_authorization_attempt_01'):
++        (fixture/name).mkdir()
++    # Only source copies and synthetic metadata fixture files are created under TemporaryDirectory.
++    for path in PRODUCTION:
++        (fixture/path.name).write_bytes(path.read_bytes())
++    candidate = load_module_snapshot('_s47b_v8_actual_reader_fixture', HERE/'generation_gate.py')
++    actual_here = candidate.HERE
++    for name, value in list(candidate.__dict__.items()):
++        if isinstance(value, Path) and value.is_relative_to(actual_here):
++            setattr(candidate, name, fixture/value.relative_to(actual_here))
++    candidate.FINAL_REVIEW_PATHS = {name:fixture/path.name for name,path in candidate.FINAL_REVIEW_PATHS.items()}
++    candidate.C2_OUTPUT = fixture/'never_created_scientific_output'
++    candidate.__file__ = str(fixture/'generation_gate.py')
++    def rebound(value):
++        if isinstance(value,dict): return {rebound(k):rebound(v) for k,v in value.items()}
++        if isinstance(value,list): return [rebound(v) for v in value]
++        if isinstance(value,str) and value.startswith(str(LEGACY)):
++            return str(fixture)+value[len(str(LEGACY)):]
++        return value
++    def legacy(name): return rebound(json.loads((LEGACY/name).read_text()))
++    def inode(path):
++        item=os.stat(path,follow_symlinks=False)
++        return {'device':item.st_dev,'inode':item.st_ino}
++    def record(path): return {'path':str(path),'sha256':sha(path)}
++    freeze_sha=sha(fixture/'freeze_c2_manifest.py')
++    core=legacy('freeze_attempt_01/manifest_core.json')
++    core['output_root']=str(candidate.C2_OUTPUT)
++    core['source_identities']=candidate.required_sources()
++    core['config']=candidate.exact_config_record()
++    core['freeze_preparation']['tool_source']=record(fixture/'freeze_c2_manifest.py')
++    core['freeze_preparation']['freeze_protocol']=record(fixture/'FREEZE_PROTOCOL.md')
++    core_sha=write_json(candidate.PREPARE_CORE,core)
++    prepare=legacy('freeze_attempt_01/receipt.json')
++    for name,mode,output,stage in [('.freeze_attempt_01.claimed','prepare',candidate.PREPARE_ROOT,candidate.PREPARE_STAGING_LEASE),
++                                   ('.review_attachment_01.claimed','attach',candidate.ATTACHMENT_ROOT,candidate.ATTACH_STAGING_LEASE)]:
++        sentinel=legacy(name)
++        sentinel.update(tool_source_sha256=freeze_sha,parent_directory_identity=inode(fixture),
++                        output_path=str(output),staging_path=str(stage))
++        write_json(fixture/name,sentinel)
++    prepare.update(tool_source_sha256=freeze_sha,freeze_protocol_sha256=candidate.FREEZE_PROTOCOL_SHA256,
++                   manifest_core_file_sha256=core_sha,core_sha256=candidate.core_sha256(core),
++                   attempt_sentinel=record(candidate.PREPARE_SENTINEL),prepare_directory_identity=inode(candidate.PREPARE_ROOT))
++    prepare_sha=write_json(candidate.PREPARE_RECEIPT,prepare)
++    reviews={}
++    for kind,name in [('source_review','SOURCE_REVIEW.json'),('runtime_freeze','RUNTIME_FRESHNESS_REVIEW.json')]:
++        review=legacy(name)
++        review.update(core_file_sha256=core_sha,core_sha256=candidate.core_sha256(core),prepare_receipt_sha256=prepare_sha)
++        write_json(fixture/name,review)
++        reviews[kind]=record(fixture/name)
++    manifest=copy.deepcopy(core);manifest['review_receipts']=reviews
++    manifest_sha=write_json(candidate.PUBLISHED_MANIFEST,manifest)
++    metadata=legacy('review_attachment_01/metadata_gate.json');metadata['manifest_sha256']=manifest_sha
++    metadata_sha=write_json(candidate.PUBLISHED_METADATA_GATE,metadata)
++    attach=legacy('review_attachment_01/receipt.json')
++    attach.update(tool_source_sha256=freeze_sha,freeze_protocol_sha256=candidate.FREEZE_PROTOCOL_SHA256,
++                  attempt_sentinel=record(candidate.ATTACH_SENTINEL),manifest_sha256=manifest_sha,
++                  core_file_sha256=core_sha,core_sha256=candidate.core_sha256(core),prepare_receipt_sha256=prepare_sha,
++                  prepare_directory_identity=inode(candidate.PREPARE_ROOT),review_receipts=reviews,
++                  metadata_gate_sha256=metadata_sha,attachment_directory_identity=inode(candidate.ATTACHMENT_ROOT))
++    write_json(candidate.PUBLISHED_RECEIPT,attach)
++    bindings,attached=candidate.launch_review_bindings(manifest,manifest_sha)
++    final_docs={};final_hashes={}
++    for kind,path in candidate.FINAL_REVIEW_PATHS.items():
++        review=legacy(path.name);review['bindings']=bindings
++        final_docs[kind]=review;final_hashes[kind]=write_json(path,review,mode=0o444)
++        require(authorization.read_review_json(path,final_hashes[kind],kind)==review,
++                'V8 preflight rejected a genuinely read-only rebound final review')
++    auth=candidate.build_launch_authorization_document(
++        bindings=bindings,attachment_completed_utc=attached,review_documents=final_docs,
++        review_hashes=final_hashes,created_utc=oldauth['created_utc'],
++        tool_sha256=sha(candidate.AUTHORIZATION_TOOL))
++    auth_sha=write_json(candidate.LAUNCH_AUTHORIZATION,auth)
++    # Evaluate the actual writer's source expression against a real published-file stat.
++    # Do not construct the four-field identity by hand or call authorization main.
++    writer_tree=ast.parse((HERE/'create_launch_authorization.py').read_text())
++    writer_main=next(n for n in writer_tree.body if isinstance(n,ast.FunctionDef) and n.name=='main')
++    writer_assignment=next(n for n in ast.walk(writer_main) if isinstance(n,ast.Assign)
++                           and any(isinstance(t,ast.Name) and t.id=='authorization_identity' for t in n.targets))
++    published=os.stat(candidate.LAUNCH_AUTHORIZATION,follow_symlinks=False)
++    produced_identity=eval(compile(ast.Expression(writer_assignment.value),'actual_writer_identity_expression','eval'),
++                           {'published':published,'stat':stat})
++    start=legacy('launch_authorization_attempt_01/attempt_started.json')
++    start.update(attempt_identity=inode(candidate.AUTHORIZATION_ATTEMPT),
++                 tool_source_sha256=sha(candidate.AUTHORIZATION_TOOL),manifest_sha256=manifest_sha)
++    start_sha=write_json(candidate.AUTHORIZATION_ATTEMPT_STARTED,start)
++    success=legacy('launch_authorization_attempt_01/success_receipt.json')
++    success.update(attempt_identity=inode(candidate.AUTHORIZATION_ATTEMPT),attempt_started_sha256=start_sha,
++                   authorization_sha256=auth_sha,authorization_identity=produced_identity,
++                   tool_source_sha256=sha(candidate.AUTHORIZATION_TOOL),manifest_sha256=manifest_sha)
++    write_json(candidate.AUTHORIZATION_ATTEMPT_RECEIPT,success)
++    parsed,_,snapshot_identity=candidate.read_json_snapshot(candidate.LAUNCH_AUTHORIZATION,'actual reader fixture')
++    require(set(produced_identity)=={'device','inode','size','mode'}
++            and set(snapshot_identity)=={'device','inode','size','mode','mtime_ns','ctime_ns'},
++            'Regression must include the actual four-to-six field producer/reader boundary')
++    checked_auth=candidate.require_launch_authorization(manifest,manifest_sha)
++    require(checked_auth['authorization_identity']==produced_identity,
++            'V8 actual authorization entry did not normalize its durable identity')
++    control=candidate.open_launch_control_lease(candidate.PUBLISHED_MANIFEST,manifest_sha)
++    try:
++        held=control.validate()
++        metadata_result=candidate.check_manifest(candidate.PUBLISHED_MANIFEST,manifest_sha,metadata_only=True)
++        require(metadata_result['status']=='PASS_METADATA_ONLY','Rebound full metadata chain failed')
++        runtime_namespace={'__file__':str(fixture/'launch_generation.py'),
++                           'PYTHON':Path(manifest['runtime']['python_executable']),
++                           'PYTHONPATH':[Path(p) for p in manifest['runtime']['pythonpath']]}
++        require(control.frozen_manifest(candidate.PUBLISHED_MANIFEST,manifest_sha,runtime_namespace)==manifest,
++                'Actual frozen_manifest runtime/path/hash edge failed')
++        control.validate()
++    finally:control.close()
++    require(not os.path.lexists(candidate.C2_OUTPUT) and not os.path.lexists(fixture/'execution_01'),
++            'Real scientific execution path was created during metadata regression')
++    require(all({'sha256':sha(LEGACY/name),'mode':os.stat(LEGACY/name,follow_symlinks=False).st_mode & 0o7777}==item
++                for name,item in provenance.items()),'V7 sealed metadata or original 0644 mode changed')
++    return {'fixture_kind':'ACTUAL_V7_METADATA_WITH_EXPLICIT_DISPOSABLE_ADMINISTRATIVE_REBINDING',
++            'legacy_metadata_provenance':provenance,'legacy_files_or_permissions_modified':False,
++            'unchanged_scientific_fields':['controls','runtime','generation_limits','components','input_image','s39_loading_manifest','s39_loading_evidence','s39_loading_review'],
++            'administrative_rebinding':['temporary paths','current V8 source identities','hash links','actual fixture inode identities','review modes sealed 0444'],
++            'actual_v7_reader_failure_reproduced':True,'actual_v7_writable_review_rejected_by_preflight':True,
++            'actual_writer_identity_expression_executed':ast.unparse(writer_assignment.value),
++            'produced_identity_keys':sorted(produced_identity),'reader_identity_keys':sorted(snapshot_identity),
++            'full_read_only_control_chain_passed':True,'held_directories':len(held['directories']),
++            'held_files':len(held['files']),'frozen_manifest_passed_without_function_monkeypatch':True,
++            'validation_predicates_bypassed':0,'formal_entry_calls':0,'model_calls':0,
++            'component_or_image_body_reads':0,'production_authority':'NONE'}
++
++
+ def main():
+     require(sys.version_info[:2] in {(3, 12), (3, 13)},
+-            "V7 self-test requires reviewed Python 3.12 or 3.13")
++            "V8 self-test requires reviewed Python 3.12 or 3.13")
+     require(all(not os.path.lexists(path) for path in FORMAL_PATHS),
+             "A formal C2 path exists; source-only self-test refuses to run")
+     parsed = {path.name: ast.parse(path.read_bytes(), filename=str(path))
+@@ -1197,11 +1361,11 @@
+     sys.meta_path.insert(0, blocker)
+     try:
+         gate = load_module_snapshot("generation_gate", HERE / "generation_gate.py")
+-        runtime = load_module_snapshot("_s47_runtime_v7_static", HERE / "runtime_adapter.py")
+-        launcher = load_module_snapshot("_s47_launcher_v7_static", HERE / "launch_generation.py")
+-        freeze = load_module_snapshot("_s47_freeze_v7_static", HERE / "freeze_c2_manifest.py")
++        runtime = load_module_snapshot("_s47_runtime_v8_static", HERE / "runtime_adapter.py")
++        launcher = load_module_snapshot("_s47_launcher_v8_static", HERE / "launch_generation.py")
++        freeze = load_module_snapshot("_s47_freeze_v8_static", HERE / "freeze_c2_manifest.py")
+         authorization = load_module_snapshot(
+-            "_s47_authorization_v7_static", HERE / "create_launch_authorization.py"
++            "_s47_authorization_v8_static", HERE / "create_launch_authorization.py"
+         )
+         require(gate.C2_PROTOCOL_SHA256 == sha(HERE / "PROTOCOL.md")
+                 and gate.FREEZE_PROTOCOL_SHA256 == sha(HERE / "FREEZE_PROTOCOL.md"),
+@@ -1234,7 +1398,7 @@
+             and runtime_proof["same_fd_torch_loader_sites"] == 1
+             and runtime_proof["same_fd_loader_patch_sites"] == 1
+             and runtime_proof["same_fd_input_loader_sites"] == 1,
+-            "Reversible V7 derivation or namespace-closure proof failed",
++            "Reversible V8 derivation or namespace-closure proof failed",
+         )
+ 
+         public = ["--manifest", str(launcher.PUBLISHED_MANIFEST),
+@@ -1256,7 +1420,7 @@
+             require(rejected(launcher.parse_exact_arguments, vector, internal=False),
+                     "Unsafe CLI vector passed")
+ 
+-        with tempfile.TemporaryDirectory(prefix="s47-c2-v7-static-") as temporary:
++        with tempfile.TemporaryDirectory(prefix="s47-c2-v8-static-") as temporary:
+             scratch = Path(temporary).resolve()
+             real = scratch / "real"; real.mkdir()
+             nested_dir = real / "nested"; nested_dir.mkdir()
+@@ -1304,6 +1468,7 @@
+             derived_process_api = derived_parent_process_api_integration_probe(
+                 launcher, scratch
+             )
++            actual_metadata_chain = actual_v7_metadata_consumer_regression(scratch, authorization)
+     finally:
+         sys.meta_path.remove(blocker)
+ 
+@@ -1312,10 +1477,10 @@
+     ))
+     require(scientific_loaded == [], "Scientific modules were imported: " + repr(scientific_loaded))
+     require(all(not os.path.lexists(path) for path in FORMAL_PATHS),
+-            "V7 source-only self-test created a formal C2 path")
+-    require(sha(HERE / "SOURCE_REVIEW_ADVERSARIAL_V4.json")
++            "V8 source-only self-test created a formal C2 path")
++    require(sha(LEGACY / "SOURCE_REVIEW_ADVERSARIAL_V4.json")
+             == "03e19676a6a1ea1810bfd199628ad4504c3f59ee48542da7bdfc13f09a0f0cb1"
+-            and sha(HERE / "SOURCE_REVIEW_PRIMARY_V4.json")
++            and sha(LEGACY / "SOURCE_REVIEW_PRIMARY_V4.json")
+             == "0036acc53dfde7ff1a9a5f8ead7db01df80f53b84e44476c306bc2ca3d38167c",
+             "Exact V4 blocked review history changed")
+     v6_history_expected = {
+@@ -1334,7 +1499,7 @@
+         "PROBE_PY313.json": "296eb050c1cb8479a9070737332a24032d5bf99646b69b2ae2160498709d4116",
+         "PROBE_PY312.json": "8956ea993562f7a63b622f2e638c7c0aef88af16eba172a975ee94b73e53656a",
+     }
+-    v6_history_root = HERE / "history/v6_blocked_exact"
++    v6_history_root = LEGACY / "history/v6_blocked_exact"
+     require(
+         all(sha(v6_history_root / name) == digest
+             for name, digest in v6_history_expected.items()),
+@@ -1342,7 +1507,7 @@
+     )
+ 
+     result = {
+-        "status": "PASS_S47_C2_V7_CANDIDATE_STATIC_SELFTEST",
++        "status": "PASS_S47_C2_V8_CANDIDATE_STATIC_SELFTEST",
+         "python": {"version": ".".join(str(value) for value in sys.version_info[:3]),
+                    "executable": sys.executable, "isolated": sys.flags.isolated == 1,
+                    "dont_write_bytecode": sys.dont_write_bytecode,
+@@ -1376,6 +1541,7 @@
+             "terminal_commit_fault_matrix": terminal_commit_faults,
+             "watchdog_monitor_death_matrix": watchdog_results,
+             "derived_parent_process_api_integration": derived_process_api,
++            "actual_v7_metadata_producer_consumer_chain": actual_metadata_chain,
+             "persistent_freeze_auth_execution_directory_fds": persistent_directory_static,
+             "scientific_payload_path_reopens_in_candidate_route": (
+                 0 if scientific_descriptor_static else None
+@@ -1384,24 +1550,24 @@
+         "candidate_sha256": {path.name: sha(path) for path in PRODUCTION},
+         "static_selftest_sha256": sha(HERE / "static_selftest.py"),
+         "withdrawn_v5": {
+-            "candidate_receipt_sha256": sha(HERE / "CANDIDATE_STATIC_SELFTEST_V5.json"),
+-            "primary_blocked_review_sha256": sha(HERE / "SOURCE_REVIEW_PRIMARY_V5.json"),
+-            "review_probe_sha256": sha(HERE / "SOURCE_REVIEW_PRIMARY_V5_PROBE.py"),
+-            "authority_for_v7": "NONE"},
++            "candidate_receipt_sha256": sha(LEGACY / "CANDIDATE_STATIC_SELFTEST_V5.json"),
++            "primary_blocked_review_sha256": sha(LEGACY / "SOURCE_REVIEW_PRIMARY_V5.json"),
++            "review_probe_sha256": sha(LEGACY / "SOURCE_REVIEW_PRIMARY_V5_PROBE.py"),
++            "authority_for_v8": "NONE"},
+         "withdrawn_v6": {
+             "exact_history_sha256": v6_history_expected,
+             "candidate_receipt_sha256": sha(
+-                HERE / "history/v6_blocked_exact/CANDIDATE_STATIC_SELFTEST_V6.json"
++                LEGACY / "history/v6_blocked_exact/CANDIDATE_STATIC_SELFTEST_V6.json"
+             ),
+             "functional_blocker_receipt_sha256": sha(
+-                HERE / "history/v6_blocked_exact/FUNCTIONAL_BLOCKER_RECEIPT.json"
++                LEGACY / "history/v6_blocked_exact/FUNCTIONAL_BLOCKER_RECEIPT.json"
+             ),
+             "independent_probe_sha256": sha(
+-                HERE / "history/v6_blocked_exact/SOURCE_REVIEW_ADVERSARIAL_V6_PROBE.py"
++                LEGACY / "history/v6_blocked_exact/SOURCE_REVIEW_ADVERSARIAL_V6_PROBE.py"
+             ),
+-            "authority_for_v7": "NONE"},
++            "authority_for_v8": "NONE"},
+         "formal_lexists": {str(path): os.path.lexists(path) for path in FORMAL_PATHS},
+-        "next_gate": "TWO_FRESH_DIFFERENT_AUTHOR_EXACT_V7_SOURCE_REVIEWS_BEFORE_UNIQUE_PREPARE",
++        "next_gate": "TWO_FRESH_DIFFERENT_AUTHOR_EXACT_V8_SOURCE_REVIEWS_BEFORE_UNIQUE_PREPARE",
+     }
+     print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
+     return 0

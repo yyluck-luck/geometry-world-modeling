@@ -1,0 +1,756 @@
+--- v7/camera_guard.py
++++ v8/camera_guard.py
+@@ -33,17 +33,17 @@
+ ROOT = HERE.parents[1]
+ SELF = Path(__file__).resolve()
+ PROTOCOL = HERE / "PROTOCOL.md"
+-PROTOCOL_SHA256 = "0a2b2b04b3878e0bf048f0380091f099f0d82c81d2c308ee5d132ff6bf51e778"
++PROTOCOL_SHA256 = "eee87990cf482ea0592b3b26d90ee8e0dc693bf9897c9659eab4a5cb6fc60c35"
+ BINDING_TEMPLATE = HERE / "C1_CAMERA_GUARD_BINDING_TEMPLATE.json"
+-BINDING_TEMPLATE_SHA256 = "ac65f7a715dab027f4b555a9bcba13bf299c8e2500bddecb1e4683909392c7b6"
++BINDING_TEMPLATE_SHA256 = "3724c384147a7f0f52ee3fe3b8fc87525ffdcb6a89f1099e9b624cfaf4d3ddf8"
+ SELFTEST = HERE / "synthetic_selftest.py"
+-SELFTEST_SHA256 = "008fb8d8988bff406c7c59e8143771bf50d04c9dfc4e71599afd55b792b6af14"
++SELFTEST_SHA256 = "468bec82efab57c043c3ff8229e0cc2de72da3d249bc572245f145fa77559587"
+ SUPERVISOR = HERE / "supervise_camera_guard.py"
+-BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V7.json"
+-BINDING_REVIEW = HERE / "BINDING_REVIEW_V7.json"
+-SOURCE_REVIEW_PRIMARY = HERE / "SOURCE_REVIEW_PRIMARY_V7.json"
+-SOURCE_REVIEW_ADVERSARIAL = HERE / "SOURCE_REVIEW_ADVERSARIAL_V7.json"
+-GOVERNANCE_ATTESTATION = HERE / "GOVERNANCE_ATTESTATION_V7.json"
++BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V8.json"
++BINDING_REVIEW = HERE / "BINDING_REVIEW_V8.json"
++SOURCE_REVIEW_PRIMARY = HERE / "SOURCE_REVIEW_PRIMARY_V8.json"
++SOURCE_REVIEW_ADVERSARIAL = HERE / "SOURCE_REVIEW_ADVERSARIAL_V8.json"
++GOVERNANCE_ATTESTATION = HERE / "GOVERNANCE_ATTESTATION_V8.json"
+ FORMAL_OUT = HERE / "execution_01"
+ LOCK = HERE / ".c1_numeric_camera_guard.lock"
+ LOCK_STAGING = HERE / ".c1_numeric_camera_guard.lock.staging"
+@@ -96,9 +96,9 @@
+ SECONDS = 300
+ MAX_CAMERA_TENSOR_BYTES = 4096
+ HEX = re.compile(r"^[0-9a-f]{64}$")
+-AUTHOR_ROLE = "/root/s48_v5_adversarial_review"
++AUTHOR_ROLE = "/root"
+ WIDTHS = {"float32": 4, "float64": 8}
+-ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V7-PREBOUND-ARTIFACT"
++ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V8-PREBOUND-ARTIFACT"
+ 
+ 
+ class GuardInvalid(ValueError):
+@@ -440,7 +440,7 @@
+         require(
+             review.get("schema") == "s45b-c1-numeric-camera-guard-source-review-v4"
+             and review.get("review_kind") == kind
+-            and review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V7"
++            and review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V8"
+             and review.get("verdict") == "PASS_SUPERVISED_SOURCE_NOT_EXECUTED"
+             and review.get("reviewed_identities") == expected
+             and review.get("author_role") == AUTHOR_ROLE
+@@ -494,7 +494,7 @@
+     }
+     require(
+         binding.get("schema") == "s45b-c1-numeric-camera-guard-binding-v4"
+-        and binding.get("status") == "FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V7"
++        and binding.get("status") == "FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V8"
+         and binding.get("row") == "C1"
+         and binding.get("placeholder_hashes") == 0
+         and binding.get("source_set") == expected_source_set
+@@ -534,12 +534,12 @@
+         "synthetic_selftest.py": SELFTEST_SHA256,
+         "primary_source_review": args.primary_source_review_sha256,
+         "adversarial_source_review": args.adversarial_source_review_sha256,
+-        "C1_CAMERA_GUARD_BINDING_V7.json": args.binding_sha256,
++        "C1_CAMERA_GUARD_BINDING_V8.json": args.binding_sha256,
+         **{name: item["sha256"] for name, item in upstream.items()},
+     }
+     require(
+         binding_review.get("schema") == "s45b-c1-numeric-camera-guard-binding-review-v4"
+-        and binding_review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V7"
++        and binding_review.get("status") == "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V8"
+         and binding_review.get("verdict") == "PASS_SUPERVISED_BINDING_ONLY_NO_TENSOR_BODIES"
+         and binding_review.get("reviewed_identities") == expected_reviewed
+         and binding_review.get("author_role") == binding["author_role"]
+@@ -581,18 +581,18 @@
+ 
+     The Python source validates exact cross-document consistency.  Trust in the
+     named orchestration task remains external and is stated as such; unequal
+-    self-declared role strings alone never authorize V7.
++    self-declared role strings alone never authorize V8.
+     """
+     receipt, record = read_json(
+         GOVERNANCE_ATTESTATION, args.governance_attestation_sha256,
+-        "external V7 governance attestation", deadline,
++        "external V8 governance attestation", deadline,
+     )
+     artifacts = {
+         **expected_source_review_identities(args.self_sha256, args.supervisor_sha256),
+         "primary_source_review": args.primary_source_review_sha256,
+         "adversarial_source_review": args.adversarial_source_review_sha256,
+-        "C1_CAMERA_GUARD_BINDING_V7.json": args.binding_sha256,
+-        "BINDING_REVIEW_V7.json": args.binding_review_sha256,
++        "C1_CAMERA_GUARD_BINDING_V8.json": args.binding_sha256,
++        "BINDING_REVIEW_V8.json": args.binding_review_sha256,
+         "v6_primary_blocked_review":
+         "0b30345a8546cd2e89036b118b12b75825cf7662b133d2bac380b4f9904aeb16",
+     }
+@@ -633,7 +633,7 @@
+     issuer = receipt.get("issuer")
+     require(
+         receipt.get("schema") == "s45b-c1-numeric-camera-guard-governance-attestation-v1"
+-        and receipt.get("status") == "PASS_EXTERNAL_ORCHESTRATOR_PROVENANCE_GATE_V7"
++        and receipt.get("status") == "PASS_EXTERNAL_ORCHESTRATOR_PROVENANCE_GATE_V8"
+         and receipt.get("trust_boundary")
+         == "EXTERNAL_ORCHESTRATOR_PROVENANCE_NOT_SELF_AUTHENTICATED_BY_CANDIDATE"
+         and receipt.get("artifact_identities") == artifacts
+@@ -1140,8 +1140,9 @@
+                       "First cache commit is not preserved in second cache")
+         continuity.append({"id": frame_id, "pose_max_abs": pose_error, "K_max_abs": k_error})
+ 
+-    base_pose = cache_commits[0]["c2ws"][0]
+-    base_k = cache_commits[0]["Ks"][0]
++    # S42 anchors every planned pose, fixed K and closure to final-cache ID0.
++    base_pose = cache_commits[1]["c2ws"][0]
++    base_k = cache_commits[1]["Ks"][0]
+     homogeneous_error = matrix_max_abs(base_pose[3], [0.0, 0.0, 0.0, 1.0])
+     require_guard(homogeneous_error <= TOLERANCE,
+                   "Base c2w homogeneous row differs")
+@@ -1942,7 +1943,7 @@
+         print(json.dumps(synthetic_selftest(), sort_keys=True, allow_nan=False))
+         return 0
+     require(False,
+-            "V7 worker has no formal pathname CLI: the reviewed supervisor forks its "
++            "V8 worker has no formal pathname CLI: the reviewed supervisor forks its "
+             "already-running interpreter and invokes held-source code in memory")
+ 
+ 
+--- v7/supervise_camera_guard.py
++++ v8/supervise_camera_guard.py
+@@ -40,11 +40,11 @@
+ FORMAL_OUT = HERE / "execution_01"
+ LOCK = HERE / ".c1_numeric_camera_guard.lock"
+ LOCK_STAGING = HERE / ".c1_numeric_camera_guard.lock.staging"
+-BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V7.json"
+-BINDING_REVIEW = HERE / "BINDING_REVIEW_V7.json"
+-PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V7.json"
+-ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V7.json"
+-GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V7.json"
++BINDING = HERE / "C1_CAMERA_GUARD_BINDING_V8.json"
++BINDING_REVIEW = HERE / "BINDING_REVIEW_V8.json"
++PRIMARY_REVIEW = HERE / "SOURCE_REVIEW_PRIMARY_V8.json"
++ADVERSARIAL_REVIEW = HERE / "SOURCE_REVIEW_ADVERSARIAL_V8.json"
++GOVERNANCE_RECEIPT = HERE / "GOVERNANCE_ATTESTATION_V8.json"
+ 
+ REPORT_NAME = "report.json"
+ WORKER_RECEIPT_NAME = "worker_receipt.json"
+@@ -68,7 +68,7 @@
+ RUSAGE_INFO_V4 = 4
+ MEMORY_SAMPLE_INTERVAL_SECONDS = 0.02
+ CAPABILITY_PROBE_BYTES = 8 * 1024 * 1024
+-ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V7-PREBOUND-ARTIFACT"
++ARTIFACT_AUTH_DOMAIN = b"S45B-C1-V8-PREBOUND-ARTIFACT"
+ 
+ 
+ class SupervisorTermination(RuntimeError):
+@@ -136,7 +136,7 @@
+ 
+ def darwin_process_usage(pid):
+     """Read kernel process memory/accounting for one exact live Darwin PID."""
+-    require(platform.system() == "Darwin", "V7 requires the reviewed Darwin containment path")
++    require(platform.system() == "Darwin", "V8 requires the reviewed Darwin containment path")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pid_rusage
+     function.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+@@ -768,10 +768,10 @@
+             and parsed.get("passed") is False
+             and parsed.get("terminal_authority") is False
+             and parsed.get("authority_conditions", {}).get("canonical_path_alone_is_authoritative") is False,
+-            "Held final candidate does not have the full exact V7 pending document",
++            "Held final candidate does not have the full exact V8 pending document",
+         )
+         returned_observation = {
+-            "schema": "s45b-v7-held-terminal-candidate-observation-v3",
++            "schema": "s45b-v8-held-terminal-candidate-observation-v3",
+             "status": "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL",
+             "passed": False,
+             "terminal_authority": False,
+@@ -807,7 +807,7 @@
+     if not isinstance(observation, dict):
+         return False
+     if (
+-        observation.get("schema") != "s45b-v7-held-terminal-candidate-observation-v3"
++        observation.get("schema") != "s45b-v8-held-terminal-candidate-observation-v3"
+         or observation.get("status") != "HELD_CANDIDATE_READY_FOR_EXTERNAL_EXIT_GATED_SEAL"
+         or observation.get("passed") is not False
+         or observation.get("terminal_authority") is not False
+@@ -883,7 +883,7 @@
+ 
+ 
+ def spawn_contained(inner, pass_fds=()):
+-    """Synthetic subprocess helper; the V7 formal worker never uses this path."""
++    """Synthetic subprocess helper; the V8 formal worker never uses this path."""
+     return subprocess.Popen(
+         contained_command(inner),
+         stdin=subprocess.DEVNULL,
+@@ -908,7 +908,7 @@
+ 
+ def apply_darwin_no_fork_sandbox():
+     """Apply Seatbelt inside the already-forked interpreter, without exec."""
+-    require(platform.system() == "Darwin", "V7 formal containment requires Darwin")
++    require(platform.system() == "Darwin", "V8 formal containment requires Darwin")
+     library = ctypes.CDLL(None, use_errno=True)
+     function = library.sandbox_init
+     function.argtypes = [ctypes.c_char_p, ctypes.c_uint64,
+@@ -993,7 +993,7 @@
+ 
+ 
+ def _execute_loaded_worker(source_code, namespace):
+-    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v7")
++    module = types.ModuleType("_s45b_c1_camera_worker_fork_bound_v8")
+     module.__file__ = str(WORKER)
+     exec(source_code, module.__dict__)
+     require(module.SELF == WORKER and module.formal_worker_run.__module__
+@@ -1014,7 +1014,7 @@
+     require(namespace.worker_source_fd == lease["fd"],
+             "Formal namespace does not carry the retained worker source FD")
+     execution_binding = {
+-        "schema": "s45b-v7-fork-bound-worker-execution-v1",
++        "schema": "s45b-v8-fork-bound-worker-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1164,7 +1164,7 @@
+ 
+ 
+ def darwin_process_path(pid):
+-    require(platform.system() == "Darwin", "V7 process-image binding requires Darwin")
++    require(platform.system() == "Darwin", "V8 process-image binding requires Darwin")
+     library = ctypes.CDLL(DARWIN_LIBPROC, use_errno=True)
+     function = library.proc_pidpath
+     function.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+@@ -1186,7 +1186,7 @@
+     kernel_snapshot = executable_snapshot(kernel_path)
+     launcher_snapshot = executable_snapshot(executable_path)
+     value = {
+-        "schema": "s45b-v7-running-interpreter-binding-v1",
++        "schema": "s45b-v8-running-interpreter-binding-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_NO_EXEC",
+         "supervisor_pid": os.getpid(),
+         "kernel_process_path": str(kernel_path),
+@@ -1320,7 +1320,7 @@
+         allocation[offset] = 1
+     time.sleep(0.10)
+     value = {
+-        "schema": "s45b-v7-darwin-fork-bound-capability-probe-v1",
++        "schema": "s45b-v8-darwin-fork-bound-capability-probe-v1",
+         "status": "PASS_CAPABILITY_PROBE_ONLY",
+         "pid": os.getpid(),
+         "cpu_limit": list(cpu),
+@@ -1340,10 +1340,10 @@
+ 
+ def runtime_capability_preflight(worker_source_record):
+     """Exercise the exact fork-without-exec production mechanism pre-attempt."""
+-    require(platform.system() == "Darwin", "V7 formal execution supports reviewed macOS only")
++    require(platform.system() == "Darwin", "V8 formal execution supports reviewed macOS only")
+     interpreter_binding, interpreter_binding_sha256 = current_interpreter_binding()
+     execution_binding = {
+-        "schema": "s45b-v7-fork-bound-capability-execution-v1",
++        "schema": "s45b-v8-fork-bound-capability-execution-v1",
+         "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+         "interpreter_binding_sha256": interpreter_binding_sha256,
+         "interpreter_process_uuid": interpreter_binding["process_uuid"],
+@@ -1378,7 +1378,7 @@
+         "POSIX_SPAWN_SETSID",
+     }
+     require(
+-        payload.get("schema") == "s45b-v7-darwin-fork-bound-capability-probe-v1"
++        payload.get("schema") == "s45b-v8-darwin-fork-bound-capability-probe-v1"
+         and payload.get("status") == "PASS_CAPABILITY_PROBE_ONLY"
+         and payload.get("cpu_limit") == [CPU_LIMIT_SECONDS, CPU_LIMIT_SECONDS]
+         and payload.get("file_size_limit") == [MAX_ARTIFACT_BYTES, MAX_ARTIFACT_BYTES]
+@@ -1397,7 +1397,7 @@
+             and binding_after_sha256 == interpreter_binding_sha256,
+             "Running interpreter binding changed across capability probe")
+     return {
+-        "schema": "s45b-v7-runtime-capability-preflight-v1",
++        "schema": "s45b-v8-runtime-capability-preflight-v1",
+         "status": "PASS_BEFORE_ATTEMPT_COMMIT",
+         "started_utc": started_utc,
+         "completed_utc": completed_utc,
+@@ -1804,8 +1804,8 @@
+                 "supervise_camera_guard.py": args.self_sha256,
+                 "primary_source_review": args.primary_source_review_sha256,
+                 "adversarial_source_review": args.adversarial_source_review_sha256,
+-                "C1_CAMERA_GUARD_BINDING_V7.json": args.binding_sha256,
+-                "BINDING_REVIEW_V7.json": args.binding_review_sha256,
++                "C1_CAMERA_GUARD_BINDING_V8.json": args.binding_sha256,
++                "BINDING_REVIEW_V8.json": args.binding_review_sha256,
+                 "governance_attestation": args.governance_attestation_sha256,
+             },
+             "capability_sha256": capability_sha256,
+@@ -2175,7 +2175,7 @@
+ 
+ 
+ def synthetic_loaded_code_entry(code, output_fd):
+-    module = types.ModuleType("_s45b_v7_synthetic_exact_loaded_code")
++    module = types.ModuleType("_s45b_v8_synthetic_exact_loaded_code")
+     module.__file__ = "/synthetic/held/source.py"
+     exec(code, module.__dict__)
+     return module.entry(output_fd)
+@@ -2321,7 +2321,7 @@
+     fcntl.flock(parent_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+     parent_identity = worker.inode_identity(os.fstat(parent_fd))
+     lock_doc = {
+-        "schema": "synthetic-v7-attempt-lock-v1",
++        "schema": "synthetic-v8-attempt-lock-v1",
+         "status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
+         "passed": False,
+     }
+@@ -2507,7 +2507,7 @@
+     # V6's missing acquisition-window attack: the parent creates both inodes
+     # before fork, the child writes only inherited FDs, and the parent never
+     # reopens either pathname to acquire authority.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v7_prebound_nominal_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v8_prebound_nominal_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(
+@@ -2526,7 +2526,7 @@
+             synthetic_prebound_writer,
+             (worker, output_fd, report_bound, receipt_bound, secret),
+             (output_fd, report_bound["fd"], receipt_bound["fd"]),
+-            {"schema": "synthetic-v7-prebound-writer",
++            {"schema": "synthetic-v8-prebound-writer",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         observation = bounded_process_wait(
+@@ -2551,7 +2551,7 @@
+     checks["prespawn_create_only_pair_child_inherited_fd_publication"] = "PASS"
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v7_prelaunch_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v8_prelaunch_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2579,7 +2579,7 @@
+             os.close(output_fd)
+ 
+     for attacked_name in (REPORT_NAME, WORKER_RECEIPT_NAME):
+-        with tempfile.TemporaryDirectory(prefix="s45b_v7_preacquire_swap_") as raw:
++        with tempfile.TemporaryDirectory(prefix="s45b_v8_preacquire_swap_") as raw:
+             root = Path(raw).resolve()
+             os.mkdir(root / "execution", 0o700)
+             output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2613,7 +2613,7 @@
+             close_leases({"report": report_bound, "receipt": receipt_bound})
+             os.close(output_fd)
+ 
+-    with tempfile.TemporaryDirectory(prefix="s45b_v7_same_inode_tamper_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v8_same_inode_tamper_") as raw:
+         root = Path(raw).resolve()
+         os.mkdir(root / "execution", 0o700)
+         output_fd = os.open(root / "execution", os.O_RDONLY | os.O_DIRECTORY)
+@@ -2647,7 +2647,7 @@
+     # Force the exact V6 race on a disposable source: replace its pathname
+     # after compilation but before fork.  The child still executes ORIGINAL
+     # because the code object and interpreter image are inherited, not reopened.
+-    with tempfile.TemporaryDirectory(prefix="s45b_v7_source_exec_binding_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v8_source_exec_binding_") as raw:
+         source_path = Path(raw) / "probe.py"
+         original = b"import os\ndef entry(fd):\n os.write(fd, b'ORIGINAL')\n return 0\n"
+         source_path.write_bytes(original)
+@@ -2665,7 +2665,7 @@
+         interpreter, interpreter_sha = current_interpreter_binding()
+         process = _fork_loaded_entry(
+             synthetic_loaded_code_entry, (code, write_fd), (write_fd,),
+-            {"schema": "synthetic-v7-loaded-code-race",
++            {"schema": "synthetic-v8-loaded-code-race",
+              "interpreter_binding_sha256": interpreter_sha},
+         )
+         os.close(write_fd)
+--- v7/PROTOCOL.md
++++ v8/PROTOCOL.md
+@@ -1,12 +1,12 @@
+-# S45B supervised C1 numeric requested-camera guard protocol, V7.0.0
++# S45B supervised C1 numeric requested-camera guard protocol, V8.0.0
+ 
+ Status: `SOURCE_ONLY_UNBOUND_REQUIRES_FRESH_DUAL_REVIEW_NOT_EXECUTABLE`.
+ 
+-V7 replaces the blocked V6 source candidate. The exact V6 primary BLOCKED
++V8 replaces the blocked V6 source candidate. The exact V6 primary BLOCKED
+ review is `0b30345a8546cd2e89036b118b12b75825cf7662b133d2bac380b4f9904aeb16`.
+ All V6 sources, receipts, and the BLOCKED review remain unchanged in
+ `work/S45B_c1_numeric_camera_guard_supervised_v6/`. No V6 test result or review
+-transfers to V7.
++transfers to V8.
+ 
+ This preparation opens no real C1 manifest, receipt, event, tensor, image, or
+ pixel. It creates no formal binding, governance attestation, permanent lock, or
+@@ -15,7 +15,7 @@
+ 
+ ## 1. Threat model fixed before implementation
+ 
+-V7 must fail closed against these source-level and same-user concurrent faults:
++V8 must fail closed against these source-level and same-user concurrent faults:
+ 
+ 1. a nonportable `preexec_fn` fails only after the permanent one-use lock;
+ 2. report, receipt, lock, output directory, staging candidate, or final candidate is
+@@ -42,12 +42,12 @@
+ pathname. Before a permanent attempt exists, that exact fork/sandbox mechanism
+ actually attempts fork→setsid with stdio kept open, fork→setsid with stdio
+ closed, and `posix_spawn(..., setsid=True)`; all must fail with `EPERM`.
+-V7 does not claim to discover every descendant after allowing forks.
++V8 does not claim to discover every descendant after allowing forks.
+ 
+ The candidate cannot authenticate Codex task identity inside one Unix account.
+ Therefore unequal role strings and ordered timestamps are structural checks,
+ not identity proof. Formal launch additionally requires a separate exact
+-`GOVERNANCE_ATTESTATION_V7.json`, created after both source reviews, binding, and
++`GOVERNANCE_ATTESTATION_V8.json`, created after both source reviews, binding, and
+ binding review by the external orchestration layer. The candidate validates its
+ cross-document artifact, task, turn, role, and UTC consistency. Trust in that
+ external issuer remains an explicit governance boundary.
+@@ -73,6 +73,15 @@
+ 
+ Cache history is exactly 1→5→9 entries. First-batch padding is not assigned an
+ identity and is not evaluated.
++
++The authority for ID0 pose and K is **cache_commit occurrence 1**, the final
++cache, exactly as in the sealed S42 scorer. The first-cache overlap check is
++retained as a separate diagnostic; two individually tolerated deviations may
++not be added to widen the final-anchor tolerance. V7's first-cache anchor was
++blocked by its fresh primary review because two opposing 0.75e-6 deviations
++could produce a false PASS relative to S42. V8 changes only this numerical
++anchor, its regression coverage, version identities and dependent source pins.
++V7 and its BLOCKED review remain preserved and confer no V8 authority.
+ 
+ Frozen yaw in degrees is `[0,1.25,2.5,3.75,5,3.75,2.5,1.25,0]`. For ID0 c2w
+ `C0` and yaw `a` in radians:
+@@ -121,7 +130,7 @@
+ 
+ ## 4. Source, binding, and governance gates
+ 
+-The reviewed V7 source set is exactly:
++The reviewed V8 source set is exactly:
+ 
+ 1. `camera_guard.py`;
+ 2. `supervise_camera_guard.py`;
+@@ -132,23 +141,23 @@
+ Two fresh reviews use schema
+ `s45b-c1-numeric-camera-guard-source-review-v4`, kinds `primary` and
+ `adversarial`, status
+-`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V7`, exact five-file
++`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V8`, exact five-file
+ identities, zero real C1/model/formal counters, and empty blockers. They also
+ record externally matchable reviewer task and turn IDs. Review files are not
+ formal attempt paths, so the canonical full synthetic suite remains runnable
+ after a primary review exists.
+ 
+-The later binding is `C1_CAMERA_GUARD_BINDING_V7.json`, schema
++The later binding is `C1_CAMERA_GUARD_BINDING_V8.json`, schema
+ `s45b-c1-numeric-camera-guard-binding-v4`, status
+-`FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V7`. Its independent
+-review is `BINDING_REVIEW_V7.json`, schema
++`FROZEN_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_INPUT_BINDING_V8`. Its independent
++review is `BINDING_REVIEW_V8.json`, schema
+ `s45b-c1-numeric-camera-guard-binding-review-v4`, status
+-`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V7`. Both include
++`PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_BINDING_REVIEW_V8`. Both include
+ task/turn provenance fields. The unbound template has 15 future source/upstream
+ hash nulls. Null is never a wildcard.
+ 
+ After binding review, external orchestration creates
+-`GOVERNANCE_ATTESTATION_V7.json`. It binds the five sources, both source reviews,
++`GOVERNANCE_ATTESTATION_V8.json`. It binds the five sources, both source reviews,
+ binding, binding review, V6 BLOCKED evidence, role/task/turn/UTC events, and its
+ issuer task/turn. Its SHA is supplied separately to the formal command. This
+ extra receipt avoids treating each artifact's own role/time fields as sole
+@@ -178,7 +187,7 @@
+ swap can therefore cause a canonical identity rejection but cannot change the
+ bytes or executable image that run.
+ 
+-Darwin rejects the V5 `RLIMIT_AS=2 GiB` preexec call. V7 never calls
++Darwin rejects the V5 `RLIMIT_AS=2 GiB` preexec call. V8 never calls
+ `RLIMIT_AS`, `RLIMIT_RSS`, or `RLIMIT_DATA`. The forked child sets only the
+ successfully probed `RLIMIT_CPU=120 s` and `RLIMIT_FSIZE=64 MiB`. Memory uses the
+ exact child PID: `proc_pid_rusage(RUSAGE_INFO_V4)` is sampled every 20 ms and the
+@@ -247,7 +256,7 @@
+ 
+ This closes the V5 setsid+stdio-closure escape by preventing descendant creation.
+ If a future worker needs subprocesses, it requires a new containment design,
+-new source version, and two new reviews; V7 cannot simply relax the sandbox.
++new source version, and two new reviews; V8 cannot simply relax the sandbox.
+ 
+ ## 8. Held-FD candidate and exit-gated terminal authority
+ 
+@@ -259,7 +268,7 @@
+ yaw order, cache/batch relation, closure, tensor identity/byte/count, event/source
+ identity, timing, and explicit non-goal sentinel. Only then does it write the
+ pending-only supervisor receipt and barrier. It stages the full
+-V7 **pending terminal candidate**, fsyncs it, hard-links the same inode to
++V8 **pending terminal candidate**, fsyncs it, hard-links the same inode to
+ `terminal_pass_candidate.json`, and verifies the invalid two-link state. Both
+ candidate names contain `passed=false` and `terminal_authority=false`; no
+ filesystem path written by the publication routine contains a truthy PASS.
+@@ -272,7 +281,7 @@
+ 3. rechecks canonical final pathname against that held inode and exact bytes;
+ 4. rechecks the permanent lock, canonical execution directory, and every held
+    evidence FD/path/SHA;
+-5. parses the complete expected V7 pending candidate, not selected fields;
++5. parses the complete expected V8 pending candidate, not selected fields;
+ 6. creates an in-memory candidate observation containing candidate SHA, byte count,
+    inode identity, and evidence-projection SHA while all core FDs are held;
+ 7. performs required evidence/candidate closes and a final output-directory
+@@ -317,7 +326,7 @@
+   BLOCKED primary review immutability;
+ - tensor list/tuple/scalar provenance and pixel-shape pre-open rejection.
+ 
+-Known platform limit: V7 formal containment is macOS-specific and depends on
++Known platform limit: V8 formal containment is macOS-specific and depends on
+ the in-process Seatbelt `sandbox_init` API and libproc behavior proven at runtime.
+ Missing or changed behavior blocks before attempt; there is no fallback. Memory is a fail-closed acceptance
+ and kill monitor, not a kernel allocation reservation. The external governance
+--- v7/C1_CAMERA_GUARD_BINDING_TEMPLATE.json
++++ v8/C1_CAMERA_GUARD_BINDING_TEMPLATE.json
+@@ -1,10 +1,10 @@
+ {
+   "schema": "s45b-c1-numeric-camera-guard-binding-template-v4",
+-  "status": "UNBOUND_SUPERVISED_V7_TEMPLATE_NOT_EXECUTABLE",
+-  "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v7.0.0",
++  "status": "UNBOUND_SUPERVISED_V8_TEMPLATE_NOT_EXECUTABLE",
++  "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v8.0.0",
+   "row": "C1",
+   "placeholder_hashes": 15,
+-  "purpose": "Non-executing template. A different-role binder may copy this to C1_CAMERA_GUARD_BINDING_V7.json only after both fresh V7 source reviews and every exact upstream identity exist. A separate post-binding governance attestation is then required before launch.",
++  "purpose": "Non-executing template. A different-role binder may copy this to C1_CAMERA_GUARD_BINDING_V8.json only after both fresh V8 source reviews and every exact upstream identity exist. A separate post-binding governance attestation is then required before launch.",
+   "known_static_identities": {
+     "c1_generation_manifest": {
+       "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/manifest.json",
+@@ -79,8 +79,8 @@
+     "runtime_capability_preflight_consumes_attempt": false,
+     "runtime_capability_preflight": "fork the already-running interpreter without exec, apply sandbox_init inside the child, enforce CPU/file limits, verify the inherited Mach-O process UUID with Darwin libproc and wait4, and reject fork-setsid-stdio plus posix_spawn attacks before lock",
+     "capability_sha256_bound_in_permanent_lock": true,
+-    "permanent_lock_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/.c1_numeric_camera_guard.lock",
+-    "single_fixed_staging_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/.c1_numeric_camera_guard.lock.staging",
++    "permanent_lock_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/.c1_numeric_camera_guard.lock",
++    "single_fixed_staging_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/.c1_numeric_camera_guard.lock.staging",
+     "atomic_commit": "fully_written_fsynced_default_failure_receipt_hard_linked_to_permanent_lock_then_staging_removed",
+     "default_committed_status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_SEAL",
+     "lock_revalidation": "held_fd_and_canonical_path_dev_inode_mode_nlink_type_size_sha_at_every_trust_boundary",
+@@ -101,23 +101,23 @@
+       "complete exact report and receipt schemas including every planned-sequence, closure, event, camera-tensor identity, counter, source, upstream, and non-goal sentinel field",
+       "successful fsync and required closes before a pending held-FD candidate observation is returned and the exit-gated stdout PASS is constructed"
+     ],
+-    "terminal_candidate_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/execution_01/terminal_pass_candidate.json",
+-    "terminal_candidate_staging_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/execution_01/.terminal_pass_candidate.staging",
++    "terminal_candidate_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/execution_01/terminal_pass_candidate.json",
++    "terminal_candidate_staging_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/execution_01/.terminal_pass_candidate.staging",
+     "terminal_pass_seal_channel": "one complete exact JSON document on supervisor stdout followed by supervisor process exit zero",
+     "terminal_authority_rule": "Every canonical candidate pathname remains passed=false and terminal_authority=false. PASS exists only in the supervisor stdout seal derived from the held candidate/evidence FDs after staging unlink, exact final revalidation, successful required closes, output and parent directory fsyncs, and successful output/lock/parent control-FD closes; later result review must bind that exact stdout document and observed exit zero.",
+     "atomic_terminal_commit": "the pending candidate first has two names; after staging unlink the supervisor retains final/evidence FDs, rejects canonical rename or unlink-recreate, consumes the exact full pending document, performs all required closes and fsyncs, closes every filesystem control FD and the retained worker-source FD, then emits the exit-gated stdout PASS seal",
+-    "terminal_failure_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/execution_01/terminal_seal_failure.json"
++    "terminal_failure_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/execution_01/terminal_seal_failure.json"
+   },
+   "governance_attestation_requirement": {
+-    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/GOVERNANCE_ATTESTATION_V7.json",
++    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/GOVERNANCE_ATTESTATION_V8.json",
+     "sha256": null,
+     "phase": "created only after source reviews, binding, and binding review; supplied as an exact formal CLI identity",
+     "trust_boundary": "external orchestrator provenance is required; candidate Python validates cross-document consistency but does not claim to authenticate Codex identities"
+   },
+-  "formal_output_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v7/execution_01",
++  "formal_output_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/execution_01",
+   "created_utc": null,
+   "author_role": null,
+   "author_task_id": null,
+   "author_turn_id": null,
+-  "note": "The 15 source/upstream hash nulls are deliberate absent future identities, never wildcard values. The separate governance SHA is post-binding and is not included in placeholder_hashes. V6 tests and its BLOCKED review do not authorize V7; two pairwise-distinct non-author fresh V7 reviews are required."
++  "note": "The 15 source/upstream hash nulls are deliberate absent future identities, never wildcard values. The separate governance SHA is post-binding and is not included in placeholder_hashes. V6 tests and its BLOCKED review do not authorize V8; two pairwise-distinct non-author fresh V8 reviews are required."
+ }
+--- v7/synthetic_selftest.py
++++ v8/synthetic_selftest.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Independent source and synthetic attack suite for S45B V7.
++"""Independent source and synthetic attack suite for S45B V8.
+ 
+ Only candidate/reference source text and generated temporary state are opened.
+ No real C1 manifest, receipt, event, tensor, image, or pixel is opened, and no
+@@ -30,9 +30,9 @@
+     "execution_01",
+     ".c1_numeric_camera_guard.lock",
+     ".c1_numeric_camera_guard.lock.staging",
+-    "C1_CAMERA_GUARD_BINDING_V7.json",
+-    "BINDING_REVIEW_V7.json",
+-    "GOVERNANCE_ATTESTATION_V7.json",
++    "C1_CAMERA_GUARD_BINDING_V8.json",
++    "BINDING_REVIEW_V8.json",
++    "GOVERNANCE_ATTESTATION_V8.json",
+ )
+ 
+ EXPECTED_V6_HISTORY = {
+@@ -165,14 +165,14 @@
+ 
+ def assert_formal_paths_absent():
+     present = formal_paths_present(HERE)
+-    require(not present, "formal V7 path unexpectedly exists: " + repr(present))
++    require(not present, "formal V8 path unexpectedly exists: " + repr(present))
+ 
+ 
+ def review_files_do_not_break_source_suite():
+-    with tempfile.TemporaryDirectory(prefix="s45b_v7_review_phase_") as raw:
++    with tempfile.TemporaryDirectory(prefix="s45b_v8_review_phase_") as raw:
+         root = Path(raw)
+-        (root / "SOURCE_REVIEW_PRIMARY_V7.json").write_text("{}\n")
+-        (root / "SOURCE_REVIEW_ADVERSARIAL_V7.json").write_text("{}\n")
++        (root / "SOURCE_REVIEW_PRIMARY_V8.json").write_text("{}\n")
++        (root / "SOURCE_REVIEW_ADVERSARIAL_V8.json").write_text("{}\n")
+         require(not formal_paths_present(root),
+                 "Completed source reviews were confused with formal attempt paths")
+ 
+@@ -236,12 +236,69 @@
+         raise AssertionError("pixel-shaped tensor passed the pre-open shape gate")
+ 
+ 
++def final_cache_anchor_regression(worker):
++    """Compare actual V7/V8 functions on opposing and aligned tolerance bands."""
++    import copy
++    legacy_path = HERE.parent / "S45B_c1_numeric_camera_guard_supervised_v7/camera_guard.py"
++    require(sha256(legacy_path) == "6f60c290888dd3ee66aabf570d87136c8026f25d09372d3d1e42f4ba9c0bc34c",
++            "preserved V7 numeric witness source changed")
++    _, _, _, legacy = load_exact_source(legacy_path, "_s45b_v7_anchor_witness")
++    records = []
++    for field in ("pose", "K", "both"):
++        for direction in (-1.0, 1.0):
++            for valid_at_final in (False, True):
++                base = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0],
++                        [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
++                k = [[500.0, 0.0, 288.0], [0.0, 500.0, 288.0], [0.0, 0.0, 1.0]]
++                poses = [worker.expected_pose(base, yaw) for yaw in worker.EXPECTED_YAW]
++                ks = [copy.deepcopy(k) for _ in poses]
++                shift = direction * worker.TOLERANCE * (1.5 if valid_at_final else -0.75)
++                for index in range(1, 9):
++                    if field in ("pose", "both"):
++                        poses[index][0][3] += shift
++                    if field in ("K", "both"):
++                        ks[index][0][0] += shift
++                commits = copy.deepcopy([
++                    {"c2ws": poses[:5], "Ks": ks[:5]},
++                    {"c2ws": poses[:9], "Ks": ks[:9]},
++                ])
++                # deepcopy the two cache entries independently: ID0 must differ.
++                commits = [copy.deepcopy(commits[0]), copy.deepcopy(commits[1])]
++                if field in ("pose", "both"):
++                    commits[1]["c2ws"][0][0][3] += direction * worker.TOLERANCE * 0.75
++                if field in ("K", "both"):
++                    commits[1]["Ks"][0][0][0] += direction * worker.TOLERANCE * 0.75
++                batches = copy.deepcopy([
++                    {"c2ws": poses[1:5], "Ks": ks[1:5]},
++                    {"c2ws": poses[5:9], "Ks": ks[5:9]},
++                ])
++                outcomes = {}
++                for name, module in (("v7", legacy), ("v8", worker)):
++                    try:
++                        result = module.evaluate_numeric_guard(batches, commits)
++                    except module.GuardInvalid:
++                        outcomes[name] = False
++                    else:
++                        require(result["status"] == "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
++                                "numeric guard returned an unexpected result")
++                        outcomes[name] = True
++                require(outcomes["v8"] is valid_at_final,
++                        "V8 disagrees with the final-anchor tolerance band")
++                require(outcomes["v7"] is (not valid_at_final),
++                        "preserved V7 failed to reproduce the first-anchor discrepancy")
++                records.append({"field": field, "direction": direction,
++                                "expected_final_anchor_pass": valid_at_final, **outcomes})
++    require(len(records) == 12, "anchor regression case count differs")
++    return {"status": "PASS_SYNTHETIC_FINAL_CACHE_ANCHOR_REGRESSION", "cases": records,
++            "real_data_reads": 0, "model_runs": 0}
++
++
+ def main():
+     assert_formal_paths_absent()
+     review_files_do_not_break_source_suite()
+-    worker_raw, worker_text, worker_tree, worker = load_exact_source(WORKER, "_s45b_v7_worker")
++    worker_raw, worker_text, worker_tree, worker = load_exact_source(WORKER, "_s45b_v8_worker")
+     supervisor_raw, supervisor_text, supervisor_tree, supervisor = load_exact_source(
+-        SUPERVISOR, "_s45b_v7_supervisor",
++        SUPERVISOR, "_s45b_v8_supervisor",
+     )
+ 
+     forbidden = {"numpy", "torch", "PIL", "cv2", "diffusers"}
+@@ -280,7 +337,7 @@
+     supervised = supervisor.synthetic_selftest()
+     require(supervised["status"] == "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+             "supervisor attack suite failed")
+-    required_v7_attacks = {
++    required_v8_attacks = {
+         "prespawn_create_only_pair_child_inherited_fd_publication",
+         "prespawn_report.json_substitution",
+         "prespawn_worker_receipt.json_substitution",
+@@ -295,12 +352,12 @@
+         "complete_schema_rejects_camera_tensor_identity_nested_field",
+         "complete_schema_rejects_not_evaluated_sentinel",
+     }
+-    require(required_v7_attacks.issubset(supervised["checks"])
++    require(required_v8_attacks.issubset(supervised["checks"])
+             and supervised["checks"]["complete_report_top_level_deletion_matrix"]
+             == len(supervisor.REPORT_KEYS)
+             and supervised["checks"]["complete_worker_receipt_top_level_deletion_matrix"]
+             == len(supervisor.WORKER_RECEIPT_KEYS),
+-            "V7 pre-acquisition or complete-schema attack matrix is incomplete")
++            "V8 pre-acquisition or complete-schema attack matrix is incomplete")
+ 
+     base = [
+         [0.0, -1.0, 0.0, 1.0], [1.0, 0.0, 0.0, -2.0],
+@@ -332,7 +389,7 @@
+             and "spawn_contained" not in formal_segment
+             and "open_regular_lease(output_fd, FORMAL_OUT, REPORT_NAME)" not in formal_segment
+             and "open_regular_lease(output_fd, FORMAL_OUT, WORKER_RECEIPT_NAME)" not in formal_segment,
+-            "formal supervisor bypasses V7 containment/capability binding")
++            "formal supervisor bypasses V8 containment/capability binding")
+ 
+     fork_segment = ast.get_source_segment(
+         supervisor_text, named_function(supervisor_tree, "_fork_loaded_entry"),
+@@ -425,13 +482,13 @@
+ 
+     template = json.loads(TEMPLATE.read_text())
+     require(template.get("schema") == "s45b-c1-numeric-camera-guard-binding-template-v4"
+-            and template.get("status") == "UNBOUND_SUPERVISED_V7_TEMPLATE_NOT_EXECUTABLE"
++            and template.get("status") == "UNBOUND_SUPERVISED_V8_TEMPLATE_NOT_EXECUTABLE"
+             and template.get("placeholder_hashes") == 15,
+-            "V7 binding template is not explicitly unbound")
++            "V8 binding template is not explicitly unbound")
+     nulls = sum(value is None for value in template["source_set"].values())
+     nulls += sum(item["sha256"] is None for item in template["upstream"].values())
+     require(nulls == 15 and template["governance_attestation_requirement"]["sha256"] is None,
+-            "V7 template null/governance boundary differs")
++            "V8 template null/governance boundary differs")
+ 
+     history = {name: sha256(V6 / name) for name in EXPECTED_V6_HISTORY}
+     require(history == EXPECTED_V6_HISTORY, "V6 source/review history changed")
+@@ -445,11 +502,12 @@
+             "V6 two-CRITICAL/two-MAJOR correction evidence is not preserved")
+ 
+     selective_decoder_tests(worker)
++    anchor_regression = final_cache_anchor_regression(worker)
+     assert_formal_paths_absent()
+     output = {
+         "schema": "s45b-c1-numeric-camera-guard-independent-synthetic-test-v4",
+-        "status": "PASS_V7_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
+-        "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v7.0.0",
++        "status": "PASS_V8_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
++        "version": "S45B-prebound-output-fork-bound-interpreter-complete-schema-v8.0.0",
+         "python": sys.version,
+         "identities": {
+             "camera_guard.py": hashlib.sha256(worker_raw).hexdigest(),
+@@ -462,6 +520,7 @@
+         },
+         "checks": {
+             "source_compile_and_no_model_import": "PASS",
++            "final_cache_anchor_twelve_boundary_cases": anchor_regression,
+             "worker_pending_only_supervisor_terminal_constructor": "PASS",
+             "exact_protocol_template_selftest_binding": "PASS",
+             "B0_source_segments_and_yaw_math": "PASS",
