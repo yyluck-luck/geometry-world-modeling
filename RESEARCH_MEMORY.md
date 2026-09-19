@@ -1471,3 +1471,29 @@ GEN3C 的是**陈旧标志 → 非法状态被放行**(静态预测的 error/inv
 二者不是同一种"后果",不能在同一张表里当作同质证据聚合。这一点在写作时必须显式处理,不得模糊。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回;本轮零 GPU。
+
+## 2026-09-19 我自己的 oracle 提案:两个 HIT 可统一为"代码库自我声明的生命周期"
+
+R14-C 提出的最强反对意见是:没有 reset contract 时,"字段没被清"不等于 defect——可能是有意持久化。
+我认为这两个已验证实例给出了**不需要询问作者、也不是风格偏好**的 oracle,且二者是同一族:
+
+| 系统 | 意图在**哪里被代码库自己声明** | 违反形式 |
+|---|---|---|
+| **GEN3C** | **另一层**:`gen3c_persistent.py:551-553` `clear_cache()` 把模型自己的 `self.model_was_seeded = False` 清了 | 服务端 `gui/api/server_base.py:60` 的 `self.model_seeded` 从不被清 |
+| **VMem** | **构造函数**:`initial_threshold` 在 `__init__`(`pipeline.py:47-135`)中**出现 0 次**,故 fresh 对象根本没有该属性 | 混合序列 + `reset()` 之后,该属性存在且为 `1e8` |
+
+**统一表述(构造器等价性 / 跨层一致性 oracle):**
+> `reset()` 应把对象恢复到与**新构造对象**行为等价的状态;
+> 若同一概念在多层各有表示,生命周期路径应一致地清理它们。
+> **参照点是代码库自身的构造函数与自身的清理声明,不是审计者的偏好。**
+
+已验证的支撑事实(我自己复核):
+- `initial_threshold` 在 VMem `__init__` 中 **0 次出现**(grep 计数,行范围 47–135);
+- 我们自己的 `arm_state_isolation_test.py` 早已把这件事写进代码:`:70` 先 `pipe.reset()`,
+  `:79-80` 仍必须 `delattr(pipe, 'initial_threshold')`,并在 `:85` 记录
+  `FRESH_HAS_THRESHOLD = hasattr(pipe, 'initial_threshold')`、`:185` 记录 `reset_alone_is_insufficient`。
+  **即:该 oracle 不是事后为论文构造的,它是我们在做别的事情时被迫实现的。**
+
+**注意边界:** 这个 oracle 必须容许合法例外(已加载权重、刻意保温的缓存、RNG 状态等),
+不能退化为"reset 必须清空一切"。它约束的是**语义状态**,不是资源状态。
+该区分如何形式化,是这条路线成立与否的关键,已交 R15-E 压力测试。
