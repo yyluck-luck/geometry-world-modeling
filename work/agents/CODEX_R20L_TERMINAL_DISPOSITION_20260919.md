@@ -11,7 +11,7 @@ Evidence for the stopping condition: the project records `new_method_validated=f
 the proposal alignment says the only implemented intervention did not meet its predeclared threshold
 and that all other mechanism candidates were closed (`proposal_alignment_20260919.md:23-36`);
 the closeout section explicitly rules out further candidate search, training, and new generation
-(`proposal_alignment_20260919.md:151-169`).
+(`proposal_alignment_20260919.md:151-169`; `RESEARCH_MEMORY.md:1106-1162`).
 
 ## Verification boundary
 
@@ -189,7 +189,7 @@ review, not a recorded budget. It is valuable quality control but does not fill 
 A maintainer statement could clarify whether a relation is an intended public contract or whether the
 GEN3C admission behavior is considered a bug. It cannot supply the missing measured consequence and
 cannot make two consumers one method. It is also outside the current authorization: no maintainer
-contact has been made and outbound messages are forbidden (`AGENTS.md:15`; `RESEARCH_MEMORY.md:2178-2187`).
+contact has been made and outbound messages are forbidden (`AGENTS.md:15`; `AGENTS.md:15`).
 **UNVERIFIED cost estimate:** no GPU but an unpredictable response delay of days to weeks. A non-response
 would unlock nothing; a reply that merely acknowledges the code would still not validate behavior.
 
@@ -199,7 +199,7 @@ would unlock nothing; a reply that merely acknowledges the code would still not 
 future is a human C6 decision to accept an audit/measurement deliverable; that decision has not been
 made, and it would not turn the work into a method. Until then, preserve the existing negative and
 partial results exactly as recorded: no method validated, no novelty authorized, no prevalence claim,
-and no further GPU work (`RESEARCH_MEMORY.md:2033-2057`, `:2151-2159`; `AGENTS.md:45`).
+and no further GPU work (`RESEARCH_MEMORY.md:1110-1162`, `:2033-2057`, `:2151-2159`; `AGENTS.md:45`).
 
 ## Q5 — What this project should tell its supervisor
 
