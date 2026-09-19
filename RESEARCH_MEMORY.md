@@ -1802,3 +1802,42 @@ published-result impact、新方法验证。
 连续两轮执行前审查:第一轮拦下一个会被"你证明的是自己桩"打穿的设计,
 第二轮拦下一次为有限证据增量而做的重依赖环境搭建。
 **两次都是在"改还合法"的时刻。成本各一次 codex 调用。**
+
+## 2026-09-19 CausVid oracle 的血缘关系:**明文确认**,但须守住一条边界
+
+我此前把"Self-Forcing 是 CausVid 代码的后继"作为**推断**(同名文件、同类结构、同样的注释)。
+**现已明文确认,不再是推断:**
+
+`guandeh17/Self-Forcing` `README.md:98` 原文:
+> "This codebase is **built on top of the open-source implementation of
+> [CausVid](https://github.com/tianweiy/CausVid)** by Tianwei Yin and the Wan2.1 repo."
+
+旁证(全部 grep 实见):
+- `SF/model/causvid.py:8` — `class CausVid(BaseModel)`,即在自身代码库内实现 CausVid 作为对照;
+- `SF/model/__init__.py:2,9` — 导出 `CausVid`;`trainer/distillation.py:61-62` — `distribution_loss == "causvid"` 时实例化;
+- `SF/wan/modules/causal_model.py:727` — "See Algorithm 2 of CausVid paper https://arxiv.org/abs/2412.07772";
+- `SF/model/ode_regression.py:16` — "See Sec 4.3 of CausVid";
+- `SF/README.md:83` — ODE 初始化"与 CausVid repo 所述过程相同";
+- 文件对应:`SF/pipeline/causal_inference.py` ↔ `CV/causvid/models/wan/causal_inference.py`。
+
+### 可辩护的表述与不可辩护的表述
+
+**可辩护:** 明确声明建立在 CausVid 开源实现之上的后继代码库,
+在**对应分支**中包含 KV index 重置(`# reset kv cache` → `global_end_index` / `local_end_index`),
+而 CausVid 在同一位置**没有**。
+
+**不可辩护(必须避免):** "Self-Forcing 修复了 CausVid 的 bug。"
+补上那段重置可能是 (a) 有意修复,也可能是 (b) Self-Forcing 不同 rollout 结构的必然要求。
+**两者本轮都未确立**,不得择一宣称。
+
+### 这对 oracle 强度的影响
+
+R15-E 的 oracle 排序中,"跨层 duplicate-state consistency"只排第 4,**不能单独定罪**。
+但本例不是同一代码库内的跨层比较,而是**明文承继关系下的同位置差异**——
+证据来源是**后继作者自己的 README 声明**,而非审计者的相似性判断。
+**这把它从"我认为应该清"提升为"生态中最接近该代码的实现在同一位置清了"。**
+仍需回答的是:该差异是否具有公共可观察后果(条件 5),以及它是否构成 CausVid 的
+**公共生命周期合同**违反——后者尚未确立,因为 **CausVid 没有 reset 方法,也没有相应文档合同**。
+
+故 CausVid 当前状态:**静态 HIT,oracle 证据最强,但仍未达到 R15-E 要求的
+"公开合同 + 事前冻结关系 + 公共可观察违反"三件套。**
