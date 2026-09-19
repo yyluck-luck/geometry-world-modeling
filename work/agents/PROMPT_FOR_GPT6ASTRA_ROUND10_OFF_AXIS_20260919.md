@@ -55,29 +55,37 @@ occupied, algebraically constrained, or open. My own list, incomplete and unveri
 **Is (d) or (e) genuinely less occupied than (a)–(c), or do I only think so because I have not
 searched them?**
 
-## 3. One measurement that points at (d), offered honestly
+## 3. Axis (d)'s one concrete instance — I killed it myself today
 
-On my fixed 14-window panel, the shipped retrieval's advantage over a fixed-offset context, by target
-offset:
+I had one live observation pointing at axis (d): on my fixed 14-window panel, the shipped retrieval's
+advantage over a fixed-offset context by target offset was **+2.950 / +0.398 / −0.180 / −0.321 dB** —
+a 3.3 dB swing crossing zero, within the same arms and the same generation calls.
 
-| offset | +60 | +75 | +90 | +105 |
-|---|---|---|---|---|
-| mean | **+2.950 dB** | +0.398 | −0.180 | −0.321 |
-| windows positive | 13/14 | 7/14 | 5/14 | 6/14 |
+**Before putting it to you as a candidate, I ran the cheap checks. It decomposes into two known
+effects.**
 
-A **3.3 dB swing, crossing zero**, within the same arms and the same generation calls.
+**Check 1 — is it just "closer context helps"?** No, and the reason is exact: the retrieval arm's
+nearest context frame is **always exactly 10 frames closer** than the fixed-offset arm's (retrieval
+takes the bank end at +55, fixed-offset takes +45). The gap advantage is **constant at 10 across all
+four target positions**, so it cannot by itself produce a sign change.
 
-**Caveats I am stating so you do not have to extract them.** These are framewise PSNRs averaged
-across targets, which is a **different aggregation** from my prespecified pooled-MSE endpoint — the
-pooled contrast is +0.242 dB and the framewise is +0.712 dB, and one is not a decomposition of the
-other. Target offset, camera pose, visible content and slot position all co-vary, so this isolates
-**nothing causally**. It is an observation about effects by target position, not a mechanism.
+**Check 2 — context spread.** Retrieval's context spans **10 frames** in 10 of 12 windows, clustered
+at the bank end; the fixed-offset arm always spans 45. The two windows where retrieval happened to
+span 45 as well (`scene_14 w150`, `w200`) **stay positive at the far targets** (+1.624, +0.760). The
+sign flips in only **6 of 14 windows**.
 
-**Q3. Does this observation point at a real question on axis (d), or is it fully explained by
-"extrapolate further, do worse", which needs no paper?** The specific thing that interests me is the
-**sign change**: a retrieval policy that is strongly better nearby and mildly worse far away means a
-single aggregate number for a retrieval policy is a design artefact of where you chose to evaluate.
-Is that occupied, trivial, or a question?
+So the profile is: **proximity advantage with diminishing returns as the target recedes, plus a
+clustering disadvantage that dominates at range.** The second is the Context-as-Memory result
+(FOV+Non-adj, 19.17 → 20.11). The "sign change" is their crossover, not a new question.
+
+**I am telling you this because it changes what I am asking.** I am not asking you to evaluate that
+observation — it is closed. I am asking whether axis (d) has anything else, given that its one
+concrete instance collapsed back onto axis (a).
+
+**Q3. Does axis (d) survive the loss of that instance?** If the only question I could formulate on
+the query side reduces to context spread, that is evidence the query side is not a separate axis for
+this consumer at all — the target schedule is fixed and the only thing that varies is which sources
+happen to be near it. Say so if that is the honest reading.
 
 ## 4. The filter I want applied to whatever you propose
 
