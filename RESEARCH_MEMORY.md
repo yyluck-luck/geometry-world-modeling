@@ -1736,3 +1736,69 @@ CosmosBaseModel()                     → 无参构造成功
 
 这条记录支持一条更一般的判断:**执行前审查的价值可以被事后独立验证,不必只凭信任。**
 本例中它的三条反对里,至少这一条已由实测确认。
+
+## 2026-09-19 R17-I 分解审查:分解**在限定后成立**;E1 裁定为 **DESIGNED_NOT_EXECUTED**
+
+### 我的表述被纠正(接受)
+
+我写"**任意**异常都会留下 stale=True"。**过宽。** 可辩护的命题必须限定为:
+
+> 在**已成功 seed** 的实例上,一个公开 schema 可表达的多帧无 depth 请求,
+> 若**实际进入 released seeding call** 并抛出普通异常,则 wrapper 会留下外层 stale flag,admission gate 放行。
+
+四条边界:
+1. 失败前外层 flag 若为 `False`,失败后仍为 `False` —— **必须是"成功 seed A → 失败 seed B"序列**;
+2. 异常必须发生在**清理之后、`:71` 之前**。`:47` 的 torch 导入、`clear_cache`、history `.clear()`、
+   `req.world_to_cameras()` 处的失败**不适用**该结论;
+3. "可达"只能读作**静态的 route-to-wrapper 分支可达性**,不是每种部署配置都已确认;
+4. 直接构造 `CosmosBaseModel` 不足 —— 缺成员导致的 `AttributeError` 是 harness 初始化失败,不是目标异常。
+
+### 我 preflight 结论的自我更正
+
+我记了"Tier A 无需 torch"。**只对了一半。** 模块确可导入,但 released `seed_model` 的**第一条语句**
+(`server_cosmos_base.py:47`)就是 `import torch`。我实测:无 torch 时
+`asyncio.run(m.seed_model(None))` → `ModuleNotFoundError: No module named 'torch'`,
+**且发生在任何清理之前**——恰好是上面边界 ② 的反例,由我亲手造出。
+故 **"clean venv 无 torch" 只证明 module importability,不证明可原样调用 released wrapper。**
+
+### GEN3C HIT 的范围被收紧(我复核)
+
+`server.py:77-84`:debug 模式或 `model_name=="debug"` → `DebugInferenceModel`;
+仅 `cosmos`/`cosmos-predict1` → `CosmosModel`。
+`server_cosmos.py:92-96`:**仅当 `gpu_count == 1`** 才 `self.model = Gen3cPersistentModel(args)`,
+否则 `MultiGPUInferenceAR`。
+
+**精确区分:stale-flag 缺陷位于基类 `CosmosBaseModel.seed_model`,与 GPU 配置无关;
+而发布版 `:208` 这个具体触发源是单 GPU 路径特有的。** `MultiGPUInferenceAR` 是否有同形触发源:**未审计**。
+
+### Q2:审稿人视角
+
+审稿人**可以**接受"released raise 的静态可达性 + wrapper 的异常无关控制流"作为
+**代码级条件性缺陷**,因为两个前提都能在 source 上独立核查;端到端运行不是该窄命题的逻辑必要条件。
+**但不会把它等同于 end-to-end released-trigger demonstration。** 运行仍承担独立证据职责:
+证明所用 checkout/导入路径/路由确实选中这些 released 文件、合法请求确实穿过序列化与 dispatch、
+具体配置确实是 `Gen3cPersistentModel`、观察到真实异常与 traceback、以及可被他人复现。
+
+**`request_inference`(`server_base.py:128`)只同步创建 Task;拿到 Task/HTTP 202 仍是 admission,不是 downstream execution。**
+真实 inner cache 的首次相关使用在 `gen3c_persistent.py:308`。
+
+### Q4 裁定:**不值得为 E1 现在建 Tier B**
+
+Tier B 的增量只是把 S2 的异常归属从 harness 注入提升为 released `:208` 实际调用;
+它**仍不自动提供空 cache 的 downstream runtime 证据**,更不提供生成质量或冻结权重影响。
+在这个成本/证据增量比下,不应为一个较窄的审稿人争议建立重依赖环境。
+
+**本轮诚实裁决:E1 = `DESIGNED_NOT_EXECUTED`。静态结论单独保留,标签为
+`STATIC_RELEASED_REACHABILITY_PLUS_EXCEPTION_AGNOSTIC_WRAPPER_CONTROL_FLOW`。**
+
+**禁止使用的标签(记录在案以防日后漂移):** `MEASURED_RELEASED_TRIGGER`、`END_TO_END_RELEASED_FAILURE`、
+"released `:208` observed"、真实 inference/runtime consequence、视频/图像质量、prevalence、
+published-result impact、新方法验证。
+若将来注入 `sys.modules['torch']` shim 执行,只能标 `MEASURED_WRAPPER_SEMANTICS_UNDER_DEPENDENCY_SHIM`,
+**不得称 native runtime**。
+
+### 方法论
+
+连续两轮执行前审查:第一轮拦下一个会被"你证明的是自己桩"打穿的设计,
+第二轮拦下一次为有限证据增量而做的重依赖环境搭建。
+**两次都是在"改还合法"的时刻。成本各一次 codex 调用。**
