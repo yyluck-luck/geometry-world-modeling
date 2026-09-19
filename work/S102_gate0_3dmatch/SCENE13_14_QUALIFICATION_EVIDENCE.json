@@ -1,0 +1,42 @@
+{
+  "schema": "gwm-3dmatch-scene-qualification-v1",
+  "recorded_at_local": "2026-09-16T01:45:56.823781+08:00",
+  "archive_hashes": {
+    "scene_13": "9fa3b934b0fa747573d8a3bf40570b8fec9987e43405ec682efe8c4a2c0c7684",
+    "scene_14": "d3011fe0c00c133b31899ed24c7bf49a00541a0c39d218c3b5647b3d781531b6"
+  },
+  "source_contract_evidence": {
+    "camera_intrinsics_sha256_scene_13": "7b3d9cbd5616f9a714cf1917e023c12cd5847dff3f55636f256fdad5381e4089",
+    "camera_intrinsics_scene_13_and_14": "[[540.021232,0,320],[0,540.021232,240],[0,0,1]]",
+    "rgb_shape_mode": "640x480 RGB",
+    "depth_shape_dtype_observed": "640x480 PNG decoded as int32 by PIL; source contract is 16-bit PNG",
+    "depth_invalid_rule": "raw==0",
+    "depth_scale": "raw millimetres; z_m=raw/1000",
+    "pose": "4x4 camera-to-world, metres, RGB-D Mapping estimate",
+    "association": "same frame stem; no hardware timestamp claim"
+  },
+  "sample_audit": {
+    "scene_13_seq_01_frame_000000": {
+      "depth_zero_count": 61908,
+      "depth_max_raw": 2767,
+      "pose_present": true
+    },
+    "scene_14_seq_01_frame_000000": {
+      "depth_zero_count": 60077,
+      "depth_max_raw": 2680,
+      "pose_present": true
+    }
+  },
+  "roles": {
+    "scene_13": "calibration/development only",
+    "scene_14": "independent scene-heldout candidate for future RGB-D scoring"
+  },
+  "limitations": [
+    "mapping pose is an estimated reference, not mocap ground truth",
+    "source page does not prove no pretraining overlap",
+    "one sequence per scene; no dynamic-scene claim",
+    "pixel-center and exact preprocessing transform remain to be frozen"
+  ],
+  "status": "QUALIFIED_FORMAT_SAMPLE_PENDING_PRE_RUN_ADAPTER_AND_ISOLATION",
+  "recorded_at_note": "recorded immediately after sample audit; see research_events for append time"
+}

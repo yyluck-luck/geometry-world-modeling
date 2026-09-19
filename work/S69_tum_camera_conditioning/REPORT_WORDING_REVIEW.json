@@ -1,0 +1,123 @@
+{
+  "schema": "s69-report-wording-review-v1",
+  "status": "PASS_S69_REPORT_WORDING_REVIEW",
+  "reviewed_utc": "2026-09-09T02:30:14.460776+00:00",
+  "reviewer_role": "/root/negative_result_question_triage",
+  "report_author_role": "/root",
+  "evidence_kind": "different_author_team_internal_text_and_metadata_review",
+  "reviewed_report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S69_CAMERA_CONDITIONING_RESULT.md",
+    "sha256": "8882c76cc1ba3ce561095b5ee3232363c345fba5d31ff29c868d68375c294f44",
+    "bytes": 6969,
+    "mode": "0644"
+  },
+  "initial_report_sha256": "791a8dfc1f6c720d3e8abfe8e0985c818335637d7b12f5751b039dab7c3ab377",
+  "final_report_sha256": "8882c76cc1ba3ce561095b5ee3232363c345fba5d31ff29c868d68375c294f44",
+  "only_two_text_replacements_verified": true,
+  "evidence": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S69_CAMERA_CONDITIONING_RESULT.md",
+      "sha256": "8882c76cc1ba3ce561095b5ee3232363c345fba5d31ff29c868d68375c294f44",
+      "bytes": 6969,
+      "mode": "0644"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/INDEPENDENT_RESULT_REVIEW.md",
+      "sha256": "522043aab08392e09835d9d5337da86aad8fc993d06fc24dc262265c69978484",
+      "bytes": 3321,
+      "mode": "0444"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/INDEPENDENT_RESULT_REVIEW.json",
+      "sha256": "8d9f3f2eff39d4995c2723b359cbfeaa1ee073b0b5646e09f0a7afb4c734cbdd",
+      "bytes": 47205,
+      "mode": "0444"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/GEMINI_FACTCHECK.md",
+      "sha256": "7fc13f50ade4bc6469d605fca4e57e28089d3e2440ae6d257f1c75148e71fca0",
+      "bytes": 6708,
+      "mode": "0444"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/SOURCE_PLAN.md",
+      "sha256": "ed216af7705ccee7d04067259b9e0686d6836c3bd813966f3df4528c8b68f466",
+      "bytes": 10773,
+      "mode": "0444"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/ROOT_FINAL_RESULT_ACCEPTANCE.json",
+      "sha256": "e2eae97c8d541d6bf127dbd61137e3ad1d9f8af3fdfce869bf696be3613506c4",
+      "bytes": 8635,
+      "mode": "0444"
+    }
+  ],
+  "blockers": [],
+  "unresolved_notes": [],
+  "resolved_notes": [
+    {
+      "id": "W1",
+      "initial_severity": "MINOR_NONBLOCKING",
+      "line": 15,
+      "status": "RESOLVED_IN_FINAL_REPORT",
+      "initial_wording": "**换一组参考照片，原模型会连带改变内部坐标缩放。** 即使两组要拍摄的物理位置相同，最终输入模型的部分几何数字也会不同。因此，后续若画面变化，不能马上解释成“参考照片内容更好”或“相机位置改变”。",
+      "review_finding": "任意参考替换都会改尺度的表述过宽；应限定本次A/B。",
+      "final_wording": "**本次从A组换到B组参考照片，原条件组装实际改变了内部坐标缩放。** 两组要拍摄的物理位置相同，最终输入模型的部分几何数字却不同。因此，后续若画面变化，不能马上解释成“参考照片内容更好”或“相机位置改变”。"
+    },
+    {
+      "id": "W2",
+      "initial_severity": "MINOR_NONBLOCKING",
+      "line": 30,
+      "status": "RESOLVED_IN_FINAL_REPORT",
+      "initial_wording": "目前最值得继续检验的问题是：**参考集合改变时，内部坐标归一化是否会影响生成质量，以及影响有多大。** 当前只确认了输入变化的结构，尚未证明模型对此敏感，更未证明改变缩放能改进结果。普通尺度归一化和置信度方法已有大量前例；这不是已经成立的新方法。",
+      "review_finding": "S70三臂先检验整套context作用，不能单独识别尺度机制。",
+      "final_wording": "目前先检验：**整套参考集合从A换到B，实际画面是否改变、质量是否改善。** 内部坐标归一化是后续可定位的候选影响路径，当前三次生成对照无法单独回答它的影响。现在只确认了输入变化的结构，尚未证明模型对此敏感，更未证明改变缩放能改进结果。普通尺度归一化和置信度方法已有大量前例；这不是已经成立的新方法。"
+    }
+  ],
+  "checks": [
+    "时间、A/B/目标身份、3旧加6新相机、150结构条件和40数值比较与已接受核验一致。",
+    "表格和容差表述与JSON已保存摘要一致；40比较含37准入与3描述性预测，未被当作独立科学样本。",
+    "Gemini错误出处、虚构depth/warp及一次重放方差均未恢复为正面结论。",
+    "S70明确只有计划、执行程序未完成且未启动，未来采样/解码/评分未冒称实际完成。",
+    "物理标定、目标暴露、GT输入、ft-mse、原C2失败、无新生成收益及NO_METHOD_SELECTED边界完整。",
+    "最终报告相对初稿只有已审的两段改动；反向文字替换后的SHA精确对应初稿。"
+  ],
+  "scope": {
+    "text_metadata_files_read": [
+      "docs/S69_CAMERA_CONDITIONING_RESULT.md",
+      "work/S69_tum_camera_conditioning/INDEPENDENT_RESULT_REVIEW.md",
+      "work/S69_tum_camera_conditioning/INDEPENDENT_RESULT_REVIEW.json",
+      "work/S69_tum_camera_conditioning/GEMINI_FACTCHECK.md",
+      "work/S70_fixed_context_generation/SOURCE_PLAN.md",
+      "work/S69_tum_camera_conditioning/ROOT_FINAL_RESULT_ACCEPTANCE.json"
+    ],
+    "independent_json_sections_reviewed": [
+      "status",
+      "reviewed_utc",
+      "blockers",
+      "actual_external_execution",
+      "checked_author_execution",
+      "counts",
+      "numeric_summary",
+      "predictions",
+      "between_arm_changes",
+      "limits"
+    ],
+    "scientific_arrays_read": 0,
+    "RGB_bytes_read": 0,
+    "depth_bytes_read": 0,
+    "GT_numeric_file_bytes_read": 0,
+    "weight_bytes_read": 0,
+    "models_run": 0,
+    "scientific_numeric_recomputations": 0,
+    "new_web_retrievals": 0,
+    "report_edited_by_reviewer": false
+  },
+  "limits": [
+    "只核文字是否忠实于已接受证据；本轮未从科学数组重算数值。",
+    "只绑定最终报告SHA，不覆盖未来修改。",
+    "S70计划的S69审查待完成是02:18:46Z历史状态；02:25:18Z接受解决该依赖，但不等于S70实现或生成。",
+    "本票不是生成启动许可，也不新增控制臂或创新主张。"
+  ],
+  "new_method_validated": false
+}

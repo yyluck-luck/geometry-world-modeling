@@ -1,0 +1,54 @@
+{
+  "schema": "s103-predictor-contract-fix-receipt-v1",
+  "recorded_at_local": "2026-09-16T13:35:19+08:00",
+  "scope": "source and synthetic software checks only; no model/data/future outcome/GPU",
+  "status": "PASS_SOFTWARE_ONLY",
+  "defects_fixed": [
+    {
+      "defect": "camera_intrinsics.json was read directly but absent from the hashed predictor manifest",
+      "repair": "camera_intrinsics is now a required thirteenth manifest record, read through the same SHA/byte-checked helper, and explicitly accepted/requires exactly once by the Gate0 validator"
+    },
+    {
+      "defect": "predictor attempted to create a VAE directory and symlinks under a read-only source mount",
+      "repair": "VAE loads directly from the read-only verified weights directory containing config.json and diffusion_pytorch_model.safetensors"
+    },
+    {
+      "defect": "command camera records were opened once while zipping history and a second time for query construction",
+      "repair": "history RGB/pose pairing is separate; each command camera record is opened once in the query loop"
+    }
+  ],
+  "artifacts": {
+    "predictor": {
+      "path": "work/S103_selector_free_baseline/predictor_s103.py",
+      "bytes": 9644,
+      "sha256": "57477b7ef416fb8e37e03df4a9a76b0f8870139600e3ad46e6e86761c863efa2"
+    },
+    "validator": {
+      "path": "work/S102_gate0_tum/validate_gate0_v2.py",
+      "bytes": 27995,
+      "sha256": "e782fc551983fe39f4d365f51f4a3b03749a5d03a524b64fbe463e2c85466586"
+    },
+    "static_regression": {
+      "path": "work/S103_selector_free_baseline/test_predictor_static_contract.py",
+      "bytes": 2020,
+      "sha256": "9b5357f1a9e18d300990f5df276c949be684418bddaca62933164302690ee0de"
+    },
+    "historical_snapshot_directory": "work/S103_selector_free_baseline/history_before_camera_intrinsics_binding_20260916/"
+  },
+  "tests": {
+    "compile": "PASS",
+    "gate0_validator_self_test": "7/7 PASS",
+    "predictor_static_contract": "7/7 PASS",
+    "scorer_and_independent_recompute_regression": "4/4 PASS"
+  },
+  "claim_boundary": {
+    "formal_gate0_pass": false,
+    "pre_run_ready": false,
+    "model_forward_executed": false,
+    "future_outcome_opened": false,
+    "scientific_result": false,
+    "new_method_validated": false,
+    "novelty_authorization": "NONE"
+  },
+  "next_step": "Build the 13-record predictor manifest and scorer-only target manifest for one development window, then bind exact source/runtime/isolation identities in a new contract revision."
+}

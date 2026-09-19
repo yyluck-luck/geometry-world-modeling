@@ -1,0 +1,92 @@
+{
+  "schema": "S41_VMEM_XET_ATTEMPT4_SOURCE_REVIEW_V1",
+  "status": "PASS_SOURCE_REVIEW_NOT_EXECUTED",
+  "passed": true,
+  "reviewer": "/root/vmem_recovery_diagnosis",
+  "completed_utc": "2026-09-07T05:37:17+00:00",
+  "completed_asia_shanghai": "2026-09-07T13:37:17+08:00",
+  "binding": {
+    "source": {
+      "path": "work/S41_vmem_xet_attempt4/download_attempt4.py",
+      "sha256": "a708d23cc0b64c8b3f5a23d427a6414a12fe1e1fb935beb8726b3e698102aa15",
+      "bytes": 12402
+    },
+    "protocol": {
+      "path": "work/S41_vmem_xet_attempt4/PROTOCOL.md",
+      "sha256": "ba6b7befbbb4c0c4f94d958cd832c4b73d39cdc18de1a87badf10f431d2ddbea",
+      "bytes": 1709
+    },
+    "imported_helper": {
+      "path": "work/S39_auth_recovery/download_original.py",
+      "sha256": "e303d1be1c4dfa512a180363aafd08c7b488721d7a26e8b1451d82ccd5e812ca"
+    },
+    "hf_cli_wrapper": {
+      "path": "work/S39_auth_recovery/cli-env/bin/hf",
+      "sha256": "aa49bf3ac325de69f1fe8e5933cc8905e7c6481c91a20586f885a724c52213fc",
+      "observed_version": "1.30.0"
+    },
+    "hf_xet_binary": {
+      "path": "work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/hf_xet/hf_xet.abi3.so",
+      "sha256": "0b3cacbe4132a05bf6aa4cb72a392c90d07760fd3f1bbc89e23c3aa52783a618",
+      "observed_version": "1.6.0"
+    },
+    "huggingface_hub_file_download": {
+      "path": "work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/file_download.py",
+      "sha256": "f99d5b54b07b55d22e539023031d4572e08b388b7d32f3fa9bfe1e5ab4652ed4"
+    }
+  },
+  "fixed_target_identity": {
+    "repo": "liguang0115/vmem",
+    "revision": "ac5921080a57f5a634f4b9acbbc8f3db67c9d113",
+    "filename": "vmem_weights.pth",
+    "expected_bytes": 5056346672,
+    "expected_sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+  },
+  "reviewed_controls": {
+    "attempt3_exact_identity_and_terminal_gate": "PASS",
+    "attempt3_live_process_group_gate": "PASS_SOURCE_AND_CURRENT_PRECHECK",
+    "http_recovery_exact_identity_zero_byte_terminal_gate": "PASS",
+    "fresh_unique_evidence_directory": "PASS",
+    "fresh_unique_target_directory": "PASS",
+    "canonical_read_only_absence_gate": "PASS",
+    "official_endpoint_fixed": "PASS",
+    "hf_cli_version_fixed": "PASS",
+    "hf_xet_version_fixed": "PASS",
+    "single_worker_and_single_xet_concurrency": "PASS",
+    "wrapped_request_retry_semantics_recorded": "PASS",
+    "no_whole_file_outer_retry": "PASS",
+    "budget_includes_complete_sha": "PASS",
+    "complete_size_sha_and_stability_success_gate": "PASS",
+    "sigterm_to_exception": "PASS",
+    "process_group_term_kill_cleanup": "PASS",
+    "cleanup_failure_overrides_success_or_failure_status": "PASS",
+    "try_return_finally_control_flow": "PASS",
+    "static_ast_parse": "PASS"
+  },
+  "prelaunch_observation": {
+    "observed_utc": "2026-09-07T05:37:17+00:00",
+    "execution_directory_absent": true,
+    "target_directory_absent": true,
+    "canonical_target_absent": true,
+    "attempt3_pgid_84800_visible_members": 0,
+    "attempt3_receipt_sha256": "412989014901a3c05dcb9cd76e28adc3555d950649e14053f03f42d3d7d49c9a",
+    "http_recovery_receipt_sha256": "94e18db2a44d8009c3eec895708b65d8f777631f2b8ecb11187767c2c4241719",
+    "companion_receipt_sha256": "837979a5480b51f080d6dd5e72382091a1142119bbd9b7eaafd530dc72208aec"
+  },
+  "execution_authorization_boundary": {
+    "authorized_attempts_under_this_review": 1,
+    "requires_exact_source_and_protocol_sha_match_at_launch": true,
+    "download_executed_by_review": false,
+    "network_requests_by_review": 0,
+    "model_or_scientific_runs": 0,
+    "credential_files_read": 0,
+    "canonical_ledger_changed": false
+  },
+  "nonblocking_limitations": [
+    "A target left after hash timeout or mismatch remains unverified despite its filename; downstream must require receipt success.",
+    "Companion assets reuse prior full-SHA receipts and current size checks instead of rehashing approximately 4.3 GB.",
+    "SIGKILL, power loss, disk failure, or external evidence mutation cannot be converted into a guaranteed terminal receipt.",
+    "The external launcher, not this script, must enforce the source-review SHA binding before the single launch."
+  ],
+  "verdict": "PASS for one bounded resource-download attempt only; no download, model loading, generation, experiment, or novelty is established."
+}

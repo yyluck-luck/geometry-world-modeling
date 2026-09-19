@@ -1,0 +1,172 @@
+{
+  "schema": "s40-terminal-evidence-independent-review-v1",
+  "status": "PASS_S40_TERMINAL_EVIDENCE_REVIEW",
+  "reviewed_utc": "2026-09-07T12:14:56Z",
+  "reviewer_role": "/root/clip_mean_innovation_audit",
+  "generation_executor_role": "/root",
+  "review_scope": "Independent review of the completed S40 parent/worker receipts, resource and metadata gates, monitor, stdout/stderr identities, runtime-loading metadata, observation summary, trace closure, archive manifest and archive metadata chain. Large tensor bodies, images, model weights and prediction arrays were not read.",
+  "manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+    "sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe",
+    "schema": "s40-declared-variant-two-batch-v1",
+    "status": "FROZEN_DECLARED_VARIANT_TWO_BATCH_EXECUTION",
+    "source_identity_count": 218,
+    "source_identity_mapping_sha256": "5f031676e947e4a3d79c740473cc028070773465f34addcca3ee18dc0c6f7b8d",
+    "source_bytes_rehashed": 2077645,
+    "all_218_source_sha256_recomputed_equal": true
+  },
+  "evidence_sha256": {
+    "parent_receipt": "4c771df1e46f96e218b92f01339b55ebd056ef002fdc28e0083a5bb0907300d4",
+    "worker_receipt": "a564a67e63036b3195390b5059476c1729c99e74bb0a8fe0ef26e0c1211b4911",
+    "full_resource_gate": "5a23262c01c2e777721b9c320b4344e26be3f20ef991836b0e53035dfb090948",
+    "launch_ticket": "ccebc0daec5b532f3afefcfb76933cf32d1701242c9075ba695e5882e810776c",
+    "metadata_gate": "7381a9b46ed1a5f12c2c0ac0e52f4e9fd7b8c7542b7230347248fd113a37b856",
+    "monitor": "038240f008a67f721e7f6e554196a7a50024573d9a3044c0811053088b087d31",
+    "worker_stdout": "a5b4f5d7271efd782ffbc18504c8d0d8efa43ea644dbb71b69b8883d60b734dc",
+    "worker_stderr": "bd8c7b8dc72e914a338bb18893ac44e4ce93b4c8fd2146cab49ac79ee6838ce4",
+    "runtime_loading": "339039380d95f32ee1287c5b924d4c79260c2e4ac8bf3e40faa04d9811500c31",
+    "observation_summary": "06fe7ac55c9d05d8700f160e29250b9899782934c396c45ac474963365cf76b1",
+    "trace_events": "5d748f8c7fb095c0ecc6eac899b846d86a89a07264b927ee20fc6cbd6b65bb3e",
+    "archive_manifest": "4e2acb3448589710aedcf6945d2d278bfa1b6d194b94adaad0d9b371697e153b",
+    "archive_events": "bca5c9148a81ba6a070cb4d10c67db384bf1d96f06a0233f746b117a3228a7b1"
+  },
+  "checks": [
+    {
+      "id": "T01_PARENT_TERMINAL_RECEIPT",
+      "verdict": "PASS",
+      "evidence": "The parent receipt has schema s40-declared-variant-launch-v1, status DECLARED_VARIANT_EXTERNAL_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW, returncode 0, worker_spawned true, scientific_status NOT_EVALUATED, the exact manifest and launcher identities, source_unchanged_at_close true, and the recomputed worker-receipt SHA. It has neither limit_exceeded nor unexpected_live_descendants."
+    },
+    {
+      "id": "T02_WORKER_TERMINAL_RECEIPT",
+      "verdict": "PASS",
+      "evidence": "The worker receipt has status DECLARED_VARIANT_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW, binds the same manifest and launcher, records one attempted/completed full resource check and one runtime factory, and binds the recomputed observation-summary, trace and archive-manifest SHA values."
+    },
+    {
+      "id": "T03_RESOURCE_AND_SOURCE_BINDING",
+      "verdict": "PASS",
+      "evidence": "The full resource gate has status PASS_DECLARED_GENERATION_RESOURCE_GATE and recorded_execution evidence. Its controls, variant and 218 source identities equal the frozen S40 manifest; its component path/size/SHA projection equals the manifest, and its stat-extended components equal the nested successful S39 full gate. All 218 source files, totaling 2,077,645 bytes, were independently rehashed and matched. Component weight bodies were not rehashed in this small-evidence review."
+    },
+    {
+      "id": "T04_METADATA_AND_LAUNCH_BINDING",
+      "verdict": "PASS",
+      "evidence": "metadata_gate.json is the expected PASS_METADATA_ONLY record and intentionally says execution_authorized false because a new worker full-resource gate was still required. launch_ticket.json binds the same manifest, launcher and dedicated output root."
+    },
+    {
+      "id": "T05_RUNTIME_LOADING_METADATA",
+      "verdict": "PASS",
+      "evidence": "runtime_loading.json binds this manifest and declared ft-mse variant, records zero network attempts, empty missing/unexpected keys for VMem, CLIP and CUT3R, and empty VAE missing/unexpected/mismatched/error lists. Its generation_calls=0 and generation_completed=false describe the component-loading substep, not the later terminal generation; generation return is evidenced separately by the worker and trace."
+    },
+    {
+      "id": "T06_MONITOR_AND_LIMITS",
+      "verdict": "PASS",
+      "evidence": "All 5,292 newline-terminated monitor rows parsed. Elapsed time, phase and completed-batch counters are monotone. Recomputed sampled peak process-tree RSS is 25,862,127,616 bytes under the 48,318,382,080-byte limit; minimum recorded free disk is 1,347,891,740,672 bytes above the 10,737,418,240-byte floor. Both phase times are below 1,800 seconds, total elapsed is below 3,600 seconds, the final row has two completed batches, 327 trace rows and zero sampled RSS. Recomputed maximum poll gap is 0.9995821669872385 seconds and equals the parent receipt."
+    },
+    {
+      "id": "T07_TRACE_HASH_CHAIN_AND_CLOSURE",
+      "verdict": "PASS",
+      "evidence": "The 327-line trace has contiguous sequence numbers, correct previous-hash links and recomputed canonical row hashes. Every row is recorded_execution. It opens with one session bound to the same manifest and 218 source identities, contains no failure or operation_failure event, closes two distinct nonoverlapping batch state machines, has 50 consecutive denoiser callbacks in each batch, and ends with one session_end declaring two batches."
+    },
+    {
+      "id": "T08_HISTORY_AND_BATCH_RECORDS",
+      "verdict": "PASS",
+      "evidence": "Trace metadata records history_before lengths 1 and 5, then batch_complete retained IDs [1,2,3,4] and [5,6,7,8], supporting the recorded 1-to-5-to-9 progression. The two batch-complete sequence/hash/retained-ID tuples exactly equal the parent trace_budget_boundary; session_closed is true, seen_failure false, pending_bytes zero and parsed_events 327."
+    },
+    {
+      "id": "T09_OBSERVATION_SUMMARY",
+      "verdict": "PASS",
+      "evidence": "The SHA-bound summary has status OBSERVED_ROUTE_RETURNED_NOT_QUALITY_VERIFIED. Its fixed route counts include two sampler calls, 100 Euler steps and 100 main-model forwards; the six actual-call counters represented in trace observations independently equal the summary. Its batch IDs, selected-context IDs and retained IDs equal trace metadata and the archive caller metadata binds the same summary SHA."
+    },
+    {
+      "id": "T10_ARCHIVE_METADATA",
+      "verdict": "PASS",
+      "evidence": "The archive manifest has status ARCHIVE_COMPLETE, recorded_execution evidence, scientific_status NOT_EVALUATED, the same manifest and 218 source identities, zero failed captures and no missing required names. Its 102-row metadata event chain has valid sequence/hash links, paired capture begin/complete events, counts equal archived_name_counts, and a matching final archive_finalize hash. The physical inventory equals all 3,912 manifest entries and every recorded byte size matches; 1,951 tensor descriptors are present. Tensor and image bodies were not read or rehashed."
+    },
+    {
+      "id": "T11_STDOUT_STDERR",
+      "verdict": "PASS_WITH_NARROW_SCOPE",
+      "evidence": "Both logs exist and their SHA values were recomputed. A narrow scan found no Python traceback, MemoryError, CUDA out-of-memory, segmentation-fault or killed-9 signature. Nonfatal library/font/deprecation warnings remain in stderr; log text is not treated as a correctness or quality test."
+    },
+    {
+      "id": "T12_SELECTED_CONTEXT_EVIDENCE_BOUNDARY",
+      "verdict": "PASS_WITH_REQUIRED_LIMITATION",
+      "evidence": "selected_context_ids are [0] for batch 1 and [0,2,4,1] for batch 2. IDs 1, 2 and 4 are generated-history IDs, so this is necessary evidence that the original selector named generated cache entries. It is not sufficient evidence that the second sampler consumed first-batch samples_z bit for bit; that claim remains reserved for the separately reviewed saved-output readback."
+    }
+  ],
+  "derived_counts": {
+    "monitor_rows": 5292,
+    "trace_rows": 327,
+    "trace_event_counts": {
+      "session": 1,
+      "observation": 209,
+      "batch_begin": 2,
+      "sample_call": 2,
+      "sampler_enter": 2,
+      "denoiser_call": 100,
+      "sampler_return": 2,
+      "sample_return": 2,
+      "cache_commit": 2,
+      "map_commit": 2,
+      "batch_complete": 2,
+      "session_end": 1
+    },
+    "history_before_lengths": [
+      1,
+      5
+    ],
+    "selected_context_ids": [
+      [
+        0
+      ],
+      [
+        0,
+        2,
+        4,
+        1
+      ]
+    ],
+    "retained_frame_ids": [
+      [
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        5,
+        6,
+        7,
+        8
+      ]
+    ],
+    "archive_files_stat_checked": 3912,
+    "archive_manifest_declared_file_bytes": 237280131,
+    "archive_file_bodies_not_comprehensively_read_or_rehashed": true,
+    "archive_tensor_descriptors": 1951,
+    "archive_metadata_events": 102
+  },
+  "blocking_findings": [],
+  "claim_boundary": {
+    "established": [
+      "The one declared-variant S40 parent and worker returned with code zero under their recorded external limits.",
+      "The small terminal evidence chain is internally bound to one frozen manifest and one 218-file source domain.",
+      "Two trace batches closed with recorded history progression 1 to 5 to 9 and batch 2 selected generated-history IDs."
+    ],
+    "not_established": [
+      "Bitwise first-batch samples_z to second-batch cache, condition and sampler consumption.",
+      "Mathematical correctness of the model, renderer, geometry alignment, RNG restoration or codec.",
+      "Image or video quality, long-term consistency, exact original SD2.1 baseline equivalence, method gain or novelty."
+    ]
+  },
+  "operations": {
+    "generation_runs": 0,
+    "readback_runs": 0,
+    "gate_runs": 0,
+    "model_or_renderer_calls": 0,
+    "tensor_body_reads": 0,
+    "image_reads": 0,
+    "component_weight_reads": 0,
+    "archive_tensor_or_image_payload_sha_recomputations": 0,
+    "network_requests": 0,
+    "canonical_ledger_modified": false
+  }
+}

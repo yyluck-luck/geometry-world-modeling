@@ -1,0 +1,315 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v2",
+  "review_kind": "adversarial",
+  "status": "BLOCKED_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V5",
+  "verdict": "BLOCKED_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T07:12:47Z",
+  "time_basis": "The UTC clock was captured immediately before this review was written; no historical work duration is inferred.",
+  "author_role": "/root/c1_blind_score_builder",
+  "primary_reviewer_role": "/root",
+  "reviewer_role": "/root/s48_statistical_reviewer",
+  "reviewer_independence": {
+    "different_from_author": true,
+    "different_from_primary_reviewer": true,
+    "primary_conclusion_inherited": false,
+    "fresh_source_and_adversarial_review_performed": true
+  },
+  "reviewed_identities": {
+    "camera_guard.py": "37951063262505ef18bb62e0544c31cfb5a460434e9a67b489f58fab9315dbdb",
+    "supervise_camera_guard.py": "98084f2a7806b4f88a52a6599edeba9633c066f3bb2b128c4fba2ba70577b3bd",
+    "PROTOCOL.md": "29915a117a561c73e32e30ae3f85d09d7466adb4a1a247fcda1b9da1f3366139",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "12045c57d99fbaa3275f2023bef04847bcbea5825a5dac67a1be7cfb4382bd52",
+    "synthetic_selftest.py": "c95331c14d2d17256da42efb94f86c636a468e33918d4db48a639c7129749593",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "reviewed_control_documents": {
+    "FROZEN_SOURCE_SET.json": "4be945c0daa344ef767be6d30efe1269eaa7f82474d8d5cce1a783edff11401f",
+    "SOURCE_REVIEW_PRIMARY_V5.json": "ad062bf954faeaaaf754d5ed554d0cdda0778da9e5ed1f70090c6340b060d55e"
+  },
+  "review_scope": {
+    "question": "Can the exact five-file V5 source set safely proceed to a binding and one formal C1 requested-camera numeric-guard attempt on the current macOS host?",
+    "method": "Fresh line-by-line source/protocol review, AST checks, exact built-in suites, an exact-byte isolated mirror of the independent suite, and additional standard-library-only fault and path-identity attacks in disposable temporary directories.",
+    "python_interpreters": [
+      "CPython 3.13.0 at /opt/homebrew/bin/python3.13",
+      "CPython 3.12.14 at .venv-cut3r/bin/python"
+    ],
+    "candidate_files_modified": false,
+    "formal_binding_created": false,
+    "formal_attempt_executed": false,
+    "real_c1_content_opened": false,
+    "model_imported_or_run": false
+  },
+  "independent_dual_interpreter_reproduction": {
+    "python_3_13_0": {
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 1549,
+        "stdout_sha256": "b3a635af3bb34f16b2b8923d5011ead3d2ab1e993d480cd03f7d3da039af0e9b"
+      },
+      "canonical_independent_suite_after_primary_review": {
+        "returncode": 1,
+        "status": "FAILED_BECAUSE_SOURCE_REVIEW_PRIMARY_V5_JSON_EXISTS",
+        "stderr_bytes": 1159,
+        "stderr_sha256": "87ee63095d16f084f8846472d8fb57782328fc78cfdade8efacf44da190cad74"
+      },
+      "exact_byte_isolated_mirror_independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V5_STATIC_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 3566,
+        "stdout_sha256": "36bdfefbd5ea040010fb4baf10598525488d840d22a5836630034c318a250069",
+        "all_five_source_sha256_values_equal_reviewed_identities": true,
+        "formal_paths_created": 0
+      },
+      "fresh_extended_adversarial_matrix": {
+        "returncode": 0,
+        "stdout_bytes": 2315,
+        "stdout_sha256": "373a28c09e0bb2ccba6d0be5c26c2444802408c388d094407da75d5cc8a26fa4"
+      }
+    },
+    "python_3_12_14": {
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 1549,
+        "stdout_sha256": "b3a635af3bb34f16b2b8923d5011ead3d2ab1e993d480cd03f7d3da039af0e9b"
+      },
+      "canonical_independent_suite_after_primary_review": {
+        "returncode": 1,
+        "status": "FAILED_BECAUSE_SOURCE_REVIEW_PRIMARY_V5_JSON_EXISTS",
+        "stderr_bytes": 1037,
+        "stderr_sha256": "5cb82ee3415b00b12541adae99e34bd6e64b0398b69a220965d00dee80640bb5"
+      },
+      "exact_byte_isolated_mirror_independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V5_STATIC_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 3548,
+        "stdout_sha256": "ef7273d6479ecc22b2a489590029e6a493c797530da121dc3be534362e41455a",
+        "all_five_source_sha256_values_equal_reviewed_identities": true,
+        "formal_paths_created": 0
+      },
+      "fresh_extended_adversarial_matrix": {
+        "returncode": 0,
+        "stdout_bytes": 2369,
+        "stdout_sha256": "784f3eb102c122e2970a7fcf213bb2be96ef7255f959faa77298833451b6cea9"
+      }
+    }
+  },
+  "attack_checklist": [
+    {
+      "id": "A01_EXACT_IDENTITY_REHASH",
+      "attack": "Rehash the five frozen source files, frozen-source receipt, and primary review immediately before writing this review.",
+      "result": "PASS",
+      "observation": "Every digest matched the assigned value."
+    },
+    {
+      "id": "A02_WORKER_EARLY_TERMINAL_TRUTH",
+      "attack": "Inspect all worker AST owners of passed=true and terminal_authority=true and all worker output names.",
+      "result": "PASS_REJECTED_BY_EXACT_WORKER_SOURCE",
+      "observation": "The exact worker contains no passed=true or terminal_authority=true constructor; its body-read result and receipt remain pending-only."
+    },
+    {
+      "id": "A03_EXACT_FORMAL_RESOURCE_PREEXEC",
+      "attack": "Use the exact worker_resource_limit function as subprocess.Popen preexec_fn under both required interpreters without invoking the formal entrypoint.",
+      "result": "BLOCKER",
+      "observation": "Both interpreters raised SubprocessError before exec. Direct isolated invocation located the cause at resource.setrlimit(RLIMIT_AS, (2147483648, 2147483648)), which raised ValueError: current limit exceeds maximum limit on this macOS host."
+    },
+    {
+      "id": "A04_SUPERVISOR_SIGKILL_AND_SIGTERM_AT_TWO_LINK_BOUNDARY",
+      "attack": "Repeat the built-in isolated SIGKILL_AFTER_LINK and SIGTERM_AFTER_LINK cases under both interpreters.",
+      "result": "PASS_FAIL_CLOSED_AT_TESTED_BOUNDARY",
+      "observation": "Both signal cases retained an invalid two-link seal state and no structurally authoritative PASS."
+    },
+    {
+      "id": "A05_DETACHED_DESCENDANT_ESCAPE",
+      "attack": "Launch a child in the supervised process group, fork a descendant that calls setsid and closes stdin/stdout/stderr, let the original child return zero, and apply bounded_process_wait plus process_group_empty exactly as the supervisor does.",
+      "result": "BLOCKER",
+      "observation": "On both interpreters the original return code was zero, stdout/stderr were empty, timeout and overflow were false, process_group_empty(original_pid) was true, yet the detached descendant was still alive. It was explicitly killed by the test cleanup."
+    },
+    {
+      "id": "A06_HELD_ARTIFACT_PATH_ATTACKS",
+      "attack": "For report, worker receipt, supervisor receipt, and barrier independently attempt symlink, added hardlink, rename/recreate, and unlink/recreate while their exact FDs are leased.",
+      "result": "PASS_REJECTED_32_OF_32",
+      "observation": "All four attack forms against all four leased artifacts were rejected under both interpreters."
+    },
+    {
+      "id": "A07_LOCK_AND_OUTPUT_IDENTITY_ATTACKS",
+      "attack": "Repeat built-in lock hardlink/symlink/unlink-recreate and output-directory rename/recreate tests, then add a lock rename/recreate-same-bytes case.",
+      "result": "PASS_REJECTED",
+      "observation": "Held FD/path device and inode checks rejected the replacements."
+    },
+    {
+      "id": "A08_TERMINAL_SEAL_PATH_ATTACKS",
+      "attack": "After nominal publication, test seal hardlink, symlink, rename/recreate with identical bytes, and unlink/recreate with only the four fields read by terminal_seal_authoritative.",
+      "result": "BLOCKER",
+      "observation": "Hardlink and symlink were rejected, but rename/recreate-identical and a fresh four-field seal were accepted as structurally authoritative."
+    },
+    {
+      "id": "A09_TERMINAL_COMMIT_RACE",
+      "attack": "At the final staging unlink, replace terminal_pass_seal.json after all leases have closed but before the staging link is removed.",
+      "result": "BLOCKER",
+      "observation": "publish_terminal_seal returned success under both interpreters while the canonical final file had SHA-256 f4ff9db2d5c3daa0ca7951913296a3686ca6ac03f6930ade2c83ef893ebdf91f instead of the SHA returned by the publisher; terminal_seal_authoritative still returned true for the replacement."
+    },
+    {
+      "id": "A10_FSYNC_AND_CLOSE_FAULTS",
+      "attack": "Inject an OSError at each of the five fsync calls in terminal publication, at the actual staged-file close, and after each of the two close_leases boundaries.",
+      "result": "PASS_FAIL_CLOSED_16_OF_16",
+      "observation": "Every injected fsync/close error raised before authority and terminal_seal_authoritative returned false in both interpreters."
+    },
+    {
+      "id": "A11_STDIO_WALL_CPU_FILE_AND_MEMORY_BOUNDS",
+      "attack": "Repeat stdout overflow, stderr overflow, and wall timeout tests; inspect and directly exercise the formal CPU/file/address-space preexec path.",
+      "result": "PARTIAL_WITH_BLOCKER",
+      "observation": "The stdio and wall-time cases terminated fail closed. CPU and file limits are present, but the combined exact preexec function never reaches exec because the macOS RLIMIT_AS call fails. The built-in resource child tests do not use worker_resource_limit."
+    },
+    {
+      "id": "A12_ROLE_TIME_AND_CAPABILITY_BYPASS",
+      "attack": "Construct two synthetic reviews in one process with different role strings and a year-2000 timestamp, and inspect the one-read capability provenance.",
+      "result": "STRUCTURAL_FIELDS_ACCEPTED_WITHOUT_EXTERNAL_ATTESTATION",
+      "observation": "verify_source_reviews accepted self-asserted distinct strings and backdated but ordered UTC values. The capability token and its digest are both selected by the live caller, while supervisor_pid is only compared with getppid. These controls establish internal consistency, not external identity or supervisor authenticity."
+    },
+    {
+      "id": "A13_REAL_C1_BODY_PREOPEN_BOUNDARY",
+      "attack": "Inspect the formal worker call order and repeat the pixel-shaped descriptor negative test without touching a real archive.",
+      "result": "PASS_SOURCE_ONLY",
+      "observation": "committed_worker_preflight is called at line 1484, CameraTensorStore is constructed at 1491, and decode_selected_cameras is called at 1495. Shape and descriptor checks reject a pixel-shaped tensor before _snapshot/body open."
+    },
+    {
+      "id": "A14_CANONICAL_FRESH_REVIEW_REPRODUCIBILITY",
+      "attack": "Run synthetic_selftest.py in the canonical V5 directory after the existing primary review, then in an exact-byte disposable mirror without review outputs.",
+      "result": "CANONICAL_FAILED_MIRROR_PASSED",
+      "observation": "The canonical run failed in both interpreters solely because assert_formal_paths_absent treats SOURCE_REVIEW_PRIMARY_V5.json as forbidden. The exact-byte mirror passed with the author's published hashes."
+    }
+  ],
+  "blocking_findings": [
+    {
+      "id": "B1_MACOS_RLIMIT_AS_PREEXEC_ABORTS_THE_ONLY_FORMAL_WORKER",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "supervise_camera_guard.py:524-527",
+        "supervise_camera_guard.py:751-780",
+        "supervise_camera_guard.py:1137-1146"
+      ],
+      "finding": "The exact worker_resource_limit sets RLIMIT_AS hard and soft limits to 2 GiB. On the current macOS host, both required CPython versions raise ValueError: current limit exceeds maximum limit at that call. When used as Popen preexec_fn this becomes SubprocessError before exec. The permanent one-use lock and execution directory are created before Popen, so a formal attempt would be consumed without starting the worker. The built-in resource tests miss this because isolated_resource_process omits preexec_fn=worker_resource_limit.",
+      "impact": "The frozen V5 source is not executable on its actual target host and would irreversibly consume the only C1 numeric-guard attempt if launched.",
+      "required_fix": "Replace the nonportable RLIMIT_AS-as-RSS mechanism with a macOS-tested hard memory monitor or another enforceable platform-specific bound. Add a no-op child spawn using the exact production preexec path before the permanent attempt commit, and add dual-interpreter tests that exercise the exact formal preexec function rather than only bounded_process_wait. Freeze new source hashes and restart both reviews."
+    },
+    {
+      "id": "B2_FINAL_SEAL_CAN_BE_REPLACED_AT_THE_SOLE_AUTHORITY_TRANSITION",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "supervise_camera_guard.py:425-463",
+        "supervise_camera_guard.py:466-491",
+        "supervise_camera_guard.py:953-989"
+      ],
+      "finding": "publish_terminal_seal closes all seal and evidence leases before the final staging unlink and performs no final-path identity/content validation after that unlink. An injected replacement at this exact boundary removed terminal_pass_seal.json, created a different single-link four-field JSON, and then allowed the staging unlink to complete. The publisher returned the old seal SHA, formal control flow would return zero, and terminal_seal_authoritative accepted the replacement because it checks only schema, status, passed, and terminal_authority.",
+      "impact": "The claimed sole atomic authority transition is not bound to the seal inode/content the supervisor validated. A canonical rename/unlink-recreate race can yield supervisor success and a structurally authoritative path that is not the published evidence bundle.",
+      "required_fix": "Redesign terminal commitment so the authoritative observation binds the final seal's exact SHA and identity after the commit transition, validates the full required seal schema and embedded evidence, and cannot return success on a path replacement. Add explicit final-seal rename/recreate and unlink/recreate-at-commit tests. A later independent review remains necessary but cannot substitute for the source's own claimed atomic publication property."
+    },
+    {
+      "id": "B3_SETSID_DESCENDANT_ESCAPES_THE_NO_SURVIVOR_GATE",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "supervise_camera_guard.py:498-528",
+        "supervise_camera_guard.py:530-597",
+        "supervise_camera_guard.py:771-820"
+      ],
+      "finding": "The no-survivor check probes only killpg(worker_pid, 0). A descendant can call setsid, close the inherited stdio pipes, and remain alive after the original worker exits zero. In that state bounded_process_wait reports no timeout or overflow, both streams are empty, and process_group_empty(worker_pid) returns true. The fresh dual-interpreter reproduction observed exactly this state.",
+      "impact": "The terminal seal can assert worker_process_group_empty_after_wait=true while a descendant of the supervised worker remains alive outside that process group. This contradicts the protocol's surviving-descendant fail-closed claim and leaves wall/resource enforcement dependent on cooperative group membership.",
+      "required_fix": "Use an OS-enforced containment/liveness design that descendants cannot escape, such as an external watchdog plus a full-lifetime parent-death channel and platform-appropriate process-tree accounting. Add tests for setsid descendants that keep pipes open, close pipes, survive supervisor SIGTERM, and survive supervisor SIGKILL. If the exact worker's no-fork property is the intended assumption, state and enforce that narrower threat model instead of claiming all descendants are covered."
+    }
+  ],
+  "major_findings": [
+    {
+      "id": "M1_CANONICAL_INDEPENDENT_SUITE_FORBIDS_THE_PRIOR_PRIMARY_REVIEW",
+      "severity": "MAJOR",
+      "source_locations": [
+        "synthetic_selftest.py:29-38",
+        "synthetic_selftest.py:123-126",
+        "PREPARATION_REPORT.md:136-143"
+      ],
+      "finding": "The requested fresh adversarial review occurs after SOURCE_REVIEW_PRIMARY_V5.json exists, but synthetic_selftest.py treats that required prior review as a forbidden formal path. Therefore a canonical fresh rerun necessarily fails; only an exact-byte mirror can reproduce the remaining checks.",
+      "required_fix": "Separate scientific/formal paths from already completed source-review outputs, or add an explicit adversarial-review phase that requires the exact bound primary review while still forbidding binding, lock, and execution paths."
+    },
+    {
+      "id": "M2_ROLE_TIME_AND_CAPABILITY_FIELDS_ARE_SELF_ATTESTED",
+      "severity": "MAJOR",
+      "source_locations": [
+        "camera_guard.py:315-347",
+        "camera_guard.py:401-442",
+        "camera_guard.py:1457-1466",
+        "supervise_camera_guard.py:751-767"
+      ],
+      "finding": "Pairwise independence is inferred from unequal JSON strings, timestamps are only checked for ordering, and the capability token plus expected digest are both chosen by the caller. These checks prevent accidental mismatch but do not authenticate distinct human/agent roles, real completion times, or the exact supervisor executable.",
+      "required_fix": "Bind the one-use capability digest into the permanent supervisor-created attempt record before child launch, and retain externally observable task/receipt identities for governance claims. Describe role/time checks as structural declarations unless a trusted attestation mechanism is added."
+    }
+  ],
+  "minor_findings": [],
+  "verified_nonblocking_properties": [
+    "The exact worker has no passed=true or terminal_authority=true publication path.",
+    "Complete source/review/binding/upstream/event preflight precedes selected camera tensor-body access in the exact worker control flow.",
+    "Pixel-sized tensor descriptors are rejected before body open in the synthetic decoder test.",
+    "Held report, worker receipt, supervisor receipt, barrier, lock, and canonical output identities reject the exercised symlink, hardlink, rename/recreate, and unlink/recreate attacks before their leases close.",
+    "All five injected terminal fsync failures, the actual staged-file close failure, and both lease-close failures remained non-authoritative in both interpreters.",
+    "The tested SIGKILL/SIGTERM two-link boundary remained fail closed.",
+    "The worker and supervisor built-in synthetic outputs exactly reproduced the frozen receipt hashes under CPython 3.12.14 and 3.13.0.",
+    "The exact-byte mirror reproduced the complete independent suite under both interpreters without creating formal paths."
+  ],
+  "formal_state_observed_before_review_write": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V5.json": false,
+    "BINDING_REVIEW_V5.json": false,
+    "SOURCE_REVIEW_ADVERSARIAL_V5.json": false
+  },
+  "access_ledger": {
+    "candidate_source_files_read": 5,
+    "primary_review_read": 1,
+    "frozen_source_set_read": 1,
+    "reference_source_and_withdrawn_review_files_read_by_exact_selftest": true,
+    "real_c1_manifest_opened": 0,
+    "real_c1_receipts_opened": 0,
+    "real_c1_archive_events_opened": 0,
+    "real_c1_tensor_bodies_read": 0,
+    "real_scientific_arrays_mapped": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_calls": 0,
+    "generation_or_renderer_runs": 0,
+    "formal_binding_paths_created": 0,
+    "formal_lock_paths_created": 0,
+    "formal_execution_paths_created": 0,
+    "synthetic_data_only": true,
+    "temporary_directories_only": true
+  },
+  "executed": false,
+  "formal_binding_created": false,
+  "formal_attempt_created": false,
+  "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,
+  "c1_tensor_bodies_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "model_renderer_generation_calls": 0,
+  "authorization_effect": "NONE_BLOCKED_REVIEW_DOES_NOT_AUTHORIZE_BINDING_EXECUTION_BLIND_SCORE_PIXEL_ACCESS_OR_IMAGE_VIEW",
+  "required_next_state": "Preserve this V5 BLOCKED review and the primary PASS; revise all affected source and self-test files, freeze a new complete source set, and obtain two fresh different-author reviews before creating any binding or formal attempt.",
+  "evidence_boundary": "This is a source/static/synthetic adversarial engineering review. It establishes no C1 requested-camera validity, rendered-camera obedience, pixel score, image quality, baseline failure, method gain, causal result, novelty, or publication level."
+}

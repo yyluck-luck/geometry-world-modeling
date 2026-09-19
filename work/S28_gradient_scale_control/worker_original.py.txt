@@ -1,0 +1,118 @@
+def ga_worker(m, mode):
+    require(mode in ('cut3r', 'ttt3r', 'filt3r'), 'S26B never reruns common_old GA')
+    out = OUT / mode
+    require(not out.exists(), 'Never overwrite or repeat an existing GA run')
+    out.mkdir(parents=True)
+    n = 4 if mode == 'common_old' else 8
+    r = dict(status='RUNNING', started_utc=utc(), mode=mode, frame_count=n, manifest_sha256=sha(MANIFEST), sensor_depth_used=False, model_forwards=0)
+    write(out / 'receipt.json', r)
+    try:
+        cr = read(WORK / 'control_receipt.json')
+        compat = read(WORK / 'compatibility_receipt.json')
+        require(cr['status'] == 'PASS' and compat['status'] == 'PASS', 'Controls/compatibility required')
+        require(cr['manifest_sha256'] == compat['manifest_sha256'] == sha(MANIFEST), 'Control manifest identity')
+        require(sha(WORK / 'control_c2w.npy') == cr['output_sha256'], 'Camera input seal')
+        np, torch, a, ns, views, proof = original_context(m)
+        cameras = torch.from_numpy(np.load(WORK / 'control_c2w.npy', allow_pickle=False)[:n].copy())
+        name = 'common_old_depth_original4' if mode == 'common_old' else mode
+        records = m['candidate']['archives'][name]
+        predictions = a.load_saved_predictions(records)
+        output = a.assemble_saved_output(ns, views[:n], predictions)
+        old = None
+        common_seal = None
+        common_tensor_sha = None
+        common_pose_sha = None
+        if n == 8:
+            prior = read(OUT / 'common_old/receipt.json')
+            require(prior['status'] == 'PASS' and prior['manifest_sha256'] == sha(MANIFEST), 'Common old-depth producer')
+            require(sha(OUT / 'common_old/output.npz') == prior['outputs']['output.npz'], 'Common depth output seal')
+            require(sha(OUT / 'common_old/inputs_seal.json') == prior['inputs_seal_sha256'], 'Common input seal')
+            with np.load(OUT / 'common_old/output.npz', allow_pickle=False) as z:
+                old = torch.from_numpy(z['depth'].copy())
+            common_seal = sha(OUT / 'common_old/receipt.json')
+            common_tensor_sha = prior['depth_tensor_sha256']
+            common_pose_sha = prior['control_pose_prefix_tensor_sha256']
+            require(a.tensor_sha256(old) == common_tensor_sha and a.tensor_sha256(cameras[:4]) == common_pose_sha, 'Common old depth/camera tensor identity')
+        seal = dict(manifest_sha256=sha(MANIFEST), mode=mode, frame_count=n, sensor_depth_used=False, saved_heads=records, control_c2w_sha256=cr['output_sha256'], common_old_receipt_sha256=common_seal, compatibility_receipt_sha256=sha(WORK / 'compatibility_receipt.json'))
+        write(out / 'inputs_seal.json', seal)
+        r['inputs_seal_sha256'] = sha(out / 'inputs_seal.json')
+        write(out / 'receipt.json', r)
+        observer = SceneObserver(out, n, cameras, old, torch)
+        observer.install()
+        numeric_setup()
+        started = time.perf_counter()
+        try:
+            result = a.run_original_ga(ns, output, control_c2ws=cameras, old_depth=None if old is None else a.CommonOldDepth(old, common_seal, common_tensor_sha, common_pose_sha), output_dir=out)
+        finally:
+            observer.restore()
+            observer.checkpoint('GA_call_exit')
+        require(observer.steps == observer.adam_steps == 400 and observer.clean_calls == observer.mst_calls == 1, 'Complete original GA/Adam/MST/clean')
+        points, colors, depths, confs, cam = result
+        original_colors = np.clip(np.concatenate([array(v['img']) for v in views[:n]]).transpose(0, 2, 3, 1) * 0.5 + 0.5, 0, 1)
+        actual_colors = array(torch.cat(colors))
+        require(np.array_equal(actual_colors, original_colors), 'Wrapper colors are the input images')
+        np.savez_compressed(out / 'input_colors.npz', colors=actual_colors)
+        c2w = np.repeat(np.eye(4, dtype=np.float32)[None], n, axis=0)
+        c2w[:, :3, :3] = cam['R']
+        c2w[:, :3, 3] = cam['t']
+        vals = dict(depth=array(torch.cat(depths)), point_cloud=array(torch.cat(points)), conf=array(torch.cat(confs)), focal=array(cam['focal']), pp=array(cam['pp']), c2w=c2w)
+        shapes = dict(depth=(n, 384, 512), point_cloud=(n, 384, 512, 3), conf=(n, 384, 512), focal=(n, 1), pp=(n, 2), c2w=(n, 4, 4))
+        for k, shape in shapes.items():
+            require(vals[k].shape == shape and vals[k].dtype == np.float32 and np.isfinite(vals[k]).all(), 'Output schema ' + k)
+            require(np.array_equal(vals[k], observer.snapshot[k]), 'Wrapper output matches scene ' + k)
+        require((vals['depth'] > 0).all() and (vals['focal'] > 0).all() and (vals['conf'] >= 0).all(), 'Output domain')
+        np.savez_compressed(out / 'output.npz', **vals)
+        spec = importlib.util.spec_from_file_location('s26_independent_reference', m['numerical_reference'])
+        ref = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ref)
+        with np.load(out / 'preclean_conf.npz', allow_pickle=False) as z:
+            preconf = z['conf'].copy()
+        expected, visits, margins = ref.clean_reference(preconf, vals['depth'], vals['point_cloud'], vals['focal'], vals['pp'], vals['c2w'][:, :3, :3], vals['c2w'][:, :3, 3])
+        mismatch = expected != vals['conf']
+        observer.report['independent_clean_mismatch_pixels'] = int(mismatch.sum())
+        write(out / 'independent_clean_visits.json', visits)
+        if mismatch.any():
+            np.savez_compressed(out / 'clean_mismatch_diagnostics.npz', **margins, mismatch=mismatch)
+        del margins
+        require(not mismatch.any(), 'Independent FP32 clean mismatch; no exemptions')
+        with np.load(out / 'pairwise_state.npz', allow_pickle=False) as z:
+            objectives = [ref.pair_objective(vals['point_cloud'][[0, j]], array(predictions[0]['pts3d_in_self_view'])[0], array(predictions[j]['pts3d_in_other_view'])[0], array(predictions[0]['conf_self'])[0], array(predictions[j]['conf'])[0], z['pw_poses'][j - 1], z['adaptors'][j - 1]) for j in range(1, n)]
+        independent_loss = float(np.mean(objectives))
+        require(np.isclose(independent_loss, observer.report['postfinal_objective'], atol=1e-05, rtol=0.0001), 'Independent original objective')
+        observer.report['independent_objective'] = independent_loss
+        yy, xx = np.indices((384, 512), dtype=np.float64)
+        maxerror = 0.0
+        for i in range(n):
+            d = vals['depth'][i].astype(float)
+            f = float(vals['focal'][i, 0])
+            p = vals['pp'][i]
+            campts = np.stack([(xx - p[0]) * d / f, (yy - p[1]) * d / f, d], -1)
+            world = campts @ vals['c2w'][i, :3, :3].astype(float).T + vals['c2w'][i, :3, 3]
+            maxerror = max(maxerror, float(np.abs(world - vals['point_cloud'][i]).max()))
+            require(np.allclose(world, vals['point_cloud'][i], atol=1e-05, rtol=1e-05), 'Independent backprojection')
+        loaded = {}
+        embedded = Path(m['binding']['embedded_root']).resolve()
+        for name, module in list(sys.modules.items()):
+            if name.startswith(('cloud_opt.', 'dust3r.', 'src.dust3r.', 'models.', 'croco.')):
+                origin = getattr(module, '__file__', None)
+                if origin:
+                    p = Path(origin).resolve()
+                    require(p.is_relative_to(embedded), 'Mixed geometry namespace ' + name)
+                    require(m['binding']['source_identities'].get(str(p)) == sha(p), 'Unbound geometry module ' + name)
+                    loaded[name] = str(p)
+        loaded_deps = {}
+        overlay = Path(m['binding']['overlay']).resolve()
+        for name, module in list(sys.modules.items()):
+            origin = getattr(module, '__file__', None)
+            if origin:
+                p = Path(origin).resolve()
+                if p.is_relative_to(overlay):
+                    require(m['dependency_identities'].get(str(p)) == sha(p), 'Unbound loaded overlay module ' + name)
+                    loaded_deps[name] = str(p)
+        r.update(status='PASS', completed_utc=utc(), ga_with_observation_seconds=time.perf_counter() - started, outputs={p.name: sha(p) for p in out.iterdir() if p.is_file() and p.name not in {'receipt.json', 'progress.json'}}, depth_tensor_sha256=a.tensor_sha256(torch.from_numpy(vals['depth'])), control_pose_prefix_tensor_sha256=a.tensor_sha256(cameras[:4]), iterations=observer.steps, adam_steps=observer.adam_steps, clean_calls=observer.clean_calls, observer=observer.report, loaded_geometry_modules=loaded, loaded_overlay_modules=loaded_deps, independent_backprojection_max_abs=maxerror, original_source_proof=proof)
+        write(out / 'receipt.json', r)
+    except BaseException as e:
+        r.update(status='FAILED', failed_utc=utc(), error=type(e).__name__ + ': ' + str(e))
+        write(out / 'receipt.json', r)
+        (out / 'traceback.txt').write_text(traceback.format_exc())
+        raise

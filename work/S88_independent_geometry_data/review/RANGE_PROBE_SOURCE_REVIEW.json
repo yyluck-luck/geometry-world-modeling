@@ -1,0 +1,107 @@
+{
+  "status": "GO_CURRENT_BOUND_SOURCE_METADATA_PROBE_ONLY",
+  "recorded_utc": "2026-09-11T00:57:12.272983+00:00",
+  "reviewer": "s77_science_closure, different source author; not actual transfer verification",
+  "files": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/probe_tar_metadata.py",
+      "bytes": 5353,
+      "sha256": "ec631dc6a4b9407dd306b41bf325af9070a12623f4900b0f97d9a6c77cdc590a",
+      "read_scope": "full current source"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/RTMV_RANGE_PLAN.md",
+      "bytes": 1938,
+      "sha256": "da2aa264e1e41905582b35001670e4d37d6693146ca23d54fdc137b406767641",
+      "read_scope": "full current source"
+    }
+  ],
+  "scope": "Read both complete current files; reviewed prior draft and root repairs; no probe execution, no remote scientific payload, no model or scoring.",
+  "checks": [
+    {
+      "check": "Archive identity",
+      "result": "PASS_STATIC",
+      "detail": "Fixed official repository resolve URL, commit 855627f73a6fdd4db7fa150097a576f6e890c569, abc.tar and expected total 12064450560; no full archive hash claimed. Metadata identity comes from root source records, not newly fetched by this reviewer."
+    },
+    {
+      "check": "Request count and byte ranges",
+      "result": "PASS_STATIC",
+      "detail": "At most 24 calls of 512 bytes and first regular JSON at most 2097152 bytes; upper accepted body sum 2109440 bytes, excluding HTTP/redirect header overhead. Offset and end checked against expected size; no recursive archive extraction."
+    },
+    {
+      "check": "Transport acceptance",
+      "result": "PASS_STATIC",
+      "detail": "Explicit curl max-filesize=request length, connect timeout10/max-time at most25, retry0/max-redirs5; require transport rc0, final reported HTTP206, exact Content-Range start/end/total and exact saved length; preserve stop/partial response."
+    },
+    {
+      "check": "Tar traversal",
+      "result": "PASS_AFTER_ROOT_FIX",
+      "detail": "TarInfo.frombuf checks header checksum; only REGTYPE, AREGTYPE, DIRTYPE accepted, directories require size0; PAX/GNU sparse/longname and other types stop before advancing. Standard 512 padded size arithmetic used only after this type gate."
+    },
+    {
+      "check": "RGB/depth isolation",
+      "result": "PASS_STATIC_LIMITED_TO_VALID_SUPPORTED_TAR",
+      "detail": "Only header ranges and first .json body are requested; no RGB/EXR/depth member body request, decoding, extraction or model imports. Actual server response and archive validity must be recorded at execution."
+    },
+    {
+      "check": "JSON possible GT exposure",
+      "result": "PASS_AFTER_ROOT_FIX",
+      "detail": "Immediately after attempted json_quarantine transfer and before HTTP assertions/json.loads, receipt saves attempted=true and metadata_includes_possible_gt_bytes=bool(raw); parse failures cannot erase exposure record."
+    },
+    {
+      "check": "Redirect query persistence",
+      "result": "PASS_STATIC_AND_SYNTHETIC",
+      "detail": "Raw curl stdout stays in memory; only selected headers and scrubbed stderr/error persisted. Artificial URL query scrubbed; no actual signed URLs read by this reviewer."
+    },
+    {
+      "check": "Create only and failure scope",
+      "result": "PASS_STATIC",
+      "detail": "rtmv_range_01 mkdir exist_ok=False, no retry wrapper, each HTTP recorded, exceptions become STOPPED. Completion or stop is not scientific data qualification or model result."
+    }
+  ],
+  "timing_limit_note": "240 s is a cooperative elapsed-time guard plus per-curl remaining-time setting, not a hard operating-system deadline. max(1, ...) may allow the last network call up to about 1 s beyond 240 if started in the final fractional second; local receipt/parse overhead is additional. Do not report it as measured strict process-wall compliance before actual receipt. This minor distinction does not expand request/body scope.",
+  "initial_findings": [
+    {
+      "id": "R1",
+      "status": "CLOSED_BY_ROOT_CURRENT_SOURCE",
+      "finding": "Unsupported tar extension/sparse headers were skipped without applying overridden sizes, risking next offset inside a payload.",
+      "repair": "Reject unsupported tar types and nonempty directory before stepping."
+    },
+    {
+      "id": "R2",
+      "status": "CLOSED_BY_ROOT_CURRENT_SOURCE",
+      "finding": "Possible GT exposure previously marked only after JSON parse.",
+      "repair": "Record attempt and received bytes before transport assertions and parse."
+    },
+    {
+      "id": "R3",
+      "status": "RETRACTED_NOT_A_CONFIRMED_BUG",
+      "finding": "Reviewer briefly suspected escape display issue.",
+      "resolution": "Actual AST constants and artificial Content-Range/URL/newline checks pass. Root independently confirmed; no escape edit requested.",
+      "note": "Original source SHA was not captured before root edits; do not fabricate a pre-repair SHA."
+    }
+  ],
+  "synthetic_checks": {
+    "kind": "AST constants and artificial strings only, not executing probe",
+    "content_range_matches": [
+      [
+        "0",
+        "511",
+        "12064450560"
+      ]
+    ],
+    "scrubbed_dummy_url": "Location: https://example.com/file?[REDACTED_QUERY]",
+    "json_write_uses_actual_newline": true
+  },
+  "local_tool_observation": "/usr/bin/curl --version was read: 8.7.1; no curl network request or cap stress test was run by reviewer.",
+  "actions": {
+    "probe_runs": 0,
+    "network_requests": 0,
+    "models": 0,
+    "scores": 0,
+    "rgb_or_depth_decodes": 0,
+    "scientific_array_reads": 0
+  },
+  "blocking_findings_current": [],
+  "root_execution_authorization_separate": true
+}

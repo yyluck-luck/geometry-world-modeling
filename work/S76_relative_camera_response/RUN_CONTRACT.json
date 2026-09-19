@@ -1,0 +1,101 @@
+{
+  "schema": "s76-single-yaw-fixed-response-contract-v1",
+  "created_utc": "2026-09-09T09:04:29.389375+00:00",
+  "old_acceptance": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/ROOT_RESULT_ACCEPTANCE.json",
+    "sha256": "749d24f6599fbca2843c34bf9f3bd465952b3ceebd43c483dbdf49d76a3e0989",
+    "size": 1349
+  },
+  "old_generation_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/generation_verification_01/receipt.json",
+    "sha256": "4d05302a786a45f70c1c1ff32182e85a696ffa6107ff6acc0a649474eaba8ab8",
+    "size": 70718
+  },
+  "old_worker_receipt": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/execution_01/receipt.json",
+    "sha256": "7672de7042fcb1c231414384eda94415c189d2956f94433d88d5c8acd9334e84",
+    "size": 101790
+  },
+  "s70_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/generate_fixed_contexts.py",
+    "sha256": "ba3a5fb9954e10b51bc56b717fe3de213728560f5dd3c6bc7e319594f1391b92",
+    "size": 24873
+  },
+  "s70_manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/INPUTS.json",
+    "sha256": "2a5551e348f1f389ef44ca6fac7d47e8853b44772884cbd38cecb0064a6e80e7",
+    "size": 16382
+  },
+  "rules_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/pilot_rules.py",
+    "sha256": "1da603e68a1c427231f491309a412c7cb005e2b460c4eccad436318b9484a326",
+    "size": 7337
+  },
+  "camera_util_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py",
+    "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+    "size": 45708
+  },
+  "pipeline_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+    "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "size": 62233
+  },
+  "python_version": "3.12.14",
+  "limits": {
+    "worker_seconds": 3540,
+    "external_seconds": 3600,
+    "rss_bytes": 48318382080,
+    "minimum_free_bytes": 10737418240
+  },
+  "intervention": {
+    "arm": "yaw_plus5",
+    "degrees": 5.0,
+    "axis": "local optical +y",
+    "composition": "right multiply target c2w rotations by Ry(+5), targets20-23 only",
+    "history_order": [
+      19,
+      18,
+      13,
+      12
+    ],
+    "target_ids": [
+      20,
+      21,
+      22,
+      23
+    ],
+    "unchanged": "all eight centers, four history cameras, K, mask, appearance c/uc crossattn/replace, history rays, original random draw path and actual states, model values/modes",
+    "descendants": "Original get_translation_scaling_factor and get_cond; all c/uc ray fields and post-cond c2ws passed to original MultiviewCFG",
+    "noise": "Fixed original image-grid Gaussian stream, no warp/transport/interpolation; no exact H-equivariance theorem"
+  },
+  "outputs": "Create-only execution_01, original S70 all8 latents/four target raw+uint8 quantizer, all four targets, masks/H/condition hashes saved before generation; old A0 reused, zero baseline rerun",
+  "score": {
+    "pythonpath": [
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_environment/site-packages"
+    ],
+    "worker_seconds": 55,
+    "external_seconds": 60,
+    "seed": 76,
+    "versions": {
+      "numpy": "1.26.4",
+      "opencv-python-headless": "4.11.0.86",
+      "Pillow": "10.3.0"
+    },
+    "sift": {
+      "nfeatures": 1500,
+      "nOctaveLayers": 3,
+      "contrastThreshold": 0.04,
+      "edgeThreshold": 10,
+      "sigma": 1.6
+    },
+    "ratio": 0.75,
+    "matching": "Fixed mutual BF-L2 k2 ratio<.75 on original stored uint8; all matches retained with complete source/new feature counts and source denominators. No fits, RANSAC, alignments or geometric residual filtering.",
+    "geometry": "H=K Rnew.T Rold inv(K); original/new raw optical FP32 cast to FP64. Prescribed geometry and bidirectional 576x576 integer-pixel common FOV masks saved before generation.",
+    "measurement": "For identical matched point pairs compute identity residual and H residual, paired difference identity-H; q25/50/75/95/max and sign counts over all finite positive-depth projections. Common FOV secondary subset requires both observed and mapped/inverse-mapped points in [0,575]^2. Report both subsets and all invalid/outside counts.",
+    "event": "Per target median paired identity-H>0; report all4 event for each family, UNKNOWN/None if any target has undefined median, else all strict-positive. This exploratory direction event is not significance or camera correctness.",
+    "claim_boundary": "Already seen one scene and fixed stochastic realization. Generated correspondences are not ground truth. Directional response is full-system intervention, not isolated rays, global pose accuracy, exact noise equivariance or method validation."
+  },
+  "execution_boundary": "Author source-only. Root independently reviews final files, writes ROOT_RUN_BINDING.json with status ACCEPTED_S76_SOURCE_SET and exact argv/hashes, then starts observer. Do not launch until this source review is actually accepted. This is team source verification, not a new user permission request."
+}

@@ -1,0 +1,62 @@
+{
+  "schema": "s20-import-independent-review-v2",
+  "status": "PASS_SOURCE_AND_IMPORT_RECEIPT_REVIEW_ONLY",
+  "completed_utc": "2026-09-06T12:48:08.361120+00:00",
+  "independence": "Read-only different-author source/guard review and root-run receipt verification. This reviewer did not execute the import or rerun models.",
+  "script_sha256": {
+    "prepare_source.py": "e8e449363b24261e3e2656720c8e5c6f8a82ea0bd0ebfb8eca3c7d014d2ffb9d",
+    "source_manifest.json": "66f913d7a7be7890447ea01e766c4bef10e2818fcafd7a8141d2e01d7bdbe841",
+    "import_smoke.py": "6b7fcf4c4ed89bec719c11ccbd51588ec427481f87a3976e4a7a0575350db249",
+    "import_smoke_v2.py": "01160cc9f0648e77a21bc52b3be9aa1621e23297db538d6fccc350f7a31a66c8",
+    "import_smoke_v3.py": "14a845f15aea26c87531ddad09c5c51407a50754e343dcfe1bb75a95fd4771b2",
+    "wheel_plan_v2.json": "90f0f93266d63aea4077f48a98389287156bdc42d819fef214d6731d26786b41",
+    "install_receipt.json": "660510f6b8eaa6d49a80a88fb28635c6961f9d4a5b0ffd048044266085a82763",
+    "import_smoke.json": "13637d51f4c4f6147d50e3dc9185511f28af499ef806d9f23180c05c9eb84f5a",
+    "import_smoke_v2.json": "0ccab2330ca35e0183a67cfeb700c500d5ed3e2adc4c2fe0c9be6c916c6e9ea6",
+    "import_smoke_v3.json": "c74df6a03cb07add0d7865edc9e2ffb54fc8bd5d7052e5baac79d363d3f319d6"
+  },
+  "source_files_checked_earlier": 199,
+  "source_check_not_repeated": true,
+  "loaded_module_entries_matched_to_manifest": 45,
+  "latest_import": {
+    "status": "PASS_FULL_PIPELINE_IMPORT_ONLY",
+    "started_utc": "2026-09-06T12:46:58.854593+00:00",
+    "ended_utc": "2026-09-06T12:47:08.129791+00:00",
+    "pass_checks": 292,
+    "elapsed_seconds": 9.27522420900641,
+    "peak_rss_bytes": 665321472,
+    "model_constructor_attempts": 0,
+    "torch_weight_load_attempts": 0,
+    "PIL_image_open_attempts": 0,
+    "network_attempts": 0,
+    "blocked_events": [],
+    "blocked_optional_local_probes": [
+      {
+        "event": "subprocess.Popen",
+        "executable": "lscpu",
+        "decision": "deny with PermissionError; NumPy catches OSError and sets SVE unsupported"
+      }
+    ]
+  },
+  "guard_review": [
+    "resolve before data/results/old and new test_samples path check",
+    "weight .bin is now denied",
+    "connect/sendto/subprocess/system/spawn attempts denied by audit",
+    "exact lscpu optional probe remains denied with PermissionError instead of RuntimeError; NumPy original OSError branch handles it",
+    "all other prohibited events retain hard failure",
+    "Torch load and PIL open hooks plus five model constructor profiler in intended import scope",
+    "guard is observability for trusted local import not a hostile-code OS sandbox"
+  ],
+  "old_environment_claim": "existing helper checks stat/path, METADATA/RECORD/bin and excludes bytecode; not all-byte source certification",
+  "scope_counts": {
+    "reviewer_import_runs": 0,
+    "model_calls": 0,
+    "real_image_reads": 0,
+    "weight_reads": 0,
+    "GT_reads": 0
+  },
+  "failure_retention": "v1 PASS original weaker guards retained; v2 actual FAIL on denied optional lscpu retained; v3 isolated new guard succeeds",
+  "blocking_findings": [],
+  "pipeline_default_device_helper": "Additional convenience patch, not needed by original Navigator calls which already pass self.device. Mathematically tested S17 candidate inherited explicitly.",
+  "full_generation_ready": false
+}

@@ -1,0 +1,717 @@
+                         This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                      Except for this watermark, it is identical to the accepted version;
+                                the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+SLAM3R: Real-Time Dense Scene Reconstruction from Monocular RGB Videos
+
+                      Yuzheng Liu1 * Siyan Dong2 *† Shuzhe Wang3 Yingda Yin1
+                            Yanchao Yang2† Qingnan Fan4 Baoquan Chen1†
+            1
+              Peking University 2 The University of Hong Kong 3 Aalto University                                       4
+                                                                                                                           VIVO
+
+
+                           Abstract
+
+    In this paper, we introduce SLAM3R, a novel and ef-
+fective system for real-time, high-quality, dense 3D recon-
+struction using RGB videos. SLAM3R provides an end-
+to-end solution by seamlessly integrating local 3D recon-
+struction and global coordinate registration through feed-
+forward neural networks. Given an input video, the sys-
+tem first converts it into overlapping clips using a sliding
+window mechanism. Unlike traditional pose optimization-
+based methods, SLAM3R directly regresses 3D pointmaps
+from RGB images in each window and progressively aligns
+and deforms these local pointmaps to create a globally con-
+sistent scene reconstruction - all without explicitly solving
+any camera parameters. Experiments across datasets con-
+sistently show that SLAM3R achieves state-of-the-art re-
+construction accuracy and completeness while maintain-
+ing real-time performance at 20+ FPS. Code available at:
+https://github.com/PKU-VCL-3DV/SLAM3R.                                     Figure 1. We introduce a novel dense reconstruction system -
+                                                                           SLAM3R. It takes a monocular RGB video as input and recon-
+                                                                           structs the scene as a dense pointcloud. The video is converted
+1. Introduction                                                            into short clips for local reconstruction (denoted as inner-window),
+                                                                           which are then incrementally registered together (inter-window) to
+Dense 3D reconstruction, a long-standing challenge in com-                 create a global scene model. This process runs in real-time, pro-
+puter vision, aims to capture and reconstruct the detailed ge-             ducing a reconstruction that is both accurate and complete.
+ometry of real-world scenes. Traditional approaches have
+largely relied on multi-stage pipelines. These typically
+begin with sparse Simultaneous Localization and Map-                       depth sensors. Recently, several monocular SLAM sys-
+ping (SLAM) [7, 16, 25, 37, 38] or Structure-from-Motion                   tems [29, 46, 73, 75, 77, 79] have been proposed to tackle
+(SfM) [31, 33, 47, 53, 66] algorithms to estimate camera                   dense scene reconstruction from RGB videos. By incorpo-
+parameters, followed by Multi-View Stereo (MVS) [18, 48,                   rating advanced scene representations [24, 36, 40, 57, 62],
+60, 68] techniques to fill in scene details. While these meth-             these systems produce accurate and complete scene recon-
+ods offer high-quality reconstructions, they often require of-             structions. However, this comes at the cost of reduced run-
+fline processing to produce a complete model, which limits                 ning efficiency. For example, NICER-SLAM [79] operates
+their applicability in real-world scenarios.                               at a speed significantly below 1 FPS. Therefore, current ap-
+    In the literature, dense SLAM approaches [5, 9, 10, 17,                proaches struggle with at least one of three key criteria: re-
+22, 39, 42, 55, 56, 76, 78] have been developed to address                 construction accuracy, completeness, or efficiency.
+dense scene reconstruction as a complete system. How-                          While monocular dense SLAM systems encounter the
+ever, these approaches often fall short in terms of recon-                 limitations mentioned earlier, recent advances in two-view
+struction accuracy or completeness, or they rely heavily on                geometry have shown promising potential. DUSt3R [64]
+  * Joint first authors: liu yuzheng@stu.pku.edu.cn, siyan3d@hku.hk        introduces a purely end-to-end approach for learning dense
+  † Corresponding authors                                                  reconstruction. Trained on large-scale datasets, its network
+
+
+
+                                                                      16651
+is capable of producing high-quality dense reconstructions        2. Related Work
+from paired images in real-time. However, for multiple
+views, a global optimization step is required to align these      Traditional offline approaches. Dense 3D pointcloud re-
+image pairs, which significantly hampers its efficiency. A        construction is a long-standing problem in computer vision.
+concurrent work, Spann3R [61], extends DUSt3R to multi-           Classical approaches to this problem first determine cam-
+view (video) scenarios through an incremental pipeline with       era parameters using Structure from Motion (SfM) [31, 33,
+spatial memory. While this method accelerates the recon-          47, 53, 66], followed by dense 3D points triangulation with
+struction process, it unfortunately results in noticeable ac-     Multi-View Stereo (MVS) [1, 18, 48, 60, 68]. In recent
+cumulated drift and reduced reconstruction quality.               years, neural implicit [8, 30, 36, 62, 65] and 3D Gaus-
+                                                                  sian [12, 19, 20] representations have been applied to fur-
+    To address these challenges, we present SLAM3R (pro-
+                                                                  ther enhance the quality of dense reconstruction. While
+nounced “slæm@r”), a real-time dense 3D reconstruction
+                                                                  these methods deliver high-quality results, they have a sig-
+system using RGB-only videos as input. Unlike tradi-
+                                                                  nificant limitation: the requirement for offline processing
+tional SLAM problems, SLAM3R performs implicit cam-
+                                                                  to generate the final 3D model, which restricts their appli-
+era localization and focuses more on dense scene mapping,
+                                                                  cability in real-time scenarios. In this paper, we focus on
+where 3R stands for 3D Reconstruction. SLAM3R com-
+                                                                  online dense reconstruction in the context of Simultaneous
+prises a two-hierarchy framework. First, it reconstructs lo-
+                                                                  Localization and Mapping (SLAM).
+cal 3D geometry from a sliding window that processes short
+                                                                  Dense SLAM. Early works on SLAM [4, 7, 15, 16, 25, 37,
+clips from the input video. Then, it progressively regis-
+                                                                  38] focused on reconstructing the structure of unknown en-
+ters these local reconstructions to build a globally consis-
+                                                                  vironments while simultaneously localizing camera poses.
+tent 3D scene. Both modules are developed with simple
+                                                                  These approaches prioritize real-time performance but pro-
+yet effective feed-forward models, enabling end-to-end and
+                                                                  duce only sparse structures of the scene. Dense SLAM ap-
+efficient scene reconstruction. Specifically, the two mod-
+                                                                  proaches [5, 9–11, 17, 22, 27, 39, 42, 55, 56, 76, 78] in-
+ules are the Image-to-Points (I2P) network and the Local-
+                                                                  corporate detailed scene geometry information to improve
+to-World (L2W) network. The I2P module, inspired by
+                                                                  pose estimation. DROID-SLAM [56] introduces recurrent
+DUSt3R, selects a keyframe in a local window as the co-
+                                                                  iterative updates of camera poses and pixel-wise depth esti-
+ordinate system reference. It directly predicts the dense 3D
+                                                                  mates, while TANDEM [27] proposes an online MVS mod-
+point map supported by the remaining frames within that
+                                                                  ule for depth prediction. These systems enable real-time
+window. The L2W module incrementally fuses locally re-
+                                                                  dense scene reconstruction. However, their focus on cam-
+constructed points into a coherent global coordinate system.
+                                                                  era trajectory accuracy often results in incomplete and noisy
+Both processes reconstruct the 3D points without explicitly
+                                                                  3D reconstruction. Neural implicit and Gaussian represen-
+estimating any camera parameters.
+                                                                  tations have also been integrated with dense SLAM sys-
+    Through extensive experiments, we demonstrate that            tems [9, 21–23, 32, 34, 42, 42, 44, 45, 55, 67, 72, 78].
+SLAM3R provides high-quality scene reconstructions with           However, these approaches often rely on additional depth
+minimal drift, outperforming existing dense SLAM sys-             sensors or focus primarily on novel view synthesis rather
+tems across various benchmarks. Furthermore, SLAM3R               than producing detailed geometric reconstruction.
+achieves these results at 20+ FPS, bridging the gap between           More recently, several monocular dense SLAM sys-
+quality and efficiency in RGB-only dense scene reconstruc-        tems [29, 46, 73, 75, 77, 79] have been developed to produce
+tion. Our contributions are summarized below:                     dense scene geometry reconstruction. A notable limitation
+• We present a novel real-time end-to-end dense 3D recon-         of these systems is their slow runtime. Among these sys-
+  struction system that uses RGB videos to directly pre-          tems, GO-SLAM [75] achieves a speed of ∼8 FPS, which
+  dict 3D pointmaps in a unified coordinate system through        still falls short of real-time capability. Furthermore, these
+  feed-forward neural networks.                                   methods all share a common strategy: they alternate be-
+• Through careful design, our Image-to-Points module can          tween solving for camera poses and estimating the scene
+  process an arbitrary number of images simultaneously, ef-       representation. In contrast, this paper presents a novel ap-
+  fectively extending DUSt3R to handle multiple views and         proach to dense scene reconstruction that eliminates the
+  produce higher-quality predictions.                             need for explicitly solving camera parameters, offering a
+• The proposed Local-to-World module directly aligns pre-         more efficient and streamlined solution.
+  dicted local 3D pointmaps into a unified global coordinate      End-to-end dense 3D reconstruction. DUSt3R [64] intro-
+  system. This eliminates the need for explicit camera pa-        duces the first purely end-to-end dense 3D reconstruction
+  rameter estimation and costly global optimization.              pipeline without relying on camera parameters. Recently,
+• We evaluate our method on multiple public benchmarks.           several works have adopted a similar approach for single-
+  It achieves state-of-the-art reconstruction quality in terms    view reconstruction [63], feature matching [28], novel view
+  of both accuracy and completeness at real-time speeds.          synthesis [52, 70], and dynamics reconstruction [74]. These
+
+
+
+                                                             16652
+successes demonstrate the effectiveness of end-to-end dense       first window and use the reconstructed frames (image and
+point prediction, inspiring us to develop a dense reconstruc-     local point map produced by the I2P) as input for the L2W
+tion system with a similar methodology.                           model. The L2W model incrementally register these lo-
+    While DUSt3R operates in real-time for two-view pre-          cal reconstructions into a unified global 3D coordinate sys-
+dictions, its extension to multiple views involves exhaustive     tem. To ensure both accuracy and efficiency during this pro-
+pairing images and performing an additional global opti-          cess, the system maintains a limited reservoir of registered
+mization step. This process significantly increases compu-        frames, called scene frames. Whenever the L2W model reg-
+tational time, thereby hindering its real-time performance.       isters a new keyframe, we retrieve the best-correlated scene
+MASt3R [28] enhances the matching capability of DUSt3R            frames as a reference. The details are introduced in Sec. 3.2.
+by adding a match head, achieving more accurate keypoint
+correspondences for 3D reconstruction [14], but at the cost       3.1. Inner-Window Local Reconstruction
+of increased computational time. More recently, the con-         The Image-to-Points (I2P) model aims to infer dense 3D
+current work Spann3R [61] extends DUSt3R with spatial            pointmaps for every pixel of a keyframe in a given video
+memory. It takes a video as input and performs incremental       clip. By default, the middle image of a window W is chosen
+scene reconstruction in a unified coordinate system without      as the keyframe Ikey to define the local coordinate system,
+requiring global optimization. While this approach signifi-      as it is most likely to have the largest overlap with other
+cantly improves runtime efficiency, the incremental recon-                                                 L−1
+                                                                 frames. The remaining images {Isupi }i=1       serve as sup-
+struction pipeline frame by frame leads to noticeable accu-      porting frames. Note that the 3D pointmaps of supporting
+mulated drift. Unlike Spann3R, our networks at each hier-        frames can also be reconstructed through I2P.
+archy take multiple frames as input to minimize drift. Addi-         The I2P network draws inspiration from DUSt3R [64],
+tionally, we propose a self-contained retrieval module that,     originally designed for stereo 3D reconstruction. We in-
+when registering a new frame, this module selects not only       troduce several simple yet effective modifications to extend
+its previous few frames but also other similar frames from       it for multi-view scenarios. The I2P model uses a multi-
+long-term history for more global scene reference.               branch Vision Transformer (ViT) [13] as its backbone. It
+                                                                 consists of a shared encoder Eimg , two separate decoders
+3. Method                                                        Dkey and Dsup , and a point regression head for final pre-
+                                                                 diction. These components are detailed below.
+Problem statement. Given a monocular video consisting
+                                                                 Image encoder. For a given video clip, the image encoder
+of a sequence of RGB image frames {Ii ∈ RH×W ×3 }N         i=1   Eimg encodes each frame Ii to obtain token representa-
+that captures a static scene, the goal is to reconstruct its
+                                                                 tions Fi ∈ RT ×d , where T is the number of tokens and
+dense 3D poincloud P ∈ RM ×3 , where M is the number of
+                                                                 d is the token dimension. The encoder Eimg comprises
+3D points. Our work focuses on three key objectives: maxi-
+                                                                 m ViT encoder blocks, each containing self-attention and
+mizing 3D points recovery for reconstruction completeness,
+                                                                 feed-forward layers. The encoding process is denoted as
+improving the accuracy of each recovered point, and achiev-
+ing these goals while preserving real-time performance.                     F_i^{(T \times d)} = E_{img}(I_i^{(H \times W \times 3)}), \ i=1, ..., L. 
+System overview. Figure 2 illustrates an overview of the
+proposed dense reconstruction system. It consists of two          The frames are processed independently and in parallel,
+main components: an Image-to-Points (I2P) network that            with the output divided into two parts: Fkey for the
+                                                                                          L−1
+recovers local 3D points from video clips, and a Local-to-        keyframe and {Fsupi }i=1     for the supporting frames.
+World (L2W) network that registers local reconstructions          Keyframe decoder. The keyframe decoder Dkey consists
+into a global scene coordinate system. During the recon-          of n ViT decoder blocks, each containing self-attention,
+struction of the dense point cloud, the system does not ex-       cross-attention, and feed-forward layers. Unlike DUSt3R
+plicitly solve any camera parameters. Instead, it directly        which uses the standard cross-attention, we introduce a
+predicts 3D point maps in unified coordinate systems.             novel multi-view cross-attention to combine information
+    The system starts by applying a sliding window mecha-         from different supporting frames. Given the feature tokens
+nism of length L to convert the input video into short clips      Fkey and {Fsupi }L−1i=1 , the keyframe decoder Dkey takes
+{Wi ∈ RL×H×W ×3 }. The I2P network then processes                 Fkey as input for self-attention and performs cross-attention
+                                                                                                L−1
+each window Wi to recover local 3D pointmaps. Within              between Fkey and {Fsupi }i=1      . A decoder block is illus-
+each window, the system selects a keyframe to define a ref-       trated in Figure 3. For each cross-attention layer, queries are
+erence coordinate system for point reconstruction, as de-         taken from Fkey , while keys and values are extracted from
+tailed in Sec. 3.1. By default, the stride of the sliding win-    the supporting tokens Fsupi . These L − 1 cross-attention
+dow is set to 1, ensuring each input frame in the video is        layers are independent of each other, allowing for parallel
+selected at least once as a keyframe. For global scene recon-     processing. A max-pooling layer is then employed to ag-
+struction, we initialize the world coordinate system with the     gregate features after cross-attention. We obtain decoded
+
+
+
+                                                             16653
+Figure 2. System overview. Given an input monocular RGB video, we apply a sliding window mechanism to convert it into overlapping
+clips (referred to as windows). Each window is fed into an Image-to-Points (I2P) network to recover 3D points in a local coordinate
+system. Next, the local points are incrementally fed into a Local-to-World (L2W) network to create a globally consistent scene model. The
+proposed I2P and L2W networks elegantly share similar architectures. In the I2P step (Sec. 3.1), we select a keyframe as a reference to set
+up a local coordinate system and use the remaining frames in the window to estimate the 3D geometry captured within it. The points from
+the first window are used to establish the world coordinate system. We then incrementally fuse the following windows in the L2W step
+(Sec. 3.2). This process involves retrieving the most relevant already-registered keyframes as a reference, and integrating new keyframes.
+Through this iterative process, we eventually obtain the full scene reconstruction.
+
+
+keyframe tokens Gkey as:                                                        Note that all supporting frames share the same Dsup . This
+                                                                                process is denoted as
+            G_{key} = D_{key}(F_{key}, F_{sup_1}, ..., F_{sup_{L-1}}) . 
+                                                                                             G_{sup_i} = D_{sup}(F_{sup_i}, F_{key}), \ i=1, ..., L-1. 
+                                                                                Points reconstruction. Similar to DUSt3R, we apply a lin-
+                                                                                ear head [64] to regress dense 3D pointmaps in the uni-
+                                                                                fied coordinate system from decoded tokens. In addition
+                                                                                to the pointmaps, we also predict the confidence maps for
+                                                                                all frames to evaluate their reliability. The final predictions
+                                                                                are:
+                                                                                     \hat {X}_i^{(H \times W \times 3)}, \hat {C}_i^{(H \times W \times 1)} = \text {H}(G_i^{(T \times d)}), \ i=1, ..., L. 
+
+                                                                                Training loss. Following DUSt3R, the I2P network
+                                                                                is trained end-to-end using ground-truth scene points
+                                                                                {Xi }Li=1 . Both the ground truth and predicted point maps
+                                                                                are normalized to a canonical scale, determined by the av-
+                                                                                erage distance of all valid points within the window to the
+                                                                                origin. The confidence-aware training loss is:
+
+Figure 3. Illustration of a decoder block in the proposed keyframe
+decoder Dkey . We present a minimalist modification to integrate                      \mathcal {L}_{I2P} = \sum _{i=1}^L M_i \cdot ( \hat {C}_i \cdot \text {L1}(\frac {1}{\hat {z}}\hat {X}_i, \frac {1}{z}X_i) - \alpha \ \text {log} \hat {C}_i ) , 
+information from different supporting images. Our approach tra-
+verses each of them, selects its token keys and values, and uses the
+keyframe queries to interact with them separately across the sup-              where Mi represents a mask of valid points that have
+porting images. This multi-view information is then aggregated                 ground-truth values in Xi , z and ẑ are the scale factor, Ĉi
+through max-pooling. The registration decoder Dreg and scene                   is the confidence map, the operator · denotes the element-
+decoder Dsce (described in Sec. 3.2) share the same architecture.              wise matrix multiplication, L1(·) denotes the point-wise
+                                                                               Euclidean distance, and α is a hyper-parameter to control
+Supporting decoder. The supporting decoder Dsup is de-                         the regularization term. We will detail the process in Sec 4.
+signed to complement the keyframe decoder. It inherits the
+                                                                               3.2. Inter-Window Global Registration
+decoder architecture used in DUSt3R, consisting of n stan-
+dard ViT decoder blocks. The cross-attention mechanism                         After obtaining the 3D pointmap {X̂key } from the I2P
+is applied only to exchange information with the keyframe.                     network, we use the inter-window Local-to-World (L2W)
+
+
+
+                                                                           16654
+model to incrementally register the newly generated                                              retrieved scene frames in parallel as:
+pointmap into a global 3D coordinate system. Similar to the
+I2P network, the L2W model also relies on some frames to                                                       \mathcal {P}_i^{(T \times d)} = E_{pts}(\hat {X}_i^{(H \times W \times 3)}), \ i=1, ..., K+1. 
+serve as a reference for the scene coordinate system. Fur-
+thermore, it can leverage multiple registered keyframes as a                                     The encoded geometric tokens are combined with their cor-
+global reference. These registered keyframes are referred to                                     responding visual tokens by
+as scene frames and they are maintained in a buffering set
+through a sampling mechanism.                                                                                  \mathcal {F}_i^{(T \times d)} = F_i^{(T \times d)} +\mathcal {P}_i^{(T \times d)}, \ i=1, ..., K+1. 
+   The buffering set is designed for scalability in handling
+long videos. We apply a reservoir strategy [59] that main-                                      This resulting a token set {Fkey , {Fscei }K
+                                                                                                                                           i=1 } contains joint
+tains a maximum of B registered frames in the buffering set.                                    features of image patch appearance and 3D geometry for
+When a new keyframe is inferred from I2P and ready for                                          the keyframe and retrieved scene frames. In the following
+fusion, we retrieve the top-K best-correlated scene frames                                      decoders, {P} are further accumulated to {F} between ad-
+from the buffering set as its support for global registration.                                  jacent blocks to enhance the geometric representation.
+Scene initialization. The first window is used to initialize                                    Registration decoder. The registration decoder Dreg takes
+the scene model. It’s crucial to ensure this initialization is                                  feature tokens {Fkey , {Fscei }Ki=1 } as input and aims to
+as accurate as possible. To achieve this, we execute the I2P                                    transform the local reconstruction of the keyframe to the
+network L times, attempting to traverse and designate each                                      scene coordinate system. It takes the same network archi-
+frame within the window as the keyframe. We then select                                         tecture of the keyframe decoder Dkey . This decoding pro-
+the result with the highest total confidence score for scene                                    cess is denoted by
+model initialization. This process results in a scene point-
+cloud along with a set of registered frames. All these frames                                                                \mathcal {G}_{key} = D_{reg}(\mathcal {F}_{key}, \mathcal {F}_{sce_1}, ..., \mathcal {F}_{sce_{K}}) . 
+are regarded as scene frames, and they are used to initialize
+the buffering set.                                                                              Scene decoder. The scene decoder Dsce takes the token set
+Reservoir and retrieval. Each scene frame Iscei is                                              {Fkey , {Fscei }K
+                                                                                                                i=1 } as input to refine the scene geometry
+recorded with its latent feature Fscei and pointmaps X̃scei .                                   without coordinate system changes. It uses the same net-
+For efficiency, we apply reservoir sampling to allow storing                                    work architecture as the keyframe decoder Dkey , allowing
+an unbiased subset of an empirical distribution in a bounded                                    us to extend to multi-keyframe co-registration (see supple-
+amount of memory. The first B registered frames chosen                                          mentary material for details). By default, we register one
+are directly inserted into the buffering set. For each subse-                                   keyframe each time. Each of the Fscei has information ex-
+quent frame with id > B, the probability of inserting it is                                     change only with the Fkey . This decoding process is de-
+B/id. If chosen for insertion, it will randomly replace one                                     noted by
+of the current scene frames in the buffering set.
+   Given a new keyframe Ikey to be registered, we feed its                                                               \mathcal {G}_{sce_i} = D_{sce}(\mathcal {F}_{sce_i}, \mathcal {F}_{key}), \ i=1, ..., K. 
+feature Fkey and the features from the buffering set into a
+retrieval module,                                                                                Points reconstruction and training loss. We apply the
+                                                                                                 same head design as that of the I2P network to predict all
+                \text {Retrieval}(F_{key}^{(T \times d)}, \{F_{sce_i}^{(T \times d)}\}),         the pointmaps X̃i in the global scene coordinate system:
+
+                                                                                                      \tilde {X}_i^{(H \times W \times 3)}, \tilde {C}_i^{(H \times W \times 1)} = \text {H}(\mathcal {G}_i^{(T \times d)}), \ i=1, ..., K+1. 
+to obtain a list of correlation scores, measuring both
+the visual similarity and baseline suitability between the
+keyframe and the scene frames in the buffering set. The re-                                      We train the L2W network using a similar loss function as
+trieval module uses the first r decoder blocks from the I2P                                      the I2P network. Differently, no normalization is applied
+module as its backbone. A linear projection and an average-                                      to the predicted point map, as the output scale must align
+pooling layer follow, together producing an image-wise cor-                                      with the scene frames in the input. This alignment ensures
+relation score. We then select the top-K scene frames as a                                       that the output can be directly integrated into the existing
+global reference to fuse the current keyframe. As a result,                                      reconstruction. The training loss of the L2W network is:
+we have K scene frames and one keyframe as the input for
+the following L2W model.
+                                                                                                               \mathcal {L}_{L2W} = \sum _{i=1}^L M_i \cdot ( \tilde {C}_i \cdot \text {L1}(\tilde {X}_i, X_i) - \alpha \ \text {log} \tilde {C}_i ) . 
+Points embedding. The 3D pointmaps reconstructed by the
+I2P model are encoded into the L2W model using a patch
+embedding method similar to image patchification in the                                          The following section provides a detailed discussion of the
+ViT encoder Eimg . We process the new keyframe and K                                             training process and its implementation details.
+
+
+
+                                                                                            16655
+                                         Chess              Fire              Heads            Office            Pumpkin             RedKitchen           Stairs          Average
+       Method                                                                                                                                                                             FPS
+                                      Acc. / Comp.      Acc. / Comp.       Acc. / Comp.     Acc. / Comp.        Acc. / Comp.         Acc. / Comp.      Acc. / Comp.     Acc. / Comp.
+       DUSt3R [64]                     2.26 / 2.13          1.04 / 1.50      1.66 / 0.98      4.62 / 4.74         1.73 / 2.43         1.95 / 2.36       3.37 / 10.75      2.19 / 3.24     <1
+       MASt3R [28]                     2.08 / 2.12          1.54 / 1.43      1.06 / 1.04      3.23 / 3.19         5.68 / 3.07         3.50 / 3.37       2.36 / 13.16      3.04 / 3.90     ≪1
+       Spann3R [61]                    2.23 / 1.68          0.88 / 0.92      2.67 / 0.98      5.86 / 3.54         2.25 / 1.85         2.68 / 1.80       5.65 / 5.15       3.42 / 2.41     >50
+       SLAM3R-NoConf (Ours)            2.12 / 1.21          0.95 / 0.80      3.23 / 1.67      2.59 / 2.21         1.99 / 2.04         2.09 / 1.88       4.54 / 6.38       2.40 / 2.24     ∼25
+       SLAM3R (Ours)                   1.63 / 1.31          0.84 / 0.83      2.95 / 1.22      2.32 / 2.26         1.81 / 2.05         1.84 / 1.94       4.19 / 6.91       2.13 / 2.34     ∼25
+
+
+Table 1. Reconstruction results on 7 Scenes [51] dataset. The average numbers are computed over all test sequences. The methods are
+categorized into two groups based on whether their FPS is above or below 1. The best results within each category are shown in bold. We
+report accuracy and completeness in centimeters. The color gradient shifts from red through yellow to green to show increasing FPS.
+
+                               Room 0            Room 1              Room 2           Office 0             Office 1        Office 2             Office 3        Office 4         Average
+ Method                                                                                                                                                                                         FPS
+                             Acc. / Comp.      Acc. / Comp.        Acc. / Comp.     Acc. / Comp.         Acc. / Comp.    Acc. / Comp.         Acc. / Comp.    Acc. / Comp.     Acc. / Comp.
+ DUSt3R [64]                   3.47 / 2.50       2.53 / 1.86         2.95 / 1.76     4.92 / 3.51         3.09 / 2.21         4.01 / 3.10       3.27 / 2.25      3.66 / 2.61      3.49 / 2.48    <1
+ MASt3R [28]                   4.01 / 4.10       3.61 / 3.25         3.13 / 2.15     2.57 / 1.63         12.85 / 8.13        3.13 / 1.99       4.67 / 3.15      3.69 / 2.47      4.71 / 3.36    ≪1
+ NICER-SLAM [79]*              2.53 / 3.04       3.93 / 4.10         3.40 / 3.42     5.49 / 6.09         3.45 / 4.42         4.02 / 4.29       3.34 / 4.03      3.03 / 3.87      3.65 / 4.16    ≪1
+ DROID-SLAM [56]*             12.18 / 8.96       8.35 / 6.07        3.26 / 16.01     3.01 / 16.19        2.39 / 16.20        5.66 / 15.56       4.49 / 9.73     4.65 / 9.63     5.50 / 12.29    ∼20
+ DIM-SLAM [29]*               14.19 / 6.24       9.56 / 6.45        8.41 / 12.17     10.16 / 5.95         7.86 / 8.33        16.50 / 8.28      13.01 / 6.77    13.08 / 8.62     11.60 / 7.85    ∼3
+ GO-SLAM [75]                       -                 -                   -                -                   -                   -                 -               -          3.81 / 4.79     ∼8
+ Spann3R [61]                 9.75 / 12.94      15.51 / 12.94        7.28 / 8.50     5.46 / 18.75        5.24 / 16.64        9.33 / 11.80      16.00 / 9.03   13.97 / 16.02    10.32 / 13.33    >50
+ SLAM3R-NoConf (Ours)          3.37 / 2.40       3.22 / 2.33        3.15 / 2.00       4.43 / 2.59         3.18 / 2.34         3.95 / 2.78      4.20 / 3.15     4.57 / 3.38      3.76 / 2.62     ∼24
+ SLAM3R (Ours)                 3.19 / 2.40       3.12 / 2.34        2.72 / 2.00       4.28 / 2.60        3.17 / 2.34          3.84 / 2.78      3.90 / 3.16     4.32 / 3.36      3.57 / 2.62     ∼24
+
+
+                     Table 2. Reconstruction results on Replica [54] dataset. * denotes the results reported in NICER-SLAM.
+
+              DUSt3R [64]   MASt3R [28]      NICER-SLAM [79]*        DROID-SLAM [56]*       DIM-SLAM [29]        GO-SLAM [75]         Spann3R [61]     SLAM3R-NoConf (Ours)       SLAM3R (Ours)
+   7 Scenes      8.02          6.28                  8.55                    5.66                    -                   -                  11.70                8.44                    8.41
+   Replica       4.76          1.67                  1.88                    0.33                   0.46                0.39                32.79                6.61                    6.61
+
+
+                     Table 3. Camera pose results evaluated by ATE-RMSE (cm) on 7 Scenes [51] and Replica [54] datasets.
+
+
+
+
+Figure 4. We visualize the reconstruction results on two scenes: Office-09 and Office 2 from the 7-Scenes [51] and Replica [54] datasets.
+Our method runs in real-time and achieves high-quality reconstruction comparable to the offline method DUSt3R [64].
+
+
+4. Experiments                                                                                           850K clips for training in total. To validate our reconstruc-
+                                                                                                         tion quality, we conduct quantitative evaluations on two un-
+Datasets. For both the Image-to-Points (I2P) and Local-                                                  seen datasets: 7 Scenes [51], a real-world dataset of partial
+to-World (L2W) models, we perform training with a mix-                                                   scenes, and Replica [54], a synthetic dataset of complete
+ture of three datasets: ScanNet++ [71], Aria Synthetic En-                                               scenes. We also demonstrate visual reconstruction results
+vironments [3] and CO3D-v2 [41]. These datasets vary                                                     across diverse datasets and in-the-wild captured videos to
+from scene-level to object-centric, and contain both real-                                               showcase the generalization ability of SLAM3R.
+world and synthetic scenes. Since they are all recorded se-                                              Implementation details. Both the I2P and L2W models
+quentially, we can easily extract video clips with a sliding-                                            build upon the architecture of DUSt3R [64] with minimal
+window mechanism as our training data. We select about                                                   but effective modifications, making it natural for them to
+
+
+
+                                                                                            16656
+Figure 5. Qualitative examples. We show our reconstruction results on Tanks and Temples [26], BlendedMVS [69], Map-free Reloc [2],
+LLFF [35], and ETH3D [49, 50] datasets, as well as in-the-wild captured videos, to demonstrate SLAM3R’s generalization ability.
+
+
+initialize their weights from the DUSt3R pre-trained model.        ported in Table 1. Following Spann3R [61]’s setting, we
+We initialize our weights using the DUSt3R model trained           uniformly sample one-twentieth of the frames in each test
+on 224×224 resolution images with m = 24 encoder                   sequence as input video. Each video is regarded as an
+blocks, n = 12 decoder blocks with linear heads. All               individual scene. We evaluate SLAM3R using two set-
+images are center-cropped to 224×224 pixels before feed-           tings: integrating the full pointmaps predicted for all in-
+ing into SLAM3R. Our training is conducted on 8 NVIDIA             put frames to create reconstruction results (denoted by
+4090D GPUs, each with 24 GB of memory. It takes about              SLAM3R-NoConf), and filtering pointmaps with a confi-
+one day. At test time, we set the initial window length to         dence threshold of 3 before creating reconstruction results
+L = 5 to ensure high-quality reconstruction of all frames          (SLAM3R). We compare our method with optimization-
+within the window. For subsequent incremental windows,             based reconstruction DUSt3R [64], triangulation-based
+we use L = 11 to provide more supporting views for better          MASt3R [28], and online incremental reconstruction
+keyframe reconstruction. Please refer to our supplementary         Spann3R. Our method outperforms all baselines in both ac-
+material for more implementation details.                          curacy and completeness while maintaining real-time per-
+                                                                   formance. As shown in the Office-09 scene (the top row in
+4.1. Comparisons                                                   Figure 4), our approach demonstrates much less drift com-
+                                                                   pared to the concurrent work Spann3R [61].
+Evaluation metrics. Following NICER-SLAM [79] and
+Spann3R [61], we build a ground-truth point cloud model            Reconstruction results on the Replica [54] dataset.
+for each test sequence by back-projecting pixels to the            Besides the baselines mentioned in 7 Scene datasets,
+world using ground-truth depths and camera parameters.             we also compare the SLAM-based reconstruction ap-
+The reconstructed point clouds are aligned to ground truths        proaches NICER-SLAM [79], DROID-SLAM [56], DIM-
+using Umeyama [58] and ICP [43] algorithms. We quantify            SLAM [29] and GO-SLAM [75] on the Replica [54]
+reconstruction quality through accuracy and completeness           dataset. The numerical results on full scene reconstruc-
+metrics. To demonstrate computational efficiency, we re-           tion are reported in Table 2. Due to the memory con-
+port frames per second (FPS) on a single NVIDIA 4090D              straint, DUSt3R [64] and MASt3R [28] process only one-
+GPU. We also evaluate camera poses using absolute trajec-          twentieth of the frames for reconstruction. As is shown
+tory error (ATE-RMSE). For detailed formulations of the            in the table, our method surpasses all baselines with FPS
+metrics, please refer to the supplementary material.               greater than 1. Notably, without any optimization pro-
+Reconstruction results on the 7 Scenes [51] dataset. The           cedure, our method achieves reconstruction quality com-
+numerical results of scene reconstruction quality are re-          parable to optimization-based methods such as NICER-
+
+
+
+                                                              16657
+        Method          # Frames   Acc.   Comp.    FPS                           Method               Acc.   Comp.    FPS
+        DUSt3R [64]        2       3.16   2.89     42.55                         I2P+GA               4.87    3.00    ∼3
+                                                                                 I2P+UI               7.47    3.86    ∼1
+        I2P               2        3.39   3.04     42.55
+                                                                                 I2P+L2W              6.19    3.54    ∼92
+        I2P                5       2.62   2.28     40.82
+                                                                                 I2P+L2W+Re (Full)    3.62    2.70    ∼43
+        I2P (Default)     11       2.38   2.03     40.11
+        I2P               15       2.27   1.94     35.51
+        I2P               51       2.23   1.86     11.97               Table 5. Reconstruction results using various point alignment
+                                                                       methods and scene frame selection strategies. The FPS reported
+Table 4. Inner-window keyframe reconstruction results with var-        only accounts for the overhead of the alignment operation.
+ious window lengths. By default, we use 11-frame windows for
+incremental reconstruction to balance quality and efficiency.
+                                                                       from DUSt3R [64] (I2P-GA), traditional approaches such
+                                                                       as Umeyama [58] and ICP [43] (I2P+UI), and our L2W
+SLAM [79] and DUSt3R [64]. Example of the Office 2                     model (I2P+L2W+Re). For consistency, we set the win-
+(the bottom row in Figure 4) also illustrates the global con-          dow size for global optimization to 10, which is equal to the
+sistency of our reconstruction result.                                 number of views used to align new frames in other meth-
+Camera pose estimation on 7 Scenes [51] and                            ods. Results in Table 5 show that our full method achieves
+Replica [54]. Our method is designed in a new paradigm                 superior alignment accuracy and computational efficiency
+that reconstructs 3D points end-to-end without explicitly              compared to the alternatives.
+solving camera parameters. Following DUSt3R [64], We                   Analysis of the retrieval module.             We propose a
+also derive camera poses from the predicted scene points us-           lightweight retrieval module that selects historical scene
+ing PnP-RANSAC solver in OpenCV [6] with ground truth                  frames from the reservoir. This approach effectively per-
+camera intrinsics of each frame. The results are reported in           forms implicit re-localization. We compare our retrieval
+Table 3. We can observe that camera poses and scene recon-             method with a baseline approach that selects the ten near-
+struction results are not fully positively correlated. This dis-       est previous frames, named I2P+L2W. The results in Table
+crepancy between pose and reconstruction errors indicates              5 indicate a significant performance improvement with our
+that effective end-to-end 3D reconstruction is possible and            retrieval strategy, demonstrating its effectiveness.
+promising without first obtaining precise camera poses.                In-the-wild scene reconstruction. We have tested our
+    For more details on the comparisons in this section,               method on a diverse range of unseen datasets and found
+please refer to our supplementary material.                            that SLAM3R shows strong generalization capabilities.
+                                                                       Figure 5 shows our reconstruction results on Tanks and
+4.2. Analyses                                                          Temples [26], BlendedMVS [69], Map-free Reloc [2],
+Effectiveness of the I2P model. To highlight the advan-                LLFF [35], and ETH3D [49, 50] datasets, as well as in-
+tages of our multi-view I2P model over the original two-               the-wild videos we captured. These results show that our
+view DUSt3R [64], we evaluate the reconstruction quality               method performs reliably across different scales and scenes.
+of keyframes with varying numbers of supporting views.                 We also provide additional numerical results on sampled
+We conduct experiments on the Replica [54] dataset, where              scenes from these datasets in the supplementary material.
+input views are sampled using a sliding window of different
+sizes, and the reconstruction accuracy and completeness of             5. Conclusion
+the keyframes are computed. The results are reported in Ta-
+ble 4. As the number of supporting views increases, our ap-            In this paper, we present SLAM3R, a novel and effec-
+proach progressively improves reconstruction quality. No-              tive system that performs real-time, high-quality, dense 3D
+tably, the efficiency of our method remains stable until the           scene reconstruction using RGB videos. It employs a two-
+window size exceeds 11, demonstrating the effectiveness of             hierarchy neural network framework to perform end-to-end
+our parallel design. However, the results also show dimin-             3D reconstruction through streamlined feed-forward pro-
+ishing returns as the number of views increases, which we              cesses, eliminating the need to explicitly solve any camera
+detail in the supplementary material. Visual results of I2P            parameters. Experiments demonstrate its state-of-the-art re-
+reconstruction can be found in Figure 1.                               construction quality and real-time efficiency (20+ FPS).
+Advantages of the L2W model. The effectiveness of                      Limitations and future work. The elimination of camera
+the L2W model is evaluated through ablation studies on                 parameter prediction prevents us from performing global
+the Replica [54] dataset. Per-window reconstructions are               bundle adjustment. Additionally, the poses derived from
+first generated with a window size of 11 using the I2P                 our scene point cloud prediction still fall short of SLAM
+model. Local points are then aligned to a unified coor-                systems that specialize in camera localization. Addressing
+dinate frame using different methods: global optimization              these limitations will be the focus of our future work.
+
+
+
+                                                                  16658
+6. Acknowledgments                                                    [10] Jan Czarnowski, Tristan Laidlow, Ronald Clark, and An-
+                                                                           drew J Davison. Deepfactors: Real-time probabilistic dense
+This work is supported by the National Key R&D Pro-                        monocular slam. IEEE Robotics and Automation Letters, 5
+gram of China (2022ZD0160800). This work is also sup-                      (2):721–728, 2020. 1
+ported by the Early Career Scheme of the Research Grants              [11] Angela Dai, Angel X Chang, Manolis Savva, Maciej Hal-
+Council (grant # 27207224), the HKU-100 Award, a dona-                     ber, Thomas Funkhouser, and Matthias Nießner. Scannet:
+tion from the Musketeers Foundation, and in part by the                    Richly-annotated 3d reconstructions of indoor scenes. In
+JC STEM Lab of Robotics for Soft Materials funded by                       Proceedings of the IEEE conference on computer vision and
+The Hong Kong Jockey Club Charities Trust. We thank                        pattern recognition, pages 5828–5839, 2017. 2
+the reviewers for their valuable feedback, as well as Zihan           [12] Pinxuan Dai, Jiamin Xu, Wenxiang Xie, Xinguo Liu,
+Zhu and Songyou Peng for their help with our experiments.                  Huamin Wang, and Weiwei Xu. High-quality surface recon-
+Siyan Dong would also like to thank the support from HKU                   struction using gaussian surfels. In ACM SIGGRAPH 2024
+                                                                           Conference Papers, pages 1–11, 2024. 2
+School of Computing and Data Science.
+                                                                      [13] Alexey Dosovitskiy. An image is worth 16x16 words:
+References                                                                 Transformers for image recognition at scale. arXiv preprint
+                                                                           arXiv:2010.11929, 2020. 3
+ [1] Henrik Aanæs, Rasmus Ramsbøl Jensen, George Vogiatzis,           [14] Bardienus Duisterhof, Lojze Zust, Philippe Weinzaepfel,
+     Engin Tola, and Anders Bjorholm Dahl. Large-scale data for            Vincent Leroy, Yohann Cabon, and Jerome Revaud. Mast3r-
+     multiple-view stereopsis. International Journal of Computer           sfm: a fully-integrated solution for unconstrained structure-
+     Vision, 120:153–168, 2016. 2                                          from-motion. arXiv preprint arXiv:2409.19152, 2024. 3
+ [2] Eduardo Arnold, Jamie Wynn, Sara Vicente, Guillermo              [15] Hugh Durrant-Whyte and Tim Bailey. Simultaneous local-
+     Garcia-Hernando, Aron Monszpart, Victor Prisacariu, Dani-             ization and mapping: part i. IEEE robotics & automation
+     yar Turmukhambetov, and Eric Brachmann. Map-free visual               magazine, 13(2):99–110, 2006. 2
+     relocalization: Metric pose relative to a single image. In       [16] Jakob Engel, Thomas Schöps, and Daniel Cremers. Lsd-
+     European Conference on Computer Vision, pages 690–708.                slam: Large-scale direct monocular slam. In European con-
+     Springer, 2022. 7, 8                                                  ference on computer vision, pages 834–849. Springer, 2014.
+ [3] Armen Avetisyan, Christopher Xie, Henry Howard-Jenkins,               1, 2
+     Tsun-Yi Yang, Samir Aroudj, Suvam Patra, Fuyang Zhang,
+                                                                      [17] Jakob Engel, Vladlen Koltun, and Daniel Cremers. Direct
+     Duncan Frost, Luke Holland, Campbell Orme, et al. Scene-
+                                                                           sparse odometry. IEEE transactions on pattern analysis and
+     script: Reconstructing scenes with an autoregressive struc-
+                                                                           machine intelligence, 40(3):611–625, 2017. 1, 2
+     tured language model. arXiv preprint arXiv:2403.13064,
+                                                                      [18] Yasutaka Furukawa, Carlos Hernández, et al. Multi-view
+     2024. 6
+                                                                           stereo: A tutorial. Foundations and Trends® in Computer
+ [4] Tim Bailey and Hugh Durrant-Whyte. Simultaneous local-
+                                                                           Graphics and Vision, 9(1-2):1–148, 2015. 1, 2
+     ization and mapping (slam): Part ii. IEEE robotics & au-
+     tomation magazine, 13(3):108–117, 2006. 2                        [19] Antoine Guédon and Vincent Lepetit. Sugar: Surface-
+ [5] Michael Bloesch, Jan Czarnowski, Ronald Clark, Stefan                 aligned gaussian splatting for efficient 3d mesh reconstruc-
+     Leutenegger, and Andrew J Davison. Codeslam—learning                  tion and high-quality mesh rendering. In Proceedings of
+     a compact, optimisable representation for dense visual slam.          the IEEE/CVF Conference on Computer Vision and Pattern
+     In Proceedings of the IEEE conference on computer vision              Recognition, pages 5354–5363, 2024. 2
+     and pattern recognition, pages 2560–2568, 2018. 1, 2             [20] Binbin Huang, Zehao Yu, Anpei Chen, Andreas Geiger, and
+ [6] G Bradski. The opencv library. Dr. Dobb’s Journal of Soft-            Shenghua Gao. 2d gaussian splatting for geometrically ac-
+     ware Tools, 2000. 8                                                   curate radiance fields. In ACM SIGGRAPH 2024 Conference
+ [7] Carlos Campos, Richard Elvira, Juan J Gómez Rodrı́guez,              Papers, pages 1–11, 2024. 2
+     José MM Montiel, and Juan D Tardós. Orb-slam3: An accu-        [21] Huajian Huang, Longwei Li, Hui Cheng, and Sai-Kit Yeung.
+     rate open-source library for visual, visual–inertial, and mul-        Photo-slam: Real-time simultaneous localization and photo-
+     timap slam. IEEE Transactions on Robotics, 37(6):1874–                realistic mapping for monocular stereo and rgb-d cameras.
+     1890, 2021. 1, 2                                                      In Proceedings of the IEEE/CVF Conference on Computer
+ [8] Yiyang Chen, Siyan Dong, Xulong Wang, Lulu Cai, Youyi                 Vision and Pattern Recognition, pages 21584–21593, 2024.
+     Zheng, and Yanchao Yang. Sg-nerf: Neural surface re-                  2
+     construction with scene graph optimization. arXiv preprint       [22] Jiahui Huang, Shi-Sheng Huang, Haoxuan Song, and Shi-
+     arXiv:2407.12667, 2024. 2                                             Min Hu. Di-fusion: Online implicit 3d reconstruction with
+ [9] Chi-Ming Chung, Yang-Che Tseng, Ya-Ching Hsu, Xiang-                  deep priors. In Proceedings of the IEEE/CVF Conference
+     Qian Shi, Yun-Hung Hua, Jia-Fong Yeh, Wen-Chin Chen,                  on Computer Vision and Pattern Recognition, pages 8932–
+     Yi-Ting Chen, and Winston H Hsu. Orbeez-slam: A real-                 8941, 2021. 1, 2
+     time monocular visual slam with orb features and nerf-           [23] Nikhil Keetha, Jay Karhade, Krishna Murthy Jatavallabhula,
+     realized mapping. In 2023 IEEE International Confer-                  Gengshan Yang, Sebastian Scherer, Deva Ramanan, and
+     ence on Robotics and Automation (ICRA), pages 9400–9406.              Jonathon Luiten. Splatam: Splat track & map 3d gaussians
+     IEEE, 2023. 1, 2                                                      for dense rgb-d slam. In Proceedings of the IEEE/CVF Con-
+
+
+
+
+                                                                  16659
+     ference on Computer Vision and Pattern Recognition, pages        [37] Raul Mur-Artal and Juan D Tardós. Orb-slam2: An open-
+     21357–21366, 2024. 2                                                  source slam system for monocular, stereo, and rgb-d cam-
+[24] Bernhard Kerbl, Georgios Kopanas, Thomas Leimkühler,                 eras. IEEE transactions on robotics, 33(5):1255–1262, 2017.
+     and George Drettakis. 3d gaussian splatting for real-time             1, 2
+     radiance field rendering. ACM Trans. Graph., 42(4):139–1,        [38] Raul Mur-Artal, Jose Maria Martinez Montiel, and Juan D
+     2023. 1                                                               Tardos. Orb-slam: a versatile and accurate monocular slam
+[25] Georg Klein and David Murray. Parallel tracking and map-              system. IEEE transactions on robotics, 31(5):1147–1163,
+     ping on a camera phone. In 2009 8th IEEE International                2015. 1, 2
+     Symposium on Mixed and Augmented Reality, pages 83–86.           [39] Richard A Newcombe, Steven J Lovegrove, and Andrew J
+     IEEE, 2009. 1, 2                                                      Davison. Dtam: Dense tracking and mapping in real-time.
+[26] Arno Knapitsch, Jaesik Park, Qian-Yi Zhou, and Vladlen                In 2011 international conference on computer vision, pages
+     Koltun. Tanks and temples: Benchmarking large-scale scene             2320–2327. IEEE, 2011. 1, 2
+     reconstruction. ACM Transactions on Graphics (ToG), 36           [40] Songyou Peng, Michael Niemeyer, Lars Mescheder, Marc
+     (4):1–13, 2017. 7, 8                                                  Pollefeys, and Andreas Geiger. Convolutional occupancy
+[27] Lukas Koestler, Nan Yang, Niclas Zeller, and Daniel Cre-              networks. In Computer Vision–ECCV 2020: 16th European
+     mers. Tandem: Tracking and dense mapping in real-time us-             Conference, Glasgow, UK, August 23–28, 2020, Proceed-
+     ing deep multi-view stereo. In Conference on Robot Learn-             ings, Part III 16, pages 523–540. Springer, 2020. 1
+     ing, pages 34–45. PMLR, 2022. 2                                  [41] Jeremy Reizenstein, Roman Shapovalov, Philipp Henzler,
+[28] Vincent Leroy, Yohann Cabon, and Jérôme Revaud. Ground-             Luca Sbordone, Patrick Labatut, and David Novotny. Com-
+     ing image matching in 3d with mast3r. arXiv preprint                  mon objects in 3d: Large-scale learning and evaluation
+     arXiv:2406.09756, 2024. 2, 3, 6, 7                                    of real-life 3d category reconstruction. In Proceedings of
+[29] Heng Li, Xiaodong Gu, Weihao Yuan, Luwei Yang, Zilong                 the IEEE/CVF international conference on computer vision,
+     Dong, and Ping Tan. Dense rgb slam with neural implicit               pages 10901–10911, 2021. 6
+     maps. In Proceedings of the International Conference on          [42] Antoni Rosinol, John J Leonard, and Luca Carlone. Nerf-
+     Learning Representations, 2023. 1, 2, 6, 7                            slam: Real-time dense monocular slam with neural radiance
+[30] Zhaoshuo Li, Thomas Müller, Alex Evans, Russell H Tay-               fields. In 2023 IEEE/RSJ International Conference on Intel-
+     lor, Mathias Unberath, Ming-Yu Liu, and Chen-Hsuan Lin.               ligent Robots and Systems (IROS), pages 3437–3444. IEEE,
+     Neuralangelo: High-fidelity neural surface reconstruction. In         2023. 1, 2
+     Proceedings of the IEEE/CVF Conference on Computer Vi-
+                                                                      [43] Szymon Rusinkiewicz and Marc Levoy. Efficient variants of
+     sion and Pattern Recognition, pages 8456–8465, 2023. 2
+                                                                           the icp algorithm. In Proceedings third international confer-
+[31] Philipp Lindenberger, Paul-Edouard Sarlin, Viktor Lars-
+                                                                           ence on 3-D digital imaging and modeling, pages 145–152.
+     son, and Marc Pollefeys. Pixel-perfect structure-from-
+                                                                           IEEE, 2001. 7, 8
+     motion with featuremetric refinement. In Proceedings of
+                                                                      [44] Erik Sandström, Yue Li, Luc Van Gool, and Martin R Os-
+     the IEEE/CVF international conference on computer vision,
+                                                                           wald. Point-slam: Dense neural point cloud-based slam. In
+     pages 5987–5997, 2021. 1, 2
+                                                                           Proceedings of the IEEE/CVF International Conference on
+[32] Lorenzo Liso, Erik Sandström, Vladimir Yugay, Luc
+                                                                           Computer Vision, pages 18433–18444, 2023. 2
+     Van Gool, and Martin R Oswald. Loopy-slam: Dense neural
+     slam with loop closures. In Proceedings of the IEEE/CVF          [45] Erik Sandström, Kevin Ta, Luc Van Gool, and Martin R Os-
+     Conference on Computer Vision and Pattern Recognition,                wald. Uncle-slam: Uncertainty learning for dense neural
+     pages 20363–20373, 2024. 2                                            slam. In Proceedings of the IEEE/CVF International Con-
+[33] Shaohui Liu, Yifan Yu, Rémi Pautrat, Marc Pollefeys, and             ference on Computer Vision, pages 4537–4548, 2023. 2
+     Viktor Larsson. 3d line mapping revisited. In Proceedings of     [46] Erik Sandström, Keisuke Tateno, Michael Oechsle, Michael
+     the IEEE/CVF Conference on Computer Vision and Pattern                Niemeyer, Luc Van Gool, Martin R Oswald, and Federico
+     Recognition, pages 21445–21455, 2023. 1, 2                            Tombari. Splat-slam: Globally optimized rgb-only slam with
+[34] Hidenobu Matsuki, Riku Murai, Paul HJ Kelly, and An-                  3d gaussians. arXiv preprint arXiv:2405.16544, 2024. 1, 2
+     drew J Davison. Gaussian splatting slam. In Proceedings          [47] Johannes L Schonberger and Jan-Michael Frahm. Structure-
+     of the IEEE/CVF Conference on Computer Vision and Pat-                from-motion revisited. In Proceedings of the IEEE con-
+     tern Recognition, pages 18039–18048, 2024. 2                          ference on computer vision and pattern recognition, pages
+[35] Ben Mildenhall, Pratul P Srinivasan, Rodrigo Ortiz-Cayon,             4104–4113, 2016. 1, 2
+     Nima Khademi Kalantari, Ravi Ramamoorthi, Ren Ng, and            [48] Johannes L Schönberger, Enliang Zheng, Jan-Michael
+     Abhishek Kar. Local light field fusion: Practical view syn-           Frahm, and Marc Pollefeys. Pixelwise view selection for
+     thesis with prescriptive sampling guidelines. ACM Transac-            unstructured multi-view stereo. In Computer Vision–ECCV
+     tions on Graphics (ToG), 38(4):1–14, 2019. 7, 8                       2016: 14th European Conference, Amsterdam, The Nether-
+[36] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik,                  lands, October 11-14, 2016, Proceedings, Part III 14, pages
+     Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf:                501–518. Springer, 2016. 1, 2
+     Representing scenes as neural radiance fields for view syn-      [49] Thomas Schops, Johannes L Schonberger, Silvano Galliani,
+     thesis. Communications of the ACM, 65(1):99–106, 2021. 1,             Torsten Sattler, Konrad Schindler, Marc Pollefeys, and An-
+     2                                                                     dreas Geiger. A multi-view stereo benchmark with high-
+
+
+
+
+                                                                 16660
+     resolution images and multi-camera videos. In Proceed-            [62] Peng Wang, Lingjie Liu, Yuan Liu, Christian Theobalt, Taku
+     ings of the IEEE conference on computer vision and pattern             Komura, and Wenping Wang. Neus: Learning neural implicit
+     recognition, pages 3260–3269, 2017. 7, 8                               surfaces by volume rendering for multi-view reconstruction.
+[50] Thomas Schops, Torsten Sattler, and Marc Pollefeys. Bad                arXiv preprint arXiv:2106.10689, 2021. 1, 2
+     slam: Bundle adjusted direct rgb-d slam. In Proceedings of        [63] Ruicheng Wang, Sicheng Xu, Cassie Dai, Jianfeng Xiang,
+     the IEEE/CVF Conference on Computer Vision and Pattern                 Yu Deng, Xin Tong, and Jiaolong Yang. Moge: Unlocking
+     Recognition, pages 134–144, 2019. 7, 8                                 accurate monocular geometry estimation for open-domain
+[51] Jamie Shotton, Ben Glocker, Christopher Zach, Shahram                  images with optimal training supervision. arXiv preprint
+     Izadi, Antonio Criminisi, and Andrew Fitzgibbon. Scene co-             arXiv:2410.19115, 2024. 2
+     ordinate regression forests for camera relocalization in rgb-d    [64] Shuzhe Wang, Vincent Leroy, Yohann Cabon, Boris
+     images. In Proceedings of the IEEE conference on computer              Chidlovskii, and Jerome Revaud. Dust3r: Geometric 3d vi-
+     vision and pattern recognition, pages 2930–2937, 2013. 6,              sion made easy. In Proceedings of the IEEE/CVF Conference
+     7, 8                                                                   on Computer Vision and Pattern Recognition, pages 20697–
+[52] Brandon Smart, Chuanxia Zheng, Iro Laina, and Vic-                     20709, 2024. 1, 2, 3, 4, 6, 7, 8
+     tor Adrian Prisacariu. Splatt3r: Zero-shot gaussian splat-        [65] Yiming Wang, Qin Han, Marc Habermann, Kostas Dani-
+     ting from uncalibarated image pairs.          arXiv preprint           ilidis, Christian Theobalt, and Lingjie Liu. Neus2: Fast
+     arXiv:2408.13912, 2024. 2                                              learning of neural implicit surfaces for multi-view recon-
+[53] Noah Snavely, Steven M Seitz, and Richard Szeliski. Photo              struction. In Proceedings of the IEEE/CVF International
+     tourism: exploring photo collections in 3d. In ACM siggraph            Conference on Computer Vision, pages 3295–3306, 2023. 2
+     2006 papers, pages 835–846. 2006. 1, 2                            [66] Changchang Wu. Visualsfm: A visual structure from motion
+[54] Julian Straub, Thomas Whelan, Lingni Ma, Yufan Chen, Erik              system. http://www. cs. washington. edu/homes/ccwu/vsfm,
+     Wijmans, Simon Green, Jakob J. Engel, Raul Mur-Artal,                  2011. 1, 2
+     Carl Ren, Shobhit Verma, Anton Clarkson, Mingfei Yan,
+                                                                       [67] Chi Yan, Delin Qu, Dan Xu, Bin Zhao, Zhigang Wang, Dong
+     Brian Budge, Yajie Yan, Xiaqing Pan, June Yon, Yuyang
+                                                                            Wang, and Xuelong Li. Gs-slam: Dense visual slam with 3d
+     Zou, Kimberly Leon, Nigel Carter, Jesus Briales, Tyler
+                                                                            gaussian splatting. In Proceedings of the IEEE/CVF Con-
+     Gillingham, Elias Mueggler, Luis Pesqueira, Manolis Savva,
+                                                                            ference on Computer Vision and Pattern Recognition, pages
+     Dhruv Batra, Hauke M. Strasdat, Renzo De Nardi, Michael
+                                                                            19595–19604, 2024. 2
+     Goesele, Steven Lovegrove, and Richard Newcombe. The
+     Replica dataset: A digital replica of indoor spaces. arXiv        [68] Yao Yao, Zixin Luo, Shiwei Li, Tian Fang, and Long Quan.
+     preprint arXiv:1906.05797, 2019. 6, 7, 8                               Mvsnet: Depth inference for unstructured multi-view stereo.
+                                                                            In Proceedings of the European conference on computer vi-
+[55] Edgar Sucar, Shikun Liu, Joseph Ortiz, and Andrew J Davi-
+                                                                            sion (ECCV), pages 767–783, 2018. 1, 2
+     son. imap: Implicit mapping and positioning in real-time. In
+     Proceedings of the IEEE/CVF international conference on           [69] Yao Yao, Zixin Luo, Shiwei Li, Jingyang Zhang, Yufan Ren,
+     computer vision, pages 6229–6238, 2021. 1, 2                           Lei Zhou, Tian Fang, and Long Quan. Blendedmvs: A large-
+                                                                            scale dataset for generalized multi-view stereo networks. In
+[56] Zachary Teed and Jia Deng. Droid-slam: Deep visual slam
+                                                                            Proceedings of the IEEE/CVF conference on computer vi-
+     for monocular, stereo, and rgb-d cameras. Advances in neu-
+                                                                            sion and pattern recognition, pages 1790–1799, 2020. 7, 8
+     ral information processing systems, 34:16558–16569, 2021.
+     1, 2, 6, 7                                                        [70] Botao Ye, Sifei Liu, Haofei Xu, Xueting Li, Marc Pollefeys,
+[57] Fabio Tosi, Youmin Zhang, Ziren Gong, Erik Sandström,                 Ming-Hsuan Yang, and Songyou Peng. No pose, no problem:
+     Stefano Mattoccia, Martin R Oswald, and Matteo Poggi.                  Surprisingly simple 3d gaussian splats from sparse unposed
+     How nerfs and 3d gaussian splatting are reshaping slam: a              images. arXiv preprint arXiv:2410.24207, 2024. 2
+     survey. arXiv preprint arXiv:2402.13255, 4, 2024. 1               [71] Chandan Yeshwanth, Yueh-Cheng Liu, Matthias Nießner,
+[58] Shinji Umeyama. Least-squares estimation of transforma-                and Angela Dai. Scannet++: A high-fidelity dataset of 3d in-
+     tion parameters between two point patterns. IEEE Transac-              door scenes. In Proceedings of the IEEE/CVF International
+     tions on Pattern Analysis & Machine Intelligence, 13(04):              Conference on Computer Vision, pages 12–22, 2023. 6
+     376–380, 1991. 7, 8                                               [72] Vladimir Yugay, Yue Li, Theo Gevers, and Martin R Os-
+[59] Jeffrey S Vitter. Random sampling with a reservoir. ACM                wald. Gaussian-slam: Photo-realistic dense slam with gaus-
+     Transactions on Mathematical Software (TOMS), 11(1):37–                sian splatting. arXiv preprint arXiv:2312.10070, 2023. 2
+     57, 1985. 5                                                       [73] Ganlin Zhang, Erik Sandström, Youmin Zhang, Manthan Pa-
+[60] Fangjinhua Wang, Silvano Galliani, Christoph Vogel, and                tel, Luc Van Gool, and Martin R Oswald. Glorie-slam: Glob-
+     Marc Pollefeys. Itermvs: Iterative probability estimation for          ally optimized rgb-only implicit encoding point cloud slam.
+     efficient multi-view stereo. In Proceedings of the IEEE/CVF            arXiv preprint arXiv:2403.19549, 2024. 1, 2
+     conference on computer vision and pattern recognition,            [74] Junyi Zhang, Charles Herrmann, Junhwa Hur, Varun Jam-
+     pages 8606–8615, 2022. 1, 2                                            pani, Trevor Darrell, Forrester Cole, Deqing Sun, and Ming-
+[61] Hengyi Wang and Lourdes Agapito. 3d reconstruction with                Hsuan Yang. Monst3r: A simple approach for estimat-
+     spatial memory. arXiv preprint arXiv:2408.16061, 2024. 2,              ing geometry in the presence of motion. arXiv preprint
+     3, 6, 7                                                                arXiv:2410.03825, 2024. 2
+
+
+
+
+                                                                  16661
+[75] Youmin Zhang, Fabio Tosi, Stefano Mattoccia, and Matteo
+     Poggi. Go-slam: Global optimization for consistent 3d in-
+     stant reconstruction. In Proceedings of the IEEE/CVF Inter-
+     national Conference on Computer Vision, pages 3727–3737,
+     2023. 1, 2, 6, 7
+[76] Huizhong Zhou, Benjamin Ummenhofer, and Thomas Brox.
+     Deeptam: Deep tracking and mapping. In Proceedings of
+     the European conference on computer vision (ECCV), pages
+     822–838, 2018. 1, 2
+[77] Heng Zhou, Zhetao Guo, Shuhong Liu, Lechen Zhang,
+     Qihao Wang, Yuxiang Ren, and Mingrui Li. Mod-slam:
+     Monocular dense mapping for unbounded 3d scene recon-
+     struction. arXiv preprint arXiv:2402.03762, 2024. 1, 2
+[78] Zihan Zhu, Songyou Peng, Viktor Larsson, Weiwei Xu, Hu-
+     jun Bao, Zhaopeng Cui, Martin R Oswald, and Marc Polle-
+     feys. Nice-slam: Neural implicit scalable encoding for slam.
+     In Proceedings of the IEEE/CVF conference on computer vi-
+     sion and pattern recognition, pages 12786–12796, 2022. 1,
+     2
+[79] Zihan Zhu, Songyou Peng, Viktor Larsson, Zhaopeng Cui,
+     Martin R Oswald, Andreas Geiger, and Marc Pollefeys.
+     Nicer-slam: Neural implicit scene encoding for rgb slam. In
+     2024 International Conference on 3D Vision (3DV), pages
+     42–52. IEEE, 2024. 1, 2, 6, 7, 8
+
+
+
+
+                                                                16662
+

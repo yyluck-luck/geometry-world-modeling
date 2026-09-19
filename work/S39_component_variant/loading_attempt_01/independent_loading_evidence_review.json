@@ -1,0 +1,133 @@
+{
+  "schema": "s39-independent-loading-evidence-review-v1",
+  "status": "PASS_S39_LOADING_EVIDENCE_REVIEW",
+  "reviewed_utc": "2026-09-07T06:40:23Z",
+  "reviewed_asia_shanghai": "2026-09-07T14:40:23+08:00",
+  "reviewer_role": "independent_evidence_reviewer_not_loading_executor",
+  "variant": {
+    "name": "VMem + stabilityai/sd-vae-ft-mse (declared VAE component variant)",
+    "repo": "stabilityai/sd-vae-ft-mse",
+    "revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+    "subfolder": "",
+    "original_sd21_vae_identity": "UNKNOWN",
+    "exact_original_baseline": false
+  },
+  "evidence_paths": {
+    "launch": "work/S39_component_variant/loading_attempt_01/receipt.json",
+    "worker": "work/S39_component_variant/loading_attempt_01/worker_receipt.json",
+    "runtime_loading": "results/S39_declared_ft_mse_component_loading/runtime_loading.json",
+    "full_resource_gate": "work/S39_component_variant/loading_attempt_01/full_resource_gate.json"
+  },
+  "evidence_sha256": {
+    "launch": "272df44fae38bf20ac441afc080bc60ae4f4b49a5db2d94c822f35d1ff929237",
+    "worker": "a081b5e3dc33f535bf3cb2f3c334fe3a62ce70c1c035eb11c6afcf9923cb4a42",
+    "runtime_loading": "95221d97e21f571b1559409486f19eed869742246bdc9bf8f49bfba0801607c9",
+    "full_resource_gate": "62e5f67f5c05f7a8a091cf4850d17016660fe1a05901c13f1c6c06750369f9f2"
+  },
+  "loading_manifest_path": "work/S39_component_variant/review_attachment_01/manifest.json",
+  "loading_manifest_sha256": "2631479b193dd4a64cf65ca3574b5b2a07715c1a7e553c10b4113761a52437e6",
+  "resource_core_path": "work/S39_component_variant/freeze_attempt_01/manifest_core.json",
+  "resource_core_file_sha256": "192a67337fb825a7ba156b3454d160faf489914efd76ba78f91f2e73e4f9205b",
+  "resource_core_sha256": "816d86cbdb529f5621b4e9e210ec6ddd925390eb33c75cad07dc0664d12fb416",
+  "checks": {
+    "four_evidence_file_sha256_exact": true,
+    "loading_manifest_file_sha256_exact": true,
+    "canonical_core_recomputed_from_final_manifest": true,
+    "canonical_core_recomputed_from_frozen_core": true,
+    "canonical_core_values_equal": true,
+    "core_file_sha_and_canonical_core_sha_not_confused": true,
+    "variant_exact_across_manifest_and_four_evidence_files": true,
+    "launch_status_pending_independent_review": true,
+    "worker_status_pending_independent_review": true,
+    "runtime_status_pass_declared_variant_component_loading_only": true,
+    "full_resource_gate_status_pass": true,
+    "manifest_sha_bound_in_all_four_evidence_files": true,
+    "worker_receipt_sha_bound_by_launch": true,
+    "runtime_loading_sha_bound_by_worker": true,
+    "returncode_zero": true,
+    "limit_exceeded_absent": true,
+    "unexpected_live_descendants_absent": true,
+    "monitor_final_process_tree_rss_zero": true,
+    "current_worker_pid_parent_and_process_group_survivors_zero": true,
+    "runtime_factory_calls_exactly_one": true,
+    "generation_calls_zero": true,
+    "encode_decode_calls_requested_zero": true,
+    "network_attempts_zero": true,
+    "all_state_dict_missing_keys_empty": true,
+    "all_state_dict_unexpected_keys_empty": true,
+    "worker_and_runtime_state_dict_records_equal": true,
+    "vae_loading_info_missing_unexpected_mismatched_and_errors_empty": true,
+    "source_unchanged_at_close": true,
+    "full_gate_components_bound_to_manifest": true,
+    "full_gate_component_current_stat_records_unchanged": true,
+    "all_214_source_identity_hashes_current": true
+  },
+  "observed_execution": {
+    "returncode": 0,
+    "worker_pid": 35518,
+    "elapsed_seconds_including_termination": 43.84404887500568,
+    "wall_limit_seconds": 1800,
+    "sampled_peak_process_tree_rss_bytes": 17005658112,
+    "rss_limit_bytes": 48318382080,
+    "monitor_rows": 86,
+    "monitor_minimum_free_bytes": 1348618997760,
+    "minimum_free_limit_bytes": 10737418240,
+    "monitor_final_process_tree_rss_bytes": 0,
+    "runtime_factory_calls": 1,
+    "generation_calls": 0,
+    "encode_decode_calls_requested": 0,
+    "network_attempts": 0
+  },
+  "state_dict_loads": [
+    {
+      "class": "VMemModel",
+      "strict_requested": true,
+      "missing_keys": [],
+      "unexpected_keys": []
+    },
+    {
+      "class": "CLIP",
+      "strict_requested": true,
+      "missing_keys": [],
+      "unexpected_keys": []
+    },
+    {
+      "class": "ARCroco3DStereo",
+      "strict_requested": false,
+      "missing_keys": [],
+      "unexpected_keys": []
+    }
+  ],
+  "vae_loading_info": {
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "mismatched_keys": [],
+    "error_msgs": []
+  },
+  "variant_invariants": {
+    "diffusers_version": "0.32.2",
+    "use_tiling": false,
+    "use_slicing": false,
+    "sample_size": 256,
+    "latent_channels": 4,
+    "wrapper_chunk_size": 1,
+    "wrapper_scale_factor": 0.18215,
+    "wrapper_downsample": 8
+  },
+  "scope": {
+    "established": "The declared VMem plus stabilityai/sd-vae-ft-mse component variant completed constructor, state_dict, eval, device, and invariant loading checks under the recorded CPU resource limits.",
+    "not_established": [
+      "codec numeric correctness",
+      "video generation",
+      "scientific quality",
+      "original Stable Diffusion 2.1 VAE identity or equivalence",
+      "exact original VMem baseline reproduction"
+    ],
+    "component_weight_bodies_rehashed_by_this_independent_review": false,
+    "resource_evidence_used": "The immutable full_resource_gate evidence file was hash-verified; its manifest/component bindings and current component stat records were independently checked. The gate records its own prior full-content verification.",
+    "models_loaded_or_run_by_this_review": 0,
+    "generation_or_codec_requests_by_this_review": 0,
+    "network_requests_by_this_review": 0,
+    "canonical_ledger_writes_by_this_review": 0
+  }
+}

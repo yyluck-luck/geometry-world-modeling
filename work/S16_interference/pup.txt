@@ -1,0 +1,581 @@
+                           This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                        Except for this watermark, it is identical to the accepted version;
+                                  the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+                                  PUP 3D-GS: Principled Uncertainty Pruning
+                                         for 3D Gaussian Splatting
+
+                    Alex Hanson*           Allen Tu*      Vasu Singla    Mayuka Jayawardhana
+                                         Matthias Zwicker          Tom Goldstein
+                                              University of Maryland, College Park
+
+
+                  3D-GS                              PUP 3D-GS (Ours)                                  LightGaussian
+
+
+
+
+    2.65M Gaussians               76.65 FPS      0.265M Gaussians          318.06 FPS           0.265M Gaussians          261.27 FPS
+
+Figure 1. We prune the 3D Gaussian Splatting (3D-GS) reconstruction of the Deep Blending playroom scene from 2.65M Gaussians to
+0.265M Gaussians using our PUP 3D-GS pipeline, accelerating rendering speed from 76.65 FPS to 318.06 FPS – a 4.15× speed-up on
+this scene– while preserving fine details. In comparison, LightGaussian, a recent high-performing post-hoc pruning pipeline for pretrained
+3D-GS models, loses substantially more fine details than PUP 3D-GS and achieves a slower rendering speed of 261.27 FPS.
+
+
+                             Abstract                                    tial parameters of each Gaussian. Additionally, we propose
+                                                                         a multi-round prune-refine pipeline that can be applied to
+Recent advances in novel view synthesis have enabled                     any pretrained 3D-GS model without changing its training
+real-time rendering speeds with high reconstruction accu-                pipeline. After pruning 90 % of Gaussians, a substantially
+racy. 3D Gaussian Splatting (3D-GS), a foundational point-               higher percentage than previous methods, our PUP 3D-GS
+based parametric 3D scene representation, models scenes                  pipeline increases average rendering speed by 3 .56 × while
+as large sets of 3D Gaussians. However, complex scenes                   retaining more salient foreground information and achiev-
+can consist of millions of Gaussians, resulting in high stor-            ing higher image quality metrics than existing techniques on
+age and memory requirements that limit the viability of                  scenes from the Mip-NeRF 360, Tanks & Temples, and Deep
+3D-GS on devices with limited resources. Current tech-                   Blending datasets. Code and additional visualizations are
+niques for compressing these pretrained models by prun-                  available at https://pup3dgs.github.io/.
+ing Gaussians rely on combining heuristics to determine
+which Gaussians to remove. At high compression ratios,
+these pruned scenes suffer from heavy degradation of vi-                 1. Introduction
+sual fidelity and loss of foreground details. In this paper,
+we propose a principled sensitivity pruning score that pre-              Novel view synthesis aims to render views from new view-
+serves visual fidelity and foreground details at significantly           points given a set of 2D images. Neural Radiance Fields
+higher compression ratios than existing approaches. It is                (NeRFs) [20] use volume rendering to represent the 3D
+computed as a second-order approximation of the recon-                   scene using a multilayer perceptron that can be used to ren-
+struction error on the training views with respect to the spa-           der novel views. Although NeRF and its variants achieve
+                                                                         high-quality reconstructions, they suffer from slow infer-
+  * denotes equal contribution.                                          ence and require several seconds to render a single image.
+
+
+
+                                                                  5949
+3D Gaussian Splatting (3D-GS) [11] has recently emerged                 2.1. Uncertainty Estimation
+as a faster alternative to NeRF, achieving real-time render-
+                                                                        Several works estimate uncertainty in NeRF-based ap-
+ing on modern GPUs and comparable image quality. It
+                                                                        proaches that arise from sources like transient objects, cam-
+represents scenes using a large set of 3D Gaussians with
+                                                                        era model differences, and lightning changes [10, 18, 25,
+independent location, shape, and appearance parameters.
+                                                                        27]. Other works focus on uncertainty caused by occlusion
+Since they typically consist of millions of Gaussians, 3D-
+                                                                        or sparsity of training views [19]. These approaches rely
+GS scenes often have high storage and memory require-
+                                                                        on an ensemble of models [31] or variational inference and
+ments that limit their viability on devices with limited re-
+                                                                        KL Divergence [29, 30], requiring intricate changes to the
+sources.
+                                                                        training pipeline to model uncertainty.
+    Several recent works propose techniques that reduce the
+                                                                            BayesRays [7] uses Fisher information for post-hoc un-
+storage requirements of 3D-GS models, including heuristics
+                                                                        certainty quantification in NeRF-based approaches. Since
+for pruning Gaussians that have an insignificant contribu-
+                                                                        NeRFs [19] represent the scene as a continuous 3D func-
+tion to the rendered images [4, 6, 14, 16, 23]. In this work,
+                                                                        tion, they compute the Hessian over a hypothetical perturba-
+we propose a more mathematically principled approach for
+                                                                        tion field to estimate uncertainty. In contrast, our approach
+deciding which Gaussians to prune from a 3D-GS scene.
+                                                                        focuses on 3D Gaussian Splats [11] instead, and we directly
+We introduce a computationally feasible sensitivity score
+                                                                        compute the Fisher information using gradient information
+that is derived from the Hessian of the reconstructed error
+                                                                        without relying on a hypothetical perturbation field.
+on the training images in a converged scene. Following the
+                                                                            FisherRF [9] also computes Fisher information for 3D
+methodology in LightGaussian [4], we prune the scene us-
+                                                                        Gaussian Splats; however, it only approximates the diago-
+ing our sensitivity score and then fine-tune the remaining
+                                                                        nal of the Fisher matrix and uses the color parameters (DC
+Gaussians. Our experiments demonstrate that this process
+                                                                        color and spherical harmonic coefficients) of the Gaussians
+can remove 80% of the Gaussians in the base 3D-GS scene
+                                                                        for post-hoc uncertainty estimation. Our approach uses the
+while preserving image quality metrics.
+                                                                        spatial mean and scaling parameters to compute a more ac-
+    Moreover, our approach enables a second consecutive
+                                                                        curate block-wise approximation of the Fisher instead (see
+round of pruning and fine-tuning. As shown in Figure 1,
+                                                                        Section 4.1). Lastly, our work uses uncertainty estimates to
+our multi-round pruning approach can remove 90% of the
+                                                                        prune Gaussians from the model, whereas FisherRF applies
+Gaussians in the base 3D-GS scene while surpassing pre-
+                                                                        their method to perform active-view selection.
+vious heuristics-based methods like LightGaussian in both
+rendering speed and image quality. Our work is orthogonal               2.2. Pruning Gaussian Splat Models
+to several other methods that modify the training framework
+of 3D-GS or apply quantization-based techniques to reduce               While 3D-GS [11] demonstrates remarkable performance,
+its disk storage. We show that our PUP 3D-GS pipeline can               it also entails substantial storage requirements. Several re-
+be used in conjunction with these techniques to further im-             cent works use codebooks to quantize and reduce storage
+prove performance and compress the model.                               for various Gaussian parameters [14, 22, 23]. Others use
+    In summary, we propose the following contributions:                 the spatial relationships between neighboring Gaussians to
+1. A post-hoc pruning technique, PUP 3D-GS, that can be                 reduce the number of parameters [3, 16, 17, 21]. Although
+    applied to any pretrained 3D-GS model without chang-                these methods tout high compression rates, they modify the
+    ing its training pipeline.                                          underlying primitives and training framework of 3D-GS.
+2. A novel spatial sensitivity score that is more effective at          They also do not necessarily reduce the number of prim-
+    pruning Gaussians than heuristics-based approaches.                 itives and are, therefore, orthogonal to our work. We ap-
+3. A multi-round prune-refine approach that produces                    ply one such technique, Vectree Quantization [4], to further
+    higher fidelity reconstructions than an equivalent single           compress our pruned scenes in Section 5.3.3.
+    round of prune-refining.                                                A recent pruning-based method, Compact-3DGS [14],
+                                                                        proposes a learnable masking strategy to prune small, trans-
+2. Related work                                                         parent Gaussians during training. EAGLES [6], which we
+                                                                        apply our pipeline to in Appendix A.5, prunes Gaussians
+Neural Radiance Field (NeRF) based [20] approaches use                  based on the least total transmittance per Gaussian. They
+neural networks to represent scenes and perform novel-view              also begin with low-resolution images, progressively in-
+synthesis. They produce remarkable visual fidelity but suf-             creasing image resolution to reduce Gaussian densification
+fer from slow training and inference. Recently, 3D Gaus-                during training, then quantize several attributes to reduce
+sian Splatting (3D-GS) [11] has emerged as an effective al-             disk storage. LightGaussian [4] computes a global signif-
+ternative for novel view synthesis, achieving faster infer-             icance score for each Gaussian with heuristics, uses that
+ence speed and comparable visual fidelity to state-of-the-art           score to prune the least significant Gaussians, and finally
+NeRF-based approaches [1].                                              uses quantization to further reduce storage requirements.
+
+
+
+                                                                 5950
+Mini-Splatting [5] and RadSplat [24] are concurrent with                                                                                                                                              4. Method
+our work and introduce heuristics-based pruning compo-
+nents. However, they primarily focus on orthogonal com-                                                                                                                                               3D scene reconstruction is an inherently underconstrained
+ponents, such as alternative densification strategies and pre-                                                                                                                                        problem. Capturing a scene as a set of posed images
+trained NeRF priors, for 3D-GS instead of pruning.                                                                                                                                                    (Pgt , Igt ) involves projecting it onto the 2D image plane
+                                                                                                                                                                                                      of each view. As illustrated by Figure 2, this introduces un-
+3. Background: 3D Gaussian Splatting                                                                                                                                                                  certainty in the locations and sizes of the Gaussians recon-
+                                                                                                                                                                                                      structing the scene: a large Gaussian far from the camera
+3D Gaussian Splatting (3D-GS) is a point-based novel view                                                                                                                                             can be equivalently modeled in pixel space by a small Gaus-
+synthesis technique that uses 3D Gaussians to model the                                                                                                                                               sian close to the camera. In other words, Gaussians that
+scene. The attributes of the Gaussians are optimized over                                                                                                                                             are not perceived by a sufficient number of cameras may
+input training views given by a set of camera poses Pgt =                                                                                                                                             be able to reconstruct the input view image from a range of
+{ϕi ∈ R3×4 }K  i=1 and corresponding ground truth training                                                                                                                                            locations and scales.
+images Igt = {I i ∈ RH×W }K      i=1 . A sparse point cloud of                                                                                                                                            We define uncertainty in 3D-GS as the amount that a
+the scene generated by Structure from Motion (SfM) over                                                                                                                                               Gaussian’s parameters, such as its location and scale, can be
+the training views is used to initialize the Gaussians. At                                                                                                                                            perturbed without affecting the reconstruction loss over the
+fixed intervals during training, a Gaussian densification step                                                                                                                                        input views. Concretely, this is the sensitivity of the error
+is applied to increase the number of Gaussians in areas of                                                                                                                                            over the input views to that particular Gaussian. Given a
+the model where small-scale geometry is insufficiently re-                                                                                                                                            loss function L : RG → R that takes the set of Gaussians G
+constructed.                                                                                                                                                                                          as inputs and outputs an error value over the set of training
+   Each 3D Gaussian Gi is independently parameterized by                                                                                                                                              views, this sensitivity can be captured by the Hessian ∇2G L.
+position xi ∈ R3 , scaling si ∈ R3 , rotation ri ∈ R4 , base                                                                                                                                              In the following subsections, we demonstrate how to
+color ci ∈ R3 , view-dependent spherical harmonics hi ∈                                                                                                                                               compute this sensitivity and use it to decide which Gaus-
+R15×3 , and opacity αi ∈ R. From these, we define the set                                                                                                                                             sians to prune from the model. Directly computing the full
+of all Gaussian parameters as:                                                                                                                                                                        Hessian matrix is intractable due to memory constraints.
+                           \Set {G} = \{\Set {G}_i = \{x_i, s_i, r_i, c_i, h_i, \alpha _i\}\}_{i=1}^N,                                                                                   (1)          We demonstrate how to obtain a close estimate of the Hes-
+                                                                                                                                                                                                      sian via a Fisher approximation in Section 4.1. We also
+where N is the total number of Gaussians in the model.                                                                                                                                                find that only a block-wise approximation of the Hessian pa-
+    During view synthesis, the scaling parameters si and ro-                                                                                                                                          rameters is needed to quantify Gaussian sensitivity in Sec-
+tation parameters ri are converted into the scaling and ro-                                                                                                                                           tion 4.2, and that computing this over image patches is suf-
+tation matrices S i and Ri . The Gaussian Gi is spatially                                                                                                                                             ficient for pruning in Section 4.3. Finally, we find that mul-
+characterized in the 3D scene by its center point, or mean                                                                                                                                            tiple rounds of pruning and fine-tuning improves our per-
+position, xi and a decomposable covariance matrix Σi :                                                                                                                                                formance over one-shot pruning and fine-tuning, giving our
+                 \Set {G}_i(x_i) = e^{-\frac {1}{2}x_i^T\Mat {\Sigma }^{-1}_i x_i}, \Mat {\Sigma }_i = \Mat {R}_i\Mat {S}_i\Mat {S}_i^T\Mat {R}_i^T. \label {gaussian_representation}    (2)          full PUP 3D-GS pipeline in Section 4.4.
+
+For a given camera pose ϕ, a differentiable rasterizer ren-                                                                                                                                           4.1. Fisher Information Matrix
+ders 2D image IG (ϕ) by projecting all Gaussians observed                                                                                                                                             To obtain a per-Gaussian sensitivity, we begin by taking the
+from ϕ onto the image plane. The color of each pixel p in                                                                                                                                             L2 error over the input reconstruction images IG :
+IG (ϕ) is given by the blending of the N ordered Gaussians
+that overlap it:                                                                                                                                                                                                                                            L_2 = \frac {1}{2}\sum _{\phi \in \Set {P}_{gt}}||I_{\Set {G}}(\phi ) - I_{gt}||_2^2.                                                                         (5)
+
+                             C(p)=\sum _{i\in \Set {N}} \tilde {c}_i \tilde {\alpha }_i(p) \prod _{j=1}^{i-1}(1 - \tilde {\alpha }_j(p)), \label {contribution}                          (3)          Differentiating this twice gives us the Hessian:
+
+where c̃i represents the view-dependent color calculated                                                                                                                                                \nabla _{\Set {G}}^2 L_2 = \sum _{\phi \in \Set {P}_{gt}}\nabla _{\Set {G}} I_{\Set {G}}(\phi ) \nabla _{\Set {G}} I_{\Set {G}}(\phi )^T + (I_{\Set {G}}(\phi ) - I_{gt})\nabla _{\Set {G}}^2 I_{\Set {G}}(\phi ). \label {eq:l2_d2} 
+from the camera pose ϕ and the optimizable per-Gaussian
+color ci and spherical harmonics hi , and α̃i (p) represents                                                                                                                                                                                                   (6)
+the projected Gaussian value at p times the Gaussian’s opac-                                                                                                                                          On a converged 3D-GS model, the ||IG −Igt ||1 residual term
+ity αi .                                                                                                                                                                                              of Equation 4 approaches zero, causing the second order
+    The 3D-GS model is trained by optimizing the loss func-                                                                                                                                           term (IG (ϕ) − Igt )∇2G IG in Equation 6 to vanish:
+tion L via stochastic gradient descent:
+                                                                                                                                                                                                                                                 \nabla _{\Set {G}}^2 L_2 = \sum _{\phi \in \Set {P}_{gt}}\nabla _{\Set {G}} I_{\Set {G}}(\phi ) \nabla _{\Set {G}} I_{\Set {G}}(\phi )^T.                                (7)
+   L(\Set {G} | \phi , I_{gt} ) = ||I_{\Set {G}}(\phi )-I_{gt}||_1 + L_{SSIM}(I_\Set {G}(\phi ),I_{gt}), \label {eq:gs_loss}  (4)
+where the first term is a L1 residual loss and the second term                                                                                                                                        This is identified as the Fisher Information matrix in re-
+is a SSIM loss.                                                                                                                                                                                       lated literature [7, 9]. We provide an explicit derivation of
+
+
+
+                                                                                                                                                                                               5951
+     Possible                                                                                                                                Constrained
+ Gaussian Locations                                                                                                                        Gaussian Location
+
+
+Projected                                                                                                                                Projected                                                                                                               Projected
+Gaussian                                                                                                                                 Gaussian                                                                                                                Gaussian
+
+
+
+
+                        Image                                                                                                                                Image                                                          Image
+  Camera                                                           (a)                                                                     Camera                                                    (b)                                                         Camera
+
+Figure 2. Spatial uncertainty arises from limited views because there are multiple possible 3D Gaussian locations that map to the same
+projected Gaussian in pixel space (a). This is reduced when multiple cameras observe previously unconstrained Gaussians (b).
+
+
+the Fisher Information matrix from this L2 loss along with                                                                              sensitivity pruning score Ui ∈ R is:
+a Bayesian interpretation of our method in Appendix A.1.
+                                                                                                                                                         U_i = \log |\nabla _{x_i,s_i}I_{\Set {G}} \nabla _{x_i,s_i} I_{\Set {G}}^T|. \label {eq:uncertainty}          (10)
+Note that ∇G IG is the gradient over only the reconstructed
+images, so our approximation only depends on the input                                                                                  We speculate that only the mean and scaling parameters
+poses Pgt and not the input images Igt .                                                                                                are needed because they capture the projective geometric
+                                                                                                                                        invariances that exist between the 3D scene and the in-
+4.2. Sensitivity Pruning Score                                                                                                          put views as shown in Figure 2. Rotations – the remain-
+The full Hessian over the model parameters ∇2G L ∈ RG×G                                                                                 ing geometric parameters – are excluded because they do
+is quadratically large. However, we find that using only a                                                                              not induce a change of 3D geometry when invariances are
+subset of these parameters is sufficient for an effective sen-                                                                          present. We ablate the choice of parameters in Section 6.3.
+sitivity pruning score. For brevity, we remove the Pgt terms.                                                                           4.3. Patch-wise Uncertainty
+    To obtain sensitivity scores for each Gaussian Gi , we re-
+strict ourselves to the block diagonal of the Hessian that                                                                              The computation of the Hessian over the entire scene re-
+only captures inter-Gaussian parameter relationships. This                                                                              quires a sum over all per-pixel Fisher approximations of the
+allows us to use each block as a per-Gaussian Hessian from                                                                              reconstructed input views. However, we empirically ob-
+which we can obtain an independent sensitivity score:                                                                                   serve that sensitivity scores computed over image patches
+                                                                                                                                        are highly correlated with those computed over individual
+                                    \Mat {H}_i = \nabla _{\Set {G}_i}I_{\Set {G}} \nabla _{\Set {G}_i}I_{\Set {G}}^T,      (8)          pixels. Specifically, we compute the Fisher information ap-
+                                                                                                                                        proximation on image patches by rendering images at lower
+where ∇Gi is the gradient with respect to the parameters                                                                                resolution and then computing the Fisher approximation on
+of Gaussian Gi . Intuitively, each block Hessian H i mea-                                                                               each of their pixels. Then, we obtain the scene-level Hes-
+sures the isolated impact that perturbing only Gi ’s parame-                                                                            sian by summing the patch-wise Fisher approximations over
+ters would have on the reconstruction error. To turn H i into                                                                           all views. We use 4 × 4 image patches in our experiments
+a sensitivity score Ũi ∈ R, we take its log determinant:                                                                               and ablate our choice of patch size in Appendix A.2.
+
+              \tU _i = \log |\Mat {H}_i| = \log |\nabla _{\Set {G}_i}I_{\Set {G}} \nabla _{\Set {G}_i} I_{\Set {G}}^T|.                 4.4. Multi-Round Pipeline
+                                                                                                                           (9)
+                                                                                                                                        Similar to LightGaussian [4], we prune the model and then
+This captures the relative impact of all the parameters of                                                                              fine-tune it without further Gaussian densification. For
+Gaussian Gi on the reconstruction error. Specifically, it is                                                                            brevity, we will refer to this process as prune-refine. We
+a relative volume measure of the basin around the Gaus-                                                                                 find that, in many circumstances, the model is able to re-
+sian parameters Gi in the second-order approximation of the                                                                             cover the small ||IG − Igt ||1 residual after fine-tuning, al-
+function describing their impact on the reconstruction error.                                                                           lowing us to repeat prune-refine over multiple rounds. We
+   We find that we can restrict the per Gaussian parameters                                                                             empirically notice that multiple rounds of prune-refine out-
+even further and consider only the spatial mean xi and scal-                                                                            performs an equivalent single round of prune-refine. Details
+ing si parameters for an effective sensitivity score. Our final                                                                         of this evaluation are in Section 6.1.
+
+
+
+                                                                                                                                 5952
+Figure 3. The average metrics over all scenes in the Mip-NeRF 360 dataset after pruning with different percentages in our two-round
+pipeline. PSNR and SSIM decrease and LPIPS and FPS increase with more pruning. Per-round percentages are selected in 5% intervals
+and the model is fine-tuned for 5, 000 iterations in each round. The red dots at (80%, 50%) represent our percentages for 90% compression.
+
+
+5. Experiments                                                           5.3. Results
+
+5.1. Datasets                                                            5.3.1   Analysis of PUP 3D-GS Pipeline
+
+We evaluate our approach on the same challenging, real                   The efficacy of our PUP 3D-GS pipeline is demonstrated by
+world scenes as 3D-GS [11]. All nine scenes from the Mip-                Table 1, where we record the mean of each metric over the
+NeRF 360 dataset [1], which consists of five outdoor and                 Mip-NeRF 360 dataset. Pruning 80% of Gaussians from the
+four indoor scenes that each contain a complex central ob-               original 3D-GS model more than doubles its FPS while de-
+ject or viewing area and a detailed background, are used.                grading PSNR, SSIM, and LPIPS. Fine-tuning the pruned
+Two outdoor scenes, truck and train, are taken from the                  model for 5,000 iterations recovers the image quality met-
+Tanks & Temples dataset [13], and two indoor scenes, dr-                 rics with only a slight decrease in rendering speed. Pruning
+johnson and playroom, are taken from the Deep Blending                   50% of the remaining Gaussians, such that a total of 90%
+dataset [8]. For consistency, we use the COLMAP [28]                     of Gaussians are pruned from the base 3D-GS scene, causes
+camera pose estimates that were provided by the creators                 another drop in the image quality metrics. However, we re-
+of the datasets.                                                         cover most of this degradation by fine-tuning this signifi-
+                                                                         cantly smaller model for another 5,000 iterations. Render-
+                                                                         ing speed is more than tripled over the 3D-GS model.
+5.2. Implementation Details
+                                                                         Table 1. Mean PSNR, SSIM, LPIPS, FPS, and point cloud size
+Our method, PUP 3D-GS, can be applied to any 3D-GS                       for the Mip-NeRF 360 dataset at each stage of our PUP 3D-GS
+model. We implement the Hessian computation as a CUDA                    pipeline. The operation in each row is applied cumulatively to all
+kernel in the original 3D-GS codebase [11], then adapt the               of the following rows.
+pruning and refining framework from LightGaussian [4]
+to accommodate our uncertainty estimate and multi-round                   Methods        PSNR↑     SSIM↑    LPIPS↓    FPS↑     Size (MB)↓
+pruning method. Computing pruning scores across the en-                   3D-GS           27.47    0.8123   0.2216     63.88     746.46
+tire training view set takes seconds. For a fair comparison,              + Prune 80%     21.00    0.7075   0.3075    167.93     149.29
+we run LightGaussian and our pipeline on the same pre-                    + Refine        26.97    0.7991   0.2444    148.28     149.29
+                                                                          + Prune 50%     22.63    0.7021   0.3316    241.97      74.65
+trained 3D-GS scenes. Rendering speeds are collected us-                  + Refine        26.67    0.7862   0.2719    204.81      74.65
+ing a Nvidia RTXA4000 GPU in frames per second (FPS).
+
+
+
+                                                                  5953
+             GT                            3D-GS                                   Ours                             LightGaussian
+
+
+
+
+Figure 4. Visual comparison after two rounds of prune-refine using our and LightGaussian’s methods. Top: bonsai from Mip-NeRF 360.
+Middle: room from Mip-NeRF 360. Bottom: train from Tanks & Temples. Additional visualizations are presented in Appendix A.8.
+
+
+5.3.2   Comparison with LightGaussian                                   Table 2. Comparison of our PUP 3D-GS pipeline against Light-
+                                                                        Gaussian [4]. In both methods, we prune-refine 80% of the Gaus-
+Figure 3 compares our spatial uncertainty estimate against              sians from the 3D-GS model and then 50% of the remaining Gaus-
+                                                                        sians for a total of 90%. The final sizes are identical. PUP 3D-GS
+LightGaussian’s global significance score at different per-
+                                                                        increases the rendering speed of 3D-GS by 3.56× on average. Per-
+round pruning percentages in our two-round prune refine
+                                                                        scene metrics for each dataset are recorded in Appendix A.4.
+pipeline. After each round of pruning, the models are
+fine-tuned for 5, 000 iterations for a total of 10, 000 itera-              Datasets         Methods       PSNR↑   SSIM↑    LPIPS↓   FPS↑     Size (MB)↓
+                                                                                              3D-GS        27.47   0.8123   0.2216    64.07     746.46
+tions. The per-dataset means of each metric are illustrated               MipNeRF-360      LightGaussian   26.28   0.7622   0.3054   162.12     74.65
+as heatmaps. As illustrated by the contour lines, our method                                   Ours        26.67   0.7862   0.2719   204.81     74.65
+consistently outperforms LightGaussian across all metrics                                     3D-GS        23.77   0.8458   0.1777    97.86     433.24
+                                                                         Tanks & Temples   LightGaussian   23.08   0.7950   0.2634   329.03     43.33
+and pruning percentage permutations.                                                           Ours        22.72   0.8013   0.2441   391.10     43.33
+
+   We choose to prune 80% then 50% of the Gaussians in                                        3D-GS        28.98   0.8816   0.2859    66.79     699.19
+                                                                          Deep Blending    LightGaussian   28.51   0.8675   0.3292   234.10     69.92
+the first and second rounds of pruning to optimize image                                       Ours        28.85   0.8810   0.3015   301.43     69.92
+quality and rendering speed at 90% pruning, a significantly
+higher compression ratio than previous methods. Table 2
+                                                                           We speculate that the visibility score in LightGaussian’s
+compares our 90% pruning results against LightGaussian’s
+                                                                        importance sampling heuristic is biased towards retaining
+using the per-dataset mean of each metric. We show that
+                                                                        larger Gaussian because they have a higher probability of
+our spatial uncertainty estimate outperforms LightGaussian
+                                                                        being visible in more pixels across the training views. In
+across nearly every metric – the lone exception is PSNR in
+                                                                        Figure 5, we plot the distributions of the log determinants
+the Tanks & Temples dataset, where we are outperformed
+                                                                        of the Gaussian covariances over the scenes visualized in
+by LightGaussian by 0.36 points. Our choice of pruning
+                                                                        Figure 4. The distributions skew more heavily towards
+percentages is further ablated in Section 6.2.
+                                                                        larger Gaussians in the scenes pruned with LightGaussian’s
+   In Figures 1 and 4, we report qualitative results on scenes          pipeline than ours. We address other pruning methods
+taken from each dataset. The magnified regions demon-                   [5, 14, 24] in Appendix A.6.
+strate that our method retains many fine foreground details
+that are not preserved by LightGaussian. Error residual vi-
+                                                                        5.3.3    Vectree Quantization
+sualizations with respect to the ground truth images and
+original 3D-GS renders are available in Appendix A.10; vi-              We apply Vectree Quantization – a compression method that
+sualizations of other scenes are provided in Appendix A.8.              is orthogonal to pruning – from the LightGaussian frame-
+
+
+
+                                                                 5954
+Figure 5. Histograms of the distribution of Gaussians over the log of their volumes for the bonsai, room, and train scenes after two rounds
+of prune-refine. PUP 3D-GS retains smaller Gaussians than LightGaussian, consistent with its higher rendering speed and visual fidelity.
+
+
+work [4] to further compress our pruned models. Our final                                 Table 4. One step of pruning 90% of Gaussians from 3D-GS and
+models are smaller than the unpruned 3D-GS scenes by an                                   then fine-tuning for 10,000 iterations, versus pruning 80% then
+average of 51.70×, 52.56×, and 51.06× for the Mip-NeRF                                    50% of Gaussians and fine-tuning for 5,000 iterations in each step.
+                                                                                          In both methods, 90% of Gaussians are pruned cumulatively and
+360, Tanks & Temples, and Deep Blending datasets. De-
+                                                                                          the model is fine-tuned for 10,000 total steps. Our multi-round
+tailed results are in Table 3. We also apply our method to                                approach outperforms the one-round approach across all metrics.
+EAGLES [6], another orthogonal method, in Appendix A.5.
+                                                                                                                                        Mip-NeRF 360
+                                                                                                   Methods
+Table 3. Vectree Quantization comparison with LightGaussian af-                                                        PSNR↑   SSIM↑     LPIPS↓   FPS↑     Size (MB)↓
+
+ter pruning to 90%. PUP 3D-GS outperforms LightGaussian in                                          3D-GS              27.47   0.8123    0.2216    95.59     746.46
+                                                                                           Prune 90% + 10K Fine-tune   26.12   0.7761    0.2807   189.95      74.65
+terms of image quality, rendering speed, and now size.                                     Prune 80% + 50% (5K Each)   26.67   0.7862    0.2719   204.81     74.65
+
+    Datasets         Methods       PSNR↑   SSIM↑    LPIPS↓   FPS↑     Size (MB)↓
+
+  Mip-NeRF 360
+                      3D-GS
+                   LightGaussian
+                                   27.47
+                                   24.65
+                                           0.8123
+                                           0.7302
+                                                    0.2216
+                                                    0.3341
+                                                              64.07
+                                                             162.34
+                                                                        746.46
+                                                                        14.44
+                                                                                          6.2. Per-Round Pruning Percentages
+                       Ours        24.93   0.7584   0.2988   205.97     14.44
+                      3D-GS        23.77   0.8458   0.1777    97.86     433.24
+                                                                                          We choose to prune 90% of Gaussians, substantially more
+ Tanks & Temples   LightGaussian   21.88   0.7679   0.2886   331.47      8.53             than previous methods, because preserving visual fidelity at
+                       Ours        21.61   0.7787   0.2670   389.18      8.49
+                                                                                          extreme compression ratios is challenging. Figure 7 plots
+                      3D-GS        28.98   0.8816   0.2859    66.79     699.19
+  Deep Blending    LightGaussian   27.90   0.8586   0.3403   233.28     13.38             the metrics for each permutation of per-round pruning per-
+                       Ours        28.24   0.8735   0.3108   300.15     13.30
+                                                                                          centages that results in approximately 90% total pruning.
+                                                                                          Pruning 80% then 50% of the Gaussians in the first and sec-
+6. Ablations                                                                              ond rounds optimizes image quality and rendering speed at
+                                                                                          exactly 90% total pruning. Our method outperforms Light-
+6.1. Multi-Round Pruning                                                                  Gaussian across all metrics and percentage permutations.
+A core component of our pipeline is multiple rounds of
+prune-refine. In Table 4, we compare the mean image qual-
+                                                                                          6.3. Spatial vs. Color Parameters
+ity metrics and FPS over the Mip-NeRF 360 scenes when                                     Another component of our method is restricting our sensi-
+we prune using our two step prune-refine method against                                   tivity pruning score to only the mean and scale parameters
+pruning 90% of Gaussians in a single round with an equiv-                                 of each Gaussian. We choose to exclude rotations, the re-
+alent number of fine-tuning steps. Two-round pruning pro-                                 maining geometric parameters, because they do not induce
+duces better measurements across all metrics.                                             a change in 3D geometry when invariances are present. Fur-
+   The number of pruning percentage permutations in-                                      thermore, including rotation parameters produces 10 × 10
+creases exponentially as the number of rounds increases, so                               Fisher Information matrices that are 2.78× larger than the
+we use interpolation to compare two against three rounds of                               6 × 6 mean and scale parameter-only matrices used in our
+pruning on the Mip-NeRF 360 bicycle scene in Figure 6.                                    method, inducing significant additional computational over-
+Three-round pruning is substantially worse at lower per-                                  head. It is no longer possible to run the pruning pipeline on
+centages and only slightly better at higher percentages. We                               the Nvidia RTXA4000 GPU used for our other experiments
+choose the simpler two-round approach for our pipeline be-                                due to memory constraints, necessitating more expensive
+cause both configurations outperform LightGaussian by a                                   hardware like the Nvidia RTXA5000.
+much larger margin at 90%.                                                                    Table 5 shows that image quality decreases if we include
+
+
+
+                                                                                   5955
+Figure 6. Summary results on the MipNeRF-360 bicycle scene for               Figure 7. Results for the MipNeRF-360 bicycle scene when prun-
+2× and 3× prune-refine rounds. We plot the mean and standard                 ing approximately 90% of Gaussians with varying per-round per-
+deviation of 2× for all cumulative pruning percents in Figure 3,             centages in our two-round pipeline. The dotted black line denotes
+computed via cubic interpolation, then do the same for 3× with               our chosen pruning percentages of 80% then 50%; the 90% means
+10% pruning intervals. The dotted red line denotes our target 90%            from Figure 6 are also shown as dotted lines. Appendix A.3 reports
+cumulative percentage; per-round results are ablated in Figure 7.            the average metrics across all scenes in the MipNeRF-360 dataset.
+
+the rotation parameters in our mean and scale parameter                      with prune-refine, allowing for a second round of pruning,
+sensitivity score. Image quality also decreases if we use                    as shown in Section 4.4. Another limitation is that the mem-
+the RGB color parameters of the Gaussians to compute our                     ory requirement for computing the Fisher matrices is pro-
+sensitivity score instead. We speculate that the lower perfor-               portional to N × 36, where N is the total number of Gaus-
+mance of the RGB sensitivity score is due to its similarity                  sians. We do not find this size to be prohibitive for our
+with LightGaussian’s visibility score – the change in the L2                 post-hoc pruning pipeline on 16GB Nvidia RTXA4000 or
+error over the training images with respect to perturbations                 larger GPUs. Appendix A.7 discusses potential directions
+in the RGB value of a Gaussian correlates with its visibility                for future research related to PUP 3D-GS.
+across the training views.
+
+Table 5. Results from our two step prune-refine pipeline when
+                                                                             8. Conclusion
+computing sensitivity via our score, our score with rotation param-          In this work, we propose PUP 3D-GS: a new post-hoc
+eters, and RGB color parameters. Our spatial score outperforms
+                                                                             pipeline for pruning pretrained 3D-GS models without
+the spatial with rotation and RGB color scores.
+                                                                             changing their training pipelines. It uses a novel, mathemat-
+                                     Mip-NeRF 360
+                                                                             ically principled approach for choosing which Gaussians to
+     Methods                                                                 prune by assessing their sensitivity to the reconstruction er-
+                   PSNR↑    SSIM↑     LPIPS↓   FPS↑     Size (MB)↓
+                                                                             ror over the training views. This sensitivity pruning score
+     3D-GS         27.47    0.8123    0.2216   95.59      746.46
+      Ours         26.67    0.7862    0.2719   204.81      74.65
+                                                                             is derived from a computationally tractable Fisher approx-
+ Ours + Rotation   26.79    0.7861    0.2726   177.30      74.65             imation of the Hessian over that reconstruction error. We
+ RGB Sensitivity   26.40    0.7798    0.2769   195.76      74.65             use our sensitivity score to prune Gaussians from the re-
+                                                                             constructed scene, then fine-tune the remaining Gaussians
+7. Limitations                                                               in the model over multiple rounds. After pruning 90% of
+                                                                             Gaussians, PUP 3D-GS increases average rendering speed
+A limitation of our approach is that it assumes that the scene               by 3.56×, while retaining more salient foreground informa-
+is converged because the Fisher approximation requires a                     tion and achieving higher image quality metrics than exist-
+small L1 residual to be accurate. We find that a small resid-                ing techniques on scenes from the Mip-NeRF 360, Tanks &
+ual is preserved even after removing 80% of the Gaussians                    Temples, and Deep Blending datasets.
+
+
+
+                                                                      5956
+9. Acknowledgements                                                          [9] Wen Jiang, Boshu Lei, and Kostas Daniilidis. Fisherrf:
+                                                                                 Active view selection and uncertainty quantification for
+This research is based upon work supported by the Office                         radiance fields using fisher information. arXiv preprint
+of the Director of National Intelligence (ODNI), Intelli-                        arXiv:2311.17874, 2023. 2, 3, 13
+gence Advanced Research Projects Activity (IARPA), via                      [10] Liren Jin, Xieyuanli Chen, Julius Rückin, and Marija
+IARPA R&D Contract No. 140D0423C0076. The views                                  Popović. Neu-nbv: Next best view planning using un-
+and conclusions contained herein are those of the authors                        certainty estimation in image-based neural rendering. In
+and should not be interpreted as necessarily representing                        IEEE/RSJ International Conference on Intelligent Robots
+the official policies or endorsements, either expressed or                       and Systems, pages 11305–11312. IEEE, 2023. 2
+implied, of the ODNI, IARPA, or the U.S. Government.                        [11] Bernhard Kerbl, Georgios Kopanas, Thomas Leimkühler,
+The U.S. Government is authorized to reproduce and dis-                          and George Drettakis. 3d gaussian splatting for real-time
+tribute reprints for Governmental purposes notwithstand-                         radiance field rendering. ACM Transactions on Graphics, 42
+                                                                                 (4):1–14, 2023. 2, 5, 11
+ing any copyright annotation thereon. Additional support
+                                                                            [12] Andreas Kirsch and Yarin Gal. Unifying approaches in ac-
+was provided by ONR MURI program and the AFOSR
+                                                                                 tive learning and active sampling via fisher information and
+MURI program. Commercial support was provided by Cap-                            information-theoretic quantities. Transactions on Machine
+ital One Bank, the Amazon Research Award program, and                            Learning Research, 2022. Expert Certification. 11
+Open Philanthropy. Zwicker was additionally supported                       [13] Arno Knapitsch, Jaesik Park, Qian-Yi Zhou, and Vladlen
+by the National Science Foundation (IIS-2126407). Gold-                          Koltun. Tanks and temples: Benchmarking large-scale scene
+stein was additionally supported by the National Science                         reconstruction. ACM Transactions on Graphics, 36(4):1–13,
+Foundation (IIS-2212182) and by the NSF TRAILS Insti-                            2017. 5
+tute (2229885).                                                             [14] Joo Chan Lee, Daniel Rho, Xiangyu Sun, Jong Hwan Ko,
+                                                                                 and Eunbyung Park. Compact 3d gaussian representation for
+References                                                                       radiance field. arXiv preprint arXiv:2311.13681, 2023. 2, 6,
+                                                                                 12
+ [1] Jonathan T Barron, Ben Mildenhall, Dor Verbin, Pratul P                [15] Erich L Lehmann and George Casella. Theory of point esti-
+     Srinivasan, and Peter Hedman. Mip-nerf 360: Unbounded                       mation. Springer Science & Business Media, 1998. 11
+     anti-aliased neural radiance fields. In Proceedings of the             [16] Xiangrui Liu, Xinju Wu, Pingping Zhang, Shiqi Wang, Zhu
+     IEEE/CVF Conference on Computer Vision and Pattern                          Li, and Sam Kwong. Compgs: Efficient 3d scene repre-
+     Recognition, pages 5470–5479, 2022. 2, 5                                    sentation via compressed gaussian splatting. arXiv preprint
+ [2] Danpeng Chen, Hai Li, Weicai Ye, Yifan Wang, Weijian Xie,                   arXiv:2404.09458, 2024. 2
+     Shangjin Zhai, Nan Wang, Haomin Liu, Hujun Bao, and                    [17] Tao Lu, Mulin Yu, Linning Xu, Yuanbo Xiangli, Limin
+     Guofeng Zhang. Pgsr: Planar-based gaussian splatting for                    Wang, Dahua Lin, and Bo Dai. Scaffold-gs: Structured
+     efficient and high-fidelity surface reconstruction. 2024. 13                3d gaussians for view-adaptive rendering. arXiv preprint
+ [3] Yihang Chen, Qianyi Wu, Jianfei Cai, Mehrtash Ha-                           arXiv:2312.00109, 2023. 2, 13
+     randi, and Weiyao Lin. Hac: Hash-grid assisted con-                    [18] Linjie Lyu, Ayush Tewari, Marc Habermann, Shunsuke
+     text for 3d gaussian splatting compression. arXiv preprint                  Saito, Michael Zollhöfer, Thomas Leimkühler, and Christian
+     arXiv:2403.14530, 2024. 2                                                   Theobalt. Manifold sampling for differentiable uncertainty
+ [4] Zhiwen Fan, Kevin Wang, Kairun Wen, Zehao Zhu, De-                          in radiance fields. In SIGGRAPH Asia 2024 Conference Pa-
+     jia Xu, and Zhangyang Wang. Lightgaussian: Unbounded                        pers, page 1–11. ACM, 2024. 2
+     3d gaussian compression with 15x reduction and 200+ fps.               [19] Ricardo Martin-Brualla, Noha Radwan, Mehdi SM Sajjadi,
+     arXiv preprint arXiv:2311.17245, 2023. 2, 4, 5, 6, 7                        Jonathan T Barron, Alexey Dosovitskiy, and Daniel Duck-
+ [5] Guangchi Fang and Bing Wang. Mini-splatting: Represent-                     worth. Nerf in the wild: Neural radiance fields for uncon-
+     ing scenes with a constrained number of gaussians, 2024. 3,                 strained photo collections. In Proceedings of the IEEE/CVF
+     6, 12, 13                                                                   Conference on Computer Vision and Pattern Recognition,
+ [6] Sharath Girish, Kamal Gupta, and Abhinav Shrivastava. Ea-                   pages 7210–7219, 2021. 2
+     gles: Efficient accelerated 3d gaussians with lightweight en-          [20] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik,
+     codings. arXiv preprint arXiv:2312.04564, 2023. 2, 7, 12                    Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf:
+ [7] Lily Goli, Cody Reading, Silvia Selllán, Alec Jacobson, and                Representing scenes as neural radiance fields for view syn-
+     Andrea Tagliasacchi. Bayes’ rays: Uncertainty quantifica-                   thesis. Communications of the ACM, 65(1):99–106, 2021. 1,
+     tion for neural radiance fields. Proceedings of the IEEE/CVF                2
+     Conference on Computer Vision and Pattern Recognition,                 [21] Wieland Morgenstern, Florian Barthel, Anna Hilsmann, and
+     2024. 2, 3                                                                  Peter Eisert. Compact 3d scene representation via self-
+ [8] Peter Hedman, Julien Philip, True Price, Jan-Michael Frahm,                 organizing gaussian grids. arXiv preprint arXiv:2312.13299,
+     George Drettakis, and Gabriel Brostow. Deep blending for                    2023. 2
+     free-viewpoint image-based rendering. ACM Transactions                 [22] KL Navaneet, Kossar Pourahmadi Meibodi, Soroush Abbasi
+     on Graphics, 37(6):1–15, 2018. 5                                            Koohpayegani, and Hamed Pirsiavash. Compact3d: Com-
+
+
+
+
+                                                                     5957
+     pressing gaussian splat radiance field models with vector
+     quantization. arXiv preprint arXiv:2311.18159, 2023. 2
+[23] Simon Niedermayr, Josef Stumpfegger, and Rüdiger West-
+     ermann. Compressed 3d gaussian splatting for accelerated
+     novel view synthesis. arXiv preprint arXiv:2401.02436,
+     2023. 2
+[24] Michael Niemeyer, Fabian Manhardt, Marie-Julie Rakoto-
+     saona, Michael Oechsle, Daniel Duckworth, Rama Gosula,
+     Keisuke Tateno, John Bates, Dominik Kaeser, and Federico
+     Tombari. Radsplat: Radiance field-informed gaussian splat-
+     ting for robust real-time rendering with 900+ fps, 2024. 3, 6,
+     12
+[25] Xuran Pan, Zihang Lai, Shiji Song, and Gao Huang. Ac-
+     tivenerf: Learning where to see with uncertainty estimation.
+     In European Conference on Computer Vision, pages 230–
+     246. Springer, 2022. 2
+[26] Kerui Ren, Lihan Jiang, Tao Lu, Mulin Yu, Linning Xu,
+     Zhangkai Ni, and Bo Dai. Octree-gs: Towards consistent
+     real-time rendering with lod-structured 3d gaussians. arXiv
+     preprint arXiv:2403.17898, 2024. 13
+[27] Sara Sabour, Suhani Vora, Daniel Duckworth, Ivan Krasin,
+     David J Fleet, and Andrea Tagliasacchi. Robustnerf: Ig-
+     noring distractors with robust losses. In Proceedings of
+     the IEEE/CVF Conference on Computer Vision and Pattern
+     Recognition, pages 20626–20636, 2023. 2
+[28] Johannes L Schonberger and Jan-Michael Frahm. Structure-
+     from-motion revisited. In Proceedings of the IEEE/CVF
+     Conference on Computer Vision and Pattern Recognition,
+     pages 4104–4113, 2016. 5
+[29] Jianxiong Shen, Adria Ruiz, Antonio Agudo, and Francesc
+     Moreno-Noguer. Stochastic neural radiance fields: Quanti-
+     fying uncertainty in implicit 3d representations. In 2021 In-
+     ternational Conference on 3D Vision, pages 972–981. IEEE,
+     2021. 2
+[30] Jianxiong Shen, Antonio Agudo, Francesc Moreno-Noguer,
+     and Adria Ruiz. Conditional-flow nerf: Accurate 3d mod-
+     elling with reliable uncertainty quantification. In European
+     Conference on Computer Vision, pages 540–557. Springer,
+     2022. 2
+[31] Niko Sünderhauf, Jad Abou-Chakra, and Dimity Miller.
+     Density-aware nerf ensembles: Quantifying predictive un-
+     certainty in neural radiance fields. In 2023 IEEE Interna-
+     tional Conference on Robotics and Automation, pages 9370–
+     9376. IEEE, 2023. 2
+
+
+
+
+                                                                      5958
+

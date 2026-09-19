@@ -1,0 +1,15 @@
+# S70 prospective emitted-RGB comparison
+
+Frozen UTC: 2026-09-09T02:43:13.210615+00:00 . No new target/prediction pixels have been read for this contract.
+
+The question is whether the previously higher-support ordered set A=[19,18,13,12] also lowers reference RGB error compared with B=[19,18,14,13] for all four known targets20–23. A0/A1 repeat the exact same inputs and actual random stream. This is a post-selection baseline diagnostic, not a new method.
+
+Primary endpoint: mean of four full-frame MSEs between original emitted prediction uint8 and fixed preprocessed reference uint8, both normalized to[0,1] in float64. Delta=L(B)-L(A0); positive favors A, negative favors B. Report each frame and the aggregate, perframe PSNR and separately PSNR derived from mean MSE. Exact-zero MSE yields JSON string `Infinity` for PSNR. No ROI, filtering, image registration, brightness adjustment, new threshold, seed hunting or post-result changes. A nonpositive delta ends the benefit claim for this particular higher-support fixed comparison; it does not prove all support measures useless.
+
+Reference processing exactly extracts original S68 helpers from the pinned CPU util source: load_img_and_K with size=None returns FP32[-1,1], then transform_img_and_K to576 crop uses Torch area interpolation to768x576 and centered576crop. Convert this known reference range with(x+1)/2,clip,multiply255,truncateuint8. Prediction processing remains the original content-dependent tensor_to_pil rule: when frame min<-0.1 rescale, otherwise treat as[0,1], then255/clip/truncate. Independently verify saved uint8 from raw predictions; record branches and ranges. These intentionally different mappings respect the known reference range and actual original emission. Do not substitute PIL resize or silently alter model outputs.
+
+Replay eligibility is exact full8 latent and four raw FP32 RGB C-order bytes (also compare emitted RGB). A failed replay leaves any computed scores descriptive and prevents context-effect attribution. One repeat does not estimate stochastic variance. Generation and different-author result checks must finish before scoring opens the four real PNGs. The targets were already historically exposed; access ordering here does not restore blindness.
+
+Scoring reads the four exact target identities and all prebound A0/A1/B saved outputs, writes create-only scoring_01 artifacts, and preserves errors. No additional copy-last, neural metric or selected-pixel arm is introduced: B is the already available same-budget ordinary pose-selection comparison. Future controls need a distinct reason and separate plan.
+
+Limitations: one known short scene/four correlated frames, GT query cameras, approximate K/no extra undistortion/interpolated poses, ft-mse component variant, full ordered-condition changes. Lower MSE can reward blurring and does not establish perceptual or geometric quality, long-term memory, online selection, isolated scale effects or novelty. All exact IDs/hashes/versions/arithmetic and interpretation rules are in SCORING_CONTRACT.json.

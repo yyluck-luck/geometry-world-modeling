@@ -1,0 +1,434 @@
+{
+  "schema_version": "1.0",
+  "audit_id": "S43-nearest-work-independent-verification",
+  "verified_at_utc": "2026-09-07T16:39:57Z",
+  "verified_at_local": "2026-09-08T00:39:57+08:00",
+  "timezone": "Asia/Shanghai",
+  "verification_policy": {
+    "allowed_evidence": [
+      "official proceedings page or paper PDF",
+      "arXiv abstract or full-text page",
+      "author project page",
+      "official public code repository"
+    ],
+    "search_non_detection_is_novelty_proof": false,
+    "claim_rule": "A joint gap that was not contradicted by checked sources remains unresolved; it is not verified novelty."
+  },
+  "inputs": [
+    {
+      "path": "work/S43_paradigm_shift_audit/NEAREST_WORK_CAUSAL_MEMORY_ACCEPTANCE.md",
+      "expected_sha256": "98ce907c5d0eeea334d8d7bc762abe9661f7eeaf0ebe45406fabfbe74db23261",
+      "observed_sha256": "98ce907c5d0eeea334d8d7bc762abe9661f7eeaf0ebe45406fabfbe74db23261",
+      "integrity_status": "PASS"
+    },
+    {
+      "path": "work/S43_paradigm_shift_audit/nearest_work_causal_memory_acceptance_sources.json",
+      "expected_sha256": "a44c9a8f873fea3b667084e9e4cfc8cb22ae1bbe0ed8fa4816e4565656cea150",
+      "observed_sha256": "a44c9a8f873fea3b667084e9e4cfc8cb22ae1bbe0ed8fa4816e4565656cea150",
+      "integrity_status": "PASS"
+    }
+  ],
+  "overall_status": "NEEDS_CORRECTION",
+  "overall_reason": "Five recorded titles are incorrect, one negative keyword claim about ReMind is false as written, three closest-neighbor mechanisms are materially under-described, and at least two high-pressure primary works were absent from the recorded source set.",
+  "recommended_disposition": "KEEP_CONDITIONAL_AFTER_CORRECTION_AND_EXPANDED_CITATION_NETWORK_AUDIT",
+  "novelty_status": "UNRESOLVED_NO_FIRST_OR_NOVEL_CLAIM_AUTHORIZED",
+  "counts": {
+    "recorded_primary_sources_checked": 20,
+    "input_integrity_pass": 2,
+    "bibliographic_records_needing_correction": 5,
+    "false_or_unsafe_negative_claims_needing_correction": 1,
+    "materially_under_described_closest_neighbors": 3,
+    "material_omissions_found": 2,
+    "additional_system_neighbors_found": 2,
+    "official_repository_heads_rechecked": 13
+  },
+  "bibliographic_corrections": [
+    {
+      "id": "agra-arxiv2026",
+      "reported_title": "Making Foresight Actionable: Repurposing Representation Alignment for Causally Grounded Video World Models",
+      "verified_title": "Making Foresight Actionable: Repurposing Representation Alignment in World Action Models",
+      "source": "https://arxiv.org/abs/2606.12217",
+      "status": "NEEDS_CORRECTION"
+    },
+    {
+      "id": "adarefsr-iclr2026",
+      "reported_title": "Trust but Verify: Adaptive Conditioning for Reference-Based Image Super-Resolution",
+      "verified_title": "Trust but Verify: Adaptive Conditioning for Reference-Based Diffusion Super-Resolution via Implicit Reference Correlation Modeling",
+      "source": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/9d0947107ea92d6ce369dce7749180dd-Abstract-Conference.html",
+      "status": "NEEDS_CORRECTION"
+    },
+    {
+      "id": "remind-arxiv2026",
+      "reported_title": "Teaching Video Generators to Remember: Training-Time Memory for Long-Horizon World Simulation",
+      "verified_title": "Teaching Video Generators to Remember: Eliciting Dynamic Memory for Out-of-Sight State Evolution",
+      "source": "https://arxiv.org/abs/2605.25333",
+      "status": "NEEDS_CORRECTION"
+    },
+    {
+      "id": "recomp-iclr2024",
+      "reported_title": "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation",
+      "verified_title": "RECOMP: Improving Retrieval-Augmented LMs with Context Compression and Selective Augmentation",
+      "source": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/bda88ed2892f5e61c9a9bf215c566913-Abstract-Conference.html",
+      "status": "NEEDS_CORRECTION"
+    },
+    {
+      "id": "care-emnlp2025",
+      "reported_title": "CARE: Context-Aware Retrieval Enhancement for Countering Retrieval-Augmented Generation Failures",
+      "verified_title": "Conflict-Aware Soft Prompting for Retrieval-Augmented Generation",
+      "source": "https://aclanthology.org/2025.emnlp-main.1371/",
+      "status": "NEEDS_CORRECTION",
+      "note": "The paper expands CARE as Conflict-Aware REtrieval-Augmented Generation."
+    }
+  ],
+  "claim_corrections": [
+    {
+      "id": "remind-arxiv2026-keyword-check",
+      "reported_claim": "keyword checks of the arXiv HTML did not find counterfactual, causal, accept or reject terminology",
+      "status": "NEEDS_CORRECTION",
+      "reason": "The official full text contains causal-video-generation wording, so the literal keyword claim is false. More importantly, keyword absence would not establish a methodological absence.",
+      "replacement": "Method and appendix review did not identify a fixed-state intervention on one selected runtime memory source. ReMind instead uses corrupted-memory training, protected anchors, retrieval and attention or KV-importance diagnostics."
+    }
+  ],
+  "source_checks": [
+    {
+      "id": "vmem-iccv2025",
+      "verified_title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "year": 2025,
+      "venue": "ICCV 2025",
+      "primary_url": "https://openaccess.thecvf.com/content/ICCV2025/html/Li_VMem_Consistent_Interactive_Video_Scene_Generation_with_Surfel-Indexed_View_Memory_ICCV_2025_paper.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS_WITH_BOUNDED_READING",
+      "verified_mechanism": "Indexes historical view identifiers by 3D surfels, renders query-view evidence, frequency-votes historical views, conditions the generator on selected views, and writes generated views back to memory.",
+      "verified_boundary": "Its paper-level evidence is system and module evaluation; it does not report a fixed-state intervention that estimates one selected view's total source-to-generated-region causal effect."
+    },
+    {
+      "id": "spmem-neurips2025",
+      "verified_title": "Video World Models with Long-term Spatial Memory",
+      "year": 2025,
+      "venue": "NeurIPS 2025",
+      "primary_url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/467655d26fcc207bca08915dc91964c6-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS_WITH_BOUNDED_READING",
+      "verified_mechanism": "Combines recent-frame working memory, a geometry-grounded static point-cloud spatial memory, and sparse historical-frame episodic memory as conditioning signals.",
+      "verified_boundary": "Component ablations do not isolate a selected source's fixed-state causal effect or localize that effect to its output support. SPMEM is the public project shorthand; the formal paper title does not visibly use it as an acronym."
+    },
+    {
+      "id": "worldmem-neurips2025",
+      "verified_title": "WorldMem: Long-term Consistent World Simulation with Memory",
+      "year": 2025,
+      "venue": "NeurIPS 2025",
+      "primary_url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/470629a47e2d65ce0606c40055df5d26-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS_WITH_BOUNDED_READING",
+      "verified_mechanism": "Stores frames with state information in memory units and consumes them with state-aware memory attention.",
+      "verified_boundary": "No fixed-state counterfactual attribution for one runtime memory unit was identified."
+    },
+    {
+      "id": "vrag-neurips2025",
+      "verified_title": "Learning World Models for Interactive Video Generation",
+      "year": 2025,
+      "venue": "NeurIPS 2025",
+      "primary_url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/e32310c3acb058d563a6a9e54d0e9000-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Motivates explicit global-state conditioning because naive long context or retrieval can be ineffective under limited in-context learning.",
+      "verified_boundary": "No runtime memory-source-to-output-region intervention was identified."
+    },
+    {
+      "id": "context-as-memory-2025",
+      "verified_title": "Context as Memory: Scene-Consistent Interactive Long Video Generation with Memory Retrieval",
+      "year": 2025,
+      "venue": "SIGGRAPH Asia 2025, as stated on the author project page",
+      "primary_url": "https://context-as-memory.github.io/",
+      "bibliography_status": "PASS_WITH_VENUE_PROVENANCE_NOTE",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS_WITH_BOUNDED_READING",
+      "verified_mechanism": "Selects historical frames using field-of-view overlap and supplies them in frame-formatted context.",
+      "verified_boundary": "The checked project and paper materials do not establish single-source causal attribution or evidence acceptance."
+    },
+    {
+      "id": "memory-forcing-arxiv2025",
+      "verified_title": "Memory Forcing: Spatio-Temporal Memory for Consistent Scene Generation on Minecraft",
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2510.03198",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS_WITH_SCOPE_NOTE",
+      "verified_mechanism": "Shows that over-reliance on insufficient spatial context can harm novel-scene generation, then uses hybrid temporal and spatial memory training, chained forward training, geometry-indexed memory and point-to-frame retrieval.",
+      "verified_boundary": "It already treats exploration and revisit regimes differently, but does not report a per-query, fixed-state, single-source causal localization and acceptance protocol."
+    },
+    {
+      "id": "remind-arxiv2026",
+      "verified_title": "Teaching Video Generators to Remember: Eliciting Dynamic Memory for Out-of-Sight State Evolution",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2605.25333",
+      "bibliography_status": "NEEDS_CORRECTION",
+      "mechanism_status": "PASS_WITH_MATERIAL_SCOPE_EXPANSION",
+      "comparison_claim_status": "NEEDS_CORRECTION",
+      "verified_mechanism": "Uses memory-oriented frame graphs, protected anchors, node dropping, noisy memory and reference-cache training, with PM-RoPE and non-contiguous streaming KV cache; it also studies memory or KV importance and trains on memories of differing reliability.",
+      "verified_boundary": "No fixed-state intervention estimating one selected source's generated-region causal effect was identified, but the paper is closer to reliability-aware memory use than the original summary suggests."
+    },
+    {
+      "id": "worldtrace-arxiv2026",
+      "verified_title": "Addressable Memory for Video World Models",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2608.07408",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Diagnoses out-of-training RoPE offsets and slot averaging as causes of unaddressable or corrupted cached content, then introduces virtual in-distribution positions and field or landmark compression.",
+      "verified_boundary": "Addressability alone does not establish source correctness, causal consumption or output localization."
+    },
+    {
+      "id": "daam-acl2023",
+      "verified_title": "What the DAAM: Interpreting Stable Diffusion Using Cross Attention",
+      "year": 2023,
+      "venue": "ACL 2023",
+      "primary_url": "https://aclanthology.org/2023.acl-long.310/",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Aggregates cross-attention into word-to-image spatial attribution maps and validates them against segmentation and human attribution.",
+      "verified_boundary": "This is not a causal effect estimate for a runtime image-memory source."
+    },
+    {
+      "id": "i2am-iclr2025",
+      "verified_title": "I2AM: Interpreting Image-to-Image Latent Diffusion Models via Bi-Attribution Maps",
+      "year": 2025,
+      "venue": "ICLR 2025",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/c4a59e985de8b134328f41a47bc7dfac-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS_WITH_MATERIAL_SCOPE_EXPANSION",
+      "comparison_claim_status": "PASS_WITH_STRONGER_NEIGHBOR_PRESSURE",
+      "verified_mechanism": "Aggregates cross-attention across diffusion steps, heads and layers into reference-to-generated and generated-to-reference maps; SRAM maps a selected generated patch to reference patches, and the maps are evaluated against object boxes and task masks, including a random-box baseline.",
+      "verified_boundary": "It does not intervene on a reference under fixed state or estimate a causal total effect. Mask alignment, random-box comparison and attention-guided model refinement remain non-causal evidence about a runtime memory item."
+    },
+    {
+      "id": "diffquickfix-iclr2024",
+      "verified_title": "Localizing and Editing Knowledge in Text-to-Image Generative Models",
+      "year": 2024,
+      "venue": "ICLR 2024",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/4bfcebedf7a2967c410b64670f27f904-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Adapts causal mediation and causal tracing to localize concept and attribute knowledge in text-to-image components.",
+      "verified_boundary": "It does not estimate a selected runtime reference-memory source's effect on a generated region."
+    },
+    {
+      "id": "locogen-icml2024",
+      "verified_title": "On Mechanistic Knowledge Localization in Text-to-Image Generative Models",
+      "year": 2024,
+      "venue": "ICML 2024",
+      "primary_url": "https://proceedings.mlr.press/v235/basu24b.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Shows architecture-sensitive limits of causal tracing and uses direct cross-attention-layer interventions to localize knowledge.",
+      "verified_boundary": "The intervention unit is not one selected runtime memory source and localization is not against that source's geometric output support."
+    },
+    {
+      "id": "activation-patching-iclr2024",
+      "verified_title": "Towards Best Practices of Activation Patching in Language Models: Metrics and Methods",
+      "year": 2024,
+      "venue": "ICLR 2024",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/06a52a54c8ee03cd86771136bc91eb1f-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Demonstrates that corruption, restoration and metric choices materially alter localization conclusions.",
+      "verified_boundary": "This is methodological evidence for intervention controls, not a video-memory protocol."
+    },
+    {
+      "id": "agra-arxiv2026",
+      "verified_title": "Making Foresight Actionable: Repurposing Representation Alignment in World Action Models",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2606.12217",
+      "bibliography_status": "NEEDS_CORRECTION",
+      "mechanism_status": "PASS_WITH_MATERIAL_SCOPE_EXPANSION",
+      "comparison_claim_status": "PASS_WITH_STRONGER_NEIGHBOR_PRESSURE",
+      "verified_mechanism": "Performs zero, mean, shuffle and complement-swap interventions on hidden spatial tokens, measures downstream action deviation, and evaluates localization against manually annotated interaction masks with a matched sensitivity ratio, alongside robot-task success and OOD evaluation.",
+      "verified_boundary": "The target is a hidden spatial token, not a selected runtime memory item; the outcome is action deviation, not generated-video pixels; no strict item-level replay contract or prediction of natural revisit failure was identified."
+    },
+    {
+      "id": "adarefsr-iclr2026",
+      "verified_title": "Trust but Verify: Adaptive Conditioning for Reference-Based Diffusion Super-Resolution via Implicit Reference Correlation Modeling",
+      "year": 2026,
+      "venue": "ICLR 2026",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/9d0947107ea92d6ce369dce7749180dd-Abstract-Conference.html",
+      "bibliography_status": "NEEDS_CORRECTION",
+      "mechanism_status": "PASS_WITH_MATERIAL_SCOPE_EXPANSION",
+      "comparison_claim_status": "PASS_WITH_STRONGER_NEIGHBOR_PRESSURE",
+      "verified_mechanism": "Uses summary tokens to estimate implicit low-quality-to-reference correlation and applies an online soft gate at each output token to modulate reference attention; it tests irrelevant, blurred, affine-transformed and variably matched references.",
+      "verified_boundary": "It establishes online spatial gating for one external reference, but not a fixed-state causal audit of an episodic world-memory item, a geometry-derived pre-treatment support mask, or a per-example causal score predicting natural revisit failure."
+    },
+    {
+      "id": "sufficient-context-iclr2025",
+      "verified_title": "Sufficient Context: A New Lens on Retrieval Augmented Generation Systems",
+      "year": 2025,
+      "venue": "ICLR 2025",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/33dffa2e3d2ab74a783d1a8c292f66d9-Abstract-Conference.html",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Separates insufficient retrieved context from model failure under sufficient context and trains guided abstention.",
+      "verified_boundary": "It pressures the generic abstention abstraction but does not establish geometry-aware video evidence acceptance."
+    },
+    {
+      "id": "recomp-iclr2024",
+      "verified_title": "RECOMP: Improving Retrieval-Augmented LMs with Context Compression and Selective Augmentation",
+      "year": 2024,
+      "venue": "ICLR 2024",
+      "primary_url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/bda88ed2892f5e61c9a9bf215c566913-Abstract-Conference.html",
+      "bibliography_status": "NEEDS_CORRECTION",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Lets a context compressor return an empty string when retrieved information is irrelevant or unhelpful.",
+      "verified_boundary": "It does not provide a causal or geometry-aware acceptance protocol for video memory."
+    },
+    {
+      "id": "care-emnlp2025",
+      "verified_title": "Conflict-Aware Soft Prompting for Retrieval-Augmented Generation",
+      "year": 2025,
+      "venue": "EMNLP 2025",
+      "primary_url": "https://aclanthology.org/2025.emnlp-main.1371/",
+      "bibliography_status": "NEEDS_CORRECTION",
+      "mechanism_status": "PASS_WITH_TITLE_AND_ACRONYM_CORRECTION",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Uses a context assessor and grounded or adversarial soft prompts to guide reliance on parametric versus external information under conflict.",
+      "verified_boundary": "It pressures reliability-based source selection but does not establish runtime video-memory source-to-region causality."
+    },
+    {
+      "id": "stevo-bench-arxiv2026",
+      "verified_title": "Out of Sight, Out of Mind? Evaluating State Evolution in Video World Models",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2603.13215",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Uses observation and control interventions to evaluate state progression, plausibility and coherence while state is out of sight.",
+      "verified_boundary": "It does not identify which selected memory source caused which generated region."
+    },
+    {
+      "id": "memobench-arxiv2026",
+      "verified_title": "MemoBench: Benchmarking World Modeling in Dynamically Changing Environments",
+      "year": 2026,
+      "venue": "arXiv preprint; author project page labels ECCV 2026 but no proceedings status was used",
+      "primary_url": "https://arxiv.org/abs/2606.27537",
+      "bibliography_status": "PASS",
+      "mechanism_status": "PASS",
+      "comparison_claim_status": "PASS",
+      "verified_mechanism": "Evaluates disappear-reappear consistency with visual quality, motion, identity, 3D, camera, reappearance, pixel-fidelity and VQA-related metrics.",
+      "verified_boundary": "External behavior scores do not isolate internal single-source causal consumption or acceptance."
+    }
+  ],
+  "official_code_head_checks": [
+    {"id": "vmem-iccv2025", "url": "https://github.com/runjiali-rl/vmem", "recorded_head": "39291e4f272f6b4f270691d930926ab5930f942e", "rechecked_head": "39291e4f272f6b4f270691d930926ab5930f942e", "status": "PASS"},
+    {"id": "spmem-neurips2025", "url": "https://github.com/spmem/spmem", "recorded_head": "89e1f70e7d8b4087b87306f958406cf9e4b2b2a7", "rechecked_head": "89e1f70e7d8b4087b87306f958406cf9e4b2b2a7", "status": "PASS"},
+    {"id": "worldmem-neurips2025", "url": "https://github.com/xizaoqu/WorldMem", "recorded_head": "c1cc91bdfb2dda52fe309280e5ed046b1faba448", "rechecked_head": "c1cc91bdfb2dda52fe309280e5ed046b1faba448", "status": "PASS"},
+    {"id": "vrag-neurips2025", "url": "https://github.com/yeyutaihan/vrag", "recorded_head": "a771a6c67f6ecaa1cec0ca420924c1b0df906563", "rechecked_head": "a771a6c67f6ecaa1cec0ca420924c1b0df906563", "status": "PASS"},
+    {"id": "remind-arxiv2026", "url": "https://github.com/Applied-Intuition-Open-Source/ReMind", "recorded_head": "fc8381c0020efaee28fc92e0fdb12b1982bef312", "rechecked_head": "fc8381c0020efaee28fc92e0fdb12b1982bef312", "status": "PASS"},
+    {"id": "daam-acl2023", "url": "https://github.com/castorini/daam", "recorded_head": "c30493ed0154bfccb6c342400f25cc24599bb1ff", "rechecked_head": "c30493ed0154bfccb6c342400f25cc24599bb1ff", "status": "PASS"},
+    {"id": "i2am-iclr2025", "url": "https://github.com/qkrwnstj306/I2AM", "recorded_head": "7c3e19ca3606f45a82439765b3f8fe0769d52215", "rechecked_head": "7c3e19ca3606f45a82439765b3f8fe0769d52215", "status": "PASS"},
+    {"id": "diffquickfix-iclr2024", "url": "https://github.com/samyadeepbasu/DiffQuickFix", "recorded_head": "6bd2ba0385b74eda7dd0670873e1d9143cad334f", "rechecked_head": "6bd2ba0385b74eda7dd0670873e1d9143cad334f", "status": "PASS"},
+    {"id": "locogen-icml2024", "url": "https://github.com/samyadeepbasu/LocoGen", "recorded_head": "5bd3f5cc17afb361e606fc7345b204d2431011ee", "rechecked_head": "5bd3f5cc17afb361e606fc7345b204d2431011ee", "status": "PASS"},
+    {"id": "adarefsr-iclr2026", "url": "https://github.com/vivoCameraResearch/AdaRefSR", "recorded_head": "2d3d882db0d75dd77bf4c41c98c731be9520a275", "rechecked_head": "2d3d882db0d75dd77bf4c41c98c731be9520a275", "status": "PASS"},
+    {"id": "sufficient-context-iclr2025", "url": "https://github.com/hljoren/sufficientcontext", "recorded_head": "801b465eb3be5bf5216fbe3301e61daee85ff99c", "rechecked_head": "801b465eb3be5bf5216fbe3301e61daee85ff99c", "status": "PASS"},
+    {"id": "stevo-bench-arxiv2026", "url": "https://github.com/jhanliufu-personal/STEVO-Bench", "recorded_head": "680fb6ee2733894ebc8e5584c08146f4bf7e6415", "rechecked_head": "680fb6ee2733894ebc8e5584c08146f4bf7e6415", "status": "PASS"},
+    {"id": "memobench-arxiv2026", "url": "https://github.com/MemoBench-Team/MemoBench", "recorded_head": "f4edb0c4f9f1820bac837ee30d4957811cf275ff", "rechecked_head": "f4edb0c4f9f1820bac837ee30d4957811cf275ff", "status": "PASS"}
+  ],
+  "material_omissions": [
+    {
+      "id": "vision-language-binding-arxiv2026",
+      "title": "Vision-Language Binding in In-Context Image Generation",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2605.24624",
+      "pressure_level": "HIGHEST",
+      "why_material": "It causally analyzes reference-image-to-generated-image pathways in FLUX.2 using a T2I lens, attention knockout and I2I-to-I2I activation patching, separating reference-to-text-to-image from direct reference-to-image paths.",
+      "remaining_difference": "It is not a selected episodic memory item in a video world model, does not define one coherent intervention across every real memory-consumption path, does not evaluate against a pre-treatment geometry support and area baseline, and does not link the score to natural revisit failure or benefit.",
+      "required_action": "Add as a closest causal-reference neighbor and run backward, forward and author citation-network checks before any novelty wording."
+    },
+    {
+      "id": "mosaicmem-arxiv2026",
+      "title": "MosaicMem: Hybrid Spatial Memory for Controllable Video World Models",
+      "year": 2026,
+      "venue": "arXiv preprint",
+      "primary_url": "https://arxiv.org/abs/2603.17117",
+      "pressure_level": "HIGH",
+      "why_material": "It lifts image patches into 3D for spatial localization and targeted retrieval, exposes a patch-and-compose interface, and supports memory-based scene editing in a controllable video world model.",
+      "remaining_difference": "The checked primary material does not establish a fixed-state causal effect of one selected source or a natural-failure-linked acceptance score.",
+      "required_action": "Add to the geometry-routing and source-localization neighbor set."
+    }
+  ],
+  "additional_system_neighbors": [
+    {
+      "id": "implicit-memory-retrieval-arxiv2026",
+      "title": "Compression and Retrieval: Implicit Memory Retrieval for Video World Models",
+      "primary_url": "https://arxiv.org/abs/2606.23105",
+      "why_relevant": "Adds attention-driven viewpoint-conditioned implicit retrieval and context compression, further crowding the Select and Consume design space."
+    },
+    {
+      "id": "dreamx-world-arxiv2026",
+      "title": "DreamX-World 1.0: A General-Purpose Interactive World Model",
+      "primary_url": "https://arxiv.org/abs/2606.16993",
+      "why_relevant": "Uses camera-geometry memory retrieval and memory-conditioned persistence, and reports robustness mechanisms for imperfect memory latents."
+    }
+  ],
+  "closest_neighbor_scope_corrections": [
+    {
+      "id": "i2am-iclr2025",
+      "correction": "Do not describe it as merely a heatmap. It already uses stored masks, inside-versus-outside measures, a random-box baseline and attention-guided downstream refinement. The remaining distinction is causal intervention plus geometry-derived pre-treatment support and an area-controlled effect."
+    },
+    {
+      "id": "agra-arxiv2026",
+      "correction": "Do not imply that mask comparison or performance linkage is absent. It already combines hidden-token interventions, a manual interaction mask, matched inside/background sensitivity, robot success and OOD tests. The remaining distinction is item-level memory intervention and generated-video-region outcome under strict replay."
+    },
+    {
+      "id": "adarefsr-iclr2026",
+      "correction": "Do not claim online or spatial reference gating as new. It already implements per-output-token soft gating and evaluates irrelevant, blurred, affine and variably matched references. The remaining distinction is causal measurement of a historical memory item and calibrated prediction of natural failures."
+    }
+  ],
+  "five_part_gap_verification": {
+    "conditions": [
+      {"id": "C1", "definition": "Intervene on one actual runtime-selected memory source or item."},
+      {"id": "C2", "definition": "Hold sampling, retrieval, camera and every other relevant internal state fixed."},
+      {"id": "C3", "definition": "Change that source coherently across every real consumption path."},
+      {"id": "C4", "definition": "Localize the generated-output effect against a geometry-derived pre-treatment support and area baseline."},
+      {"id": "C5", "definition": "Show that the causal-localized quantity predicts natural failure or benefit and can support acceptance decisions."}
+    ],
+    "joint_gap_status": "NOT_FALSIFIED_BY_CHECKED_PRIMARY_SOURCES_BUT_NOT_PROVEN",
+    "search_coverage_status": "INCOMPLETE_MATERIAL_OMISSIONS_FOUND",
+    "novelty_inference_allowed": false,
+    "matrix": [
+      {"work": "VMem", "C1": "NO", "C2": "NO", "C3": "NO", "C4": "NO_STRICT_GEOMETRY_USED_FOR_ROUTING_ONLY", "C5": "PARTIAL_SYSTEM_BENEFIT"},
+      {"work": "SPMEM", "C1": "NO", "C2": "NO", "C3": "NO", "C4": "NO_STRICT_GEOMETRY_USED_FOR_MEMORY_ONLY", "C5": "PARTIAL_COMPONENT_BENEFIT"},
+      {"work": "Memory Forcing", "C1": "NO", "C2": "NO", "C3": "NO", "C4": "NO", "C5": "PARTIAL_REGIME_LEVEL_FAILURE_AND_BENEFIT"},
+      {"work": "ReMind", "C1": "NO", "C2": "NO", "C3": "NO", "C4": "NO", "C5": "PARTIAL_RELIABILITY_TRAINING_AND_DIAGNOSTICS"},
+      {"work": "I2AM", "C1": "NO_CAUSAL_INTERVENTION", "C2": "NO", "C3": "NO", "C4": "PARTIAL_NON_CAUSAL_MASK_AND_RANDOM_BOX_LOCALIZATION", "C5": "PARTIAL_DATASET_LEVEL_DIAGNOSTIC_AND_REFINEMENT"},
+      {"work": "AGRA", "C1": "NO_HIDDEN_TOKEN_NOT_MEMORY_SOURCE", "C2": "PARTIAL_CONTROLLED_TOKEN_INTERVENTION", "C3": "NO", "C4": "PARTIAL_MANUAL_ACTION_MASK_AND_ACTION_OUTCOME", "C5": "PARTIAL_TASK_LEVEL_BENEFIT_NOT_NATURAL_REVISIT_SCORE"},
+      {"work": "Ada-RefSR", "C1": "NO_CAUSAL_INTERVENTION", "C2": "NO", "C3": "NO", "C4": "PARTIAL_PER_OUTPUT_TOKEN_GATE_NOT_CAUSAL_GEOMETRY_EFFECT", "C5": "PARTIAL_ROBUSTNESS_AND_DATASET_BENEFIT"},
+      {"work": "Vision-Language Binding in In-Context Image Generation", "C1": "PARTIAL_EXTERNAL_REFERENCE_CAUSAL_PATHWAY", "C2": "PARTIAL_PATCHING_CONTROLS_BUT_NOT_TARGET_REPLAY_CONTRACT", "C3": "NO_SEPARATE_PATH_ANALYSIS_NOT_ONE_COHERENT_ALL_PATH_INTERVENTION", "C4": "NO_PRETREATMENT_GEOMETRY_SUPPORT_BASELINE", "C5": "NO_NATURAL_REVISIT_FAILURE_LINK"},
+      {"work": "MosaicMem", "C1": "NO_CAUSAL_INTERVENTION", "C2": "NO", "C3": "NO", "C4": "PARTIAL_3D_PATCH_ROUTING_AND_EDIT_INTERFACE", "C5": "PARTIAL_SYSTEM_LEVEL_CONTROL"}
+    ],
+    "interpretation": "No checked work satisfied all five conditions jointly. This result only bounds the reviewed set. Because the source set missed high-pressure works, it cannot support a field-wide novelty claim."
+  },
+  "required_corrections_before_reuse": [
+    "Correct AGRA, Ada-RefSR, ReMind, RECOMP and CARE titles in both human-readable and machine-readable artifacts.",
+    "Replace the ReMind keyword-absence sentence with a method-level bounded statement.",
+    "Expand I2AM, AGRA and Ada-RefSR descriptions so mask baselines, causal token intervention, online spatial gating and task linkage are not presented as absent.",
+    "Add Vision-Language Binding in In-Context Image Generation and MosaicMem to the closest-neighbor matrix.",
+    "Add the two additional 2026 video-memory systems to the broader system-neighbor search.",
+    "Run backward and forward citation networks plus author-page checks for the high-pressure works.",
+    "Keep all first, novel and no-prior-work wording disabled until the expanded audit is independently repeated."
+  ]
+}

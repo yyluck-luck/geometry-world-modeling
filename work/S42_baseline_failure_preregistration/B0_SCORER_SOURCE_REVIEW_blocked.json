@@ -1,0 +1,89 @@
+{
+  "schema": "s42-b0-blind-scorer-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "BLOCKED_BEFORE_B0_EXECUTION",
+  "created_utc": "2026-09-07T14:57:39Z",
+  "review_scope": "Different-author, static source review of the exact B0 scorer rebase. This is not a scorer execution, B0 result, visual review, or scientific result.",
+  "scorer_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/score_b0_blind.py",
+  "scorer_sha256": "00974932a2efefb6833b87037fc95f3550f2c2c1cf9b59425f85e58c42c34a67",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORING_CONTRACT.json",
+  "contract_sha256": "52ba3cc2c7390b21c4b35b45d9dc53a7ed1ddbaf2b4b5f5ae71a842ea992878a",
+  "preregistration_protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+  "preregistration_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+  "rebase_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_REBASE_V3_3_RECEIPT.json",
+  "rebase_receipt_sha256": "321c9a84da05cb9a2c6e6102b150c12c12a68e6921c4bdd2148a2f2517adb325",
+  "archive_manifest_metadata_observed": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S40_declared_variant_generation/archive/manifest.json",
+    "sha256_from_bound_generation_worker_receipt": "4e2acb3448589710aedcf6945d2d278bfa1b6d194b94adaad0d9b371697e153b",
+    "tensor_descriptors_type": "object",
+    "tensor_descriptor_count": 1951,
+    "payload_bodies_read": false
+  },
+  "executed": false,
+  "scorer_imported": false,
+  "s40_generated_images_viewed": false,
+  "s40_result_arrays_decoded": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "model_generation_renderer_readback_or_gate_runs": 0,
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "blocking_findings": [
+    {
+      "id": "B0-SOURCE-BLOCKER-001",
+      "title": "Authoritative tensor descriptors are not checked against the frozen archive manifest registry",
+      "evidence": [
+        "B0_SCORING_CONTRACT.json:70-75 requires complete descriptor agreement for each canonical blob path.",
+        "B0_REBASE_AUDIT_AFTER_READBACK_V3_3.md:102 and :125-138 require each event descriptor to equal archive_manifest.tensor_descriptors[blob] in full while retaining every existing tensor check.",
+        "score_b0_blind.py:680-696 reads the archive manifest and event chain but never obtains or passes archive_manifest['tensor_descriptors'].",
+        "score_b0_blind.py:82 and :487-489 instead use an initially empty process-global cache that records only descriptors already presented to tensor_path; the first descriptor for any blob is accepted without comparison to the frozen manifest registry.",
+        "The bound archive manifest metadata contains an object-valued tensor_descriptors registry with 1951 entries, so the missing authoritative comparison is available and mechanically checkable.",
+        "B0_REBASE_V3_3_RECEIPT.json:37 states canonical_blob_complete_descriptor_registry_checked=true, which the reviewed source does not implement."
+      ],
+      "impact": "Body SHA-256, descriptor-plus-body SHA-256, sidecar equality, shape, dtype, byte order, and size checks remain useful, but they do not prove that a descriptor decoded from an event is the exact descriptor registered for that blob by the frozen archive manifest. The source therefore does not meet its own rebase receipt and frozen contract.",
+      "minimum_strict_fix": "After verifying the frozen archive manifest, require tensor_descriptors to be an exact built-in dict and pass that immutable registry through every numeric read. Before opening a tensor body, require desc['blob'] to be one exact registry key and require dict(desc) == registry[desc['blob']] in full. Keep the exact TensorDescriptor provenance test and all current body, descriptor-plus-body, sidecar, shape, dtype, byte-order, C-order, size, path-containment, finiteness, and deadline checks. Do not replace the manifest comparison with the current first-seen cache."
+    },
+    {
+      "id": "B0-SOURCE-BLOCKER-002",
+      "title": "The pre-score blindness attestation gate does not establish the frozen real-attestation conditions",
+      "evidence": [
+        "B0_REBASE_AUDIT_AFTER_READBACK_V3_3.md:132 and :174-185 requires the attestation to bind the frozen manifest path, carry a real nonempty UTC creation time, and be a new immutable file rather than the template itself.",
+        "B0_BLINDNESS_ATTESTATION_TEMPLATE.json:3-6 is explicitly TEMPLATE_NOT_AN_ATTESTATION with created_utc=null and identifies the frozen manifest path.",
+        "score_b0_blind.py:217-229 checks schema, PASS status, manifest SHA, three exact false fields, and a nonempty attestor role, but it never checks manifest_path, created_utc, or path != B0_BLINDNESS_ATTESTATION_TEMPLATE.json.",
+        "Consequently, a copy with a null timestamp, a wrong or missing manifest_path, or even a modified template at the template path can satisfy the implemented gate."
+      ],
+      "impact": "The scorer can label human viewing as allowed after accepting a document that does not satisfy the predeclared evidence for when and for which frozen input the blind attestation was made.",
+      "minimum_strict_fix": "Require path to be a canonical new file distinct from B0_BLINDNESS_ATTESTATION_TEMPLATE.json; require manifest_path to equal the exact frozen manifest path; require created_utc to be a nonempty, timezone-aware UTC timestamp that precedes scoring; retain schema/status, exact manifest SHA, exact false booleans, nonempty truthful role, caller-bound attestation SHA, and final receipt binding. Do not create or sign the attestation during the source fix."
+    }
+  ],
+  "nonblocking_checks": {
+    "exact_target_identities_match": true,
+    "attempt02_supervisor_worker_report_and_result_review_exactly_pinned": true,
+    "attempt02_result_review_schema_status_roles_and_no_viewing_fields_checked": true,
+    "list_and_tuple_decode_to_distinct_exact_container_types": true,
+    "scalar_label_and_exact_builtin_value_type_checked": true,
+    "bool_is_not_accepted_as_int_for_archived_scalar_nodes": true,
+    "TensorDescriptor_is_created_only_by_raw_kind_tensor_decode_branch": true,
+    "ordinary_kind_dict_decodes_to_exact_builtin_dict_and_cannot_pass_exact_TensorDescriptor_gate": true,
+    "pil_image_pixels_are_recursively_decoded": true,
+    "tensor_body_descriptor_plus_body_and_sidecar_hash_checks_retained": true,
+    "M_outer4_regions_and_counts_match_preregistration": true,
+    "uint8_to_float64_divide_by_255_precedes_subtraction": true,
+    "primary_pair_is_exactly_ID0_to_ID8": true,
+    "event_is_strict_unrounded_MSE_greater_than_0_01": true,
+    "equality_to_0_01_is_not_an_event": true,
+    "requested_camera_guard_is_labeled_condition_only_and_not_visual_camera_pass": true,
+    "copy_guard_matches_both_preregistered_degeneracy_cases": true,
+    "first_technically_valid_attempt_blocks_rerun": true,
+    "fresh_gapless_sequential_direct_child_output_directory_required": true,
+    "scoring_deadline_seconds": 300,
+    "B0_output_remains_single_row_and_cohort_INCOMPLETE": true,
+    "memory_mean_camera_visual_quality_repeatability_and_novelty_claims_remain_prohibited": true
+  },
+  "limitations": [
+    "No B0 score, scorer import, readback, model, renderer, generation, or gate was run.",
+    "No S40 image, PNG, montage, tensor body, image payload body, or scientific array was opened, decoded, mapped, or viewed.",
+    "This review inspected source and small JSON/text metadata only. It does not validate numeric outputs or visual quality.",
+    "Because blocking_findings is nonempty, B0_SCORER_SOURCE_REVIEW.json must not be created and B0 must remain unexecuted."
+  ],
+  "next_gate": "Revise the exact scorer and contract without changing the frozen ROI, pairs, threshold, metric arithmetic, camera tolerance, copy guard, attempt policy, or claim boundary; then obtain a new different-author static source review before creating a truthful blindness attestation or executing B0."
+}

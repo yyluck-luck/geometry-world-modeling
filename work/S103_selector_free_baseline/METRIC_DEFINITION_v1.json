@@ -1,0 +1,22 @@
+{
+  "schema": "s103-rgb-metric-definition-v1",
+  "status": "FROZEN_IMPLEMENTATION_CANDIDATE",
+  "scope": "selector-free development baseline RGB only",
+  "prediction_input": {
+    "shape": [4, 3, 576, 576],
+    "dtype": "float32",
+    "conversion": "For each frame: if min < -0.1 apply (x+1)/2, otherwise use x; multiply by 255, clip to [0,255], truncate to uint8. This matches the pinned VMem tensor_to_pil branch."
+  },
+  "reference_input": {
+    "native_shape": [480, 640, 3],
+    "native_dtype": "uint8 RGB",
+    "conversion": "torch float32 /255; area resize to 576x768 with antialias=false; crop x=[96,672); multiply by 255, clip, truncate to uint8"
+  },
+  "denominator": "Every channel value of all four 576x576 RGB targets; no pixel or frame exclusion",
+  "per_frame_metrics": ["integer squared sum", "integer absolute sum", "MSE in [0,1]", "MAE in [0,1]", "PSNR from MSE"],
+  "aggregate": "Sum integer numerators and denominators over all four targets before division",
+  "primary_metric": "aggregate MSE in [0,1]",
+  "secondary_metrics": ["aggregate MAE in [0,1]", "aggregate PSNR", "all per-frame values"],
+  "future_access": "Future RGB is opened only after the prediction seal. Future depth and pose are not opened by this metric.",
+  "claim_boundary": "This is a development RGB reconstruction score. It is not a geometry score, held-out result, memory gain, method benefit, or novelty evidence."
+}

@@ -1,0 +1,272 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v4",
+  "review_kind": "adversarial",
+  "status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V10",
+  "verdict": "PASS_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T13:08:58.260635+00:00",
+  "time_basis": "Actual UTC captured after finite fresh source review and six existing isolated test commands.",
+  "author_role": "/root/c2_v5_lifecycle_review",
+  "reviewer_role": "/root/c1_v8_binding_review",
+  "reviewer_task_id": "/root/c1_v8_binding_review",
+  "reviewer_turn_id": "c1-v10-fresh-adversarial-source-2026-09-08T13:08:58.260635+00:00",
+  "reviewed_identities": {
+    "camera_guard.py": "96d07f6f0c1c8c8bdfd1be57eb5725315b1dd340fbf25aec1c879066f7b9193b",
+    "supervise_camera_guard.py": "92793f1a250f24e1a275a2a7995a21929a3b63be7da23481eeddd81de897f306",
+    "PROTOCOL.md": "397e19d08d129cfbaf986ea5c5e9f8b96113652a93a7babed84d623fa5ad1126",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "1f6220af9889e2008168684435ef19306f0ed7ece88c3b2d1c8e6410a80c06bf",
+    "synthetic_selftest.py": "56c7fee2235e8c4180e9aa4bdc71889a914abd369e83b37fb15117f2180d7f48",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "blocking_findings": [],
+  "reviewed_control_documents": {
+    "FROZEN_SOURCE_SET.json": "2b80f5b017445e3c12290dc70d535623eeb3476a10761746f6ef11759cf0116a",
+    "SOURCE_ONLY_AUTHOR_RECEIPT_V10.json": "b95f99afce6dbd90fd32610f5dd006f3ed6934e3e80ed4d33d3e3bdd90889de5"
+  },
+  "independent_functional_diff_sha256": "7b14910a4b5e541e86a92948cbf713de5306f4513316cfc5ae75d11776af49f0",
+  "independent_test_runs_sha256": "35c85238af5fbc35b488d5228d606b1b70ed0e6b628038a04bed4a33fcdf57de",
+  "reviewer_independence": {
+    "different_from_v10_source_author": true,
+    "v10_source_files_modified": false,
+    "prior_role_disclosure": "This reviewer reviewed the earlier V9 source and diagnosed V8 metadata adaptation. V10 was implemented by a different author. No prior PASS substitutes for these fresh V10 checks."
+  },
+  "checks": {
+    "five_exact_frozen_source_hashes": "PASS",
+    "fixed_s42_b0_s45_reference_identities": "PASS",
+    "only_changed_production_predicate_adds_individual_3x3_K": "PASS",
+    "all_worker_function_and_class_asts_preserved_after_version_literals": "PASS",
+    "all_other_supervisor_function_asts_preserved_after_version_literals": "PASS",
+    "individual_pose_reader_still_requires_4x4": "PASS",
+    "individual_K_reader_already_accepts_3x3_or_4x4": "PASS",
+    "dtype_nbytes_count_hash_and_4096B_guards_unchanged": "PASS",
+    "final_cache_ID0_anchor_yaw_and_inclusive_1e_minus_6_unchanged": "PASS",
+    "actual_v9_report_shape_mismatch_reproduced_then_repaired": "PASS_TEXT_METADATA_ONLY",
+    "dual_python_six_existing_entrypoints": "PASS",
+    "existing_12_anchor_cases_per_interpreter": "PASS",
+    "formal_paths_absent": "PASS"
+  },
+  "producer_reader_reasoning": "The original worker decode_selected_cameras separately requires each c2w to be 4x4, while a single K may be 3x3 or 4x4 and all target/cache K shapes must agree. Its identity emitter legitimately outputs one 3x3 float32 36-byte K. The final generic c2w/K metadata validator now admits that existing producer output; it does not change pose decoding or weaken dtype, identity, body-size, total-byte, numeric or authentication checks.",
+  "actual_v9_report_text_regression": {
+    "Python 3.13.0": {
+      "actual_metadata_body_bytes": 1584,
+      "actual_report_sha256": "c064b8cde12d389c4a75502abb335c74612a03a69181c4ea86046c8ddd516797",
+      "actual_tensor_identity_count": 11,
+      "camera_tensor_body_bytes_read_by_regression": 0,
+      "pixels_decoded": 0,
+      "single_K_3x3_count": 1,
+      "status": "PASS_ACTUAL_V9_REPORT_TEXT_ONLY_SHAPE_REGRESSION",
+      "v10_accepts_legitimate_single_K_3x3": true,
+      "v10_rejects_ordinary_bad_shape_2x2": true,
+      "v9_rejection_reproduced": true
+    },
+    "Python 3.12.14": {
+      "actual_metadata_body_bytes": 1584,
+      "actual_report_sha256": "c064b8cde12d389c4a75502abb335c74612a03a69181c4ea86046c8ddd516797",
+      "actual_tensor_identity_count": 11,
+      "camera_tensor_body_bytes_read_by_regression": 0,
+      "pixels_decoded": 0,
+      "single_K_3x3_count": 1,
+      "status": "PASS_ACTUAL_V9_REPORT_TEXT_ONLY_SHAPE_REGRESSION",
+      "v10_accepts_legitimate_single_K_3x3": true,
+      "v10_rejects_ordinary_bad_shape_2x2": true,
+      "v9_rejection_reproduced": true
+    }
+  },
+  "actual_s45_metadata_integration": {
+    "Python 3.13.0": {
+      "camera_tensor_body_bytes_read": 0,
+      "camera_tensor_store_constructed": false,
+      "capture_counts": {
+        "batch_input": 2,
+        "cache_commit": 2
+      },
+      "distinct_upstream_metadata_paths": 10,
+      "event_summary": {
+        "event_count": 102,
+        "last_event_sha256": "67a58d988d205b6a371225e563b7a602537c18d976488e1143d9a43cd768409f"
+      },
+      "formal_paths_created": 0,
+      "image_body_files_opened": 0,
+      "legacy_v8_failure_reproduced": true,
+      "model_runs": 0,
+      "pixels_decoded": 0,
+      "selected_camera_tensor_descriptors": 32,
+      "status": "PASS_ACTUAL_S45_METADATA_TO_CAMERA_DESCRIPTOR_BOUNDARY",
+      "v10_two_schema_adapters_passed": true
+    },
+    "Python 3.12.14": {
+      "camera_tensor_body_bytes_read": 0,
+      "camera_tensor_store_constructed": false,
+      "capture_counts": {
+        "batch_input": 2,
+        "cache_commit": 2
+      },
+      "distinct_upstream_metadata_paths": 10,
+      "event_summary": {
+        "event_count": 102,
+        "last_event_sha256": "67a58d988d205b6a371225e563b7a602537c18d976488e1143d9a43cd768409f"
+      },
+      "formal_paths_created": 0,
+      "image_body_files_opened": 0,
+      "legacy_v8_failure_reproduced": true,
+      "model_runs": 0,
+      "pixels_decoded": 0,
+      "selected_camera_tensor_descriptors": 32,
+      "status": "PASS_ACTUAL_S45_METADATA_TO_CAMERA_DESCRIPTOR_BOUNDARY",
+      "v10_two_schema_adapters_passed": true
+    }
+  },
+  "existing_test_summary": [
+    {
+      "python": "Python 3.13.0",
+      "entry": "camera_guard.py",
+      "returncode": 0,
+      "status": "PASS_SYNTHETIC_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_camera_guard.py.stdout",
+          "sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+          "bytes": 512
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_camera_guard.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "python": "Python 3.13.0",
+      "entry": "supervise_camera_guard.py",
+      "returncode": 0,
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_supervise_camera_guard.py.stdout",
+          "sha256": "dd4b1616844e854011985ea930f510040e4989ab48041af2241e4f8eae996b3c",
+          "bytes": 8233
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_supervise_camera_guard.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "python": "Python 3.13.0",
+      "entry": "synthetic_selftest.py",
+      "returncode": 0,
+      "status": "PASS_V10_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_synthetic_selftest.py.stdout",
+          "sha256": "88b1d369bca04ae2f90f7c0d88194a612bc207e322dbdfdd69e4774555244589",
+          "bytes": 8619
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py313_synthetic_selftest.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "python": "Python 3.12.14",
+      "entry": "camera_guard.py",
+      "returncode": 0,
+      "status": "PASS_SYNTHETIC_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_camera_guard.py.stdout",
+          "sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+          "bytes": 512
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_camera_guard.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "python": "Python 3.12.14",
+      "entry": "supervise_camera_guard.py",
+      "returncode": 0,
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_supervise_camera_guard.py.stdout",
+          "sha256": "7e513cfde779bf8f7cfcfe4dbefb092e39b0e46737a27dc348357de0f0e7307d",
+          "bytes": 8130
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_supervise_camera_guard.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "python": "Python 3.12.14",
+      "entry": "synthetic_selftest.py",
+      "returncode": 0,
+      "status": "PASS_V10_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+      "streams": {
+        "stdout": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_synthetic_selftest.py.stdout",
+          "sha256": "863529348a66671e1dc619cb7ab9927dbecb1f1beb2271c7a7962e7c87a44193",
+          "bytes": 8601
+        },
+        "stderr": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/review_v10_adversarial/py312_synthetic_selftest.py.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      }
+    }
+  ],
+  "preserved_v9_execution_boundary": "V9 worker returned zero and recorded 11 camera bodies / 1584 bytes, but its supervisor returned 2 and terminal authority remained false. This review reads only V9 report/diagnosis JSON and does not reopen those bodies, reuse V9 authorization, or reinterpret V9 as formal PASS.",
+  "formal_state_after_review": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V10.json": false,
+    "BINDING_REVIEW_V10.json": false,
+    "GOVERNANCE_ATTESTATION_V10.json": false
+  },
+  "nonblocking_observations": [
+    {
+      "id": "N1_SCOPE",
+      "observation": "Exact source and saved report metadata acceptance are established. Actual V10 requested-camera values, terminal success, rendered camera obedience, blind score, quality, method gain, causality and novelty remain untested."
+    },
+    {
+      "id": "N2_PLATFORM",
+      "observation": "Formal containment remains macOS Seatbelt/libproc dependent; memory is an observation-and-kill bound, not allocation reservation. External governance and complete supervisor stdout plus observed exit remain orchestration trust boundaries."
+    }
+  ],
+  "executed": false,
+  "c1_tensor_bodies_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "access_ledger": {
+    "formal_runner_calls": 0,
+    "formal_preflight_calls": 0,
+    "formal_runtime_capability_calls": 0,
+    "existing_synthetic_capability_probes_executed": true,
+    "new_security_or_attack_tests": 0,
+    "actual_v9_report_and_diagnosis_json_read": true,
+    "real_c1_s45_upstream_metadata_paths_read": 10,
+    "real_camera_tensor_body_bytes_read": 0,
+    "image_body_files_opened": 0,
+    "model_renderer_generation_calls": 0,
+    "formal_paths_created": 0,
+    "frozen_source_or_old_evidence_files_modified": 0
+  },
+  "authorization_effect": "SOURCE_REVIEW_ONLY. Require the other fresh nonauthor V10 source review, later distinct actual binding and independent binding review, external governance, and separate supervised launch. V9 source and consumed failure remain immutable without V10 authority."
+}

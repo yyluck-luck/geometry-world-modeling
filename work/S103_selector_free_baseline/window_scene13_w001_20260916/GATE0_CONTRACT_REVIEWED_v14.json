@@ -1,0 +1,257 @@
+{
+  "post_run": {},
+  "protocol": {
+    "author": "codex-root-20260916",
+    "baseline_acceptance_ref": null,
+    "budget": {
+      "candidate_count": 4,
+      "dtype": "fp32_params_cuda_autocast_fp32_saved_outputs",
+      "dtype_basis": "Matches the pinned official reference: VMemPipeline.__init__ defaults to torch.float32, app.py does not override it, and utils.do_sample applies torch.autocast(device_type=cuda, enabled=True) during sampling. Manual fp16 parameters were a divergence and are not used.",
+      "metric_definition_ref": {
+        "bytes": 1413,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/METRIC_DEFINITION_v1.json",
+        "sha256": "4f267658ec63c29977458fdf5be75a1f876cd9fc56b6c0cc51bb82cb6161af92"
+      },
+      "output_count": 4,
+      "rng_policy": "Python, NumPy, torch CPU and all CUDA seeds fixed to 42 before model construction",
+      "sampling_steps": 50,
+      "selection_k": 4,
+      "timeout_seconds": 3600
+    },
+    "calibration_scene_ids": [
+      "rgbd-scenes-v2-scene_13"
+    ],
+    "checkpoints": {
+      "clip": {
+        "bytes": 3944517836,
+        "path": "/home/yliutz/gwm_weights_20260915/open_clip_model.safetensors",
+        "sha256": "0084e75319a50ad85ef45377bad5bc38f2f58824459eb690048d51c9f8863be5"
+      },
+      "cut3r": {
+        "bytes": 3173761006,
+        "path": "/home/yliutz/gwm_weights_20260915/cut3r_512_dpt_4_64.pth",
+        "sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103"
+      },
+      "vae": {
+        "bytes": 334643276,
+        "path": "/home/yliutz/gwm_weights_20260915/diffusion_pytorch_model.safetensors",
+        "sha256": "a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+      },
+      "vmem": {
+        "bytes": 5056346672,
+        "path": "/home/yliutz/gwm_weights_20260915/vmem_weights.pth",
+        "sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+      }
+    },
+    "claim_boundary": "one exposed development baseline window; no held-out, comparison, method, geometry, or novelty claim",
+    "datasets": {
+      "rgbd-scenes-v2": {
+        "adapter_author": "codex-root-20260916",
+        "adapter_ref": {
+          "bytes": 13373,
+          "path": "/home/yliutz/geometry-world-modeling/work/S102_gate0_3dmatch/adapter_v1/rgbd_scenes_v2.py",
+          "sha256": "8be9af8716bb5452963e06e67bcd31704611d13c75b5d7c96e5cdf1bfcdd8d24"
+        },
+        "adapter_review_ref": {
+          "bytes": 11476,
+          "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/reviews/ADAPTER_REVIEW_20260917_CLAUDE_V3.json",
+          "sha256": "eb520bc353a03d217df95646b3b86763c00d9b07b64ee5a550fc682e238ce6b2"
+        },
+        "camera": {
+          "K": [
+            [
+              540.021232,
+              0.0,
+              320.0
+            ],
+            [
+              0.0,
+              540.021232,
+              240.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "calibration_status": "dataset_declared_intrinsics_no_independent_calibration",
+          "calibration_status_basis": "Values transcribed from the official RGB-D Scenes v2 distribution and cross-checked against the adapter source; no independent calibration was performed by this project and the poses are RGB-D Mapping estimates, not motion-capture ground truth (review F-5).",
+          "pixel_center_convention": "0.5 pixel centres; declared development compatibility convention",
+          "pose_time_association": "same normalized frame id; RGB-D Mapping estimated C2W; no hardware timestamp claim",
+          "resize_crop_K_rule": "640x480 area-resize to 768x576 then centre crop x=[96,672); K left-multiplied by matching affine",
+          "rgb_depth_registration": "registered"
+        },
+        "depth": {
+          "interpretation": "optical_axis_z",
+          "invalid_values": [
+            "raw uint16 value 0"
+          ],
+          "raw_to_metres_divisor": 1000.0
+        }
+      }
+    },
+    "development_data_exposed": true,
+    "effective_config_ref": {
+      "bytes": 879,
+      "path": "/home/yliutz/geometry-world-modeling/work/S102_gate0_3dmatch/adapter_v1/sources/vmem_inference.yaml",
+      "sha256": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3"
+    },
+    "expected_config": {
+      "model.context_num_frames": 4,
+      "model.height": 576,
+      "model.inference_num_steps": 50,
+      "model.num_frames": 8,
+      "model.target_num_frames": 4,
+      "model.width": 576,
+      "runtime.autoencoder_chunk_size": 1,
+      "runtime.torch_num_interop_threads": 1,
+      "runtime.torch_num_threads": 8,
+      "sampling.cfg": 2.0,
+      "sampling.cfg_min": 1.2,
+      "sampling.decoding_t": 1,
+      "sampling.guider_types": 1,
+      "seed": 42
+    },
+    "formal_execution": {
+      "bundle_preparer_ref": {
+        "bytes": 8298,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/prepare_formal_bundle_s103.py",
+        "sha256": "db1d523334dbca601a30e3bb0bec4c174a8b1b3f8169bb5f321face4f57a9972"
+      },
+      "bundle_root": "/home/yliutz/gwm_formal_bundle_s103_scene13_w001_v7",
+      "formal_chain_regression_receipt_ref": {
+        "bytes": 4309,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/FORMAL_CHAIN_SOFTWARE_RECEIPT_20260917_v6.json",
+        "sha256": "acd8c61451316753f9311dcb8360ea5fec33eede057e78fcd32eb27b39a1d8e5"
+      },
+      "generic_launcher_ref": {
+        "bytes": 1437,
+        "path": "/home/yliutz/geometry-world-modeling/work/remote_tmux/launch_slurm_in_tmux.sh",
+        "sha256": "6229776dd38800012fa65860e904a22f9a46a59d0c5d2d8b42a7b86be07a68f7"
+      },
+      "launch_guard_ref": {
+        "bytes": 8816,
+        "path": "/home/yliutz/geometry-world-modeling/work/remote_tmux/launch_gate0_v2_in_tmux.sh",
+        "sha256": "bf1745616c6136adc2836e5128ac1e7e55337f85e78c8efa42a0edabc1f6cb73"
+      },
+      "predictor_ref": {
+        "bytes": 15574,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/predictor_s103.py",
+        "sha256": "5e95d79ae192bdcb3313d5f452a23a72501fb90c5f97acf42046f76ee1d1cbe9"
+      },
+      "sbatch_ref": {
+        "bytes": 3914,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/run_s103_vmem_base.slurm",
+        "sha256": "7e4fb77ae8aaba0f70cdb14e2ea10d89c6432718a7229d9385dd56fb183e6aa5"
+      },
+      "sealer_ref": {
+        "bytes": 10711,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/seal_predictions_s103.py",
+        "sha256": "73f76c61266cc7f82025a5ac70c2a8a679b60baf863ef247d32c273b18b9db18"
+      },
+      "validator_ref": {
+        "bytes": 45794,
+        "path": "/home/yliutz/geometry-world-modeling/work/S102_gate0_tum/validate_gate0_v2.py",
+        "sha256": "0ba128498cded42ea25542a938504f3e89e15cd6c4006c02988454e56c923256"
+      }
+    },
+    "future_modality_disclosure": {
+      "command_camera_frame_ids": [
+        "60",
+        "75",
+        "90",
+        "105"
+      ],
+      "future_modalities_withheld": [
+        "future_rgb",
+        "future_depth"
+      ],
+      "note": "The four command_camera C2W matrices are the dataset's estimated poses for the four target frames, i.e. the future-pose modality is an INPUT to the predictor. Path-level isolation is not information-level isolation for pose. Only future RGB and future depth are withheld; the frozen metric scores RGB only, so pose is never both input and outcome. This precludes any blind-pose or held-out claim (review F-2).",
+      "target_pose_gt_provided_as_command": true
+    },
+    "heldout_exposure_review_ref": null,
+    "isolation": {
+      "execution_boundary_id": "s103-scene13-w001-vmem-base-v5-official-fp32-alignment",
+      "predictor_root": "/home/yliutz/gwm_stages/S103_SCENE13_W001_20260916",
+      "receipt_ref": {
+        "bytes": 3264,
+        "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/EXACT_ISOLATION_RECEIPT_v5_594089.json",
+        "sha256": "4cb8991a13096689c15ea590e55ddee92715c413fc8ab501c330f566a6b24261"
+      }
+    },
+    "predictor_inputs_ref": {
+      "bytes": 5688,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/predictor_inputs.json",
+      "sha256": "4bda6d3ded1b228567f291c1b7973a1e529220c8562abb276a5af2c7bca7b11e"
+    },
+    "predictor_wrapper_ref": {
+      "bytes": 15574,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/predictor_s103.py",
+      "sha256": "5e95d79ae192bdcb3313d5f452a23a72501fb90c5f97acf42046f76ee1d1cbe9"
+    },
+    "reviewer_identity_policy_id": "s103-canonical-reviewers-v1",
+    "run_id": "S103-VMemBase-scene13-w001-v1",
+    "runtime_binding_ref": {
+      "bytes": 4235,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/RUNTIME_BINDING_v5.json",
+      "sha256": "456f5ec4ddb31c5f295368817aaeec4ff75420eab09ac416cefd74c8ea5b0328"
+    },
+    "scope": "development_baseline",
+    "scorer_inputs_ref": {
+      "bytes": 5607,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/scorer_inputs.json",
+      "sha256": "46a2806ff663bfe17b9a99ac7bc3d1cdb2d1d05c1b98497c54db484abd69954e"
+    },
+    "scorer_ref": {
+      "bytes": 16866,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/scorer_s103.py",
+      "sha256": "18e82e478215789e7d19d17541e10cad1e32b4bf886bb8a1eed69de74a5298f4"
+    },
+    "source_manifest_ref": {
+      "bytes": 43042,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/window_scene13_w001_20260916/SOURCE_MANIFEST_v1.json",
+      "sha256": "53a9388b7c61800b71fa135ed4afedf8f0a0df93f308d74e664b840d73cad595"
+    },
+    "status": "FROZEN",
+    "target_camera_policy": "predeclared_command",
+    "uses_cut3r": true,
+    "vae_variant": "original_verified",
+    "validator_ref": {
+      "bytes": 45794,
+      "path": "/home/yliutz/geometry-world-modeling/work/S102_gate0_tum/validate_gate0_v2.py",
+      "sha256": "0ba128498cded42ea25542a938504f3e89e15cd6c4006c02988454e56c923256"
+    },
+    "verifier_ref": {
+      "bytes": 8379,
+      "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/verify_s103_scores.py",
+      "sha256": "bb1668fefb312cc151ad9db3a05274bd86c5aa0096251fd550e192cc442178b8"
+    },
+    "windows": [
+      {
+        "chronological": true,
+        "dataset_id": "rgbd-scenes-v2",
+        "history_ids": [
+          "0",
+          "15",
+          "30",
+          "45"
+        ],
+        "scene_id": "rgbd-scenes-v2-scene_13",
+        "sequence_id": "seq-01",
+        "target_ids": [
+          "60",
+          "75",
+          "90",
+          "105"
+        ]
+      }
+    ]
+  },
+  "review_ref": {
+    "bytes": 17164,
+    "path": "/home/yliutz/geometry-world-modeling/work/S103_selector_free_baseline/reviews/PROTOCOL_REVIEW_20260917_HUMAN_V14.json",
+    "sha256": "31bac35bfcce0d01b45d5c52b307e6e1aaec4d58c6fafed6d3587a37ae1db4a4"
+  },
+  "schema": "gwm-gate0-staged-v2"
+}

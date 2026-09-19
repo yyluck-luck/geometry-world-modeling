@@ -1,0 +1,139 @@
+{
+  "schema": "s42-b0-blind-scorer-adversarial-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "BLOCKED_BEFORE_B0_EXECUTION",
+  "completed_utc": "2026-09-07T15:00:16Z",
+  "author_role": "/root",
+  "reviewer_role": "/root/gemini_third_review_verifier",
+  "review_mode": "second_independent_read_only_adversarial_static_review",
+  "executed": false,
+  "reviewed_identities": {
+    "scorer": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/score_b0_blind.py",
+      "expected_sha256": "00974932a2efefb6833b87037fc95f3550f2c2c1cf9b59425f85e58c42c34a67",
+      "actual_sha256": "00974932a2efefb6833b87037fc95f3550f2c2c1cf9b59425f85e58c42c34a67"
+    },
+    "contract": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORING_CONTRACT.json",
+      "expected_sha256": "52ba3cc2c7390b21c4b35b45d9dc53a7ed1ddbaf2b4b5f5ae71a842ea992878a",
+      "actual_sha256": "52ba3cc2c7390b21c4b35b45d9dc53a7ed1ddbaf2b4b5f5ae71a842ea992878a"
+    },
+    "rebase_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_REBASE_V3_3_RECEIPT.json",
+      "actual_sha256": "321c9a84da05cb9a2c6e6102b150c12c12a68e6921c4bdd2148a2f2517adb325"
+    },
+    "preregistration_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "preregistration_receipt_sha256": "5336c838de1714a6ab1f65be56312d21148d9dc6114162a7ee59497f3bbb2cf7",
+    "readback_result_review_sha256": "ef56ef5e49da7f3da5df873b92c5bc3f16197c2c460eaf4b2519289db787f6d5"
+  },
+  "blocking_findings": [
+    {
+      "id": "ADV-B0-001-CONCURRENT-ATTEMPTS",
+      "severity": "BLOCKING",
+      "title": "Receiptless in-progress attempts do not block a second scoring process",
+      "evidence": [
+        "score_b0_blind.py:151-171 scans prior B0_score_attempt_NN directories but checks technically_valid only when receipt.json already exists. A matching directory with no receipt is accepted as a completed position in the sequence.",
+        "main() creates the new attempt directory at line 803 before score() begins, while score() writes receipt.json only in finally at lines 778-783.",
+        "Process A can create attempt_01 and begin scoring; before its receipt exists, process B sees attempt_01 as a valid sequence prefix, creates attempt_02, and begins the same frozen score. Both can later write technically_valid=true receipts.",
+        "There is an additional report-before-receipt window at lines 741-750. A report may become visible while no prior technically_valid receipt exists, allowing a second attempt to start after output-driven inspection or after process A is interrupted."
+      ],
+      "impact": "The implementation does not enforce B0_SCORING_CONTRACT.json:141-146 or PROTOCOL.md:70 and :75. More than one technically valid B0 attempt can be produced, and output-driven rerunning remains mechanically possible despite the claimed first-valid-attempt rule.",
+      "minimum_strict_fix": "Use an atomic parent-level run lock or equivalent single-owner claim held from before the attempt scan through the terminal receipt seal. Treat every earlier receiptless or explicitly in-progress attempt as blocking until a separate retained technical-failure adjudication exists. Recheck all prior attempts immediately before declaring the current result technically valid. Preserve every old directory and never infer retry permission merely from a missing receipt."
+    },
+    {
+      "id": "ADV-B0-002-HASH-TO-MEMMAP-TOCTOU",
+      "severity": "BLOCKING",
+      "title": "Recorded tensor hashes are not bound to the bytes actually consumed by memmap scoring",
+      "evidence": [
+        "tensor_path() at lines 454-490 hashes a tensor by pathname, rereads it for the descriptor digest, records the pre-mapping body SHA, and returns only the pathname and that SHA.",
+        "array() at lines 493-501 subsequently opens the pathname again through np.memmap. No file descriptor or immutable byte buffer from the verified read is carried into the scored array.",
+        "score_pixels() at lines 612-620 records the earlier body_sha values and uses them for the copy guard, while lines 621-629 compute MSE from the later mutable memmaps.",
+        "There is no final fstat, stat-signature seal, or rehash of all camera/K/pixel tensors after the comparisons and before report/receipt completion. A concurrent pathname replacement before memmap or an in-place modification after mapping can therefore separate reported identity/copy-guard hashes from the bytes used by the metric."
+      ],
+      "impact": "A score can be attributed to the frozen descriptor and body SHA even though different bytes influenced camera guards, the copy guard, or the strict MSE threshold. This breaks the required identity-to-metric chain and permits a race-controlled event result.",
+      "minimum_strict_fix": "Hash and score the same opened object. For these bounded arrays, read exact verified bytes from one already-open descriptor into immutable buffers, hash those buffers, and construct arrays from those same buffers; alternatively retain verified descriptors and perform a complete fstat plus body rehash closure for every used file before sealing the report. The copy guard must use hashes of the exact bytes used in MSE, and any changed signature/body must produce a retained technical-invalid receipt."
+    },
+    {
+      "id": "ADV-B0-003-MANIFEST-DESCRIPTOR-REGISTRY",
+      "severity": "BLOCKING",
+      "title": "Event tensor descriptors are not compared with the frozen archive manifest registry",
+      "evidence": [
+        "score_b0_blind.py:680-696 reads the frozen archive manifest but uses only status fields and the events.jsonl file entry. It never loads archive_manifest['tensor_descriptors'] for numeric reads.",
+        "tensor_path() uses the initially empty process-global VERIFIED_TENSOR_DESCRIPTORS at lines 487-489. The first descriptor presented for a resolved blob path becomes authoritative merely because it was first seen during this process.",
+        "Body SHA, descriptor-plus-body SHA, and sidecar equality are checked, but there is no requirement that desc['blob'] be an exact registry key and dict(desc) equal the manifest's registered descriptor in full.",
+        "B0_SCORING_CONTRACT.json:70-75 declares complete descriptor agreement for each canonical blob path, and B0_REBASE_V3_3_RECEIPT.json:35-38 records canonical_blob_complete_descriptor_registry_checked=true. The source does not implement that declared closure."
+      ],
+      "impact": "The source cannot establish that the event-supplied descriptor used for scoring is the exact authoritative descriptor registered by the frozen archive manifest. Its rebase receipt and scoring contract overstate the implemented gate.",
+      "minimum_strict_fix": "Validate archive_manifest.tensor_descriptors as an exact built-in mapping and pass it through every array read. Before opening a body, require desc['blob'] to be an exact registry key, require dict(desc) == registry[desc['blob']], and require the canonical content-addressed blob and sidecar paths. Retain all current provenance, body, descriptor, sidecar, dtype, shape, byte-order, size, containment, and duplicate-conflict checks."
+    },
+    {
+      "id": "ADV-B0-004-BLIND-ATTESTATION-IDENTITY",
+      "severity": "BLOCKING",
+      "title": "The attestation gate accepts an unscoped or modified template-like document",
+      "evidence": [
+        "verify_blindness_attestation() at lines 217-230 accepts any caller-selected canonical file whose content has the requested SHA and contains the expected schema/status, manifest SHA, three false booleans, and a nonempty role.",
+        "It does not require manifest_path to equal the frozen manifest, does not require a nonempty timezone-aware UTC created_utc preceding scoring, and does not reject B0_BLINDNESS_ATTESTATION_TEMPLATE.json as the supplied path.",
+        "Consequently a copied document with missing/null time and wrong or absent manifest_path, or a modified template at the template path, can pass the implemented gate.",
+        "The stronger frozen conditions are stated in B0_REBASE_AUDIT_AFTER_READBACK_V3_3.md:132 and :174-185 but are absent from the scorer and contract's executable validation."
+      ],
+      "impact": "The terminal receipt may claim that post-score human viewing is allowed after accepting a document that does not establish when, for which frozen manifest path, or as which new immutable attestation the blindness statement was made.",
+      "minimum_strict_fix": "Require a canonical new direct-child attestation path distinct from the template; bind exact manifest_path, manifest SHA, scorer SHA, contract SHA, and preregistration identities; require a parseable nonempty timezone-aware UTC created_utc that precedes scoring; retain the exact false booleans, nonempty role, caller-bound SHA, and final receipt binding. Do not create or sign the attestation as part of the source revision."
+    }
+  ],
+  "adversarial_checks_that_passed": {
+    "actual_scorer_and_contract_hashes_match_requested_pins": true,
+    "ordinary_archived_dict_cannot_masquerade_as_TensorDescriptor": true,
+    "TensorDescriptor_plain_dict_copy_is_rejected_by_exact_type_gate": true,
+    "list_and_tuple_decode_to_distinct_container_types": true,
+    "bool_cannot_pass_as_exact_int_scalar": true,
+    "duplicate_resolved_blob_descriptors_conflict_if_full_mappings_differ_after_first_seen": true,
+    "upstream_generation_and_readback_receipt_review_paths_are_fixed": true,
+    "old_failed_readback_attempt01_pins_are_absent": true,
+    "generation_execution_01_is_correctly_retained_as_the_generation_run": true,
+    "ROI_regions_match_frozen_M_outer4": true,
+    "ROI_pixel_count_is_147456": true,
+    "ROI_RGB_scalar_count_is_442368": true,
+    "primary_pair_is_ID0_ID8": true,
+    "diagnostic_pairs_are_1_7_2_6_3_5": true,
+    "MSE_uses_float64_after_uint8_divide_by_255": true,
+    "event_uses_strict_unrounded_MSE_greater_than_0_01": true,
+    "MSE_equal_to_0_01_is_not_an_event": true,
+    "ROI_pair_and_threshold_have_no_runtime_selection_arguments": true,
+    "copy_guard_boolean_rule_matches_the_frozen_two_degenerate_cases": true,
+    "requested_camera_guard_is_labeled_as_condition_only": true,
+    "visual_camera_obedience_remains_not_evaluated": true,
+    "B0_result_remains_single_row_and_cohort_incomplete": true,
+    "memory_mean_method_gain_or_novelty_attribution_is_prohibited": true
+  },
+  "notes_on_passed_checks": {
+    "tensor_provenance": "decode_tree creates TensorDescriptor only for a raw kind=tensor node, while raw kind=dict becomes an exact built-in dict. tensor_path requires exact type TensorDescriptor, so an archived descriptor-shaped ordinary dict and a plain dict copy both fail closed.",
+    "copy_guard_boundary": "The logical condition at score_b0_blind.py:618-620 correctly rejects either all ID1-ID8 bodies equal to ID0 or all eight generated bodies mutually equal. ADV-B0-002 remains blocking because those hashes are not guaranteed to describe the later memmap bytes actually scored.",
+    "camera_boundary": "The report text limits the guard to archived requested c2w/K and explicitly leaves visual camera compliance without a frozen proxy. No rendered-pixel obedience claim is made by the reviewed source.",
+    "immutability_boundary": "Changing REGIONS, PAIRS, MSE_THRESHOLD, normalization, or interpretation requires changing the scorer SHA and obtaining a new source review. The reviewed version exposes no CLI override for these values."
+  },
+  "required_before_rereview": [
+    "Close the single-attempt concurrency and report-before-receipt retry race.",
+    "Bind recorded tensor identities to the exact immutable bytes used by camera checks, copy guard, and MSE, with a final closure check.",
+    "Compare every scored tensor descriptor against the frozen archive manifest registry in full.",
+    "Strengthen the real pre-score attestation path, manifest, timestamp, and template-distinction checks.",
+    "Issue new scorer, contract, and rebase-receipt SHA-256 identities and obtain new independent primary and adversarial reviews."
+  ],
+  "execution_boundary": {
+    "scorer_imported_or_executed": false,
+    "B0_score_runs": 0,
+    "readback_model_generation_renderer_GA_gate_or_scoring_runs": 0,
+    "s40_generated_images_or_montages_viewed": false,
+    "s40_result_arrays_decoded_or_mapped": false,
+    "tensor_blob_or_image_payload_bodies_read": false,
+    "network_requests": 0,
+    "scorer_or_contract_modified_by_reviewer": false,
+    "canonical_research_ledger_modified": false,
+    "review_artifact_written": true,
+    "allowed_operations": [
+      "Read scorer, contract, preregistration, rebase, readiness, and small JSON/text evidence.",
+      "Recompute SHA-256 for source, contract, rebase receipt, preregistration files, and readback result-review JSON.",
+      "Inspect filesystem names for existing B0 attempt and review artifacts without opening generated tensor or image payloads."
+    ]
+  },
+  "next_gate": "B0 scoring remains forbidden. Revise the four blocking mechanisms without changing the frozen ROI, pair, metric, threshold, copy rule, camera tolerance, or claim limits; then bind new exact identities and repeat both independent source reviews before creating a truthful blindness attestation."
+}

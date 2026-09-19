@@ -1,0 +1,538 @@
+{
+  "schema_version": "1.0",
+  "branch": "相邻领域与反证：融合、错误关联、位姿与记忆更新",
+  "project": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling",
+  "research_brief": "docs/LITERATURE_RESEARCH_BRIEF_V2.md",
+  "scope_note": "独立先广搜后窄搜。8项核心证据，2项背景补充。只有作者原文/官方论文库/作者项目用于方法主张；未读取S6结果，未改实验、协议或主研究记忆。核验不是本地复现。",
+  "queries": [
+    {
+      "round": 1,
+      "time_utc": "2026-09-05T15:56:55Z",
+      "queries": [
+        "surfel TSDF fusion uncertain camera poses data association failure probabilistic fusion",
+        "learned online 3D reconstruction memory fusion Spann3R uncertainty 2025 2026",
+        "ElasticFusion RoutedFusion NeuralFusion weighted average depth fusion errors"
+      ],
+      "outcome": "发现经典概率融合、EM-Fusion、DFusion、Spann3R及STream3R；二手博客仅作线索。"
+    },
+    {
+      "round": 2,
+      "time_utc": "2026-09-05T15:57:18Z",
+      "queries": [
+        "\"ElasticFusion: Dense SLAM Without A Pose Graph\" Whelan fusion weighted average",
+        "\"NeuralFusion: Online Depth Fusion in Latent Space\" Weder",
+        "\"DFusion: Denoised TSDF Fusion of Multiple Depth Maps with Sensor Pose Noises\"",
+        "\"BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Reintegration\""
+      ],
+      "outcome": "按首轮方法名查完整标题与作者，并定位原始论文。"
+    },
+    {
+      "round": 2,
+      "time_utc": "2026-09-05T15:57:30Z",
+      "queries": [
+        "\"3D Reconstruction with Spatial Memory\" Wang Agapito Spann3R",
+        "\"STream3R: Scalable Sequential 3D Reconstruction with Causal Transformer\"",
+        "\"Probabilistic Surfel Fusion for Dense LiDAR Mapping\" Park",
+        "\"EM-Fusion: Dynamic Object-Level SLAM With Probabilistic Data Association\" Strecke"
+      ],
+      "outcome": "确认标题/作者；Spann3R为3DV2025，不能沿用搜索博客误写3DV2026。"
+    },
+    {
+      "round": "targeted verification",
+      "time_note": "执行于前述第二轮之后；该批未单独读时钟，不伪造秒级查询时刻。",
+      "queries": [
+        "\"DFusion\" \"Zhaofeng Niu\" \"Fujimoto\" Sensors 2022",
+        "\"ElasticFusion\" \"weighted average\" \"4.3\"",
+        "\"BundleFusion\" \"Reintegration\" pdf Dai"
+      ],
+      "outcome": "元数据与原文交叉核验；作者DFusion活动列表漏一作者，采用论文与PubMed五人完整名单。"
+    },
+    {
+      "round": "blind-spot follow-up",
+      "time_utc": "2026-09-05 15:59:46 UTC",
+      "queries": [
+        "\"FILT3R\" \"2603.18493\"",
+        "\"TTT3R\" CUT3R state update",
+        "\"ElasticFusion\" \"Surfel Fusion\" \"weight\" site:thomaswhelan.ie",
+        "\"DFusion\" \"Limitations\" \"pose\""
+      ],
+      "outcome": "父分支提示后补查两项直接针对CUT3R状态更新的2026工作，完成标题作者与全文核验；优先列入核心，不再无限扩张。"
+    }
+  ],
+  "records": [
+    {
+      "id": "F01",
+      "core": true,
+      "title": "ElasticFusion: Dense SLAM Without A Pose Graph",
+      "authors": [
+        "Thomas Whelan",
+        "Stefan Leutenegger",
+        "Renato F. Salas-Moreno",
+        "Ben Glocker",
+        "Andrew J. Davison"
+      ],
+      "year": 2015,
+      "venue": "Robotics: Science and Systems (RSS)",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://thomaswhelan.ie/",
+        "claim_url": "https://thomaswhelan.ie/Whelan15rss.pdf",
+        "locator": "§III; §IV–VI; §VII",
+        "read_depth": "作者PDF下载成功并抽取全文",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "RGB-D → 带位置/法向/颜色/权重/半径的surfels；活动/非活动窗口；frame-to-model配准；局部和全局回环触发非刚性地图变形。",
+      "supported_claims": [
+        "经典surfels已维护权重并采用移动平均融合；简单均值不是新机制。",
+        "融合并非孤立动作，系统同步处理配准、回环和模型形变。"
+      ],
+      "conditions": "房间尺度RGB-D密集SLAM；实验评价重建和轨迹。",
+      "limitations": "本证据不能证明平均能修复错误关联，也不支持任何生成质量或历史选帧结论。RSS版与2016 IJRR扩展版须分开。",
+      "relations": [
+        {
+          "to": "F05",
+          "relation": "ElasticFusion调整surfel地图，BundleFusion修正位姿后撤销并重融合TSDF。"
+        }
+      ],
+      "project_implication": "若仅比较first-write与frame_mean，应标为既有融合思想的组件诊断；不能称置信度、过滤或回环从未存在。",
+      "evidence_levels": [
+        "explicit_geometry_fusion",
+        "pose_tracking",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F02",
+      "core": true,
+      "title": "Probabilistic Surfel Fusion for Dense LiDAR Mapping",
+      "authors": [
+        "Chanoh Park",
+        "Soohwan Kim",
+        "Peyman Moghadam",
+        "Clinton Fookes",
+        "Sridha Sridharan"
+      ],
+      "year": 2017,
+      "venue": "ICCV Workshops",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://openaccess.thecvf.com/content_ICCV_2017_workshops/w35/html/Park_Probabilistic_Surfel_Fusion_ICCV_2017_paper.html",
+        "claim_url": "https://openaccess.thecvf.com/content_ICCV_2017_workshops/papers/w35/Park_Probabilistic_Surfel_Fusion_ICCV_2017_paper.pdf",
+        "locator": "§3.2; §4, Fig.3; §4.1–4.3; §5",
+        "read_depth": "CVF PDF下载并读取方法全文",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "稀疏ellipsoid地图做ICP定位，稠密disk地图做融合；位置/法向不确定性；octree候选后用几何/不确定性对应，再Bayesian更新。",
+      "supported_claims": [
+        "球形搜索半径过小会漏匹配，过大则降低表面分辨率。",
+        "入射角、距离和邻域退化使位置及法向噪声具有方向性。"
+      ],
+      "conditions": "有扫描线结构的LiDAR；模拟与真实数据；估计位姿后融合。",
+      "limitations": "LiDAR噪声模型不能直接当作CUT3R误差分布；文中位置协方差主要为测量噪声变换，不能说其完整传播任意相机位姿后验。",
+      "relations": [
+        {
+          "to": "F03",
+          "relation": "Park处理surfel对应与分辨率，EM-Fusion处理像素到不同对象/背景的软关联。"
+        }
+      ],
+      "project_implication": "同一像素格/搜索球内的两个点不能由接近程度本身 断言属于同一物理表面；此处是研究推论，需本地边界/遮挡分组验证。",
+      "evidence_levels": [
+        "data_association",
+        "uncertainty_fusion",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F03",
+      "core": true,
+      "title": "EM-Fusion: Dynamic Object-Level SLAM With Probabilistic Data Association",
+      "authors": [
+        "Michael Strecke",
+        "Jörg Stückler"
+      ],
+      "year": 2019,
+      "venue": "ICCV",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://emfusion.is.tue.mpg.de/",
+        "claim_url": "https://openaccess.thecvf.com/content_ICCV_2019/papers/Strecke_EM-Fusion_Dynamic_Object-Level_SLAM_With_Probabilistic_Data_Association_ICCV_2019_paper.pdf",
+        "locator": "Fig.1; §3.1–3.3; Fig.3; §4 Table3",
+        "read_depth": "CVF PDF下载成功，读取方法、消融、失败条件",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "对象/背景各自TSDF；EM估计像素所属对象概率；关联概率进入直接SDF配准与地图融合权重；实例分割初始化对象。",
+      "supported_claims": [
+        "去除关联概率时，动态物体深度可错误写进背景，形成轨迹伪影（Fig.1）。",
+        "Room4消融对大部分对象影响较小，rocking Horse的AT-RMSE为9.12cm（无关联）与3.57cm（完整方法），不能称对所有对象均大幅改善。"
+      ],
+      "conditions": "动态刚体对象RGB-D SLAM；Room4消融为合成场景。",
+      "limitations": "大面积未检测物体仍可能导致失败；对象探测/分割是条件；不是静态学习点图或视频生成实验。",
+      "relations": [
+        {
+          "to": "F01",
+          "relation": "在均值/加权更新前先解决关联；方法不同，不能只比较融合后误差。"
+        }
+      ],
+      "project_implication": "最有力的反例是错误表面归属会污染地图；项目目前需要独立测量表面/来源关联，不能从深度MAE自动推断。",
+      "evidence_levels": [
+        "causal_component_ablation",
+        "object_association",
+        "pose_tracking",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F04",
+      "core": true,
+      "title": "DFusion: Denoised TSDF Fusion of Multiple Depth Maps with Sensor Pose Noises",
+      "authors": [
+        "Zhaofeng Niu",
+        "Yuichiro Fujimoto",
+        "Masayuki Kanbara",
+        "Taishi Sawabe",
+        "Hirokazu Kato"
+      ],
+      "year": 2022,
+      "venue": "Sensors 22(4):1631",
+      "doi": "10.3390/s22041631",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://pubmed.ncbi.nlm.nih.gov/35214532/",
+        "claim_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8879644/",
+        "locator": "Abstract; §1 Fig.1; fusion/denoising method description",
+        "read_depth": "原文索引返回长段方法内容；直接PMC访问遇到验证页/SSL失败，未完成本地全文下载",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "带位姿的depth先经RoutedFusion式模块形成TSDF，再用3D U-Net式模块去噪；训练同时加入深度与位姿扰动。",
+      "supported_claims": [
+        "融合中位姿旋转/平移误差是区别于深度噪声的误差源。",
+        "已有学习方法专门尝试同时抑制两类噪声；不能宣称此前只关注深度。"
+      ],
+      "conditions": "有GT深度/位姿的合成监督及真实场景测试；声明限于本次实际可读的原文方法/摘要。",
+      "limitations": "不沿用作者的first/earliest新颖性措辞；未核本次不可读的具体表格数值；不能等同恢复正确位姿或正确来源身份。",
+      "relations": [
+        {
+          "to": "F05",
+          "relation": "DFusion在融合体上学习去噪，BundleFusion直接重新估计位姿并撤销旧融合。"
+        }
+      ],
+      "project_implication": "至少把深度误差、相机变换误差、错误匹配分成不同干预，否则归因不清。",
+      "evidence_levels": [
+        "noise_intervention",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F05",
+      "core": true,
+      "title": "BundleFusion: Real-Time Globally Consistent 3D Reconstruction Using On-the-Fly Surface Reintegration",
+      "authors": [
+        "Angela Dai",
+        "Matthias Nießner",
+        "Michael Zollhöfer",
+        "Shahram Izadi",
+        "Christian Theobalt"
+      ],
+      "year": 2017,
+      "venue": "ACM Transactions on Graphics 36(3), Article 24",
+      "doi": "10.1145/3054739",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://graphics.stanford.edu/projects/bundlefusion/",
+        "claim_url": "https://vcai.mpi-inf.mpg.de/projects/MZ/Papers/arXiv2016_BF/paper.pdf",
+        "alternate_claim_url": "https://pure.mpg.de/rest/items/item_2351932_2/component/file_2351931/content",
+        "locator": "Abstract; system overview; §4 Global Pose Alignment; surface reintegration",
+        "read_depth": "作者项目+论文原文索引核验；非本地运行",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "全历史稀疏/稠密对应优化相机位姿；RGB-D帧在旧位姿de-integrate，再按更新位姿re-integrate到体积。",
+      "supported_claims": [
+        "持续重估位姿可以与撤销旧融合配合，而不是仅在当前位置多平均一次。"
+      ],
+      "conditions": "同步标定RGB-D流；面向扫描、重建和跟踪；作者项目提供场景数据及校准。",
+      "limitations": "本项目未运行该系统；其生成地图/轨迹指标不能替代来源选帧或生成质量。",
+      "relations": [
+        {
+          "to": "F01",
+          "relation": "与ElasticFusion的地图形变代表两种不同的一致性修正手段。"
+        }
+      ],
+      "project_implication": "如果根因在位姿，位置平均未必够；可先做冻结预测pose/替代pose的诊断，而非直接发明复杂gate。",
+      "evidence_levels": [
+        "pose_optimization",
+        "reversible_fusion",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F06",
+      "core": true,
+      "title": "3D Reconstruction with Spatial Memory",
+      "short_name": "Spann3R",
+      "authors": [
+        "Hengyi Wang",
+        "Lourdes Agapito"
+      ],
+      "year": 2025,
+      "first_preprint_year": 2024,
+      "venue": "3DV 2025",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://arxiv.org/abs/2408.16061",
+        "claim_url": "https://arxiv.org/html/2408.16061",
+        "release_url": "https://github.com/HengyiWang/spann3r",
+        "locator": "§3; §4.3 Table3/Fig.6; §4.4; appendix Table4",
+        "read_depth": "arXiv HTML全文方法/消融/局限；官方release notes核版本",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "DUSt3R系图像编码/双decoder；外部working+long-term spatial memory；融合几何与视觉特征供后续pointmap读出；attention clipping。",
+      "supported_claims": [
+        "Table3检验长期记忆及attention clipping；小attention权重遇到几何离群值仍可能干扰读出。",
+        "持续向前、多房间、闭环时可能失败；§4.4建议更结构化记忆或BA校正几何后写回。",
+        "附录Table4比较offline重建的view-selection置信度函数。"
+      ],
+      "conditions": "论文版主要5帧224训练；官方2025-02-25 v1.01另以10帧/15数据集训练，不能将版本数字混用。",
+      "limitations": "选view用于重建过程，不能当作生成模型历史参考检索；长期记忆有益也不等于不再漂移。",
+      "relations": [
+        {
+          "to": "F07",
+          "relation": "Spann3R改外部feature memory；TTT3R改CUT3R内部recurrent state写入幅度。"
+        }
+      ],
+      "project_implication": "已有几何参与记忆检索和写回思想；差异须落实到显式点-来源关联与下游参考选择的可测机制。",
+      "evidence_levels": [
+        "memory_ablation",
+        "reconstruction_view_selection",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F07",
+      "core": true,
+      "title": "TTT3R: 3D Reconstruction as Test-Time Training",
+      "authors": [
+        "Xingyu Chen",
+        "Yue Chen",
+        "Yuliang Xiu",
+        "Andreas Geiger",
+        "Anpei Chen"
+      ],
+      "year": 2026,
+      "first_preprint_year": 2025,
+      "venue": "ICLR 2026",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://arxiv.org/abs/2509.26645",
+        "claim_url": "https://arxiv.org/html/2509.26645",
+        "conference_url": "https://openreview.net/pdf?id=aMs6FtNaY5",
+        "code_url": "https://github.com/Inception3D/TTT3R",
+        "locator": "§3.3 Eq.7–8; §4; §5; Appendix A.1–A.3",
+        "read_depth": "原文HTML与官方项目/代码元数据；已读方法/评测/局限/附录消融",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "冻结CUT3R，用state-query/image-key匹配统计的sigmoid导出每token更新率；前向时控制候选state与旧state的混合，无测试时模型参数微调。",
+      "supported_claims": [
+        "置信度引导的CUT3R状态更新已有非常直接的先例。",
+        "作者明确仅缓解遗忘；附录微调改善pose却降低depth，单个指标进步不可推广。"
+      ],
+      "conditions": "主要为公开CUT3R 512 DPT 4–64-view权重；长序列depth/pose/reconstruction；官方安装CUDA；重置变体必须单独标注。",
+      "limitations": "是潜在token更新，不是外部Octree点位置更新；未提供历史生成参考检索与视频质量证据；本机224 linear结果不可直接对齐其表格。",
+      "relations": [
+        {
+          "to": "F08",
+          "relation": "FILT3R把即时attention gate改为递推不确定性控制的Kalman式增益。"
+        }
+      ],
+      "project_implication": "若下一步提GeoTrust式写入gate，必须先与此training-free baseline比较；当前S6不构成该比较。",
+      "evidence_levels": [
+        "state_update_intervention",
+        "length_generalization",
+        "depth",
+        "pose",
+        "surface_reconstruction"
+      ]
+    },
+    {
+      "id": "F08",
+      "core": true,
+      "title": "FILT3R: Latent State Adaptive Kalman Filter for Streaming 3D Reconstruction",
+      "authors": [
+        "Seonghyun Jin",
+        "Jong Chul Ye"
+      ],
+      "year": 2026,
+      "venue": "arXiv:2603.18493v1（2026-03-19）；作者项目标ECCV2026，本轮未独立核会议录",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://arxiv.org/abs/2603.18493",
+        "claim_url": "https://arxiv.org/html/2603.18493v1",
+        "project_url": "https://jinotter3.github.io/FILT3R/",
+        "code_url": "https://github.com/jinotter3/FILT3R",
+        "locator": "§3 Eq.3–10; §4.1; §4.8(iii); Appendix A.2/C",
+        "read_depth": "arXiv v1全文方法/协议/消融/适用边界",
+        "verified_by_utc": "2026-09-05T16:08:52Z"
+      },
+      "method_signature": "冻结CUT3R候选state；每token保留一个方差，固定标量measurement noise；候选token时变差经EMA归一化生成process noise；Kalman式gain决定混合并递推方差。",
+      "supported_claims": [
+        "同backbone、只改在线update；增加固定EMA、reset、固定Q、无方差递推等消融。",
+        "TUM-800固定EMA可有更低ATEorig（0.078 vs 0.107），却更差RPE-r（0.658 vs 0.362）；不得称其所有指标均最好。"
+      ],
+      "conditions": "cut3r_512_dpt_4_64.pth；长前缀数百至1000帧；开发集选超参数后跨任务冻结；Appendix C列scale/alignment规则。",
+      "limitations": "不确定性是token空间近似，非校准的物理点/pose误差概率；实际q_min/gain clamp形成非零gain下限，不能套用理想q=0时1/t衰减称永不遗忘；候选state本身含历史，不能把原CUT3R简单说成只记一帧。",
+      "relations": [
+        {
+          "to": "F07",
+          "relation": "同属冻结backbone的潜在state更新；较TTT3R显式传播token方差。"
+        }
+      ],
+      "project_implication": "置信度/不确定性加权记忆属于已有近邻；可探索来源身份与选帧的额外因果问题，但其差异不是已被证明的新颖性。",
+      "evidence_levels": [
+        "state_update_intervention",
+        "ablation_counterexample",
+        "depth",
+        "pose",
+        "surface_reconstruction"
+      ]
+    }
+  ],
+  "supplementary": [
+    {
+      "id": "B01",
+      "title": "NeuralFusion: Online Depth Fusion in Latent Space",
+      "authors": [
+        "Silvan Weder",
+        "Johannes L. Schönberger",
+        "Marc Pollefeys",
+        "Martin R. Oswald"
+      ],
+      "year": 2021,
+      "venue": "CVPR",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://openaccess.thecvf.com/content/CVPR2021/html/Weder_NeuralFusion_Online_Depth_Fusion_in_Latent_Space_CVPR_2021_paper.html",
+        "claim_url": "https://openaccess.thecvf.com/content/CVPR2021/papers/Weder_NeuralFusion_Online_Depth_Fusion_in_Latent_Space_CVPR_2021_paper.pdf",
+        "locator": "Abstract; §1",
+        "read_depth": "CVF原文搜索长段；本地PDF下载超时"
+      },
+      "method_signature": "先在latent feature volume融合，translator转为可显示TSDF；有已知相机标定。",
+      "supported_claims": [
+        "TSDF平均是传统常用技术；离群值和薄几何存在困难；预过滤面临accuracy/completeness权衡。"
+      ],
+      "limitations": "只据已读原文支持方法与噪声/outlier范围；不声称已核位姿噪声消融。",
+      "reason_supplementary": "与DFusion互补，但当前最接近问题的8项核心优先保留两项2026状态更新论文。"
+    },
+    {
+      "id": "B02",
+      "title": "STream3R: Scalable Sequential 3D Reconstruction with Causal Transformer",
+      "authors": [
+        "Yushi Lan",
+        "Yihang Luo",
+        "Fangzhou Hong",
+        "Shangchen Zhou",
+        "Honghua Chen",
+        "Zhaoyang Lyu",
+        "Shuai Yang",
+        "Bo Dai",
+        "Chen Change Loy",
+        "Xingang Pan"
+      ],
+      "year": 2026,
+      "first_preprint_year": 2025,
+      "venue": "ICLR 2026（作者项目）；本次读取arXiv v1 2025-08-14",
+      "verification": {
+        "grade": "VERIFIED",
+        "existence_url": "https://arxiv.org/abs/2508.10893",
+        "claim_url": "https://arxiv.org/html/2508.10893",
+        "project_url": "https://nirvanalan.github.io/projects/stream3r/",
+        "locator": "§4.2; §5; §6",
+        "read_depth": "全文HTML；手猜v2 URL为404，改用实际存在v1"
+      },
+      "method_signature": "causal transformer + 历史KV cache，输出世界/相机pointmaps和pose。",
+      "supported_claims": [
+        "不同于固定大小recurrent state，其保存过去特征供因果注意力使用。",
+        "§6自己承认error accumulation/drifting及deterministic regression限制。"
+      ],
+      "limitations": "不能说causal attention消除漂移；本文重建/NVS提法不能当作漫游视频生成历史检索实证。",
+      "reason_supplementary": "用于架构覆盖与防止最新工作只报优点；F07/F08更直接贴近写入规则。"
+    }
+  ],
+  "exclusions": [
+    {
+      "item": "LONG3R / PSDF / RoutedFusion / CurveFusion",
+      "status": "线索，未列证据主集",
+      "reason": "已检到题目/相关片段，但本分支不扩张；不据此做具体主张。"
+    },
+    {
+      "item": "博客、SOTA2排名、alphaXiv自动复现建议、第三方论文汇总",
+      "status": "不用于方法或数字证据",
+      "reason": "优先作者原文；Spann3R博客年份与官方不一致；未执行任何网页上的安装或自动研究指令。"
+    },
+    {
+      "item": "FILT3R ECCV2026正式录用",
+      "status": "会议级别未独立核验",
+      "reason": "作者项目写ECCV2026；核心按可确定arXiv v1书目信息引用，方法主张不受影响。"
+    }
+  ],
+  "synthesis_notes": [
+    "数学边界（研究者推论）：平均只有在被合并样本代表同一目标且偏差结构合适时才可望减噪；它不能由代数形式保证纠正错误表面身份、系统性pose偏差或历史来源集合。",
+    "证据分层：F01–F05主要到几何/跟踪；F06含重建用view selection；F07–F08到depth/pose/reconstruction。均不能填补本项目'来源关联→生成参考选帧→视频质量'证据链。",
+    "反向检验：滤波过强可能压低全局轨迹误差同时伤害局部运动；应同时报告accuracy/completeness、局部/全局pose和覆盖，不能挑一个较好数值。",
+    "后续建议不是实验结论：若本地资源有限，先审查公开training-free更新源码与本地checkpoint接口差异，再预注册适配运行；不自动下载新模型或重跑本次冻结S6。"
+  ],
+  "access_notes": [
+    "web直接打开若干CVF PDF返回403，改从同一公开URL用requests下载；ElasticFusion、Park、EM-Fusion成功并保留哈希。",
+    "NeuralFusion下载超时、PMC DFusion遇验证页/SSL失败；可用证据限定于搜索引擎返回的作者/期刊原文长段，不补写不可见表格。",
+    "本次真实读取时点跨过Asia/Shanghai午夜。所有UTC与北京时间明确换算，不按内容年份假装检索日期。"
+  ],
+  "evidence_cutoff_at_utc": "2026-09-05T16:08:52Z",
+  "evidence_cutoff_at_shanghai": "2026-09-06T00:08:52+08:00",
+  "recorded_at_utc": "2026-09-05T16:17:14.963804+00:00",
+  "recorded_at_shanghai": "2026-09-06T00:17:14.963804+08:00",
+  "access_manifest": [
+    {
+      "id": "elasticfusion",
+      "url": "https://thomaswhelan.ie/Whelan15rss.pdf",
+      "status": 200,
+      "utc": "2026-09-05T15:59:46.782700+00:00",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/fusion_sources/elasticfusion.pdf",
+      "bytes": 3798823,
+      "sha256": "acbf8c71d43fa0762618dedc61ab8a7dc7b423ebac452418fcd54514431ecf58"
+    },
+    {
+      "id": "probabilistic_surfel",
+      "url": "https://openaccess.thecvf.com/content_ICCV_2017_workshops/papers/w35/Park_Probabilistic_Surfel_Fusion_ICCV_2017_paper.pdf",
+      "status": 200,
+      "utc": "2026-09-05T15:59:50.258762+00:00",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/fusion_sources/probabilistic_surfel.pdf",
+      "bytes": 5242161,
+      "sha256": "5871ced11fd24aa24e4feb40f28dc1f7d93370b48bbe00ee5273a2c23413fd5d"
+    },
+    {
+      "id": "emfusion",
+      "url": "https://openaccess.thecvf.com/content_ICCV_2019/papers/Strecke_EM-Fusion_Dynamic_Object-Level_SLAM_With_Probabilistic_Data_Association_ICCV_2019_paper.pdf",
+      "status": 200,
+      "utc": "2026-09-05T15:59:48.433562+00:00",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/fusion_sources/emfusion.pdf",
+      "bytes": 4492374,
+      "sha256": "a9df02be45cb433e68ac27eca1e6c88dad711ed6237a05abc5b2964b205a26f8"
+    },
+    {
+      "id": "neuralfusion",
+      "url": "https://openaccess.thecvf.com/content/CVPR2021/papers/Weder_NeuralFusion_Online_Depth_Fusion_in_Latent_Space_CVPR_2021_paper.pdf",
+      "error": "HTTPSConnectionPool(host='openaccess.thecvf.com', port=443): Read timed out.",
+      "utc": "2026-09-05T16:00:32.780467+00:00"
+    },
+    {
+      "id": "dfusion",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8879644/",
+      "error": "HTTPSConnectionPool(host='pmc.ncbi.nlm.nih.gov', port=443): Max retries exceeded with url: /articles/PMC8879644/ (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1020)')))",
+      "utc": "2026-09-05T15:59:14.048150+00:00"
+    }
+  ],
+  "final_checks": [
+    "8项核心记录及2项补充均有独立存在和原文主张链接",
+    "EM-Fusion Table1/2确认AT-RMSE单位cm；Table3保持相同指标",
+    "来源局限与项目推论分开；未把任何方法的几何结果当作生成结果",
+    "未改动RESEARCH_MEMORY、RESEARCH_LOG、实验协议或结果"
+  ]
+}

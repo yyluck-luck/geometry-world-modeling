@@ -1,0 +1,120 @@
+{
+  "schema": "s40-readback-supervisor-source-review-v2",
+  "status": "PASS_S40_READBACK_SUPERVISOR_V3_3_REBIND_SOURCE_REVIEW",
+  "verdict": "PASS_SUPERVISOR_REBIND_NOT_EXECUTED",
+  "reviewed_utc": "2026-09-07T13:42:53Z",
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "review_scope": "Independent read-only static review of the exact S40 attempt02 external supervisor rebind, its protocol, the double-reviewed v3.3 readback bundle, the preserved attempt01 failure boundary, fixed child command, resource controls, process-tree cleanup, close seals, and terminal claim scope.",
+  "supervisor_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/supervise_readback.py",
+  "supervisor_sha256": "f04b9bcd4a0e2908d2bc3ead9a732e16d4f4ef651a60541a87f37a7b37f2b238",
+  "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/SUPERVISOR_PROTOCOL.md",
+  "protocol_sha256": "e16832daf1fbda8f98e61da368cf00a319659f8d6970c79d582b0e35685827b3",
+  "bound_readback": {
+    "readback.py": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933",
+    "PROTOCOL_DRAFT.md": "257e1b7583b000e907cde8baf3e4e3fcefb9f2c81037ed98887d0f6367483163",
+    "source_review_v3_3.json": "70d4c48a6940778247763c901637e18e231b926f4733ac8edb64923ef0240484",
+    "source_review_v3_3_adversarial.json": "8ca313e712eec18d275122c95181aff987ae1ff5ceb04a880af61bb41b5a3ec7",
+    "revision_v3_3_receipt.json": "bebc80b8fccf6e8699d4768f6ffab097bcc75f6bca4a7f101ef53e827b0e2e9d"
+  },
+  "bound_attempt01_receipts": {
+    "supervision_01/receipt.json": "f269dc2486478e65176c38445ab97251f31a5a4ac6c9f50cbd344a73daefd5da",
+    "executed_01/receipt.json": "4b762c3061d395a6767f319a553e681dbea8fe4d90bd49e5ac8a563d36bf35c6"
+  },
+  "generation_launcher_sha256": "8ade694bc750f9693fc461257437af7b919b0c46755fc0eef2e21096d31e8860",
+  "supervisor_rebind_receipt": {
+    "path": "supervisor_rebind_v2_receipt.json",
+    "sha256": "2fc1a6aa640d39f3503605610dd88b57299632c3b88ccd6f89f6b6d99cf159cb",
+    "status": "SUPERVISOR_REBOUND_AWAITING_DIFFERENT_AUTHOR_SOURCE_REVIEW"
+  },
+  "reviewed_line_counts": {
+    "supervise_readback.py": 1028,
+    "SUPERVISOR_PROTOCOL.md": 149
+  },
+  "executed": false,
+  "checks": [
+    {
+      "id": "R1_EXACT_REBIND_IDENTITIES",
+      "verdict": "PASS",
+      "evidence": "supervise_readback.py:24-50 fixes the supervisor protocol, v3.3 worker source/protocol, both v3.3 PASS reviews, revision receipt, both attempt01 failure receipts, old attempt01 worker source, and generation launcher. source_identities_at_start at lines 179-225 hashes all of them plus this different-role supervisor review before spawn; lines 941-958 rehash and stat-seal the resulting source and input records at close."
+    },
+    {
+      "id": "R2_V3_3_DOUBLE_PASS_AND_REVISION_GATE",
+      "verdict": "PASS",
+      "evidence": "supervise_readback.py:226-290 requires the primary and adversarial files to carry the exact v3.3 PASS status/verdict, exact source/protocol/revision identities, empty blocking fields, non-execution boundaries, and different author/reviewer roles. The fixed files currently satisfy those predicates and are SHA-bound."
+    },
+    {
+      "id": "R3_ATTEMPT01_FAILURE_AND_NO_REPORT_BOUNDARY",
+      "verdict": "PASS",
+      "evidence": "supervise_readback.py:292-324 validates the exact outer failure, one worker invocation, return code 2, exact worker TypeError, old worker SHA, zero model/GA runs, no original weights/photo/GT read, NOT_EVALUATED quality, and absence of executed_01/report.json. Both receipts are fixed inputs and rehashed at close. The only constructed child output is executed_02, so the reviewed program has no path that writes attempt01 artifacts."
+    },
+    {
+      "id": "R4_FIXED_FRESH_ATTEMPT02_PATHS",
+      "verdict": "PASS",
+      "evidence": "Constants at supervise_readback.py:51-52 and fresh_child_directory at lines 140-146 require the absent direct children supervision_02 and executed_02. main creates only supervision_02 at lines 1018-1024; readback receives only executed_02. Lines 693-716 reject directory overlap with each other and with generation evidence. Both paths were absent during this static review."
+    },
+    {
+      "id": "R5_UNIQUE_FIXED_CHILD_COMMAND",
+      "verdict": "PASS",
+      "evidence": "Static AST inspection found one subprocess.Popen site at line 790, no shell=True, and no eval/exec child dispatch. The argv at lines 722-738 consists only of the fixed venv Python, -B, fixed readback.py, validated manifest/generation receipt bindings, fixed fresh output, and literal --seconds 300. There is no arbitrary command or extra-argument option."
+    },
+    {
+      "id": "R6_CPU1_300S_2GIB_10GIB_AND_POLL_BOUNDARY",
+      "verdict": "PASS_WITH_DECLARED_SAMPLING_LIMITS",
+      "evidence": "supervise_readback.py:54-64 fixes 300 seconds, 2,147,483,648 sampled process-tree RSS bytes, 10,737,418,240 free bytes, a 0.5-second poll, and five numerical-library thread variables. Lines 717-762 enforce the disk/Python preflight and thread/offline environment; lines 811-888 sample and fail on wall/RSS/disk/inspection limits; lines 909-911 and 977-984 prevent a success status beyond the final pre-receipt 300-second seals."
+    },
+    {
+      "id": "R7_NO_RETRY_AND_PROCESS_TREE_TERMINATION",
+      "verdict": "PASS",
+      "evidence": "There is one Popen invocation, readback_invocations is set once, and automatic_retries remains zero. The child uses start_new_session=True at line 796. refresh_tree tracks descendants by PID plus creation time; terminate_tree at lines 469-511 sends TERM then KILL to the process group and every observed live descendant, waits, and records return code, group state, and survivors. Limit, inspection, interrupt, natural-exit-survivor, exception, and finalization paths invoke cleanup as needed at lines 858-899 and 917-940."
+    },
+    {
+      "id": "R8_SOURCE_INPUT_WORKER_AND_EVIDENCE_CLOSE_SEALS",
+      "verdict": "PASS",
+      "evidence": "Bound JSON/files receive SHA plus size/mtime/ctime/device/inode checks at lines 154-176. Generation manifest, outer receipt, and worker receipt are mutually bound at lines 328-407. A successful worker must produce exactly report.json and receipt.json, the narrow saved-output status, exact readback SHA, same external inputs, and exact report scope at lines 514-612. Every worker identity is checked against its saved stat and rechecked at close without rereading tensor bodies; sources and metadata inputs are rehashed at close; launch ticket, monitor, stdout, and stderr are hashed before the terminal receipt at lines 941-984."
+    },
+    {
+      "id": "R9_PENDING_RESULT_REVIEW_ONLY",
+      "verdict": "PASS",
+      "evidence": "The sole success token is S40_READBACK_RETURNED_PENDING_INDEPENDENT_REVIEW at line 66. Lines 912-916 and 985-992 keep the result pending different-author review and expressly exclude model mathematics, visual quality, exact-original equivalence, and novelty. SUPERVISOR_PROTOCOL.md:127-141 states the same narrow boundary."
+    },
+    {
+      "id": "R10_REBIND_DELTA_DID_NOT_RELAX_EXISTING_RESOURCE_OR_CLEANUP_LOGIC",
+      "verdict": "PASS",
+      "evidence": "The exact diff from preserved history_attempt01_before_v3_3_rebind/supervise_readback.py changes the worker/review/attempt receipt pins, adds their content gates, fixes the two attempt02 basenames, and updates review schema expectations. The inherited child command, monitor, resource thresholds, termination, worker-result validation, close seals, failure preservation, and no-retry logic are otherwise unchanged."
+    }
+  ],
+  "current_static_state": {
+    "supervision_02_absent": true,
+    "executed_02_absent": true,
+    "executed_01_report_absent": true,
+    "primary_v3_3_review_pass": true,
+    "adversarial_v3_3_review_pass": true,
+    "python_ast_parse": "PASS",
+    "subprocess_popen_sites": 1,
+    "shell_true_sites": 0,
+    "arbitrary_child_command_option": false
+  },
+  "blocking_findings": [],
+  "new_blocking_source_findings": [],
+  "nonblocking_boundaries": [
+    "CPU1 is enforced through five numerical-library thread variables and is not an operating-system CPU-affinity claim.",
+    "Process-tree RSS and descendant discovery are userspace samples every 0.5 seconds; an inter-sample spike or a process that changes session and reparents before observation is outside the measured maximum.",
+    "Termination grace and terminal receipt serialization/fsync can occur after the 300-second threshold, but no run crossing the final pre-receipt 300-second seals can receive the success status.",
+    "The outer close check rehashes fixed source and metadata inputs, while the worker's already-hashed scientific identity set is rechecked by stat seal without rereading tensor or image bodies.",
+    "This review authorizes only the exact supervisor source/protocol pair. It is not an attempt02 execution or result review."
+  ],
+  "execution_boundary": {
+    "supervisor_imported_or_executed": false,
+    "readback_imported_or_executed": false,
+    "generation_model_ga_gate_renderer_or_scoring_executed": false,
+    "scientific_arrays_mapped_or_compared": false,
+    "tensor_or_image_payload_bodies_read": false,
+    "images_decoded_or_viewed": false,
+    "network_requests": 0,
+    "author_source_or_protocol_modified_by_reviewer": false,
+    "canonical_research_ledger_modified": false,
+    "review_artifact_written": true
+  },
+  "next_gate": "The exact reviewed supervisor may be invoked once with this review file's SHA and the fixed supervision_02/executed_02 paths. Any returned status remains pending a separate different-author result review."
+}

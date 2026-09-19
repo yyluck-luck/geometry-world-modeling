@@ -1,0 +1,107 @@
+{
+  "status": "PASS_ARTIFICIAL_ONLY",
+  "utc": "2026-09-06T11:23:13.782286+00:00",
+  "checks": [
+    {
+      "name": "negative world Z accepted; only camera depth positive",
+      "pass_": true
+    },
+    {
+      "name": "zero cleaned confidence accepted",
+      "pass_": true
+    },
+    {
+      "name": "refuse depths 0",
+      "pass_": true,
+      "refusal": "Camera depth strictly positive; world Z unrestricted"
+    },
+    {
+      "name": "refuse focal -1",
+      "pass_": true,
+      "refusal": "Positive focal"
+    },
+    {
+      "name": "refuse confidence -1",
+      "pass_": true,
+      "refusal": "Clean confidence nonnegative including zero"
+    },
+    {
+      "name": "refuse world_points nan",
+      "pass_": true,
+      "refusal": "Array finite gate: world_points"
+    },
+    {
+      "name": "refuse colors 1.01",
+      "pass_": true,
+      "refusal": "Real input color range"
+    },
+    {
+      "name": "reflection camera refused",
+      "pass_": true,
+      "refusal": "Proper camera rotation"
+    },
+    {
+      "name": "400 delegate iterations/400 real scalar optimizer steps/401 objectives",
+      "pass_": true
+    },
+    {
+      "name": "schedule endpoints and sentinel returns preserved",
+      "pass_": true
+    },
+    {
+      "name": "clean changes only confidence; snapshots remain independent",
+      "pass_": true
+    },
+    {
+      "name": "changed iteration schedule refused",
+      "pass_": true,
+      "refusal": "Native fixed optimization schedule"
+    },
+    {
+      "name": "all instrumentation restored",
+      "pass_": true
+    },
+    {
+      "name": "valid artificial manifest role contract",
+      "pass_": true
+    },
+    {
+      "name": "refuse contract niter",
+      "pass_": true,
+      "refusal": "Contract: niter"
+    },
+    {
+      "name": "refuse contract poses",
+      "pass_": true,
+      "refusal": "Contract: poses"
+    },
+    {
+      "name": "refuse contract depths",
+      "pass_": true,
+      "refusal": "Contract: depths"
+    },
+    {
+      "name": "refuse contract main_generator_calls",
+      "pass_": true,
+      "refusal": "Contract: main_generator_calls"
+    },
+    {
+      "name": "refuse contract size",
+      "pass_": true,
+      "refusal": "Contract: size"
+    },
+    {
+      "name": "extra target array identity refused",
+      "pass_": true,
+      "refusal": "Unexpected data or unfrozen identity"
+    }
+  ],
+  "check_count": 20,
+  "runner_sha256": "e38fc8e6d74246d84413237be9c26f83e72588e713554343f539e1b772b447c3",
+  "checkpoint_reads": 0,
+  "real_rgb_decodes": 0,
+  "full_model_instances": 0,
+  "GT_reads": 0,
+  "video_generations": 0,
+  "fixture": "scalar nn.Module and tiny fake scene; numerical validation uses fabricated shapes"
+}

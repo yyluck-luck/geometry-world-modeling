@@ -1,0 +1,250 @@
+MoPe: Motion Permanence for Robust Monocular Gaussian Mapping in Dynamic Environments (https://arxiv.org/abs/2606.29237)
+citeturn377academia12 [wordlim: 200] Published: 2 months ago; Date: Sun Jun 28 06:51:17 2026 ... This makes the representation effectively memoryless: when a pedestrian slows, pauses, or reappears after occlusion, the current frame may look static, allowing dynamic content to be absorbed into the map and leaving persistent ghosting artifacts. ... Building on this view, we introduce Motion Permanence: the principle that an object's dynamic identity should persist over time rather than be re-decided from each frame independently. ... The resulting persistent posterior guides tracking, mapping, dynamic-aware Gaussian insertion, and Gaussian-level post-cleanup. ... These results show that maintaining temporal dynamic state inside the scene representation is a practical step toward more reliable representation-centric autonomy in changing real-world environments.
+Title: MoPe: Motion Permanence for Robust Monocular Gaussian Mapping in Dynamic Environments
+Authors: Qixin Xiao
+Date: Sun Jun 28 06:51:17 2026
+
+Robust robot autonomy depends on scene representations that remain stable enough to support localization, navigation, and downstream decision making in dynamic environments. Monocular Gaussian Splatting SLAM provides high-fidelity mapping, but current uncertainty-aware methods still treat dynamic regions largely as per-frame observations. This makes the representation effectively memoryless: when a pedestrian slows, pauses, or reappears after occlusion, the current frame may look static, allowing dynamic content to be absorbed into the map and leaving persistent ghosting artifacts. We argue that this failure reflects a representation-level mismatch. Dynamic-ness is not an instantaneous appearance property, but a temporal property defined by motion history. Building on this view, we introduce Motion Permanence: the principle that an object's dynamic identity should persist over time rather than be re-decided from each frame independently. We realize this principle in MoPe, a memory-aware uncertainty filter for monocular Gaussian mapping. MoPe propagates the historical dynamic posterior through geometry-consistent SE(3) warping and fuses it with current-frame evidence using bounded Bayesian log-odds updates. The resulting persistent posterior guides tracking, mapping, dynamic-aware Gaussian insertion, and Gaussian-level post-cleanup. On Wild-SLAM, Bonn, and TUM sequences, MoPe improves tracking robustness and reduces residual ghosting, with the strongest gains on dynamic-human scenes that most directly violate the memoryless assumption. These results show that maintaining temporal dynamic state inside the scene representation is a practical step toward more reliable representation-centric autonomy in changing real-world environments.--------------------------------------------------------------------------------
+PersistGS: Differentiable Physics for Object Permanence in 4D Gaussian Splatting (https://arxiv.org/abs/2606.03479)
+citeturn377academia13 [wordlim: 200] Published: 3 months ago; Date: Tue Jun  2 10:57:15 2026 ... Existing approaches to incomplete observations in neural reconstruction rely on learned generative priors that prioritize visual plausibility over physical correctness.We propose $\textbf{PersistGS}$, a method that restores object permanence during occlusion by coupling differentiable rigid body simulation with 3D Gaussian Splatting. ... Because the predicted trajectory satisfies the governing equations of rigid body dynamics, it faithfully captures contact events (bounces, friction-based deceleration, direction changes) that kinematic extrapolation cannot model.
+Title: PersistGS: Differentiable Physics for Object Permanence in 4D Gaussian Splatting
+Authors: Adrian Ramlal, John S. Zelek
+Date: Tue Jun  2 10:57:15 2026
+
+Dynamic 3D Gaussian Splatting (3DGS) methods reconstruct time-varying scenes from synchronized multi-camera video using photometric supervision. When a moving object becomes fully occluded from all training cameras, this supervision vanishes: the Gaussians representing it receive no gradient signal and degrade. Existing approaches to incomplete observations in neural reconstruction rely on learned generative priors that prioritize visual plausibility over physical correctness. We propose $\textbf{PersistGS}$, a method that restores object permanence during occlusion by coupling differentiable rigid body simulation with 3D Gaussian Splatting. Our approach decomposes the scene into per-object Gaussians and collision meshes, estimates friction and velocity from the observed pre-occlusion trajectory via differentiable simulation, and uses the resulting SE(3) trajectory to position object Gaussians throughout the occlusion period. Because the predicted trajectory satisfies the governing equations of rigid body dynamics, it faithfully captures contact events (bounces, friction-based deceleration, direction changes) that kinematic extrapolation cannot model. We introduce a centroid silhouette loss that isolates positional gradients from appearance noise, yielding 40% lower trajectory error than photometric supervision. We evaluate using cameras withheld from training that observe the object during its occlusion. Experiments on synthetic scenes show that PersistGS outperforms constant velocity extrapolation by +2.46dB PSNR and comes within 0.19dB of a ground-truth trajectory upper bound.--------------------------------------------------------------------------------
+3D-Anchored Lookahead Planning for Persistent Robotic Scene Memory via World-Model-Based MCTS (https://arxiv.org/abs/2604.11302)
+citeturn377academia14 [wordlim: 200] Published: 4 months ago; Title: 3D-Anchored Lookahead Planning for Persistent Robotic Scene Memory via World-Model-Based MCTS ... Date: Mon Apr 13 11:01:30 2026 ... Unlike reactive policies that evaluate actions from the current camera frame only, 3D-ALP maintains a persistent camera-to-world (c2w) anchor that survives occlusion, enabling accurate replanning to object positions that are no longer directly observable.
+Title: 3D-Anchored Lookahead Planning for Persistent Robotic Scene Memory via World-Model-Based MCTS
+Authors: Bronislav Sidik, Dror Mizrahi
+Date: Mon Apr 13 11:01:30 2026
+
+We present 3D-Anchored Lookahead Planning (3D-ALP), a System 2 reasoning engine for robotic manipulation that combines Monte Carlo Tree Search (MCTS) with a 3D-consistent world model as the rollout oracle. Unlike reactive policies that evaluate actions from the current camera frame only, 3D-ALP maintains a persistent camera-to-world (c2w) anchor that survives occlusion, enabling accurate replanning to object positions that are no longer directly observable. On a 5-step sequential reach task requiring spatial memory (Experiment E3), 3D-ALP achieves 0.650 0.109 success rate on memory-required steps versus 0.006 0.008 for a greedy reactive baseline (Δ=+0.645), while step 5 success reaches 0.822 against 0.000 for greedy. An ablation study (30 episodes, 3 seeds) isolates tree search spatial memory as the primary driver (+0.533, 82% of gain) with additional benefit from deeper lookahead (+0.111, 17%). We also identify and resolve four structural failure modes in applying UCT-MCTS (Upper Confidence Bounds applied to Trees [10]) to continuous robotic manipulation.--------------------------------------------------------------------------------
+R4DSG: Relative 4D Scene Graph Memory for Object-Centric Question Answering in Long Egocentric Video (https://arxiv.org/abs/2608.11017)
+citeturn377academia15 [wordlim: 200] Published: 3 weeks ago; Title: R4DSG: Relative 4D Scene Graph Memory for Object-Centric Question Answering in Long Egocentric Video ... Long-horizon egocentric video is a rich substrate for wearable AI assistants, but object-centric questions such as where an item was moved, when it last changed state, or why it was relocated remain difficult because caption- and transcript-based memories rarely preserve persistent object identity or structured spatial change. ... The main idea is to separate stable anchors from dynamic objects, maintain persistent object identity across frames, and represent object state through anchor-relative transitions rather than a globally aligned world model. ... Evaluation on a 255-question object-related subset from EgoLifeQA shows, under question-only retrieval, a 6.7-point overall gain over EgoRAG-Text and a 12.5-point gain on when questions, which highlights the value of temporally organized object memory.
+Title: R4DSG: Relative 4D Scene Graph Memory for Object-Centric Question Answering in Long Egocentric Video
+Authors: Ke Ma, Yamin Mao, Weiming Li, Shuai Tan, Yijie Zhong, Hao Chen, Haofen Wang, Meng Wang
+Date: Tue Aug 11 15:00:15 2026
+
+Long-horizon egocentric video is a rich substrate for wearable AI assistants, but object-centric questions such as where an item was moved, when it last changed state, or why it was relocated remain difficult because caption- and transcript-based memories rarely preserve persistent object identity or structured spatial change. Existing long-video QA methods mainly emphasize temporal grounding and clip retrieval, while prior 3D scene-graph methods typically assume stronger geometry than free-motion wearable RGB video provides, including point clouds, RGB-D input, posed views, sparse reconstruction, or reconstructed scenes. R4DSG introduces a relative 4D scene graph memory for long egocentric video. Instead of storing raw graph sequences, R4DSG converts video into compact queryable memory entries indexed by time, place, persistent objects, anchor-relative change, and local interaction context. The main idea is to separate stable anchors from dynamic objects, maintain persistent object identity across frames, and represent object state through anchor-relative transitions rather than a globally aligned world model. Built on recent RGB-only advances in promptable video segmentation, temporal propagation, and relative 3D lifting, the method produces a retrieval-ready memory directly usable for long-horizon question answering. Evaluation on a 255-question object-related subset from EgoLifeQA shows, under question-only retrieval, a 6.7-point overall gain over EgoRAG-Text and a 12.5-point gain on when questions, which highlights the value of temporally organized object memory. These results position relative 4D scene graphs as a practical memory substrate for wearable assistants, AR systems, and embodied multimedia agents. GitHub Page: https://dualtransparency.github.io/R4DSG/.--------------------------------------------------------------------------------
+A Synthetic Testbed for Object Permanence and Counterfactual Prediction with Object-Centric World Models | Zenodo (https://zenodo.org/records/20725115)
+citeturn377search0 [wordlim: 200] Published: 2 months ago; Crawled: 2 months ago; This paper presents a compact synthetic testbed that operationalizes one computational aspect of object permanence as persistent object-state prediction under occlusion. ... malhotra_object_permanence_world_models.pdf md5:d6d3c5cde9ee133ec793bde72fd4ac3d  | 143.3 kB  | Preview Download ...     https://github.com/yajasmalhotra/world-model
+
+# A Synthetic Testbed for Object Permanence and Counterfactual Prediction with Object-Centric World Models
+
+### Authors/Creators
+
+  * Yajas, Malhotra (Researcher)^{1}
+
+[Button: Show affiliations ]
+
+  * 1. Georgia Institute of Technology
+
+## Description
+
+Object permanence requires maintaining object-level continuity across temporary gaps in visual evidence. This paper presents a compact synthetic testbed that operationalizes one computational aspect of object permanence as persistent object-state prediction under occlusion. The system combines controlled 2D video generation, explicit object-state dynamics, supervised pixel-to-state inference, a direct pixel-rollout baseline, and counterfactual interventions on internal object state. The goal is not to introduce a state-of-the-art architecture, but to provide an inspectable experimental tool for separating state-prediction errors from perception errors. In the strongest oracle-state condition, the object-centric dynamics model achieves rollout RMSE of 0.101 and identity consistency of 0.913 on the standard test split, with identity consistency above 0.74 across three harder generalization settings. --------------------------------------------------------------------------------
+LSM-World | Latent Spatial Memory for Video World Models (https://microsoft.github.io/LatentSpatialMemory/)
+citeturn377search1 [wordlim: 200] Crawled: last week; 10.57× faster generation 55× lower 3D cache memory 70.36 WorldScore average ... Image: Efficiency comparison of LSM-World against video world model baselines Efficiency comparison showing LSM-World's generation speed, cache memory reduction, and WorldScore performance. ...     `@article{wang2026latentspatialmemory,
+
+# Latent Spatial Memory
+
+for Video World Models
+
+Weijie Wang^{1*} Haoyu Zhao^{1*} Yifan Yang^{2} Feng Chen^{3} Zeyu Zhang^{1} Yefei He^{1} Zicheng Duan^{3} Donny Y. Chen^{4} Yuqing Yang^{2} Bohan Zhuang^{1}
+
+^{1} Zhejiang University · ^{2} Microsoft Research · ^{3} Adelaide University · ^{4} Monash University ^{*} Equal contribution
+
+Paper Code Promo Video Results World-R1
+
+10.57× faster generation 55× lower 3D cache memory 70.36 WorldScore average
+
+## Promo Video
+
+A short preview of video world modeling with persistent latent spatial memory.
+
+LSM-World promo video
+
+## Latent Spatial Memory
+
+Latent Spatial Memory stores static scene content as 3D latent tokens, then reads and updates that cache directly during generation.
+
+Image: Latent spatial memory compared with RGB point-cloud memory Latent spatial memory keeps persistent 3D scene context directly in latent space, avoiding the RGB render-and-reencode loop used by point-cloud memory.
+
+## LSM-World Architecture
+
+LSM-World initializes, reads, and updates a persistent latent spatial memory.
+
+Image: LSM-World architecture with cache initialization readout update pipeline LSM-World architecture initializes a latent cache from the first frame, reads it for each target view, and writes updated static content back across generated chunks.
+
+## Efficiency
+
+LSM-World reduces repeated 3D cache rendering while preserving strong world modeling quality.
+
+Image: Efficiency comparison of LSM-World against video world model baselines Efficiency comparison showing LSM-World's generation speed, cache memory reduction, and WorldScore performance.
+
+## Qualitative Evaluation
+
+Each row compares the same trajectory and conditioning across LSM-World and four baselines.
+
+LSM-World Spatia Voyager Gen3C VMem
+
+## BibTeX
+    
+    `@article{wang2026latentspatialmemory,
+      title   = {Latent Spatial Memory for Video World Models},
+      author  = {Wang, Weijie and Zhao, Haoyu and Yang, Yifan and Chen, Feng and Zhang, Zeyu and He, Yefei and Duan, Zicheng and Chen, Donny Y. and Yang, Yuqing and Zhuang, Bohan},
+      journal = {arXiv preprint arXiv:2606.09828},
+      year    = {2026}
+    }`--------------------------------------------------------------------------------
+WorldDirector: Building Controllable World Simulators with Persistent Dynamic Memory | Arxiv - DeepPaper (https://arxiv.deeppaper.ai/papers/2607.02517v1)
+citeturn377search2 [wordlim: 200] Published: 2 months ago; Crawled: last week; Introduces a decoupled framework that uses LLM-coordinated 3D trajectories as control signals for video generation, ensuring physical logic, appearance stability, and persistent memory for dynamic entities. ... We present WorldDirector, a highly controllable video world model framework designed for persistent dynamic object memory and unrestricted viewpoint exploration. ... By leveraging an LLM to coordinate 3D trajectories with camera movements and subsequently employing these orchestrated trajectories as control signals for video generation, our approach ensures strict physical logic and appearance stability, successfully preserving the exact visual identities of dynamic entities even when they re-enter the scene after prolonged periods out of view. ... Image: arXiv 2607.02517v1
+
+# WorldDirector: Building Controllable World Simulators with Persistent Dynamic Memory
+
+PDF DeepRead
+
+### Key Contributions
+
+Introduces a decoupled framework that uses LLM-coordinated 3D trajectories as control signals for video generation, ensuring physical logic, appearance stability, and persistent memory for dynamic entities.
+
+### Abstract
+
+We present WorldDirector, a highly controllable video world model framework designed for persistent dynamic object memory and unrestricted viewpoint exploration. Unlike existing world models that entangle physical dynamics with pixel rendering and rely on continuous visual observation to sustain motion, our framework explicitly decouples semantic motion orchestration from visual generation. By leveraging an LLM to coordinate 3D trajectories with camera movements and subsequently employing these orchestrated trajectories as control signals for video generation, our approach ensures strict physical logic and appearance stability, successfully preserving the exact visual identities of dynamic entities even when they re-enter the scene after prolonged periods out of view. Experimental results demonstrate that our method supports the synthesis of complex and extended events with unprecedented controllability and persistent dynamic object memory. Project Page: https://worlddirector.github.io/
+
+### Summary
+
+WorldDirector decouples semantic motion orchestration from visual generation using LLMs to achieve persistent dynamic object memory and high controllability in video world models.
+
+### Subjects
+
+cs.CV
+
+### arXiv
+
+Image: arXiv 2607.02517v1
+
+### Paper Type
+
+Framework Method
+
+### Domain
+
+Video Generative AI World Models
+
+Authors
+
+Hanlin Wang, Hao Ouyang, Qiuyu Wang, Wen Wang, Qingyan Bai, Ka Leong Cheng, Yue Yu, Yixuan Li, Yihao Meng, Zichen Liu, Yanhong Zeng, Yujun Shen, Qifeng Chen
+
+Submitted
+
+Jul 02, 2026--------------------------------------------------------------------------------
+MemoBench: Benchmarking World Modeling in Dynamically Changing Environments · ArXivSignals (https://arxivsignals.io/papers/2606.27537)
+citeturn377search3 [wordlim: 200] Published: 2 months ago; Crawled: 3 days ago; Across 360 ground-truth clips and 10 state-of-the-art models, no model exceeds an Object Reappearance Score (ORS) of $0.6$, and the best camera-conditioned model scores only $0.582$, revealing that persistent object memory across occlusion remains an open problem. ... Neither setting tests the joint challenge of dynamic camera motion and dynamic scene content — the scenario where a model must track not just object identity but its evolving physical state across an occlusion gap. ...   * Real-world (164 clips): Controlled indoor recordings of 30 physical-state-change processes (dissolution, combustion, viscous flow, etc.) across 7 categories; poses estimated via MapAnything followed by trajectory smoothing. ...      * General video quality: Visual Quality ($S_{\mathrm{vq}}$, LAION aesthetic + CLIP-IQA+), Motion Smoothness ($S_{\mathrm{ms}}$, RAFT optical flow warp error), Object Identity Consistency ($S_{\mathrm{oc}}$, DINOv2 ViT-B/14 top-$k$% patch cosine similarity), Geo3D Consistency ($S_{\mathrm{gc}}$, Depth Anything V2 consecutive depth-map cosine similarity).
+## Summary
+
+[Button: ⧉ Copy MD][Button: ↓ .md]
+
+✦ AI summary · sonnet
+
+## TL;DR
+
+MemoBench is a diagnostic benchmark for evaluating memory consistency in video generation models under the disappear-and-reappear paradigm: a target object undergoes a physical process, leaves the field of view, and must reappear in its updated state. Across 360 ground-truth clips and 10 state-of-the-art models, no model exceeds an Object Reappearance Score (ORS) of $0.6$, and the best camera-conditioned model scores only $0.582$, revealing that persistent object memory across occlusion remains an open problem.
+
+## Problem & Motivation
+
+Existing video generation benchmarks either (a) evaluate consistency only while the target object remains continuously visible, or (b) force objects out of view but only in static scenes where nothing changes during occlusion. Neither setting tests the joint challenge of dynamic camera motion and dynamic scene content — the scenario where a model must track not just object identity but its evolving physical state across an occlusion gap. --------------------------------------------------------------------------------
+OCC-MLLM-V1: Occlusion reasoning with commonsense-guided Multi-modal LLM based agent via internal Chain-of-Thoughts (CoTs) - ScienceDirect (https://www.sciencedirect.com/science/article/abs/pii/S1077314226001955)
+citeturn377search4 [wordlim: 200] Crawled: last month; Agent framework for occluded object reasoning with 3D reconstruction. ... We propose OCC-MLLM-V1, a commonsense-guided multi-modal LLM based agent framework that addresses these limitations with three contributions: (1) a multi-modal agent framework leveraging 3D-aware supervision and internal Chain-of-Thought reasoning to autonomously understand and reconstruct occluded objects through step-by-step visual analysis, (2) an agent-driven CoT reasoning mechanism incorporating supervised learning and reinforcement learning to guide step-by-step reasoning and self-reflection for enhanced occlusion understanding, and (3) two large-scale multi-modal CoT reasoning datasets with 110k synthetic and 34k real-world samples of occluded hand-held objects, extending category coverage from 8 to 20 classes.Extensive experiments demonstrate improvements of 17.9% on dataset 1 and 6.0% on dataset 2, outperforming both open-source and closed-source state-of-the-art MLLMs.
+
+## Computer Vision and Image Understanding
+
+Date: August 2026
+
+Article: 104828
+
+Volume: Volume 270
+
+## Published by: Elsevier
+
+# OCC-MLLM-V1: Occlusion reasoning with commonsense-guided Multi-modal LLM based agent via internal Chain-of-Thoughts (CoTs)
+
+Author links open overlay panel Chaoyi Wang ^{a} ^{b}, Qingdong He ^{d}, Jun Pei ^{a}, Lijie Xia ^{a}, Jianpo Liu ^{a}, Baoqing Li ^{a}, Xinhan Di ^{c}
+
+Show more
+
+Cite
+
+Add to Mendeley
+
+Share
+
+10.1016/j.cviu.2026.104828
+
+Access through your organizationPurchase PDF
+
+More actions
+
+  * Article preview
+
+## Highlights
+
+  * •
+
+Agent framework for occluded object reasoning with 3D reconstruction.
+
+  * •
+
+Internal CoT reasoning with supervised and RL training.
+
+  * •
+
+Two large-scale multimodal CoT occlusion datasets (110k and 34k samples).
+
+## Abstract
+
+Comprehending occluded objects remains a critical challenge for multi-modal large language models (MLLMs). Existing MLLMs struggle with this task as they do not leverage external tools such as 3D reconstruction to recover visual information lost to occlusion, and lack a step-by-step commonsense-guided reasoning agent capable of systematically analyzing partial cues, assessing evidence sufficiency, and making informed decisions under ambiguity. --------------------------------------------------------------------------------
+DL0162 World Model Object Permanence - Interview for Machine Learning (https://intvml.com/dl0162-world-model-object-permanence/)
+citeturn377search5 [wordlim: 200] Published: 2 weeks ago; Crawled: 3 days ago; The ground-truth trajectory is a dotted grey line; an explicit 3D memory model tracks it closely after the occlusion, a long-context model re-emerges about 1.2 metres off-lane and slowly converges back, and a short-context model produces no object after the occlusion until a spurious new vehicle appears far from the true trajectory ...   * $m_t$ is everything the generator may condition on: the context window of past latents, the recurrent state, and the persistent geometric memory. ... Sixty frames of latents at 256 tokens per frame is 15,360 tokens of context bought for a single occlusion, and every additional second of horizon costs another 6,144 tokens of cache plus a quadratic increase in prefill work, which is precisely why real-time interactive world models cap $H$ aggressively and then need a cheaper memory.
+Image: Architecture diagram in which an observation, an action, and a video tokenizer feed three parallel memory blocks: a long-context attention cache over the last H frames, a recurrent latent state whose prior propagates hidden objects, and a pose-indexed 3D or bird's-eye-view memory holding explicit object slots; all three condition a diffusion or autoregressive generator that predicts the next frame, which is appended back into the context as an autoregressive loop
+
+Figure 1: Three places a hidden object can live. The generator is identical in all three cases; what changes is which memory still contains the occluded vehicle at frame $t$, and therefore whether the model re-renders the same car or invents a new one.
+
+The cleanest way to reason about the recurrent path is the standard latent-dynamics factorization used by Dreamer-style world models. A posterior $q(s_t \mid s_{t-1}, a_t, o_t)$ fuses the new observation, while a prior $p(s_t \mid s_{t-1}, a_t)$ predicts the next state without one. Under full occlusion the object’s contribution to the posterior disappears, so the model is effectively running the prior for $T_{\mathrm{occ}}$ steps on that part of the scene, which is exactly the regime where capacity limits and accumulated error show up. --------------------------------------------------------------------------------
+Event-Conditioned Diagnostics of Kinematic, Contact, and Object-Permanence Fields in Passive Object-State World Models | Zenodo (https://zenodo.org/records/20827855)
+citeturn377search6 [wordlim: 200] Published: 2 months ago; Crawled: today; # Event-Conditioned Diagnostics of Kinematic, Contact, and Object-Permanence Fields in Passive Object-State World Models ... Finally, fixed-horizon projection causal field effect (CFE) shows that suppressing field-aligned directions can degrade event-relevant prediction, with strongest evidence for contact-aligned structure in collision-contact windows and more qualified evidence for object-permanence-aligned structure in hard-occlusion hidden windows. ... 2026-06-26 ...     https://github.com/lysea8282/event-conditioned-world-model-diagnostics
+--------------------------------------------------------------------------------
+AtlasVLA: Persistent World-Ego State Modeling for Vision-Language-Action Models — METAL LAB (https://metallab.ai/en/papers/arxiv-2608.06729)
+citeturn377search7 [wordlim: 200] Published: last month; Crawled: 5 days ago; arXiv:2608.06729 2026-08-06 ... Persistent World State Memory Continuously fuses 2D observations into a 3D voxel map so objects out of frame are still remembered. ... AtlasVLA lifts each 2D wrist-camera frame into 3D space using depth estimation, continuously fusing it into a voxel-hashed (small 3D grid cell based) 4D 'Persistent World State Memory,' while a separate 'Ego-Working State Memory' condenses what tasks have already been completed.
+--------------------------------------------------------------------------------
+Published as a conference paper at ICLR 2026 (https://openreview.net/pdf?id=9agaxh8ClV)
+citeturn377search16 [wordlim: 200] Published: 6 months ago; similarly distinguish dynamic objects from static backgrounds while maintaining persistent mem- ... the cognitive mapping capabilities needed for persistent memory and scene revisitation. ... stored static scene, relocates the camera pose, and updates the memory with new observations, ... a pointmap representation for scene-level 3D reconstruction, implicitly inferring both camera pose
+--------------------------------------------------------------------------------
+Continuous 3D Perception Model with Persistent State (https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_Continuous_3D_Perception_Model_with_Persistent_State_CVPR_2025_paper.pdf)
+citeturn377search17 [wordlim: 200] maintains and incrementally updates a persistent internal state that encodes the scene content.With each new observation, the model simultaneously updates this state and reads from it to predict the current view’s 3D properties, including an estimate of that view’s dense 3D geometry (as a pointmap; a 3D point per-pixel in a world coordinate frame) and camera parameters (both intrinsics and extrinsics). ... One prominent direction focuses on improving traditional reconstruction pipelines, including replacing hand-crafted components with learning-based alternatives (e.g., substituting conventional feature descriptors [6, 47] with learned ones [17, 20, 63, 73], integrating data-driven priors [13, 77–79, 93, 97, 105] into the systems, or optimizing entire systems end-to-end [76, 78, 83, 94].
+--------------------------------------------------------------------------------
+CVPR 2026 Open Access Repository (https://openaccess.thecvf.com/content/CVPR2026/html/Yugay_Gaussian_Mapping_for_Evolving_Scenes_CVPR_2026_paper.html)
+citeturn377search8 [wordlim: 200] Crawled: 2 months ago; While recent works have begun addressing short-term dynamics (motion within the camera's view), long-term dynamics (the scene evolving through changes out of view) remain less explored.To overcome this limitation, we introduce a dynamic scene adaptation mechanism that continuously updates the 3D representation to reflect the latest changes. ...     [pdf] [arXiv] ... @InProceedings{Yugay_2026_CVPR, author = {Yugay, Vladimir and Kersten, Thies and Carlone, Luca and Gevers, Theo and Oswald, Martin R. and Schmid, Lukas}, title = {Gaussian Mapping for Evolving Scenes}, booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, month = {June}, year = {2026}, pages = {18903-18912} }
+--------------------------------------------------------------------------------
+State of World Models 2026 | Landscape Report (https://world-models.io/reports/state-of-world-models-2026/)
+citeturn377search9 [wordlim: 200] Crawled: 5 days ago; # State of World Models 2026 ... The report distinguishes reinforcement learning, video, embodied, autonomous driving, spatial and 3D, and agentic or procedural world models. ... WorldModelBench focuses on video generation as world modeling, WorldPrediction on high-level world modeling and long-horizon procedural planning, and WorldArena on the gap between perceptual quality and functional utility in embodied systems.Evaluation should include temporal coherence, physical consistency, object permanence, action sensitivity, causal plausibility, planning utility, generalization and functional value.
+--------------------------------------------------------------------------------
+Paper page - Mem-World: Memory-Augmented Action-Conditioned World Models for Persistent Robot Manipulation (https://huggingface.co/papers/2606.18960)
+citeturn377search10 [wordlim: 200] Published: 2 months ago; Crawled: today; arxiv:2606.18960 ... Mem-World enhances robot learning by introducing a memory-augmented multi-view action-conditioned world model that uses 4D surfel-indexed memory to maintain persistent visual consistency during manipulation tasks.
+--------------------------------------------------------------------------------
+Recurrent connections facilitate occluded object recognition by explaining-away | Nature Communications (https://www.nature.com/articles/s41467-026-68806-5)
+citeturn377search11 [wordlim: 200] Published: 7 months ago; Crawled: last week; We subsequently developed a more detailed, neurobiologically inspired model demonstrating that recurrent processing can morph the internal representation of an occluded object to a state more similar to that of an unoccluded one. ... We created the 3D occlusion dataset from ThreeDWorld^{39}, a high-fidelity multi-modal platform for physical simulation. ... 6E) and reaction times were shorter (low occlusion p < 1e-5, medium occlusion p < 0.002, high occlusion p < 1e-4, paired Student’s t test).
+--------------------------------------------------------------------------------
+PersistGS: Differentiable Physics for Object Permanence (https://openreview.net/attachment?id=EjVChlugG1&name=pdf)
+citeturn377search18 [wordlim: 200] Published: 4 months ago; found the decomposed architecture outperforms by +6.9 dB, ... and simulates deformable objects from real-world video. ... data, and POGS [38] maintains persistent object Gaussians ... through occlusion, we maintain a complete 3D Gaussian ... Splatting for object permanence through temporal occlusion. ... Our goal is a 4D reconstruction in which the object persists ... Gaussians (∼25K) and a separate per-object Gaussian model
+--------------------------------------------------------------------------------
+3.1. Introduction (https://www.doc.ic.ac.uk/~ajd/Publications/Wada-K-2022-PhD-Thesis.pdf)
+citeturn377search19 [wordlim: 200] Published: 4.3 years ago; A complete semantic world model composed of object CAD models allows manipulations in complex scenes (e.g., object piles) enabling reasoning about inter-object geometric relationships (e.g., contact, support) and object-specific manipulations (e.g., desired grasp points, place poses).However, inferring object configurations in cluttered environments such as piles (Figure 3.1) is challenging even with state-of-the-art methods for object detection [Li et al., 2017, He et al., 2017] and pose estimation [Xiang et al., 2018, Wang et al., 2019] due to the limited visibility of objects that are mutually occluding and in contact. ... In this chapter, we present a vision system that tackles semantic mapping of objects (object-level semantic mapping) in such challenging scenes, producing a persistent 3D multi-object representation from multi-view images. ... This visual capability to infer the poses of multiple objects with occlusion and contact enables robotic planning for pick-and-place in a cluttered scene.
+--------------------------------------------------------------------------------
+World model (artificial intelligence) (https://en.wikipedia.org/wiki/World_model_%28artificial_intelligence%29)
+citeturn377search20 [wordlim: 200] Crawled: 3 months ago; They simulate dynamics such as physics, object interactions, and causality. ... They predict state changes in that data in latent space. ... * Interactive evaluation measures consistency over minutes of interaction, memory of off-screen objects, and response to user actions or text prompts.Genie 3: A new frontier for world models. ... However, pixel reconstruction error rate with episodic rewards often fails. ... The model supports persistent three-dimensional worlds and real-time interaction.Waymo adopted Genie 3 in February 2026 and used it to create a specialized world model for autonomous driving simulation, called the Waymo World Model.
+--------------------------------------------------------------------------------
+Object permanence (https://en.wikipedia.org/wiki/Object_permanence)
+citeturn377search21 [wordlim: 200] Crawled: 4 months ago; Object permanence is the understanding that whether an object can be sense d has no effect on whether it continues to exist. ... Jean Piaget, the Swiss psychologist who first studied object permanence in infants, argued that it is one of an infant's most important accomplishments, as, without this concept, objects would have no separate, permanent existence. ... Piaget thought that an infant's perception and understanding of the world depended on their motor development, which was required for the infant to link visual, tactile and motor representations of objects. ... Object permanence is considered to be one of the earliest methods for evaluating working memory. ... May 1976.
+--------------------------------------------------------------------------------
+Persistent object memory for robots – tracks what, where, and when (https://www.reddit.com/r/robotics/comments/1smaekh/persistent_object_memory_for_robots_tracks_what/)
+citeturn377reddit22 [wordlim: 200] Published: 4 months ago; [Wednesday April 15 2026] [+9 votes] ... RTSM watches an RGB-D stream, segments objects, tracks them across viewpoints, and maintains a queryable 3D object map. ... The option to query for IDs sounds very promising because my robot has a semantic memory which could be tied to the object IDs of your RTSM.
+

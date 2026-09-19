@@ -1,0 +1,117 @@
+{
+  "schema": "s47-c2-v7-candidate-static-selftest-v1",
+  "status": "PASS_S47_C2_V7_CANDIDATE_STATIC_SELFTEST",
+  "completed_utc": "2026-09-08T11:34:34.245202+00:00",
+  "row": "C2",
+  "seed": 44,
+  "scope": "Frozen source, standard-library AST, disposable synthetic process/filesystem checks, and one disposable pre-scientific derived-parent production-route regression",
+  "production_candidate_sha256": {
+    "PROTOCOL.md": "183ae19b30c28b224d631e0d1a06051322391dab10386de0169a98a4f1e952ef",
+    "FREEZE_PROTOCOL.md": "122f840d3be68d813bb911445590e3b2c00a7428de92020fe1624933df4d9faf",
+    "generation_gate.py": "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec",
+    "runtime_adapter.py": "5e6f2e89c724cfc3f5b4eb486eb2a9384fde9b23fb12010576f5c7f3f98e8d7f",
+    "launch_generation.py": "4a96ba1e49a8ce2dae4885f70cf3b55debcacde594425dbaae1d59268dafc974",
+    "freeze_c2_manifest.py": "994276b38b1b597d2a691e020f5593289631c3be7568aa9bbf3ef2be41b9a8f3",
+    "create_launch_authorization.py": "209d6b141e154574d8ddd59e252839c27c911e4ec6fba4b18da5a9aca16ec89e",
+    "inference_seed44.yaml": "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+  },
+  "static_selftest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/static_selftest.py",
+    "sha256": "e2ffea8bd9825a5387962c2a966e5942eec031e2a2a47a467e01fd8b0f76c2f5"
+  },
+  "isolated_runs": [
+    {
+      "executable": "/opt/homebrew/bin/python3",
+      "python_version": "3.13.0",
+      "flags": ["-I", "-B", "-S"],
+      "returncode": 0,
+      "reported_status": "PASS_S47_C2_V7_CANDIDATE_STATIC_SELFTEST",
+      "stdout_sha256": "c42471aac33cf16493dc997f96e62b8b553ed6b1a8f67dc66d20c7494911250b"
+    },
+    {
+      "executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+      "python_version": "3.12.14",
+      "flags": ["-I", "-B", "-S"],
+      "returncode": 0,
+      "reported_status": "PASS_S47_C2_V7_CANDIDATE_STATIC_SELFTEST",
+      "stdout_sha256": "206a2a66f8927cf1f1b14c96c81e0252fe5b1b3b88849be25a55d4784f336a76"
+    }
+  ],
+  "v6_functional_blocker_and_minimum_fix": {
+    "withdrawn_v6_receipt_sha256": "71574a42d38b7ab0905869468aae312fa88a6e4153375056dd3082db06fc463c",
+    "independent_probe_source_sha256": "dc4875960f563f714408ce33b19938fdbf77992f4a5be8c6a1291eecd6856753",
+    "independent_python_3_13_output_sha256": "296eb050c1cb8479a9070737332a24032d5bf99646b69b2ae2160498709d4116",
+    "independent_python_3_12_output_sha256": "8956ea993562f7a63b622f2e638c7c0aef88af16eba172a975ee94b73e53656a",
+    "blocker": "the inherited parent stores psutil as a fast local while V6 watchdog normal and cleanup paths looked up namespace['psutil'], which was absent",
+    "v7_change": "the AST Popen replacement passes process_api=psutil; private spawn_worker requires it; normal watchdog and exceptional cleanup both use the same process_api binding",
+    "unrelated_security_mechanisms_added": 0
+  },
+  "derived_parent_process_api_regression": {
+    "ran_on_both_interpreters": true,
+    "actual_derived_parent_called": true,
+    "private_spawn_worker_called": true,
+    "capability_consumed_before_gate": true,
+    "watchdog_receipt_status": "WATCHDOG_CONFIRMED_REGISTERED_DESCENDANTS_GONE",
+    "worker_stopped_before_scientific_import": true,
+    "module_namespace_psutil_lookup_absent": true,
+    "process_api_binding": "s47-v7-source-only-process-api",
+    "synthetic_supervisor_returncode": 1,
+    "why_returncode_one_is_required": "the disposable full resource gate intentionally rejects before scientific import; the regression tests dependency transport and watchdog closure, not generation success"
+  },
+  "reproduced_v6_security_checks": {
+    "launcher_full_ast_reversible": true,
+    "runtime_full_ast_reversible": true,
+    "source_domain_count": 219,
+    "public_worker_route_absent": true,
+    "cli_negative_cases": 8,
+    "same_fd_path_swap_rejected": true,
+    "prepare_success_failure_coexistence_rejected": true,
+    "authorization_success_failure_coexistence_rejected": true,
+    "runtime_create_only_terminal_preserved": true,
+    "all_seven_scientific_resources_required_before_complete_seal": true,
+    "inherited_output_inode_swap_rejected": true,
+    "sigkill_and_sigterm_watchdog_cases": 5,
+    "detached_closed_stdio_descendant_cases": 2,
+    "terminal_commit_fault_cases": 2
+  },
+  "withdrawn_v6": {
+    "exact_history_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/history/v6_blocked_exact",
+    "candidate_receipt_sha256": "acafa9ab89ecb832c19bb355b4948696039e2e2be1748ad856f4bd6be29b219a",
+    "static_selftest_sha256": "2759903ba1e5dbde83f4050abbc9b65c46cd8fb86267b6dc5afb3c01a3da941b",
+    "authority_for_v7": "NONE"
+  },
+  "formal_paths_lexists": {
+    "freeze_attempt_01": false,
+    "review_attachment_01": false,
+    "FINAL_ATTACHMENT_REVIEW.json": false,
+    "LAUNCH_READINESS_REVIEW.json": false,
+    "launch_authorization_01.json": false,
+    "launch_authorization_attempt_01": false,
+    ".freeze_attempt_01.claimed": false,
+    ".review_attachment_01.claimed": false,
+    ".review_attachment_01.preflight": false,
+    ".freeze_attempt_01.staging": false,
+    ".review_attachment_01.staging": false,
+    ".execution_01.watchdog_failure.json": false,
+    ".execution_01.supervisor_failure.json": false,
+    "execution_01": false,
+    "results/S47_C2_confirmation_generation": false
+  },
+  "execution_boundary": {
+    "formal_gate_calls": 0,
+    "prepare_calls": 0,
+    "attach_calls": 0,
+    "authorization_main_calls": 0,
+    "launcher_main_calls": 0,
+    "disposable_pre_scientific_derived_worker_calls": 2,
+    "model_or_scientific_imports": 0,
+    "component_bodies_read": 0,
+    "c2_input_body_bytes_read": 0,
+    "images_opened": 0,
+    "pixels_decoded": 0,
+    "generation_calls": 0,
+    "formal_or_result_paths_created": 0
+  },
+  "next_gate": "TWO_FRESH_DIFFERENT_AUTHOR_EXACT_V7_SOURCE_REVIEWS_BEFORE_UNIQUE_PREPARE",
+  "authorization_effect": "NONE"
+}

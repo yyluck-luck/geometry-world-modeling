@@ -1,0 +1,46 @@
+{
+  "schema": "s35-resource-gate-initial-source-review-v1",
+  "status": "REVISION_REQUIRED_FOR_BINDING",
+  "passed": false,
+  "reviewed_utc": "2026-09-06T22:47:14.835234+00:00",
+  "reviewer": "/root/supervisor_full_readthrough",
+  "scope": "Only current resource_gate.py draft, not whole integration approval",
+  "reviewed_identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/resource_gate.py": "ee7c2f9447e1243986d77a57409fdc59db7ccfb8849fb887f79fcbac9a746b25"
+  },
+  "positive_findings": [
+    "Standard-library-only imports; draft/missing metadata/file checks precede any component GB hash and no model constructor is reachable here.",
+    "All5 actual file roles and published VMem/CLIP/CUT3R identities are checked before data hashing; original VAE pair requires a dedicated same-directory config/weight and claimed original revision.",
+    "Immediate stat recheck avoids a second GB hash; trusted-project guard is explicitly not an adversarial filesystem sandbox.",
+    "Fresh exclusive readiness receipt distinguishes NOT_READY_BEFORE_MODEL_IMPORT from PASS_RESOURCE_GATE; no download or auth behavior."
+  ],
+  "necessary_revisions": [
+    {
+      "id": "review_content_and_required_source_domain",
+      "finding": "source_identities need only be nonempty; review_receipts need only point to SHA-matching files. No approval status, scope, approved controls/source/component identities or VAE provenance is read. This can accidentally accept an old NOT_INTEGRATED or unrelated receipt and omit an actual execution module.",
+      "fix": "Require the final bounded execution source domain (at least gate/integration/archive/factory/runner plus actual delegated originals/trace controls), and inspect the3 receipt schemas/statuses and their approved preparation core/source/controls/VAE file identities. Bind a noncircular candidate/core identity or exact reviewed fields, not mutually recursive final-manifest and receipt SHAs."
+    },
+    {
+      "id": "gate_manifest_rebinding",
+      "finding": "validate_gate verifies the manifest file hash but never compares supplied gate component/source records against its JSON content. A wrong or stale manually assembled gate can retain a correct manifest hash while using other component records.",
+      "fix": "Read the already-small manifest and compare its role/path/size/SHA/source-domain/controls fields to the gate exactly, then perform current stat/source checks. Do not call full check_manifest again or rehash GB files."
+    }
+  ],
+  "recorded_execution_boundary": "PASS_RESOURCE_GATE only permits the next reviewed loading stage. It is not actual model construction, generation or scientific completion; a recorded_execution trace still needs the legitimate live pipeline/runtime source chain and observed calls.",
+  "proposed_minimal_checks": [
+    "Actual negative missing-component entry stops before scientific imports/model/weight access.",
+    "Draft or wrong-manifest entry stops before loading; retained failure receipt is not a generation result.",
+    "After correction, a mismatched source/component gate is rejected using metadata-only fixtures, without fabricating positive whole-resource readiness."
+  ],
+  "actual_activity": {
+    "real_weight_bytes_read": 0,
+    "real_RGB_reads": 0,
+    "GT_reads": 0,
+    "real_arrays_read": 0,
+    "science_imports": 0,
+    "new_tests_run": 0,
+    "network": 0,
+    "other_author_files_modified": 0
+  },
+  "next": "Root patches this bounded draft and binds its final version with the remaining implementation; different-author final integration source review is still pending."
+}

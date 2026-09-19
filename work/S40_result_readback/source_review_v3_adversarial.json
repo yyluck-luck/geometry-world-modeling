@@ -1,0 +1,180 @@
+{
+  "schema": "s40-readback-v3-adversarial-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "REVISION_REQUIRED",
+  "completed_utc": "2026-09-07T12:44:05Z",
+  "reviewer_role": "/root/gemini_third_review_verifier",
+  "author_role": "/root",
+  "review_mode": "independent_read_only_adversarial_static_review",
+  "reviewed_identities": {
+    "readback_source": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/readback.py",
+      "expected_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+      "actual_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0"
+    },
+    "protocol": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/PROTOCOL_DRAFT.md",
+      "expected_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+      "actual_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078"
+    },
+    "revision_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/revision_v3_receipt.json",
+      "expected_sha256": "e382f67a6e59b830443b2a947a27e7285e87aef2b6701474888ac88171757424",
+      "actual_sha256": "e382f67a6e59b830443b2a947a27e7285e87aef2b6701474888ac88171757424"
+    },
+    "reconstructed_v2_source_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "frozen_pipeline_sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "archive_manifest_sha256_from_revision_receipt": "4e2acb3448589710aedcf6945d2d278bfa1b6d194b94adaad0d9b371697e153b",
+    "archive_events_sha256_from_revision_receipt": "bca5c9148a81ba6a070cb4d10c67db384bf1d96f06a0233f746b117a3228a7b1",
+    "trace_events_sha256_from_revision_receipt": "5d748f8c7fb095c0ecc6eac899b846d86a89a07264b927ee20fc6cbd6b65bb3e"
+  },
+  "delta_audit": {
+    "reconstructed_v2_matches_revision_receipt_previous_sha256": true,
+    "v3_diff_is_one_hunk": true,
+    "v3_changed_source_lines": [
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283,
+      284
+    ],
+    "change_scope": "Only context_time_indices dispatch in the two-batch loop changed relative to reviewed v2.",
+    "unrelated_hash_chain_file_identity_comparison_and_claim_boundaries_relaxed": false
+  },
+  "actual_schema_metadata_observed_without_payload_body_reads": {
+    "first_context_output": {
+      "archive_event_seq": 22,
+      "encoded_kind": "list",
+      "encoded_items": [
+        {
+          "kind": "scalar",
+          "type": "int",
+          "value": 0
+        }
+      ]
+    },
+    "second_context_output": {
+      "archive_event_seq": 68,
+      "encoded_kind": "tensor",
+      "dtype": "int64",
+      "shape": [
+        4
+      ],
+      "nbytes": 32,
+      "sha256": "2a1119dcc2a2f3d1103985b60723071ec44ab4594d565dfb832141f07b2ea1d5"
+    },
+    "frozen_source": {
+      "first_batch_assignment": "modeling/pipeline.py:631-632 assigns context_time_indices = [0]",
+      "later_batch_assignment": "modeling/pipeline.py:752-753 assigns torch.from_numpy(np.array(selected_indices))"
+    }
+  },
+  "adversarial_checks": {
+    "actual_first_batch_metadata_matches_int_list_zero": true,
+    "actual_second_batch_metadata_matches_tensor_descriptor": true,
+    "valid_archived_bool_item_rejected_by_type_x_is_int": true,
+    "valid_archived_tuple_zero_rejected_as_tuple": false,
+    "second_batch_list_rejected_after_decode": true,
+    "second_batch_true_tensor_uses_reader_array": true,
+    "second_batch_reader_array_requires_blob_path_previously_seen_as_a_tensor": true,
+    "second_batch_reader_array_requires_the_supplied_descriptor_to_equal_the_registered_descriptor": false,
+    "decoded_metadata_preserves_list_versus_tuple_origin": false,
+    "decoded_metadata_validates_scalar_type_tag_against_json_value_type": false
+  },
+  "blocking_findings": [
+    {
+      "id": "R1",
+      "severity": "BLOCKING",
+      "title": "The first-batch exact-list gate cannot distinguish an archived tuple from a list",
+      "evidence": [
+        "archive_outputs.py:190-197 records list and tuple as distinct kind values.",
+        "readback.py:108 decodes both kind=list and kind=tuple to a Python list.",
+        "readback.py:273-277 applies type(raw_ids) is list only after that lossy decode.",
+        "Therefore a valid archived Python tuple containing one exact int zero decodes to [0] and passes the claimed exact original Python-list gate."
+      ],
+      "impact": "The source does not establish the protocol's representation-specific claim that batch 1 was originally a Python list. This is the exact boundary v3 was introduced to certify, so the current source cannot receive a PASS even though the fixed S40 archive itself records the correct list.",
+      "required_fix": "Check the raw encoded archive node at context_info.context_time_indices before Reader.metadata erases its kind, or preserve tuple as tuple. Require batch 1 raw kind=list with exactly one item whose complete scalar schema is kind=scalar,type=int,value=0."
+    },
+    {
+      "id": "R2",
+      "severity": "BLOCKING",
+      "title": "The second-batch tensor-origin check also occurs after provenance-erasing metadata decoding",
+      "evidence": [
+        "readback.py:103-111 decodes an archived ordinary Python dict into a plain dict, while a true tensor descriptor is also returned as a plain dict.",
+        "readback.py:279-283 checks only that the decoded dict reports kind=tensor before Reader.array.",
+        "readback.py:112-120 requires that the referenced blob path exists in tensor_files, but it does not require the supplied descriptor to equal the descriptor registered for that path.",
+        "An archived ordinary dict shaped like a tensor descriptor can therefore masquerade as a tensor if it references a tensor blob registered elsewhere."
+      ],
+      "impact": "The current code correctly follows the tensor path for the fixed event-68 value, but the verifier itself does not strictly prove that the original second-batch value was encoded as a tensor rather than a descriptor-like Python dict.",
+      "required_fix": "Require the raw context_time_indices archive node itself to have kind=tensor, and require Reader.array's supplied descriptor to equal tensor_files[resolved_blob_path] exactly before mapping it."
+    }
+  ],
+  "nonblocking_findings": [
+    {
+      "id": "A1",
+      "title": "A genuine archived bool does not pass, but scalar type tags are not validated",
+      "evidence": "A valid bool decodes to Python bool and is rejected by type(x) is int. Reader.metadata at line 109 nevertheless ignores the encoded scalar type field, so malformed kind=scalar,type=bool,value=0 would decode as int and pass. The fixed event 22 is correctly encoded as type=int,value=0.",
+      "recommendation": "The raw-node fix for R1 should validate the complete scalar schema; more generally Reader.metadata should reject inconsistent or unknown metadata schemas."
+    },
+    {
+      "id": "A2",
+      "title": "One error message reverses the stated temporal relation",
+      "evidence": "readback.py:340 enforces maps[0][0] < contexts[1][0], meaning the first map commit precedes the second context capture, while the message says the second context precedes the first committed map.",
+      "recommendation": "Correct the message during the next source revision; the inequality itself has the intended direction."
+    }
+  ],
+  "preserved_downstream_constraints": {
+    "selected_ids_unique_in_range_and_equal_trace_begin_and_cache_commit": true,
+    "retained_ids_equal_trace_batch_complete_and_fixed_1_to_4_then_5_to_8": true,
+    "archive_causal_order_preserved": true,
+    "history_lengths_1_to_5_to_9_preserved": true,
+    "map_counts_5_then_14_and_depth_counts_5_then_9_preserved": true,
+    "sampler_output_to_samples_z_to_cache_latent_checks_preserved": true,
+    "target_samples_to_encoder_input_to_encoder_output_to_cache_embedding_checks_preserved": true,
+    "context_camera_K_translation_condition_and_sampler_checks_preserved": true,
+    "cross_batch_first_five_latent_embedding_camera_K_and_pixel_checks_preserved": true,
+    "summary_selected_and_retained_ids_equality_preserved": true,
+    "trace_two_batch_state_machine_callback_counts_and_session_closure_preserved": true,
+    "evidence": "The exact reconstructed-v2 versus v3 diff contains only the context_time_indices hunk; readback.py:284-355 and trace_states at 147-179 remain unchanged."
+  },
+  "required_regression_conditions": [
+    "A raw encoded batch-1 list containing scalar int zero is accepted.",
+    "A raw encoded batch-1 tuple containing scalar int zero is rejected before lossy decoding.",
+    "A raw encoded batch-1 list containing bool false is rejected, including when its scalar type tag is inspected.",
+    "Batch 2 accepts only a raw archive tensor node whose complete descriptor equals the already body-verified registered descriptor.",
+    "Batch-2 list, tuple, or ordinary dict values are rejected even if their decoded value or descriptor-looking fields match the expected IDs.",
+    "All selected/history/trace/commit and bitwise-consumption checks remain textually and semantically unchanged."
+  ],
+  "next_gate": "Revise the representation checks, issue new source/protocol/revision hashes, and obtain a fresh independent adversarial source review before rebasing or executing the outer supervisor.",
+  "post_review_input_recheck": {
+    "checked_utc": "2026-09-07T12:47:10Z",
+    "readback_source_unchanged": true,
+    "readback_source_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+    "revision_receipt_unchanged": true,
+    "revision_receipt_sha256": "e382f67a6e59b830443b2a947a27e7285e87aef2b6701474888ac88171757424",
+    "protocol_changed_after_review_snapshot": true,
+    "reviewed_protocol_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+    "current_protocol_sha256": "be2cb8e12f68677deefbe3b5f5b8661eb394677c49cc861ea0e392f63fe571ca",
+    "boundary": "This verdict remains a review of the exact dispatched ad74e5... protocol snapshot and 51f675... source. It does not approve the concurrently revised protocol."
+  },
+  "execution_boundary": {
+    "readback_executed": false,
+    "readback_source_imported": false,
+    "model_executed": false,
+    "generation_executed": false,
+    "resource_gate_executed": false,
+    "tensor_blob_or_image_payload_bodies_read": false,
+    "static_operations_only": [
+      "SHA-256 of source, protocol, and receipts",
+      "line-by-line source and protocol inspection",
+      "in-memory reconstruction and textual diff of v2",
+      "JSON/JSONL metadata-only inspection of the two context_time_indices representations"
+    ]
+  }
+}

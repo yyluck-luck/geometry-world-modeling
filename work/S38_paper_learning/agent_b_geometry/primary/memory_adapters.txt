@@ -1,0 +1,709 @@
+                              This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                           Except for this watermark, it is identical to the accepted version;
+                                     the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+                      Memory-based Adapters for Online 3D Scene Perception
+
+    Xiuwei Xu1 ,* Chong Xia2 ,* Ziwei Wang3 , Linqing Zhao1 , Yueqi Duan2 , Jie Zhou1 , Jiwen Lu1†
+                          1
+                            Department of Automation, Tsinghua University
+                     2
+                       Department of Electronic Engineering, Tsinghua University
+                                     3
+                                       Carnegie Mellon University
+                      {xxw21, xiac20}@mails.tsinghua.edu.cn; {ziweiwa2}@andrew.cmu.edu;
+                   {linqingzhao}@tju.edu.cn; {duanyueqi, jzhou, lujiwen}@tsinghua.edu.cn
+
+
+                Online Semantic Segmentation                          Online Object Detection           Online Instance Segmentation
+                                                    wall
+                                                    floor
+                                                    cabinet
+                                                    bed
+                                                    chair
+                                                    picture
+                                                    counter
+                                                    desk
+                                                    curtain
+                                                    refrigerator
+                                                    sofa
+                                                    table
+                                                    door
+                                                    window
+                                                    bookshelf
+                                                    shower curtain
+                                                    toilet
+                                                    sink
+                                                    bathtub
+                                                    other furniture
+
+
+
+
+Figure 1. We propose a general framework for online 3D scene perception. With the presented memory-based adapters, we empower
+existing offline models in different tasks with online perception ability, which is valuable for robotics applications.
+
+                              Abstract                                       global context. Our adapters can be easily inserted into
+                                                                             mainstream offline architectures of different tasks and sig-
+   In this paper, we propose a new framework for online 3D                   nificantly boost their performance on online tasks. Exten-
+scene perception. Conventional 3D scene perception meth-                     sive experiments on ScanNet and SceneNN datasets demon-
+ods are offline, i.e., take an already reconstructed 3D scene                strate our approach achieves leading performance on three
+geometry as input, which is not applicable in robotic ap-                    3D scene perception tasks compared with state-of-the-art
+plications where the input data is streaming RGB-D videos                    online methods by simply finetuning existing offline models,
+rather than a complete 3D scene reconstructed from pre-                      without any model and task-specific designs. Project page.
+collected RGB-D videos. To deal with online 3D scene per-
+ception tasks where data collection and perception should
+be performed simultaneously, the model should be able to
+process 3D scenes frame by frame and make use of the                         1. Introduction
+temporal information. To this end, we propose an adapter-
+                                                                             3D scene perception aims to parse a 3D scene into semantic
+based plug-and-play module for the backbone of 3D scene
+                                                                             or object-level entities, mainly including semantic segmen-
+perception model, which constructs memory to cache and
+                                                                             tation, object detection and instance segmentation, which is
+aggregate the extracted RGB-D features to empower offline
+                                                                             the fundamental ability for robotics or AR/VR applications.
+models with temporal learning ability. Specifically, we pro-
+                                                                             Since PointNet [32] proposes the first model that directly
+pose a queued memory mechanism to cache the supporting
+                                                                             process point clouds, great improvement on 3D scene per-
+point cloud and image features. Then we devise aggregation
+                                                                             ception [6, 38, 40, 42, 43] has been achieved in recent years
+modules which directly perform on the memory and pass
+                                                                             by accurate and efficient architecture design.
+temporal information to current frame. We further propose
+                                                                                 However, conventional 3D scene perception methods are
+3D-to-2D adapter to enhance image features with strong
+                                                                             offline, i.e., they take an already reconstructed 3D scene ge-
+  * Equal contribution.   † Corresponding author.                            ometry from pre-collected RGB-D videos without tempo-
+
+
+
+                                                                         21604
+ral information as input. While in most robotic application        2. Related Work
+such as navigation [4, 47] and manipulation [25] where the
+agent is usually initialized in an unknown environment, the        3D Scene Perception: 3D scene perception is widely stud-
+input data is streaming RGB-D videos and scene percep-             ied in computer vision, which can be divided into three
+tion should be performed synchronously with data collec-           mainstream tasks: semantic segmentation [6, 11, 32, 33],
+tion to guide the agent how to explore. Therefore, online 3D       object detection [13, 34, 38, 43] and instance segmenta-
+scene perception model with temporal modeling ability is           tion [17, 18, 40, 42, 45]. As we focus on the feature ex-
+required, which takes in streaming RGB-D video and con-            traction of 3D scene in this work, we mainly discuss the
+tinuously outputs the perception of the currently observed         backbone of 3D scene perception networks. Due to the un-
+3D scene. There are also a few online 3D scene perception          ordered property of point cloud data, voxelizing the points
+methods [16, 22, 24, 26, 46] designed for special architec-        and applying convolution on 3D grids is a natural solu-
+ture and task. As these methods only focus on temporal             tion [3, 31]. However, the computational cost and mem-
+aggregation for single modality, they cannot fully exploit         ory requirement both increase cubically with voxel resolu-
+temporal relations between image and point cloud features          tion, which is inefficient. PointNet [32] is the pioneer work
+and thus their performances are not satisfactory.                  which directly extracts feature representations from raw
+                                                                   point clouds. PointNet++ proposes set abstraction and fea-
+    In this paper, we propose a new general framework for          ture propagation operation based on PointNet, which helps
+online 3D scene perception. Different from previous works          learning more detailed local geometric information. As
+which design online perception approachs based on spe-             the furthest point sampling operation in PointNet++ is time
+cific architecture and task and train models on RGB-D              consuming, PV-CNN [23] converts point clouds to low-
+videos from scratch, we convert exsiting offline 3D per-           resolution voxels and apply 3D convolution to efficiently
+ception models to online ones by simply inserting plug-            aggregate local features. Another way to extract high-
+and-play modules and finetuning. Taking inspiration from           quality 3D features is sparse convolution [9, 10], which
+adapters [5, 29] which adapt image backbones to down-              voxelizes the point clouds but only apply 3D convolution
+stream tasks by additional parameter tuning, we propose            on non-empty voxels. To further improve the efficiency of
+memory-based adapters to empower the backbone of 3D                sparse CNNs, submanifold sparse convolution [6, 11] is in-
+perception model with temporal modeling ability by reusing         troduced, which only conducts convolution when the center
+the extracted features from previous frames. Specifically,         of kernel slides over active sites and keeps the same level of
+we propose a queued memory mechanism to cache the                  sparsity throughout the network. However, these methods
+supporting point cloud and image features for the RGB-D            are designed for offline 3D scene perception, which is not
+frame at current time. Based on the structure of memory, we        able to process a streaming RGB-D video at real time.
+devise aggregation modules which directly operate on the              Streaming Data Analysis: As the input for online 3D
+memory and pass temporal information to current frame. As          scene perception model is streaming RGB-D video, we re-
+the global context of image features is limited, we further        view the streaming data analysis methods for both image
+propose 3D-to-2D adapter to enhance image features with            and point cloud domains. In 2D vision, many works [2,
+3D memory projection and 2D sparse aggregation. In this            8, 19] extend causal convolution [28] to streaming videos,
+way, we can make use of the existing mainstream 3D scene           where a stream buffer is devised to cache previous frames
+perception model zoo to acquire a series of online models,         and 3D causal convolution is applied to unidirectionally ag-
+with simple inserting and finetuning. We conduct extensive         gregate spatial-temporal information. TSM [20] utilizes a
+experiments on three online perception tasks on ScanNet [7]        more efficient shift mechanism, where a proportion of chan-
+and SceneNN [15] datasets. Our approach achieves leading           nels of previous image features are shifted to the next frame.
+performance on all tasks and datasets without any additional       Then the spatial-temporal information can be efficiently ag-
+loss function and special prediction fusion strategy. To sum-      gregated by 2D convolution. Our image adapter also utilizes
+marize, our contributions include:                                 channel shift for efficient temporal modeling. Differently,
+• We propose a new framework for online 3D scene percep-           TSM is trained from scratch where the network can learn
+  tion, which extends existing offline models to online ones       how to model temporal information according to the shift
+  by adapter without model and task-specific design.               proportion. While we reorganize the channels and adopt
+• We propose general memory-based adapters for image               channel shift in a plug-and-play adapter to empower im-
+  and point cloud backbones, which cache and aggregate             age backbone with temporal modeling ability. However,
+  extracted features to model the temporal relations be-           as 2D streaming videos contain less helpful information
+  tween frames.                                                    for real world applications like robotic navigation [4, 47]
+• Equipped with our adapters, offline models are able to           and manipulation [25], increasing attention has been paid
+  achieve leading performance on three tasks compared              to 3D streaming RGB-D video analysis. A natural solu-
+  with state-of-the-art online models.                             tion is to first process 2D images and then project the pre-
+
+
+
+                                                                21605
+                      ...
+                                                                                                             result t-1
+                                  input t-1           Detailed
+                                                                 3D-2D-adapter
+
+
+                                                                   I-memory      I-adapter
+                                               Image                                         +
+                                              Backbone
+                                                                                                                         Fusion
+
+                                                      Detailed                                   Task Head
+                                                                  P-memory       P-adapter
+                                              Pointcloud                                     +
+                                              Backbone
+
+
+                                  input t                        3D-2D-adapter
+                                                                                                              result t
+                      ...
+
+
+Figure 2. Overall architecture of our approach. We insert memory-based adapters after image and point cloud backbones, which cache the
+extracted features in memory over time and perform temporal aggregation. 3D-to-2D adapter is proposed to further exploit inter-modal
+temporal information. Solid lines indicate operations within a single frame, while dashed lines indicate temporal operations.
+
+
+dictions to 3D point clouds, which is followed by a fusion               Some works also perform 3D reconstruction along with on-
+step to merge the predictions from different frames [24, 26].            line perception [22] to acquire high-quality point clouds or
+Fusion-aware 3D-Conv [46] and SVCNN [16] maintain the                    meshes, but this is not required [4, 35, 47]. In this work we
+information of previous frames in 3D space and conduct                   do not rely on 3D reconstruction and directly take RGB-D
+point-based convolution to fuse the 3D features for semantic             streaming video as input, which is a more general setting.
+segmentation. INS-CONV [22] extends sparse convolution                      Although great improvement has been achieved in the
+to incremental CNN to efficiently extract global 3D features             design of 3D perception models, most of them only fo-
+for semantic and instance segmentation. Differently, our                 cus on two scenarios: (1) Reconstructed scenes [1, 7].
+approach empowers offline model with online perception                   The model MRec is trained on point clouds of complete
+ability by image and point cloud memory-based adapters,                  scenes reconstructed from RGB-D videos. (2) Single-view
+which fully exploits the multimodal temporal relations.                  scenes [27, 41]. The model MSV is trained on single-view
+                                                                         point clouds back-projected from RGB-D image. However,
+3. Approach                                                              MRec requires the input to be a complete scene, which is
+                                                                         not accessible in real-time tasks. MSV is able to process
+In this section, we first introduce the definition of online 3D          RGB-D videos frame-by-frame, but fails to exploit temporal
+scene perception and explain our motivation of memory-                   information. Therefore, previous 3D models are not ready
+based adapter. Then we describe how to construct memory                  for the more practical online scene perception.
+and refine the backbone features by adapter for point cloud                 To this end, we aim to devise a plug-and-play temporal
+and image respectively.                                                  learning module, which can be inserted into any single-view
+3.1. Online 3D Scene Perception                                          perception model MSV and empowers it with temporal
+                                                                         modeling ability. Note that MSV is originally a 3D percep-
+Let Xt = {x1 , x2 , ..., xt } be a posed RGB-D streaming                 tion model. We can extend it to a RGB-D perception model
+video, which means the video is collected with the mov-                  by early fusing the image features to point clouds [39]:
+ing of sensor rather than a pre-collected video. We have:
+                                                                                                 pt = MSV (Pt0 ),
+                                                                                  Pt0 = Pt ⊕ S(MI (It ), Pt , Mt ), S(·) ∈ RN ×C   (2)
+xt = (It , Pt , Mt ), It ∈ RH×W ×3 , Pt ∈ RN ×3 , Mt ∈ R3×4
+                                                         (1)             where pt is the prediction for input frame at time t. MI is
+where It and Pt refer to the image and point clouds for one              a image backbone pretrained on the same perception task
+RGB-D frame. Pt is acquired by lifting the depth image to                as MSV . S projects Pt to image coordinate system by
+world coordinate system with pose parameters Mt , where                  Mt and samples the corresponding 2D features to enrich
+Mt can be estimated by visual odometry [30, 48]. At time                 the features of Pt . We divide MSV into a backbone MP
+t, the input to online perception model is Xt andSthe out-               for extracting features of point clouds and a task-specific
+                                                    t
+put is predictions for the observed 3D scene St = i=1 Pi ,               head MH . The goal of this work is to construct an im-
+which can be bounding boxes and semantic/instance masks.                 age memory-based adapter for MI (It ) and a point cloud
+
+
+
+                                                                     21606
+                                                                                       dinates of the point cloud are real values, the storage over-
+                                                                             add
+                                                                                       head will keep growing even if the RGB-D camera is not
+                                  sparsify                    map
+                                                                                       moving; (2) the number of points will be very large over
+                                  aggregate
+                                                                                       time, so point-based sampling and feature aggregate take
+Input feature    query                        Point cloud adapter                      up high computation overhead. To this end, we propose to
+                                                                                       store the features in a quantitized coordinate system, where
+                                                                                       point clouds are voxelized and stored in 3D grids. We also
+                         merge                     update                              maintain the voxels in a queue to reduce the memory foot-
+   voxelize                                                                            print when the scene is too large. Specifically, MP (Pt0 )
+                                                                                       is first voxelized into the voxel grids Vt by averaging all
+    Point cloud memory           previous memory            updated memory             features whose coordinates falls into the same grid. These
+                                                                                       voxels are tagged with timestamp t. Then we merge Vt to
+Figure 3. The architecture of the memory-based adapter for point                       the memory mP   t−1 by maxpooling:
+cloud features. We cache and aggregate the features in a queue of
+3D voxel grids. Gray, green, yellow and red block refer to previ-                                    mP                    P
+                                                                                                      t = maxpooling(Vt , mt−1 ),
+ous, current, updated and aggregated voxel features.
+                                                                                                mP        P             P
+                                                                                                 t = deq(mt , l) if N (mt ) > Nmax               (4)
+
+                                                                                       where maxpooling refers to channel-wise maxpooling con-
+memory-based adapter for MP (Pt0 ) to store and reuse the
+                                                                                       ducted on each voxel grid, which will update both fea-
+extracted backbone features for temporal modeling:
+                                                                                       tures and timestamps. deq(·, l) means removing voxels with
+          MI (It ), mIt = AI (MI (It ), mIt−1 , mP                                     timestamp earlier than t − l + 1 from the memory. N (mP   t )
+                                                 t−1 ),
+                                                                                       is the number of voxels in the memory. We utilize max-
+              MP (Pt0 ), mP            0     P
+                          t = AP (MP (Pt ), mt−1 )                            (3)      pooling as it preserves the most discriminative features over
+                                                                                       time, which is also efficient to compute as only features at
+where the memory-based adapter A updates the memory mt
+                                                                                       time t − 1 and t are required.
+with current features and refines current features by reusing
+                                                                                           Memory-based adapter: After caching and updating
+the memory. We fully exploit inter-modal and intra-modal
+                                                                                       the point cloud features in voxels, we need to make use of
+relationships: MSV fuses image features to point clouds,                                                        0
+                                                                                       mP t to enhance MP (Pt ) with temporal information. To ex-
+AP reuses previous point cloud features to refine current
+                                                                                       ploit rich scene context from the memory mP  t while reduce
+point cloud features, and AI reuses previous features from
+                                                                                       redundant computation, we first use the coordinates of Vt to
+both modal to refine the current image features. As shown
+                                                                                       query a neighbor voxel set:
+in Figure 2, we follow the same paradigm to design both
+modules, which can be easily embedded into image and                                         N (Vt ) = {mP
+                                                                                                         t [x][y][z]|(x, y, z) ∈ s ∗ B(Vt )}     (5)
+point cloud backbones to achieve temporal modeling.
+                                                                                       where N (Vt ) is the queired neighborhood of Vt .
+3.2. Temporal Modeling for Point Clouds                                                mP                                          P
+                                                                                          t [x][y][z] refers to the voxel in mt at coordinate
+Given {MP (P10 ), MP (P20 ), ..., MP (Pt0 )} at time t, i.e.,                          (x, y, z). B is the minimum enclosing axis-aligned bound-
+the sequence of point cloud features extracted from the                                ing box of Vt and s is a scaling factor to enlarge the size
+backbone, we aim to enhance the current features MP (Pt0 )                             of box. In this way, the temporal information which pro-
+by exploiting the temporal relations within this sequence.                             vides supporting geometric information for current frame is
+Here we first construct a memory to efficiently cache the                              collected into this voxel set.
+point cloud features from different timestamp. Then we ag-                                 We then convert N (Vt ) to a sparse tensor [6, 11], which
+gregate the temporal information from the memory to fea-                               is followed by a 3D sparse convolutional module AP to ag-
+tures at current time t with a plug-and-play adapter.                                  gregate the context information within N (Vt ) to locations
+    Memory construction: The temporal information for                                  of Vt . Finally we update MP (Pt0 ) in an adapter-manner:
+3D scenes is reflected in a more complete geometry. As a                               (1) We map the aggregated features back to the coordinates
+single RGB-D frame may not contain a complete large ob-                                of MP (Pt0 ) and then add it to the original features with
+jects or high-level scene context, the geometric information                           residual connection; (2) The adapter module AP is zero-
+from previous frames are important for accurate perception                             initialized. Therefore after inserting the adapter, finetuning
+of current frame. Therefore, we can cache the sequence of                              will smoothly start from the original point.
+extracted point cloud features in a shared 3D space. A sim-
+                                                                                       3.3. Temporal Modeling for Images
+ple way is to directly store the features in terms of point
+clouds in the world coordinate system. However, this is in-                            For the sequence of image features {MI (I1 ), ..., MI (It )}
+efficient in both storage and computation: (1) as the coor-                            at time t, we follow the same paradigm as the point cloud
+
+
+
+                                                                                    21607
+                                     shift in ...                     add
+                                                                                        Memory-based adapter: At time t, after shifting out
+                   Image memory
+                                  from memory                                        a proportion of channels to memory, we can pad the empty
+                                                                                     channels with previous memory mIt−1 . In this way, the tem-
+                 reorganize
+                                                shift out                            poral information of the adjacent two frames are merged
+                   shift                       to memory
+                                                                                     into a single frame, for which we can directly adopt 2D con-
+ Input feature                    add                          Image adapter         volution to aggregate the features:
+
+                                                                                      Ft = 2D-Conv(mIt−1 ⊕ (MI (It ) · R1 )[:,:, C 0 :] ) · R2 (7)
+                                                                                                                                   τ
+                  project                     aggregate
+                                                densify                                              0
+                                                                                     where R2 ∈ RC ×C is a learnable inverse transformation to
+ 3D memory                                                                           map image features back to the original embedding space.
+                                                            3D to 2D adapter         Finally we update MI (It ) by adding Ft with a residual con-
+                                                                                     nection. We also zero-initialize R1 , R2 and 2D-Conv for
+Figure 4. The architecture of the memory-based adapter for image                     smooth finetuning.
+features. We reorganize the input features and shift out a propor-
+tion of channels into the memory, while shifting in previous mem-                    3.4. Inter-modal Temporal Modeling
+ory and aggregating temporal information by 2D convolution. We
+also resort to the 3D memory for more global context.                                Although maintaining a short queue and adopting channel
+                                                                                     shift are able to effectively aggregate temporal information
+                                                                                     for image features, the global context is limited. This will
+counterpart to store it with a memory and aggregate tempo-
+                                                                                     lead to a performance drop when an object is very large or
+ral information to current frame MI (It ) with an adapter.
+                                                                                     the RGB-D camera stops moving. However, as analyzed be-
+    Memory construction: Different from 3D data where
+                                                                                     fore, extracting rich global context from a streaming video
+point clouds from different timestamps can be stored in a
+                                                                                     is really memory and computation consuming. To solve this
+shared 3D space, for 2D data the image features are stacked
+                                                                                     problem, we resort to the point cloud memory for global
+into a streaming video. A common practice to process this
+                                                                                     context extraction, because the point cloud features are ef-
+kind of data [19] is to maintain a queue and perform causal
+                                                                                     ficiently cached in a shared 3D space and thus the length of
+convolution (unidirectional along temporal dimension) to
+                                                                                     queue can be long. We devise a 3D-to-2D adapter to refine
+aggregate the information from previous frames to current
+                                                                                     current image features with the global 3D features. Here we
+image features. However, video analysis methods focus on
+                                                                                     first project mPt−1 to the discrete image coordinate system
+extracting the global information of the streaming video up
+                                                                                     with the inverse function of S, which are then converted to
+to now, while in our case we only need to enhance the cur-
+                                                                                     sparse tensor. In this way, we keep the sparsity of point
+rent image features MI (It ). So causal convolution on pre-
+                                                                                     cloud memory and make the 2D features geometry-aware.
+vious frames will bring a large amount of redundant compu-
+                                                                                     2D sparse convolution is then applied on the sparse tensor
+tation. Moreover, in online 3D scene perception, the most
+                                                                                     to aggregate the context information, followed by a densify
+important information for image features is the observation
+                                                                                     operation to keep features inside image and pad other pix-
+of objects from multiple perspectives. Since an object is
+                                                                                     els with zero. Finally we add the densified 2D features to
+usually observed in a few adjacent frames, maintaining a
+                                                                                     enhance MI (It ) · R1 with richer global context. We zero-
+short queue is enough in most cases. To this end, we make
+                                                                                     initialize the 2D sparse convolution for smooth training.
+an extreme simplification: we only store one frame of previ-
+                                                                                         To acquire the final online perception results, a predic-
+ous image and exploit temporal relations between frames at
+                                                                                     tion fusion strategy is needed. As the focus of our work
+time t−1 and t. In order to efficiently aggregate the adjacent
+                                                                                     is the temporal learning modules for image and point cloud
+frames, we adopt channel shift to cache the temporal infor-
+                                                                                     backbones, we only adopt a simple post-processing strategy
+mation. Formally, given MI (It ) ∈ RH×W ×C , we learn a
+                                      0                                              to fuse the predictions of each frame in a whole, which we
+linear transformation R1 ∈ RC×C to map the image fea-
+                                                                                     detail in Section 4.1.
+tures into another embedding space, where the first τ1 chan-
+nels contain rich temporal information relevant to the next
+frame. Therefore the memory can be simply constructed by                             4. Experiment
+shifting out this part of channels:                                                  In this section, we first describe our datasets and implemen-
+                    mIt = (MI (It ) · R1 )[:,:,: C 0 ]                      (6)      tation details. Then we compare our method with state-of-
+                                                 τ
+                                                                                     the-art methods on both room-level and online benchmarks
+Note that this operation is repeated frame-by-frame, thus                            to comprehensively analyze the advantage of memory-
+mIt−1 contains the temporal information relevant with cur-                           based adapters. Finally we conduct ablation studies to vali-
+rent features MI (It ).                                                              date the effectiveness of our design.
+
+
+
+                                                                                  21608
+4.1. Benchmarks and Implementation Details                        Table 1. 3D semantic segmentation results on ScanNet and Sce-
+                                                                  neNN datasets. For online methods, we map the predictions on
+We evaluate our method on two datasets: ScanNet [7] and           point clouds concatenated from posed RGB-D images to the re-
+SceneNN [15]. ScanNet contains 1513 scanned scene se-             constructed point clouds to compare with offline method.
+quences, out of which we use 1201 sequences for training
+and the rest 312 for testing. SceneNN is a smaller dataset                                            ScanNet  SceneNN
+which contains 50 high-quality scanned scene sequences             Method                  Type
+                                                                                                    mIoU mAcc mIoU mAcc
+with semantic label. After careful filtering, we select 12
+                                                                   MkNet [6]              Offline   71.6     80.4       –         –
+clean sequences for testing. We train all models on Scan-
+Net and evaluate them on ScanNet or SceneNN.                       Fs-A [46]     Online             63.5     73.7     51.1      62.4
+   Benchmarks: We first compare different methods on               MkNet-SV      Online             68.8     77.7     48.4      61.2
+room-level benchmarks, i.e., the performance on the re-            MkNet-SV+Ours Online             72.7     84.1     56.7      70.1
+constructed complete scenes. For semantic segmentation,
+we compare different methods on ScanNet and SceneNN.              Table 2. 3D object detection and instance segmentation results on
+Since online methods may not perform 3D reconstruction,           ScanNet dataset. Offline and online methods are separated by hor-
+we map their predictions on point clouds concatenated from        izontal line. † means INS-Conv requires an additional 3D recon-
+posed RGB-D images to the reconstructed point clouds with         struction algorithm to acquire high-quality point clouds or meshes.
+nearest neighbor interpolation. For object detection and in-
+stance segmentation, the metric is computed on each object                    Detection                             Insseg
+rather than the whole point clouds. Therefore we use re-                                    mAP                                mAP
+constructed point clouds and RGB-D videos as the inputs                  Method                            Method
+                                                                                          @25 @50                            @25 @50
+for offline and online methods respectively, and calculate
+                                                                     FCAF3D [38]          70.7 56.0    SoftGroup [42]        78.9 67.6
+metrics based on their respective inputs.
+                                                                    CAGroup3D [43]        74.5 60.3      TD3D [18]           81.3 71.1
+   We also follow AnyView [44] to organize an online
+benchmark on ScanNet for more comprehensive evaluation.             AnyView [44] 60.4 36.0 INS-Conv† [22]  –   57.4
+We divide the RGB-D video of each room into several non-            FCAF3D-SV    41.9 20.6   TD3D-SV      53.7 36.8
+overlapping sequences and regard each sequence as an in-          FCAF3D-SV+Ours 70.5 49.9 TD3D-SV+Ours 71.3 60.5
+dependent scene, where the number or the length of each
+sequence can be set to different values. In this way, we
+can measure the generalization ability of different methods       for each frame are concatenated, which has the same point
+when the input scenes are incomplete and of variable scales,      number with St . We use 2cm voxelization to unify the pre-
+which is a more practical setting. In our experiments, we         dictions for points inside the same voxel grid by channel-
+divide each room into 1/5/10 sequences or sequences with          wise maxpooling. Object detection: The predicted bound-
+fixed length 5/10/15, resulting in 6 metrics.                     ing boxes for each frame are merged by 3D NMS. When
+   Implementation details: To train MSV , we first train          two boxes of different time are colliding during NMS, we
+a 2D perception model MI following Pri3D [14]. We                 add δ to the classification scores of box in the newer frame.
+use UNet [37] for semantic segmentation and Faster-               This is because our method ensures the backbone extracts
+RCNN [36] (only ResNet [12] and FPN [21] backbones                more complete geometric features for the newer frame. In-
+are needed) for object detection and instance segmenta-           stance segmentation: Instance segmentation can be divided
+tion. Then we fix the image backbone and train MSV on             into transformer-based [40], grouping-based [17, 42] and
+ScanNet-25k [7], which is a single-view RGB-D dataset.            detection-based [13, 18, 45]. As the first two kinds require
+For online perception, we zero-initialize the memory-based        a specially designed mask fusion strategy [22] for online
+adapters and insert them into MSV . Then we train the new         perception, we opt for the detection-based manner, where
+model on RGB-D videos from ScanNet. To reduce memory              we can first conduct online 3D object detection and then ut-
+footprint, we randomly sample 8 adjacent RGB-D frames             lize the boxes to crop and segment the point cloud features
+for each scene at every iteration. We insert our memory-          stored in the memory.
+based adapters between the backbone and neck. For back-
+                                                                  4.2. Comparison with State-of-the-art
+bones which output multi-level features, we insert different
+adapters to different levels. In terms of hyperparameters,        We compare our method with the top-performance offline
+we set l = 50, s = 2.5, τ = 8 and δ = 0.03. We simply use         and online 3D perception models. Offline models refer to
+the same optimizer configurations to train the models as in       MRec described in Section 3.1, which is trained on recon-
+their original paper (designed for offline training).             structed point clouds. Models with suffix ”-SV” refer to
+   For prediction fusion, we adopt different strategies for       MSV that is trained on single-view RGB-D images.
+different tasks. Semantic segmentation: The predictions              Room-level benchmarks: By default, offline methods
+
+
+
+                                                               21609
+Table 3. The performance of different 3D scene perception methods on ScanNet online benchmark. We report mIoU / mAcc, mAP@25 /
+mAP@50 and mAP@25 / mAP@50 for semantic segmentation, object detection and instance segmentation respectively.
+
+                                                     Number of Sequence                              Length of Sequence
+              Method            Type
+                                                1            5              10               5               10                15
+              MkNet            Offline     63.7 / 73.5    62.7 / 72.8   58.9 / 69.4     59.3 / 69.8      63.0 / 73.0      63.5 / 73.7
+
+  Semseg
+              Fs-A             Online      62.0 / 72.8    60.6 / 71.7   60.0 / 71.3     60.1 / 71.3      60.7 / 71.8      61.0 / 72.0
+              MkNet-SV         Online      63.3 / 74.3    63.3 / 74.3   63.3 / 74.3     63.3 / 74.3      63.3 / 74.3      63.3 / 74.3
+              MkNet-SV+Ours    Online      69.1 / 82.2    66.8 / 80.0   65.9 / 79.2     65.9 / 79.3      66.8 / 80.1      67.1 / 80.4
+              FCAF3D           Offline     57.0 / 40.6    41.1 / 25.2   34.6 / 19.3     28.4 / 15.2      33.9 / 19.4      37.7 / 22.8
+
+  Detection
+              AnyView          Online      60.4 / 36.0    48.8 / 25.3   43.1 / 20.5     36.6 / 16.5      42.0 / 20.7      45.6 / 23.8
+              FCAF3D-SV        Online      41.9 / 20.6    29.8 / 13.3   27.0 / 11.5     24.4 / 10.1      26.2 / 11.0      27.6 / 12.1
+              FCAF3D-SV+Ours   Online      70.5 / 49.9    58.7 / 37.7   56.2 / 34.3     53.1 / 31.2      54.9 / 33.8      56.1 / 35.6
+              TD3D             Offline     64.0 / 50.8    61.6 / 49.7   59.4 / 48.4     59.0 / 47.9      61.4 / 49.8      61.7 / 49.8
+  Insseg      TD3D-SV          Online      53.7 / 36.8    54.2 / 41.6   57.0 / 46.3     56.4 / 45.5      53.9 / 40.9      52.6 / 39.5
+              TD3D-SV+Ours     Online      71.3 / 60.5    64.7 / 55.2   64.2 / 55.0     64.0 / 54.7      64.6 / 55.1      63.9 / 54.3
+
+
+take in reconstructed point clouds and online methods take         Table 4. Ablation study on point cloud and image modules. We re-
+in posed RGB-D videos without 3D reconstruction. Spe-              port semantic segmentation results on ScanNet. The performance
+cial case is denoted by † . Note that there is a challenge in      of image module is based on point cloud module.
+online methods when compare to offline alternatives, as of-
+                                                                          Method                                mIoU         mAcc
+fline methods directly process the complete and clean 3D
+geometry of rooms while online methods deal with partial                  Remove residual connection            64.6         77.9
+                                                                          Random initialization                 66.2         78.6
+and noisy frames. According to Table 1 and Table 2, by                    Remove voxel maxpooling               64.8         76.1
+simply inserting the memory-based adapters into MSV , we                  Set scaling factor s = 1              65.3         78.4
+significantly boost their accuracy on complete scenes and                 Set scaling factor s = 5              66.8         79.3
+achieve better performance compared with state-of-the-art                 Insert after neck                     66.0         78.8
+                                                                          The final point cloud module          66.9         79.3
+online 3D scene perception models specially designed for
+each task. We observe the improvement upon MSV is es-                     Remove residual connection            67.1         79.8
+                                                                          Random initialization                 68.7         81.7
+pecially significant on 3D object detection and instance seg-             Set shift ratio τ = 4                 68.9         82.1
+mentation tasks. This is because these tasks require com-                 Set shift ratio τ = 16                68.7         81.9
+plete predictions for each object, while it is usually very               Remove 3D to 2D adapter               68.0         80.8
+hard to infer the whole geometry of large objects with a sin-             Insert after neck                     68.4         81.6
+                                                                          The final image module                69.1         82.2
+gle RGB-D frame. We also notice our method even outper-
+forms offline methods on semantic segmentation task. Since
+this task requires more detailed perception of local geome-        Table 5. Effects of our memory-based adapters when both image
+try rather than the global context, our method can predict         and point cloud backbones are fixed during finetuning.
+finer segmentation with only partial and noisy inputs.
+                                                                                         MkNet           FCAF3D          TD3D
+    Online benchmark: In this benchmark, the inputs to all
+                                                                            Fix I      69.1 / 82.2     70.5 / 49.9     71.3 / 60.5
+methods are the posed RGB-D sequences. We concatenate                     Fix P & I    67.3 / 79.9     66.4 / 47.1     69.1 / 58.2
+the point clouds from each RGB-D frame of a sequence into
+a whole for offline methods. As the code of INS-Conv is not
+accessible, we do not compare with it on this benchmark.
+According to Table 3, offline methods show bad generaliza-         performance compared with other offline and online meth-
+tion ability on partial and noisy scenes, especially when the      ods on all tasks and experimental settings. We observe the
+input sequence is short. Note that offline methods take in         longer the input sequence, the larger the improvement upon
+the whole observed scene St at each time. When processing          MSV , which validates our modules can effectively aggre-
+St+1 , the features extracted for St is wasted. On the con-        gate long-term temporal information.
+trary, online methods process a single frame xt at each time          We visualize the predictions of different methods in Fig-
+and fuse the per-frame predictions, which is much more ef-         ure 5. It can be seen that our method is more accurate than
+ficient and practical in real-time robotic tasks. Equipped         MSV due to the temporal modeling ability, and more robust
+with our memory-based adapters, MSV achieves the best              to number of frames than offline methods.
+
+
+
+                                                                21610
+                      Semantic Segmentation                   Object Detection                       Instance Segmentation
+
+
+
+
+       Ground-turth
+
+
+
+
+       Offline
+
+
+
+
+       SV
+
+
+
+
+       Ours
+
+
+
+
+Figure 5. Visualization results on the online benchmark. Our predictions are accurate and robust to the number of frames. Note that some
+ground-truth masks are incomplete due to the noisy 2D annotations, in this case our predictions are more reasonable than the ground-truths.
+Some typical failure cases are shown in red boxes with red arrows.
+
+
+4.3. Ablation Study                                                     all three online tasks. In this way, we can further reduce
+                                                                        the memory footprint and training time, which provides the
+We first ablate the design choices of two memory-based                  users with more efficiency-accuracy tradeoff.
+adapters on 3D semantic segmentation task on ScanNet.
+Besides, we further show the performance of our method                  5. Conclusion
+when both image and point cloud backbones are fixed dur-
+ing finetuning the adapters.                                            In this paper, we have presented memory-based adapters for
+   Point cloud and image modules: Table 4 validates the                 online 3D scene perception. To this end, we propose plug-
+effectiveness of our designs. We observe removing voxel                 and-play temporal learning modules, which can empower
+maxpooling significantly degrades the performance, which                offline methods with online perception ability by simply
+shows the importance of updating memory. With the in-                   inserting memory-based adapters and finetuning on RGB-
+crease of s, the performance first improves and then keeps              D videos. Specifically, given point cloud and image fea-
+steady or even slightly declines, which indicates the neigh-            tures extracted from the backbones, we first devise a queued
+bor context information is important for temporal learn-                memory mechanism to cache these information over time.
+ing, but too large neighbor voxel set brings much redun-                Then we propose aggregation modules which directly oper-
+dant features. Large s will also increase the computa-                  ate on the memory and pass temporal information from the
+tion overhead, so we choose s = 2.5 to achieve the best                 cached features to current frame. Since the global context of
+accuracy-computation tradeoff. We observe the influence                 image features is limited due to the short queue, we further
+of τ is similar with s and thus choosing a proper value is              propose 3D-to-2D adapter to enhance image features with
+important for both high accuracy and less memory storage.               3D memory. We conduct extensive experiments on ScanNet
+From these experiments, we also validate the effectiveness              and SceneNN. By equipping offline models with our mod-
+of the ’adapter paradigm’, which includes residual connec-              ules, we achieve leading performance on three scene per-
+tion, zero-initialization and inserting after backbone.                 ception tasks compared with state-of-the-art online meth-
+                                                                        ods, even without any model and task-specific designs.
+   Fixed backbones: When finetuning our adapters, we
+fix the image backbone and finetune other parameters. We                Acknowledgements
+further study the effects of our method when both image
+and point cloud backbones are fixed. As shown in Table                  This work was supported in part by the National Natural
+5, even with both image and point cloud backbones fixed,                Science Foundation of China under Grant 62125603, Grant
+our method still achieves state-of-the-art performance on               62321005, and Grant 62336004.
+
+
+
+                                                                    21611
+References                                                                [16] Shi-Sheng Huang, Ze-Yu Ma, Tai-Jiang Mu, Hongbo Fu, and
+                                                                               Shi-Min Hu. Supervoxel convolution for online 3d semantic
+ [1] Iro Armeni, Ozan Sener, Amir R Zamir, Helen Jiang, Ioannis                segmentation. TOG, 40(3):1–15, 2021. 2, 3
+     Brilakis, Martin Fischer, and Silvio Savarese. 3d semantic
+                                                                          [17] Li Jiang, Hengshuang Zhao, Shaoshuai Shi, Shu Liu, Chi-
+     parsing of large-scale indoor spaces. In ICCV, pages 1534–
+                                                                               Wing Fu, and Jiaya Jia. Pointgroup: Dual-set point grouping
+     1543, 2016. 3
+                                                                               for 3d instance segmentation. In CVPR, pages 4867–4876,
+ [2] Joao Carreira, Viorica Patraucean, Laurent Mazare, Andrew                 2020. 2, 6
+     Zisserman, and Simon Osindero. Massively parallel video              [18] Maksim Kolodiazhnyi, Danila Rukhovich, Anna Vorontsova,
+     networks. In ECCV, pages 649–666, 2018. 2                                 and Anton Konushin. Top-down beats bottom-up in 3d
+ [3] Angel X Chang, Thomas Funkhouser, Leonidas Guibas,                        instance segmentation. arXiv preprint arXiv:2302.02871,
+     Pat Hanrahan, Qixing Huang, Zimo Li, Silvio Savarese,                     2023. 2, 6
+     Manolis Savva, Shuran Song, Hao Su, et al. Shapenet:                 [19] Dan Kondratyuk, Liangzhe Yuan, Yandong Li, Li Zhang,
+     An information-rich 3d model repository. arXiv preprint                   Mingxing Tan, Matthew Brown, and Boqing Gong.
+     arXiv:1512.03012, 2015. 2                                                 Movinets: Mobile video networks for efficient video recog-
+ [4] Devendra Singh Chaplot, Dhiraj Prakashchand Gandhi, Ab-                   nition. In CVPR, pages 16020–16030, 2021. 2, 5
+     hinav Gupta, and Russ R Salakhutdinov. Object goal naviga-           [20] Ji Lin, Chuang Gan, and Song Han. Tsm: Temporal shift
+     tion using goal-oriented semantic exploration. NeurIPS, 33:               module for efficient video understanding. In ICCV, pages
+     4247–4258, 2020. 2, 3                                                     7083–7093, 2019. 2
+ [5] Zhe Chen, Yuchen Duan, Wenhai Wang, Junjun He, Tong                  [21] Tsung-Yi Lin, Piotr Dollár, Ross Girshick, Kaiming He,
+     Lu, Jifeng Dai, and Yu Qiao. Vision transformer adapter for               Bharath Hariharan, and Serge Belongie. Feature pyramid
+     dense predictions. arXiv preprint arXiv:2205.08534, 2022.                 networks for object detection. In CVPR, pages 2117–2125,
+     2                                                                         2017. 6
+ [6] Christopher Choy, JunYoung Gwak, and Silvio Savarese. 4d             [22] Leyao Liu, Tian Zheng, Yun-Jou Lin, Kai Ni, and Lu Fang.
+     spatio-temporal convnets: Minkowski convolutional neural                  Ins-conv: Incremental sparse convolution for online 3d seg-
+     networks. In CVPR, pages 3075–3084, 2019. 1, 2, 4, 6                      mentation. In CVPR, pages 18975–18984, 2022. 2, 3, 6
+ [7] Angela Dai, Angel X. Chang, Manolis Savva, Maciej Hal-               [23] Zhijian Liu, Haotian Tang, Yujun Lin, and Song Han. Point-
+     ber, Thomas Funkhouser, and Matthias Nießner. Scannet:                    voxel cnn for efficient 3d deep learning. In NeurIPS, pages
+     Richly-annotated 3d reconstructions of indoor scenes. In                  963–973, 2019. 2
+     CVPR, pages 5828—-5839, 2017. 2, 3, 6                                [24] John McCormac, Ankur Handa, Andrew Davison, and Ste-
+ [8] Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Carbonell,                    fan Leutenegger. Semanticfusion: Dense 3d semantic map-
+     Quoc V Le, and Ruslan Salakhutdinov. Transformer-xl:                      ping with convolutional neural networks. In ICRA, pages
+     Attentive language models beyond a fixed-length context.                  4628–4635. IEEE, 2017. 2, 3
+     arXiv preprint arXiv:1901.02860, 2019. 2                             [25] Arsalan Mousavian, Clemens Eppner, and Dieter Fox. 6-dof
+ [9] Martin Engelcke, Dushyant Rao, Dominic Zeng Wang,                         graspnet: Variational grasp generation for object manipula-
+     Chi Hay Tong, and Ingmar Posner. Vote3deep: Fast ob-                      tion. In ICCV, pages 2901–2910, 2019. 2
+     ject detection in 3d point clouds using efficient convolutional      [26] Gaku Narita, Takashi Seno, Tomoya Ishikawa, and Yohsuke
+     neural networks. In ICRA, pages 1355–1361, 2017. 2                        Kaji. Panopticfusion: Online volumetric semantic mapping
+                                                                               at the level of stuff and things. In IROS, pages 4205–4212.
+[10] Benjamin Graham. Spatially-sparse convolutional neural
+                                                                               IEEE, 2019. 2, 3
+     networks. arXiv preprint arXiv:1409.6070, 2014. 2
+                                                                          [27] Pushmeet Kohli Nathan Silberman, Derek Hoiem and Rob
+[11] Benjamin Graham, Martin Engelcke, and Laurens Van
+                                                                               Fergus. Indoor segmentation and support inference from
+     Der Maaten. 3d semantic segmentation with submanifold
+                                                                               rgbd images. In ECCV, 2012. 3
+     sparse convolutional networks. In CVPR, pages 9224–9232,
+                                                                          [28] Aaron van den Oord, Sander Dieleman, Heiga Zen, Karen
+     2018. 2, 4
+                                                                               Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner,
+[12] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.                    Andrew Senior, and Koray Kavukcuoglu. Wavenet: A gener-
+     Deep residual learning for image recognition. In CVPR,                    ative model for raw audio. arXiv preprint arXiv:1609.03499,
+     pages 770–778, 2016. 6                                                    2016. 2
+[13] Ji Hou, Angela Dai, and Matthias Nießner. 3d-sis: 3d seman-          [29] Junting Pan, Ziyi Lin, Xiatian Zhu, Jing Shao, and Hong-
+     tic instance segmentation of rgb-d scans. In CVPR, pages                  sheng Li. St-adapter: Parameter-efficient image-to-video
+     4421–4430, 2019. 2, 6                                                     transfer learning. NeurIPS, 35:26462–26477, 2022. 2
+[14] Ji Hou, Saining Xie, Benjamin Graham, Angela Dai, and                [30] Jaesik Park, Qian-Yi Zhou, and Vladlen Koltun. Colored
+     Matthias Nießner. Pri3d: Can 3d priors help 2d represen-                  point cloud registration revisited. In ICCV, pages 143–152,
+     tation learning? In ICCV, pages 5693–5702, 2021. 6                        2017. 3
+[15] Binh-Son Hua, Quang-Hieu Pham, Duc Thanh Nguyen,                     [31] Charles R Qi, Hao Su, Matthias Nießner, Angela Dai,
+     Minh-Khoi Tran, Lap-Fai Yu, and Sai-Kit Yeung. Scenenn:                   Mengyuan Yan, and Leonidas J Guibas. Volumetric and
+     A scene meshes dataset with annotations. In 3DV, pages 92–                multi-view cnns for object classification on 3d data. In
+     101, 2016. 2, 6                                                           CVPR, pages 5648–5656, 2016. 2
+
+
+
+
+                                                                       21612
+[32] Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J Guibas.           [48] Xiaoming Zhao, Harsh Agrawal, Dhruv Batra, and Alexan-
+     Pointnet: Deep learning on point sets for 3d classification             der G Schwing. The surprising effectiveness of visual odom-
+     and segmentation. In CVPR, pages 652–660, 2017. 1, 2                    etry techniques for embodied pointgoal navigation. In ICCV,
+[33] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J                   pages 16127–16136, 2021. 3
+     Guibas. Pointnet++: Deep hierarchical feature learning on
+     point sets in a metric space. In NeurIPS, pages 5099–5108,
+     2017. 2
+[34] Charles R. Qi, Or Litany, Kaiming He, and Leonidas J.
+     Guibas. Deep hough voting for 3d object detection in point
+     clouds. In ICCV, pages 9277–9286, 2019. 2
+[35] Santhosh Kumar Ramakrishnan, Devendra Singh Chap-
+     lot, Ziad Al-Halah, Jitendra Malik, and Kristen Grauman.
+     Poni: Potential functions for objectgoal navigation with
+     interaction-free learning. In CVPR, pages 18890–18900,
+     2022. 3
+[36] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun.
+     Faster r-cnn: towards real-time object detection with region
+     proposal networks. TPAMI, 39(6):1137–1149, 2016. 6
+[37] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+     Convolutional networks for biomedical image segmentation.
+     In MICCAI, pages 234–241. Springer, 2015. 6
+[38] Danila Rukhovich, Anna Vorontsova, and Anton Konushin.
+     Fcaf3d: fully convolutional anchor-free 3d object detection.
+     In ECCV, pages 477–493. Springer, 2022. 1, 2, 6
+[39] Danila Rukhovich, Anna Vorontsova, and Anton Konushin.
+     Tr3d: Towards real-time indoor 3d object detection. arXiv
+     preprint arXiv:2302.02858, 2023. 3
+[40] Jonas Schult, Francis Engelmann, Alexander Hermans, Or
+     Litany, Siyu Tang, and Bastian Leibe. Mask3d for 3d seman-
+     tic instance segmentation. arXiv preprint arXiv:2210.03105,
+     2022. 1, 2, 6
+[41] Shuran Song, Samuel P Lichtenberg, and Jianxiong Xiao.
+     Sun rgb-d: A rgb-d scene understanding benchmark suite. In
+     CVPR, pages 567–576, 2015. 3
+[42] Thang Vu, Kookhoi Kim, Tung M Luu, Thanh Nguyen, and
+     Chang D Yoo. Softgroup for 3d instance segmentation on
+     point clouds. In CVPR, pages 2708–2717, 2022. 1, 2, 6
+[43] Haiyang Wang, Lihe Ding, Shaocong Dong, Shaoshuai Shi,
+     Aoxue Li, Jianan Li, Zhenguo Li, and Liwei Wang. Ca-
+     group3d: Class-aware grouping for 3d object detection on
+     point clouds. arXiv preprint arXiv:2210.04264, 2022. 1, 2,
+     6
+[44] Zhenyu Wu, Xiuwei Xu, Ziwei Wang, Chong Xia, Linqing
+     Zhao, Jiwen Lu, and Haibin Yan. Anyview: generalizable in-
+     door 3d object detection with variable frames. arXiv preprint
+     arXiv:2310.05346, 2022. 6
+[45] Li Yi, Wang Zhao, He Wang, Minhyuk Sung, and Leonidas J
+     Guibas. Gspn: Generative shape proposal network for 3d
+     instance segmentation in point cloud. In CVPR, pages 3947–
+     3956, 2019. 2, 6
+[46] Jiazhao Zhang, Chenyang Zhu, Lintao Zheng, and Kai Xu.
+     Fusion-aware point convolution for online semantic 3d scene
+     segmentation. In CVPR, pages 4534–4543, 2020. 2, 3, 6
+[47] Jiazhao Zhang, Liu Dai, Fanpeng Meng, Qingnan Fan,
+     Xuelin Chen, Kai Xu, and He Wang. 3d-aware object goal
+     navigation via simultaneous exploration and identification.
+     In CVPR, pages 6672–6682, 2023. 2, 3
+
+
+
+
+                                                                     21613
+

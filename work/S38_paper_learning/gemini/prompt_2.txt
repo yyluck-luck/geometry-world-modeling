@@ -1,0 +1,5 @@
+请先纠错，不扩展新论文清单，不用导师口吻或顶会价值的绝对判断。我们已经核对原始来源：SceneScape作者页 https://scenescape.github.io/ 标NeurIPS2023；StreamingT2V正式PDF位于 https://openaccess.thecvf.com/content/CVPR2025/papers/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.pdf ，是CVPR2025；https://luciddreamer-cvlab.github.io/ 的Domain-free是Chung等，作者页标TVCG2025，机制Dreaming+Alignment。ISM属于另一篇Liang等CVPR2024论文 https://openaccess.thecvf.com/content/CVPR2024/html/Liang_LucidDreamer_Towards_High-Fidelity_Text-to-3D_Generation_via_Interval_Score_Matching_CVPR_2024_paper.html 。请明确撤回错误的venue、混用的标题与方法、没有核实的图表编号和精确帧数。
+
+实验逻辑也有问题：对深度加噪而输出不变不能定位深层注意力机制，可能是扰动没进入条件、模型对这类噪声鲁棒、噪声尺度不足、其他条件补偿或指标失灵；深度估计准确不等于真实几何。注意力图也不是因果证明。M3推理速度、能否反传和20段只需几小时都未经本机验证。不要用这些断言替换原VMem基线。
+
+只输出约800–1200中文字的修订意见：1明确纠错和未核项；2保留一个足够窄、真正可证伪的机制问题；3在原VMem真实闭环上，固定历史、相机、候选数、随机性、几何/latent等条件，只干预一个实际消费通路，如何先验收干预已生效，再排除普通重编码/固定锚点/简单mask等替代解释；4给出结果支持范围和停止条件。条件敏感性、具体内部因果定位、新方法收益必须分开。没有实际结果，不能宣布创新或要求明天交结果。

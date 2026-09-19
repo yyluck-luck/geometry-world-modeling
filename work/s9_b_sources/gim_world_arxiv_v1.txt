@@ -1,0 +1,1264 @@
+Geometry-Aware Implicit Memory for Video World Models
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1 Introduction
+2 Related Work
+2.1 Video World Models
+2.2 Memory in Video Generation and World Models
+2.3 Geometry Consistency in Video Generation
+3 Methodology
+3.1 Problem Formulation
+3.2 Implicit Memory Encoder
+3.3 Camera-Queryable Geometry Supervision
+3.4 Information-Guided Pruning
+3.5 Training and Inference
+4 Experiments
+4.1 Experimental Setup
+Dataset.
+Baselines.
+Implementation Details.
+Metrics.
+4.2 Comparison with State-of-the-Art Methods
+Quantitative Results.
+Qualitative Results.
+4.3 Ablation Study
+Geometry Supervision.
+Information-Guided Pruning.
+Compact Attention.
+5 Conclusion
+References
+License: CC BY 4.0
+arXiv:2606.02436v1 [cs.CV] 01 Jun 2026
+Geometry-Aware Implicit Memory for Video World Models
+Zhengxuan Wei
+Affiliation: School of Intelligence Science and Technology, Nanjing University
+Affiliation: Kling Team, Kuaishou Technology
+Xu Guo
+Affiliation: Kling Team, Kuaishou Technology
+Affiliation: Tsinghua UniversityProject page: https://gim-world.github.io/
+Xinghui Li
+Affiliation: Kling Team, Kuaishou Technology
+Xunzhi Xiang
+Affiliation: School of Intelligence Science and Technology, Nanjing University
+Min Wei
+Affiliation: Kling Team, Kuaishou Technology
+Yiran Zhu
+Affiliation: Kling Team, Kuaishou Technology
+Qiulin Wang
+Affiliation: Kling Team, Kuaishou Technology
+Xintao Wang
+Affiliation: Kling Team, Kuaishou Technology
+Pengfei Wan
+Affiliation: Kling Team, Kuaishou Technology
+Xiangwang Hou
+Affiliation: Tsinghua UniversityProject page: https://gim-world.github.io/
+Qi Fan
+Affiliation: School of Intelligence Science and Technology, Nanjing University
+Abstract
+Video world models aim to simulate controllable visual environments, but
+long-horizon rollouts depend on what the model remembers after observations
+leave its native context window. Explicit memories retain frames or online
+3D reconstructions, which can suffer from heuristic retrieval errors,
+redundant appearance storage, or reconstruction artifacts. Implicit memories
+compress history into a compact state, but existing designs are not explicitly
+constrained to encode cross-view scene geometry. We propose
+GIM-World, a geometry-aware implicit memory framework for video
+world models. A lightweight transformer encoder compresses variable-length
+history into fixed-size memory tokens, a camera-queryable geometry head
+distills 3D scene structure from a frozen foundation model into the memory
+during training, and an information-guided pruning rule keeps encoding cost
+bounded as history grows. The geometry teacher is discarded at inference,
+leaving a lightweight memory module. Experiments on MIND show that
+GIM-World better preserves long-horizon geometric and visual consistency
+than both explicit- and implicit-memory baselines.
+Figure 1: We present GIM-World, a geometry-aware
+implicit memory framework for video world models. By distilling 3D
+scene structure from a frozen 3D foundation model into a compact,
+fixed-size memory state, GIM-World produces long-horizon
+autoregressive rollouts that remain geometrically coherent and
+visually consistent with the underlying scene, while existing
+memory designs degrade into visible geometric distortion and
+memory drift.
+††footnotetext: ∗Equal contribution.††footnotetext: †Corresponding author.
+1 Introduction
+Video world models learn controllable visual simulators. Given past
+observations together with a stream of actions or camera motion, they
+predict how the scene evolves next [18, 3, 10, 42, 21]. As rollouts grow
+beyond a few seconds, per-frame realism alone is no longer sufficient,
+and long-horizon consistency becomes the central challenge. Regions
+an agent has visited before should look the same when it returns to
+them, forward and reverse trajectories should agree on scene layout,
+and newly generated viewpoints should remain compatible with structure
+established earlier. These properties decide whether the rollout can
+support embodied agents, interactive games, and persistent visual
+simulators [44, 12, 40, 38]. They are decided, in turn, by what the model keeps
+about observations that have left its native context window.
+Existing memory mechanisms fall into two families. Explicit memory keeps
+past observations as explicit items, either historical frames that the
+generator retrieves at each rollout step [64, 60, 36, 8, 22],
+or online 3D reconstructions of the scene [39, 33, 55, 62]. Frame-level retrieval typically relies on
+heuristic rules such as visual similarity or camera overlap, and a
+missed or wrong selection can propagate as an inconsistency in the
+generated rollout, while appearance redundancy among retained frames
+further limits how much scene information any bounded memory can
+actually carry. 3D reconstructions avoid this heuristic selection,
+but they require running a reconstruction pipeline alongside the
+generator, adding inference latency and engineering complexity, and
+can be sensitive to dynamic objects, occlusion, or weak texture, with
+reconstruction errors that can accumulate over long rollouts. Implicit memory instead uses a memory model decoupled from
+the generator, compressing past frames into a compact world-state
+representation [56, 41, 54]. Current implicit memories, however, lack a geometric
+training signal. The appearance signals they compress are highly
+redundant across views, and the resulting compressed state is not
+explicitly constrained to encode cross-view scene structure.
+Meanwhile, 3D foundation models [50, 32, 47, 49, 48] recover dense per-frame
+geometric features from video in a single feed-forward pass. A growing
+line of work injects these features into video generators along three
+axes: direct conditioning, which concatenates geometric tokens or
+point-map projections to the generator’s
+input [70, 5, 39, 23, 26, 61]; feature supervision, which aligns the
+generator’s backbone features with 3D features at training
+time [52, 66]; and post-training alignment,
+which derives rewards or preferences from 3D features in an additional DPO
+or RL stage [11, 31, 2].
+Despite their differences, these methods primarily inject geometry
+into the generator, either as input, supervision, or post-training
+feedback. We take the opposite view. Geometry is best treated as a
+property of the remembered world rather than only as an additional
+signal on the generator; it should therefore be encoded in the memory
+state.
+We propose GIM-World, a geometry-aware implicit memory framework
+for video world models. It has three parts, introduced in turn below: a
+memory encoder, a training-only geometry supervision head, and an
+information-guided pruning rule. The memory itself is formed by a simple
+transformer-based encoder: a fixed-size set of learnable memory queries
+attends to the tokens of the historical frames, and the updated queries
+are concatenated with the target latents and passed to the generator as
+conditioning. Memory size therefore does not grow with the history. The
+encoder is also lightweight at inference, running in less than 0.3%0.3\%
+of the diffusion backbone’s time, so the fixed-size memory comes at
+negligible compute cost.
+To force the memory to carry geometry, we attach a lightweight
+camera-queryable geometry head. Rather than aligning generator
+features with 3D features or reconstructing historical frames
+directly, we train the memory to answer camera-conditioned geometric
+queries. Given the memory and a historical camera, the head predicts
+the per-patch features that a 3D foundation model would extract from
+that view. The head is trained jointly with the memory encoder and
+the generator, while the 3D foundation model is kept frozen and used
+only as a training-time teacher. All trainable components share a
+single end-to-end objective, so the framework is trained in one stage
+without staged schedules or auxiliary fine-tuning. At inference, the
+geometry head and the 3D teacher are discarded.
+The memory has a fixed size, but the cost of building it still scales
+with the number of history tokens. We prune history before encoding by
+keeping the subset that best predicts the frames we drop, following the
+mutual-information sensor-placement criterion of Krause et al. [30],
+and optimize it with a greedy algorithm.
+Our contributions are as follows:
+•
+We propose a lightweight implicit memory framework for video
+world models. A memory encoder compresses variable-length history
+into a fixed-size set of memory tokens, and an information-guided
+pruning rule keeps its cost bounded as the history grows.
+•
+We design a camera-queryable geometry supervision loss that
+distills scene geometry from a frozen 3D foundation model into the
+memory during training, so the compressed state encodes cross-view
+scene structure rather than just appearance.
+•
+Experiments show that GIM-World consistently outperforms both
+explicit-memory and implicit-memory baselines on memory consistency,
+action control, and 3D geometric consistency.
+2 Related Work
+2.1 Video World Models
+Classical world models compress interaction histories into latent dynamics for
+planning and control [18, 19]. Recent
+video world models instead learn controllable visual simulators directly from
+interaction data, predicting future observations in pixel or latent video
+space given past observations together with actions, cameras, or user
+controls. This direction has developed rapidly in games and simulated
+environments [3, 1, 45, 10, 6, 13, 65, 15, 27], with more recent interactive generators
+emphasizing real-time or streaming control with persistent scene consistency
+[35, 21, 42, 44].
+Recent work has increasingly moved beyond short reactive prediction toward
+persistent and interactive world simulation, with systems exploring real-time
+interaction, out-of-sight dynamics, 4D scene simulation, and multi-agent or
+multi-view settings [44, 12, 43, 9, 53]. Similar generative
+world-model ideas also appear in driving and robotics
+[40, 38, 71, 16]. These
+efforts motivate our focus on the memory needed to support persistent world
+simulation.
+2.2 Memory in Video Generation and World Models
+Long videos are often generated by extending the rollout or the available
+context, using denoising windows, diffusion or self-forcing, and routed context
+[37, 29, 7, 28, 4, 59, 57, 58]. These methods increase the
+generation horizon, but they leave open what information should remain once
+observations fall outside the model’s native context window.
+Memory-based systems address this by keeping history in different forms.
+Retrieval and packing methods keep frames, compressed tokens, or KV caches for
+later reuse
+[64, 60, 14, 17, 36, 8, 22].
+Spatial memories bind history to explicit geometric substrates such as 3D caches,
+surfels, point maps, or warped positional structures
+[39, 33, 55, 25, 67, 62]. More recent implicit memories learn compact states
+whose size does not grow with the full history
+[56, 41, 68, 54]. Our work
+follows the implicit-memory direction but differs in how the compressed
+state is trained. Rather than relying only on the future-frame generation
+loss, we supervise the memory to answer camera-conditioned geometric
+queries, so that it encodes cross-view scene structure.
+2.3 Geometry Consistency in Video Generation
+Camera-controlled video generation exposes a central weakness of purely
+image-space training: visually plausible rollouts can still drift in camera
+motion, parallax, or scene structure. One line of work supplies geometry to the
+generator, from camera and motion control to RGB-XYZ modeling, point-cloud or
+3D-cache conditioning, geometry-as-context, and implicit 3D/4D feature
+conditions [20, 51, 70, 5, 39, 23, 26, 61]. Another line uses geometry as an optimization signal:
+Geometry Forcing aligns video features with VGGT representations, while
+VideoGPA, Epipolar-DPO, and VGGRPO derive preference or reward signals from
+geometric consistency [52, 11, 31, 2]. These methods improve the geometric
+fidelity of generated videos, but the geometric signal is applied to the
+generator or its outputs. Our focus is to use such supervision to shape the
+fixed-size memory state itself, with no geometry model or head at inference.
+3 Methodology
+Figure 2: Overview of GIM-World.
+Top: history latents are pruned (Sec. 3.4) and
+compressed into a small set of memory tokens
+(Sec. 3.2), which condition the DiT together with
+action embeddings to generate the next latents.
+Bottom-left: the memory encoder fuses history latents with
+camera embeddings and the memory tokens through two blocks of compact
+self-attention and feed-forward layers.
+Bottom-right: during training, a sampled frame’s camera produces
+a ray map that queries the memory; the decoded output is matched against
+its VGGT features through a geometry loss
+(Sec. 3.3).
+We introduce a geometry-aware implicit memory that writes past observations
+and their camera poses into a fixed-size state, and supervises that state to
+reconstruct the geometry features corresponding to a given viewpoint.
+Fig. 2 gives an overview of the framework.
+Sec. 3.1 formulates the memory-conditioned world-modeling
+problem, and Sec. 3.2 instantiates the memory as a fixed-size set of
+tokens produced by a learned encoder. To prevent this encoder from
+merely caching appearance, Sec. 3.3 introduces
+camera-queryable geometry supervision. For long histories, Sec. 3.4
+additionally prunes redundant observations under an information-guided
+criterion. Finally, Sec. 3.5 summarizes the training
+objective and the inference pipeline.
+3.1 Problem Formulation
+A video world model predicts a future rollout by iteratively generating new
+frames from past observations and future actions. At rollout step tt, given
+the observed history
+ℋt={(xi,ci)}i=1t,\mathcal{H}_{t}=\{(x_{i},c_{i})\}_{i=1}^{t},
+(1)
+where xix_{i} is an observed frame (or its VAE latent) and cic_{i} is its camera
+pose, and a block of future actions at+1:t+Ka_{t+1:t+K}, the model samples the next
+KK frames,
+xt+1:t+K∼pθ(⋅∣ℋt,at+1:t+K),x_{t+1:t+K}\sim p_{\theta}(\cdot\mid\mathcal{H}_{t},a_{t+1:t+K}),
+(2)
+and appends them, together with their cameras, to form ℋt+K\mathcal{H}_{t+K}.
+The process repeats until the full rollout is complete.
+Conditioning on the unbounded ℋt\mathcal{H}_{t} does not scale with rollout
+length. Memory-based world models instead summarize the history through a
+memory operator ℳ\mathcal{M} and the corresponding memory state
+mt=ℳ⁡(ℋt),m_{t}=\mathcal{M}(\mathcal{H}_{t}),
+(3)
+and generate from
+pθ(xt+1:t+K∣mt,at+1:t+K).p_{\theta}(x_{t+1:t+K}\mid m_{t},a_{t+1:t+K}).
+(4)
+The form of ℳ\mathcal{M} defines the design space of memory-based world
+models: it can retrieve frames, cache tokens, build an explicit 3D
+reconstruction, or encode a learned implicit state.
+3.2 Implicit Memory Encoder
+The memory encoder maps a variable-length, camera-indexed history to a fixed
+number of memory slots. Historical frames are first turned into patch tokens
+by the video VAE and the diffusion backbone’s patch embedding, yielding
+H={hi,p}i=1,p=1T,P,H=\{h_{i,p}\}_{i=1,p=1}^{T,P},
+(5)
+where each frame lives on a patch grid of Hp×WpH_{p}\times W_{p} with
+P=Hp​WpP=H_{p}W_{p} tokens. Since the same scene point can appear from many
+viewpoints, we inject camera information only into the history tokens,
+h~i,p=hi,p+Ec​(ci),\tilde{h}_{i,p}=h_{i,p}+E_{c}(c_{i}),
+(6)
+where EcE_{c} is a linear camera embedding. The memory queries themselves stay
+pose-free and are therefore not tied to a particular view or future action.
+We maintain NmN_{m} learnable memory queries Q0∈ℝNm×dQ_{0}\in\mathbb{R}^{N_{m}\times d},
+and concatenate them with the camera-aware history into the encoder input
+Z0=[Q0;H~]Z_{0}=[Q_{0};\tilde{H}]. The encoder uses only two blocks, which keeps it
+lightweight and adds negligible cost to the diffusion backbone at inference
+time. Each block updates ZZ through a compact self-attention branch and a
+full-resolution feed-forward branch:
+Z\displaystyle Z
+←Z+Expand⁡(Attn⁡(Compact⁡(Z))),\displaystyle\leftarrow Z+\mathrm{Expand}\big(\mathrm{Attn}(\mathrm{Compact}(Z))\big),
+(7)
+Z\displaystyle Z
+←Z+FFN⁡(Z).\displaystyle\leftarrow Z+\mathrm{FFN}(Z).
+(8)
+The two operators act per frame:
+Compact\displaystyle\mathrm{Compact}
+:ℝHp×Wp×d→ℝ(Hp/s)×(Wp/s)×d,\displaystyle:\mathbb{R}^{H_{p}\times W_{p}\times d}\to\mathbb{R}^{(H_{p}/s)\times(W_{p}/s)\times d},
+(9)
+Expand\displaystyle\mathrm{Expand}
+:ℝ(Hp/s)×(Wp/s)×d→ℝHp×Wp×d,\displaystyle:\mathbb{R}^{(H_{p}/s)\times(W_{p}/s)\times d}\to\mathbb{R}^{H_{p}\times W_{p}\times d},
+(10)
+where Compact\mathrm{Compact} flattens each s×ss\times s block of tokens through a
+shared linear layer applied identically to queries and history, and
+Expand\mathrm{Expand} inverts this with another shared linear layer.
+Self-attention therefore runs on (Nm+T​Hp​Wp)/s2(N_{m}+T\,H_{p}W_{p})/s^{2} tokens, with separate
+rotary positional grids for the query and history segments.
+After the two blocks, we take mm as the first NmN_{m} tokens of ZZ, and feed
+mm to the diffusion backbone by concatenating it along the temporal axis
+with the target latents, following Context-as-Memory
+[64].
+3.3 Camera-Queryable Geometry Supervision
+Flow matching trains the generator to predict future frames, but it does not
+specify what information the memory should store. A fixed-size implicit memory
+could spend capacity on redundant appearance projections that are useful for
+short-term reconstruction but poor as a compact world state. We therefore add a
+training-time geometry supervision signal that directly constrains the memory.
+Recent methods such as Geometry Forcing [52] inject
+geometric information into video generators by aligning the intermediate
+features of the backbone with per-frame encoder features from a 3D foundation
+model such as VGGT [48]. This assumes the student
+representation stays indexed by frame and spatial location, so that alignment
+can be applied token-to-token. Our memory is deliberately different: after
+compressing a variable-length history, its tokens carry no one-to-one
+correspondence with input frames or patches, and direct token matching would
+impose an artificial ordering on the memory slots and collapse the
+representation back toward a frame-indexed cache. Instead, we query the
+memory through historical cameras and align the queried output against VGGT
+features.
+Concretely, at each training step we uniformly sample one historical frame
+ii from ℋt\mathcal{H}_{t}. Conditioned on the sampled camera cic_{i}, a
+lightweight geometry head maps the memory mm to a feature map
+G^i∈ℝHg​Wg×dg\hat{G}_{i}\in\mathbb{R}^{H_{g}W_{g}\times d_{g}} defined on an Hg×WgH_{g}\times W_{g}
+patch grid, which we supervise against the VGGT encoder feature map
+Gi∈ℝHg​Wg×dgG_{i}\in\mathbb{R}^{H_{g}W_{g}\times d_{g}} of the same frame.
+To condition the geometry head on the queried viewpoint, we convert cic_{i} into a
+set of per-patch queries. For patch (u,v)(u,v), the world-space ray
+ρ​(ci)u,v=[oi,di,u,v]∈ℝ6\rho(c_{i})_{u,v}=[o_{i},d_{i,u,v}]\in\mathbb{R}^{6}
+(11)
+concatenates the camera origin oio_{i} and the normalized ray direction
+di,u,vd_{i,u,v}; it is embedded by a small MLP and added to a learnable 2D grid
+positional embedding eu,ve_{u,v} shared across frames,
+qi,u,v=MLPr​a​y​(ρ​(ci)u,v)+eu,v.q_{i,u,v}=\mathrm{MLP}_{ray}(\rho(c_{i})_{u,v})+e_{u,v}.
+(12)
+The queries qiq_{i} then pass through the geometry head: a
+cross-attention over the memory, a self-attention over the patch grid, and
+a feed-forward network that projects the output into the VGGT encoder
+feature dimension,
+G^i=FFN⁡(SelfAttn⁡(CrossAttn⁡(qi,m))).\hat{G}_{i}=\mathrm{FFN}\bigl(\mathrm{SelfAttn}(\mathrm{CrossAttn}(q_{i},\,m))\bigr).
+(13)
+The cross-attention retrieves the information from mm that answers the ray
+query, while the self-attention exchanges context across the patch grid.
+We train the memory and the geometry head jointly with a per-patch cosine loss
+between G^i\hat{G}_{i} and GiG_{i},
+ℒg​e​o=1−1Hg​Wg​∑u,vcos⁡(G^i,u,v,Gi,u,v).\mathcal{L}_{geo}=1-\frac{1}{H_{g}W_{g}}\sum_{u,v}\cos\bigl(\hat{G}_{i,u,v},\,G_{i,u,v}\bigr).
+(14)
+Since ii is resampled at every step, this single-frame estimator is
+unbiased for the all-frame alignment objective, while the per-step
+distillation cost stays independent of the history length.
+3.4 Information-Guided Pruning
+The memory has fixed size, but the cost of forming it still scales with
+the number of history tokens. For long rollouts, many views are redundant:
+nearby cameras often observe nearly the same scene through slightly
+different projections. We prune history before memory encoding by keeping
+a retained subset S⊆ℋS\subseteq\mathcal{H} with |S|≤K|S|\leq K that is as
+informative as possible about the frames it leaves out, following the
+mutual-information sensor-placement criterion
+of Krause et al. [30]:
+S⋆=arg⁡maxS⁡I⁡(S,ℋ∖S)s.t.|S|≤K.S^{\star}=\arg\max_{S}\;I\bigl(S;\,\mathcal{H}\setminus S\bigr)\quad\text{s.t.}\quad|S|\leq K.
+(15)
+To evaluate I⁡(S,ℋ∖S)I(S;\mathcal{H}\setminus S), we place a Gaussian process
+over per-frame observations with a pose-time kernel
+k⁡(ci,cj)=exp⁡(−∥pi−pj∥222​σp2−∠​(𝐟i,𝐟j)22​σr2−(ti−tj)22​σt2),k(c_{i},c_{j})=\exp\!\left(-\frac{\lVert p_{i}-p_{j}\rVert_{2}^{2}}{2\sigma_{p}^{2}}-\frac{\angle(\mathbf{f}_{i},\mathbf{f}_{j})^{2}}{2\sigma_{r}^{2}}-\frac{(t_{i}-t_{j})^{2}}{2\sigma_{t}^{2}}\right),
+(16)
+where pip_{i} is the camera position, 𝐟i\mathbf{f}_{i} the camera forward
+direction, tit_{i} the frame time, and σp,σr,σt\sigma_{p},\sigma_{r},\sigma_{t}
+are RBF bandwidths. Two frames are highly correlated under this GP when
+their cameras are close in space, point in similar directions, and are
+close in time, so frames likely to observe similar scene content are
+treated as similar.
+The GP turns the kernel into a posterior variance σ2​(h∣A)\sigma^{2}(h\mid A)
+that measures the remaining uncertainty about frame hh after observing
+frames in A⊆ℋA\subseteq\mathcal{H}:
+σ2​(h∣A)=k⁡(h,h)−𝐤h​A⊤​KA​A−1​𝐤A​h,\sigma^{2}(h\mid A)=k(h,h)-\mathbf{k}_{hA}^{\top}K_{AA}^{-1}\mathbf{k}_{Ah},
+(17)
+where KA​A=[k⁡(ai,aj)]K_{AA}=[k(a_{i},a_{j})] is the kernel matrix over AA and
+𝐤h​A=[k⁡(h,ai)]\mathbf{k}_{hA}=[k(h,a_{i})] the kernel vector between hh and the frames
+in AA. The first term k⁡(h,h)k(h,h) is the prior uncertainty about hh; the
+second term subtracts the portion explained by observing AA. So
+σ2​(h∣A)\sigma^{2}(h\mid A) is large when hh has low kernel similarity to every
+frame in AA, and small when hh is close to at least one frame of AA.
+I⁡(S,ℋ∖S)I(S;\mathcal{H}\setminus S) is submodular, and the standard greedy
+rule is near-optimal for this objective [30]. At step
+tt, let S¯t−1=ℋ∖St−1\bar{S}_{t-1}=\mathcal{H}\setminus S_{t-1} denote the
+still-unselected frames. Under the GP, the greedy marginal gain for
+adding h∈S¯t−1h\in\bar{S}_{t-1} is a log-ratio of posterior variances,
+st=arg⁡maxh∈S¯t−1⁡12​log​σ2​(h∣St−1)σ2​(h∣S¯t−1∖{h}).s_{t}=\arg\max_{h\in\bar{S}_{t-1}}\;\tfrac{1}{2}\log\frac{\sigma^{2}\!\bigl(h\mid S_{t-1}\bigr)}{\sigma^{2}\!\bigl(h\mid\bar{S}_{t-1}\setminus\{h\}\bigr)}.
+(18)
+The numerator is large when the retained set St−1S_{t-1} cannot predict
+hh, so adding hh brings new information into SS; the denominator is
+small when the other unselected frames already predict hh, so hh is
+representative rather than an outlier. Greedy therefore fills SS with
+frames that are informative relative to the current retained set yet
+well-covered by the rest of the history.
+3.5 Training and Inference
+The diffusion backbone is trained with a flow-matching objective conditioned
+on the memory and the future action sequence,
+ℒF​M=𝔼⁡[‖vθ​(zt,t,m,a)−v⋆‖22],\mathcal{L}_{FM}=\mathbb{E}\bigl[\|v_{\theta}(z_{t},t,m,a)-v^{\star}\|_{2}^{2}\bigr],
+(19)
+and the memory encoder, the geometry head, and the backbone are optimized jointly
+to minimize
+ℒ=ℒF​M+λ​ℒg​e​o.\mathcal{L}=\mathcal{L}_{FM}+\lambda\,\mathcal{L}_{geo}.
+(20)
+The whole pipeline is therefore trained end-to-end in a single
+stage, without separate pretraining, distillation, or fine-tuning
+steps. At inference, the geometry head and the VGGT encoder are no
+longer needed and are discarded.
+4 Experiments
+Table 1:
+Quantitative comparison on the first-person and third-person MIND
+test sets. Memory metrics quantify how faithfully each method
+reconstructs the observed scene, action accuracy reports the relative
+pose error of the rendered camera trajectory, and 3D Geometry reports
+the normalized dense reprojection score. Lower is better for MSE,
+LPIPS, and RPE; higher is better for PSNR, SSIM, and the reprojection
+score.
+Method
+First-person view
+Third-person view
+Memory
+Action Accuracy
+3D Geometry
+Memory
+Action Accuracy
+3D Geometry
+MSE↓\downarrow
+PSNR↑\uparrow
+SSIM↑\uparrow
+LPIPS↓\downarrow
+Trans.↓\downarrow
+Rot.↓\downarrow
+Reproj.↑\uparrow
+MSE↓\downarrow
+PSNR↑\uparrow
+SSIM↑\uparrow
+LPIPS↓\downarrow
+Trans.↓\downarrow
+Rot.↓\downarrow
+Reproj.↑\uparrow
+Explicit Memory
+Matrix-Game 2.0
+0.1188
+–
+–
+–
+0.0265
+0.6914
+–
+0.1404
+–
+–
+–
+0.0622
+0.9031
+–
+MIND-World
+0.1035
+–
+–
+–
+0.0384
+0.5534
+–
+0.1042
+–
+–
+–
+0.0321
+0.3328
+–
+FramePack
+0.0764
+12.04
+0.3763
+0.7062
+0.0269
+0.6536
+73.97
+0.0735
+12.23
+0.3957
+0.6770
+0.0145
+0.2852
+70.82
+Context-as-Memory
+0.0706
+12.50
+0.3917
+0.6953
+0.0235
+0.5697
+66.14
+0.0671
+12.81
+0.4051
+0.6480
+0.0241
+0.4385
+69.17
+Implicit Memory
+SSM
+0.0796
+11.96
+0.3953
+0.7439
+0.0379
+0.6702
+53.95
+0.0928
+11.76
+0.4037
+0.6830
+0.0201
+0.2971
+61.26
+GIM-World
+0.0614
+13.40
+0.4135
+0.6304
+0.0247
+0.4126
+81.70
+0.0605
+13.58
+0.4303
+0.5974
+0.0106
+0.1588
+87.10
+Figure 3: Qualitative comparison on first-person MIND scenes.
+Figure 4: Qualitative comparison on third-person MIND scenes.
+Figure 5: Long-horizon qualitative results on the MIND benchmark.
+4.1 Experimental Setup
+Dataset.
+We train and evaluate on MIND [63], an open-domain
+closed-loop revisited benchmark for video world models. MIND provides
+10801080p / 2424 fps Unreal Engine 5 videos with a shared action space
+of four planar movement keys W,A,S,DW,A,S,D and four camera rotation keys
+↑,↓,←,→\uparrow,\downarrow,\leftarrow,\rightarrow. The benchmark contains
+100100 first-person and 100100 third-person clips, each about three
+minutes long, split 50/5050/50 into training and evaluation; we follow
+this split exactly. Each evaluation clip is annotated with a context
+boundary that takes roughly the first quarter of the clip as context
+and leaves the remaining three quarters as the prediction segment.
+Following MIND’s protocol, the model observes the context as initial
+memory and then autoregressively generates the prediction segment
+under the same action sequence; evaluation is performed entirely on
+the prediction segment, at 720720p resolution, separately for the
+first-person and third-person subsets.
+Baselines.
+We group baselines along the explicit-versus-implicit memory axis used
+in the introduction. For explicit memory, we compare against
+Matrix-Game 2.0 [21] and
+MIND-World [63], taking their numbers directly from the
+MIND benchmark, and against FramePack [69] and
+Context-as-Memory [64], which we re-train under our
+setting. For implicit memory, we reproduce the SSM-based
+memory module of VideoSSM [68]. The four re-trained
+baselines share the same Wan2.1 backbone, the same memory-token
+budget, and the same training data and schedule as our model, so that
+comparisons isolate the effect of the memory design rather than
+backbone capacity or compute.
+Implementation Details.
+We use Wan2.1 [46] as the diffusion backbone. Actions
+are injected by adding the action embedding to the timestep embedding,
+following MIND-World [63]. The memory size NmN_{m} is set
+to match the patch-token count of 2020 latent frames. We set the
+compact stride in the memory encoder to s=2s=2, giving a 4×4\times
+reduction in attention tokens, and set the pruning budget to K=200K=200,
+as defined in Sec. 3.4. The memory encoder, the
+geometry head, and the backbone are trained jointly under
+ℒF​M+λ​ℒg​e​o\mathcal{L}_{FM}+\lambda\,\mathcal{L}_{geo} with λ=0.05\lambda=0.05,
+following Sec. 3.5. We optimize for 88K steps at
+learning rate 1​e−51\mathrm{e}{-5} with batch size 3232.
+Metrics.
+We evaluate three groups of properties. (1) Memory consistency
+is measured per frame between the rollout and the ground-truth video
+with MSE, PSNR, SSIM, and LPIPS, following MIND’s long-context memory
+protocol [63]. (2) Action accuracy reports
+relative pose error in translation and rotation: we recover the
+camera trajectory from each generated rollout with
+ViPE [24], align it to the ground truth via Sim(3)
+Umeyama, and compute RPE following MIND. (3) Geometric
+consistency is measured by 3D reprojection: we estimate per-frame
+depth and camera pose with Depth Anything
+3 [34], compute cross-frame cycle
+reprojection error, and normalize it to a 00–100100 score where
+higher is better. Several entries are reported as “–” in
+Table 1
+because we copy Matrix-Game 2.0 and MIND-World numbers directly from
+the MIND benchmark, and no directly comparable public results are
+available for the additional metrics we include.
+4.2 Comparison with State-of-the-Art Methods
+Quantitative Results.
+Table 1
+reports quantitative comparisons on the first-person and third-person
+MIND subsets. GIM-World achieves the best memory-consistency scores
+on both views, improving all four reconstruction metrics over explicit
+and implicit memory baselines. The gain is especially clear on 3D
+geometric consistency: our normalized reprojection score reaches
+81.7081.70 in the first-person setting and 87.1087.10 in the third-person
+setting, compared with 73.9773.97 and 70.8270.82 for the strongest baseline
+with comparable metrics.
+The comparison across memory types supports the motivation of our
+design. Explicit-memory methods keep historical observations available
+to the generator, but retaining frames or packed tokens does not by
+itself produce a compact cross-view world state, and their reprojection
+scores remain substantially lower. The SSM baseline provides a compact
+implicit state, but without geometry supervision it performs worse on
+both reprojection and memory consistency. In contrast, GIM-World keeps
+the fixed-size advantage of implicit memory while supervising that
+state to encode view-consistent geometry. Action accuracy is also at
+least on par with the strongest baseline on every subset, indicating
+that improving the memory’s geometric structure does not come at the
+cost of controllable rollout dynamics.
+Qualitative Results.
+Figures 3 and 4 compare GIM-World
+against FramePack, CaM, and SSM on first-person and third-person
+MIND scenes, with each row a
+method and each column a rollout frame at a fixed stride over 400400
+frames; all methods share the same initial observation and action
+sequence. Baselines show clear structural collapse: scene layouts
+drift within the first hundred frames, walls and landmark structures
+deform or disappear, and the predicted content soon stops
+corresponding to the same environment as the input. The third-person
+setting additionally exposes character behavior, where baselines
+either lose track of the controllable character or render it in
+inconsistent locations. GIM-World shows only small viewpoint offsets
+on individual frames, while the overall scene geometry, layout,
+landmark structures, and character pose stay consistent with the
+ground truth across the entire horizon.
+Figure 5 pushes the rollout to a thousand frames
+on a single first-person scene from our model alone, sampled every
+5050 steps. The yellow boxes at frame 100100 and frame 750750 mark two
+close viewpoints that the camera revisits more than six hundred
+frames apart, and within these frames the small objects highlighted
+by the green and red boxes retain the same spatial positions,
+relative arrangement, and fine texture details across this long gap.
+This indicates that the implicit memory stores a stable 33D
+representation of the scene rather than merely propagating short-term
+context, and the world geometry remains globally consistent over a
+thousand-frame autoregressive rollout.
+4.3 Ablation Study
+Figure 6: Qualitative ablation on geometry supervision on the MIND benchmark.
+Geometry Supervision.
+Table 2 compares three ways of training the
+memory encoder. w/o geometry drops the geometry loss and trains
+only with flow matching. Geometry Forcing reproduces
+Wu et al. [52] by distilling VGGT [48]
+features into intermediate diffusion layers, applying the geometry
+signal on the generator rather than the memory. Ours is the
+camera-queryable supervision of Sec. 3.3, applied
+directly on the memory state.
+Geometry Forcing improves only marginally over the no-geometry
+baseline, lifting the reprojection score from 58.8058.80 to 63.4063.40,
+while our supervision pushes it to 81.7081.70, with a parallel drop in
+rotation RPE from 0.48230.4823 to 0.41260.4126. MSE and translation RPE move
+much less because they are not primarily geometry-bound. Together with
+Fig. 6, where Geometry Forcing still deviates in
+scale and viewpoint while ours keeps the rollout aligned with the
+ground-truth structure throughout the horizon, this confirms that
+constraining the memory directly is more effective than constraining
+the generator alone.
+Table 2:
+Ablation on geometry supervision on the first-person MIND test
+set. The shaded row marks our setting.
+Variant
+MSE↓\downarrow
+LPIPS↓\downarrow
+Trans.↓\downarrow
+Rot.↓\downarrow
+Reproj.↑\uparrow
+w/o geometry
+0.0628
+0.6485
+0.0252
+0.5028
+58.80
+Geometry Forcing
+0.0623
+0.6452
+0.0251
+0.4823
+63.40
+Ours
+0.0614
+0.6304
+0.0247
+0.4126
+81.70
+Information-Guided Pruning.
+Table 3 compares three pruning rules under
+the same budget K=200K=200: Uniform temporal sampling,
+Camera FPS that performs farthest-point sampling in a
+pose-time space, and our MI greedy from
+Sec. 3.4. Uniform and Camera FPS sit close
+together, splitting wins across metrics, while MI greedy is strictly
+the best on every metric with a clear margin, showing that the
+GP-based information criterion captures structure across pose,
+viewing direction, and time that pure temporal or pose-space
+heuristics miss.
+Table 3:
+Ablation on history pruning on the first-person MIND test set. The
+shaded row marks our setting.
+Pruning
+MSE↓\downarrow
+LPIPS↓\downarrow
+Trans.↓\downarrow
+Rot.↓\downarrow
+Reproj.↑\uparrow
+Uniform
+0.0658
+0.6582
+0.0269
+0.4475
+77.05
+Camera FPS
+0.0664
+0.6553
+0.0258
+0.4598
+77.52
+MI greedy
+0.0614
+0.6304
+0.0247
+0.4126
+81.70
+Compact Attention.
+Table 4 compares four attention designs in
+the memory encoder. Full attention runs at the native token
+resolution. Global Compact s=2s=2 applies 2×22{\times}2 pooling
+to both the attention and the FFN. Attention Compact s=2s=2 is
+our default from Sec. 3.2, pooling only the
+attention branch and keeping the FFN at full resolution.
+Attention Compact s=4s=4 uses the same recipe with stronger
+pooling.
+Full attention defines the quality upper bound but is more than
+10×10\times slower than the compact variants. Our default matches it
+on MSE and Reproj and is in fact the best on LPIPS, while costing
+only 0.26%0.26\% of the DiT decode. Pooling the FFN as well in Global
+Compact loses heavily on every metric at almost no extra speedup,
+indicating that the FFN capacity is what the memory cannot afford to
+lose. Stronger pooling at s=4s=4 is cheaper still but degrades both
+LPIPS and Reproj, so s=2s=2 is the practical default.
+Table 4:
+Ablation on compact attention. Runtime is measured relative to the
+DiT backbone. The shaded row marks the default setting.
+Variant
+Time / DiT↓\downarrow
+MSE↓\downarrow
+LPIPS↓\downarrow
+Reproj.↑\uparrow
+Full attention
+2.80%
+0.0608
+0.6512
+81.85
+Global Compact (s=2s=2)
+0.20%
+0.0696
+0.6892
+62.45
+Attention Compact (s=2s=2)
+0.26%
+0.0614
+0.6304
+81.70
+Attention Compact (s=4s=4)
+0.10%
+0.0651
+0.6498
+76.18
+5 Conclusion
+We presented GIM-World, a geometry-aware implicit memory framework
+for long-horizon video world models. It compresses variable-length history
+into fixed-size memory tokens, distills camera-queryable geometry into the
+memory during training, and prunes redundant history to keep encoding bounded.
+The geometry teacher is discarded at inference, leaving a lightweight memory
+module. On MIND, GIM-World better preserves scene geometry and appearance
+consistency than existing baselines.
+References
+[1]
+E. Alonso, A. Jelley, V. Micheli, A. Kanervisto, A. Storkey, T. Pearce, and F. Fleuret (2024)
+Diffusion for world modeling: visual details matter in atari.
+Advances in Neural Information Processing Systems 37, pp. 58757–58791.
+Cited by: §2.1.
+[2]
+Z. An, O. Kupyn, T. Uscidda, A. Colaco, K. Ahuja, S. Belongie, M. Gonzalez-Franco, and M. T. Gazulla (2026)
+VGGRPO: towards world-consistent video generation with 4d latent reward.
+arXiv preprint arXiv:2603.26599.
+Cited by: §1,
+§2.3.
+[3]
+J. Bruce, M. D. Dennis, A. Edwards, J. Parker-Holder, Y. Shi, E. Hughes, M. Lai, A. Mavalankar, R. Steigerwald, C. Apps, et al. (2024)
+Genie: generative interactive environments.
+In Forty-first International Conference on Machine Learning,
+Cited by: §1,
+§2.1.
+[4]
+S. Cai, C. Yang, L. Zhang, Y. Guo, J. Xiao, Z. Yang, Y. Xu, Z. Yang, A. Yuille, L. Guibas, et al. (2025)
+Mixture of contexts for long video generation.
+arXiv preprint arXiv:2508.21058.
+Cited by: §2.2.
+[5]
+C. Cao, J. Zhou, S. Li, J. Liang, C. Yu, F. Wang, X. Xue, and Y. Fu (2025)
+Uni3c: unifying precisely 3d-enhanced camera and human motion controls for video generation.
+In Proceedings of the SIGGRAPH Asia 2025 Conference Papers,
+pp. 1–12.
+Cited by: §1,
+§2.3.
+[6]
+H. Che, X. He, Q. Liu, C. Jin, and H. Chen (2024)
+Gamegen-x: interactive open-world game video generation.
+arXiv preprint arXiv:2411.00769.
+Cited by: §2.1.
+[7]
+B. Chen, D. Martí Monsó, Y. Du, M. Simchowitz, R. Tedrake, and V. Sitzmann (2024)
+Diffusion forcing: next-token prediction meets full-sequence diffusion.
+Advances in Neural Information Processing Systems 37, pp. 24081–24125.
+Cited by: §2.2.
+[8]
+K. Chen, D. Liang, X. Zhou, Y. Ding, X. Liu, P. Wan, and X. Bai (2026)
+Out of sight but not out of mind: hybrid memory for dynamic video world models.
+arXiv preprint arXiv:2603.25716.
+Cited by: §1,
+§2.2.
+[9]
+Y. Chen, Y. Liang, J. Wang, T. Chen, J. Cheng, Z. Gu, Y. Huang, Z. Jiang, W. Li, T. Li, et al. (2025)
+TeleWorld: towards dynamic multimodal synthesis with a 4d world model.
+arXiv preprint arXiv:2601.00051.
+Cited by: §2.1.
+[10]
+E. Decart, Q. McIntyre, S. Campbell, X. Chen, and R. Wachen (2024)
+Oasis: a universe in a transformer.
+URL: https://oasis-model. github. io 2 (3), pp. 6.
+Cited by: §1,
+§2.1.
+[11]
+H. Du, J. Ye, X. Cong, R. Li, J. Ni, A. Agarwal, Z. Zhou, Z. Li, R. Balestriero, and Y. Wang (2026)
+VideoGPA: distilling geometry priors for 3d-consistent video generation.
+arXiv preprint arXiv:2601.23286.
+Cited by: §1,
+§2.3.
+[12]
+Z. Duan, J. Xia, Z. Zhang, W. Zhang, G. Zhou, C. Gou, Y. He, F. Chen, X. Zhang, and L. Liu (2026)
+Liveworld: simulating out-of-sight dynamics in generative video world models.
+arXiv preprint arXiv:2603.07145.
+Cited by: §1,
+§2.1.
+[13]
+R. Feng, H. Zhang, Z. Yang, J. Xiao, Z. Shu, Z. Liu, A. Zheng, Y. Huang, Y. Liu, and H. Zhang (2024)
+The matrix: infinite-horizon world generation with real-time moving control.
+arXiv preprint arXiv:2412.03568.
+Cited by: §2.1.
+[14]
+X. Gao, J. Guan, S. Luo, W. Li, G. Tan, and J. Wang (2026)
+MemCam: memory-augmented camera control for consistent video generation.
+arXiv preprint arXiv:2603.26193.
+Cited by: §2.2.
+[15]
+J. Guo, Y. Ye, T. He, H. Wu, Y. Jiang, T. Pearce, and J. Bian (2025)
+Mineworld: a real-time and open-source interactive world model on minecraft.
+arXiv preprint arXiv:2504.08388.
+Cited by: §2.1.
+[16]
+Y. Guo, L. X. Shi, J. Chen, and C. Finn (2025)
+Ctrl-world: a controllable generative world model for robot manipulation.
+arXiv preprint arXiv:2510.10125.
+Cited by: §2.1.
+[17]
+Y. Guo, Z. Zhang, P. Wang, X. Liang, Z. Ma, and L. Zhang (2026)
+Memorize when needed: decoupled memory control for spatially consistent long-horizon video generation.
+arXiv preprint arXiv:2604.18215.
+Cited by: §2.2.
+[18]
+D. Ha and J. Schmidhuber (2018)
+World models.
+arXiv preprint arXiv:1803.10122 2 (3), pp. 440.
+Cited by: §1,
+§2.1.
+[19]
+D. Hafner, J. Pasukonis, J. Ba, and T. Lillicrap (2023)
+Mastering diverse domains through world models.
+arXiv preprint arXiv:2301.04104.
+Cited by: §2.1.
+[20]
+H. He, Y. Xu, Y. Guo, G. Wetzstein, B. Dai, H. Li, and C. Yang (2024)
+Cameractrl: enabling camera control for text-to-video generation.
+arXiv preprint arXiv:2404.02101.
+Cited by: §2.3.
+[21]
+X. He, C. Peng, Z. Liu, B. Wang, Y. Zhang, Q. Cui, F. Kang, B. Jiang, M. An, Y. Ren, et al. (2025)
+Matrix-game 2.0: an open-source real-time and streaming interactive world model.
+arXiv preprint arXiv:2508.13009.
+Cited by: §1,
+§2.1,
+§4.1.
+[22]
+Y. Hong, Y. Mei, C. Ge, Y. Xu, Y. Zhou, S. Bi, Y. Hold-Geoffroy, M. Roberts, M. Fisher, E. Shechtman, et al. (2025)
+Relic: interactive video world model with long-horizon memory.
+arXiv preprint arXiv:2512.04040.
+Cited by: §1,
+§2.2.
+[23]
+J. Hu, J. Liu, L. Yang, X. Zhang, K. Li, S. Zeng, Y. Li, H. Huang, C. Zhang, and Y. Lu (2026)
+Geometry-as-context: modulating explicit 3d in scene-consistent video generation to geometry context.
+arXiv preprint arXiv:2602.21929.
+Cited by: §1,
+§2.3.
+[24]
+J. Huang, Q. Zhou, H. Rabeti, A. Korovko, H. Ling, X. Ren, T. Shen, J. Gao, D. Slepichev, C. Lin, et al. (2025)
+Vipe: video pose engine for 3d geometric perception.
+arXiv preprint arXiv:2508.10934.
+Cited by: §4.1.
+[25]
+J. Huang, X. Hu, B. Han, S. Shi, Z. Tian, T. He, and L. Jiang (2025)
+Memory forcing: spatio-temporal memory for consistent scene generation on minecraft.
+arXiv preprint arXiv:2510.03198.
+Cited by: §2.2.
+[26]
+K. Huang, Y. Huang, Y. Li, J. Bai, X. Wang, Z. Lin, X. Ning, J. Yu, P. Wan, Y. Wang, et al. (2026)
+CineScene: implicit 3d as effective scene representation for cinematic video generation.
+arXiv preprint arXiv:2602.06959.
+Cited by: §1,
+§2.3.
+[27]
+S. Huang, J. Wu, Q. Zhou, S. Miao, and M. Long (2025)
+Vid2world: crafting video diffusion models to interactive world models.
+arXiv preprint arXiv:2505.14357.
+Cited by: §2.1.
+[28]
+X. Huang, Z. Li, G. He, M. Zhou, and E. Shechtman (2025)
+Self forcing: bridging the train-test gap in autoregressive video diffusion.
+arXiv preprint arXiv:2506.08009.
+Cited by: §2.2.
+[29]
+J. Kim, J. Kang, J. Choi, and B. Han (2024)
+Fifo-diffusion: generating infinite videos from text without training.
+Advances in Neural Information Processing Systems 37, pp. 89834–89868.
+Cited by: §2.2.
+[30]
+A. Krause, A. Singh, and C. Guestrin (2008)
+Near-optimal sensor placements in gaussian processes: theory, efficient algorithms and empirical studies.
+Journal of Machine Learning Research 9, pp. 235–284.
+Cited by: §1,
+§3.4,
+§3.4.
+[31]
+O. Kupyn, F. Manhardt, F. Tombari, and C. Rupprecht (2025)
+Epipolar geometry improves video generation models.
+arXiv preprint arXiv:2510.21615.
+Cited by: §1,
+§2.3.
+[32]
+V. Leroy, Y. Cabon, and J. Revaud (2024)
+Grounding image matching in 3d with mast3r.
+In European conference on computer vision,
+pp. 71–91.
+Cited by: §1.
+[33]
+R. Li, P. Torr, A. Vedaldi, and T. Jakab (2025)
+Vmem: consistent interactive video scene generation with surfel-indexed view memory.
+In Proceedings of the IEEE/CVF International Conference on Computer Vision,
+pp. 25690–25699.
+Cited by: §1,
+§2.2.
+[34]
+H. Lin, S. Chen, J. Liew, D. Y. Chen, Z. Li, G. Shi, J. Feng, and B. Kang (2025)
+Depth anything 3: recovering the visual space from any views.
+arXiv preprint arXiv:2511.10647.
+Cited by: §4.1.
+[35]
+X. Mao, S. Lin, Z. Li, C. Li, W. Peng, T. He, J. Pang, M. Chi, Y. Qiao, and K. Zhang (2025)
+Yume: an interactive world generation model.
+arXiv preprint arXiv:2507.17744.
+Cited by: §2.1.
+[36]
+Y. Oshima, Y. Iwasawa, M. Suzuki, Y. Matsuo, and H. Furuta (2025)
+WorldPack: compressed memory improves spatial consistency in video world modeling.
+arXiv preprint arXiv:2512.02473.
+Cited by: §1,
+§2.2.
+[37]
+H. Qiu, M. Xia, Y. Zhang, Y. He, X. Wang, Y. Shan, et al. (2023)
+FreeNoise: tuning-free longer video diffusion via noise rescheduling.
+arXiv preprint arXiv:2310.15169.
+Cited by: §2.2.
+[38]
+X. Ren, Y. Lu, T. Cao, R. Gao, S. Huang, A. Sabour, T. Shen, T. Pfaff, J. Z. Wu, R. Chen, et al. (2025)
+Cosmos-drive-dreams: scalable synthetic driving data generation with world foundation models.
+arXiv preprint arXiv:2506.09042.
+Cited by: §1,
+§2.1.
+[39]
+X. Ren, T. Shen, J. Huang, H. Ling, Y. Lu, M. Nimier-David, T. Müller, A. Keller, S. Fidler, and J. Gao (2025)
+Gen3c: 3d-informed world-consistent video generation with precise camera control.
+In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition,
+pp. 6121–6132.
+Cited by: §1,
+§1,
+§2.2,
+§2.3.
+[40]
+L. Russell, A. Hu, L. Bertoni, G. Fedoseev, J. Shotton, E. Arani, and G. Corrado (2025)
+Gaia-2: a controllable multi-view generative world model for autonomous driving.
+arXiv preprint arXiv:2503.20523.
+Cited by: §1,
+§2.1.
+[41]
+N. Savov, N. Kazemi, D. Zhang, D. P. Paudel, X. Wang, and L. Van Gool (2025)
+Statespacediffuser: bringing long context to diffusion world models.
+arXiv preprint arXiv:2505.22246.
+Cited by: §1,
+§2.2.
+[42]
+W. Sun, H. Zhang, H. Wang, J. Wu, Z. Wang, Z. Wang, Y. Wang, J. Zhang, T. Wang, and C. Guo (2025)
+Worldplay: towards long-term geometric consistency for real-time interactive world modeling.
+arXiv preprint arXiv:2512.14614.
+Cited by: §1,
+§2.1.
+[43]
+I. Team, D. Shen, G. Zhang, H. Liu, H. Ji, H. Bao, H. Zhai, J. Liu, J. Guo, N. Wang, et al. (2026)
+INSPATIO-world: a real-time 4d world simulator via spatiotemporal autoregressive modeling.
+arXiv preprint arXiv:2604.07209.
+Cited by: §2.1.
+[44]
+R. Team, Z. Gao, Q. Wang, Y. Zeng, J. Zhu, K. L. Cheng, Y. Li, H. Wang, Y. Xu, S. Ma, et al. (2026)
+Advancing open-source world models.
+arXiv preprint arXiv:2601.20540.
+Cited by: §1,
+§2.1,
+§2.1.
+[45]
+D. Valevski, Y. Leviathan, M. Arar, and S. Fruchter (2024)
+Diffusion models are real-time game engines.
+arXiv preprint arXiv:2408.14837.
+Cited by: §2.1.
+[46]
+T. Wan, A. Wang, B. Ai, B. Wen, C. Mao, C. Xie, D. Chen, F. Yu, H. Zhao, J. Yang, et al. (2025)
+Wan: open and advanced large-scale video generative models.
+arXiv preprint arXiv:2503.20314.
+Cited by: §4.1.
+[47]
+H. Wang and L. Agapito (2025)
+3d reconstruction with spatial memory.
+In 2025 International Conference on 3D Vision (3DV),
+pp. 78–89.
+Cited by: §1.
+[48]
+J. Wang, M. Chen, N. Karaev, A. Vedaldi, C. Rupprecht, and D. Novotny (2025)
+Vggt: visual geometry grounded transformer.
+In Proceedings of the Computer Vision and Pattern Recognition Conference,
+pp. 5294–5306.
+Cited by: §1,
+§3.3,
+§4.3.
+[49]
+Q. Wang, Y. Zhang, A. Holynski, A. A. Efros, and A. Kanazawa (2025)
+Continuous 3d perception model with persistent state.
+In Proceedings of the Computer Vision and Pattern Recognition Conference,
+pp. 10510–10522.
+Cited by: §1.
+[50]
+S. Wang, V. Leroy, Y. Cabon, B. Chidlovskii, and J. Revaud (2024)
+Dust3r: geometric 3d vision made easy.
+In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition,
+pp. 20697–20709.
+Cited by: §1.
+[51]
+Z. Wang, Z. Yuan, X. Wang, Y. Li, T. Chen, M. Xia, P. Luo, and Y. Shan (2024)
+Motionctrl: a unified and flexible motion controller for video generation.
+In ACM SIGGRAPH 2024 Conference Papers,
+pp. 1–11.
+Cited by: §2.3.
+[52]
+H. Wu, D. Wu, T. He, J. Guo, Y. Ye, Y. Duan, and J. Bian (2025)
+Geometry forcing: marrying video diffusion and 3d representation for consistent world modeling.
+arXiv preprint arXiv:2507.07982.
+Cited by: §1,
+§2.3,
+§3.3,
+§4.3.
+[53]
+H. Wu, J. Yu, Y. Zou, and X. Liu (2026)
+MultiWorld: scalable multi-agent multi-view video world models.
+arXiv preprint arXiv:2604.18564.
+Cited by: §2.1.
+[54]
+R. Wu, X. He, M. Cheng, T. Yang, Y. Zhang, Z. Kang, X. Cai, X. Wei, C. Guo, C. Li, et al. (2026)
+Infinite-world: scaling interactive world models to 1000-frame horizons via pose-free hierarchical memory.
+arXiv preprint arXiv:2602.02393.
+Cited by: §1,
+§2.2.
+[55]
+T. Wu, S. Yang, R. Po, Y. Xu, Z. Liu, D. Lin, and G. Wetzstein (2025)
+Video world models with long-term spatial memory.
+arXiv preprint arXiv:2506.05284.
+Cited by: §1,
+§2.2.
+[56]
+X. Wu, G. Zhang, Z. Xu, Y. Zhou, Q. Lu, and X. He (2025)
+Pack and force your memory: long-form and consistent video generation.
+arXiv preprint arXiv:2510.01784.
+Cited by: §1,
+§2.2.
+[57]
+X. Xiang, Y. Chen, G. Zhang, Z. Wang, Z. Gao, Q. Xiang, G. Shang, J. Liu, H. Huang, Y. Gao, et al. (2025)
+Macro-from-micro planning for high-quality and parallelized autoregressive long video generation.
+arXiv preprint arXiv:2508.03334.
+Cited by: §2.2.
+[58]
+X. Xiang, Z. Duan, G. Zhang, H. Zhang, Z. Gao, J. Wu, S. Zhang, T. Wang, Q. Fan, and C. Guo (2026)
+Pathwise test-time correction for autoregressive long video generation.
+arXiv preprint arXiv:2602.05871.
+Cited by: §2.2.
+[59]
+X. Xiang and Q. Fan (2025)
+Make it efficient: dynamic sparse attention for autoregressive image generation.
+arXiv preprint arXiv:2506.18226.
+Cited by: §2.2.
+[60]
+Z. Xiao, Y. Lan, Y. Zhou, W. Ouyang, S. Yang, Y. Zeng, and X. Pan (2025)
+Worldmem: long-term consistent world simulation with memory.
+arXiv preprint arXiv:2504.12369.
+Cited by: §1,
+§2.2.
+[61]
+M. Xie, N. Khan, T. Wang, N. Dhingra, S. Nam, H. Yang, Z. Hui, C. Metzler, A. Vedaldi, H. Pirsiavash, et al. (2026)
+LaVR: scene latent conditioned generative video trajectory re-rendering using large 4d reconstruction models.
+arXiv preprint arXiv:2601.14674.
+Cited by: §1,
+§2.3.
+[62]
+T. Xu, Z. Wang, G. Wang, L. Hu, Z. Zhang, P. Zhang, B. Zhang, and S. Zhang (2026)
+UCM: unifying camera control and memory with time-aware positional encoding warping for world models.
+arXiv preprint arXiv:2602.22960.
+Cited by: §1,
+§2.2.
+[63]
+Y. Ye, X. Lu, Y. Jiang, Y. Gu, R. Zhao, Q. Liang, J. Pan, F. Zhang, W. Wu, and A. J. Wang (2026)
+Mind: benchmarking memory consistency and action control in world models.
+arXiv preprint arXiv:2602.08025.
+Cited by: §4.1,
+§4.1,
+§4.1,
+§4.1.
+[64]
+J. Yu, J. Bai, Y. Qin, Q. Liu, X. Wang, P. Wan, D. Zhang, and X. Liu (2025)
+Context as memory: scene-consistent interactive long video generation with memory retrieval.
+In Proceedings of the SIGGRAPH Asia 2025 Conference Papers,
+pp. 1–11.
+Cited by: §1,
+§2.2,
+§3.2,
+§4.1.
+[65]
+J. Yu, Y. Qin, X. Wang, P. Wan, D. Zhang, and X. Liu (2025)
+Gamefactory: creating new games with generative interactive videos.
+In Proceedings of the IEEE/CVF International Conference on Computer Vision,
+pp. 11590–11599.
+Cited by: §2.1.
+[66]
+S. Yu, S. Kwak, H. Jang, J. Jeong, J. Huang, J. Shin, and S. Xie (2024)
+Representation alignment for generation: training diffusion transformers is easier than you think.
+arXiv preprint arXiv:2410.06940.
+Cited by: §1.
+[67]
+W. Yu, R. Qian, Y. Li, L. Wang, S. Yin, D. Anthony, Y. Ye, Y. Li, W. Wan, A. Garg, et al. (2026)
+MosaicMem: hybrid spatial memory for controllable video world models.
+arXiv preprint arXiv:2603.17117.
+Cited by: §2.2.
+[68]
+Y. Yu, X. Wu, X. Hu, T. Hu, Y. Sun, X. Lyu, B. Wang, L. Ma, Y. Ma, Z. Wang, et al. (2025)
+Videossm: autoregressive long video generation with hybrid state-space memory.
+arXiv preprint arXiv:2512.04519.
+Cited by: §2.2,
+§4.1.
+[69]
+L. Zhang and M. Agrawala (2025)
+Packing input frame context in next-frame prediction models for video generation.
+arXiv e-prints, pp. arXiv–2504.
+Cited by: §4.1.
+[70]
+Q. Zhang, S. Zhai, M. A. B. Martin, K. Miao, A. Toshev, J. Susskind, and J. Gu (2025)
+World-consistent video diffusion with explicit 3d modeling.
+In Proceedings of the Computer Vision and Pattern Recognition Conference,
+pp. 21685–21695.
+Cited by: §1,
+§2.3.
+[71]
+C. Zhu, R. Yu, S. Feng, B. Burchfiel, P. Shah, and A. Gupta (2025)
+Unified world models: coupling video and action diffusion for pretraining on large robotic datasets.
+arXiv preprint arXiv:2504.02792.
+Cited by: §2.1.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+methods listed below:
+Click the "Report Issue" (
+) button, located in the page header.
+Tip: You can select the relevant text first, to include it in your report.
+Our team has already identified the following issues. We appreciate your time reviewing and reporting rendering errors we
+may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion, and welcome developer contributions.
+We gratefully acknowledge support from
+our major funders,
+member institutions, ,
+and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status (opens in new tab)
+Major funding support from

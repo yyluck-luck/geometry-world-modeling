@@ -1,0 +1,132 @@
+{
+  "schema": "s40-readback-v3-2-adversarial-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "REVISION_REQUIRED",
+  "completed_utc": "2026-09-07T12:58:57Z",
+  "reviewer_role": "/root/gemini_third_review_verifier",
+  "author_role": "/root",
+  "review_mode": "second_independent_read_only_adversarial_static_review",
+  "reviewed_identities": {
+    "readback_source": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/readback.py",
+      "expected_sha256": "b40f44bea0dbde25479bc7c7f4fd89c3224a5bf71f54c7518da33b1f510d4d9f",
+      "actual_sha256": "b40f44bea0dbde25479bc7c7f4fd89c3224a5bf71f54c7518da33b1f510d4d9f"
+    },
+    "protocol": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/PROTOCOL_DRAFT.md",
+      "expected_sha256": "b468e7500be1c61ab39f343c6692cb2dc349ea0495f01e71141139a3f1534428",
+      "actual_sha256": "b468e7500be1c61ab39f343c6692cb2dc349ea0495f01e71141139a3f1534428"
+    },
+    "revision_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/revision_v3_2_receipt.json",
+      "expected_sha256": "68a8ee68abb842b6b6e6fe648e8b4300c2da369262633b0ed0384a4a8befbed1",
+      "actual_sha256": "68a8ee68abb842b6b6e6fe648e8b4300c2da369262633b0ed0384a4a8befbed1"
+    },
+    "reconstructed_v2_source_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "prior_adversarial_review_sha256": "e7dac1824c9387834045f7b86cd81a85326e54fc7b6dc2a3a01b847a63fc3dcc",
+    "archive_writer_sha256": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+    "tensor_codec_sha256": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57"
+  },
+  "previous_findings_regression": {
+    "R1_list_tuple_erasure": {
+      "status": "CLOSED",
+      "evidence": "readback.py:108-109 now returns list for kind=list and tuple for kind=tuple; the batch-1 gate at 279-282 requires exact type list, exact [0], and exact int elements."
+    },
+    "R2_path_only_descriptor_reuse": {
+      "status": "PARTIALLY_CLOSED_STILL_BLOCKING",
+      "evidence": "readback.py:117-118 now requires equality with tensor_files[canonical_path], closing the path-only substitution. However metadata still decodes both a true tensor node and an ordinary descriptor-shaped Python dict to an indistinguishable plain dict, so tensor origin is not established."
+    },
+    "R3_scalar_label_value_check": {
+      "status": "CLOSED_FOR_THE_FIXED_S40_ARCHIVE_BUT_NOT_EQUAL_TO_THE_WRITER_NOMINAL_DOMAIN",
+      "evidence": "readback.py:110-114 enforces exact built-in str/int/bool/NoneType labels and JSON value types. The fixed archive contains exactly 12,357 str, 11,060 int, 6 bool, and 2,352 NoneType scalar nodes. archive_outputs.py:182-183 uses isinstance(str,bool,int), which also nominally accepts Python subclasses and records their subclass names."
+    }
+  },
+  "positive_checks": {
+    "tuple_preservation_breaks_args_consumers": false,
+    "args_evidence": "Both translation_input captures and both condition_input captures encode args as tuple. Their consumers use len(), integer indexing, or slicing only at readback.py:321-331; no list-only method, mutation, or list equality is required.",
+    "valid_bool_can_pass_first_batch_gate": false,
+    "valid_bool_evidence": "A valid archived bool decodes to Python bool, and type(bool_value) is int is false at the batch-1 gate.",
+    "second_actual_context_uses_tensor_path": true,
+    "second_context_evidence": "The fixed metadata-only archive record at event 68 has kind=tensor, dtype=int64, shape=[4], nbytes=32, sha256=2a1119dc...ea1d5; it reaches Reader.array after the branch at 283-288.",
+    "exact_descriptor_equality_rejects_legitimate_content_addressed_reuse": false,
+    "content_address_evidence": "The codec identity includes dtype, shape, byte order, order, nbytes, bytes_sha256, and body bytes. Identical content-addressed reuse therefore supplies an equal complete descriptor and passes both descriptor() duplicate handling at 90-95 and array() at 117-118; different metadata receives a different canonical identity/path.",
+    "first_actual_context_path_reachable": true,
+    "second_actual_context_path_reachable": true,
+    "downstream_constraints_relaxed": false,
+    "protocol_attempt01_5916_file_boundary_correct": true
+  },
+  "attempt01_boundary_recalculation_from_existing_receipt_only": {
+    "files_stream_hashed_before_failure": 5916,
+    "all_recorded_identity_bytes": 244804717,
+    "archive_tensor_bin_files": 1951,
+    "archive_tensor_bin_bytes": 226619164,
+    "archive_png_files": 9,
+    "archive_png_bytes": 5698754,
+    "worker_error_type": "TypeError",
+    "worker_error": "list indices must be integers or slices, not str",
+    "report_present": false,
+    "interpretation": "Protocol line 3 correctly says these bodies were stream-hashed for identity before failure. It does not claim successful NumPy mapping/comparison, image decoding/viewing, quality scoring, or scientific validation."
+  },
+  "blocking_findings": [
+    {
+      "id": "R2_REMAINS",
+      "severity": "BLOCKING",
+      "title": "Complete descriptor equality does not preserve tensor-node provenance",
+      "evidence": [
+        "readback.py:103-116 decodes an archived ordinary Python dict to a plain dict and returns a true tensor descriptor as a plain dict as well.",
+        "readback.py:283-286 checks the already-decoded raw_ids with isinstance(dict) and raw_ids.get('kind') == 'tensor'.",
+        "readback.py:117-118 now checks exact equality with the descriptor registered for the blob path, which closes path-only descriptor mutation but not origin erasure.",
+        "An ordinary archived Python dict whose decoded fields exactly copy a descriptor registered elsewhere still satisfies both the branch and the new equality check."
+      ],
+      "impact": "The fixed S40 event 68 is in fact a tensor node, but a successful run of this verifier would not by itself prove the protocol's stronger claim that batch 2's original archived value was a tensor rather than a descriptor-shaped Python dict.",
+      "required_fix": "Preserve tensor-node provenance during metadata decoding and require it at the batch-2 branch. One minimal option is a dedicated dict subclass returned only for raw kind=tensor, followed by an exact type check plus the existing complete-descriptor equality check. An equivalent raw-tree kind check is also sufficient."
+    },
+    {
+      "id": "R3_WRITER_DOMAIN_MISMATCH",
+      "severity": "BLOCKING_PROTOCOL_OR_CONTRACT_PRECISION",
+      "title": "The declared scalar allowlist is a strict subset of the archive writer's nominal accepted Python domain",
+      "evidence": [
+        "archive_outputs.py:182-183 accepts values using isinstance(value, (str, bool, int)) and records type(value).__name__.",
+        "That condition also accepts int-derived enums and custom int/str subclasses, whose recorded labels are not int or str.",
+        "readback.py:111-113 accepts only the four exact labels str, int, bool, and NoneType.",
+        "The fixed archive contains only those four built-in labels, so the current input remains reachable; the mismatch is fail-closed rather than a false scientific PASS."
+      ],
+      "impact": "The revision receipt's statement that these are the archive writer's complete scalar labels is not literally true. A future valid output from the same frozen writer could be rejected, and JSON cannot reconstruct a subclass's exact Python class from only its label and base value.",
+      "required_fix": "Either scope the protocol and receipt explicitly to the four exact built-in scalar types observed in this fixed S40 archive and state that the reader deliberately rejects the writer's broader subclass domain, or define a verifiable writer/reader scalar contract that handles the nominal subclass domain without weakening type provenance."
+    }
+  ],
+  "preserved_downstream_constraints": {
+    "selected_ids_unique_in_range_and_equal_trace_begin_and_cache_commit": true,
+    "retained_ids_equal_trace_batch_complete": true,
+    "archive_causal_order": true,
+    "history_1_to_5_to_9": true,
+    "map_K_counts_5_to_14_and_depth_counts_5_to_9": true,
+    "sampler_output_samples_z_cache_latent_chain": true,
+    "target_samples_encoder_input_encoder_output_cache_embedding_chain": true,
+    "target_and_context_camera_K_translation_condition_sampler_chain": true,
+    "conditional_and_unconditional_sampler_inputs": true,
+    "replace_latent_and_context_mask_channel": true,
+    "cross_batch_first_five_latent_embedding_camera_K_and_pixel_identity": true,
+    "summary_selected_and_retained_ids": true,
+    "trace_state_machine_callbacks_and_session_closure": true,
+    "evidence": "The reconstructed-v2-to-v3.2 diff changes only metadata representation handling, Reader.array descriptor equality, and the two-branch context_time_indices parser; readback.py:289-360 and trace_states at 152-184 retain the prior constraints."
+  },
+  "required_regression_conditions": [
+    "Batch 1 accepts the raw list [scalar int 0] and rejects the raw tuple equivalent and every bool form.",
+    "Batch 2 accepts only a value carrying provenance that it came from a raw tensor node, with full descriptor equality to the body-verified registered descriptor.",
+    "A descriptor-shaped ordinary archived dict is rejected even when it copies an already registered descriptor exactly.",
+    "The scalar contract is either made exactly writer-compatible or explicitly narrowed to the four built-in types in this fixed archive without claiming full writer-domain equivalence.",
+    "Tuple-preserving args remain usable through len, indexing, and slicing, and all selected/history/trace/commit checks remain unchanged."
+  ],
+  "next_gate": "Revise the tensor provenance check and scalar contract wording or implementation, issue new exact source/protocol/revision hashes, and obtain another independent adversarial review before rebasing or executing the supervisor.",
+  "execution_boundary": {
+    "readback_executed": false,
+    "readback_source_imported": false,
+    "model_executed": false,
+    "generation_executed": false,
+    "resource_gate_executed": false,
+    "tensor_blob_or_image_payload_bodies_read": false,
+    "archive_event_metadata_only_read": true,
+    "attempt01_receipt_only_recalculation": true
+  }
+}

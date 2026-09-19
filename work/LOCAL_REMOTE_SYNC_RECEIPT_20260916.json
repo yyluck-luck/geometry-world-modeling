@@ -1,0 +1,79 @@
+{
+  "schema": "gwm-local-remote-sync-receipt-v1",
+  "date_local": "2026-09-16",
+  "recorded_at_local": "2026-09-16T13:07:36+08:00",
+  "scope": "local macOS project tree <-> HKUST SuperPOD (yliutz@superpod.ust.hk:~/geometry-world-modeling)",
+  "direction": "bidirectional reconciliation; one file pulled back, the rest pushed local -> remote",
+  "driven_by": "user request: guarantee local and cloud stay in sync, including the recorded experiment process",
+
+  "method": {
+    "transport": "rsync over ssh -i ~/.ssh/id_ed25519_superpod",
+    "transfer_flags": "-a (archive: preserve symlinks, times, permissions)",
+    "excludes_anchored": ["/data/", "/results/", "/tmp/", "/.venv/", "/.venv-cut3r/", "/tools/deepseek-harness/runtime/", "/tools/deepseek-harness/state/", "__pycache__/", ".DS_Store"],
+    "exclude_correction": "Earlier recorded syncs used unanchored patterns ('data/', 'results/', 'tmp/'). In rsync an unanchored pattern matches a directory of that name at ANY depth, so nested directories such as vendor/academic-figure-generator/backend/data/ were silently skipped. This run anchors every pattern with a leading '/' and pushes the previously skipped nested files.",
+    "verification": "sorted '<bytes>|<path>' manifest of every regular file on both sides, plus SHA-256 of the nine record files, plus a symlink target manifest"
+  },
+
+  "findings_before_sync": {
+    "local_files": 22013,
+    "remote_files_before": 19507,
+    "local_only_files": 2507,
+    "local_only_bytes": 1381.3,
+    "local_only_bytes_unit": "MB",
+    "remote_only_files": 1,
+    "remote_only_detail": "work/S85_fixed_geometry_warp/execution_01/.TARGET_22.npz.9HaYdc — a partial rsync temp file left by the interrupted work/ push",
+    "remote_newer_content": "none; the only content-differing files were the five record files that are newer locally",
+    "root_cause": "the previous session's ~6 GB work/ push (started 12:10) was interrupted; the missing files cluster in work/S85-S99 plus work/agents"
+  },
+
+  "actions": [
+    "pushed the 2470 missing/modified files (1,226,475,958 bytes transferred, total tree size 6,374,939,265 B) at ~2.0 MB/s",
+    "re-pushed with anchored excludes to recover the nested data/ and results/ directories previously skipped by the unanchored pattern (3,556,428 bytes transferred, total tree size 6,722,278,265 B)",
+    "cleaned the interrupted-transfer temp file on the remote (now absent; TARGET_22.npz present at its full 146,338,446 bytes)",
+    "no deletion, overwrite or restructuring of any research record"
+  ],
+
+  "verification_result": {
+    "local_files_after": 22013,
+    "remote_files_after": 22013,
+    "manifest_diff_lines": 0,
+    "manifest_scope": "every regular file under the sync excludes; compared as '<bytes>|<path>'",
+    "record_file_sha256_match": "9/9 identical",
+    "record_files": {
+      "research_events.jsonl": "fe45511fc3f0056e2e0c6d6f44ac2adc1a35e11e3a3a02a47ce97900d611a012",
+      "RESEARCH_LOG.md": "5d4b2e7da96d8800f181c2a81ee81f0b028af81e396c0251337b6a5d3b3ca1d8",
+      "RESEARCH_MEMORY.md": "0e09c52e8d8cf9d6567e69cf6f5252375cfe4ef6807173a5ebbd438755689e16",
+      "RESEARCH_PRINCIPLES.md": "c805ea678b18db39331004e9261892478fbca9d51438568fe37ff16beb2addb7",
+      "workflow_checks.jsonl": "b3df82967abb0e991beb2c5869c26c38ebe14e816bc64e0d688a9106d9354817",
+      "docs/RESEARCH_HANDOFF_CURRENT.md": "704f40a62dcdc88c88e9b8d28a86bd0283541317a7e3cd08696670a3df5169b9",
+      "docs/RESEARCH_PLANS_EN.md": "8476e239105c394342b292a7cde29fc46d86ee8b0edd7bb9b5ac7e5383ebef87",
+      "docs/GATE0_AND_GPU_START_STATUS_20260916.md": "ba8ffa4a6715aecddc6cd610e5c8023c91eb8f039edf1465340373ae83b41b5a",
+      "docs/GPU_EXPERIMENT_PLAN_AND_PROGRESS_20260915.md": "8642fbeca366df05367c09285f647fbf93bf81057a6187da6207da7e053fea46"
+    },
+    "symlink_manifest": "17 links, identical targets on both sides"
+  },
+
+  "known_caveats": [
+    "All 17 synced symlinks are dangling on the Linux remote because they encode macOS absolute targets (e.g. /Users/rocket/.../data/vae_official_ft_mse/... and /opt/homebrew/opt/python@3.13/...). The record tree is byte-identical; only these links do not resolve. Rewriting them to relative paths would change preserved records and was not done.",
+    "Top-level data/ (~33 GB) and results/ (~28 GB) are deliberately local-only; the remote never held them. Nested data/ and results/ directories are now synced.",
+    ".venv/, .venv-cut3r/, tmp/ and tools/deepseek-harness/{runtime,state}/ are deliberately not synced.",
+    "The 1.5 GB CUDA SIF lives at the remote ~/gwm-images/ outside the project tree and must not be synced back.",
+    "Size|path manifest equality is a strong but not cryptographic check; the nine record files were additionally hash-verified."
+  ],
+
+  "open_items": [
+    "Re-run this same anchored-exclude sync after any future long push, and check the transfer actually completed rather than assuming the background rsync finished.",
+    "Consider a recorded pre/post manifest hash in each future sync so interruption is detectable without a manual diff."
+  ],
+
+  "concurrent_writer": {
+    "detected": true,
+    "evidence": "two ledger entries not written by this session appeared during verification: '2026-09-16T13:06:12+08:00 本机与SuperPOD同步完成并通过checksum校验' and '2026-09-16T13:07:25+08:00 同步闭环复核：发现并行写入方并完成第二次校验'",
+    "other_writer_method": "rsync --partial resume with keepalive options, verified by 'rsync --checksum --delete --dry-run'; it reported its own final total size 6,374,939,265 B (the state before this session's anchored-exclude re-push added the nested data/results directories)",
+    "effect": "the ledger and handoff files were written by two sessions within the same few minutes; any manifest equality statement is therefore a snapshot, not a permanent guarantee",
+    "handling": "this receipt records the point-in-time result; re-verify after any further concurrent write"
+  },
+
+  "novelty_authorization": "NONE",
+  "new_method_validated": false
+}

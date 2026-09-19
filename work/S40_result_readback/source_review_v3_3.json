@@ -1,0 +1,207 @@
+{
+  "schema": "s40-readback-source-review-v3-3",
+  "status": "PASS_S40_READBACK_V3_3_SOURCE_REVIEW",
+  "verdict": "PASS_SOURCE_DELTA_REVIEW_NOT_EXECUTED",
+  "reviewed_utc": "2026-09-07T13:11:42Z",
+  "reviewer_role": "/root/readback_schema_audit",
+  "author_role": "/root",
+  "different_author_and_reviewer": true,
+  "review_mode": "independent_read_only_incremental_and_adversarial_source_review",
+  "identities_relative_to_review_directory": {
+    "readback.py": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933",
+    "PROTOCOL_DRAFT.md": "257e1b7583b000e907cde8baf3e4e3fcefb9f2c81037ed98887d0f6367483163",
+    "revision_v3_3_receipt.json": "bebc80b8fccf6e8699d4768f6ffab097bcc75f6bca4a7f101ef53e827b0e2e9d"
+  },
+  "preserved_blocking_reviews": {
+    "source_review_v3_2.json": {
+      "sha256": "0de2fa685d1487690e0ff782c571bf51866810d6aa927512f7d056713ee7f4fd",
+      "verdict": "REVISION_REQUIRED",
+      "finding_closed_here": "A raw tensor node now produces a dedicated exact-type provenance marker, while an ordinary archived dict remains a built-in dict."
+    },
+    "source_review_v3_2_adversarial.json": {
+      "sha256": "6d03a856e69fdb71b85eab789f8a7c5d495dc967cba2d4b550c005d029aaa6ce",
+      "verdict": "REVISION_REQUIRED",
+      "findings_closed_here": [
+        "The raw tensor-node provenance blocker is closed by the exact TensorDescriptor type gate.",
+        "The scalar allowlist is explicitly scoped in revision_v3_3_receipt.json to the four exact built-in labels observed in this frozen S40 archive and does not claim compatibility with every subclass nominally accepted by the generic writer."
+      ]
+    }
+  },
+  "executed": false,
+  "incremental_audit": {
+    "python_ast_parse": "PASS",
+    "reconstructed_v2_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "reconstruction_matches_preserved_v2_review": true,
+    "delta_from_reconstructed_v2": [
+      "Add the TensorDescriptor marker class.",
+      "Preserve list versus tuple, require exact scalar label/value Python types, mark raw tensor nodes, and preserve the raw tensor marker for PIL pixels during metadata decoding.",
+      "Require exact TensorDescriptor provenance and complete mapping equality with the body-verified registered descriptor before any Reader.array mapping.",
+      "Handle batch 1 as exact built-in integer list [0] and batch 2 as a marked integer tensor.",
+      "Correct the first-map-before-second-context error text without changing its inequality."
+    ],
+    "tensor_descriptor_constructor_call_sites": [
+      "readback.py:120"
+    ],
+    "tensor_descriptor_exact_type_gate": "readback.py:125",
+    "ordinary_dict_decoder": "readback.py:109-111",
+    "unrelated_tensor_hash_chain_bitwise_or_scientific_checks_relaxed": false
+  },
+  "resolved_findings": {
+    "raw_tensor_provenance": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:30-31 defines TensorDescriptor; the only constructor call is readback.py:120 under raw metadata kind=tensor. Reader.array at readback.py:125 requires type(d) is exactly TensorDescriptor."
+    },
+    "ordinary_dict_impersonation": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:109-111 reconstructs raw archival kind=dict as exact built-in dict(pairs), including a descriptor-shaped ordinary Python dict. It may pass the preliminary isinstance check at readback.py:292, but it necessarily fails the immediate exact-type Reader.array gate at readback.py:294/125 before mapping or use."
+    },
+    "pil_pixel_provenance_and_usability": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:121-122 explicitly decodes a raw PIL node's pixels child through Reader.metadata. Fixed archive metadata shows every inspected PIL pixels child is raw kind=tensor, so cross-batch pixel comparisons at readback.py:357 receive TensorDescriptor inputs and retain the exact array gate."
+    },
+    "complete_descriptor_binding": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:125-126 requires both the provenance marker and equality of the complete descriptor mapping, including rejection of extra or changed fields, against the descriptor previously registered after codec, shape, byte-count, canonical SHA, and body SHA checks at readback.py:86-99. A registered blob path alone is insufficient."
+    },
+    "batch_representation_split": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:286-296 requires batch 1 to be exact built-in list [0] with exact int elements, while batch 2 must reach Reader.array and then be a one-dimensional integer tensor. Fixed archive event metadata records occurrence 0 at seq 22 as list containing scalar type=int value=0 and occurrence 1 at seq 68 as kind=tensor, dtype=int64, shape=[4], nbytes=32."
+    },
+    "fixed_archive_scalar_scope": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:114-118 accepts only exact str/int/bool/NoneType labels with exact corresponding JSON-decoded Python value types. Metadata-only enumeration of the frozen archive found 12,357 str, 11,060 int, 6 bool, and 2,352 NoneType nodes and no other scalar label. revision_v3_3_receipt.json explicitly limits this contract to those four labels in this fixed archive and disclaims the generic writer's broader nominal subclass domain."
+    },
+    "attempt01_read_boundary": {
+      "verdict": "RESOLVED_AND_PRESERVED",
+      "evidence": "PROTOCOL_DRAFT.md:3 distinguishes identity hashing from NumPy mapping, image decoding/viewing, and quality evaluation. Existing attempt01 receipt identities independently total 5,916 files and 244,804,717 bytes, including 1,951 archive tensor .bin files totaling 226,619,164 bytes and 9 archive PNG files totaling 5,698,754 bytes."
+    },
+    "temporal_error_message": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py:353 now describes the checked maps[0][0] < contexts[1][0] direction; the numerical condition itself is unchanged from v2."
+    }
+  },
+  "fixed_archive_metadata_evidence": {
+    "path": "../../results/S40_declared_variant_generation/archive/events.jsonl",
+    "archive_event_json_only": true,
+    "tensor_blob_or_image_body_reads": 0,
+    "context_time_indices": [
+      {
+        "capture_seq": 22,
+        "occurrence": 0,
+        "raw_kind": "list",
+        "items": [
+          {
+            "kind": "scalar",
+            "type": "int",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "capture_seq": 68,
+        "occurrence": 1,
+        "raw_kind": "tensor",
+        "dtype": "int64",
+        "shape": [
+          4
+        ],
+        "nbytes": 32,
+        "sha256": "2a1119dcc2a2f3d1103985b60723071ec44ab4594d565dfb832141f07b2ea1d5"
+      }
+    ],
+    "pil_captures_checked": [
+      {
+        "capture_seq": 14,
+        "name": "initial_output",
+        "occurrence": 0,
+        "pil_nodes": 2,
+        "pixel_raw_kinds": [
+          "tensor"
+        ]
+      },
+      {
+        "capture_seq": 22,
+        "name": "context_output",
+        "occurrence": 0,
+        "pil_nodes": 1,
+        "pixel_raw_kinds": [
+          "tensor"
+        ]
+      },
+      {
+        "capture_seq": 44,
+        "name": "cache_commit",
+        "occurrence": 0,
+        "pil_nodes": 5,
+        "pixel_raw_kinds": [
+          "tensor"
+        ]
+      },
+      {
+        "capture_seq": 68,
+        "name": "context_output",
+        "occurrence": 1,
+        "pil_nodes": 5,
+        "pixel_raw_kinds": [
+          "tensor"
+        ]
+      },
+      {
+        "capture_seq": 90,
+        "name": "cache_commit",
+        "occurrence": 1,
+        "pil_nodes": 9,
+        "pixel_raw_kinds": [
+          "tensor"
+        ]
+      }
+    ],
+    "scalar_label_counts": {
+      "str": 12357,
+      "int": 11060,
+      "bool": 6,
+      "NoneType": 2352
+    }
+  },
+  "preserved_checks": {
+    "tensor_codec_dtype_shape_nbytes_body_and_canonical_sha": true,
+    "complete_archive_inventory_sidecars_and_file_hashes": true,
+    "archive_and_trace_hash_chains": true,
+    "trace_session_batch_state_machine_and_callback_counts": true,
+    "selected_id_nonempty_unique_range_and_trace_commit_order_bindings": true,
+    "history_1_5_9_and_map_counts": true,
+    "sampler_samples_cache_and_encoder_bridges": true,
+    "context_translation_condition_and_sampler_bridges": true,
+    "cross_batch_latent_embedding_camera_K_and_pixel_bitwise_checks": true,
+    "same_dtype_shape_and_raw_bit_comparison_default": true,
+    "limited_small_camera_K_FP64_to_FP32_cast_only": true,
+    "source_and_input_stat_seals": true,
+    "failed_attempt01_directory_and_receipts_preserved": true,
+    "quality_or_novelty_claim_added": false
+  },
+  "protocol_consistency": {
+    "raw_tensor_marker_and_ordinary_dict_exclusion_match_source": true,
+    "pil_pixel_marker_path_matches_source": true,
+    "complete_descriptor_equality_matches_source": true,
+    "first_list_and_second_tensor_contract_matches_source_and_fixed_archive_metadata": true,
+    "attempt01_identity_hash_boundary_matches_preserved_receipt": true,
+    "executed_02_is_future_fresh_output_directory": true,
+    "no_runtime_quality_or_innovation_claim": true
+  },
+  "blocking_findings": [],
+  "new_blocking_source_findings": [],
+  "nonblocking_findings": [],
+  "operations": {
+    "readback_runs": 0,
+    "readback_source_imports": 0,
+    "tensor_blob_or_image_body_reads": 0,
+    "images_decoded_or_viewed": 0,
+    "scientific_arrays_mapped_or_compared": 0,
+    "models_ga_gates_scoring_or_generation_runs": 0,
+    "network_requests": 0,
+    "source_or_protocol_modified_by_reviewer": false,
+    "canonical_ledger_modified": false,
+    "review_artifact_written": true
+  },
+  "authorization_boundary": "This PASS covers only the exact bound v3.3 source/protocol/revision delta. It is not a readback result, image-quality evaluation, model/GA validation, or novelty claim; any externally supervised execution remains a later separately reviewed gate."
+}

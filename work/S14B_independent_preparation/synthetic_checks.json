@@ -1,0 +1,166 @@
+{
+  "completed_utc": "2026-09-06T05:46:10.085503+00:00",
+  "source_sha256": "5a0d117254b8428063aaf826eafaaab4800931d6de3a78e59b3b24a2d6611afa",
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "unequal_frame_pixel_counts",
+      "expected": {
+        "W": 0.5,
+        "B": 9.0,
+        "A": 16.0,
+        "D": 25.0,
+        "W_over_radius2": 0.125,
+        "B_over_radius2": 2.25,
+        "A_over_radius2": 4.0,
+        "D_over_radius2": 6.25
+      },
+      "computed": {
+        "W": 0.5,
+        "B": 9.0,
+        "A": 16.0,
+        "D": 25.0,
+        "W_over_radius2": 0.125,
+        "B_over_radius2": 2.25,
+        "A_over_radius2": 4.0,
+        "D_over_radius2": 6.25
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "single_source",
+      "expected": {
+        "W": 1.0,
+        "B": 0.0,
+        "A": 1.0,
+        "D": 1.0
+      },
+      "computed": {
+        "W": 1.0,
+        "B": 0.0,
+        "A": 1.0,
+        "D": 1.0,
+        "W_over_radius2": 0.25,
+        "B_over_radius2": 0.0,
+        "A_over_radius2": 0.25,
+        "D_over_radius2": 0.25
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "zero_variance",
+      "expected": {
+        "W": 0.0,
+        "B": 0.0,
+        "A": 0.0,
+        "D": 0.0
+      },
+      "computed": {
+        "W": 0.0,
+        "B": 0.0,
+        "A": 0.0,
+        "D": 0.0,
+        "W_over_radius2": 0.0,
+        "B_over_radius2": 0.0,
+        "A_over_radius2": 0.0,
+        "D_over_radius2": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "large_translation",
+      "expected": {
+        "W": 0.5,
+        "B": 9.0,
+        "A": 16.0,
+        "D": 25.0
+      },
+      "computed": {
+        "W": 0.5,
+        "B": 9.0,
+        "A": 16.0,
+        "D": 25.0,
+        "W_over_radius2": 0.125,
+        "B_over_radius2": 2.25,
+        "A_over_radius2": 4.0,
+        "D_over_radius2": 6.25
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "0.0",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "-1.0",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "nan",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "inf",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "1e-200",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "invalid_radius",
+      "radius": "1e+200",
+      "status": "EXPECTED_REJECTION"
+    },
+    {
+      "case": "linear_quantile",
+      "values": [
+        0.0,
+        10.0
+      ],
+      "probability": 0.9,
+      "expected": 9.0,
+      "status": "PASS"
+    },
+    {
+      "case": "linear_quantile",
+      "values": [
+        4.0
+      ],
+      "probability": 0.9,
+      "expected": 4.0,
+      "status": "PASS"
+    },
+    {
+      "case": "linear_quantile",
+      "values": [
+        1.0,
+        3.0,
+        5.0,
+        7.0
+      ],
+      "probability": 0.5,
+      "expected": 4.0,
+      "status": "PASS"
+    },
+    {
+      "case": "linear_quantile",
+      "values": [
+        1.0,
+        2.0,
+        8.0
+      ],
+      "probability": 0.9,
+      "expected": 6.8,
+      "status": "PASS"
+    }
+  ],
+  "float_checks": 28,
+  "real_npz_arrays_decoded": 0,
+  "gt_query_scores_reads": 0
+}

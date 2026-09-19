@@ -1,0 +1,422 @@
+{
+  "schema": "s42-causal-memory-gap-search-sources-v1",
+  "retrieved_utc": "2026-09-07T05:52:10Z",
+  "question": "After VMem retrieval is fixed, is the memory consumer causally addressable and sufficient at the source-to-target-region level, and does wrong or conflicting memory justify calibrated subset/null consumption?",
+  "source_policy": "Formal proceedings or official conference pages were preferred. Recent work without proceedings was retained only when an arXiv primary record and original PDF were available. Search snippets or assistant summaries alone were not used as scientific evidence.",
+  "primary_literature": [
+    {
+      "id": "vmem",
+      "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "venue_status": "ICCV 2025",
+      "url": "https://openaccess.thecvf.com/content/ICCV2025/html/Li_VMem_Consistent_Interactive_Video_Scene_Generation_with_Surfel-Indexed_View_Memory_ICCV_2025_paper.html",
+      "verification": "official_cvf_page_plus_pinned_local_source",
+      "read_scope": "official paper identity; exact post-retrieval implementation checked in pinned local source",
+      "used_for": "Audited baseline and retrieval-consumption boundary."
+    },
+    {
+      "id": "worldmem",
+      "title": "WorldMem: Long-term Consistent World Simulation with Memory",
+      "venue_status": "NeurIPS 2025",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/470629a47e2d65ce0606c40055df5d26-Abstract-Conference.html",
+      "verification": "official_neurips_proceedings",
+      "read_scope": "official abstract plus project-local verified full-paper synthesis",
+      "used_for": "Pose/time-bound token memory and state-aware cross-attention after retrieval."
+    },
+    {
+      "id": "easyref",
+      "title": "EasyRef: Omni-Generalized Group Image Reference for Diffusion Models via Multimodal LLM",
+      "venue_status": "ICML 2025",
+      "url": "https://proceedings.mlr.press/v267/zong25a.html",
+      "verification": "official_pmlr_proceedings",
+      "read_scope": "official paper page plus project-local verified full-paper synthesis",
+      "used_for": "Direct prior art on the inadequacy of average/concatenate multi-reference embeddings and learned group-image interaction."
+    },
+    {
+      "id": "mimo",
+      "title": "Improving Autoregressive Video Modeling with History Understanding",
+      "venue_status": "ICLR 2026",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/9d30c2def27b5c6a5fb21a9aa5c16f8f-Abstract-Conference.html",
+      "verification": "official_iclr_proceedings",
+      "read_scope": "official abstract plus project-local verified synthesis",
+      "used_for": "History representation quality and masked history modeling in VideoAR."
+    },
+    {
+      "id": "corradapter",
+      "title": "Align Images Before You Generate",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Zhang_Align_Images_Before_You_Generate_CVPR_2026_paper.html",
+      "verification": "official_cvf_page",
+      "read_scope": "official paper page plus prior verified full-paper audit",
+      "used_for": "Native correspondence and aligned-area aggregation as a strong nearest mechanism."
+    },
+    {
+      "id": "spad",
+      "title": "SPAD: Spatially Aware Multi-View Diffusers",
+      "venue_status": "CVPR 2024",
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Kant_SPAD_Spatially_Aware_Multi-View_Diffusers_CVPR_2024_paper.html",
+      "pdf_sha256": "ca9b9070c31769c52dc8706cdf4385e3d33b3f9cbbbbeaa4cf56350ede3a284d",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper in prior S41 audit",
+      "used_for": "Epipolar-constrained cross-view attention and Plucker ray embeddings."
+    },
+    {
+      "id": "epidiff",
+      "title": "EpiDiff: Enhancing Multi-View Synthesis via Localized Epipolar-Constrained Diffusion",
+      "venue_status": "CVPR 2024",
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Huang_EpiDiff_Enhancing_Multi-View_Synthesis_via_Localized_Epipolar-Constrained_Diffusion_CVPR_2024_paper.html",
+      "pdf_sha256": "4344d4867e699d59b04ec76adddb73b0dc2e7f44344e118ffab2335ef299b1ad",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper in prior S41 audit",
+      "used_for": "Localized epipolar-constrained feature aggregation in diffusion."
+    },
+    {
+      "id": "worldstereo",
+      "title": "WorldStereo: Bridging Camera-Guided Video Generation and Scene Reconstruction via 3D Geometric Memories",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Zhang_WorldStereo_Bridging_Camera-Guided_Video_Generation_and_Scene_Reconstruction_via_3D_CVPR_2026_paper.html",
+      "pdf_url": "https://openaccess.thecvf.com/content/CVPR2026/papers/Zhang_WorldStereo_Bridging_Camera-Guided_Video_Generation_and_Scene_Reconstruction_via_3D_CVPR_2026_paper.pdf",
+      "pdf_sha256": "107cd9ad1c37f4d7a195db0c75e4f778c86f4d8ea8a50d792d239035fc5c6405",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper, including Global-Geometric and Spatial-Stereo Memory",
+      "used_for": "Direct rejection of generic geometry-guided token routing or correspondence-constrained attention."
+    },
+    {
+      "id": "spatia",
+      "title": "Spatia: Video Generation with Updatable Spatial Memory",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/papers/Zhao_Spatia_Video_Generation_with_Updatable_Spatial_Memory_CVPR_2026_paper.pdf",
+      "pdf_sha256": "7963bb288b3c884befa4c2656a0c21692a230e313055c20e9042e5755966fb74",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper in prior S41 audit",
+      "used_for": "Updatable point-cloud memory, visual SLAM or MapAnything update and projection-video conditioning."
+    },
+    {
+      "id": "geometry_as_context",
+      "title": "Geometry-as-context: Modulating Explicit 3D in Scene-consistent Video Generation to Geometry Context",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Hu_Geometry-as-context_Modulating_Explicit_3D_in_Scene-consistent_Video_Generation_to_Geometry_CVPR_2026_paper.html",
+      "pdf_sha256": "b2817bb1c656909fbb8ed927b9a3edda07b7c9c8be0d07d0a982ad7404a464d4",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper in prior S41 audit",
+      "used_for": "Plucker camera features used to modulate queries and gate attention outputs."
+    },
+    {
+      "id": "poco",
+      "title": "Rethinking Position Embedding as a Context Controller for Multi-Reference and Multi-Shot Video Generation",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/papers/Huang_Rethinking_Position_Embedding_as_a_Context_Controller_for_Multi-Reference_and_CVPR_2026_paper.pdf",
+      "pdf_sha256": "55d18602d9096a999d9c7ca4d3c11e37fd4c40b8fd7cd42d6ab4144ad2c3e40d",
+      "verification": "official_cvf_full_paper",
+      "read_scope": "full paper",
+      "used_for": "Source/reference ID association via SideInfo-RoPE."
+    },
+    {
+      "id": "rebind",
+      "title": "ReBind: Multi-Reference Video Editing via Structured Instructions with Explicit Reference Relationships",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2607.14681",
+      "url": "https://arxiv.org/abs/2607.14681",
+      "verification": "arxiv_primary_record",
+      "read_scope": "title, authors and abstract",
+      "used_for": "Explicit semantic binding between attributes and reference sources in video editing."
+    },
+    {
+      "id": "anchorweave",
+      "title": "AnchorWeave: World-Consistent Video Generation with Retrieved Local Spatial Memories",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2602.14941v1",
+      "url": "https://arxiv.org/abs/2602.14941",
+      "verification": "arxiv_primary_record_plus_project_local_full_paper_audit",
+      "read_scope": "method, retrieval, pose-guided fusion and ablation boundaries",
+      "used_for": "Local point-cloud memories, coverage retrieval, multi-anchor attention and pose-guided fusion."
+    },
+    {
+      "id": "mosaicmem",
+      "title": "MosaicMem: Hybrid Spatial Memory for Controllable Video World Models",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2603.17117v1",
+      "url": "https://arxiv.org/abs/2603.17117",
+      "verification": "arxiv_primary_record_and_full_pdf_text",
+      "read_scope": "3D positioned patch memory, target-aware composition and Warped Latent/RoPE trade-offs",
+      "used_for": "Spatially addressable patch state and camera-versus-memory trade-offs."
+    },
+    {
+      "id": "lsm_world",
+      "title": "Latent Spatial Memory for Video World Models",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2606.09828v2",
+      "url": "https://arxiv.org/abs/2606.09828",
+      "verification": "arxiv_primary_record_and_project_local_v2_full_paper_audit",
+      "read_scope": "3D latent tokens, depth-guided lift, z-buffer projection, visibility mask and dynamic-object filtering",
+      "used_for": "Explicit world-coordinate latent memory and target projection."
+    },
+    {
+      "id": "worldtrace",
+      "title": "Addressable Memory for Video World Models",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2608.07408v1",
+      "url": "https://arxiv.org/abs/2608.07408",
+      "pdf_sha256": "d9fb2a5a98fe0b3bac20df23d223d3f9494b9785d26a3edf800eb6d66161f37d",
+      "verification": "arxiv_primary_record_and_full_pdf",
+      "read_scope": "full paper, especially out-of-horizon RoPE addressability, cache compression and LoopBench",
+      "used_for": "Direct prior art on memory addressability and destructive averaging of incompatible positional phases."
+    },
+    {
+      "id": "memory_forcing",
+      "title": "Memory Forcing: Spatio-Temporal Memory for Consistent Scene Generation on Minecraft",
+      "venue_status": "arXiv preprint 2025",
+      "identifier": "arXiv:2510.03198",
+      "url": "https://arxiv.org/abs/2510.03198",
+      "pdf_sha256": "13ef9f178206248426914426e0dd116672f2ccb168168bf6d259e4740da0de6b",
+      "verification": "arxiv_primary_record_and_full_pdf",
+      "read_scope": "full paper, including Sections 3.2-3.4 and memory cross-attention",
+      "used_for": "Temporal/spatial memory reliance, over-reliance on insufficient spatial context, point-to-frame retrieval and memory cross-attention."
+    },
+    {
+      "id": "remind",
+      "title": "Teaching Video Generators to Remember: Eliciting Dynamic Memory for Out-of-Sight State Evolution",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2605.25333v2",
+      "url": "https://arxiv.org/abs/2605.25333",
+      "pdf_sha256": "500d1ef02ca179c6bcf43ba9da7a03983e685aa5a684e53db866a588a5a54c20",
+      "verification": "arxiv_primary_record_and_full_pdf",
+      "read_scope": "full paper, including node-drop, noisy-memory, protected anchors, reference-cache training and PM-RoPE",
+      "used_for": "Direct pressure on noisy-memory robustness and learning to recover from intended anchors."
+    },
+    {
+      "id": "memory_experts",
+      "title": "Composition of Memory Experts for Diffusion World Models",
+      "venue_status": "ICLR 2026",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/19eae75beed66321d62272e794a9c2ac-Abstract-Conference.html",
+      "verification": "official_iclr_proceedings",
+      "read_scope": "official abstract",
+      "used_for": "Short-term, episodic long-term and spatial long-term experts combined through contrastive product-of-experts."
+    },
+    {
+      "id": "adarefsr",
+      "title": "Trust but Verify: Adaptive Conditioning for Reference-Based Diffusion Super-Resolution via Implicit Reference Correlation Modeling",
+      "venue_status": "ICLR 2026",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/9d0947107ea92d6ce369dce7749180dd-Abstract-Conference.html",
+      "pdf_sha256": "f370fb84ad438a08d4081c650fa19a7d93f05b8d97553c67b38a41b838224c0b",
+      "verification": "official_iclr_proceedings_and_full_pdf",
+      "read_scope": "full paper, focused on Adaptive Implicit Correlation Gating",
+      "used_for": "Direct rejection of unreliable-reference summary-token gating as a novel mechanism."
+    },
+    {
+      "id": "multiref",
+      "title": "MultiRef: Controllable Image Generation with Multiple Visual References",
+      "venue_status": "ACM Multimedia 2025 Dataset Track",
+      "identifier": "DOI:10.1145/3746027.3758292",
+      "url": "https://doi.org/10.1145/3746027.3758292",
+      "pdf_sha256": "a6af47cf7a0cb93a86bd97a2e94be6bd93bf9a1afb232f318c1b665653a66bd0",
+      "verification": "doi_metadata_and_full_pdf",
+      "read_scope": "full paper, benchmark construction, inconsistent references, source fidelity and order effects",
+      "used_for": "Existing multi-reference conflict/source-fidelity benchmark outside online world memory."
+    },
+    {
+      "id": "multibanana",
+      "title": "MultiBanana: A Challenging Benchmark for Multi-Reference Text-to-Image Generation",
+      "venue_status": "CVPR 2026",
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Oshima_MultiBanana_A_Challenging_Benchmark_for_Multi-Reference_Text-to-Image_Generation_CVPR_2026_paper.html",
+      "verification": "official_cvf_page",
+      "read_scope": "official abstract and benchmark axes",
+      "used_for": "Reference-count, domain, scale and rare-concept stress tests."
+    },
+    {
+      "id": "hm_world",
+      "title": "Out of Sight but Not Out of Mind: Hybrid Memory for Dynamic Video World Models",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2603.25716v2",
+      "url": "https://arxiv.org/abs/2603.25716",
+      "pdf_sha256": "cf47e18081426b4edfd391110a511428958f7274c49dc9ac49cfce5e7a824483",
+      "verification": "arxiv_primary_record_and_full_pdf",
+      "read_scope": "full paper, HM-World dataset and HyDRA memory",
+      "used_for": "Dynamic-subject exit/re-entry state and spatiotemporal relevance retrieval."
+    },
+    {
+      "id": "memobench",
+      "title": "MemoBench: Benchmarking World Modeling in Dynamically Changing Environments",
+      "venue_status": "arXiv preprint 2026; project claims ECCV 2026",
+      "identifier": "arXiv:2606.27537v6",
+      "url": "https://arxiv.org/abs/2606.27537",
+      "pdf_sha256": "c70e11d0a66291582149298853a568e40f8458e1b0488670b1cdafb7d807f16f",
+      "verification": "arxiv_primary_record_and_full_pdf",
+      "read_scope": "full paper, disappear-process-reappear benchmark and evaluation pillars",
+      "used_for": "Existing benchmark coverage of dynamically evolving hidden state."
+    },
+    {
+      "id": "sufficient_context",
+      "title": "Sufficient Context: A New Lens on Retrieval Augmented Generation Systems",
+      "venue_status": "ICLR 2025",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/33dffa2e3d2ab74a783d1a8c292f66d9-Abstract-Conference.html",
+      "pdf_sha256": "1d48ccb637e44694bf41fbef81d087c60aa2e38a31bb9641554b422c47de8f3e",
+      "verification": "official_iclr_proceedings_and_full_pdf",
+      "read_scope": "full paper, context sufficiency diagnosis and guided abstention",
+      "used_for": "Separation of retrieval insufficiency from consumer error and selective generation."
+    },
+    {
+      "id": "recomp",
+      "title": "RECOMP: Improving Retrieval-Augmented LMs with Context Compression and Selective Augmentation",
+      "venue_status": "ICLR 2024",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/bda88ed2892f5e61c9a9bf215c566913-Abstract-Conference.html",
+      "verification": "official_iclr_proceedings",
+      "read_scope": "official abstract and original PDF abstract",
+      "used_for": "Compressed multi-document context and the empty-string/null augmentation action."
+    },
+    {
+      "id": "why_so_gullible",
+      "title": "Why So Gullible? Enhancing the Robustness of Retrieval-Augmented Models against Counterfactual Noise",
+      "venue_status": "Findings of NAACL 2024",
+      "url": "https://aclanthology.org/2024.findings-naacl.159/",
+      "verification": "official_acl_anthology",
+      "read_scope": "official abstract",
+      "used_for": "Relevant-but-wrong retrieved documents, inter-document conflict and discriminator-based robustness."
+    },
+    {
+      "id": "care",
+      "title": "Conflict-Aware Soft Prompting for Retrieval-Augmented Generation",
+      "venue_status": "EMNLP 2025",
+      "url": "https://aclanthology.org/2025.emnlp-main.1371/",
+      "verification": "official_acl_anthology",
+      "read_scope": "official abstract and PDF abstract",
+      "used_for": "Conflict assessor, compact memory embeddings and guidance toward a reliable source."
+    },
+    {
+      "id": "selective_multisource_qa",
+      "title": "Selective QA over Conflicting Multi-Source Personal Memory: A Diagnostic Testbed and Method Comparison",
+      "venue_status": "arXiv preprint 2026",
+      "identifier": "arXiv:2605.30087",
+      "url": "https://arxiv.org/abs/2605.30087",
+      "verification": "arxiv_primary_record_plus_public_artifact_crosscheck",
+      "read_scope": "primary abstract, benchmark task and selective accuracy/coverage framing",
+      "used_for": "Near-exact abstract prior for conflicting multi-source memory with answer/abstain and controlled source distortions."
+    },
+    {
+      "id": "sam2long",
+      "title": "SAM2Long: Enhancing SAM 2 for Long Video Segmentation with a Training-Free Memory Tree",
+      "venue_status": "ICCV 2025",
+      "url": "https://openaccess.thecvf.com/content/ICCV2025/html/Ding_SAM2Long_Enhancing_SAM_2_for_Long_Video_Segmentation_with_a_ICCV_2025_paper.html",
+      "verification": "official_cvf_page_and_pdf",
+      "read_scope": "official abstract and relevant uncertainty/tree-memory sections",
+      "used_for": "Uncertainty-aware branching and pruning in long-video memory, in a non-generative task."
+    },
+    {
+      "id": "uar_scenes",
+      "title": "Uncertainty-Aware Diffusion-Guided Refinement of 3D Scenes",
+      "venue_status": "ICCV 2025",
+      "url": "https://openaccess.thecvf.com/content/ICCV2025/html/Bose_Uncertainty-Aware_Diffusion-Guided_Refinement_of_3D_Scenes_ICCV_2025_paper.html",
+      "verification": "official_cvf_page_and_pdf",
+      "read_scope": "official abstract and uncertainty-guided refinement sections",
+      "used_for": "Per-pixel semantic uncertainty and discarding unreliable diffusion pseudo-view supervision."
+    },
+    {
+      "id": "dtrak",
+      "title": "Intriguing Properties of Data Attribution on Diffusion Models",
+      "venue_status": "ICLR 2024",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/50be7e77b9c883144940be925b608acc-Abstract-Conference.html",
+      "verification": "official_iclr_proceedings",
+      "read_scope": "official abstract",
+      "used_for": "Generic diffusion training-data attribution and counterfactual evaluation prior."
+    },
+    {
+      "id": "das",
+      "title": "Diffusion Attribution Score: Evaluating Training Data Influence in Diffusion Models",
+      "venue_status": "ICLR 2025",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/398ae57ed4fda79d0781c65c926d667b-Abstract-Conference.html",
+      "verification": "official_iclr_proceedings",
+      "read_scope": "official abstract",
+      "used_for": "Predicted-distribution comparison for generic diffusion training-sample influence."
+    },
+    {
+      "id": "promark",
+      "title": "ProMark: Proactive Diffusion Watermarking for Causal Attribution",
+      "venue_status": "CVPR 2024",
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Asnani_ProMark_Proactive_Diffusion_Watermarking_for_Causal_Attribution_CVPR_2024_paper.html",
+      "verification": "official_cvf_page",
+      "read_scope": "official abstract",
+      "used_for": "Causative attribution through proactive training-data watermarks, distinct from runtime memory-source effects."
+    },
+    {
+      "id": "cad",
+      "title": "Unveiling Concept Attribution in Diffusion Models",
+      "venue_status": "NeurIPS 2025",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/295d03c732e675d699aab6056393d5ee-Abstract-Conference.html",
+      "verification": "official_neurips_proceedings",
+      "read_scope": "official abstract",
+      "used_for": "Diffusion component attribution, distinct from online memory-source to target-region effects."
+    }
+  ],
+  "local_evidence": [
+    {
+      "path": "work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+      "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+      "lines_used": ["505-522", "630-765", "1124-1171"],
+      "used_for": "Geometry-based frame selection, fixed-source array reads, CLIP mean, one-token repeat, c_replace and c_concat."
+    },
+    {
+      "path": "work/S20_environment/isolated_vmem_source/modeling/modules/conditioner.py",
+      "sha256": "b79eb0cf4d94345a720a9a844c7daa6206b0a9234d714b7f9f23a9571c7c5fc1",
+      "lines_used": ["7-39"],
+      "used_for": "OpenCLIP ViT-H-14 global image encoding interface."
+    },
+    {
+      "path": "work/S20_environment/isolated_vmem_source/modeling/modules/transformer.py",
+      "sha256": "5f0d152a2f6464076cb0ee5aca725b3445420a5f37ac571d3daa77e580e65764",
+      "lines_used": ["39-75"],
+      "used_for": "Exact Q/K/V projections and scaled dot-product attention implementation."
+    },
+    {
+      "path": "docs/LITERATURE_SYNTHESIS_V2.md",
+      "sha256": "aa26d7354c46648de880c05857e2e6b8aa955743f825e134a381202269894e38",
+      "used_for": "Project-wide verified geometry, retrieval, state and generation literature synthesis."
+    },
+    {
+      "path": "work/S41_clip_mean_innovation_audit/AUDIT.md",
+      "sha256": "922f708a3b319e98fd5b84116a9a298df349d86700c26aded83e8ce279617475",
+      "used_for": "Prior rejection boundary for generic attention/router/geometry routing."
+    },
+    {
+      "path": "work/S40_declared_variant_generation/PROTOCOL_DRAFT.md",
+      "sha256": "2c026b3dff79ca9155e5ad86a8c539b6597b6be7ed73b2c407b3d83ce75d7ced",
+      "used_for": "Future real-generation protocol boundary; not experimental evidence."
+    },
+    {
+      "path": "work/S40_declared_variant_generation/progress_handoff.json",
+      "sha256": "fe71c2ff8843d638277f05a1f80c6befaa92d2f58d5ca7839a2913a614a4b998",
+      "used_for": "Read-time evidence that S40 was source-reviewed but not executed."
+    }
+  ],
+  "search_queries": [
+    "video world model addressable memory KV cache RoPE",
+    "video generator noisy memory protected anchor",
+    "multi-reference video explicit reference binding",
+    "reference diffusion unreliable correlation gating",
+    "conflicting multi-source memory selective abstention",
+    "retrieval sufficient context guided abstention",
+    "counterfactual diffusion attribution region source",
+    "geometry correspondence constrained memory attention video generation"
+  ],
+  "excluded_or_rejected_claims": [
+    {
+      "claim": "Geometry-guided token routing is new",
+      "reason": "Rejected by WorldStereo, CorrAdapter, SPAD and EpiDiff."
+    },
+    {
+      "claim": "Reference ID or pose-conditioned attention is new",
+      "reason": "Rejected by WorldMem, PoCo and ReBind."
+    },
+    {
+      "claim": "Confidence gating or null memory use is new",
+      "reason": "Rejected by Ada-RefSR, ReMind, RECOMP, Sufficient Context and CARE."
+    },
+    {
+      "claim": "Memory expert fusion is new",
+      "reason": "Rejected by Composition of Memory Experts for Diffusion World Models."
+    },
+    {
+      "claim": "A source-to-region change score is automatically causal benefit",
+      "reason": "Without frozen interventions it is association; without target ground truth it is sensitivity, not benefit."
+    }
+  ],
+  "retrieval_limit": "This was a targeted 2024-2026 search, not a complete systematic review. The absence of an exact match does not establish novelty. A submission-level claim requires citation-network expansion, synonym search and independent verification."
+}

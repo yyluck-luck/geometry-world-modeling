@@ -1,0 +1,135 @@
+{
+  "schema": "s61-unit-consistent-retrieval-source-review-v1",
+  "status": "PASS_S61_BOUNDED_SOURCE_REVIEW",
+  "reviewer_role": "/root/c2_v9_source_primary",
+  "completed_utc": "2026-09-08T18:27:31.989179+00:00",
+  "blockers": [],
+  "authors_and_reviewed_groups": {
+    "root_saved_geometry_acceptance": {
+      "author_role": "/root",
+      "files": [
+        "ROOT_accept_saved_geometry.py",
+        "ROOT_SAVED_DATA_ACCEPTANCE_PROTOCOL.md"
+      ]
+    },
+    "adapter_and_author_finite_tests": {
+      "author_role": "/root/c2_v9_recovery_author",
+      "handoff": "AUTHOR_FINAL_DELIVERY.json",
+      "files": [
+        "unit_consistent_renderer.py",
+        "test_unit_consistent_renderer.py",
+        "PROTOCOL.md",
+        "README.md",
+        "FINITE_TEST_RECEIPT.json"
+      ]
+    }
+  },
+  "file_bindings": {
+    "ROOT_accept_saved_geometry.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/ROOT_accept_saved_geometry.py",
+      "sha256": "7eec7b5fdc4f8c187c87851e83beee52d427427a1f664358779e23239b60568a",
+      "bytes": 7591,
+      "mode": "0o444"
+    },
+    "ROOT_SAVED_DATA_ACCEPTANCE_PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/ROOT_SAVED_DATA_ACCEPTANCE_PROTOCOL.md",
+      "sha256": "8def0f0e20f32adb35814f64a6aeb1b101c542e71c6347cc11ead4912e1706cb",
+      "bytes": 1717,
+      "mode": "0o444"
+    },
+    "AUTHOR_FINAL_DELIVERY.json": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/AUTHOR_FINAL_DELIVERY.json",
+      "sha256": "111715a4d98dfaf9ed48e75a2a4073b68f47c129c7f408102c612d1bbafe4a07",
+      "bytes": 2022,
+      "mode": "0o444"
+    },
+    "unit_consistent_renderer.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py",
+      "sha256": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c",
+      "bytes": 5262,
+      "mode": "0o444"
+    },
+    "test_unit_consistent_renderer.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/test_unit_consistent_renderer.py",
+      "sha256": "36995c9494e0c05dcd60967c5154c255b4872c05945db2e842f37ab959aebf09",
+      "bytes": 9653,
+      "mode": "0o444"
+    },
+    "PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/PROTOCOL.md",
+      "sha256": "ac14841f0c8f50dcde6de89b6a315a5630596ebc7442ad1afa132459fe526e42",
+      "bytes": 3086,
+      "mode": "0o444"
+    },
+    "README.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/README.md",
+      "sha256": "8dfd4adad1f04a41af9a6343b95c532e0da9b6c517dce6633877d9ae33cf7df6",
+      "bytes": 1827,
+      "mode": "0o444"
+    },
+    "FINITE_TEST_RECEIPT.json": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/FINITE_TEST_RECEIPT.json",
+      "sha256": "bb9964860835f1c215e0e7045205a6df30072a3eab0ee6ad631c50d2d0d89af8",
+      "bytes": 1699,
+      "mode": "0o444"
+    }
+  },
+  "root_acceptance_source_checks": [
+    "Only pinned C2 archive seq58 surfels, source mapping, actual render pose/focals/kwargs are decoded. Other seq58 depth maps and surfel_Ks remain undecoded. Surfels contain color=None metadata, not RGB payload. S60 decoder is imported under a non-main name; its replay main is not called.",
+    "Pinned original pipeline source is parsed and only the three unique undecorated renderer/distribution/aggregation AST functions are compiled unchanged. Their reviewed bodies contain numeric operations only. No full pipeline import, model load, image decode or generation call occurs.",
+    "S60 normalized numeric-map pin 1b2fefa8c44eeca818f4aab979b95b176fee4875df1e6c3538615477b8b23bfe and receipt pin 8c5353945322be90093db0bbbcb2992e898a7dbc91e5e8e009d16b92c269b9f0 match the prior independent S60 result record. Current source enforces those pins before numeric decode. This source-only review did not repeat payload readback.",
+    "Exactly three conditions use factors 1, 1e-6, 1e6 on the same 515-surface scene. Each passes all positions/radii and camera translation through the same factor and invokes the adapter once. The wrapper requires exactly one original renderer call, positive camera-z median 1 within abs/rel 1e-12, and unchanged focal/kwargs.",
+    "Index maps must match S60 golden exactly. Depth/cos arrays must be finite and 288x512 and match abs/rel 1e-6. Source frame counts must match exactly; source weights use abs1e-6,rel0. These bounds are fixed with no fallback/extra unit search.",
+    "Camera/focal/position/normal/radius/kwargs identities are compared before/after each adapter call. Source IDs/order preservation is established by the exact adapter deepcopy-only source path and author finite-test evidence, not by this root numeric fingerprint, which omits source_ids.",
+    "Execution directory is create-only and currently absent; three named numeric NPZ outputs and one receipt are produced on success then made 0444. Failures retain the consumed directory. Three conditions are explicitly one independent scene. The external 120-second limit remains root runner responsibility; no actual run is attested here."
+  ],
+  "adapter_source_checks": [
+    "NumPy-only component imports no pipeline, model or RGB library and performs no file access. Signature and return (maps, receipt) match the root acceptance call.",
+    "For positive shared length factor a, q=R^-1(X-t) becomes aq and the median of strictly positive z becomes au. Dividing X,t,radius by u therefore yields the same canonical geometry. R, focal/principal points, normals, source IDs and order retain their values. The rule uses all positive-depth centers before rasterization; it does not select by visibility, score or desired retrieval result.",
+    "Finite shapes and proper-rotation/homogeneous-row checks precede conversion; empty geometry or no positive depth fails before renderer invocation. Zero normals/radii remain unchanged; invalid/nonfinite conversion fails. No assertion of stability beyond finite representable arithmetic is made.",
+    "Positions/radii/camera are copied, then all original surfel objects including extra attributes and source IDs are deep-copied; focal and renderer kwargs are deep-copied at the sole renderer call. Original input caches are not edited. Renderer exceptions propagate without a retry.",
+    "The original three-map dictionary is returned directly. Depth deliberately remains dimensionless positive-median units and is not multiplied back to historical length units. Receipt states unit, scale and unknown physical calibration. This changes the semantics of the original cos/(1+depth) consumer and is a declared engineering baseline variant, not exact historical equivalence.",
+    "This is a component boundary only. It neither installs a production path nor proves a full second generation batch, C2 recovery, image quality gain, cross-scene generality or novelty."
+  ],
+  "author_finite_test_evidence": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/FINITE_TEST_RECEIPT.json",
+    "sha256": "bb9964860835f1c215e0e7045205a6df30072a3eab0ee6ad631c50d2d0d89af8",
+    "status": "PASS_SYNTHETIC_NUMERIC_ONLY",
+    "started_utc": "2026-09-08T18:22:45.396158+00:00",
+    "completed_utc": "2026-09-08T18:22:45.408174+00:00",
+    "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "numpy": "1.26.4",
+    "tests_run": 5,
+    "failure_count": 0,
+    "error_count": 0,
+    "returncode_basis": "Author final handoff records return0; reviewer read source-bound finite receipt and did not rerun tests.",
+    "actual_scope": [
+      "Nonidentity rotation/nonzero translation, positive factors1e-9/1/1e9, center and radius-endpoint projection and canonical geometry invariance",
+      "Unscaled dimensionless output-map identity and copies isolate a deliberately mutating numerical spy",
+      "Six representative invalid inputs and empty/no-positive geometry invoke zero renderers; renderer exception propagates after one call"
+    ],
+    "original_renderer_calls": 0,
+    "saved_data_payload_reads": 0
+  },
+  "ownership_boundary": "Use AUTHOR_FINAL_DELIVERY.json only for the five adapter-author files. Its correction preserves the earlier unhanded FINAL_DELIVERY.json and excludes concurrent ROOT/NEIGHBOR files. Root source identities were independently checked here; no other-author ownership is inherited.",
+  "reviewer_actions": {
+    "source_read_and_AST_compile_only": true,
+    "synthetic_tests_run": 0,
+    "saved_geometry_acceptance_runs": 0,
+    "numeric_payload_decodes": 0,
+    "renderer_calls": 0,
+    "model_calls": 0,
+    "RGB_reads": 0,
+    "new_test_matrix_or_framework": false,
+    "source_or_historical_evidence_edits": 0
+  },
+  "result_and_research_boundaries": {
+    "saved_geometry_acceptance_status": "NOT_EXECUTED",
+    "production_integration": "NOT_ESTABLISHED",
+    "new_c2_generation": false,
+    "c2_complete": false,
+    "quality_status": "NOT_EVALUATED",
+    "new_method_validated": false,
+    "novelty_authorization": "NONE"
+  }
+}

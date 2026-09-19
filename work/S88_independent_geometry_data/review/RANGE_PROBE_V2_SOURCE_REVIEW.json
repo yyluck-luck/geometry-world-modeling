@@ -1,0 +1,89 @@
+{
+  "status": "GO_V2_ONE_BOUNDED_METADATA_ATTEMPT_SOURCE_REVIEW",
+  "recorded_utc": "2026-09-11T01:00:45.158200+00:00",
+  "reviewer": "s77_science_closure; source reviewer, not probe executor",
+  "current_files": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/probe_tar_metadata_v2.py",
+      "bytes": 5402,
+      "sha256": "59f282c4d2ff980586155bae74e7b472b7b4cf5a356ffe24422e34a35fa9d666"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/RTMV_RANGE_PLAN_V2.md",
+      "bytes": 2715,
+      "sha256": "272dc7421ecdfa6d5534183ac4e126038d99d5e3d6e90d18a6e1f0a4e10a77ae"
+    }
+  ],
+  "reused_v1_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/review/RANGE_PROBE_SOURCE_REVIEW.json",
+    "bytes": 5768,
+    "sha256": "2f332184c456e2a6183aa2ecacb602e5b34406008c75cd465141f3024603d976"
+  },
+  "v1_identity": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/probe_tar_metadata.py",
+      "bytes": 5353,
+      "sha256": "ec631dc6a4b9407dd306b41bf325af9070a12623f4900b0f97d9a6c77cdc590a"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/RTMV_RANGE_PLAN.md",
+      "bytes": 1938,
+      "sha256": "da2aa264e1e41905582b35001670e4d37d6693146ca23d54fdc137b406767641"
+    }
+  ],
+  "actual_failure_evidence": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/rtmv_range_01/RECEIPT.json",
+    "bytes": 1576,
+    "sha256": "e155d845d4709882a7c99163237e12312d15346d52d75b23d37e84d4da3b9ff6"
+  },
+  "failure_interpretation": {
+    "utc_start": "2026-09-11T00:58:02.792347+00:00",
+    "utc_end": "2026-09-11T00:58:03.519110+00:00",
+    "elapsed_seconds": 0.7267786670054193,
+    "first_request_offset": 0,
+    "range_length": 512,
+    "status": "302",
+    "returncode": 56,
+    "declared_redirect_content_length": 1032,
+    "actual_saved_body_bytes": 0,
+    "body_file_exists": false,
+    "members_parsed": 0,
+    "reason": "curl max-filesize512 stopped on the redirect declared size; not a TLS failure, no evidence final object rejected Range, no tar head obtained"
+  },
+  "review_scope": "Only full source/plan diff plus v1 actual failure receipt and output body presence; unchanged common logic inherits prior review. No rerun or new network.",
+  "changes_verified": [
+    "Create-only rtmv_range_02 output instead of _01",
+    "Bind RTMV_RANGE_PLAN_V2.md",
+    "curl max-filesize becomes max(length,8192)",
+    "Receipt adds transport_body_cap=max(length,8192)",
+    "Plan distinguishes saved cap, accepted-byte cap and actual reason for v1 stop"
+  ],
+  "unchanged_accepted_boundary": [
+    "Same fixed commit URL and total archive size",
+    "At most24 header ranges of512B plus first regular JSON range up to2097152B",
+    "Final HTTP206, exact Content-Range offset/end/total and saved length equal requested length required before tar/JSON parsing",
+    "Unknown/PAX/GNU/sparse types stop; regular files and zero-size directories only",
+    "GT-byte request/exposure recorded before parse and HTTP checks",
+    "No automatic retry; same HTTP/redirect/time controls; no image or EXR body deliberately requested or decoded",
+    "Signed redirect query values scrubbed before writing; v1 actual location contains REDACTED_QUERY"
+  ],
+  "budget": {
+    "max_saved_response_body_bytes": 2293760,
+    "max_accepted_tar_metadata_bytes": 2109440,
+    "max_header_response_cap_bytes": 8192,
+    "max_json_response_cap_bytes": 2097152,
+    "header_or_redirect_overhead_included": false,
+    "strict_os_deadline": false
+  },
+  "necessary_interpretation": "A misbehaving response may save up to8192 bytes before rejection. Those bytes remain unparsed/quarantined and actual receipt governs exposure; do not claim guaranteed zero nonmetadata bytes received just from intended Range. No extra returned content may be extracted or used.",
+  "blocking_findings": [],
+  "review_check_correction": "First metadata-recording command assumed a zero-byte output file exists and stopped at FileNotFoundError before writing review. Actual curl produced no body file; source explicitly represents absent body as zero bytes. Corrected existence check, no network/scientific rerun.",
+  "actions": {
+    "probe_runs": 0,
+    "network_requests": 0,
+    "models": 0,
+    "scores": 0,
+    "scientific_array_reads": 0
+  },
+  "root_execution_authorization_separate": true
+}

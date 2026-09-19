@@ -1,0 +1,106 @@
+{
+  "schema": "raima-v4-finite-hypothesis-registry-v1",
+  "status": "SOURCE_ONLY_ONE_CONFIRMATORY_HYPOTHESIS",
+  "familywise_alpha": "0.05 one-sided",
+  "confirmatory_hypotheses": [
+    {
+      "hypothesis_id": "H1_RAIMA_SCENE_PREVALENCE",
+      "role": "single primary confirmatory hypothesis",
+      "population": "independent exchangeable scenes in the exact future frozen Stage C sampling frame",
+      "unit": "scene",
+      "scene_observation": "scene-positive when its exact two-trajectory union rate is at least 1/5; under the frozen two-unit roster this means at least one positive trajectory unit",
+      "null": "p_scene_positive <= 0.20",
+      "alternative": "p_scene_positive > 0.20",
+      "design_alternative_for_power": "p_scene_positive = 0.50",
+      "stage_1_rule": "at n=10 stop for futility if positives<=2; otherwise continue; no efficacy success",
+      "final_rule": "at n=20 require positives>=8, equal-scene mean>=1/5, minimum leave-one-scene-out mean>=3/20, and all scenes evaluable",
+      "maximum_one_sided_type_one_error": "0.029978782278531154 under the registered independent exchangeable Bernoulli model",
+      "count_power_at_design_alternative": "0.850114822387695312",
+      "missingness": "any incomplete primary unit blocks the scene and cohort; no complete-case deletion or imputation",
+      "decision_labels": [
+        "STOP_CONFIRMATION_FOR_FUTILITY",
+        "CONTINUE_TO_STAGE_C2_MAX20",
+        "PASS_RAIMA_V4_COMPOSITE_CONFIRMATION_GATE",
+        "FAIL_RAIMA_V4_COMPOSITE_CONFIRMATION_GATE",
+        "BLOCKED_INCOMPLETE_OR_INELIGIBLE_EVIDENCE"
+      ],
+      "claim_if_pass": "a retrieval-operation discrepancy is prevalent in the frozen scene sampling frame under the exact RAIMA V4/S48 V7 contracts",
+      "claims_not_authorized": [
+        "population prevalence outside the frozen frame if exchangeability fails",
+        "source non-use",
+        "absolute source harm",
+        "a novel method",
+        "a new benchmark solely from the gate"
+      ]
+    }
+  ],
+  "registered_descriptive_endpoints": [
+    {
+      "hypothesis_id": "D1_AOIG",
+      "endpoint": "AOIG",
+      "status": "DESCRIPTIVE_ONLY_IN_V4",
+      "report": "scene-level rate, exact numerator/denominator, all seed cells and missing flow",
+      "confirmatory_p_value": null
+    },
+    {
+      "hypothesis_id": "D2_HARMFUL_SEM",
+      "endpoint": "HARMFUL_SEM",
+      "status": "DESCRIPTIVE_ONLY_IN_V4",
+      "report": "scene-level rate, exact numerator/denominator, both support definitions, all seed/family cells and missing flow",
+      "confirmatory_p_value": null
+    },
+    {
+      "hypothesis_id": "D3_NEGATIVE_STABLE_RCSU",
+      "endpoint": "NEGATIVE_STABLE_RCSU",
+      "status": "DESCRIPTIVE_ONLY_IN_V4",
+      "report": "scene-level rate, exact numerator/denominator, every reference and replacement sign, all seed cells and missing flow",
+      "confirmatory_p_value": null
+    },
+    {
+      "hypothesis_id": "D4_ACCESS_SCORE_INCREMENT",
+      "endpoint": "held-out prediction by ordinary retrieval/address score",
+      "status": "DESCRIPTIVE_ONLY_IN_V4",
+      "report": "leave-one-scene-out prediction errors for score-only and score-plus-endpoint summaries; no model selection",
+      "confirmatory_p_value": null
+    },
+    {
+      "hypothesis_id": "D5_HOST_REPLICATION",
+      "endpoint": "second stable-source host replication",
+      "status": "REQUIRED_BEFORE_BROAD_CLAIM_BUT_NOT_IMPLEMENTED",
+      "report": "same scene, target, source-selection and reference contract with host interaction disclosed",
+      "confirmatory_p_value": null
+    }
+  ],
+  "retired_or_deferred": [
+    {
+      "id": "V3_SECONDARY_HOLM",
+      "status": "NOT_CARRIED_FORWARD",
+      "reason": "V3 did not define a finite endpoint-by-consumer-by-support-by-replacement hypothesis family, and adaptive Stage C continuation would require a separately justified sequential multiplicity procedure"
+    },
+    {
+      "id": "PAIRWISE_SOURCE_INTERACTION",
+      "status": "NOT_REGISTERED_FOR_V4",
+      "reason": "requires a separate result-independent version after a real negative RCSU phenomenon and compute budget exist"
+    },
+    {
+      "id": "METHOD_GAIN",
+      "status": "NOT_REGISTERED_FOR_V4",
+      "reason": "NO_METHOD_SELECTED"
+    }
+  ],
+  "multiplicity_policy": {
+    "confirmatory_family_size": 1,
+    "alpha_recycling": "none",
+    "unused_alpha": "not reassigned to descriptive endpoints",
+    "subgroups": "all scene traits and endpoint-specific analyses are descriptive unless a new preregistered version defines error control",
+    "metric_conflict": "opposite signs across registered reasonable metrics kill mechanism interpretation; they are not separate chances to pass",
+    "support_conflict": "disagreement across registered supports kills harmful SEM; it is not a selectable analysis"
+  },
+  "reporting_requirements": [
+    "all 20 planned scene slots and their terminal flow state",
+    "all trajectory, unit, seed, edit-family, sign, reference and replacement cells",
+    "exact stage reached and stopping decision",
+    "effect sizes and uncertainty without interpreting non-significance as proof of no effect",
+    "every protocol deviation and no replacement of a failed unit"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": "s40-freeze-tool-source-review-incremental-v2",
+  "status": "REVISION_REQUIRED",
+  "passed": false,
+  "reviewer": "/root/gemini_third_review_verifier",
+  "completed_utc": "2026-09-07T06:53:20.757996+00:00",
+  "completed_asia_shanghai": "2026-09-07T14:53:20.757996+08:00",
+  "supersedes_for_current_sources": "work/S40_declared_variant_generation/freeze_tool_source_review.json",
+  "prior_review_sha256": "1338179c9475cd46f14755b9f1f19b37670e61e327116878490d0b229cacf302",
+  "prior_review_preserved": true,
+  "reviewed_identities": {
+    "freeze_s40_manifest.py": "68442a0f337d36f32f4d2137916822d24eb0619776fcbe1d72e1da5c52b4e919",
+    "FREEZE_PROTOCOL.md": "8eba86bc240c4048599798c143dddf45adda33dec0e39724f8cba3138eb72b8f",
+    "manifest_candidate.json": "d3515e5ff2da0843da6bbfcdb4e13105c513e10202653561259485f65d547543",
+    "generation_gate.py": "ca16d8be631898e0200b14fcd0a19fd2d8bc6b91f32da4f5ada6038103ba7b14"
+  },
+  "prior_finding_regression": {
+    "R1_RESERVED_OUTPUT_ALIAS_CAN_FALSE_PASS_ATTACH_METADATA": {
+      "status": "PARTIALLY_FIXED_ONE_BLOCKING_CASE_REMAINS",
+      "fixed": [
+        "The candidate SHA and its two reserved roots are resolved before output.mkdir.",
+        "Freeze output equal-to, inside, or containing either candidate-defined reserved root is rejected.",
+        "Both reserved roots must be absent before directory creation and are rechecked during prepare, attach, and before success publication.",
+        "A normal core produced by this prepare retains the fixed candidate output_root and cannot collide with the freeze output."
+      ],
+      "remaining_problem": "attach accepts an externally supplied core and does not require core.output_root to equal the candidate output_root. generation_gate.read_frozen also accepts any absolute output_root. All isolation checks derive the reserved generation root from manifest_candidate.json rather than from the core being attached. A modified core can therefore name another absolute generation output root, obtain two reviews bound to that modified core, and use --out equal to or inside that alternate root. The pre-mkdir check sees no overlap with the candidate root, attach metadata can pass, and the unchanged launcher later rejects the manifest because the actual core.output_root was already created by attachment.",
+      "source_locations": [
+        "freeze_s40_manifest.py:81-102",
+        "freeze_s40_manifest.py:190-221",
+        "freeze_s40_manifest.py:289-291",
+        "generation_gate.py:71-82"
+      ],
+      "required_fix": "For attach mode, before output.mkdir, hash-check and parse args.core, require its output_root is the exact fixed candidate output_root or include that actual core output_root in the reserved set, and perform the same disjointness and absence checks against it. Repeat the exact output_root binding inside attach_reviews before publishing the final manifest. Prefer also pinning the fixed output_root in generation_gate.read_frozen so a directly supplied final manifest cannot bypass the freeze tool.",
+      "pass_condition": "Every core that can receive S40_REVIEWS_ATTACHED_METADATA_GATE_PASSED has its actual output_root protected before attachment output creation, and the actual core output root remains absent through successful attachment."
+    },
+    "R2_ATTACH_DOES_NOT_REBIND_FREEZE_PREPARATION_TO_ACTIVE_S39_RECORDS": {
+      "status": "FIXED",
+      "evidence": [
+        "attach reconstructs active_s39_records from the core top-level manifest, evidence, and loading_review fields.",
+        "attach reconstructs the exact complete freeze_preparation dictionary, including fixed candidate path/SHA, current tool identities, zero component-body/pixel/scientific-import fields, and purpose.",
+        "Exact dictionary equality rejects missing, extra, or contradictory preparation fields before loading_chain and review attachment."
+      ],
+      "source_locations": [
+        "freeze_s40_manifest.py:201-220"
+      ]
+    }
+  },
+  "unchanged_or_reverified_controls": {
+    "requested_four_file_sha256_values_match": true,
+    "candidate_and_generation_gate_are_unchanged_from_prior_review": true,
+    "source_ast_parses": true,
+    "standard_library_imports_only": true,
+    "model_or_worker_launch_calls_in_freeze_tool": 0,
+    "prepare_or_attach_calls_executed_by_reviewer": 0,
+    "gate_calls_executed_by_reviewer": 0,
+    "component_weight_body_bytes_read": 0,
+    "scientific_model_imports": 0,
+    "model_constructors_or_forwards": 0,
+    "generation_calls": 0,
+    "pixels_decoded": 0,
+    "actual_s39_manifest_four_loading_records_and_loading_review_still_cross_bound": true,
+    "core_file_sha_and_canonical_core_sha_semantics_remain_separate": true,
+    "two_s40_review_status_variant_and_core_bindings_remain_required": true,
+    "post_attachment_metadata_gate_remains_required": true,
+    "exceptions_after_fresh_output_creation_still_write_a_terminal_receipt": true,
+    "failed_or_partial_output_directories_are_not_overwritten": true,
+    "unreviewed_core_or_metadata_only_result_does_not_execute_generation": true
+  },
+  "new_blocking_findings": [],
+  "nonblocking_boundaries": [
+    "Preflight failures before output.mkdir intentionally leave no new failure directory; they do not overwrite or contaminate an existing path.",
+    "Human reviewer independence remains an external orchestration property rather than authenticated JSON identity.",
+    "Metadata checks may hash small source, evidence, review, config, and input-image bytes but do not read any of the five GB-scale component bodies or decode image pixels."
+  ],
+  "execution_boundary": {
+    "review_type": "read_only_static_incremental_source_review",
+    "prepare_calls": 0,
+    "attach_calls": 0,
+    "generation_gate_calls": 0,
+    "model_runs": 0,
+    "weight_body_reads": 0,
+    "network_requests": 0,
+    "source_or_protocol_files_modified": false,
+    "canonical_ledger_modified": false,
+    "only_new_file": "work/S40_declared_variant_generation/freeze_tool_source_review_incremental_v2.json"
+  },
+  "authorization": {
+    "prepare_authorized_by_this_review": false,
+    "attach_authorized_by_this_review": false,
+    "generation_authorized": false,
+    "required_next_step": "Close the remaining actual-core output_root isolation gap, publish the resulting source and any changed protocol/gate/candidate identities, and obtain another incremental independent review."
+  },
+  "verdict": "REVISION_REQUIRED: R2 is fixed and candidate-root isolation is implemented, but R1 is not complete for an attached core whose absolute output_root differs from the candidate root."
+}

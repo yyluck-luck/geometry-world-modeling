@@ -1,0 +1,57 @@
+{
+  "schema": "s104-cut3r-rgb-only-receipt-v1",
+  "status": "FAILED",
+  "ids": [
+    1,
+    31,
+    61,
+    91
+  ],
+  "data_access": "RGB_ONLY",
+  "depth_access": false,
+  "pose_access": false,
+  "gt_access": false,
+  "model_path": "/home/yliutz/gwm_weights_20260915/cut3r_512_dpt_4_64.pth",
+  "model_sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103",
+  "source_root": "/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R",
+  "python": "3.11.16 (main, Aug 27 2026, 14:44:21) [GCC 14.3.0]",
+  "platform": "Linux-5.15.0-1082-nvidia-x86_64-with-glibc2.35",
+  "rgb_sha256": [
+    "c91680e6e57e7e7d9b53b9604e5958f146aacb3ba2e6ca16a2d112881154176e",
+    "8ac7ecff17a4f1045082f870a5adb837e8a3db576076333d530b3b3808ef549e",
+    "c46b5e76b1c9741f7e4f3925ec943fdc8e01c1395cb6f0f0dedb9af5c2c4561b",
+    "a35f8ab7a0e4f0831002347c8a9d2569d7ddf3dc1a1a16744fd4030121b9f416"
+  ],
+  "model_bytes": 3173761006,
+  "input_shapes": [
+    [
+      1,
+      3,
+      384,
+      512
+    ],
+    [
+      1,
+      3,
+      384,
+      512
+    ],
+    [
+      1,
+      3,
+      384,
+      512
+    ],
+    [
+      1,
+      3,
+      384,
+      512
+    ]
+  ],
+  "loader_compatibility": "force_weights_only_false_for_sha_verified_cut3r_checkpoint",
+  "load_seconds": 8.173292472027242,
+  "error_type": "RuntimeError",
+  "error": "No validated RoPE implementation for this device",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/yliutz/gwm_source_transport_20260915/run_cut3r_rgb_only.py\", line 61, in main\n    with torch.no_grad(): outputs, state = inference(views, model, device)\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/inference.py\", line 236, in inference\n    res, state_args = loss_of_one_batch(groups, model, None, None, inference=True)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/inference.py\", line 75, in loss_of_one_batch\n    output, state_args = model(batch, ret_state=True)\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1751, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1762, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/model.py\", line 893, in forward\n    ress, views, state_args = self._forward_impl(views, ret_state=ret_state)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/model.py\", line 814, in _forward_impl\n    shape, feat_ls, pos = self._encode_views(views)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/model.py\", line 608, in _encode_views\n    img_out, img_pos, _ = self._encode_image(selected_imgs, selected_shapes)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/dust3r/model.py\", line 520, in _encode_image\n    x = blk(x, pos)\n        ^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1751, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1762, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/croco/models/blocks.py\", line 188, in forward\n    x = x + self.drop_path(self.attn(self.norm1(x), xpos))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1751, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1762, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/croco/models/blocks.py\", line 128, in forward\n    q = self.rope(q, xpos)\n        ^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1751, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/.local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1762, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yliutz/gwm_source_transport_20260915/vmem/extern/CUT3R/src/croco/models/pos_embed.py\", line 137, in forward\n    raise RuntimeError(\"No validated RoPE implementation for this device\")\nRuntimeError: No validated RoPE implementation for this device\n"
+}

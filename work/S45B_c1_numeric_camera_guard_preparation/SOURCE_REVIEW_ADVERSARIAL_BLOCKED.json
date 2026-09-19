@@ -1,0 +1,49 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-blocked-history-v1",
+  "review_kind": "adversarial",
+  "status": "BLOCKED_SOURCE_CANDIDATE_WITHDRAWN",
+  "verdict": "BLOCKED_DO_NOT_EXECUTE_DO_NOT_SIGN_PASS",
+  "author_role": "/root/c1_blind_score_builder",
+  "reviewer_role": "/root/c1_blind_score_builder/s45b_static_adversarial",
+  "recorded_utc": "2026-09-08T03:45:42Z",
+  "withdrawn_identities": {
+    "camera_guard.py": "cd35f7af93a22a191be668dae9798f3c689fd66390231b2ff0d7218fa09eaec0",
+    "PROTOCOL.md": "2993b2760690f64cfb96c27dbbd79246d116f1994031c3270dbdb03412dfd592",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "4a10ade70c0246cd4d9168e2b4dec25a7c60782575f77239c20f9fc8d7406015",
+    "synthetic_selftest.py": "8dedbc19d6417b058f0f34c4e450ec4005c329bf83339bca9dd7c1d60d77ad19"
+  },
+  "blocking_findings": [
+    {
+      "id": "PASS_REPORT_PUBLISHED_BEFORE_CLOSE_VALIDATION",
+      "finding": "The withdrawn runner wrote a PASS-status report before tensor-FD close verification and final source/upstream identity revalidation; interruption or a late failure could leave a standalone PASS artifact."
+    },
+    {
+      "id": "HASH_TO_PARSE_TOCTOU",
+      "finding": "The withdrawn JSON and event readers hashed one path open and parsed a second path open, so verified bytes and parsed bytes were not guaranteed to be one snapshot."
+    },
+    {
+      "id": "NO_STABLE_LOCK_OR_OUTPUT_INODE_LEASE",
+      "finding": "The withdrawn lock used touch/open with symlink following and formal writes used replaceable paths instead of held non-symlink file descriptors."
+    },
+    {
+      "id": "FAILURE_TENSOR_READ_COUNT_COULD_BE_UNDERREPORTED",
+      "finding": "If tensor close verification raised, assignment of the verified-close count did not occur and a failure receipt could report zero despite bodies having been read."
+    }
+  ],
+  "checks_that_were_correct_but_do_not_override_blockers": [
+    "left-multiply positive-Y sign and multiplication side",
+    "translation preservation and inclusive max-abs <= 1e-6",
+    "two-batch target-to-cache mapping and 5-to-9 prefix continuity",
+    "ID8-to-ID0 c2w/K closure",
+    "raw TensorDescriptor and list/tuple provenance",
+    "pixel-shaped tensor rejection before body open"
+  ],
+  "executed": false,
+  "real_c1_files_opened_by_reviewer": 0,
+  "c1_tensor_bodies_read": 0,
+  "real_scientific_arrays_mapped": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "formal_paths_created": 0,
+  "supersession_rule": "This is immutable correction history for the withdrawn source set. It is not a PASS review and cannot satisfy the final runner's SOURCE_REVIEW_ADVERSARIAL.json gate."
+}

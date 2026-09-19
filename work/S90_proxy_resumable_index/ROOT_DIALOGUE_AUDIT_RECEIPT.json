@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "evidence_type": "saved_synthetic_data_exact_recomputation_and_source_identity_only",
+  "started_utc": "2026-09-11T16:03:40.781608+00:00",
+  "completed_utc": "2026-09-11T16:03:40.782461+00:00",
+  "python": "3.13.0 (main, Oct  7 2024, 05:02:14) [Clang 16.0.0 (clang-1600.0.26.3)]",
+  "platform": "macOS-26.7-arm64-arm-64bit-Mach-O",
+  "script_sha256": "cd32665e7e966b32f411be3175413af0c4e01145ba46dc1a0c7bdba5ccd1ac48",
+  "inputs": [
+    {
+      "path": "agents/two_by_two_logic_results.json",
+      "sha256": "4ef4d5b54c520a556b2897e77f8222b130a167d5f4e10ec732c3fc759d6f0a87"
+    },
+    {
+      "path": "agents/threshold_consumer_loss_counterexample_results.json",
+      "sha256": "619e71c53a9f2fc67a0eb6a84052e56c76cc2c25a6e186fb8f66476027af7534"
+    },
+    {
+      "path": "innovation_agent/GRC_MATH_SANITY_RESULTS.json",
+      "sha256": "222e32b95932f7943675b627f76a955dc1c4213ce4134e762300594c0e69f2ca"
+    },
+    {
+      "path": "innovation_agent/agents/math_repro_20260911_1814/GRC_MATH_SANITY_RESULTS.json",
+      "sha256": "90f4f76f05663e1719bffbab36788869de4f25d99e2921f927f1f2d44b711490"
+    }
+  ],
+  "checks": [
+    "two_by_two_exact_rational_counterexamples",
+    "threshold_choice_exact_rational_and_source_hash",
+    "latest_seven_core_fields_equal_prior_independent_run_and_source_hash"
+  ],
+  "two_by_two_exact": {
+    "scenario_A": {
+      "low_risk_memory": {
+        "interaction": "0",
+        "mean": "1/5"
+      },
+      "high_risk_memory": {
+        "interaction": "0",
+        "mean": "3/5"
+      }
+    },
+    "scenario_B": {
+      "memory_A": {
+        "interaction": "0",
+        "mean": "3/10"
+      },
+      "memory_B": {
+        "interaction": "-4/5",
+        "mean": "3/10"
+      }
+    }
+  },
+  "threshold_exact_future_loss_increase": "1/2",
+  "boundaries": [
+    "No new model, video, RGB-D, future geometry metric or GRC validation.",
+    "Recomputed saved artificial numbers; did not rerun either author script.",
+    "The old independent run covers the older script. Current core values match; added monotonicity-check count is new.",
+    "Non-additive risk example is generic set-conditioned loss, not a counterexample to the probability union bound.",
+    "Two-by-two absence of mean benefit refers to the declared uniform four-cell estimand."
+  ]
+}

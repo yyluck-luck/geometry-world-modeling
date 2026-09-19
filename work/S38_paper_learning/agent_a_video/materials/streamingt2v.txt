@@ -1,0 +1,799 @@
+StreamingT2V: Consistent, Dynamic, and Extendable
+Long Video Generation from Text
+Roberto Henschel1∗+
+, Levon Khachatryan1∗
+, Hayk Poghosyan1∗
+, Daniil Hayrapetyan1∗
+,
+Vahram Tadevosyan1†
+, Zhangyang Wang1,2
+, Shant Navasardyan1
+, Humphrey Shi1,3
+1
+Picsart AI Resarch (PAIR) 2
+UT Austin 3
+Georgia Tech
+https://github.com/Picsart-AI-Research/StreamingT2V
+Figure 1. StreamingT2V is an advanced autoregressive technique to create long videos featuring rich motion dynamics, ensuring temporal
+consistency, alignment with descriptive text, high frame-level image quality, and no stagnation. Demonstrations include videos up to 1200
+frames, spanning 2 minutes, which can be extended further. The effectiveness of StreamingT2V is not limited by the Text2Video model
+used, indicating potential for even higher-quality with improved base models.
+Abstract
+Text-to-video diffusion models enable the generation of
+high-quality videos that follow text instructions, simplify-
+ing the process of producing diverse and individual con-
+*Equal contribution. + Current affiliation: Moonvalley. † Current
+affiliation: Superside. Correspondence to: Roberto Henschel <first-
+name@moonvalley.com>, for Levon Khachatryan, Hayk Poghosyan,
+Daniil Hayrapetyan: <firstname.lastname@picsart.com>.
+tent. Current methods excel in generating short videos (up
+to 16s), but produce hard-cuts when naively extended to
+long video synthesis. To overcome these limitations, we
+present StreamingT2V, an autoregressive method that gen-
+erates long videos of up to 2 minutes or longer with seam-
+less transitions. The key components are: (i) a short-term
+memory block called conditional attention module (CAM),
+which conditions the current generation on the features ex-
+tracted from the preceding chunk via an attentional mech-
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+2568anism, leading to consistent chunk transitions, (ii) a long-
+term memory block called appearance preservation module
+(APM), which extracts high-level scene and object features
+from the first video chunk to prevent the model from for-
+getting the initial scene, and (iii) a randomized blending
+approach that allows for the autoregressive application of
+a video enhancer on videos of indefinite length, ensuring
+consistency across chunks. Experiments show that Stream-
+ingT2V produces more motion, while competing methods
+suffer from video stagnation when applied naively in an au-
+toregressive fashion. Thus, we propose with StreamingT2V
+a high-quality seamless text-to-long video generator, sur-
+passing competitors in both consistency and motion.
+1. Introduction
+The emergence of diffusion models [13, 25, 27, 31] has
+sparked significant interest in text-guided image synthesis
+and manipulation. Building on the success in image gener-
+ation, they have been extended to text-guided video genera-
+tion [3, 4, 6, 10–12, 15, 16, 18, 29, 34, 36, 41].
+Despite the impressive generation quality and text align-
+ment, the majority of existing approaches such as [3, 4,
+15, 22, 36, 41, 44] are mostly focused on generating short
+frame sequences (typically of 16, 24, or recently 384 frame-
+length). However, short videos generators are limited in
+real-world use-cases such as ad making, storytelling, etc.
+The naı̈ve approach of training video generators on long
+videos (e.g. ≥ 1200 frames) is usually impractical. Even for
+generating short sequences, it typically requires expensive
+training (e.g. 260K steps and 4.5K batch size in order to
+generate 16 frames [36]).
+Some approaches [4, 15, 21, 44] thus extend baselines
+by autoregressively generating short videos based on the
+last frame(s) of the preceding chunk. Yet, simply con-
+catenating the noisy latents of a video chunk with the last
+frame(s) of the preceding chunk leads to poor condition-
+ing with inconsistent scene transitions (see Sec. A.3). Some
+works [3, 7, 37, 39, 43] integrate also CLIP [24] image em-
+beddings of the last frame of the preceding chunk, which
+slightly improves consistency. However, they are still prone
+to inconsistencies across chunks (see Fig. A.7) due to the
+CLIP image encoder losing crucial information necessary
+for accurately reconstructing the conditional frames. The
+concurrent work SparseCtrl [11] utilizes a sparse encoder
+for conditioning. To match the size of the inputs, its archi-
+tecture requires to concatenate additional zero-filled frames
+to the conditioning frames before being plugged into sparse
+encoder. However, this inconsistency in the input leads to
+inconsistencies in the output (see Sec. 5.2).
+Our experiments (see Sec. 5.2) reveal that in fact all as-
+sessed image-to-video methods produce video stagnation
+or strong quality degradation when applied autoregressively
+by conditioning on the last frame of the preceding chunk.
+To overcome the weaknesses of current works, we
+propose StreamingT2V, an autoregressive text-to-video
+method equipped with long/short-term memory blocks that
+generates long videos without temporal inconsistencies.
+To this end, we propose the Conditional Attention Mod-
+ule (CAM) which, due to its attentional nature, effectively
+borrows the content information from the previous frames
+to generate new ones, while not restricting their motion by
+the previous structures/shapes. Thanks to CAM, our results
+are smooth and with artifact-free video chunk transitions.
+Current methods not only exhibit temporal inconsisten-
+cies and video stagnation, but also experience alterations
+in object appearance/characteristics (see e.g. SEINE [6] in
+Fig. A.4) and a decline in video quality over time (see e.g.
+SVD [3] in Fig. 5). This occurs as only the last frame(s) of
+the preceding chunk are considered, thus overlooking long-
+termdependencies in theautoregressive process. To address
+this issue we design an Appearance Preservation Module
+(APM) that extracts object and global scene details from an
+initial image, to condition the video generation with that in-
+formation, ensuringconsistencyinobjectandscenefeatures
+throughout the autoregressive process.
+To further enhance the quality and resolution of our long
+video generation, we adapt a video enhancement model for
+autoregressive generation. To this end, we apply the SDEdit
+[20] approach on a high-resolution text-to-video model and
+enhance consecutive 24-frame chunks (overlapping with 8
+frames) of our video. To make the chunk enhancement tran-
+sitions smooth, we design a randomized blending approach
+for seamless merging of overlapping chunks.
+Experiments show that StreamingT2V generates long
+and temporal consistent videos from text without video
+stagnation. To summarize, our contributions are three-fold:
+• We introduce StreamingT2V, an autoregressive approach
+for seamless synthesis of extended video content using
+short and long-term dependencies.
+• Our Conditional Attention Module (CAM) and Appear-
+ance Preservation Module (APM) ensure the natural
+continuity of the global scene and object characteristics
+of generated videos.
+• We seamlessly enhance generated long videos by intro-
+ducing our randomized blending approach of consecu-
+tive overlapping chunks.
+2. Related Work
+Text-Guided Video Diffusion Models. Generating videos
+from text instructions using Diffusion Models [13, 30] is a
+newly established and actively researched field introduced
+by Video Diffusion Models (VDM) [15]. The method can
+generate only low-resolution videos (up to 128x128) with
+a maximum of 16 frames (without autoregression), impos-
+ing significant limitations, while requiring massive training
+2569resources. Several methods thus employ spatial/temporal
+upsampling [4, 14, 15, 29], using cascades with up to 7 en-
+hancer modules [14]. While this leads to high-resolution
+and long videos, the generated content is still limited by the
+content depicted in the key frames.
+Towards generating longer videos (i.e. more keyframes),
+Text-To-Video-Zero (T2V0) [16] and ART-V [38] utilize
+a text-to-image diffusion model. Thus, they can generate
+only simple motions. T2V0 conditions on its first frame via
+cross-frame attention and ART-V on an anchor frame. The
+lack of global reasoning leads to unnatural or repetitive mo-
+tions. MTVG [21] and FIFO-Diffusion [17] transforms a
+text-to-video model into an autoregressive method through
+a training-free approach. As it uses strong consistency pri-
+ors within and between chunks, it results in low motion
+amount, and mostly near-static background. FreeNoise [23]
+samples a small set of noise vectors, re-uses them for the
+generation of all frames, while temporal attention is per-
+formed on local windows. As temporal attention is in-
+variant to such frame shuffling, it leads to high similarity
+between frames, almost always static global motion and
+near-constant videos. Gen-L [35] generates overlapping
+short videos and combines them via temporal co-denoising,
+whichcanleadtoqualitydegradation withvideostagnation.
+Recenttransformed-baseddiffusionmodels[22,44]operate
+in the latent space of a 3D autoencoder, enabling the gener-
+ation of up to 384 frames. Despite extensive training, these
+models produce videos with limited motion, often resulting
+in near-constant videos.
+Image-Guided Video Diffusion Models as Long Video
+Generators. Several works condition the video generation
+by a driving image or video [3, 5–7, 9, 11, 19, 26, 37, 39, 40,
+43]. They can thus be turned into an autoregressive method
+by conditioning on the frame(s) of the preceding chunk.
+VideoDrafter [19] takes an anchor frames (from a text-
+to-image model) and conditions a video diffusion model
+on it to generate independently multiple videos that share
+the same high-level context. However, this leads to dras-
+tic scene cuts as no consistency among video chunks is en-
+forced. StoryDiffusion [45] conditions on video frames that
+have been linearly propagated from key frames, which leads
+to severe quality degradation. Several works [6, 7, 40] con-
+catenate the (encoded) conditionings (e.g. input frame(s))
+with an additional mask (indicating the provided frame(s))
+to the input of the video diffusion model.
+In addition to concatenating the conditioning to the in-
+put of the diffusion model, several works [3, 37, 43] replace
+the text embeddings in the cross-attentions of the diffusion
+model by CLIP [24] image embeddings of the conditional
+frames. However, according to our experiments, their appli-
+cability for long video generation is limited. SVD [3] shows
+severe quality degradation over time (see Fig. 5), and both,
+I2VGen-XL [43] and SVD [3] generate often inconsisten-
+cies between chunks, still indicating that the conditioning
+mechanism is too weak.
+Some works [5, 39] such as DynamiCrafter-XL [39] thus
+add to each text cross-attention an image cross-attention,
+which leads to better quality, but still to frequent inconsis-
+tencies between chunks.
+The concurrent work SparseCtrl [11] adds a ControlNet
+[42] like branch to the model, using as input the conditional
+frames and a frame-mask. By design, it requires to append
+additional black frames to the conditional frames. This in-
+consistency is difficult to compensate for the model, leading
+to frequent and severe scene cuts between frames.
+3. Preliminaries
+Diffusion Models. Our text-to-video model, which we term
+StreamingT2V, is a diffusion model that operates in the la-
+tent space of the VQ-GAN [8, 32] autoencoder D(E(·)),
+where E and D are the corresponding encoder and de-
+coder, respectively. Given a video V ∈ RF×H×W×3
+, com-
+posed of F frames with spatial resolution H × W, its la-
+tent code x0 ∈ RF×h×w×c
+is obtained through frame-wise
+application of the encoder. More precisely, by identifying
+each tensor x ∈ RF×ĥ×ŵ×ĉ
+as a sequence (xf
+)F
+f=1 with
+xf
+∈ Rĥ×ŵ×ĉ
+, we obtain the latent code via xf
+0 := E(Vf
+),
+for all f = 1,...,F. The diffusion forward process grad-
+ually adds Gaussian noise ϵ ∼ N(0,I) to the signal x0:
+  q(x_t|x_{t-1}) = \mathcal {N}(x_t; \sqrt {1-\beta _t}x_{t-1}, \beta _t I), \; t = 1,\ldots ,T \label {eqn:forward-diffusion} 
+(1)
+where q(xt|xt−1) is the conditional density of xt given
+xt−1, and {βt}T
+t=1 are hyperparameters. A high value for T
+is chosen such that the forward process completely destroys
+the initial signal x0 resulting in xT ∼ N(0,I). The goal of
+a diffusion model is then to learn a backward process
+  p_\theta (x_{t-1}|x_t) = \mathcal {N}(x_{t-1};\mu _\theta (x_t,t),\Sigma _\theta (x_t,t)) \label {eqn:diffusion-backward-process} 
+(2)
+for t = T,...,1 (see DDPM [13]), which allows to gen-
+erate a valid signal x0 from standard Gaussian noise xT .
+Once x0 is obtained from xT , the generated video is ob-
+tained by applying the decoder frame-wise: e Vf
+:= D(xf
+0),
+for all f = 1,...,F. Yet, instead of learning a predictor for
+mean and variance in Eq. 2, we learn a model ϵθ(xt,t) to
+predict the Gaussian noise ϵ that was used to form xt from
+input signal x0 (a common reparametrization [13]).
+For text-guided video generation, we use a neural net-
+work with learnable weights θ as noise predictor ϵθ(xt,t,τ)
+that is conditioned on the textual prompt τ. We train it on
+the denoising task:
+  \min _{\theta } \mathbb {E}_{t,(x_{0} ,\tau ) \sim p_{data},\epsilon \sim \mathcal {N}(0,I)} ||\epsilon - \epsilon _{\theta }(x_t,t,\tau )||_{2}^{2}, 
+(3)
+2570Figure 2. The overall pipeline of StreamingT2V involves three stages: (i) Initialization Stage: The first 16-frame chunk is synthesized
+by an off-the-shelf text-to-video model. (ii) Streaming T2V Stage: New content for subsequent frames is autoregressively generated. (iii)
+Streaming Refinement Stage: The long video (e.g. 240, 1200 frames or more) is autoregressively enhanced using a high-resolution text-to-
+short-video model with a randomized blending approach.
+using the data distribution pdata. To simplify notation, we
+will denote by xr:s
+t := (xj
+t)s
+j=r the latent sequence of xt
+from frame r to frame s, for all r,t,s ∈ N.
+Text-To-Video Models. Text-to-video models [4, 10, 14,
+29, 36] typically expand pre-trained text-to-image models
+[25, 27] by adding new layers that operate on the temporal
+axis. Modelscope (MS) [36] follows this approach by ex-
+tending the UNet-like [28] architecture of Stable Diffusion
+[27] with temporal convolutional and attentional layers. It
+was trained in a large-scale setup to generate videos with 3
+FPS@256x256 and 16 frames.
+4. Method
+In this section, we introduce our method for high-resolution
+text-to-long video generation. We first generate 256 ×
+256 resolution long videos (240 frames, or 1200 frames),
+then enhance them to higher resolution (720 × 720). The
+overview of the whole pipeline is provided in Fig. 2. The
+long video generation process comprises three stages: the
+Initialization Stage, where the first 16-frame chunk is syn-
+thesized by a pre-trained text-to-video model (e.g. Mod-
+elscope [36]), the Streaming T2V Stage where new content
+for subsequent frames is generated autoregressively. To en-
+sureseamlesstransitionsbetweenchunks, weintroduce(see
+Fig. 3) our conditional attention module (CAM), which uti-
+lizes short-term information from the last Fcond = 8 frames
+and our appearance preservation module (APM), which ex-
+tracts long-term information from an anchor frame to main-
+tain object appearance and scene details during the autore-
+gressive process. After generating a long video (e.g. 240,
+1200 frames or more), the Streaming Refinement Stage
+enhances the video using a high-resolution text-to-short-
+video model (e.g. MS-Vid2Vid-XL [43]) autoregressively
+with our randomized blending approach for seamless chunk
+processing. This step does not require additional training,
+making our approach cost-effective.
+4.1. Conditional Attention Module
+For training a conditional network in our Streaming T2V
+stage, we leverage the capabilities of a pre-trained text-
+to-video model (e.g. Modelscope [36]) as a prior for au-
+toregressive long video generation. Subsequently, we
+will denote this pre-trained text-to-(short)video model as
+Video-LDM. To condition Video-LDM autoregressively
+with short-term information from the preceding chunk (see
+Fig. 2, mid), we introduce the Conditional Attention Mod-
+ule (CAM). CAM consists of a feature extractor and a fea-
+ture injector into the Video-LDM UNet, inspired by Con-
+trolNet [42]. The feature extractor utilizes a frame-wise im-
+age encoder Econd, followed by the same encoder layers that
+the Video-LDM UNet uses up to its middle layer (initialized
+with the UNet’s weights). For the feature injection, we let
+each long-range skip connection in the UNet attend to cor-
+responding features generated by CAM via cross-attention.
+Let x denote the output of Econd after zero-convolution.
+We use addition to fuse x with the output of the first tempo-
+ral transformer block of CAM. For the injection of CAM’s
+features into the Video-LDM Unet, we consider the UNet’s
+skip-connection features xSC ∈ Rb×F×h×w×c
+(see Fig. 3)
+with batch size b. We apply spatio-temporal group norm,
+and a linear map Pin on xSC. Let x′
+SC ∈ R(b·w·h)×F×c
+be
+the resulting tensor after reshaping. We condition x′
+SC on
+the corresponding CAM feature xCAM ∈ R(b·w·h)×Fcond×c
+(see Fig. 3), where Fcond is the number of conditioning
+frames, via temporal multi-head attention (T-MHA) [33],
+i.e. independently for each spatial position (and batch). Us-
+ing learnable linear maps PQ,PK,PV , for queries, keys,
+and values, we apply T-MHA using keys and values from
+xCAM and queries from x′
+SC, i.e. with Q = PQ(x′
+SC),K =
+2571Figure 3. Method overview: StreamingT2V enhances a video diffusion model (VDM) with the conditional attention module (CAM) for
+short-term memory, and with the appearance preservation module (APM) for long-term memory. CAM conditions a VDM on the preceding
+chunk using a frame encoder Econd. CAM’s attentional mechanism enables smooth transitions between chunks and high motion. APM
+extracts high-level image features from an anchor frame and injects them into the text cross-attentions of the VDM, preserving object/scene
+features during the autoregression.
+PK(xCAM),V = PV (xCAM),
+  \displaystyle x''_{\mathrm {SC}} = \text {T-MHA}\bigl (Q, K, V )\bigr . 
+(4)
+Finally, we use a linear map Pout and a reshaping oper-
+ation R, the output of CAM is added to the skip connection
+(as in ControlNet [42]):
+  x'''_{\mathrm {SC}} = x_{\mathrm {SC}} + R(P_{\text {out}}(x''_{\text {SC}})), 
+(5)
+and x′′′
+SC is used in the decoder layers of the UNet. We zero-
+initialize Pout, so that CAM initially does not affect the base
+model’s output, which improves convergence.
+The design of CAM enables conditioning the F frames
+of the base model on the Fcond frames of the preceding
+chunk. In contrast, sparse encoder [11] employs convolu-
+tion for feature injection, thus needs additional F − Fcond
+zero-valued frames (and a mask) as input, in order to add
+the output to the F frames of the base model. These incon-
+sistencies in the input lead to severe inconsistencies in the
+output (see Sec. A.3.1 and Sec. 5.2).
+4.2. Appearance Preservation Module
+Autoregressive video generators typically suffer from for-
+getting initial object and scene features, leading to severe
+appearance changes. To tackle this issue, we incorporate
+long-term memory by leveraging the information contained
+in a fixed anchor frame of the very first chunk using our
+proposed Appearance Preservation Module (APM). This
+helps to maintain scene and object features across video
+chunk generations (see Fig. A.8).
+To enable APM to balance guidance from the anchor
+frame and the text instructions, we propose (see Fig. 3): (i)
+We combine the CLIP [24] image token of the anchor frame
+with the CLIP text tokens from the textual instruction by
+expanding the clip image token to k = 16 tokens using an
+MLP layer, concatenating the text and image encodings at
+the token dimension, and utilizing a projection block, lead-
+ing to xmixed ∈ Rb×77×1024
+; (ii) For each cross-attention
+layer l, we introduce a weight αl ∈ R (initialized as 0) to
+2572perform cross-attention using keys and values derived from
+a weighted sum xmixed, and the usual CLIP text encoding
+of the text instructions xtext:
+  x_{\mathrm {cross}} = \mathrm {SiLU}(\alpha _{l}) x_{\mathrm {mixed}} + x_{\mathrm {text}}. 
+(6)
+The experiments in Sec. A.3.2show that thelight-weight
+APM module helps to keep scene and identity features
+across the autoregressive process (see Fig. A.8).
+4.3. Auto-regressive Video Enhancement
+To further enhance quality and resolution of our text-to-
+video results, we use a high-resolution (1280 × 720) text-
+to-(short)videomodel(RefinerVideo-LDM,seeFig.2), e.g.
+MS-Vid2Vid-XL [37, 43], to autoregressively improve 24-
+frame video chunks. To this end, we add noise to each video
+chunk and denoise it using Refiner Video-LDM (SDEdit ap-
+proach [20]). Specifically, we upscale each low-resolution
+24-frame video chunk to 720 × 720 using bilinear interpo-
+lation [2], zero-pad to 1280 × 720, encode the frames with
+the image encoder E to get a latent code x0, apply T′
+< T
+forward diffusion steps (see Eq. 1) so that xT′ still contains
+signalinformation, anddenoiseitwithRefinerVideo-LDM.
+Naively enhancing each chunk independently leads to
+inconsistent transitions (see Fig. 4 (a)). To overcome this
+shortcoming, we introduce shared noise and a randomized
+blending technique. We divide a low-resolution long video
+into m chunks V1,...,Vm of F = 24 frames, each with
+an O = 8 frames overlap between consecutive chunks. For
+each denoising step, we must sample noise (see Eq. 2). We
+combine that noise with the noise already sampled for the
+overlapping frames of the preceding chunk to form shared
+noise. Specifically, for chunk Vi, i = 1, we sample noise
+ϵ1 ∼ N(0,I) with ϵ1 ∈ RF×h×w×c
+. For i > 1, we sample
+noise ϵ̂i ∼ N(0,I) with ϵ̂i ∈ R(F−O)×h×w×c
+and concate-
+nate it with ϵ
+(F−O):F
+i−1 (already sampled for the preceding
+chunk) along the frame dimension to obtain ϵi i.e.:
+  \epsilon _{i} := \mathrm {concat}([\epsilon _{i-1}^{(F-\mathcal {O}):F},\hat {\epsilon }_{i}],\mathrm {dim}=0). 
+(7)
+At diffusion step t (starting from T′
+), we perform one de-
+noising step using ϵi and obtain for chunk Vi the latent code
+xt−1(i). Despite these efforts, transition misalignment per-
+sists (see Fig. 4 (b)).
+To significantly improve consistency, we introduce ran-
+domized blending. Consider the latent codes xL :=
+xt−1(i − 1) and xR := xt−1(i) of two consecutive chunks
+Vi−1,Vi atdenoisingstept−1. ThelatentcodexL ofchunk
+Vi−1 possesses a smooth transition from its first frames to
+the overlapping frames, while the latent code xR possesses
+a smooth transition from the overlapping frames to the sub-
+sequent frames. Thus, we combine the two latent codes
+via concatenation at a randomly chosen overlap position,
+Method ↓MAWE ↓SCuts ↑CLIP
+SparseCtrl [11] 6069.7 5.48 29.32
+I2VGenXL [43] 2846.4 0.4 27.28
+DynamiCrafterXL [39] 176.7 1.3 27.79
+SEINE [6] 718.9 0.28 30.13
+SVD [3] 857.2 1.1 23.95
+FreeNoise [23] 1298.4 0 31.55
+OpenSora [44] 1165.7 0.16 31.54
+OpenSoraPlan [22] 72.9 0.24 29.34
+StreamingT2V (Ours) 52.3 0.04 31.73
+Table 1. Quantitative comparison to state-of-the-art open-source
+text-to-long-video generators. Best performing metrics are high-
+lighted in red, second best in blue. Our method performs best in
+MAWE and CLIP score. Only in SCuts, StreamingT2V scores
+second best, as FreeNoise generates near-constant videos.
+by randomly sampling a frame index fthr from {0,...,O}
+according to which we merge the two latents xL and xR:
+  x_{LR} := \mathrm {concat}([x_{L}^{1:F-f_{\text {thr}}},x_{R}^{f_{\text {thr}}+1:F}], \mathrm {dim} = 0). 
+(8)
+Then, we update the latent code of the entire long video
+xt−1 on the overlapping frames and perform the next de-
+noising step. Accordingly, for a frame f ∈ {1,...,O} of
+the overlap, the latent code of chunk Vi−1 is used with prob-
+ability 1 − f
+O+1. This probabilistic mixture of latents in
+overlapping regions effectively diminishes inconsistencies
+between chunks (see Fig. 4(c)). The importance of random-
+ized blending is further assessed in an ablation study in the
+appendix (see Sec. A.3)
+5. Experiments
+We present qualitative and quantitative evaluations. Imple-
+mentation details and ablation studies showing the impor-
+tance of our contributios are provided in the appendix, (Sec.
+A.3 and Sec. A.4)
+5.1. Metrics
+For quantitative evaluation, we measure temporal consis-
+tency, text-alignment, and per-frame quality.
+For temporal consistency, we introduce SCuts, which
+counts the number of detected scene cuts in a video using
+the AdaptiveDetector [1] with default parameters. In addi-
+tion, we propose a new metric called motion aware warp
+error (MAWE), which coherently assesses motion amount
+and warp error, and yields a low value when a video ex-
+hibits both consistency and a substantial amount of motion
+(exact definition in the appendix, Sec. A.6). For the met-
+rics involving optical flow, computations are conducted by
+resizing all videos to 720 × 720 resolution.
+2573t
+X-T Slice Video
+t
+X-T Slice Video
+t
+X-T Slice Video
+(a) Naive Concatenation (b) Shared Noise (c) Randomized Blending
+Figure 4. Ablation study on our video enhancer improvements. The X-T slice visualization shows that randomized blending leads to
+smooth chunk transitions, while both baselines have clearly visible, severe inconsistencies between chunks.
+For video-textual-alignment, we employ the CLIP [24]
+text image similarity score (CLIP). CLIP computes for a
+video sequence the cosine similarity from the CLIP text en-
+coding to the CLIP image encodings for all video frames.
+All metrics are computed per video first and then av-
+eraged over all videos, all videos are generated with 240
+frames for quantitative analysis.
+5.2. Comparison with Baselines
+Benchmark. To assess the effectiveness of StreamingT2V,
+we created a test set composed of 50 prompts with different
+actions, objects and scenes (listed in Sec. A.5). We com-
+pare against recent methods with code available: image-to-
+video methods I2VGen-XL [43], SVD [3], DynamiCrafter-
+XL [39], OpenSoraPlan v1.2 [22] and SEINE [6] used au-
+toregressively, video-to-video methods SparseControl [11],
+OpenSora v1.2 [44], and FreeNoise [23].
+For all methods, we use their released model weights and
+hyperparameters. To have a fair comparison and insight-
+ful analysis on the performance of the methods for the au-
+toregressive generation, and make the analysis independent
+on the employed initial frame generator, we use the same
+Video-LDM model to generate the first chunk consisting of
+16 frames, given a text prompt and enhance it to 720x720
+resolution using the same Refiner Video-LDM. Then, we
+generate the videos, while we start all autoregressive meth-
+ods by conditioning on the last frame(s) of that chunk. For
+methods working on different spatial resolution, we apply
+zero padding to the initial frame(s). All evaluations are con-
+ducted on 240-frames video generations.
+Automatic Evaluation. Our quantitative evaluation on the
+test set shows that StreamingT2V clearly performs best re-
+garding seamless chunk transitions and motion consistency
+(see Tab. 1). Our MAWE score significantly excels all
+competing methods (e.g. nearly 30% lower than the sec-
+ond best score by OpenSoraPlan). Likewise, our method
+achieves the second lowest SCuts score among all com-
+petitors. Only FreeNoise achieves a slightly lower, per-
+fect score. However, FreeNoise produces near-static videos
+(see also Fig. 5), leading automatically to low SCuts scores.
+OpenSoraPlan frequently produces scene cuts, leading to a
+6 times higher SCuts score than our method. SparseControl
+follows a ControlNet approach, but leads to 100 times more
+scene cuts compared to StreamingT2V. This shows the ad-
+vantage of our attentional CAM block over SparseControl,
+where the conditional frames need to be pad with zeros, so
+that inconsistency in the input lead to severe scene cuts.
+Interestingly, all competing methods that incorporate
+CLIP image encodings are prone to misalignment (mea-
+sured in low CLIP scores), i.e. SVD and DynamiCrafterXL
+and I2VGen-XL. We hypothesize that this is due to a do-
+main shift; the CLIP image encoder is trained on natural
+images, but in an autoregressive setup, it is applied on gen-
+erated images. With our long-term memory, APM reminds
+the network about the domain of real images, as we use a
+fixed anchor frame, so that it does not degrade, and remains
+well-aligned to the textual prompt. So, StreamingT2V gets
+the highest CLIP score among all evaluated methods.
+To assess the stability of the metrics over time, we com-
+puted them from 120 to 220 frames in 20 frame steps. The
+results are as follows: MAWE score: (43.25, 46.92, 46.79,
+45.79, 45.84, 45.84), and CLIP score: (32.45, 32.30, 32.16,
+32.02, 31.89, 31.79). These results indicate that the metrics
+remain relatively stable over time.
+Qualitative Evaluation. Finally, we present corresponding
+visual results on the test set in Fig. 5 (and in Sec. A.2).
+The high similarity of the frames depicted for competitors
+shows that all competing methods suffer from video stag-
+nation, where the background and the camera is frozen,
+and nearly no object motion is generated. Our method is
+generating smooth and consistent videos without leading to
+standstill. I2VG, SVD, SparseCtrl, SEINE, OpenSoraPlan
+and DynamiCrafter-XL are prone to severe quality degra-
+dation, e.g. wrong colors and distorted frames, and incon-
+sistencies, showing that their conditioning via CLIP image
+encoder and concatenation is too weak and heavily ampli-
+fies errors. In contrast, thanks to the more powerful CAM
+mechanism, StreamingT2V leads to smooth chunk transi-
+tions. APM conditions on a fixed anchor frame, so that
+StreamingT2V does not suffer from error accumulation.
+2574Ours OS OS-Plan DC-XL FreeNse SpCtrl SVD SEINE I2VG
+(a) A squirrel in Antarctica, on a pile of hazelnuts. (b) A tiger eating raw meat on the street.
+Figure 5. Visual comparisons of StreamingT2V with state-of-the-art methods on 240 frame-length, autoregressively generated videos. In
+contrast to other methods, StreamingT2V generates long videos without suffering from motion stagnation.
+Figure 6. StreamingT2V results using OpenSora as base model.
+6. Conclusion and Future Work
+In this paper, we tackled the challenge of generating long
+videos from textual prompts. We observed that all existing
+methods produce long videos either with temporal inconsis-
+tencies or severe stagnation up to standstill. To overcome
+these limitations, we proposed StreamingT2V, which incor-
+poratesshort-andlong-termdependenciestoensuresmooth
+continuation of video chunks with high motion amount
+whilepreserving scenefeatures. We proposeda randomized
+blending approach enabling to use a video enhancer within
+the autoregressive process. Experiments show that Stream-
+ingT2V outperforms competitors, generating long videos
+from text prompts without content stagnation.
+We also noticed that our method can be generalized to
+the DiT architectures as well, e.g. for OpenSora (OS) [44],
+we added the CAM module by allowing the last 14 trans-
+former blocks of OS to attend to the previous chunk infor-
+mation via CAM’s attention mechanism. The APM module
+isconnectedtothecrossattentions, asinStreamingT2V.Af-
+ter adding our framework to OS, the visual inspection of the
+results confirmed the generalization ability of the method
+(see Fig. 6) enabling the future research to focus on con-
+ducting a detailed analysis of this direction.
+2575References
+[1] Pyscenedetect. https://www.scenedetect.com/.
+Accessed: 2024-03-03. 6
+[2] IsaacAmidror. Scattereddatainterpolationmethodsforelec-
+tronicimagingsystems: asurvey. Journalofelectronicimag-
+ing, 11(2):157–176, 2002. 6
+[3] Andreas Blattmann, Tim Dockhorn, Sumith Kulal, Daniel
+Mendelevitch, Maciej Kilian, Dominik Lorenz, Yam Levi,
+Zion English, Vikram Voleti, Adam Letts, et al. Stable video
+diffusion: Scaling latent video diffusion models to large
+datasets. arXiv preprint arXiv:2311.15127, 2023. 2, 3, 6,
+7
+[4] AndreasBlattmann, RobinRombach, HuanLing, TimDock-
+horn, Seung Wook Kim, Sanja Fidler, and Karsten Kreis.
+Align your latents: High-resolution video synthesis with la-
+tent diffusion models. In Proceedings of the IEEE/CVF Con-
+ference on Computer Vision and Pattern Recognition, pages
+22563–22575, 2023. 2, 3, 4
+[5] Xi Chen, Zhiheng Liu, Mengting Chen, Yutong Feng, Yu
+Liu, Yujun Shen, and Hengshuang Zhao. Livephoto: Real
+image animation with text-guided motion control. arXiv
+preprint arXiv:2312.02928, 2023. 3
+[6] Xinyuan Chen, Yaohui Wang, Lingjun Zhang, Shaobin
+Zhuang, Xin Ma, Jiashuo Yu, Yali Wang, Dahua Lin, Yu
+Qiao, and Ziwei Liu. Seine: Short-to-long video diffu-
+sion model for generative transition and prediction. In The
+Twelfth International Conference on Learning Representa-
+tions, 2023. 2, 3, 6, 7
+[7] Zuozhuo Dai, Zhenghao Zhang, Yao Yao, Bingxue Qiu, Siyu
+Zhu, Long Qin, and Weizhi Wang. Animateanything: Fine-
+grained open domain image animation with motion guid-
+ance, 2023. 2, 3
+[8] Patrick Esser, Robin Rombach, and Bjorn Ommer. Taming
+transformers for high-resolution image synthesis. In Pro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, pages 12873–12883, 2021. 3
+[9] Patrick Esser, Johnathan Chiu, Parmida Atighehchian,
+Jonathan Granskog, and Anastasis Germanidis. Structure
+and content-guided video synthesis with diffusion models.
+In Proceedings of the IEEE/CVF International Conference
+on Computer Vision, pages 7346–7356, 2023. 3
+[10] Rohit Girdhar, Mannat Singh, Andrew Brown, Quentin Du-
+val, Samaneh Azadi, Sai Saketh Rambhatla, Akbar Shah, Xi
+Yin, Devi Parikh, and Ishan Misra. Emu video: Factoriz-
+ing text-to-video generation by explicit image conditioning.
+arXiv preprint arXiv:2311.10709, 2023. 2, 4
+[11] Yuwei Guo, Ceyuan Yang, Anyi Rao, Maneesh Agrawala,
+Dahua Lin, and Bo Dai. Sparsectrl: Adding sparse con-
+trols to text-to-video diffusion models. arXiv preprint
+arXiv:2311.16933, 2023. 2, 3, 5, 6, 7
+[12] Yuwei Guo, Ceyuan Yang, Anyi Rao, Zhengyang Liang,
+Yaohui Wang, Yu Qiao, Maneesh Agrawala, Dahua Lin,
+and Bo Dai. Animatediff: Animate your personalized text-
+to-image diffusion models without specific tuning. In The
+Twelfth International Conference on Learning Representa-
+tions, 2023. 2
+[13] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffu-
+sion probabilistic models. Advances in Neural Information
+Processing Systems, 33:6840–6851, 2020. 2, 3
+[14] Jonathan Ho, William Chan, Chitwan Saharia, Jay Whang,
+Ruiqi Gao, Alexey Gritsenko, Diederik P Kingma, Ben
+Poole, Mohammad Norouzi, David J Fleet, et al. Imagen
+video: High definition video generation with diffusion mod-
+els. arXiv preprint arXiv:2210.02303, 2022. 3, 4
+[15] Jonathan Ho, Tim Salimans, Alexey Gritsenko, William
+Chan, Mohammad Norouzi, and David J Fleet. Video dif-
+fusion models. arXiv preprint arXiv:2204.03458, 2022. 2,
+3
+[16] Levon Khachatryan, Andranik Movsisyan, Vahram Tade-
+vosyan, Roberto Henschel, Zhangyang Wang, Shant
+Navasardyan, and Humphrey Shi. Text2video-zero: Text-
+to-image diffusion models are zero-shot video generators. In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision (ICCV), pages 15954–15964, 2023. 2, 3
+[17] JihwanKim, JunohKang, JinyoungChoi, andBohyungHan.
+Fifo-diffusion: Generating infinite videos from text without
+training. In NeurIPS, 2024. 3
+[18] Xin Li, Wenqing Chu, Ye Wu, Weihang Yuan, Fanglong Liu,
+Qi Zhang, Fu Li, Haocheng Feng, Errui Ding, and Jingdong
+Wang. Videogen: A reference-guided latent diffusion ap-
+proach for high definition text-to-video generation. arXiv
+preprint arXiv:2309.00398, 2023. 2
+[19] Fuchen Long, Zhaofan Qiu, Ting Yao, and Tao Mei. Video-
+drafter: Content-consistent multi-scene video generation
+with llm. arXiv preprint arXiv:2401.01256, 2024. 3
+[20] Chenlin Meng, Yang Song, Jiaming Song, Jiajun Wu, Jun-
+YanZhu, andStefanoErmon. SDEdit: Guidedimagesynthe-
+sis and editing with stochastic differential equations. In In-
+ternational Conference on Learning Representations, 2022.
+2, 6
+[21] Gyeongrok Oh, Jaehwan Jeong, Sieun Kim, Wonmin Byeon,
+Jinkyu Kim, Sungwoong Kim, Hyeokmin Kwon, and Sang-
+pil Kim. Mtvg: Multi-text video generation with text-to-
+video models. arXiv preprint arXiv:2312.04086, 2023. 2,
+3
+[22] PKU-Yuan-Lab and Tuzhan-AI. Open-sora-plan, 2024. 2, 3,
+6, 7
+[23] Haonan Qiu, Menghan Xia, Yong Zhang, Yingqing He, Xin-
+tao Wang, Ying Shan, and Ziwei Liu. Freenoise: Tuning-
+free longer video diffusion via noise rescheduling. In The
+Twelfth International Conference on Learning Representa-
+tions, 2024. 3, 6, 7
+[24] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learning
+transferable visual models from natural language supervi-
+sion. In Internationalconferenceon machinelearning, pages
+8748–8763. PMLR, 2021. 2, 3, 5, 7
+[25] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu,
+and Mark Chen. Hierarchical text-conditional image gen-
+eration with clip latents. arXiv preprint arXiv:2204.06125,
+2022. 2, 4
+2576[26] Weiming Ren, Harry Yang, Ge Zhang, Cong Wei, Xinrun
+Du, Stephen Huang, and Wenhu Chen. Consisti2v: Enhanc-
+ing visual consistency for image-to-video generation. arXiv
+preprint arXiv:2402.04324, 2024. 3
+[27] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Björn Ommer. High-resolution image
+synthesis with latent diffusion models. In Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, pages 10684–10695, 2022. 2, 4
+[28] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-
+net: Convolutional networks for biomedical image segmen-
+tation. In Medical Image Computing and Computer-Assisted
+Intervention–MICCAI 2015: 18th International Conference,
+Munich, Germany, October 5-9, 2015, Proceedings, Part III
+18, pages 234–241. Springer, 2015. 4
+[29] Uriel Singer, Adam Polyak, Thomas Hayes, Xi Yin, Jie An,
+Songyang Zhang, Qiyuan Hu, Harry Yang, Oron Ashual,
+Oran Gafni, et al. Make-a-video: Text-to-video generation
+without text-video data. In The Eleventh International Con-
+ference on Learning Representations, 2022. 2, 3, 4
+[30] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan,
+and Surya Ganguli. Deep unsupervised learning using
+nonequilibrium thermodynamics. In International confer-
+ence on machine learning, pages 2256–2265. PMLR, 2015.
+2
+[31] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denois-
+ing diffusion implicit models. In International Conference
+on Learning Representations, 2020. 2
+[32] Aaron Van Den Oord, Oriol Vinyals, et al. Neural discrete
+representation learning. Advances in neural information pro-
+cessing systems, 30, 2017. 3
+[33] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+Polosukhin. Attention is all you need. Advances in neural
+information processing systems, 30, 2017. 4
+[34] Ruben Villegas, Mohammad Babaeizadeh, Pieter-Jan Kin-
+dermans, Hernan Moraldo, Han Zhang, Mohammad Taghi
+Saffar, Santiago Castro, Julius Kunze, and Dumitru Erhan.
+Phenaki: Variablelengthvideogenerationfromopendomain
+textual descriptions. In International Conference on Learn-
+ing Representations, 2022. 2
+[35] Fu-Yun Wang, Wenshuo Chen, Guanglu Song, Han-Jia Ye,
+Yu Liu, and Hongsheng Li. Gen-l-video: Multi-text to long
+video generation via temporal co-denoising. arXiv preprint
+arXiv:2305.18264, 2023. 3
+[36] Jiuniu Wang, Hangjie Yuan, Dayou Chen, Yingya Zhang,
+Xiang Wang, and Shiwei Zhang. Modelscope text-to-video
+technical report. arXiv preprint arXiv:2308.06571, 2023. 2,
+4
+[37] Xiang Wang, Hangjie Yuan, Shiwei Zhang, Dayou Chen, Ji-
+uniu Wang, Yingya Zhang, Yujun Shen, Deli Zhao, and Jin-
+gren Zhou. Videocomposer: Compositional video synthesis
+with motion controllability. Advances in Neural Information
+Processing Systems, 36, 2024. 2, 3, 6
+[38] Wenming Weng, Ruoyu Feng, Yanhui Wang, Qi Dai,
+Chunyu Wang, Dacheng Yin, Zhiyuan Zhao, Kai Qiu, Jian-
+min Bao, Yuhui Yuan, Chong Luo, Yueyi Zhang, and Zhiwei
+Xiong. Art•v: Auto-regressive text-to-video generation with
+diffusion models. arXiv preprint arXiv:2311.18834, 2023. 3
+[39] Jinbo Xing, Menghan Xia, Yong Zhang, Haoxin Chen, Xin-
+tao Wang, Tien-Tsin Wong, and Ying Shan. Dynamicrafter:
+Animating open-domain images with video diffusion priors.
+arXiv preprint arXiv:2310.12190, 2023. 2, 3, 6, 7
+[40] Yan Zeng, Guoqiang Wei, Jiani Zheng, Jiaxin Zou, Yang
+Wei, Yuchen Zhang, and Hang Li. Make pixels dance: High-
+dynamic video generation. arXiv:2311.10982, 2023. 3
+[41] David Junhao Zhang, Jay Zhangjie Wu, Jia-Wei Liu,
+Rui Zhao, Lingmin Ran, Yuchao Gu, Difei Gao, and
+Mike Zheng Shou. Show-1: Marrying pixel and latent dif-
+fusion models for text-to-video generation. arXiv preprint
+arXiv:2309.15818, 2023. 2
+[42] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding
+conditional control to text-to-image diffusion models. In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision, pages 3836–3847, 2023. 3, 4, 5
+[43] Shiwei Zhang, Jiayu Wang, Yingya Zhang, Kang Zhao,
+Hangjie Yuan, Zhiwu Qing, Xiang Wang, Deli Zhao, and
+Jingren Zhou. I2vgen-xl: High-quality image-to-video syn-
+thesis via cascaded diffusion models. 2023. 2, 3, 4, 6, 7
+[44] Zangwei Zheng, Xiangyu Peng, Tianji Yang, Chenhui Shen,
+Shenggui Li, Hongxin Liu, Yukun Zhou, Tianyi Li, and Yang
+You. Open-sora: Democratizing efficient video production
+for all, 2024. 2, 3, 6, 7, 8
+[45] Yupeng Zhou, Daquan Zhou, Ming-Ming Cheng, Jiashi
+Feng, and Qibin Hou. Storydiffusion: Consistent self-
+attention for long-range image and video generation. 2024.
+3
+2577

@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "artifact": "S42_baseline_failure_preregistration",
+  "created_at": "2026-09-07T14:12:20+08:00",
+  "revised_at": "2026-09-07T14:25:41+08:00",
+  "author_role": "/root/vmem_recovery_diagnosis independent protocol author",
+  "verdict": "PASS",
+  "status": "PREREGISTERED_NOT_EXECUTED",
+  "verdict_scope": "The preregistration is complete and internally executable as a measurement specification. No baseline run, model result, or scientific claim has passed.",
+  "research_question": "Under the frozen declared VMem component variant and two-batch return trajectory, is there a repeatable severe RGB return discrepancy on a predeclared outer-region mask?",
+  "single_primary_endpoint": {
+    "name": "ReturnPSNR_M",
+    "pair": [0, 8],
+    "mask": "M_outer4",
+    "direction": "lower_is_worse",
+    "authoritative_decision_representation": "unrounded float64 MSE_M",
+    "per_row_event": "MSE_M > 0.01",
+    "display_equivalent": "ReturnPSNR_M < 20.0 dB",
+    "cohort_rule": "All B0/C1/C2 rows must be technically valid and executed. At least two of three rows must have unrounded float64 MSE_M > 0.01.",
+    "equality_rule": "MSE_M == 0.01, equivalently 20.0 dB, is not a failure",
+    "threshold_interpretation": "Preregistered severe-drift engineering screen; not a community standard and not a detector of every subtle failure."
+  },
+  "frozen_mask": {
+    "coordinate_system": "576x576 RGB, zero-based Python half-open [y0:y1,x0:x1]",
+    "regions": {
+      "R1": [0, 192, 0, 192],
+      "R2": [0, 192, 384, 576],
+      "R3": [192, 384, 0, 192],
+      "R4": [192, 384, 384, 576]
+    },
+    "pixel_count": 147456,
+    "rgb_scalar_count": 442368,
+    "aggregation": "union pixels and RGB channels are combined in float64 before MSE; PSNR is a monotonic display transform of the same MSE",
+    "post_output_edits_allowed": false
+  },
+  "frozen_rows": [
+    {
+      "id": "B0",
+      "role": "S40_development_screen",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/changi.jpg",
+      "sha256": "12fc2c4ddfccee952d5390b147b813a8f062209832ec675013f82283e796e54a",
+      "width": 3648,
+      "height": 2736,
+      "seed": 42
+    },
+    {
+      "id": "C1",
+      "role": "baseline_only_confirmation",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/jesus.jpg",
+      "sha256": "d611976bb9d3e8d6e1740b86ead24028bfd7857944eba118458e09e7e645f3e1",
+      "width": 1702,
+      "height": 1276,
+      "seed": 43
+    },
+    {
+      "id": "C2",
+      "role": "baseline_only_confirmation",
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/living_room.jpg",
+      "sha256": "e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278",
+      "width": 1588,
+      "height": 958,
+      "seed": 44
+    }
+  ],
+  "confirmation_scene_selection_rule": "From the same local VMem test_samples directory, exclude changi and choose the two largest original images by pixel count. The rule and hashes were fixed before generated outputs.",
+  "frozen_trajectory": {
+    "operations": ["initialize", "turn_left(5)", "turn_right(5)"],
+    "interpolation_frames_per_turn": 4,
+    "planned_yaw_degrees_by_id": {
+      "0": 0.0,
+      "1": 1.25,
+      "2": 2.5,
+      "3": 3.75,
+      "4": 5.0,
+      "5": 3.75,
+      "6": 2.5,
+      "7": 1.25,
+      "8": 0.0
+    },
+    "primary_pair": [0, 8],
+    "generated_only_no_gt_pairs": [[1, 7], [2, 6], [3, 5]],
+    "pose_and_K_max_abs_tolerance": 1e-6
+  },
+  "frozen_generation_controls": {
+    "variant": "VMem + stabilityai/sd-vae-ft-mse (declared VAE component variant)",
+    "vae_revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+    "exact_original_vmem": false,
+    "device": "cpu",
+    "dtype": "float32",
+    "threads": 8,
+    "height": 576,
+    "width": 576,
+    "T": 8,
+    "context_frames": 4,
+    "target_frames": 4,
+    "sampling_steps": 50,
+    "NMS": "default_enabled",
+    "navigation_step_size": 0.1,
+    "surfel_global_alignment_iterations": 400,
+    "surfel_global_alignment_lr": 0.01,
+    "same_worker_across_batches": true,
+    "rng_reset_between_batches": false,
+    "history_lengths": [1, 5, 9]
+  },
+  "validity_guards": [
+    "frozen identity and unique attempt directory; the first technically valid attempt is the only scientific result and a valid row may not be rerun",
+    "complete two-batch archive and independent full-array cache-consumption readback",
+    "planned pose/K are read only from batch_input occurrence 0/1 retained targets and cross-checked to cache_commit rows; centered/transformed condition and sampler c2w cannot be substituted, while K is cross-checked under its own unchanged-coordinate semantics",
+    "actual c2w/K sequence and exact-return closure within 1e-6",
+    "authoritative pixels are cache_commit occurrence 1 cache.pil_frames[id].pixels uint8 tensor blobs, never an interchangeable PNG/live-PIL/cache snapshot",
+    "complete ID-to-image mapping, tensor descriptor/blob hashes, 147456 mask pixels, 442368 RGB scalars, and unrounded float64 MSE/PSNR",
+    "no all-frame byte-identical copy shortcut",
+    "machine score receipt before human output inspection",
+    "no row deletion, replacement, or B0-based early stopping after any result",
+    "before A0/A1, a separately frozen independent visual camera-compliance proxy must pass and global visual collapse must not explain the discrepancy"
+  ],
+  "evidence_classes": {
+    "true_reference_rgb": "ID0 is an observed RGB reference only for the exact returned initial camera condition and frozen mask; it is not 3D, depth, motion, or whole-video ground truth.",
+    "no_gt_pair_consistency": "Pairs 1/7, 2/6, and 3/5 compare two generated images and are diagnostic only.",
+    "camera_compliance": "Archived c2w/K validate requested conditions, not rendered visual camera obedience. No independent real camera-output GT is claimed.",
+    "visual_quality": "All nine frames must be inspected/reported without case selection; visual QA cannot replace the headline metric."
+  },
+  "decision_states": [
+    "INCOMPLETE",
+    "INVALID_OR_UNINTERPRETABLE",
+    "NO_CONFIRMED_PREDECLARED_FAILURE",
+    "RETURN_RGB_DISCREPANCY_CAMERA_CAUSE_UNRESOLVED",
+    "CONFIRMED_SEVERE_RETURN_RGB_FAILURE_CAMERA_GUARD_PASS"
+  ],
+  "input_bindings": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/Yiyang_LIU_Proposal.pdf",
+      "sha256": "12a7e9605511726be84d70e3b4218d0f89508bf9abf719975d41648473768afa"
+    },
+    {
+      "path": "work/S40_declared_variant_generation/PROTOCOL_DRAFT.md",
+      "sha256": "2c026b3dff79ca9155e5ad86a8c539b6597b6be7ed73b2c407b3d83ce75d7ced"
+    },
+    {
+      "path": "work/S40_declared_variant_generation/independent_source_review.md",
+      "sha256": "83c9be7b703806945402e84058f1e22e6b537b8b443a25fda9a9f5ab0a9d7905"
+    },
+    {
+      "path": "work/S40_declared_variant_generation/static_derivation_receipt.json",
+      "sha256": "cda88e06eb4213145d86bcebe8925e9654716d5c7749a36099f5a84bdee9bb23"
+    },
+    {
+      "path": "work/S41_clip_mean_innovation_audit/AUDIT.md",
+      "sha256": "922f708a3b319e98fd5b84116a9a298df349d86700c26aded83e8ce279617475"
+    },
+    {
+      "path": "work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md",
+      "sha256": "fd07dfc743f9a0c3f350f5d719936b74d5d902f3f10910c1a0b30b8ecda4059a"
+    },
+    {
+      "path": "work/S41_gemini_adversarial_review/root_review_incremental_v2.json",
+      "sha256": "6c8ee3c30dffaf1454a4e178e45f0fe5805bb8d23ad8e8c81bfdfb7913068ce8"
+    },
+    {
+      "path": "work/S20_environment/isolated_vmem_source/navigation.py",
+      "sha256": "6d267365d5dcccf9f7cd6d535f19f80521f60a9634dffb35b9af398407389fcf"
+    },
+    {
+      "path": "work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+      "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255"
+    },
+    {
+      "path": "work/S20_environment/isolated_vmem_source/utils/util.py",
+      "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e"
+    },
+    {
+      "path": "work/S35_generation_integration/runtime_factory.py",
+      "sha256": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/SKILL.md",
+      "sha256": "630ce9528f472637830b216bf6de231e6dfdcdae4d3b16976324da5ce2d145fb"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/benchmark-paper-template/references/experiments.md",
+      "sha256": "0feab24e92c96e716f4c0ae60dcf385a63d9d58a58bebf09729f067db336db6e"
+    }
+  ],
+  "supervisor_skills_sources": {
+    "repository": "https://github.com/HKUSTDial/Supervisor-Skills",
+    "commit": "207bc6f7a1aa107e544099c2c7cc86816fba9628",
+    "raw_sha256": {
+      "handbook/02_Idea_Generation/2.1_Idea的生命周期与能力匹配.md": "a53a99fde8d8fdaab88145f1cf9bd55f943a489643db67128a6258373be3932e",
+      "handbook/02_Idea_Generation/2.2_想Idea的思路_更高更快更强.md": "f3ca0a15f072dc15145b940f03c00f1ece61e5955ca359afd95ab0ff9b2718dd",
+      "handbook/02_Idea_Generation/2.3_进阶_如何做颠覆式创新.md": "c4a0022cad1bfeb09301d3b78e16f2197693bd170d613e6a2be5e45c73266b59",
+      "skills/benchmark-paper-template/references/experiments.md": "0feab24e92c96e716f4c0ae60dcf385a63d9d58a58bebf09729f067db336db6e"
+    }
+  },
+  "independent_adversarial_input": {
+    "reviewer": "/root/gemini_third_review_verifier",
+    "incorporated_points": [
+      "separate development screen from confirmation",
+      "bind exact return pair to actual c2w/K",
+      "freeze ROI, metric direction, and threshold before output",
+      "separate real RGB reference from generated-only consistency",
+      "do not equate requested camera matrices with visual camera obedience"
+    ],
+    "post_draft_review": {
+      "reviewed_protocol_sha256": "82cfe4f362210db5b8529e6f35cf8782de3dcefe949a8d02e405dec084959770",
+      "verdict": "REVISION_REQUIRED",
+      "corrections_applied": [
+        "removed contradictory B0 outcome-based early stop",
+        "bound planned camera checks to pre-get_cond batch_input and matching cache_commit rows",
+        "bound scoring to final cache_commit pixel tensor blobs and an unrounded MSE threshold",
+        "made first technically valid attempt the only result and blocked memory attribution until a separate camera proxy passes"
+      ]
+    },
+    "final_regression_review": {
+      "reviewed_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+      "verdict": "PASS",
+      "reviewer": "/root/gemini_third_review_verifier",
+      "model_or_generation_run": false,
+      "files_modified_by_reviewer": false
+    }
+  },
+  "non_actions": {
+    "model_loaded": false,
+    "model_forward_run": false,
+    "video_generated": false,
+    "unproduced_arrays_read": false,
+    "aggregation_output_viewed": false,
+    "main_ledger_modified": false,
+    "novelty_claimed": false
+  }
+}

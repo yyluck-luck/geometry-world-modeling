@@ -1,0 +1,169 @@
+[2603.03482] Beyond Pixel Histories: World Models with Persistent 3D State (https://arxiv.org/abs/2603.03482)
+citeturn315view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: click({"ref_id":"turn313view1","id":10}); Total lines: 163
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training (https://arxiv.org/html/2509.26645v4)
+citeturn315view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: find({"ref_id":"turn314view2","pattern":"3.3"}); Total lines: 854
+L0: ##### Report GitHub Issue
+L1: 
+L2: [Button: ×]
+L3: 
+L4: Title: [Input: Enter title]
+L5: 
+L6: Content selection saved. Describe the issue below:
+L7: 
+L8: Description:
+L9: 
+L10: [Button: Submit without GitHub] [Button: Submit in GitHub]
+L11: 
+L12: cite0†Back to arXiv L13: 
+L14: cite1†Why HTML?†info.arxiv.org cite2†Report Issue cite3†Back to Abstract cite4†Download PDF L15:   1. cite5†Abstract L16:   2. cite6†1 Introduction L17:   3. cite7†2 Related Work L18:   4. cite8†3 Method L19:     1. cite9†3.1 Sequence Modeling for Pointmap Regression L20:     2. cite10†3.2 Revisit RNN-based Reconstruction through TTT L21:     3. cite11†3.3 Confidence-Guided State Update Rule L22:   5. cite12†4 Experiments L23:     1. cite13†4.1 Camera Pose Estimation L24:     2. cite14†4.2 Video Depth Estimation L25:     3. cite15†4.3 3D Reconstruction L26:   6. cite16†5 Discussion L27:   7. cite17†Bibliography L28:   8. cite18†Appendix L29:     1. cite19†A More Experimental Analysis L30:       1. cite20†A.1 Comparison with Standard Learnable Gating Mechanisms L31:       2. cite21†A.2 Finetuning TTT3R L32:       3. cite22†A.3 TTT-derived Update Rule vs. Non-TTT Baselines L33:     2. cite23†B State Reset L34:     3. cite24†C More Results L35:       1. cite25†C.1 Experimental Settings L36:       2. cite26†C.2 Baselines L37:       3. cite27†C.3 Camera Pose Estimation L38:       4. cite28†C.4 Video Depth Estimation L39:       5. cite29†C.5 3D Reconstruction L40:     4. cite30†D Use of Large Language Models L41: cite31†License: arXiv.org perpetual non-exclusive license†info.arxiv.org L42: 
+L43: arXiv:2509.26645v4 [cs.CV] 03 Mar 2026
+L44: # TTT3R: 3D Reconstruction as Test-Time Training
+L45: 
+L46: Xingyu Chen Affiliation: Zhejiang University Affiliation: Westlake University    Yue Chen Affiliation: Zhejiang University Affiliation: Westlake University    Yuliang Xiu Affiliation: Westlake University    Andreas Geiger Affiliation: Uni of Tübingen, Tübingen AI Center    Anpei Chen Affiliation: Westlake University
+L99: Our method processes a continuous stream of images received online. For each incoming image $\mathbf{I}_{t}\in\mathbb{R}^{W\times H\times 3}$, we aim to estimate, in real time and on the fly: the camera pose $\mathbf{T}_{t}\in\mathbb{R}^{3\times 4}$, the camera intrinsic $\mathbf{C}_{t}\in\mathbb{R}^{3\times 3}$, and the canonical point cloud $\mathbf{P}_{t}\in\mathbb{R}^{W\times H\times 3}$.
+L100: We begin in Section cite9†3.1 by introducing sequence modeling to understand and compare different prominent classes of methods that address the pointmap regression problem. Section cite10†3.2 then reformulates recent incremental 3D reconstruction methods from a Test-Time Training perspective. Finally, in Section cite11†3.3 , we propose TTT3R, showing how the cross-attention between memory and observation can be leveraged as a confidence-guided state update rule for online associative recall.
+L101: #### 3.1 Sequence Modeling for Pointmap Regression
+L102: 
+L103: To transform a sequence of images to pixel-aligned pointmaps that lie in a unified global coordinate space, a generic formulation can be written as:
+L104:  |  | $\displaystyle\mathbf{X}_{t}=\texttt{Tokenize}(\mathbf{I}_{t})$  |  | (1)
+L105:  |  | $\displaystyle\mathbf{S}_{t}=\texttt{Update}(\mathbf{S}_{t-1},\mathbf{X}_{t})$  |
+L106:  |  | $\displaystyle\mathbf{Y}_{t}=\texttt{Read}(\mathbf{S}_{t},\mathbf{X}_{t})$  |
+L107:  |  | $\displaystyle\mathbf{P}_{t}=\texttt{De-tokenize}(\mathbf{Y}_{t})$  |
+L108: where the input image $\mathbf{I}_{t}$ is patchified into a set of image tokens $\mathbf{X}_{t}\in\mathbb{R}^{(h\times w)\times c}$ through an image tokenizer [cite102†28 ], such as DINO  [cite123†15 , cite124†53 ] and CroCo [cite125†92 , cite126†93 ]. The image tokens $\mathbf{X}_{t}$ update the previous state $\mathbf{S}_{t-1}$ into the current state $\mathbf{S}_{t}$ using new information.
+L384: This forgetting also reflects the structural discrepancy relative to standard TTT: the lack of a flexible learning rate (effectively, a constant $\beta_{t}=1.0$). Consequently, we are motivated to introduce a state update weight that serves as a gating mechanism to explicitly control memory plasticity.
+L385: #### 3.3 Confidence-Guided State Update Rule
+L386: 
+L387: Our core idea is to utilize alignment confidence between memory and observation to guide state updates. Figure cite133†4 provides an overview of TTT3R. This confidence constitutes an adaptive per-token state update weight, serving as the per-token learning rate function in the TTT formulation [cite67†97 ].
+L388: Recall that the cross-attention (i.e., $\mathbf{Q}_{\mathbf{S}_{t-1}}{\mathbf{K}^{\top}_{\mathbf{X}_{t}}}$) aggregates information along the spatial dimension $m=\{1,\dots,h\}\times\{1,\dots,w\}$ of the image into $n$ state tokens. This process yields normalized attention weights for each state token, which are then used to compute a weighted sum over the value tokens $\mathbf{V}_{\mathbf{X}_{t}}$.
+L389: To address the forgetting issue, we retain the original attention formulation but introduce a per-token learning rate $\beta_{t}\in\mathbb{R}^{n\times 1}$, derived from the alignment confidence between the state queries $\mathbf{Q}_{\mathbf{S}_{t-1}}$ and the observation keys $\mathbf{K}_{\mathbf{X}_{t}}$:
+L390:  | $\displaystyle\beta_{t}=\sigma(\textstyle{\sum_{m}}\mathbf{Q}_{\mathbf{S}_{t-1}}{\mathbf{K}^{\top}_{\mathbf{X}_{t}}})$  |  | (7)
+L391: 
+L392: To simplify notation, we define the summation $\sum_{m}$ to be normalized, thus representing a mean: $\sum_{m}\equiv\frac{1}{m}\sum_{i=1}^{m}$. This learning rate can act as a soft gate in gated attention, incorporating it into the attention output allows for better long-context extrapolation [cite134†59 ]. Consequently, the full closed-form state update rule is given by:
+L677: ScalarLR: In RetNet [cite66†74 ], the learning rate is represented as a single learnable scalar parameter, $\beta\in\mathbb{R}^{1}$. However, the constraint that all observations share the same learning rate inherently limits its representational flexibility.
+L678: 
+L679:   2. 2.
+L680: ConditionLR: In models such as DeltaNet [cite62†64 , cite118†98 ], TTT [cite59†73 ], and Mamba-2 [cite113†21 ], the learning rate is modeled as an input-dependent scalar function: $\beta_{t}=\sigma\left(\ell_{\beta}\left(\mathbf{X}_{t}\right)\right)\in\mathbb{R}^{1}$. This provides the capability to condition the learning rate on the current observation $\mathbf{X}_{t}$.
+L681: 
+L682:   3. 3.
+L683: TokenLR: Gated Linear Attention [cite67†97 ] further proposed a $\beta_{t}$ that is both input-conditioned and per-token: $\beta_{t}=\sigma\left(\ell_{\beta}\left(\mathbf{X}_{t}\right)\right)\in\mathbb{R}^{n\times 1}$. This enables adaptive assignment of individual learning rates for the $n$ state tokens, conditioned on the current observation.
+L684: Our core idea also models a conditioned per-token learning rate $\beta_{t}\in\mathbb{R}^{n\times 1}$, following the TokenLR paradigm. However, in contrast to previous gating mechanisms that rely on additional learnable parameters to model the learning rate (e.g., a scalar in ScalarLR, or a hyper-network $\ell_{\beta}(\cdot)$ in ConditionLR and TokenLR), we derive a training-free, closed-form learning rate.
+L685: This is motivated by the explainable cross-attention mechanism [cite104†16 ] and is derived directly from the alignment confidence between the state queries $\mathbf{Q}_{\mathbf{S}_{t-1}}$ and the observation keys $\mathbf{K}_{\mathbf{X}_{t}}$: $\beta_{t}=\sigma\left(\sum_{m}\mathbf{Q}_{\mathbf{S}_{t-1}}{\mathbf{K}^{\top}_{\mathbf{X}_{t}}}\right).$ This formulation achieves per-token adaptivity without introducing any additional parameters, training overhead, or computational cost.
+--------------------------------------------------------------------------------
+1Introduction (https://arxiv.org/html/2510.03198v1)
+citeturn315view2 [wordlim: 200] Crawled: today; Content type: text/html; Source: find({"ref_id":"turn314view3","pattern":"Chained"}); Total lines: 369
+L44: Hybrid Training exposes distinct gameplay regimes, guiding the model to rely on temporal memory during exploration and incorporate spatial memory for revisits. Chained Forward Training extends autoregressive training with model rollouts, where chained predictions create larger pose variations and encourage reliance on spatial memory for maintaining consistency.
+L45: Point-to-Frame Retrieval efficiently retrieves history by mapping currently visible points to their source frames, while Incremental 3D Reconstruction maintains and updates an explicit 3D cache. Extensive experiments demonstrate that Memory Forcing achieves superior long-term spatial consistency and generative quality across diverse environments, while maintaining computational efficiency for extended sequences.
+L64: Besides, we introduce Chained Forward Training to augment autoregressive learning with model rollouts: it progressively replaces ground-truth temporal context with the model’s own predictions, amplifies pose/viewpoint drift across windows, and thus encourages reliance on spatial memory to maintain revisit consistency.
+L77: We develop the Hybrid Training and Chained Forward Training strategy that teaches models to use temporal memory for exploration and incorporate spatial memory for revisits, and a Geometry-indexed Spatial Memory built via streaming 3D reconstruction with Point-to-Frame Retrieval for efficient memory retrieval.
+L78: 
+L79:   * •
+L80: Extensive experiments demonstrate that Memory Forcing achieves superior performance in both spatial consistency and generative quality in new environments, while maintaining computational efficiency for extended sequences.
+L89: 3D Reconstruction and Memory Retrieval. Learning-based 3D reconstruction was pioneered by DUSt3R (cite66†Wang et al., 2024 ), with subsequent multi-view extensions (cite67†Wang et al., 2025a ; cite68†Wang et al., 2025c ; cite69†Yang et al., 2025a ) and streaming methods (cite70†Wang et al., 2025b ; cite71†Wu et al., 2025 ) for sequential processing. SLAM-based approaches like VGGT-SLAM (cite72†Maggio et al., 2025 ) handle long sequences through incremental submap alignment.
+L90: For memory retrieval in video generation, existing approaches range from pose-based methods (cite42†Xiao et al., 2025 ; cite73†Yu et al., 2025a ) using field-of-view overlap to 3D geometry-based approaches like VMem (cite74†Li et al., 2025a ) with surfel-indexed view selection.
+L91: cite75†Image: Refer to caption Figure 2: Memory Forcing Pipeline. Our framework combines spatial and temporal memory for video generation. 3D geometry is maintained through streaming reconstruction of key frames along the camera trajectory. During generation, Point-to-Frame Retrieval maps spatial context to historical frames, which are integrated with temporal memory and injected together via memory cross-attention in the DiT backbone.
+L92: Chained Forward Training creates larger pose variations, encouraging the model to effectively utilize spatial memory for maintaining long-term geometric consistency.
+L93: ## 3 Memory Forcing
+L94: We introduce Memory Forcing, a learning framework that pairs training protocols with geometry-indexed spatial memory to enable long-term spatial consistency. Our approach addresses the fundamental trade-off between temporal memory for generation and spatial memory for revisits through Hybrid Training and Chained Forward Training (CFT). Section cite9†3.1 provides background on autoregressive video diffusion models and interactive game world modeling.
+L95: Section cite10†3.2 presents our memory-augmented model architecture. Section cite11†3.3 details our Memory Forcing training protocols. Section cite12†3.4 introduces our explicit 3D memory maintenance and retrieval approach.
+L96: ### 3.1 Preliminaries
+L97: Autoregressive Video Diffusion Models. Autoregressive Video Diffusion Models generate video sequences by predicting future frames conditioned on past observations. Following Diffusion Forcing (cite28†Chen et al., 2024 ), we denote a video sequence as $X^{1:T}={x_{1},x_{2},\ldots,x_{T}}$ where each frame $x_{t}$ is assigned an independent noise level $k_{t}\in[0,1]$.
+L98: The model learns to predict noise $\epsilon_{\theta}(\tilde{X}^{1:T},k^{1:T})$ where $\tilde{X}^{1:T}$ represents the noisy sequence and $k^{1:T}={k_{1},k_{2},\ldots,k_{T}}$ are the noise levels. The training objective minimizes:
+L99:  | $$\mathcal{L}=\mathbb{E}_{k^{1:T},X^{1:T},\epsilon^{1:T}}\left[|\epsilon^{1:T}-\epsilon_{\theta}(\tilde{X}^{1:T},k^{1:T})|^{2}\right]$$  |  | (1)
+L100: 
+L101: This framework enables flexible conditioning patterns for autoregressive generation by allowing arbitrary combinations of clean and noisy frames within a sequence.
+L102: Interactive Game World Model. Interactive game environments present unique challenges for video generation models. Players navigate complex 3D environments where actions $\mathcal{A}^{1:T}$ include movement commands, camera rotations, and object interactions that directly influence both immediate visual changes and long-term environment state evolution.
+L118: Inspired by Figure cite38†1 , we apply different memory strategies to different datasets: spatial memory for synthetic dataset (cite41†Fan et al., 2022 ) with frequent area revisiting, and extended temporal context for VPT dataset (cite40†Baker et al., 2022 ) with new scene generation.
+L119: 
+L120: Algorithm 1 Chained Forward Training (CFT)
+L121: 
+L122: 0:  Video $\mathbf{x}$, conditioning inputs $\mathcal{C}$, forward steps $T$, window size $W$, model $\epsilon_{\theta}$
+L123: 1:  Initialize $\mathcal{F}_{\text{pred}}\leftarrow\emptyset$, $\mathcal{L}_{\text{total}}\leftarrow 0$
+L124: 
+L125: 2:  for $j=0$ to $T-1$ do
+L126: 
+L127: 3:   Construct window $\mathcal{W}_{j}$:
+L128: 
+L129: 4:   for $k\in[j,j+W-1]$ do
+L130: 
+L131: 5:    if $k\in\mathcal{F}_{\text{pred}}$ then
+L132: 
+L133: 6:     $\mathcal{W}_{j}[k-j]\leftarrow\mathcal{F}_{\text{pred}}[k]$ {Use predicted frame}
+L134: 
+L135: 7:    else
+L136: 
+L137: 8:     $\mathcal{W}_{j}[k-j]\leftarrow\mathbf{x}_{k}$ {Use ground truth frame}
+L138: 
+L139: 9:    end if
+L140: 
+L141: 10:   end for
+L142: 11:   Compute $\mathcal{L}_{j}\leftarrow\|\epsilon-\epsilon_{\theta}(\mathcal{W}_{j},\mathcal{C}_{j},t)\|^{2}$, update $\mathcal{L}_{\text{total}}\leftarrow\mathcal{L}_{\text{total}}+\mathcal{L}_{j}$
+L143: 
+L144: 12:   if $j<T-1$ then
+L145: 
+L146: 13:    $\hat{\mathbf{x}}_{j+W-1}\leftarrow\text{denoise}(\mathcal{W}_{j},\mathcal{C}_{j})$ {Generate with fewer steps, no gradients}
+L147: 
+L148: 14:    $\mathcal{F}_{\text{pred}}[j+W-1]\leftarrow\hat{\mathbf{x}}_{j+W-1}$ {Store for next window}
+L149: 
+L150: 15:   end if
+L151: 
+L152: 16:  end for
+L153: 17:  return $\mathcal{L}_{\text{chain}}\leftarrow\mathcal{L}_{\text{total}}/T$
+L154: Chained Forward Training. We introduce Chained Forward Training (CFT) to enhance our hybrid training strategy. CFT sequentially processes temporal windows where predicted frames from earlier windows are incorporated into subsequent windows, creating cascading dependencies across the sequence. Details are shown in Algorithm cite77†1 . At each step $j$, we construct a temporal window $\mathcal{W}_{j}$ spanning frames $[j,j+W-1]$.
+L155: For each frame position $k$ within this range, the window contains either ground-truth frames $\mathbf{x}_{k}$ (if not previously predicted) or predicted frames $\hat{\mathbf{x}}_{k}$ (if generated in earlier steps). The conditioning inputs $\mathcal{C}_{j}=\{\mathcal{A}_{j},\mathcal{P}_{j},\mathcal{M}_{\text{spatial}}\}$ comprise actions $\mathcal{A}_{j}$, poses $\mathcal{P}_{j}$, and spatial memory $\mathcal{M}_{\text{spatial}}$ retrieved for the current window. The training objective is:
+L156:  | $$\mathcal{L}_{\text{chain}}=\frac{1}{T}\sum_{j=0}^{T-1}\mathbb{E}_{t,\epsilon}\left[\|\epsilon-\epsilon_{\theta}(\mathcal{W}_{j}(\mathbf{x},\hat{\mathbf{x}}),\mathcal{C}_{j},t)\|^{2}\right],\quad t\sim\text{Uniform}(0,T_{\text{noise}}),\epsilon\sim\mathcal{N}(0,\mathbf{I})$$  |  | (4)
+L157: This approach extends autoregressive training with model rollouts, where larger pose variations created by chained predictions cause inaccuracies to propagate from earlier windows, encouraging the model to rely on spatial memory for maintaining consistency across revisited areas. Additionally, by replacing ground truth temporal context with the model’s own predictions during training, this approach helps reduce accumulation errors that typically arise during autoregressive inference.
+L158: ### 3.4 Geometry-indexed Spatial Memory
+L159: Our Geometry-indexed Spatial Memory maintains explicit 3D scene geometry to enable efficient retrieval of long-term historical visual information based on spatial relationships. The core idea is to build a global point cloud representation where each 3D point is linked to its source frame, creating traceable connections back to the original visual observations.
+L233: Training Strategy Analysis. We compare three training approaches: full-parameter Fine-Tuning (FT) after VPT pre-training, Hybrid Training without Chained Forward Training (HT-w/o-CFT), and our complete Memory Forcing training strategy (MF). Direct fine-tuning achieves limited performance as the model struggles to balance temporal memory and spatial memory, typically over-relying on one modality at the expense of the other.
+L239: Our approach consists of two key innovations: a hybrid training strategy featuring Chained Forward Training that teaches models to dynamically balance temporal and spatial memory utilization, and an efficient Geometry-indexed Spatial Memory that achieves constant-time retrieval complexity through streaming 3D reconstruction and point-to-frame retrieval.
+--------------------------------------------------------------------------------
+Mitigating Compounding Error via Video Representation Regularization (https://arxiv.org/html/2607.27036v1)
+citeturn315view3 [wordlim: 200] Crawled: today; Content type: text/html; Source: find({"ref_id":"turn314view4","pattern":"3."}); Total lines: 295
+L15:   1. cite5†Abstract L16:   2. cite6†1 Introduction L17:   3. cite7†2 Related work L18:     1. cite8†2.1 Video Diffusion Model L19:     2. cite9†2.2 Video World Model and Long Video Generation L20:     3. cite10†2.3 Representation helps generation L21:   4. cite11†3 Core Observations: Error Accumulation Coupled with Representation Collapse and Limits of Data Scaling L22:     1. cite12†3.1 Preliminary: Auto-regressive Video Diffusion L23:       1. cite13†Video Diffusion Model L24:       2. cite14†Diffusion Forcing L25:     2. cite15†3.2 Error Accumulation Is Coupled with Representation Collapse L26:     3. cite16†3.3 More Data Cannot Cure Error Accumulation L27:   5. cite17†4 Video Representation Regularization L28:     1. cite18†4.1 Effective Rank Degradation in Long-term Training L29:     2. cite19†4.2 Formulation of Video Representation Regularization L30:   6. cite20†5 Experiments L31:     1. cite21†5.1 Experimental Setup L32:       1. cite22†Datasets L33:       2. cite23†Evaluation L34:       3. cite24†Baseline L35:       4. cite25†Model Architecture L36:     2. cite26†5.2 Experimental Results L37:     3. cite27†5.3 Mitigating Compounding Error L38:     4. cite28†5.4 Ablation Study L39:       1. cite29†Comparison of Different Representation Regularization Methods L40:       2. cite30†Effect of Regularizing Hidden States at Different Layers L41:   7. cite31†6 Conclusion and Discussion L42:   8. cite32†References L87: Prior work has attempted to mitigate this issue through modified sampling schedules (cite78†Qiu et al., 2024 ; cite79†Ruhe et al., 2024 ), frame anchoring (cite80†Khachatryan et al., 2023 ; cite81†Weng et al., 2024 ), and training-time noise injection or error recycle (cite82†Li et al., 2026 ; cite83†Po et al., 2026 ). Despite these improvements, maintaining stable long-horizon dynamics remains challenging, especially when the generated frames also serve as the model’s future conditioning context.
+L88: ### 2.3 Representation helps generation
+L89: Recent studies have highlighted the importance of representations in improving generative models. One line of work introduces semantic representations to guide generative training, where pretrained encoders provide high-level supervision to improve generation quality and training efficiency (cite84†Edunov et al., 2019 ; cite85†Li et al., 2024 ; cite86†Peale et al., 2025 ).
+L90: For instance, REPA aligns diffusion features with representations from pretrained visual encoders, encouraging diffusion models to learn more semantic representations (cite87†Yu et al., 2025b ), while recent representation autoencoder (RAE)-based approaches further demonstrate the benefits of expressive latent representations for diffusion models (cite88†Zheng et al., 2025 ). Beyond representation alignment, representation regularization has also been explored to preserve feature quality and training stability.
+L91: DispLoss (cite89†Wang and He, 2025 ) introduces representation-based objectives into the denoising process to accelerate convergence and improve sample fidelity. In video world models, LeJEPA adopts SigReg (cite90†Balestriero and LeCun, 2025 ) as a regularizer to prevent latent representation collapse and maintain informative dynamics.
+L92: However, existing studies mainly focus on improving representation quality during training, while the role of representation degradation in long-horizon autoregressive rollout remains unexplored.
+L93: ## 3 Core Observations: Error Accumulation Coupled with Representation Collapse and Limits of Data Scaling
+L94: 
+L95: ### 3.1 Preliminary: Auto-regressive Video Diffusion
+L96: #### Video Diffusion Model
+L97: 
+L98: Video diffusion models operate either directly on pixel-level inputs $\bm{x}\in\mathbb{R}^{L\times H\times W\times 3}$, or on a latent representation $\bm{z}=\mathcal{E}(\bm{x})$, where $\mathcal{E}(\cdot)$ is a pretrained variational autoencoder (VAE) encoder. The forward process gradually adds Gaussian noise to the input according to a variance schedule $\{\beta_{t}\}_{t=1}^{T}$:
+L99:  | $$q(\bm{z}_{t}|\bm{z}_{t-1})=\mathcal{N}(\bm{z}_{t};\sqrt{1-\beta_{t}}\bm{z}_{t-1},\beta_{t}\mathbf{I})$$  |  | (1)
+L100: 
+L101: The model learns to reverse this process by predicting the noise $\bm{\epsilon}_{\theta}$ at each step:
+L102: 
+L103:  | $$\mathcal{L}=\mathbb{E}_{t,\bm{\epsilon},\bm{z}}\left[\|\bm{\epsilon}-\bm{\epsilon}_{\theta}(\bm{z}_{t},t)\|_{2}^{2}\right]$$  |  | (2)
+L104: where $\bm{z}_{t}=\sqrt{\bar{\alpha}_{t}}\,\bm{z}_{0}+\sqrt{1-\bar{\alpha}_{t}}\,\bm{\epsilon}$ with $\bm{\epsilon}\sim\mathcal{N}(\mathbf{0},\mathbf{I})$.
+L105: 
+L106: At inference time, new videos are generated by starting from random noise $\bm{z}_{T}\sim\mathcal{N}(\mathbf{0},\mathbf{I})$ and iteratively denoising:
+L107: 
+L108:  | $$\bm{z}_{t-1}=\frac{1}{\sqrt{\alpha_{t}}}\!\left(\bm{z}_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{\alpha}_{t}}}\bm{\epsilon}_{\theta}(\bm{z}_{t},t)\right)+\sigma_{t}\bm{\epsilon}$$  |  | (3)
+L109: where $\alpha_{t}=1-\beta_{t}$ and $\bar{\alpha}_{t}=\prod_{s=1}^{t}\alpha_{s}$.
+L110: #### Diffusion Forcing
+L111: To enable long video generation, we apply the Diffusion Forcing (cite46†Chen et al., 2024a ) technique. During training, we randomly add noise to each frame in the entire input video sequence according to the diffusion schedule: $z^{i}_{t}=\sqrt{\bar{\alpha}_{t}}z^{i}_{0}+\sqrt{1-\bar{\alpha}_{t}}\epsilon^{i},\epsilon^{i}\sim\mathcal{N}(0,\mathbf{I})$, where $z^{i}_{t}$ represents the noised latent of the $i$-th frame, and the training objective for action-conditioned autoregressive video models become:
+L112:  | $\displaystyle\mathcal{L}_{\text{DF}}$  | $\displaystyle=\mathbb{E}_{[t],\bm{\epsilon},\mathbf{z},a}[\|\bm{\epsilon}-\bm{\epsilon}_{\theta}(\mathbf{z}_{[t]},[t],\bm{a})\|_{2}^{2}]$  |
+L113:  | $\displaystyle\bm{\epsilon}$  | $\displaystyle=\{\epsilon^{i}\}_{i=1}^{L},\mathbf{z}_{[t]}=\{z^{i}_{t}\}_{i=1}^{L}$  |
+L114: where $[t]$ is vector of $L$ timesteps with different $t\in[T]$ for each frame and $\bm{a}$ is an action sequence $\bm{a}\in\mathbb{R}^{L\times A}$. The noise prediction model $\bm{\epsilon}_{\theta}$ conditioned on both the action sequence $\bm{a}$ and noised frames $\mathbf{z}_{[t]}$.
+L115: ### 3.2 Error Accumulation Is Coupled with Representation Collapse
+L116: cite91†Image: Refer to caption Figure 2: Top row: Video frames sampled from a 40k-step checkpoint trained with the vanilla diffusion forcing method. Hidden states from DiT’s 7th layer are extracted to analyze the effective rank (Erank), which reveals a direct correlation between visual collapse and abrupt Erank reduction. Middle row: Samples generated by a 4k-step checkpoint under the same training scheme; stable Erank values are observed when video content remains coherent.
+L117: Bottom row: Identical experimental settings as the middle row, with frame quality quantified via normalized SSIM, PSNR and LPIPS.
+L118: A central finding of our work is that the abrupt onset of error accumulation during autoregressive video generation is intrinsically coupled with representation collapse in the underlying diffusion model. To quantify the fidelity of internal representations, we measure the effective rank (cite92†Roy and Vetterli, 2007 ) of the hidden states extracted from intermediate layers of the DiT backbone, which captures how many linearly independent directions are actively used by the model at each generation step.
+L119: As illustrated in Figure cite93†2 , there is a correspondence between the frame at which generated video quality suddenly drifts—manifesting as semantic incoherence or visual artifacts—and the frame at which the effective rank undergoes a sharp collapse. This suggests that the model’s internal representation loses its expressive capacity precisely when error accumulation becomes catastrophic.
+L120: To validate that effective rank is a uniquely informative indicator—and not merely one of many correlated signals—we also conduct a comparison against a suite of alternative diagnostics, including standard image quality metrics such as SSIM, PSNR and LPIPS. Crucially, none of these alternatives consistently pinpoints the collapse frame.
+L121: ### 3.3 More Data Cannot Cure Error Accumulation
+L122: Another central finding of our investigation is that naïvely scaling up the training set does not alleviate error accumulation in long video generation. Following the experimental protocol of VRag (cite72†Chen et al., 2026 ), we curate a dataset of 18,000 Minecraft gameplay sequences, each spanning 1,200 frames. We train a single epoch on this dataset—deliberately avoiding multiple passes to rule out overfitting—and save checkpoints at regular intervals throughout training.
+L123: For each checkpoint we perform long-video inference and measure the effective rank of the generated sequences as a proxy for temporal diversity and structural coherence.
+L124: Figure 3: We trained for one epoch on the 18k training set using the vanilla diffusion forcing method and calculated the Erank corresponding to these checkpoints. We observed that the Erank values at step 4000 and step 8000 are generally higher and maintain stability over longer durations. In contrast, increasing the number of training steps not only reduces the overall Erank but also accelerates its degradation during long-range reasoning.
+L125: The results are shown in Figure cite94†3 . Strikingly, the effective rank peaks after exposure to only $\sim$10% of the training data; every subsequent checkpoint exhibits a monotonic decline. The ability to leverage large-scale data for improved generalization has long been regarded as a defining strength of video generation models.
+L126: Our experiment challenges this assumption in the context of autoregressive generation: error accumulation is not a data-scarcity problem that can be remedied by collecting more trajectories. Instead, it reflects a structural limitation of the generation paradigm itself, motivating the architectural intervention we introduce in the following section.
+L127: ## 4 Video Representation Regularization
+L128: ### 4.1 Effective Rank Degradation in Long-term Training
+L129: 
+L130: Motivated by the observations in the previous section, our core objective is to improve the effective rank (erank) of the diffusion model over long-term training. Given a hidden state matrix $\mathbf{H}\in\mathbb{R}^{n\times d}$, erank is defined as
+L131: 
+L132:  | $$\text{erank}(\mathbf{H})=\exp\!\left(-\sum_{i=1}^{r}p_{i}\log p_{i}\right),\qquad p_{i}=\frac{\sigma_{i}(\mathbf{H})}{\displaystyle\sum_{j=1}^{r}\sigma_{j}(\mathbf{H})},$$  |  | (4)
+

@@ -1,0 +1,1091 @@
+        Finding the Most Diverse Products using Preference
+                             Queries
+
+                Orestis Gkorgkas1 , Akrivi Vlachou2 , Christos Doulkeridis3 and Kjetil Nørvåg1
+                          1
+                           Norwegian University of Science and Technology (NTNU), Trondheim, Norway
+                    2
+                        Institute for the Management of Information Systems, R.C. “Athena”, Athens, Greece
+                                               3
+                                                 University of Piraeus, Piraeus, Greece
+                                {orestis,vlachou,noervaag}@idi.ntnu.no, cdoulk@unipi.gr
+
+ABSTRACT                                                                                                  User Preferences:
+
+In this paper, given a product database and a set of cus-                                         User     w[1]     w[2]    w[3]   Top-k
+tomer preferences, we address the problem of discovering a                                        Bob      0.1      0.2     0.7    p1
+bounded set of r diverse products that attract the interests                                      Tom      0.1      0.3     0.6    p1
+of di↵erent customers. This problem finds numerous ap-                                            Jack     0.3      0.1     0.6    p2
+                                                                                                  Max      0.8      0.1     0.1    p3
+plications in electronic marketplaces, e.g., for selecting the
+products that are placed in the home page of an online shop.                                                    Products:
+Existing approaches to tackle this problem fall short because
+                                                                                             Product     p[1]     p[2]   p[3]   Reverse top-k
+they ignore customer preferences, and instead rely solely on
+                                                                                             p1          1        2      6      Bob,Tom
+products’ attributes. We model this problem as a diversity                                   p2          2        1      6      Jack
+problem, where each product is represented by its reverse                                    p3          6        5      2      Max
+top-k result set, and seek r products that maximize their
+diversity value. Since the problem is NP-hard, we employ                             Table 1: Example of product database and user pref-
+a greedy algorithm that takes as input the reverse top-k                             erences.
+result sets of all candidate products. To further improve
+performance, we also design a more efficient approximate
+algorithm that does not require the computation of all re-                           diverse products based on the user preferences. The goal is
+verse top-k sets. Our experimental evaluation demonstrates                           to find a set of products that are attractive to a wide range
+the performance of the proposed algorithms and quality of                            of customers with di↵erent preferences. For instance, con-
+the selected diverse products.                                                       sider an electronic marketplace that wishes to advertise r
+                                                                                     products on its front page aiming to attract as many new
+1.    INTRODUCTION                                                                   customers as possible. Advertising diverse products that
+   Top-k queries [17] help customers select a ranked set of k                        are attractive to di↵erent existing customers increases the
+products that best match their preferences out of an over-                           probability that a new customer finds one of those products
+whelmingly large collection of products. For a specific cus-                         attractive. The strategy of advertising the r most influential
+tomer, her preferences are expressed by means of a top-k                             products [22], i.e., the r products that attract the highest
+query, and highly ranked products in the top-k result are                            total number of customers, does not necessarily lead to a set
+more attractive to the customer. Thus, from the perspec-                             of diverse products and may fail to attract many new cus-
+tive of product sellers, the visibility and the potential market                     tomers, since such products may be attractive to customers
+of a product relates to the top-k queries for which the prod-                        with similar preferences.
+uct is highly ranked. Towards this direction, reverse top-k                             Consider for example the set of user preferences and prod-
+queries [20] retrieve the set of user preferences for which a                        ucts depicted in Table 1, where maximum values in prod-
+product appears in their top-k lists. Reverse top-k queries                          uct attributes are preferable. Assume that the goal is to
+are very important for estimating the impact of the product                          advertise two products for attracting new customers. Our
+on the market, as the cardinality of the result set defines                          proposed method selects the r = 2 most diverse products
+an influence score [22] for the product, i.e., the number of                         based on user preferences, which in our example is the set
+customers that value a particular product.                                           {p1 , p3 }. This set is more probable to attract more new cus-
+   In this paper, we study the problem of finding the r most                         tomers because p1 and p3 satisfy more diverse preferences.
+                                                                                     For example, a customer with similar preferences to Jack is
+                                                                                     highly probable to be attracted also to p1 , even though it is
+                                                                                     not the best option for her on the market. This is because
+                                                                                     both p1 and p2 satisfy users that have high preference for
+                                                                                     the third dimension (expressed with a high weight w[3]). On
+                                                                                     the other hand, p3 satisfies users that have totally diverse
+ c 2015, Copyright is with the authors. Published in Proc. 18th Inter-               preferences compared to p1 and p2 , namely users such as
+national Conference on Extending Database Technology (EDBT), March                   Max that prefer the first dimension.
+23-27, 2015, Brussels, Belgium: ISBN 978-3-89318-067-7, on OpenPro-
+ceedings.org. Distribution of this paper is permitted under the terms of the            In this paper, we introduce the problem of finding the
+Creative Commons license CC-by-nc-nd 4.0 .                                           r most diverse products based on user preferences. The
+
+
+
+                                                                               205                                   10.5441/002/edbt.2015.19
+user preferences are captured by the reverse top-k set of                for all user preferences. Thereafter, several papers have
+each product. We model this problem as a dispersion prob-                studied the problem of efficient reverse top-k computation.
+lem [15] using as distance function the dissimilarity of the             An efficient algorithm for the two-dimensional monochro-
+reverse top-k sets. In this sense, the set of r objects with the         matic reverse top-k that relies on a novel index was pro-
+maximum diversity is returned to the user. Consequently,                 posed in [4]. In [9], efficient evaluation of multiple top-k
+the selected objects are appealing to many di↵erent cus-                 queries is studied, which in turn enables the computation of
+tomers with dissimilar user preferences. Di↵erent from our               the reverse top-k set of a query point. The proposed method
+work, existing solutions for identifying diverse objects rely            avoids evaluating the top-k queries one-by-one by grouping
+solely on product attributes and largely overlook user pref-             similar queries and evaluate them in a batch. This approach
+erences [18]. On the other hand, approaches that identify r              is suitable for processing many reverse top-k queries at once.
+objects with high total number of customers [12, 22], often              An approach for processing a large number of continuous
+fail to discover truly diverse products that can be appealing            top-k queries has appeared in [27]. The proposed framework
+to new customers with di↵erent preferences than those of                 can be employed to process reverse top-k queries efficiently,
+the existing ones.                                                       however it requires to build an index over the k-th ranked ob-
+   To summarize the contributions of this paper are:                     jects of each query that results in high pre-processing cost.
+                                                                         Recently, a novel branch-and-bound algorithm for reverse
+     • We study the novel problem of finding the r most di-              top-k queries has appeared in [23], where both the object
+       verse products based on user preferences. We model                data sets and the preferences set are indexed using an R-
+       this problem as a dispersion problem and define an ap-            tree.
+       propriate distance function that captures the dissimi-               Product impact and visibility. Several papers have
+       larity of products based on their reverse top-k sets.             proposed methods that aim to quantify the impact of prod-
+     • As dispersion problems are known to be NP-hard [8],               ucts in the market. DADA [11] aims to help manufactures
+       we use a greedy algorithm that retrieves r diverse prod-          position their products in the market, based on three types
+       ucts, after computing the reverse top-k sets of the               of dominance relationship analysis queries. Creating com-
+       products efficiently.                                             petitive products has been studied in [24]. Customer iden-
+                                                                         tification and product positioning has been recently stud-
+     • To improve the performance of our algorithm, we pro-              ied in [2], where the attractiveness of a product is defined
+       pose an alternative algorithm that progressively com-             based on the concept of reverse skyline query. Nevertheless,
+       putes an approximation of the reverse top-k sets of a             in these approaches user preferences are expressed as data
+       limited set of candidate products and retrieves a set of          points that represent preferable products, whereas reverse
+       r products of high diversity.                                     top-k queries examine user preferences in terms of weighting
+                                                                         vectors. Miah et al. [14] study a di↵erent problem, namely
+     • We present maintenance techniques for updating the                how to select the subset of attributes that increases the visi-
+       r most diverse products in the case of dynamic data               bility of a new product. Product promotion is studied in [25,
+       in a cost-efficient way. In addition, we generalize our           26], where the aim is to find the most interesting regions for
+       approach to support any set-based similarity function.            promotion of a product. Only a few papers have proposed
+     • We demonstrate the efficiency and achieved diversity              methods for retrieving interesting products by using the re-
+       of our algorithms using both synthetic and real-life              verse top-k queries. In [22], the influence of a product is de-
+       data sets.                                                        fined as the size of its reverse top-k set. Then, an algorithm
+                                                                         was presented to efficiently retrieve the m most influential
+   The rest of this paper is organized as follows: Section 2             products. Discovering k products with maximum number
+reviews the related work. Section 3 provides the necessary               of customers has been studied in [12], where the number
+preliminaries, while in Section 4 we formally define the r-              of customers is estimated as the size of the reverse top-k
+Diversity problem. Thereafter, in Section 5, we present a                set. The problems studied in [12, 22] di↵er from the diver-
+greedy algorithm applied on the reverse top-k sets. In Sec-              sity problem studied in this paper. Both approaches focus
+tion 6, we provide a more efficient algorithm that iteratively           on maximizing the number of existing customers and ignore
+computes an approximation of the reverse top-k sets and re-              the similarity of the retrieved reverse top-k sets. These ap-
+fines the set of most diverse products. Section 7 addresses              proaches fail to take into account the fact that attracting
+the case of dynamic data, while Section 8 generalizes our                new customers requires promoting products that are attrac-
+approach for set-based similarity functions. The experimen-              tive to customers with diverse preferences. Koh et al. [10]
+tal evaluation is presented in Section 9 and we conclude in              consider as products packages consisting of multiple com-
+Section 10.                                                              ponents. They study the problem of creating and selecting
+                                                                         packages from an existing pool of components such that the
+2.    RELATED WORK                                                       number of potential customers is maximized. Similarly to
+                                                                         the aforementioned approaches the number of potential cus-
+  Reverse top-k queries. Vlachou et al. first introduced
+                                                                         tomers is estimated using reverse top-k sets, yet they do not
+the reverse top-k query in [20, 21]. Two versions of the
+                                                                         study the diversity of the result set.
+reverse top-k query were presented, namely monochromatic
+                                                                            Diversity in databases. Many approaches have been
+and bichromatic. Based on the geometrical properties of the
+                                                                         proposed for retrieving a set of diverse objects. Angel et
+monochromatic reverse top-k query, an algorithm for the two
+                                                                         al. [1] study the problem of retrieving k documents relevant
+dimensional case was proposed. For computing bichromatic
+                                                                         to a query q, but are also diverse with each other. The di-
+reverse top-k queries, an algorithm (called RTA) was pro-
+                                                                         versity is computed based on document similarity metrics.
+posed that exploits the fact that similar queries share com-
+                                                                         Drosou et al. [7] study the problem of finding the k most
+mon results, in order to avoid evaluating the top-k queries
+
+
+
+                                                                   206
+ Symbol        Description                                                  If we have a set of preferences W ✓ Rm over a set of
+ Rm            m-dimensional dataspace                                    products S ✓ Rm then for a given product q, we say that
+ S             Set of data objects                                        the result set of a reverse top-k query is a set RT OPk (q)
+ D             Subset of S (D ✓ S)                                        which consists of all the preference vectors w for which it
+ p,q           Data objects/products (p, q 2 S)
+                                                                          holds that q 2 T OPk (w).
+ W             Set of weighting vectors
+ w             A weighting vector (w 2 W )
+ fw            Preference function associated with w                         Definition 2. (Reverse top-k query [20]) Given a set
+ k             Value of top-k                                             of points S, a point p, and a set of vectors W we say that a
+ T OPk (w)     Top-k data objects based on w                              vector w belongs in the reverse top-k set RT OPk (p) of point
+ RT OPk (p)    Reverse top-k result set for object p                      p, if and only if 9q 2 T OPk (w) such that fw (p) fw (q).
+ cp            Centroid of vectors in set RT OPk (p)
+ d(p, q)       Cosine distance between centroids cp , cq                    We can also define the influence score of a data object p
+ d(u, v)       Cosine distance between vectors u, v                       as the cardinality of the set RT OPk (p). Table 2 provides an
+ div(D)        Diversity value of a set of objects D                      overview of the most basic symbols used in this paper.
+ D⇤            Optimal solution of the r-Diversity problem
+ Dr (S)        Approximate solution of the r-Diversity problem
+                                                                          4.   PROBLEM STATEMENT
+                                                                             Let p and q denote two products (data objects) from a
+              Table 2: Overview of symbols.                               product database S. Also, given a set W of customer prefer-
+                                                                          ences (weighting vectors) and an integer k, let RT OPk (p) ✓
+                                                                          W and RT OPk (q) ✓ W denote the reverse top-k sets of
+diverse objects in a continuous data stream. DivDB, a sys-
+                                                                          p and q respectively. We also define a distance function
+tem that provides query result diversification, was presented
+                                                                          d : S ⇥ S ! R+ as:
+in [19]. Result diversification based on dissimilarity is stud-
+                                                                                       d(p, q) = fd (RT OPk (p), RT OPk (q))
+ied also in [6]. Estimating the diversity of a set of points that
+                                                                          that determines the dissimilarity of any two objects p and q
+fulfill a special property has been studied mainly for select-
+                                                                          based on their corresponding reverse top-k sets. Notice that
+ing representative skyline points. For instance the diversity
+                                                                          this is a radically di↵erent approach from existing initiatives
+of two skyline points can be defined as the distance between
+                                                                          that define the distance of two objects based on the objects’
+them [16] or by using their sets of dominated points [13, 18].
+                                                                          attributes only.
+More specifically, in [16] the authors define the set of rep-
+                                                                             The problem of selecting the r most diverse products from
+resentative skyline to be a set of k objects that maximize
+                                                                          a given set S can be viewed as a dispersion problem [7, 8, 15,
+the minimum Euclidean distance between any two of the k
+                                                                          18], where the aim is to find r objects such that an objective
+points. In [13], the representative skyline points are defined
+                                                                          function of their distance d is optimized. The dispersion sum
+based on the distinct number of dominated points. Valka-
+                                                                          problem maximizes the sum of pairwise distances between
+nas et al. [18] estimate the diversity of two skyline points
+                                                                          the r selected products and it has been proved that it is
+by calculating the Jaccard distance of their respective sets
+                                                                          NP-hard by reduction from the clique problem [8].
+of dominated points. The main di↵erence to our work is
+that the definitions of diversity in the above approaches rely               Problem 1. (r-Diversity Problem). Given a set of
+on the attribute values only and cannot exploit the existing              data objects S and a distance function d measuring the dis-
+user preferences.                                                         similarity between two objects, the r-Diversity problem is to
+                                                                          identify a subset D⇤ ✓ S such that:
+                                                                                                           X
+3.   PRELIMINARIES                                                                          D⇤ = arg max        d(p, q)
+  Given a space Rm , we assume that we have a set of data                                           D✓S
+                                                                                                   |D|=r
+                                                                                                           p,q2D
+                                                                                                            p6=q
+objects S where each object p 2 S can be represented as an
+m-dimensional point p = {p[1], . . . , p[m]} where p[i] 2 R+ .
+                                                                             The remaining challenge is to define an appropriate func-
+Each point p can be regarded as an object of a database and
+                                                                          tion fd that captures the dissimilarity of the reverse top-k
+each dimension of the point as a specific numerical attribute.
+                                                                          result sets. Hence, the function fd takes as input two sets
+Without loss of generality, we assume that larger values are
+                                                                          of weighting vectors and computes their dissimilarity. We
+preferable.
+                                                                          employ a function that relies on the concept of a centroid of
+  Given a scoring function f : S ! R+ ,a top-k query re-
+                                                                          a set of vectors.
+turns the k objects of S with the best score. The scor-
+ing functions P  used more often, are linear functions of the
+                                                                             Definition 3. (centroid of RTOPk). Given a set of
+form f (p) = m     i=1 w[i]p[i] where w[i]  0. Such functions
+                                                                          data objects S, a set of weighting vectors W , and an object
+can be represented by an m-dimensional weighting vector
+                                                                          p 2 S such that RT OPk (p) 6= ;, we define as the centroid
+w = {w[1], . . . , w[m]}. In such cases we denote the function
+                                                                          of p the vector:
+that results from w as fw . When w represents the pref-                                              1           X
+erences of a user over the objects in S we call this vector                                cp =                      w
+                                                                                                |RT OPk (p)|
+preference vector or simply preference.                                                                      w2RT OPk (p)
+
+
+   Definition 1. (Top-k query [20]) Given a data set S ✓                    Since each RT OPk set corresponds to exactly one data
+Rm and a vector w 2 Rm the result set T OPk (w) of the                    point, the respective centroid corresponds to exactly one
+top-k query is a set of points such that T OPk (w) ✓ S,                   data point as well. Therefore each data point can be mapped
+|T OPk (w)| = k and 8p1 , p2 : p1 2 T OPk (w), p2 2 S                     to exactly one centroid vector and vice-versa.
+T OPk (w) it holds that fw (p1 ) fw (p2 )
+
+
+
+                                                                    207
+                1                                                              Definition 5. (Diversity value) Given a set of points
+                         w1                                                  S, a subset D ✓ S of size r, and set of vectors W , we define
+              0.8          w2
+                                   w3
+                                                                             as diversity of D:
+                              cp                                                                   2      X
+              0.6                                                                       div(D)=               (1 cos(cp , cq ))
+          y                                                                                     r(r 1) p,q2D
+              0.4                                                                                         p6=q
+
+                                                         w4
+              0.2
+                                                    cq        w5             5.    ALGORITHMS WITH CENTROID COM-
+                0
+                    0   0.2         0.4       0.6    0.8           1
+                                                                                   PUTATION
+                                          x                                     The process of discovering r diverse products Dr (S) from
+                                                                             a set of products S consists of two main steps: (1) iden-
+    Figure 1: Example of dissimilarity function.                             tifying a set C of candidate centroids that correspond to
+                                                                             candidate products for inclusion in the most diverse prod-
+                                                                             ucts (Section 5.1), and (2) selecting r of these candidates as
+   Definition 4. (Dissimilarity function fd ). Given a                       the most diverse products (Section 5.2).
+set of data objects S, a set of weighting vectors W , two ob-                   Each candidate centroid in cp 2 C corresponds to one
+jects p, q 2 S, and their respective centroids cp and cq , the               product p 2 S and is the centroid vector of the RT OPk (p)
+distance of p and q is defined based on the cosine similarity                set of p. More formally C = {cp |p 2 S, RT OPk (p) 6=
+of the centroids:                                                            ;, cp is centroid of RT OPk (p)}. Obviously, products that
+         fd (RT OPk (p), RT OPk (q)) = 1 cos(cp , cq )                       are not preferable for any customer are ignored.
+                                                                                Algorithm 1 describes the afore-described method and re-
+   The advantage of using the centroid cp instead of the ac-                 turns a set of r diverse products. In line 1, the candidate
+tual set of vectors RT OPk (p) is that the centroid is a com-                centroids C are computed using any of the methods that
+pact and accurate representation of the set, which in turn                   will be described in Section 5.1. As the set of centroids C
+allows efficient processing of the dissimilarity function, com-              may be large depending on the data distribution, a sample
+pared to other dissimilarity metrics that operate on sets of                 R of fixed size s is created by picking centroids uniformly at
+arbitrary size. As a result, we use d(p, q) = 1 cos(cp , cq )                random (line 2). Finally, in line 3, the second step entails
+as distance function in this paper1 .                                        solving the r-Diversity problem by applying a greedy algo-
+                                                                             rithm, called Diverse Product Selection Algorithm (DPSA),
+   Example 1. Figure 1 shows an example of the reverse                       on the sampled set of centroids R, as will be described in
+top-k sets RT OPk (p) = {w1 , w2 , w3 } and RT OPk (q) =                     Section 5.2.
+{w4 , w5 }, which belong to products p and q respectively. In
+the Euclidean space, a linear top-k query can be represented                 Algorithm 1 r-Diverse Products
+by a vector w [20, 21]. The magnitude of the query vector                    Input: S: set of products
+does not influence the query result, as long as the direction                       W : set of weighting vectors
+remains theP  same, therefore without loss of generality we as-                     k: value of top-k and reverse top-k
+               m
+sume that      i=1 w[i] = 1. In the 2-dimensional space, all                        s : size of initial sample
+weighting vectors belong to the line as depicted in Figure 1.                       r : required number of diverse products
+Moreover, top-k queries defined by similar weighting vec-                    Output: Dr (S): the set of r most diverse products of S
+tors w are expected to produce similar result sets [20, 21].
+Thus, the weighting vectors of the reverse top-k set of p are                 1: C    CandidateCentroids(S, W , k)
+expected to lie nearby on the line. Furthermore, for a hypo-                  2: R random subset of C with |R| = s
+thetical weighting vector which lies on the line between w1                   3: Dr (S)  DPSA(C, R, r)
+and w3 , it is expected that p is highly ranked, and therefore it             4: return Dr (S)
+is highly probable that this vector would belong to the reverse
+top-k set of p.
+
+   The centroid of the weighting vectors captures the above                  5.1   Retrieving the Candidate Centroids
+intuitions, and the angle between two centroids represents                      Di↵erent alternatives exist in order to compute the set C
+the dissimilarity of the weighting vectors. Obviously, di↵er-                of candidate centroids. In the following, we present three
+ent functions for set dissimilarity (hence also for measuring                alternative methods for determining the set C. Notice that
+distance) are supported by our approach, including (for in-                  all methods produce an identical set C of centroids.
+stance) the Jaccard similarity of the reverse top-k sets. Nev-                  The most straightforward method is to perform a reverse
+ertheless, the Jaccard similarity fails to capture the locality              top-k query for each product p in S and compute the cen-
+of the weighting vectors.                                                    troid vector of each set RT OPk (p) using Definition 3. We
+   Furthermore, we define the diversity div(D) of a set of                   denote this approach Rtopk . Its processing cost is basically
+objects D ✓ S. Notice that the set D⇤ with the highest                       determined by the computation of |S| reverse top-k queries.
+diversity value div(D⇤ ) among all r-sets of points in S, is the             Since any existing algorithm for reverse top-k processing can
+optimal solution for Problem 1. The diversity value div(D)                   be employed for the underlying reverse top-k computation,
+is normalized in [0,1].                                                      this method is quite generic.
+1
+  In a slight abuse of notation, we also use d(u, v) = 1                        An improvement of the first method is derived based on
+cos(u, v) to denote the cosine distance between any two vec-                 the observation that some products have empty reverse top-
+tors u and w.                                                                k sets (i.e., they do not belong to the top-k result of any
+
+
+
+                                                                       208
+weighting vector). Hence, it is possible to avoid processing             Algorithm 2 Diverse Product Selection Algorithm DPSA()
+some reverse top-k sets. To achieve this, we exploit the pro-            Input: C : set of candidate centroids
+gressive result generation of the algorithm in [22], which is                   R : sample of C
+able to retrieve objects in decreasing order of the sizes of                    r : required number of diverse products
+their reverse top-k sets. We denote this method as Itopk                 Output: Dr (S): the set of r most diverse products of S
+based on the fact that the algorithm [22] has been proposed
+for retrieval of influential objects. As a result, we avoid pro-          1: cp1 , cp2        cp1 , cp2 : 8cpi , cpj 2 R : d(cp1 , cp2 )
+cessing a reverse top-k query for objects with empty reverse                 d(cpi , cpj )
+top-k sets, thus improving the performance of Rtopk .                     2: C      C {p1 , p2 }
+   The third method exploits the observation that it may be               3: Dr (S)       {p1 , p2 }
+more efficient to process all top-k queries, instead of pro-              4: while |Dr (S)| <⇣ r do
+cessing multiple reverse top-k queries. Thus, we perform a                                          P                       ⌘
+                                                                                                                   0
+                                                                          5:   cq = arg max            p2Dr (S) d(cq , cp )
+top-k query for each preference vector w 2 W , which makes                               c0q 2C
+straightforward the computation of the reverse top-k sets of                                          S
+                                                                          6:   Dr (S)         Dr (S) {q}
+any data object, and hence also their respective centroids.               7:   C       C {q}
+In fact, the top-k sets do not need to be maintained until all            8: end while
+top-k queries have been processed, but instead the centroids              9: return Dr (S)
+can be calculated progressively. For each retrieved object in
+the top-k result set, the centroid is updated by adding the
+new vector w to its previous centroid, while also the number
+of vectors per object is maintained. After finishing all top-k           ucts (seeds) has a cost O(|R|2 ) = O(s2 ). The remaining
+queries, for each centroid the coordinates are divided by the            part of the algorithm has a cost of O(r2 |C|) and therefore
+cardinality of the reverse top-k set. Since top-k queries for            the total cost is equal to O(s2 + r2 |C|). If no sample is used
+all vectors in W are processed, we call this method all top-k,           (s = |C|) in the seed selection then the algorithm will have
+i.e., Atopk . An advantage of Atopk is that the processing               a cost of O(|C|2 ).
+cost in terms of top-k evaluations is fixed, namely |W | top-k             Implementation details. In each loop iteration of the
+queries, in contrast to Rtopk and Itopk where in the worst               DPSA algorithm (lines 4-8), the algorithm calculates the
+case the top-k evaluations can be up to |W | · |S|. Thus, the            sum of distances between a centroid vector cq 2 C Dr (S)
+efficiency of Atopk is influenced slightly by the cardinality            and the centroid vectors in Dr (S). As described above this
+of S, in contrast to Rtopk which computes the reverse top-k              procedure has a cost of O(r2 |C|). In the case of the cosine
+set even for products with empty reverse top-k sets.                     distance we can reduce this cost to O(r|C|) by exploiting the
+                                                                         properties of the cosine function. As shown in Equation 1
+                                                                         the sum of distances of cq to all centroids in Dr (S) is equal
+5.2    Diverse Product Selection Algorithm                                             c0q
+   After having computed the centroid vectors of all non-                to |Dr(S) |         · cDr (S) . In that way it is only necessary to
+                                                                                      |c0q |
+empty reverse top-k sets, the next step is to find the r most
+                                                                         calculate the centroid of Dr (S) before each loop iteration.
+diverse centroids and the products that they represent. As
+already mentioned, the r-Diversity problem is defined as a                        X                           X
+dispersion problem that is known to be NP-hard [8]. Thus,                                  d(c0q , cp ) =              1    cos(c0q , cp )
+computing the optimal solution for the r-Diversity problem                      p2Dr (S)                    p2Dr (S)
+is not feasible even for relatively small data sets. Hence,                                                                 c0q         X         cp
+we employ an algorithm that efficiently computes an ap-                                               = |Dr (S)|                  ·                      (1)
+proximate solution of high quality [5]. More specifically, we                                                              |c0q |                |cp |
+                                                                                                                                      p2Dr (S)
+use a greedy algorithm, called Diverse Product Selection Al-                                                                c0q
+gorithm (DPSA), that iteratively selects the next centroid                                            = |Dr (S)|                  · cDr (S)
+                                                                                                                           |c0q |
+that maximizes the value of the objective function. Its pseu-
+docode is depicted in Algorithm 2.
+   Description. The algorithm takes as input the set of can-             6.    SELECTIVE TOP-K ALGORITHM
+didate centroids C, a random sample set R of the candidate                  The main drawback of the previous algorithm is that it
+centroids that is going to be used, and an integer r which is            requires the computation of all centroids, which has a sig-
+the desired number of most diverse products. It returns an               nificant processing cost regardless of the employed method
+approximate set Dr (S) of the r most diverse products and                for candidate centroid computation. In particular, depend-
+their centroids. The sample R is typically much smaller in               ing on the cardinality of W and S, the computation of the
+size than C, in order to reduce the cost of the first part of            centroids may be time-consuming. In order to alleviate this
+the algorithm, which is to find the two most distant vectors             shortcoming, in this section, we propose a method that fuses
+in R (line 2) and add them to the result set Dr (S) (line 3).            the centroid computation with the selection of diverse ob-
+Then, the algorithm iteratively selects the next centroid cq             jects. Our goal is to efficiently compute an approximation
+until r centroids have been retrieved (loop in line 4). Each             of the centroids (by evaluating only a handful of carefully
+time, the selected centroid is the one that maximizes the                selected top-k queries), which is sufficient to produce a set
+sum of distances from the already selected most diverse vec-             of r products with high diversity.
+tors Dr (S). Notice that R is used only for the initialization
+of Dr (S) (line 3), while the remaing centroids are selected             6.1    Centroid Approximation
+from C.                                                                    Conceptually, the proposed algorithm uses a series of iter-
+   Complexity. The selection of the two most diverse prod-               ations, where each iteration consists of three parts: (1) select
+
+
+
+                                                                   209
+a weighting vector wi in order to process the top-k query              Algorithm 3 Selective Top-k Algorithm
+it defines, (2) compute an approximation of the centroid-set           Input: S: set of products
+based on the results of all already processed top-k queries,                  W : set of weighting vectors
+and (3) select diverse products by invoking the DPSA algo-                    k: value of top-k and reverse top-k
+rithm (Section 5.2) with input the approximate centroid-set.                  s : size of initial sample
+In each iteration, a top-k query based on wi is executed.                     r : required number of diverse products
+Some objects p 2 T OPk (wi ) may not have been retrieved                      steps : number of iterations (steps r)
+before and those are added to the centroid-set. For the re-            Output: Dr (S): the set of r most diverse products of S
+maining objects p 2 T OPk (wi ) the approximate centroid is
+updated, since wi is added to their reverse top-k sets. In              1: W 0 random subset of W with |W 0 | = s
+fact, the reverse top-k sets are not maintained, but the cen-           2: w1 , w2       w1 , w2 : 8wi , wj 2 W 0 : d(w1 , w2 )
+troid of an object is computed progressively as in the case                d(wi , wj )
+of Atopk . Thus, in each iteration the centroid-set is only an                                         S
+                                                                        3: Cb    ComputeCentroids( x=1,2 T OPk (wx ))
+approximation of the candidate centroids C computed by
+                                                                        4: Dr (S)      DPSA(C, b C,
+                                                                                                 b 2)
+Algorithm 1 because (a) C may contain more centroids as
+some objects may not have been retrieved yet and (b) the                5: i = 2
+centroids of an object p are estimated based on a limited               6: while i < steps do
+set of top-k queries only. However, in each iteration, the              7:    i++             ⇣P                    ⌘
+candidate-set is enriched with the results of the next top-             8:    wi = arg max       p2Dr (S) d(cp , w)
+                                                                                       w2W
+k query. Additionally, a set of r diverse products Dr (S)                                                S
+is computed based on the current set of centroids. Finally,             9:    Cb    ComputeCentroids( x=1...i T OPk (wx ))
+the selection of the next weighting vector to be processed             10:     Dr (S)    DPSA( b C, b
+                                                                                                    C, min(i + 1, r))
+is based on maximizing the sum of distances to the set of              11: end while
+centroids defined by Dr (S).                                           12: return Dr (S)
+   The main idea of our algorithm is that the maximum
+cosine distance (i.e., maximum diversity) of two objects is
+bounded by the maximum cosine distance of any two weight-              placed in Dr (S) (line 4). Note that Cb is much smaller than
+ing vectors. Let us assume that w1 and w2 are the two                  C, thus DPSA algorithm is applied on Cb and no random
+weighting vectors with the maximum cosine distance (the                sample is required.
+most diverse). Let us further assume that there exist two                 In each iteration, the most dissimilar weighting vector wi
+products p1 and p2 for which holds: RT OPk (p1 ) = {w1 }               to the centroid vectors cp (p 2 Dr (S)) is selected (line 8).
+and RT OPk (p2 ) = {w2 }. Then, it holds that for 2-Diversity          For this wi , the respective top-k query is executed and the
+problem the optimal solution is {p1 , p2 } and their diversity         candidate list Cb is updated as before (line 9). Then, the
+equals to 1 cos(w1 , w2 ), since cpi = wi . If more weight-            DPSA algorithm is invoked again to produce a new set of
+ing vectors belong to RT OPk (p1 ) then the diversity between          diverse products (line 10). The same procedure is repeated
+{p1 , p2 } decreases. Therefore, our algorithm starts by eval-         for at least r steps. Notice that when the iteration counter i
+uating the top-k queries for the most diverse weighting vec-           is smaller than r, the algorithm produces i diverse products,
+tors. In each step, the most diverse weighting vector to the           and only when i becomes greater than r does the algorithm
+current most diverse centroids is selected, as each centroid           return r diverse products.
+may summarize several weighting vectors.                                  In order to improve further the approximation of the cen-
+                                                                       troids more iterations can be applied. The number of itera-
+6.2   Algorithmic Description                                          tions (steps) is a system parameter that captures an interest-
+   Algorithm 3 shows the pseudocode of the proposed algo-              ing trade-o↵ between the diversity of the result set and the
+rithm that uses a limited set of top-k queries only. We call           processing time. Small values of steps increase the efficiency
+this algorithm Selective Top-k Algorithm and denote it with            of the algorithm by reducing its processing time. In the ex-
+Stopk .                                                                perimental evaluation, we demonstrate that a small number
+   Description. The first major di↵erence to Algorithm 1               of iterations is sufficient to produce results with diversity
+is that the initial centroid computation is avoided. First,            comparable to that of Algorithm 1, with significantly lower
+the algorithm computes a random sample W 0 (of size s) of              processing cost. Notice that in the extreme case that the
+W (line 1) and the two most dissimilar weighting vectors               number of iterations of Stopk is set equal to the cardinality
+w1 and w2 of W 0 are selected (line 2). Notice that the                of W and also no sampling is used (s = |W |), the set of di-
+sample W 0 is produced uniformly at random, thus it follows            verse products and number of required top-k queries will be
+the distribution of W and is used only for the initialization          the identical with Atopk . Nevertheless, in this case, Stopk
+of b
+   C. Applying the initialization step on W would result               will have the computational overhead of applying multiple
+in a cost of O(|W |2 ), while with the sample it is reduced            times the DPSA algorithm and finding the diverse weighting
+to O(|W 0 |2 ). Next, the top-k queries for w1 and w2 are              vectors.
+processed and from the resulting merged set of products a
+set Cb of centroids is computed (line 3). Notice that Cb is               Example 2. Table 3 shows an example of the execution
+computed based solely on the products retrieved thus far by            of Stopk for r = 2. We assume that in the initialization
+the two top-k queries. These centroids form the candidate              step vectors w1 and w2 are selected. Furthermore (assum-
+set for finding the most diverse products. In the following            ing k = 3), the top-3 results for the selected vectors are
+step, the Algorithm 2 is invoked with input the candidate              depicted. After the initialization step, the sets of approxi-
+set, and the two most diverse products are retrieved and               mate centroids Cb contains 5 centroids (namely cp1 , ..., cp5 ),
+
+
+
+                                                                 210
+     Initialization step:                                                   In order to support product insertions efficiently, we ex-
+     T OPk (w1 ) = p1 , p2 , p3 , T OPk (w2 ) = p2 , p4 , p5             ploit the top-k queries that where computed during the com-
+     cp1 = w1 , cp2 = 12 (w1 + w2 ),                                     putation of bC. Let W ⇤ be the set of weighting vectors for
+     c p3 = w 1 , c p4 = w 2 , c p5 = w 2                                which the top-k queries have been computed. We main-
+     First step:                                                         tain for each weighting vector w 2 W ⇤ the score of the
+     T OPk (w3 ) = p3 , p4 , p5                                          k-th product. When a new product pnew is inserted in the
+     cp1 = w1 , cp2 = 12 (w1 + w2 ), cp3 = 21 (w1 + w3 )                 database, we check for each query w 2 W ⇤ if pnew has a
+     cp4 = 12 (w2 + w3 ), cp5 = 12 (w2 + w3 )                            better score than the k-th product. If this does not occur
+     Second step:                                                        for any w 2 W ⇤ , we can safely ignore pnew , as it does not af-
+                                                                         fect the determination of the diverse products. On the other
+     T OPk (w4 ) = p1 , p2 , p6
+                                                                         hand, if pnew becomes top-k for some weighting vector w,
+     cp1 = 12 (w1 + w4 ), cp2 = 13 (w1 + w2 + w4 ),
+                                                                         we compute the new centroids only for the a↵ected products
+     cp3 = 12 (w1 + w3 ), cp4 = 12 (w2 + w3 ),
+                                                                         (i.e., pnew and the products pi that used to be at the k-th
+     cp5 = 12 (w2 + w3 ), cp6 = w4
+                                                                         rank, but were evicted by pnew ) and update the set b    C. We
+                                                                         then apply DPSA algorithm on C    b and produce a new set of
+               Table 3: Example of Stopk .                               diverse products. Note that in the first case, we can ensure
+                                                                         that the result set is the same as in the case where Stopk
+                                                                         would be executed on the updated data set, but this does
+which correspond to the data points that have been retrieved             not hold for the second case. The similarity of the centroids
+by at least one top-k query. Algorithm 2 is applied on Cb and            before and after the update can be used in order to decide
+we assume that cp1 and cp4 as the two most diverse vectors.              when the Stopk algorithm should be invoked to have a result
+In the first iteration of Stopk , the most diverse (according to         set of higher quality.
+cp1 and cp4 ) weighting vector of W is selected. In this step,              In order to be able to handle new preferences e↵ectively,
+w3 is selected and the approximate centroids Cb are updated              during the computation of the diverse product we main-
+based on T OPk (w3 ) as depicted in Table 3. Again, Algo-                tain the minimum (min) of all maximal sums of distances
+rithm 2 is applied on Cb and cp1 and cp4 are identified as               between a centroid and any selected weighting vector (i.e.,
+the two most diverse vectors. Stopk continues with a second              the expression in line 8 of Algorithm 3). In the case of a
+                                                                         new weighting vector wnew , we follow the same principle as
+iteration by evaluating w4 . In this step, cp6 is added to Cb as
+                                                                         Algorithm 3 to decide whether
+                                                                                                  P        the respective top-k query
+it belongs to T OPk (w4 ). Again Algorithm 2 will be invoked
+                                                                         should be evaluated. If p2Dr (S) d(cp , wnew ) is larger than
+and the most dissimilar weighting vector of W will be se-
+lected. The same procedure continues until steps iterations              min, then the top-k query for wnew is computed, the set
+                                                                         of centroids Cb updated and DPSA algorithm is executed
+has been executed.
+                                                                         on C b to produce a new set of diverse products. Intuitively,
+   Complexity. To perform a cost analysis of the algo-                   when vector wnew induces small changes to the set of cen-
+rithm, we need to identify its basic cost factors. These fac-            troids, we do not need to recompute the r-diverse products
+tors include the initial computation of the two most dis-                as wnew would not have been selected by Stopk in any case.
+similar vectors (O(s2 )), the processing cost of steps top-k             Again, the retrieved diverse products are not the same as if
+queries, the cost of determining the next most dissimilar                Stopk would be executed on the updated weighting vector
+weighting vector (O(steps · r · |W |)) (line 8), and the cost            set, therefore a threshold on the similarity of the centroids
+induced by invoking the DPSA algorithm steps times. The                  before and after the update may trigger executing Stopk to
+cost of processing steps top-k queries will always be much               get a set of higher quality.
+cheaper than Algorithm 1, which needs to process W top-
+k queries (in the case of Atopk ) to perform the centroid                8.   SUPPORTING OTHER SET-BASED SIM-
+computation. It should also be noted that the calls to the                    ILARITY FUNCTIONS
+DPSA algorithm are much cheaper, because it operates on
+ b which is much smaller than C. Overall, the cost of the                   In general, our approach is applicable also for other func-
+C
+                                                                         tions that compute the similarity between sets of vectors.
+algorithm is s2 + steps · r · |W |, since these are the dominant
+                                                                         In such a case, our algorithms would not calculate centroids
+cost factors, and the complexity is linear with respect to W
+                                                                         (which is simply a representation of a set of weighting vec-
+(O(steps · r · |W |)), when steps is small (r is typically small
+                                                                         tors), but would instead directly operate on the reverse top-
+anyway).
+                                                                         k sets of products. Following this line of thought, Ĉ would
+                                                                         represent a set of approximate reverse top-k sets (instead
+7.   MAINTENANCE                                                         of a set of centroids) and the computation of the most di-
+  In this section, we present techniques for maintaining the             verse sets becomes independent of the similarity or distance
+diverse set of products in the case of dynamic data. In fact,            function.
+the methodology of Stopk (Algorithm 3) can be applied to                    In more technical terms, Algorithm 1 would not calcu-
+maintain the r-diverse products. We consider two cases: (1)              late centroids but would only maintain the reverse top-k
+new products are inserted in the product database, and (2)               sets, and Algorithm 3 would not compute centroids incre-
+new preferences (in the form of weighting vectors) are added             mentally but would simply update the approximate reverse
+in the customer preference database. Both cases actually                 top-k sets of products based on the executed top-k queries.
+occur in online shops, when new products appear in the                   Then, Algorithm 2 can be directly applied to the reverse
+market and new customer preferences are extracted from                   top-k sets.
+social sites.                                                               For instance, one popular similarity function is the Jac-
+
+
+
+                                                                   211
+ Parameter            Values
+                                                                          the percentage of an American family’s annual income spent
+                      UN, CO, AC, CL
+ Datasets                                                                 on 6 types of expenditure: gas, electricity, water, heating,
+                      NBA, HOUSE
+                      1K, 5K, 10K          (Diversity Quality)            insurance, and property tax. For the data set W of the
+                      5K, 10K, 30K         (Scalability Analysis)         weighting vectors, we used a uniform (UN) distribution.
+ Data cardinality
+                      100K, 200K, 500K     (Sensitivity Analysis)
+                      17265, 127930        (Real Datasets)                   Algorithms. We implemented the three algorithms for
+                      1K, 5K, 10K          (Diversity Quality)            centroid computation (Rtopk , Itopk , and Atopk ) coupled
+ Weight cardinality   5K, 10K, 30K         (Scalability Analysis)         with the DPSA algorithm as described in Section 5, and
+                      100K, 200K, 500K     (Sensitivity Analysis)
+                      100K, 200K, 500K     (Real Datasets)
+                                                                          the selective top-k algorithm (Stopk ) described in Section 6.
+                      3, 4, 5              (Diversity Quality)            We also implemented an exact algorithm (denoted opt) that
+ # results(r)         10                   (Scalability Analysis)         finds the optimal solution, but obviously cannot scale well.
+                      5, 10, 30            (Sensitivity Analysis)         For reverse top-k processing, Rtopk uses the state-of-the-art
+                      5, 10, 30            (Real Datasets)
+                      10, 20               (Diversity Quality)            BBR* algorithm [23], while Itopk uses the BB algorithm [22].
+                      5, 10, 30, 50        (Scalability Analysis)         In all algorithms the data set is indexed by an R-tree and
+ # top-k results(k)
+                      5, 10, 30, 50        (Sensitivity Analysis)         for the top-k query processing we employ a state-of-the-art
+                      5, 10, 30, 50        (Real Datasets)
+                      3                    (Diversity Quality)
+                                                                          branch-and-bound algorithm [17].
+ # dimensions(m)      3                    (Scalability Analysis)            Metrics. The metrics under which we evaluated the
+                      3, 4, 5, 6           (Sensitivity Analysis)         implemented algorithms were: (a) execution time required
+                                                                          by each algorithm, (b) I/O accesses, (c) achieved diversity
+                                                                          values. We also measured the number of processed top-k
+     Table 4: Parameters (default values in bold).                        queries, but in the interest of space we do not report them
+                                                                          since they follow exactly the I/O metric. We measure only
+                                                                          the I/O induced on the data set S, since the I/O on W are
+card similarity, which is defined as the size of the intersection         caused by sequential access and accessing data sequentially
+divided by the size of the union of two sets. Our approach                is much faster than the random accesses of S.
+readily supports the Jaccard similarity on reverse top-k sets,               We conduct an experimental study varying the parameters
+as outlined above. Notice that the advantage of the cosine                of dimensionality (3-6), cardinality (1K-500K) of S, cardi-
+similarity compared to Jaccard for the problem of finding di-             nality (1K-500K) of W , value of k (5-50), value of r (3-30),
+verse products is that it returns more fine-grained similarity            sample size |W 0 | (0.001|W |-0.1|W |), and number of steps
+values. For example, in the case of disjoint sets, the Jaccard            (100-1000). Each experiment was repeated 10 times over
+similarity value equals to zero, and does not distinguish be-             di↵erent instances of the data sets with the same parame-
+tween the sets. Instead, the cosine similarity of the centroid            ters and di↵erent seed to the random generator, in order to
+vectors allows us to distinguish between them by returning                factor out the e↵ect of randomization. Average values are
+a non-zero value. Moreover in the case of a set A that is                 reported in all cases.
+a subset of another set B (A ✓ B), the Jaccard similar-                      Evaluation methodology. Our evaluation was divided
+ity is equal to |B||B||A| which can get arbitrarily close to the          in three parts. In the first part (9.1), we compare the algo-
+maximum value. In such cases, using the Jaccard similarity                rithms Atopk and Stopk against the exact algorithm (opt)
+would not be helpful, as it could lead to selecting products              in order to evaluate the quality of approximation of diver-
+which are possibly covered by others. The centroid vectors                sity. In the second part (9.2), we evaluate the performance
+reduce this problem (they do not eliminate it) by choosing                of Stopk against the algorithms that rely on centroid compu-
+sets that are selected by distant user preferences.                       tation (Rtopk , Itopk , and Atopk ). In the last part (9.3 and
+                                                                          9.4), we perform a thorough sensitivity analysis of Atopk
+9.    EXPERIMENTAL EVALUATION                                             (which proved to perform best among the algorithms with
+                                                                          centroid computation) against Stopk . We should stress that
+   In this section, we present the results of the experimen-
+                                                                          the diversity of the result set of Stopk is calculated using the
+tal evaluation. All algorithms were implemented in Java
+                                                                          whole set of preferences W , and not only the vectors used
+and the experiments run on 2x Intel Xeon X5650 Processors
+                                                                          for the identification of the most diverse products.
+(2.66GHz). The algorithms are disk-based and the index
+structure used was an R-tree with a bu↵er size of 100 blocks
+and the block size is 4KB. The main parameters and values
+used through the experiments are presented in Table 4.                    9.1    Quality of Diversity
+   Data sets. For the data set S, we use both synthetic and                 The purpose of this series of experiments is to study the
+real data. We examine four di↵erent synthetic data distri-                loss of diversity compared to optimal solution when using
+butions, namely uniform (UN), correlated (CO), anticorre-                 our algorithms Atopk and Stopk . Thus, we compare to
+lated (AC) and clustered (CL). For the uniform data set, the              the optimal diversity produced by an exact algorithm (opt),
+data object values for all m dimensions are generated inde-               which examines all possible |S|  r
+                                                                                                               combinations of products
+pendently using a uniform distribution. The correlated and                exhaustively to find the optimal solution. Recall that Rtopk
+anticorrelated data sets are generated as described in [3].               and Itopk produce exactly the same result set as Atopk and
+The clustered data set was created as follows: first 5 cluster            therefore have also the same diversity. The default setup for
+centroids were selected randomly. Then, each coordinate is                this series of experiments was: m=3, |S| = 5K, |W | = 5K,
+generated on the m-dimensional space by following a nor-                  k = 10, r = 5, s = 0.1 · |W |, steps = 100, S:UN, and W :UN.
+mal distribution on each axis with variance S2 = 0.345, and                 Figure 2 depicts the diversity values for varying di↵er-
+a mean equal to the corresponding coordinate of the cen-                  ent parameters, namely |S|, |W |, r and k. The diversity
+troid. In addition, we use a real data set. HOUSE (House-                 achieved by the greedy algorithm (Atopk ) is in most cases
+hold) consists of 127930 6-dimensional tuples, representing               quite close to optimal, while Stopk results in similar diver-
+
+
+
+                                                                    212
+                          Stopk          Atopk             opt                Stopk         Atopk         opt                                         Stopk         Itopk                  Stopk         Itopk
+                                                                                                                                                      Atopk        Rtopk                   Atopk        Rtopk
+                          1                                                   1
+                                                                                                                                               1000
+
+
+
+
+                                                                                                                            total time (sec)
+                                                                                                                                                                                      60
+                         0.8                                                 0.8
+                                                                                                                                               100
+
+       diversity                                                 diversity
+                                                                                                                                                                                      50
+                         0.6                                                 0.6                                                                                                      40
+                                                                                                                                                10
+                         0.4                                                 0.4                                                                                                 IO   30
+                                                                                                                                                 1
+                                                                                                                                                                                      20
+                         0.2                                                 0.2                                                                0.1                                   10
+                          0                                                   0                                                                0.01                                    0
+                                    1K       5K           10K                          1K       5K       10K                                            5     10       30   50               5     10       30   50
+                                    Data Cardinality                                  Weight Cardinality                                                           k                                    k
+                               (a) Varying |S|                                    (b) Varying |W |                                                     (a) Time                               (b) I/O
+                          Stopk          Atopk             opt                Stopk         Atopk         opt
+                          1                                                   1
+                                                                                                                                               Figure 4: Performance when varying k.
+                         0.8                                                 0.8
+
+
+       diversity                                                 diversity
+                         0.6                                                 0.6
+                         0.4                                                 0.4
+                         0.2                                                 0.2
+                          0                                                   0
+                                                                                                                      reverse top-k query or a small number of influential points
+                                     5       10
+                                                 k
+                                                          20                            3           4
+                                                                                                    r
+                                                                                                          5
+                                                                                                                      is needed, they are less efficient when they are run repeat-
+                                (c) Varying k                                      (d) Varying r                      edly multiple times. In this case, Atopk has a benefit and
+                                                                                                                      performs better. In particular, Rtopk has no memory of the
+                                                                                                                      completed executions for di↵erent queries, and therefore it
+ Figure 2: Comparison to optimal diversity value.                                                                     computes repeatedly the top-k results of many preference
+                                  Stopk           Itopk                             Stopk        Itopk
+                                                                                                                      vectors. On the other hand, Itopk performs fewer reverse
+                                  Atopk          Rtopk                              Atopk       Rtopk
+                                                                                                                      top-k queries than Rtopk , but shares the same shortcoming
+
+
+      total time (sec)
+                         100
+                                                                             40
+                                                                             35                                       for those reverse top-k queries that it processes. Therefore,
+                                                                             30
+                          10
+                                                                 IO
+                                                                             25                                       it faces the same problem as the Rtopk , however in not such
+                           1                                                 20
+
+                          0.1
+                                                                             15
+                                                                             10
+                                                                                                                      great extent. Similar conclusions are drawn when varying
+                         0.01
+                                                                              5
+                                                                              0                                       the data cardinality |S|. The performance of the algorithms
+                                     5K      10K          30K                          5K      10K       30K
+                                   Weight Cardinality                                 Weight Cardinality              is much less a↵ected by the increase of data cardinality, as
+                                   (a) Time                                            (b) I/O                        during the execution of the top-k queries very few data ob-
+                                                                                                                      jects are accessed.
+                                                                                                                         Varying k. Figure 4 illustrates the e↵ect of varying pa-
+               Figure 3: Performance when varying |W |.                                                               rameter k. Atopk consistently outperforms Rtopk and Itopk
+                                                                                                                      in terms of time, while Stopk improves further the perfor-
+                                                                                                                      mance in terms of both time and I/O. Atopk , Rtopk and
+sity values. As we can observe, our approximate algorithms
+                                                                                                                      Itopk have the same performance in terms of I/O due to
+perform very well in comparison with the exact algorithm.
+                                                                                                                      the R-tree bu↵er employed during query processing. Fur-
+In the worst case, when the size of the objects data set is only
+                                                                                                                      thermore, for all algorithms, both time and I/O increase for
+|S|=1000 objects (Figure 2(a)), the maximum di↵erence in
+                                                                                                                      increasing values of k.
+diversity is 19%. As the datasets grow in size, the diversity
+                                                                                                                         Since Atopk consistently outperforms the two other algo-
+of the result set of the approximate algorithms approaches
+                                                                                                                      rithms (Rtopk and Itopk ) that rely on centroid computation,
+the optimal diversity. It is noteworthy that as the number
+                                                                                                                      we use only Atopk in the remaining experiments as repre-
+of returned objects (r) increases, the diversity value drops.
+                                                                                                                      sentative of this family of algorithms.
+This behavior is expected as the more points we select the
+smaller their average distance will become.
+   We omit the figures comparing the performance of our                                                               9.3                      Sensitivity Analysis
+algorithms to opt, since, as expected, our algorithms out-                                                               In this section, we provide a detailed sensitivity analy-
+performed the exact approach by 1-4 orders of magnitude in                                                            sis by varying di↵erent parameters that influence the per-
+terms of execution time.                                                                                              formance of our proposed algorithms. Due to space limi-
+                                                                                                                      tations, for some setups we omit the figures depicting the
+9.2                      Scalability Analysis                                                                         I/O since the time indicates the efficiency of the algorithms.
+   In this series of experiments we compare the performance                                                           The default setup for this series of experiments is m=3,
+of the algorithms with centroid computation (described in                                                             |S| = 100K, |W | = 100K, k = 30, r = 10, S:UN, W :UN,
+Section 5) in terms of execution time and I/O. We also in-                                                            steps = 500, s = 0.01 · |W |.
+clude the Stopk algorithm in the charts for completeness.                                                                Sensitivity analysis for varying |S|, |W |, Data Dis-
+The default setup for this series of experiments is m=3,                                                              tribution and m. In Figure 5, we study the behavior
+|S| = 10K, |W | = 10K, k = 10, r = 10, S:UN, W :UN,                                                                   of Atopk and Stopk for increasing cardinality of the data
+steps = 100, s = 0.01 · |W |.                                                                                         set S and the weighting vectors W , as well as for various
+   Varying weight cardinality |W |. As Figure 3 illus-                                                                data distributions (UN,CL,CO,AC) and dimensionality val-
+trates, Atopk and Stopk outperform by orders of magnitude                                                             ues m. First, we examine how the diversity values of Atopk
+the Rtopk and Itopk algorithms in terms of execution time.                                                            and Stopk for the di↵erent parameters are influenced (Fig-
+This di↵erence is not reflected in the measured I/O, because                                                          ures 5(a)–5(d)). We observe that Stopk benefits from the
+of the use of the bu↵er of the R-tree. When the number of                                                             increased size of the data set and the preferences set. Stopk
+issued top-k queries is considered, both Rtopk and Itopk                                                              retrieves a set of r objects that have similar diversity com-
+process at least one order of magnitude more top-k queries                                                            pared to Atopk . In most cases the diversity achieved by
+than Atopk and Stopk . This processing cost is responsi-                                                              Stopk is almost equal to the one achieved by Atopk and
+ble for their slow runtime. We note that even though both                                                             in some cases it is even slightly higher. This happens be-
+Rtopk and Itopk are more efficient than Atopk when a single                                                           cause Stopk locates the most diverse preferences and based
+
+
+
+                                                                                                                213
+                                        Stopk      Atopk                                   Stopk     Atopk                                        Stopk                   Atopk                                                      Stopk                      Atopk
+                             1                                                        1                                                   1                                                                           1
+                            0.8                                                     0.8                                                  0.8                                                                        0.8
+
+
+         diversity                                               diversity                                            diversity                                                                  diversity
+                            0.6                                                     0.6                                                  0.6                                                                        0.6
+                            0.4                                                     0.4                                                  0.4                                                                        0.4
+                            0.2                                                     0.2                                                  0.2                                                                        0.2
+                             0                                                        0                                                   0                                                                           0
+                                          100K    200K    500K                               100K   200K   500K                                         UN          CL      CO     AC                                                          3            4            5           6
+                                           Data Cardinality                                 Weight Cardinality                                      Dataset Distribution                                                                               Dimensions
+         (a) Diversity: Varying |S| (b) Diversity: Varying |W | (c) Diversity: Data distri- (d) Diversity: Varying m
+                                                                bution
+                                        Stopk     Atopk                                    Stopk     Atopk                                        Stopk                  Atopk                                                           Stopk                      Atopk
+                                                                                    1000                                                 90
+
+
+
+
+         total time (sec)                                        total time (sec)                                     total time (sec)                                                           total time (sec)
+                            20                                                                                                           80                                                                         1000
+                                                                                                                                         70
+                            15                                                      100                                                  60
+                                                                                                                                         50                                                                         100
+                            10                                                                                                           40
+                                                                                     10                                                  30                                                                          10
+                            5                                                                                                            20
+                                                                                                                                         10
+                            0                                                         1                                                   0                                                                           1
+                                          100K   200K     500K                               100K   200K     500K                                    UN             CL     CO      AC                                                              3        4            5            6
+                                          Data Cardinality                                   Weight Cardinality                                   Dataset Distribution                                                                                 Dimensions
+                       (e) Time: Varying |S|                               (f) Time: Varying |W |                    (g) Time: Data distribu-                                                                       (h) Time: Varying m
+                                                                                                                     tion
+                                         Stopk      Atopk                                  Stopk     Atopk                                            Stopk                Atopk                                                              Stopk                     Atopk
+
+                                                                                    200                                                   1.0M
+                                                                                                                                                                                                                     1.0M
+                                 1.0k                                                                                                    100.0k
+                                                                                    150                                                                                                                             100.0k
+                                                                                                                                          10.0k
+                                                                                                                                                                                                                     10.0k
+         IO                 100.0                                IO                 100                               IO                   1.0k                                                  IO                   1.0k
+                                                                                                                                         100.0                                                                      100.0
+                             10.0                                                    50
+                                                                                                                                          10.0                                                                       10.0
+                                 1.0                                                  0                                                    1.0                                                                        1.0
+                                            100K 200K 500K                                   100K   200K   500K                                               UN     CL      CO    AC                                                                  3        4            5        6
+                                            Data Cardinality                                Weight Cardinality                                            Dataset Distribution                                                                             Dimensions
+                            (i) I/O: Varying |S|                                    (j) I/O: Varying |W |            (k) I/O: Data distribution                                                                      (l) I/O: Varying m
+
+                                                Figure 5: Sensitivity analysis for varying |S|, |W |, data distribution and m.
+
+
+on them it identifies the most diverse products. Atopk on                                                                                case of increasing the data set cardinality |S|. In Figure 5(i),
+the other hand, bases the search for most diverse objects                                                                                we notice that even though the time is not increased by vary-
+on the centroids of the RT OPk sets of the products. For                                                                                 ing |S|, the I/O accesses increase. Naturally, more I/O are
+increased dimensionality, as depicted in Figure 5(d), the di-                                                                            needed for processing a top-k query of a larger data set, but
+versity value of Stopk compared to Atopk is influenced more                                                                              this is not reflected on the time. Due to the bu↵ering, the
+than for the other parameters. Recall that the diversity be-                                                                             computational cost of processing multiple top-k queries is
+tween the products was calculated for Stopk using all vectors                                                                            more significant than the time needed to retrieve the rele-
+in W and not only the ones used for the identification of the                                                                            vant index nodes. Nevertheless, in all cases Stopk outper-
+products.                                                                                                                                forms Atopk in terms of I/O. For example Figure 5(l) shows
+   Figures 5(e)–5(h) show the execution time of the algo-                                                                                that Stopk is two orders of magnitude cheaper than Atopk
+rithms with respect to various parameters. In Figure 5(e)                                                                                in I/O accesses as we increase the dimensions.
+we notice that none of the algorithms is influenced signifi-
+cantly by the data set cardinality, because top-k queries re-                                                                                                            Stopk      Atopk                                                                  Stopk                 Atopk
+
+quire retrieving only few data objects that are highly ranked                                                                                                  1
+                                                                                                                                                                                                                                              20
+
+
+
+
+                                                                                                                                                                                                                           total time (sec)
+                                                                                                                                                              0.8
+independently of the data set cardinality. Figure 5(f) (which
+                                                                                                                                                  diversity
+                                                                                                                                                                                                                                              15
+                                                                                                                                                              0.6
+uses log-scale) shows that both algorithms are influenced in                                                                                                  0.4
+                                                                                                                                                                                                                                              10
+
+a similar way while varying the number of weighting vec-                                                                                                      0.2                                                                             5
+
+tors |W |, but Stopk is always more efficient than Atopk .                                                                                                     0
+                                                                                                                                                                            5       10      30
+                                                                                                                                                                                                                                              0
+                                                                                                                                                                                                                                                                    5            10       30
+                                                                                                                                                                                    r                                                                                            r
+In particular, the time increases with increasing number of
+weighting vectors |W |. In Figure 5(g), we depict the per-                                                                                                           (a) Diversity                                                                              (b) Time
+formance of both algorithms for di↵erent data distributions.
+In the case of anticorrelated data the execution time for                                                                                                                           Figure 6: Varying r.
+Atopk is 4 times larger that in the case of a uniform distri-
+bution. On the other hand, the performance of Stopk is not                                                                                 Varying r. Figure 6 examines the e↵ect of varying the
+a↵ected by anticorrelated values significantly. Figure 5(h)                                                                              number r of retrieved products on our algorithms. First, we
+shows that Stopk scales nicely for increased dimensionality,                                                                             observe in Figure 6(a) a decreasing tendency of the diversity
+in contrast to Atopk whose cost increases by one order of                                                                                value as r increases for both algorithms, which is expected as
+magnitude when we go from 3 to 6 dimensions. This exper-                                                                                 also the diversity value of the optimal solution will decrease
+iment provides strong evidence for the scalability of Stopk                                                                              as the most diverse products are selected first. As far as
+with increased number of dimensions.                                                                                                     the performance is considered, in Figure 6(b), the time of
+   Figures 5(i)–5(l) evaluate the performance of our algo-                                                                               Atopk is not influenced by the increase of r, because Atopk
+rithms in terms of I/O accesses. The conclusions for the                                                                                 computes all top-k queries independently of the size of the
+I/O accesses are similar to those for the time, except for the                                                                           result set r and the computational cost of DPSA algorithm
+
+
+
+                                                                                                                    214
+                       Stopk         Atopk                                  Stopk         Atopk                                                       Stopk           Atopk                                                          Stopk            Atopk
+                  1                                                    40                                                                      1                                                                            20
+
+
+
+
+                                                    total time (sec)                                                                                                                                     total time (sec)
+                                                                       35
+                 0.8                                                   30                                                                     0.8
+                                                                                                                                                                                                                            15
+
+     diversity                                                                                                                    diversity
+                 0.6                                                   25                                                                     0.6
+                                                                       20                                                                                                                                                   10
+                 0.4                                                   15                                                                     0.4
+                 0.2                                                   10                                                                     0.2                                                                           5
+                                                                        5
+                  0                                                     0                                                                      0                                                                            0
+                         5     10        30    50                             5     10        30    50                                                 0.001|W|0.01|W| 0.1|W|                                                        0.001|W| 0.01|W| 0.1|W|
+                                     k                                                    k                                                                          W’                                                                               W’
+                       (a) Diversity                                          (b) Time                                                              (a) Diversity                                                                       (b) Time
+
+                                     Figure 7: Varying k.                                                                                                            Figure 9: Varying W 0 .
+                                                                                                                                              Stopk         Atopk                                                           Stopk            Atopk
+                       Stopk         Atopk                                  Stopk         Atopk
+                                                                                                                             1
+
+
+
+
+                                                                                                                                                                                total time (sec)
+                  1                                                                                                                                                                                100
+
+
+
+
+                                                    total time (sec)
+                                                                       18                                                   0.8
+                                                                       16
+
+
+                                                                                                                diversity
+                 0.8
+
+
+     diversity
+                                                                       14                                                   0.6
+                 0.6                                                   12
+                                                                       10                                                   0.4                                                                    10
+                 0.4                                                    8
+                                                                        6                                                   0.2
+                 0.2                                                    4
+                                                                        2                                                    0                                                                      1
+                  0                                                     0                                                                       100K     200K        500K                                                        100K    200K         500K
+                        100    200       500   1K                            100    200       500   1K
+                                                                                                                                               Weight Cardinality                                                                Weight Cardinality
+                                steps                                                steps
+                       (a) Diversity                                          (b) Time                         (a) Diversity:                                         varying (b) Time: varying |W |
+                                                                                                               |W|
+
+                               Figure 8: Varying steps.
+                                                                                                                                              Figure 10: House Dataset: varying |W|
+
+
+is not significant compared to the cost of the top-k queries.                                                  an important role in the performance of the Stopk algo-
+Stopk is also not significantly a↵ected, since the values of                                                   rithm. The complexity of the selection process is O(|W 0 |2 )
+r are relatively small, and the algorithm is executed steps                                                    and therefore a large sample can have significant impact on
+times in any case. Still, Stopk remains always much faster                                                     the performance of the algorithm. However, as shown in Fig-
+than Atopk .                                                                                                   ure 9, the increased cost in performance is not accompanied
+   Varying k. In Figure 7, we gradually increase the pa-                                                       by an increased gain in diversity. The reason behind this
+rameter k of the reverse top-k queries from 5 to 50. In Fig-                                                   fact is that once the sample is large enough to o↵er a good
+ure 7(a), we notice that the diversity value is stable as k in-                                                representation of the whole set of preferences, further en-
+creases, which seems counter-intuitive at first. By increasing                                                 largement will not help significantly in finding better initial
+k the size of the reverse top-k set increases for some objects                                                 centroids.
+and more objects have a non-empty reverse top-k set. How-
+ever, this does not influence the diversity value significantly,                                               9.4                            Results on Real Data
+as the most diverse centroids may not change. Figure 7(b)                                                        We have also performed an evaluation of our algorithm
+depicts the time obtained for di↵erent values of k. Although                                                   using a real data set. The conclusions drawn are overall
+we witness a small deterioration in the performance of both                                                    in accordance with the conclusions made by the evaluation
+algorithms, Stopk consistently outperforms Atopk . Process-                                                    with synthetic data, thus verifying our findings. The default
+ing top-k queries is more time-consuming for higher values                                                     setup for this series of experiments is |S| = 127930, |W | =
+of k and the DPSA algorithm gets slower with increasing                                                        100K, k = 30, r = 10, W :UN, steps = 500, s = 0.01 · |W |.
+k because the number of candidates for finding the diverse                                                     The size of the data set used and the high complexity of the
+objects increases. We should add however, that the e↵ect of                                                    exact algorithm (opt) did not allow the exact algorithm to
+parameter k has much smaller impact on the performance                                                         terminate and therefore we did not include its performance
+of Stopk because Stopk performs a small number of top-k                                                        results in this series of experiments.
+queries.                                                                                                         Analysis for varying |W |, k, and r. Figures 10-12 de-
+   Varying steps. The steps parameter is an essential pa-                                                      pict performance of the two algorithms. For all values of the
+rameter for the Stopk algorithm as it balances the efficiency                                                  varying parameters Stopk achieves diversity values close to
+of the algorithm and the diversity the algorithm achieves.                                                     the ones of Atopk . For both algorithms we notice a drop in
+Recall that Stopk performs only steps top-k queries, which                                                     the diversity values when r is increases which is expected as
+is only a small fraction of the |W | top-k queries that Atopk                                                  analyzed in 9.1. With respect to processing time it is evident
+performs. On the other hand, Stopk executes also steps
+times DPSA algorithm algorithm on a small set of approxi-
+                                                                                                                                              Stopk         Atopk                                                           Stopk            Atopk
+mate centroids, which is not necessary for Atopk . In Figure
+                                                                                                                             1
+8, we observe that the diversity achieved using very few vec-
+
+                                                                                                                                                                                total time (sec)
+                                                                                                                            0.8                                                                    100
+
+
+                                                                                                                diversity
+tors is quite close to the diversity achieved by Atopk . As we                                                              0.6
+
+increase the steps parameter the achieved diversity increases                                                               0.4                                                                    10
+                                                                                                                            0.2
+marginally. However the execution time increases propor-
+                                                                                                                             0                                                                      1
+tionally with the increase of the steps parameter. This ex-                                                                                     5      10
+                                                                                                                                                            k
+                                                                                                                                                                30     50                                                        5      10
+                                                                                                                                                                                                                                             k
+                                                                                                                                                                                                                                                 30     50
+
+periment verifies that a small value of steps is sufficient to
+                                                                                                               (a) Diversity: varying k                                                            (b) Time: varying k
+produce results of high diversity in a very efficient way.
+   Varying sample size |W 0 |. The size of sample of pref-
+erences from which we select the two initial centroids plays                                                                                    Figure 11: House Dataset: varying k
+
+
+
+                                                                                                         215
+                   Stopk   Atopk                                Stopk   Atopk
+                                                                                            [4] S. Chester, A. Thomo, S. Venkatesh, and S. Whitesides.
+              1
+                                                                                                Indexing reverse top-k queries in two dimensions. In Proc.
+
+
+                                        total time (sec)
+                                                           40
+             0.8                                           35
+                                                                                                of DASFAA (1), pages 201–208, 2013.
+ diversity
+                                                           30
+             0.6                                           25
+             0.4                                           20
+                                                           15
+                                                                                            [5] M. Drosou and E. Pitoura. Diversity over continuous data.
+             0.2                                           10                                   IEEE Data Eng. Bull., 32(4):49–56, 2009.
+                                                            5
+              0
+                      5    10      30
+                                                            0
+                                                                   5    10      30
+                                                                                            [6] M. Drosou and E. Pitoura. DisC diversity: result
+                           r                                            r                       diversification based on dissimilarity and coverage.
+ (a) Diversity: varying r                                  (b) Time: varying r                  PVLDB, 6(1):13–24, 2012.
+                                                                                            [7] M. Drosou and E. Pitoura. Dynamic diversification of
+                                                                                                continuous data. In Proc. of EDBT, pages 216–227, 2012.
+                     Figure 12: House Dataset: varying r                                    [8] E. Erkut. The discrete p-dispersion problem. European
+                                                                                                Journal of Operational Research, 46(1):48–60, 1990.
+                                                                                            [9] S. Ge, L. H. U, N. Mamoulis, and D. W. Cheung. Efficient
+that both parameters |W | and k play a significant role in the                                  all top-k computation - a unified solution for all top-k,
+performance of Atopk . This does not come as a surprise as                                      reverse top-k and top-m influential queries. TKDE,
+the processing cost of Atopk is dominated by the process-                                       25(5):1015–1027, 2013.
+ing cost of the top-k queries needed for the computation of                                [10] J.-L. Koh, C.-Y. Lin, and A. Chen. Finding k most favorite
+the centroids of the RT OPk sets for each product. On the                                       products based on reverse top-t queries. The VLDB
+                                                                                                Journal, pages 1–24, 2013.
+contrary Stopk is much less a↵ected by those parameters as
+                                                                                           [11] C. Li, B. C. Ooi, A. K. H. Tung, and S. Wang. DADA: a
+it performs a limited number of top-k queries. The increase                                     data cube for dominant relationship analysis. In Proc. of
+of parameter r has little e↵ect in both algorithms. The per-                                    SIGMOD, pages 659–670, 2006.
+formance di↵erence with respect to I/O is in all cases larger                              [12] C.-Y. Lin, J.-L. Koh, and A. L. P. Chen. Determining
+than two orders of magnitude. Only exception is for k < 10                                      (k)-most demanding products with maximum expected
+where Stopk is one order of magnitude more efficient.                                           number of total customers. IEEE Trans. Knowl. Data
+                                                                                                Eng., 25(8):1732–1747, 2013.
+10.                CONCLUSIONS                                                             [13] X. Lin, Y. Yuan, Q. Zhang, and Y. Zhang. Selecting stars:
+                                                                                                The k most representative skyline operator. In Proc. of
+   In this paper, we address the important problem of select-                                   ICDE, pages 86–95, 2007.
+ing the r most diverse products based on customers’ prefer-                                [14] M. Miah, G. Das, V. Hristidis, and H. Mannila. Standing
+ences. The reverse top-k set of each product is represented                                     out in a crowd: Selecting attributes for maximum visibility.
+by its centroid and the distance between centroids is then                                      In Proc. of ICDE, pages 356–365, 2008.
+expressed using cosine distance. In order to find products                                 [15] S. S. Ravi, D. J. Rosenkrantz, and G. K. Tayi. Heuristic
+                                                                                                and special case algorithms for dispersion problems.
+that are attractive to customers with dissimilar preferences,                                   Operations Research, 42(2):299–310, 1994.
+we define the r-Diversity problem as a dispersion problem                                  [16] Y. Tao, L. Ding, X. Lin, and J. Pei. Distance-based
+applied on the products’ reverse top-k sets. As dispersion                                      representative skyline. In Proc. of ICDE, pages 892–903,
+problems are known to be NP-hard, we propose two ap-                                            2009.
+proximate algorithms that solve the problem. The first al-                                 [17] Y. Tao, V. Hristidis, D. Papadias, and
+gorithm computes the reverse top-k sets and then applies                                        Y. Papakonstantinou. Branch-and-bound processing of
+a greedy algorithm that retrieves a set of products of high                                     ranked queries. Inf. Syst., 32(3):424–445, 2007.
+diversity. The second applies the greedy algorithm on an                                   [18] G. Valkanas, A. N. Papadopoulos, and D. Gunopulos.
+                                                                                                SkyDiver: a framework for skyline diversification. In Proc.
+approximation of the reverse top-k sets by evaluating only                                      of EDBT, pages 406–417, 2013.
+some carefully selected top-k queries. In our experimental                                 [19] M. R. Vieira, H. L. Razente, M. C. N. Barioni,
+evaluation, we study the performance of the proposed algo-                                      M. Hadjieleftheriou, D. Srivastava, C. T. Jr., and V. J.
+rithms and the diversity of the retrieved products in various                                   Tsotras. DivDB: a system for diversifying query results.
+experimental setups. In particular, we demonstrate that our                                     PVLDB, 4(12):1395–1398, 2011.
+algorithms both achieve diversity values close to optimal and                              [20] A. Vlachou, C. Doulkeridis, Y. Kotidis, and K. Nørvåg.
+are very efficient in practice.                                                                 Reverse top-k queries. In Proc. of ICDE, pages 365–376,
+                                                                                                2010.
+Acknowledgments                                                                            [21] A. Vlachou, C. Doulkeridis, Y. Kotidis, and K. Nørvåg.
+                                                                                                Monochromatic and bichromatic reverse top-k queries.
+The work of A. Vlachou was supported by the Action “Support-                                    TKDE, 23(8):1215–1229, 2011.
+ing Postdoctoral Researchers” of the Operational Program “Ed-
+                                                                                           [22] A. Vlachou, C. Doulkeridis, K. Nørvåg, and Y. Kotidis.
+ucation and Lifelong Learning” (Action’s Beneficiary: General
+                                                                                                Identifying the most influential data objects with reverse
+Secretariat for Research and Technology), and is co-financed by
+                                                                                                top-k queries. PVLDB, 3(1):364–372, 2010.
+the European Social Fund (ESF) and the Greek State. The re-
+search of C. Doulkeridis has been co-financed by ESF and Greek                             [23] A. Vlachou, C. Doulkeridis, K. Nørvåg, and Y. Kotidis.
+national funds through the Operational Program “Education and                                   Branch-and-bound algorithm for reverse top-k queries. In
+Lifelong Learning” of the National Strategic Reference Frame-                                   Proc. of SIGMOD, pages 481–492, 2013.
+work (NSRF) - Research Funding Program: Aristeia II, Project:                              [24] Q. Wan, R. C.-W. Wong, I. F. Ilyas, M. T. Özsu, and
+ROADRUNNER.                                                                                     Y. Peng. Creating competitive products. PVLDB,
+                                                                                                2(1):898–909, 2009.
+                                                                                           [25] T. Wu, Y. Sun, C. Li, and J. Han. Region-based online
+11.    REFERENCES
+ [1] A. Angel and N. Koudas. Efficient diversity-aware search.                                  promotion analysis. In Proc. of EDBT, pages 63–74, 2010.
+     In Proc. of SIGMOD, pages 781–792, 2011.                                              [26] T. Wu, D. Xin, Q. Mei, and J. Han. Promotion analysis in
+ [2] A. Arvanitis, A. Deligiannakis, and Y. Vassiliou. Efficient                                multi-dimensional space. PVLDB, 2(1):109–120, 2009.
+     influence-based processing of market research queries. In                             [27] A. Yu, P. K. Agarwal, and J. Yang. Processing a large
+     Proc. of CIKM, pages 1193–1202, 2012.                                                      number of continuous preference top-k queries. In Proc. of
+ [3] S. Börzsönyi, D. Kossmann, and K. Stocker. The skyline                                   SIGMOD, pages 397–408, 2012.
+     operator. In Proc. of ICDE, pages 421–430, 2001.
+
+
+
+
+                                                                                     216
+

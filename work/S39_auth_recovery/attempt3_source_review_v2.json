@@ -1,0 +1,23 @@
+{
+  "reviewed_utc": "2026-09-07T04:25:19.776572+00:00",
+  "review_kind": "independent static delta review; no script import/execution, test, network or download",
+  "source": "work/S39_auth_recovery/download_original_low_concurrency_attempt3.py",
+  "source_sha256": "83f3f448953db4356e89bf0583925d7b2a1138013378dc6c5028b992844e713f",
+  "preserved_v1_source": "work/S39_auth_recovery/attempt3_source_history/v1/download_original_low_concurrency_attempt3.py",
+  "preserved_v1_sha256": "af3fa6881ebad48d46752b12970ddd0f87954dabbd8e738cc0555ba944993d01",
+  "verdict": "PASS_STATIC_DELTA_ONLY",
+  "scope": "Only finally process-group cleanup changed from previously reviewed v1",
+  "checks": {
+    "leader_exit_does_not_skip_group_cleanup": "PASS: every created child enters cleanup; killpg(pid,0) probes group independently",
+    "term_then_kill_checks_entire_group": "PASS: probe before each signal and during grace periods; leader poll reaps without treating leader exit as group exit",
+    "surviving_group_or_leader_cannot_return_success": "PASS: record actual liveness, CLEANUP_FAILED overrides status and return value to1",
+    "cleanup_grace_is_bounded": "PASS: TERM5s then KILL10s plus reader join1s; outside download/hash1800s budget",
+    "remaining_code": "UNCHANGED from v1, earlier static checks retained"
+  },
+  "runtime_validation": false,
+  "network_requests": 0,
+  "models_run": 0,
+  "script_modified": false,
+  "main_ledger_modified": false,
+  "launch_decision": "Not launched; companion ALL_COMPANIONS_VERIFIED gate remains required. Parent reports CLIP still active."
+}

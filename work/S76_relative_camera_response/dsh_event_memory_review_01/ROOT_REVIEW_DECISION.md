@@ -1,0 +1,16 @@
+# Root review of the actual Flash 0731 second opinion
+
+The task completed once and was attached to the requested geometry-world-modeling workspace. Root observed and renamed it in the UI to 创新审查 01｜事件记忆与固定预算. Actual request header and assistant response both identify openrouter / deepseek/deepseek-v4-flash-0731. Session-reported tokens: input 11167, output 1153, total 12320; zero tool events observed. These are not independently verified invoice amounts. The requested 650-word response limit was a soft instruction; do not treat it as an enforced cap.
+
+The reply is useful skepticism, not an authoritative novelty verdict. Adopt the demand to compare against recent-motion/kinematic, coverage-plus-anchor and task-focused belief baselines, account for cache-reencoding cost, separate training from inference selection, and evaluate a fixed held-out future-state outcome. Keep the unchanged generator comparison distinct from a trained filtering competitor.
+
+Corrections before using the advice:
+1. ReMind's event-anchor training and cache replacement overlap strongly, but inspected evidence does not establish an identical automatic inference selector or every possible fixed-budget comparison. Calling the whole question certainly prior art exceeds the provided evidence. Conversely, not finding a selector on one released path does not establish novelty.
+2. Fair selection compares the same eligible history pool and equal feature/annotation/training access, memory and compute budgets. It intentionally supplies different selected evidence. The reply's demand for identical selected evidential content would erase the intervention. Our prompt's wording 'observed information' was ambiguous and is clarified here; no frozen experiment changed.
+3. No measured improvement against one predictor does not prove that no recoverable information exists. Misspecified readout, weak selection, noisy metric or inadequate test size can obscure it. Do not equate lack of evidence with equivalence; an equivalence/noninferiority claim needs a justified margin and precision analysis fixed before the test.
+4. A kinematic update can be cheap, but obtaining state from RGB, preprocessing, training and uncertainty estimation are not free. Charge them or supply the same features to all arms. Pixel reconstruction error alone can reward blur and is not automatically an honest dynamic-state metric; define observable task state, annotation provenance, horizon and failure handling first.
+5. Narrowing to favorable scenes after results would be exploratory; confirm the revised condition in fresh held-out data. No post hoc threshold or significance claim is selected here.
+
+New primary-source searches add task-focused information selection (NeurIPS 2013/2016) and Recurrent Kalman Networks (ICML 2019) as stronger ordinary adversaries. Those establish concepts and limitations; they are not evidence that our hypothesis has already passed an experiment. No selected method or validated innovation follows from this conversation.
+
+Old camera-review session remains preserved under Ungrouped because its recorded cwd is a child directory; no historical cwd was rewritten. All future wrapper runs start at the actual root and explicitly attach the uniquely identified new session.

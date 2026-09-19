@@ -1,0 +1,104 @@
+1090:     def get_translation_scaling_factor(self, c2ws):
+1091:         # camera centering
+1092:         """
+1093:         Args:
+1094:             c2ws: camera-to-world matrices, shape: (N, 4, 4)
+1095: 
+1096:         Returns:
+1097:             translation_scaling_factor: translation scaling factor
+1098:         """
+1099:         ref_c2ws = c2ws
+1100:         camera_dist_2med = torch.norm(
+1101:             ref_c2ws[:, :3, 3] - ref_c2ws[:, :3, 3].median(0, keepdim=True).values,
+1102:             dim=-1,
+1103:         )
+1104:         valid_mask = camera_dist_2med <= torch.clamp(
+1105:             torch.quantile(camera_dist_2med, 0.97) * 10,
+1106:             max=1e6,
+1107:         )
+1108:         c2ws[:, :3, 3] -= ref_c2ws[valid_mask, :3, 3].mean(0, keepdim=True)
+1109: 
+1110:         # camera normalization
+1111:         camera_dists = c2ws[:, :3, 3].clone()
+1112:         translation_scaling_factor = (
+1113:             self.camera_scale
+1114:             if torch.isclose(
+1115:                 torch.norm(camera_dists[0]),
+1116:                 torch.zeros(1).to(self.device, self.dtype),
+1117:                 atol=1e-5,
+1118:             ).any()
+1119:             else (self.camera_scale / torch.norm(camera_dists[0]) + 0.01)
+1120:         )
+1121:         return translation_scaling_factor, c2ws
+1122:     
+1123:     
+1124:     def get_cond(self, context_latents, all_c2ws, all_Ks, translation_scaling_factor, encoder_embeddings, input_masks):
+1125:         context_encoder_embeddings = torch.mean(encoder_embeddings, dim=0)
+1126:         input_masks = input_masks.bool()
+1127:         
+1128:         # batch_size = context_latents.shape[0]
+1129:         all_c2ws[:, :, [1, 2]] *= -1
+1130:         all_w2cs = torch.linalg.inv(all_c2ws)
+1131:         all_c2ws[:, :3, 3] *= translation_scaling_factor
+1132:         all_w2cs[:, :3, 3] *= translation_scaling_factor
+1133:         num_cameras = all_w2cs.shape[0]
+1134: 
+1135:         
+1136:         pluckers = get_plucker_coordinates(
+1137:             extrinsics_src=all_w2cs[:1],
+1138:             extrinsics=all_w2cs,
+1139:             intrinsics=all_Ks.float().clone(),
+1140:             target_size=(context_latents.shape[-2], context_latents.shape[-1]),
+1141:         ) # [B, 3, 6, H, W]
+1142:         
+1143:         target_latents = torch.nn.functional.pad(
+1144:             torch.zeros(self.config.model.num_frames - context_latents.shape[0], *context_latents.shape[1:]), (0, 0, 0, 0, 0, 1), value=0
+1145:         ).to(self.device, self.dtype)
+1146:         context_latents = torch.nn.functional.pad(
+1147:             context_latents, (0, 0, 0, 0, 0, 1), value=1.0
+1148:         )
+1149: 
+1150:         c_crossattn = repeat(context_encoder_embeddings, "d -> n 1 d", n=num_cameras)
+1151:         # c_crossattn = repeat(context_encoder_embeddings, "b 1 d -> b n 1 d", n=num_cameras)
+1152:  
+1153:         uc_crossattn = torch.zeros_like(c_crossattn)
+1154:         c_replace = torch.zeros((num_cameras, *context_latents.shape[1:])).to(self.device)
+1155:         c_replace[input_masks] = context_latents
+1156:         c_replace[~input_masks] = target_latents
+1157:         uc_replace = torch.zeros_like(c_replace)
+1158:         c_concat = torch.cat(
+1159:             [
+1160:                 repeat(
+1161:                     input_masks,
+1162:                     "n ->n 1 h w",
+1163:                     h=pluckers.shape[-2],
+1164:                     w=pluckers.shape[-1],
+1165:                 ),
+1166:                 pluckers,
+1167:             ],
+1168:             1,
+1169:         )
+1170:         uc_concat = torch.cat(
+1171:             [torch.zeros((num_cameras, 1, *pluckers.shape[-2:])).to(self.device), pluckers], 1
+1172:         )
+1173:         c_dense_vector = pluckers
+1174:         uc_dense_vector = c_dense_vector
+1175:         c = {
+1176:             "crossattn": c_crossattn,
+1177:             "replace": c_replace,
+1178:             "concat": c_concat,
+1179:             "dense_vector": c_dense_vector,
+1180:         }
+1181:         uc = {
+1182:             "crossattn": uc_crossattn,
+1183:             "replace": uc_replace,
+1184:             "concat": uc_concat,
+1185:             "dense_vector": uc_dense_vector,
+1186:         }
+1187:     
+1188:         return {"c": c, 
+1189:                 "uc": uc, 
+1190:                 "all_c2ws": all_c2ws, 
+1191:                 "all_Ks": all_Ks, 
+1192:                 "input_masks": input_masks,
+1193:                 "num_cameras": num_cameras}

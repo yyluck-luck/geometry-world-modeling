@@ -1,0 +1,104 @@
+{
+  "schema": "s15-artificial-calibration-checks-v1",
+  "started_utc": "2026-09-06T09:43:12.872302+00:00",
+  "ended_utc": "2026-09-06T09:43:12.901412+00:00",
+  "source_sha256": "f297463c4daf7e3e891061fd943590f1a4db46c68cb62d05d410fb50641c19cf",
+  "numpy_version": "1.26.4",
+  "opencv_version": "4.11.0",
+  "evidence_kind": "ARTIFICIAL_ALGEBRA_ONLY",
+  "real_image_reads": 0,
+  "real_depth_reads": 0,
+  "real_trajectory_reads": 0,
+  "model_calls": 0,
+  "K_native": [
+    [
+      542.822841,
+      0.0,
+      315.59352
+    ],
+    [
+      0.0,
+      542.57687,
+      237.756098
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "distortion_opencv_k1_k2_p1_p2_k3": [
+    0.039903,
+    -0.099343,
+    -0.00073,
+    -0.000144,
+    0.0
+  ],
+  "K_224": [
+    [
+      253.60004602968752,
+      0.0,
+      110.174941375
+    ],
+    [
+      0.0,
+      253.20253933333333,
+      110.68617906666667
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "max_native_displacement_pixels": 3.8441252885529815,
+  "checks": [
+    {
+      "name": "Brown forward-map agrees OpenCV FP32 maps",
+      "passed": true,
+      "max_pixel_error": 3.0517535606122692e-05,
+      "fixed_tolerance": 4e-05
+    },
+    {
+      "name": "zero distortion identity",
+      "passed": true,
+      "max_pixel_error": 5.2484583926105596e-14,
+      "fixed_tolerance": 1e-05
+    },
+    {
+      "name": "nearest remap preserves discrete depth labels and zeros",
+      "passed": true,
+      "zero_count": 1460
+    },
+    {
+      "name": "frontoparallel plane z retained without range normalization",
+      "passed": true,
+      "depth_m": 2.5,
+      "range_off_axis_m": 3.0923651573710407
+    },
+    {
+      "name": "half pixel resize and center crop preserve pinhole rays",
+      "passed": true,
+      "max_error": 1.1102230246251565e-16,
+      "fixed_tolerance": 1e-12
+    },
+    {
+      "name": "official Tm rejected as rigid rotation",
+      "passed": true,
+      "singular_values": [
+        1.0593475514340585,
+        1.0592862341500773,
+        1.059237574584103
+      ],
+      "determinant": 1.1886258577020001,
+      "max_orthogonality_error": 0.12218811000000018,
+      "SO3_gate": 0.0001
+    },
+    {
+      "name": "Tros is invertible rotation and self inverse",
+      "passed": true,
+      "determinant": 1.0
+    }
+  ],
+  "status": "PASS"
+}

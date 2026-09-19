@@ -1,0 +1,478 @@
+                           DTAM: Dense Tracking and Mapping in Real-Time
+
+                         Richard A. Newcombe, Steven J. Lovegrove and Andrew J. Davison
+                              Department of Computing, Imperial College London, UK
+                                                [rnewcomb,sl203,ajd]@doc.ic.ac.uk
+
+
+                                                                           tems working with a hand-held camera have recently ap-
+                             Abstract                                      peared (e.g. [9, 13]), but these still rely on feature tracking.
+                                                                           Here we present a new algorithm, DTAM (Dense Tracking
+DTAM is a system for real-time camera tracking and recon-                  and Mapping), which unlike all previous real-time monoc-
+struction which relies not on feature extraction but dense,                ular SLAM systems both creates a dense 3D surface model
+every pixel methods. As a single hand-held RGB camera                      and immediately uses it for dense camera tracking via whole
+flies over a static scene, we estimate detailed textured depth             image registration. As a hand-held camera browses a scene
+maps at selected keyframes to produce a surface patchwork                  interactively, a texture-mapped scene model with millions
+with millions of vertices. We use the hundreds of images                   of vertices is generated. This model is composed of depth
+available in a video stream to improve the quality of a sim-               maps built from bundles of frames by dense and sub-pixel
+ple photometric data term, and minimise a global spatially                 accurate multi-view stereo reconstruction. The reconstruc-
+regularised energy functional in a novel non-convex opti-                  tion framework is targeted at our live setting, where hun-
+misation framework. Interleaved, we track the camera’s                     dreds of narrow-baseline video frames are the input to each
+6DOF motion precisely by frame-rate whole image align-                     depth map. We gather photometric information sequentially
+ment against the entire dense model. Our algorithms are                    in a cost volume, and incrementally solve for regularised
+highly parallelisable throughout and DTAM achieves real-                   depth maps via a novel non-convex optimisation framework
+time performance using current commodity GPU hardware.                     with elements including accelerated exact exhaustive search
+We demonstrate that a dense model permits superior track-                  to avoid coarse-to-fine warping and the loss of small details,
+ing performance under rapid motion compared to a state of                  and an interleaved Newton step to achieve fine accuracy.
+the art method using features; and also show the additional
+                                                                           Meanwhile, in an interleaved fashion, the camera’s pose is
+usefulness of the dense model for real-time scene interac-
+                                                                           tracked at frame-rate by whole image alignment against the
+tion in a physics-enhanced augmented reality application.
+                                                                           dense textured model. This tracking benefits from the pre-
+                                                                           dictive capabilities of a dense model with regard to occlu-
+                                                                           sion handling and multi-scale operation, making it much
+1. Introduction                                                            more robust and at least as accurate as any feature-based
+                                                                           method; in particular, performance degrades remarkably
+Algorithms for real-time SFM (Structure from Motion), a                    gracefully in reaction to motion blur or camera defocus.
+problem alternatively referred to as Monocular SLAM, have                  The limited processing resources imposed by real-time
+almost always worked by generating and tracking sparse                     operation seemed to preclude dense methods in previous
+feature-based models of the world. However, it is increas-                 monocular SLAM systems, and indeed the recent availabil-
+ingly clear that in both reconstruction and tracking it is pos-            ity of powerful commodity GPGPU processors is a ma-
+sible to get more complete, accurate and robust results us-                jor enabler of our approach in both the reconstruction and
+ing dense methods which make use of all of the data in                     tracking components. However, we also believe that there
+an image. Methods for high quality dense stereo recon-                     has been a lack of understanding of the power of bring-
+struction from multiple images (e.g. [15, 4]) are becoming                 ing dense methods fully ‘into the loop’ of tracking and re-
+real-time capable due to their high parallelisability, allow-              construction. The availability of a dense scene model, all
+ing them to track the currently dominant GPGPU hardware                    the time, enables many simplifications of issues with point-
+curve. Meanwhile, the first live dense reconstruction sys-                 based systems, for instance with regard to multiple scales
+     This work was supported by DTA scholarships to R. Newcombe and
+                                                                           and rotations, occlusions or blur due to rapid motion. Also,
+S. Lovegrove, and ERC Starting Grant 210346. We are very grateful to our   our view is that the high quality correspondence required
+colleagues at Imperial College London for countless useful discussions.    by both tracking and reconstruction will always be most
+robustly and accurately enabled by dense methods, where
+matching at every pixel is supported by the totality of data
+across an image and model.
+
+2. Method
+
+The overall structure of our algorithm is straightforward.
+Given a dense model of the scene, we use dense whole im-
+age alignment against that model to track camera motion
+at frame-rate. And tightly interleaved with this, given im-
+ages from tracked camera poses, we update and expand the
+model by building and refining dense textured depth maps.
+Once bootstrapped, the system is fully self-supporting and
+no feature-based skeleton or tracking is required.               Figure 1. A keyframe r consists of a reference image Ir with pose
+                                                                 Trw and data cost volume Cr . Each pixel of the reference frame
+2.1. Preliminaries                                               ur has an associated row of entries Cr (u) (shown in red) that
+                                                                 store the average photometric error or cost Cr (u, d) computed
+We refer to the pose of a camera c with respect to the world     for each inverse depth d ∈ D in the inverse depth range D =
+frame of reference w as                                          [ξmin , ξmax ]. We use tens to hundreds of video frames indexed as
+                                                               m ∈ I(r), where I(r) is the set of frames nearby and overlapping
+                            Rwc cw                               r, to compute the values stored in the cost volume.
+                  Twc =                  ,               (1)
+                             0T    1
+where Twc ∈ SE(3) is the matrix describing point trans-          the cost volume (called a disparity space image in stereo
+fer between the camera’s frame of reference and that of the      matching [14], and generalised more recently in [10] for
+world, such that xw = Twc xc . Rwc ∈ SO(3) is the ro-            any discrete per pixel labelling) stores the accumulated pho-
+tation matrix describing directional transfer, and cw is the     tometric error as a function of inverse depth d. The aver-
+location of the optic center of camera c in the frame of         age photometric error Cr (u, d) is computed by projecting a
+reference w. Our camera has fixed and pre-calibrated in-         point in the volume into each of the overlapping images and
+trinsic matrix K and all images are pre-warped to remove         summing the L1 norm of the individual photometric errors
+radial distortion. We describe perspective projection of a       obtained:
+3D point xc = (x, y, z)> including dehomogenisation by                                   1     X
+π(xc ) = (x/z, y/z)> .                                                   Cr (u, d) =                  kρr (Im , u, d) k1 , (2)
+                                                                                      |I(r)|
+                                                                                              m∈I(r)
+Our dense model is composed of overlapping keyframes. Il-
+lustrated in Figure 1, a keyframe r with world-camera frame      where the photometric error for each overlapping image is:
+transform Trw , contains an inverse depth map ξ r : Ω → R
+                                                                 ρr (Im , u, d) = Ir (u) − Im π KTmr π −1 (u, d) . (3)
+                                                                                                                   
+and RGB reference image Ir : Ω → R3 where Ω ⊂ R2
+is the image domain. For a pixel u := (u, v)> ∈ Ω,               Under the brightness constancy assumption, we hope for
+we can back-project an inverse depth value d = ξ(u) to           ρ to be smallest at the inverse depth corresponding to the
+a 3D point x = π −1 (u, d) where π −1 (u, d) = d1 K−1 u̇.        true surface. Generally, this does not hold for images cap-
+The dot notation is used to define the homogeneous vector        tured over a wide baseline and even for the same viewpoint
+u̇ := (u, v, 1)> .                                               when lighting changes significantly. Here, rather than using
+                                                                 a patch-based normalised score, or pre-processing the input
+2.2. Dense Mapping                                               data to increase illumination invariance over wide baselines,
+                                                                 we take the opposite approach and show the advantage of
+We follow a global energy minimisation framework to es-          reconstruction from a large number of video frames taken
+timate ξ r iteratively from any number of short baseline         from very close viewpoints where very high quality match-
+frames m ∈ I(r), where our energy is the sum of a photo-         ing is possible. We are particularly interested in real-time
+metric error data term and robust spatial regularisation term.   applications where a robot or human is in the reconstruc-
+We make each keyframe available for use in pose estimation       tion loop, and so could purposefully restrict the collection
+after initial solution convergence.                              of images to within a relatively narrow region.
+We now define a projective photometric cost volume Cr for        In Figure 2, we show plots for three reference pixels where
+the keyframe as illustrated in Figure 1. A row Cr (u) in         the function ρ (Equation 3) has been computed and aver-
+Figure 2. Plots for the single pixel photometric functions ρ(u) and the resulting total data cost row C(u) are shown for three example
+pixels in the reference frame, chosen in regions of differing discernibility. Pixel (a) is in a textureless region and not well localisable; (b)
+is within a strongly textured region where a point feature might be detected; and (c) is in a region of linear repeating texture. While the
+individual costs exhibit many local minima, the total cost shows clear a clear minimum in all except nearly homogeneous regions.
+
+
+aged to form C(u) (Equation 2). It is clear that while an                  In this case  is set to a very small value ≈ 1.0e−4 to reduce
+individual data term ρ can have many minima, the total cost                the stair-casing effect obtained by the pure TV regulariser.
+generally has very few and often a clear minimum. Each                     As depth discontinuities often coincide with edges in the
+single ρ is a simple two view stereo data term, and as such                reference image, the per pixel weight g(u) we use is:
+has no useful information for scene regions which are oc-
+                                                                                               g(u) = e−αk∇Ir (u)k2 ,
+                                                                                                                        β
+cluded in the second view. As noted in [13], while increas-                                                                                 (5)
+ing signal to noise ratio, using many views with a robust L1
+norm enables the occlusions to be treated as outliers, while               reducing the regularisation strength where the edge mag-
+increasing the chance that a region has at least one useful                nitude is high, thereby limiting solution smoothing across
+non occluding data term.                                                   region boundaries. The resulting energy functional there-
+                                                                           fore contains a non-convex photometric error data term and
+Shown in Figure 3, an inverse depth map can be extracted                   a convex regulariser:
+from the cost volume by computing arg mind C(u, d) for                               Z n
+each pixel u in the reference frame. It is clear that the esti-                                                          o
+                                                                              Eξ =        g(u)k∇ξ(u)k + λC (u, ξ(u)) du . (6)
+mates obtained in featureless regions are prone to false min-                           Ω
+ima. Fortunately, the sum of individual photometric errors
+in these regions leads to a flatter total cost. We will there-             In many optical flow and variational depth map methods,
+fore seek an inverse depth map which minimises an energy                   a convex approximation to the data term can be obtained
+functional comprising the photometric error cost as a data                 by linearising the cost volume and solving the resulting
+term and a regularisation term that penalises deviation from               approximation iteratively within a coarse-to-fine warping
+a spatially smooth inverse depth map solution.                             scheme that can lead to loss of reconstruction detail. If the
+                                                                           linearisation is performed directly in image space as in [13],
+                                                                           all images used in the data term must be kept increasing
+2.2.1   Regularised Cost                                                   computational cost as more overlapping images are used.
+                                                                           Instead, following the large displacement optic flow method
+We assume that the inverse depth solution being recon-                     of [12] we approximate the energy functional by coupling
+structed consists of regions that vary smoothly together with              the data and regularisation terms through an auxiliary vari-
+discontinuities due to occlusion boundaries. We use a regu-                able α : Ω → R,
+lariser comprising a weighted Huber norm over the gradient                             Z n
+of the inverse depth map, g(u)k∇ξ(u)k . The Huber norm                                                          1                 2
+                                                                             Eξ ,α =         g(u)k∇ξ(u)k +        (ξ(u) − α(u))
+is a composite of two convex functions:                                                  Ω                      2θ                    (7)
+                                                                                                              o
+                                                                                             + λC (u, α(u)) du .
+                   (
+                       kxk22
+           kxk =        2            if kxk2 ≤         (4)
+                       kxk1 − 2       otherwise                                                          1
+                                                                           The coupling term Q(u) = 2θ      (ξ(u) − α(u))2 serves to
+Within k∇ξ r k2 ≤  an L22 norm is used, promoting smooth                  drive the original and auxiliary variables together, enforc-
+reconstruction, while otherwise the norm is L1 forming the                 ing ξ = α as θ → 0, resulting in the original energy
+total variation (TV) regulariser which allows discontinu-                  (6). As a function of ξ, the convex sum g(u)k∇ξ(u)k +
+ities to form at depth edges. More specifically, TV allows                 Q(u) is a small modification of the TV-L22 ROF image
+discontinuities to form without the need for a threshold-                  denoising model term [11], and can be efficiently opti-
+specific non-convex norm that would depend on the recon-                   mised using a primal-dual approach [1][16][3]. Also, al-
+struction scale which is not available in a monocular setting.             though still non-convex in the auxiliary variable α, each
+Figure 3. Incremental cost volume construction; we show the current inverse depth map extracted as the current minimum cost for each
+pixel row dmin
+            u    = arg mind C(u, d) as 2, 10 and 30 overlapping images are used in the data term (left). Also shown is the regularised
+solution that we solve to provide each keyframe inverse depth map (4th from left). In comparison to the nearly 300 × 103 points estimated
+in our keyframe, we show the ≈ 1000 point features used in the same frame for localisation in PTAM ([6]). Estimating camera pose from
+such a fully dense model enables tracking robustness during rapid camera motion.
+
+
+Q(u) + λC (u, α(u)) is now trivially point-wise optimis-               weighting matrix and δq (q) is the indicator function such
+able and can be solved using an exhaustive search over a               that for each element q, δq (q) = 0 if kqk1 ≤ 1 and other-
+finite range of discretely sampled inverse depth values. The           wise ∞.
+lack of coarse-to-fine warping means that smaller scene de-
+                                                                       Replacing the regulariser with the dual form, the saddle-
+tails can be correctly picked out from their surroundings.
+                                                                       point problem in primal variable d and dual variable q is
+Importantly, the discrete cost volume C, can be computed
+                                                                       coupled with the data term giving the sum of convex and
+by keeping the average cost up to date as each overlapping
+                                                                       non-convex functions we minimise,
+frame from Im∈I(r) arrives removing the need to store im-
+ages or poses and enabling constant time optimisation for                             arg max {arg min E (d, a, q)}                  (9)
+any number of overlapping images.                                                     q, kqk2 ≤1     d,a
+
+                                                                                        n                  1
+                                                                        E (d, a, q) =       hAGd, qi +        kd − ak22
+2.2.2   Discretisation of the Cost Volume and Solution                                                     2θ
+                                                                                                                               o
+                                                                                                   +λC (a) − δq (q) − kqk22 .
+The discrete cost volume is implemented as an M × N × S                                                                  2
+                                                                                                                               (10)
+element array, where M × N is the reference image res-
+                                                                       Fixing the auxillary variable a, the condition of optimality
+olution and S is the number of points linearly sampling
+                                                                       is met when ∂d,q (E (d, a, q)) = 0. For the dual variable q,
+the inverse depth range between ξ max and ξ min . Linear
+sampling in inverse depth leads to a linear sampling along                              ∂E (d, a, q)
+epipolar lines when computing ρ.                                                                     = AGd − q .                   (11)
+                                                                                            ∂q
+In the next section we will use M N × 1 stacked rasterised             Using the divergence theorem, differentiation with respect
+column vector versions of the inverse depth ξ and auxiliary            to primal variable d can be performed by noting that
+α variables (see [16] for more details of similar schemes).            hAGd, qi = A> q, Gd , where A> forms the negative
+d is the vector version of ξ; and a is the vector version of α.        divergence operator,
+We will also use g to denote the M N × 1 constant vector
+containing the stacked reference image per-pixel weights                           ∂E (d, a, q)          1
+computed by Equation 5 for image weighted regularisation.                                       = GA> q + (d − a) .                 (12)
+                                                                                       ∂d                θ
+
+                                                                       For a fixed value d we obtain the solution for each au =
+2.2.3   Solution                                                       a(u) ∈ D in the remaining non-convex function using a
+                                                                       point-wise search to solve,
+We now detail our iterative minimisation solution for (7).
+Following [1][16][3], we use duality principles to arrive at                             arg min Eaux (u, du , au ) ,               (13)
+the primal-dual form of g(u)k∇ξ(u)k + Q(u). Using the                                      au ∈D
+
+vector notation, we replace the weighted Huber regulariser                                      1            2
+(4) by its conjugate using the Legendre-Fenchel transform,               Eaux (u, du , au ) =      (du − au ) + λC (u, au ) .       (14)
+                                                                                                2θ
+                         n                         o
+ kAGdk = arg max hAGd, qi−δq (q)− kqk22 , (8)                         The complete optimisation starting at iteration n = 0 be-
+              q, kqk2 ≤1                     2
+                                                                       gins by setting dual variable q0 = 0 and initialising each
+where the matrix multiplication Ad computes the 2M N ×1                element of the primal variable with the data cost minimum,
+element gradient vector, G = diag(g) is the element-wise               d0u = a0u = arg minau ∈D C(u, au ), iterating:
+Figure 4. Accelerated exhaustive search: at each pixel we wish to minimise the total depth energy Eaux (u) (green), which is the sum of
+the fixed data energy C(u) (red) and the current convex coupling between primal and auxiliary variables Q(u) (blue). This latter term is a
+parabola which gets narrower as optimisation progresses, setting a bound on the region within which a minimum of Eaux (u) can possibly
+lie and allowing the search region (unshaded) to get smaller and smaller.
+
+
+  1. Fixing the current value of an perform a semi-implicit             terms in (14) are positive, we know that the minimum value
+     gradient ascent on ∂q = 0 (11) and descent on ∂d = 0               of any cost volume row is just Cumin . This occurs if the
+     (12) :                                                             quadratic component is zero when an+1u     = dn+1
+                                                                                                                      u   = dmin
+                                                                                                                              u .
+                                                                                                n+1     n+1
+           qn+1 −qn
+                                                                        In any case, if we set au = du then we can not exceed
+              σq    = AGdn − qn+1                                      Cumax resulting in the energy bound,
+           dn+1 −dn
+                    = − θ1n     dn+1 − an − GA> qn+1 ,
+                                         
+                                                                                              1              2
+              σd
+                                                                                   Cumin +       an+1 − dn+1    ≤ Cumax              (15)
+     resulting in the following primal-dual update step,                                     2θn u       u
+
+
+           qn+1 = Πq ((qn + σq GAdn )/(1 + σq )) ,                     Rearranging for an+1
+                                                                                           u    we find a feasible region either side
+                                                                        of the current fixed point dn+1
+                                                                                                    u    within which the solution of
+           dn+1 = (dn +σd (GA> qn+1 + θ1n an ))/(1+ σθnd )              the optimisation must exist,
+     where Πq (x) = x/ max(1, kxk2 ) projects the gradient                       an+1     ∈ dn+1
+                                                                                              
+                                                                                                     − run+1 , dn+1 + run+1
+                                                                                                                            
+                                                                                                                                 (16)
+                                                                                  u             u               u
+     ascent step back onto the constraint kqk1 ≤ 1.                               n+1           n     max        min
+                                                                                                                     
+                                                                                 ru       = 2θ λ Cu − Cu                         (17)
+  2. Fixing dn+1 , perform a point-wise exhaustive search
+     for each an+1
+               u   ∈ D (13).                                            As shown in Figure (4), the search region size drastically
+                                                                        decreases after only a small number of iterations, reducing
+  3. If θn > θend update θn+1 = θn (1 − βn), n ← n + 1
+                                                                        the number of sample points that need to be tested in the
+     and goto (1), otherwise end.
+                                                                        cost volume to ensure optimally of (13).
+In practice, the update steps for qn+1 and dn+1 can be per-
+formed efficiently and in parallel on modern GPU hardware
+using equivalent in-place computations for operators ∇ and              2.2.5    Increasing Solution Accuracy
+−∇· in place of the matrix-vector multiplication involving
+A and A> .                                                              In the large displacement optical flow method of [12] an
+                                                                        increased sampling density of the cost function is used to
+                                                                        achieve sub-pixel flows. Likewise, it is possible to increase
+2.2.4   Accelerating the Non-Convex Solution                            the density of inverse depth samples S to increase surface
+                                                                        reconstruction accuracy and the acceleration method intro-
+The exhaustive search over all S samples of Q to solve (13)             duced in the previous section would go a long way to mit-
+ensures global optimality of the iteration (within the sam-             igating the increased computational cost. However, as can
+pling limit). We now demonstrate in Figure 4 that there                 be seen in Figure 4 the sampled point-wise energy Q(u) is
+exists a deterministically decreasing feasible region within            typically well modelled around the discrete minimum with
+which the global minimum of (14) must exist, considerably               a parabola. We can therefore achieve sub-sample accuracy
+reducing the number of samples that need to be tested.                  by performing a single Newton step using numerical deriva-
+                                                                        tives of Q(u) around the current discrete minimium an+1 u   ,
+For a pixel u, the known data cost minimum and maximum
+are Cumax = C(dmax u   ) and Cumin = C(dminu ). These are                                        ∇Eaux (u, dn+1
+                                                                                                            u   , an+1
+                                                                                                                   u   )
+                                                                                ân+1
+                                                                                  u   = an+1
+                                                                                         u   −                           .           (18)
+trivial to maintain when building the cost volume. As both                                        2 aux     n+1 n+1
+                                                                                                 ∇ E (u, du , au )
+(a)                                    (b)                                     (c)                                   (d)
+
+
+
+
+                                                                                                                     (e)
+
+
+
+
+Figure 5. Example inverse depth map reconstructions obtained from DTAM using a single low sample cost volume with S = 32. (a)
+Regularised solution obtained without the sub-sample refinement is shown as a 3D mesh model with Phong shading (inverse depth map
+solution shown in inset). (b) Regularised solution with sub-sample refinement using the same cost volume also shown as a 3D mesh model.
+(c) The video frame as used in PTAM, with the point model projections of features found in the current frame and used in tracking. (d,e)
+Novel wide baseline texture mapped views of the reconstructed scene used for tracking in DTAM.
+
+
+The refinement step is embedded in the iterative optimisa-             2.3. Dense Tracking
+tion scheme by replacing the located an+1   u    with the sub-
+sample accurate version. It is not possible to perform this            Given a dense model consisting of one or more keyframes,
+refinement post-optimisation, as at that point the quadratic           we can synthesise realistic novel views over wide baselines
+coupling energy is large (due to a very small θ), and so               by projecting the entire model into a virtual camera. Since
+the fitted parabola is a spike situated at the minimum. As             such a model is maintained live, we benefit from a fully pre-
+demonstrated in Figure 5 embedding the refinement step in-             dictive surface representation, handling occluded regions
+side each iteration results in vastly increased reconstruction         and back faces naturally. We estimate the pose of a live
+quality, and enables detailed reconstructions even for low             camera by finding the parameters of motion which generate
+sample rates, e.g. S ≤ 64.                                             a synthetic view which best matches the live video image.
+                                                                       We refine the live camera pose in two stages; first with
+                                                                       a constrained inter-frame rotation estimation, and second
+2.2.6   Setting Parameter Values and Post Processing                   with an accurate 6DOF full pose refinement against the
+                                                                       model. Both are formulated as iterative Lucas-Kanade style
+Gradient ascent/descent time-steps σq , σd are set optimally           non-linear least-squares problems, iteratively minimising
+for the update scheme provided as detailed in [3]. Various             an every-pixel photometric cost function. To converge to
+values of β can be used to drive θ towards 0 as iterations in-         the global minimum, we must initialise the system within
+crease while ensuring θn+1 < θn (1 − βn). Larger values                the convex basin of the true solution. We use a coarse-fine
+result in lower quality reconstructions, while smaller values          strategy over a power of two image pyramid for efficiency
+of β with increased iterations result in higher quality. In our        and to increase our range of convergence.
+experiments we have set β = 0.001 while θn ≥ 0.001 else
+β = 0.0001 resulting in a faster initial convergence. We
+use θ0 = 0.2 and θend = 1.0e − 4. λ should reflect the                 2.3.1   Pose Estimation
+data term quality and is set dynamically to 1/(1 + 0.5 ¯    d),
+where d¯ is the minimum scene depth predicted by the cur-              We first follow the alignment method of [8] between con-
+rent scene model. For the first key-frame we set λ = 1. This           secutive frames to obtain rotational odometry at lower levels
+dynamically altered data term weighting sensibly increases             within the pyramid, offering resilience to motion blur since
+regularisation power for more distant scene reconstructions            consecutive images are similarly blurred. This optimisa-
+that, assuming similar camera motions for both closer and              tion is more stable than 6DOF estimation when the number
+further scenes, will have a poorer quality data term.                  of pixels considered is low, helping to converge for large
+                                                                       pixel motions, even when the true rotation is not strictly ro-
+Finally, we note that optimisation iterations can be inter-
+                                                                       tational (Figure 6). A similar step is performed before fea-
+leaved with updating the cost volume average, enabling the
+                                                                       ture matching in PTAM’s tracker, computing first the inter-
+surface (though in a non fully converged state) to be made
+                                                                       frame 2D image transform and fitting a 3D rotation [7].
+available for use in tracking after only a single ρ computa-
+tion. For use in tracking, we compute a triangle mesh from             The rotation estimate helps inform our current best estimate
+the inverse depth map, culling oblique edges as described in           of the live camera pose, T̂wl . We project the dense model
+[9].                                                                   in to a virtual camera v at location Twv = T̂wl , with colour
+Figure 6. MSE convergence plots over time for an illustrative
+tracking step using different combinations of rotation and full pose
+iterations. Estimating rotation first can help to avoid local minima.   Figure 7. Augmented Reality car appears fixed rigidly to the world
+                                                                        as an unmodelled hand is waved in front of the camera. Pixels in
+                                                                        green are used for tracking whilst blue do not exist in the original
+image Iv and inverse depth image ξv . Assuming that v is                prediction and yellow are rejected (hand / monitor / shadow).
+close to the true pose of the live camera, we perform a 2.5D
+alignment between Iv and the live image Il to estimate Tlv ,
+and hence the true pose Twl = Twv Tvl . We parametrise an
+update to T̂vl by ψ ∈ R6 belonging to the Lie Algebra se3
+and define a forward-compositional [2] cost function relat-
+ing photometric error to changing parameters:
+
+                     1 X       2 1
+          F (ψ) =         fu (ψ) = kf (ψ)k22 ,                  (19)         Figure 8. DTAM tracking throughout camera defocus.
+                     2             2
+                       u∈Ω
+
+
+ fu (ψ) = Il π KTlv (ψ)π −1 (u, ξv (u)) − Iv (u) (20)
+                                       
+                                                                        2.4. Model Initialisation and Management
+                            6
+                                       !
+                           X
+             Tlv (ψ) = exp     ψ i geni .        (21)                   The system is initialised using a standard point fea-
+                                    i=1    SE(3)                        ture based stereo method, which continues until the first
+                                                                        keyframe is acquired, when we switch to a fully dense track-
+This cost function does not take into account occluded sur-
+                                                                        ing and mapping pipeline. We are investigating a fully gen-
+faces directly; instead we assume that the optimisation op-
+                                                                        eral dense initialisation scheme.
+erates over only a narrow baseline from the original model
+prediction. We could perform a full prediction setting                  A new keyframe is added when the number of pixels in the
+Twv = T̂wl at every iteration but find it is not required.              previous predicted image without visible surface informa-
+                                                                        tion falls below some threshold. This is possible due to
+ψ ◦ = arg minψ F (ψ) represents a stationary point of
+                                                                        the fully dense nature of the system and is arguably better
+F (ψ) such that ∇F (ψ ◦ ) = 0. We approximate F (ψ)
+                                                                        founded than the heuristics used in feature based systems.
+with F̂ (ψ) = 21 fˆ(ψ)> fˆ(ψ) where fˆ(ψ) ≈ f (ψ) is the
+Taylor series expansion of f (ψ) about 0 up to first order.
+Via the product rule, ∇F̂ (ψ) = ∇fˆ(ψ)> fˆ(ψ) and we                    3. Evaluation
+can find the approximate minimiser ψ̂ ≈ ψ ◦ by solving
+∇f (ψ̂)> fˆ(ψ̂) = 0. Equivalently, we can solve the overde-             We have evaluated DTAM in the same desktop setting
+termined linear system ∇f (0)ψ̂ = −f (0) or its normal                  where PTAM has been successful. In all experiments, we
+equations. We then apply the update T̂lv ← T̂lv T(ψ̂) and               have used a Point Grey Flea2 camera, operating at 30Hz
+repeat until ψ̂ ≈ 0 marking convergence.                                with 640×480 resolution and 24bit RGB colour. The cam-
+                                                                        era has pre-calibrated intrinsics. We run on a commodity
+                                                                        system consisting of an NVIDIA GTX 480 GPU hosted
+2.3.2   Robustified Tracking                                            by an i7 quad-core CPU. We present a qualitative compari-
+                                                                        son of the live running system including extensive tracking
+Any observed pixels which do not belong to our model                    comparisons with PTAM and augmented reality demonstra-
+may have a large impact on tracking quality. We robus-                  tions in an accompanying video:
+tify our method by disregarding pixels whose photometric                http://youtu.be/Df9WhgibCQA.
+error falls above some threshold. In each least squares it-
+eration, our coarse-fine method ramps down this threshold               3.1. Quantitative Tracking Performance
+as we converge to achieve greater accuracy. This scheme
+makes it practical to track densely whilst observing unmod-             We have evaluated the tracking performance of our system
+elled objects.                                                          against the openly available PTAM system, which includes
+Figure 9. Linear velocities for DTAM (blue) and PTAM (red) over a challenging high acceleration back-and-forth trajectory close to a
+cup. Areas where PTAM lost tracking and resorted to relocalisation are shown in green. In comparison, DTAM’s relocaliser was disabled.
+Notice that DTAM’s linear velocity plot reflects smoother motion estimation.
+
+
+many state of the art point feature tracking methods (Fig-             [4] D. Gallup, M. Pollefeys, and J. M. Frahm. 3D reconstruction
+ure 9). Our results highlight both DTAM’s local accuracy                   using an n-layer heightmap. In Proceedings of the DAGM
+and extreme resilience to degraded images and rapid mo-                    Symposium on Pattern Recognition, 2010. 1
+tion.                                                                  [5] M. Irani and P. Anandan. Robust multi-sensor image align-
+                                                                           ment. In Proceedings of the International Conference on
+                                                                           Computer Vision (ICCV), pages 959–966, 1998. 8
+3.2. Failure Modes and Future Work                                     [6] G. Klein and D. W. Murray. Parallel tracking and map-
+                                                                           ping for small AR workspaces. In Proceedings of the Inter-
+We assume brightness constancy in all stages of reconstruc-                national Symposium on Mixed and Augmented Reality (IS-
+tion and tracking. Although section 2.3.2 describes how                    MAR), 2007. 4
+we can handle local illumination changes whilst tracking,              [7] G. Klein and D. W. Murray. Improving the agility of
+we are not robust to real-world global illumination changes                keyframe-based SLAM. In Proceedings of the European
+that can occur. Irani and Anandan [5] showed how a nor-                    Conference on Computer Vision (ECCV), 2008. 6
+malised cross correlation measure can be integrated into the           [8] S. J. Lovegrove and A. J. Davison. Real-time spherical mo-
+objective function for more robustness to local and global                 saicing using whole image alignment. In Proceedings of the
+lighting changes. As an alternative to this, in future work,               European Conference on Computer Vision (ECCV), 2010. 6
+we are interested in joint modelling of the dense lighting             [9] R. A. Newcombe and A. J. Davison. Live dense reconstruc-
+and reflectance properties of the scene to enable more accu-               tion with a single moving camera. In Proceedings of the
+                                                                           IEEE Conference on Computer Vision and Pattern Recogni-
+rate photometric cost functions to be used. We see this as
+                                                                           tion (CVPR), 2010. 1, 6
+a route forward in attempting to recover a more complete
+                                                                      [10] C. Rhemann, A. Hosni, M. Bleyer, C. Rother, and
+physically predictive description of a scene.                              M. Gelautz. Fast cost-volume filtering for visual correspon-
+                                                                           dence and beyond. In Proceedings of the IEEE Conference
+4. Conclusions                                                             on Computer Vision and Pattern Recognition (CVPR), 2011.
+                                                                           2
+                                                                      [11] L. I. Rudin, S. Osher, and E. Fatemi. Nonlinear total vari-
+We believe that DTAM represents a significant advance in                   ation based noise removal algorithms. Physica D, 60:259–
+real-time geometrical vision, with potential applications in               268, November 1992. 3
+augmented reality, robotics and other fields. Dense mod-              [12] F. Steinbrucker, T. Pock, and D. Cremers. Large displace-
+elling and dense tracking feed back on each other to make                  ment optical flow computation without warping. In Pro-
+a system with modelling and tracking performance beyond                    ceedings of the International Conference on Computer Vi-
+any point-based method.                                                    sion (ICCV), 2009. 3, 5
+                                                                      [13] J. Stuehmer, S. Gumhold, and D. Cremers. Real-time dense
+                                                                           geometry from a handheld camera. In Proceedings of the
+References                                                                 DAGM Symposium on Pattern Recognition, 2010. 1, 3
+                                                                      [14] R. Szeliski and D. Scharstein. Sampling the disparity space
+ [1] J.-F. Aujol. Some first-order algorithms for total variation
+                                                                           image. IEEE Transactions on Pattern Analysis and Machine
+     based image restoration. Journal of Mathematical Imaging
+                                                                           Intelligence (PAMI), 26:419–425, 2004. 2
+     and Vision, 34(3):307–327, 2009. 3, 4
+                                                                      [15] C. Zach. Fast and high quality fusion of depth maps. In Pro-
+ [2] S. Baker and I. Matthews. Lucas-Kanade 20 years on: A uni-
+                                                                           ceedings of the International Symposium on 3D Data Pro-
+     fying framework: Part 1. International Journal of Computer
+                                                                           cessing, Visualization and Transmission (3DPVT), 2008. 1
+     Vision (IJCV), 56(3):221–255, 2004. 7
+                                                                      [16] M. Zhu. Fast numerical algorithms for total variation based
+ [3] A. Chambolle and T. Pock. A first-order primal-dual al-
+                                                                           image restoration. PhD thesis, University of California at
+     gorithm for convex problems with applications to imaging.
+                                                                           Los Angeles, 2008. 3, 4
+     Journal of Mathematical Imaging and Vision, 40(1):120–
+     145, 2011. 3, 4, 6
+

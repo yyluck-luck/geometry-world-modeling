@@ -1,0 +1,40 @@
+{
+  "schema": "s15-history-preparation-v1",
+  "status": "PREPARED_PENDING_DIFFERENT_AUTHOR_REVIEW",
+  "completed_utc": "2026-09-06T09:45:52.564513+00:00",
+  "artifact_sha256": {
+    "scripts/run_s15_history.py": "2a31ca2ee6a9084669ea2ca75fdcb5d40ee727fa7c1a5d64af82f3088c884369",
+    "docs/S15_HISTORY_RUNNER_INTERFACE.md": "ce0986f514219d05cb62961f1f5c7e58b5a594c4d1c1373b10f69a30335177ce",
+    "work/S15_history_preparation/artificial_checks.py": "b5d170536a44c7ebb073d4d916a072a0b4188322ef4cd82f78f49a419280d85c",
+    "work/S15_history_preparation/artificial_checks.json": "4c78edc81743f228d7ba7f253bbc9eb3521f3fcb1357bc808053620bacbf03b1",
+    "work/S15_history_preparation/check_stdout.txt": "ce337e8cc80d9233ce30e117b12bf43241a0470a4acfab9bc57497f90843a5d7",
+    "work/S15_history_preparation/check_stderr.txt": "67e3f9ed61b23c85006c3e319d386ab181be6aa4dfa93c7a7ea56db613aab73e"
+  },
+  "artificial_check_count": 27,
+  "artificial_runtime_cases": 5,
+  "actual_new_image_reads": 0,
+  "actual_checkpoint_reads": 0,
+  "actual_new_prediction_array_reads": 0,
+  "actual_model_runs": 0,
+  "skills_applied": [
+    "/Users/rocket/.codex/skills/vibe-research-workflow/SKILL.md",
+    "/Users/rocket/.codex/skills/vibe-research-workflow/references/vibe-coding.md",
+    "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md"
+  ],
+  "source_checks": [
+    "Existing S14D and S14E loader/state/output/call provenance pattern",
+    "Pinned CUT3R inference.py:220 returns result and state snapshots",
+    "Pinned model.py:645 zero-dummy ray encoder fallback during RGB-only history",
+    "Pinned camera.py:396 official absT_quaR pose decoder"
+  ],
+  "corrections_before_real_execution": [
+    "Initial draft assumed zero history ray encoder calls; inspection found official zero-dummy fallback. Fixed gate to one image batch of20 plus one internal zero-dummy ray call before artificial checks or real execution.",
+    "S15A scope clarified to native RGB only; no calibration assumptions or target GT needed."
+  ],
+  "failure_interpretation": "check_stderr contains deliberately injected invalid manifest rejection; expected artificial gate success, not actual model failure.",
+  "remaining": [
+    "Different-author source review and final freeze",
+    "Parent creates native-RGB20 manifest and uses external resource monitor",
+    "Run actual S15A model once only after valid frozen contract"
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schema": "s15c-observed-depth-run-v1",
+  "mode": "score",
+  "status": "FAILED",
+  "started_utc": "2026-09-06T10:22:21.674591+00:00",
+  "executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "reads": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_8h42bx02/stage_manifest.json",
+      "role": "Frozen S15C contract and identity list",
+      "format": "json",
+      "attempted_utc": "2026-09-06T10:22:21.675548+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:22:21.675645+00:00"
+    }
+  ],
+  "identity_hashes": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_8h42bx02/stage_manifest.json",
+      "role": "Externally root-frozen stage manifest",
+      "attempted_utc": "2026-09-06T10:22:21.675443+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:22:21.675544+00:00",
+      "sha256": "8ee6a215c11d2361460139b58fa2cfb004265ccc2f348b70f6a4ae1c5905d213"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py",
+      "role": "Fixed scorer/calibrator source",
+      "attempted_utc": "2026-09-06T10:22:21.677792+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:22:21.677846+00:00",
+      "sha256": "9aa2a2a14846d8ac2ec664619d968a060abf7e3b00db249bbd96c791f0ee3867"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_8h42bx02/prediction_seal.json",
+      "role": "external calibrated prediction seal",
+      "attempted_utc": "2026-09-06T10:22:21.721907+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:22:21.721960+00:00",
+      "sha256": "2913124b1e1d0f1113a95f6dda77fa834f2d95aec9409b0da5fad1c4aa3cfc41"
+    }
+  ],
+  "counters": {
+    "identity_hash_attempts": 3,
+    "identity_hash_successes": 2,
+    "json_decode_attempts": 1,
+    "json_decoded": 1,
+    "npz_open_attempts": 0,
+    "npz_opened": 0,
+    "npz_array_decode_attempts": 0,
+    "npz_arrays_decoded": 0,
+    "depth_open_attempts": 0,
+    "depth_opened": 0,
+    "depth_decode_attempts": 0,
+    "depths_decoded": 0,
+    "rgb_decodes": 0,
+    "trajectory_decodes": 0,
+    "model_calls": 0
+  },
+  "observed_rgb_is_model_input": true,
+  "new_method_test": false,
+  "novel_view": false,
+  "video_generated": false,
+  "phase": "verify_s15c_calibrated_prediction_seal_before_eval_depth",
+  "updated_utc": "2026-09-06T10:22:21.721651+00:00",
+  "manifest_sha256": "8ee6a215c11d2361460139b58fa2cfb004265ccc2f348b70f6a4ae1c5905d213",
+  "contract": {
+    "device": "cpu",
+    "wall_seconds": 600,
+    "max_rss_bytes": 8589934592,
+    "resize": [
+      299,
+      224
+    ],
+    "crop": [
+      37,
+      0,
+      261,
+      224
+    ],
+    "depth_divisor": 5000,
+    "calibration_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "evaluation_indices": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  },
+  "numpy_version": "1.26.4",
+  "pillow_version": "10.3.0",
+  "completed_utc": "2026-09-06T10:22:21.721967+00:00",
+  "error": "ValueError('SHA256 mismatch: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_8h42bx02/prediction_seal.json')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 447, in main\n    else:score(args,m,rec)\n         ^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 363, in score\n    directory=verify_prediction_seal(args,m,rec)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 295, in verify_prediction_seal\n    rec.hash_check(args.prediction_seal,args.prediction_seal_sha256,'external calibrated prediction seal')\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 220, in hash_check\n    require(actual == digest, 'SHA256 mismatch: '+str(path))\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 37, in require\n    raise ValueError(message)\nValueError: SHA256 mismatch: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_8h42bx02/prediction_seal.json\n",
+  "wall_seconds": 0.04734591601300053,
+  "process_peak_rss_bytes": 44154880
+}

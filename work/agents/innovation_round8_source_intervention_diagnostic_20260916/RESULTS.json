@@ -1,0 +1,48 @@
+{
+  "evidence_type": "SYNTHETIC_NUMERICAL_COUNTEREXAMPLES_ONLY",
+  "scientific_validation": false,
+  "model_calls": 0,
+  "dataset_files_read": 0,
+  "future_gt_files_read": 0,
+  "checks_passed": 4,
+  "budget_confound": {
+    "consumer": "mean([query_anchor=0]+history)",
+    "synthetic_target": 0.5,
+    "full_context_count": 4,
+    "removed_context_count": 3,
+    "matched_replacement_context_count": 4,
+    "full_output": 0.8,
+    "removed_output": 0.75,
+    "matched_replacement_output": 0.8,
+    "remove_loss_improvement": 0.027500000000000024,
+    "matched_replace_loss_improvement": 0.0,
+    "interpretation": "Deletion improves squared error although every memory item is identical; the contrast includes active-count/normalization change."
+  },
+  "shared_bias": {
+    "true_depth": 10.0,
+    "biased_peer_and_pseudo_target_depth": 12.0,
+    "low_conflict_risk": 0.0,
+    "high_conflict_risk": 2.0,
+    "original_prediction": 12.0,
+    "replacement_prediction": 11.5,
+    "original_true_absrel": 0.2,
+    "replacement_true_absrel": 0.15,
+    "true_replacement_benefit": 0.05000000000000002,
+    "biased_proxy_replacement_benefit": -0.041666666666666664,
+    "interpretation": "A low-conflict but commonly biased source looks best under shared pseudo-GT and worse under independently specified truth."
+  },
+  "seed_replay": {
+    "seed": 42,
+    "branch_a_noise": 0.6394267984578837,
+    "branch_b_noise_after_extra_draw": 0.025010755222666936,
+    "same_seed_noise_delta": -0.6144160432352168,
+    "explicit_noise_replay_delta": 0.0,
+    "interpretation": "Save and inject the actual noise tensor and restore RNG states; equal integer seeds alone are not an exact replay contract."
+  },
+  "descendant_recomputation": {
+    "structural_equations": "mediator=source; output=2*mediator",
+    "fully_recomputed_total_effect": 2.0,
+    "effect_with_mediator_frozen": 0.0,
+    "interpretation": "Freezing post-intervention descendants changes the estimand and can erase the total downstream effect."
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "status": "PASS_S76_INDEPENDENT_VERIFIER_SOURCE_REVIEW",
+  "reviewer": "/root/next_control_feasibility",
+  "completed_utc": "2026-09-09T09:36:36.163443+00:00",
+  "files_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/independent_review_01/verify_saved.py": "d7bf57ef8d90b94719cdcbf5e8688e0accaa0d056ad9b4d16a309d6c34c84b50",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/independent_review_01/PLAN.md": "e723564ca4f5dedac81954cbfe21d43772048ebdeff4277c7883874cf4c6af7c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/independent_review_01/SOURCE_DELIVERY.json": "c122bb76efebaa4168fbd53ec65d46b11168163f1fb1334bb216fd3a6b070fbe",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/run_single_yaw.py": "a3a049c6a42ac05cb830379c6e1c6b2a096e24a24f887f9c367094c23957821c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/score_single_yaw.py": "5236e28c3c2ed15dceb538ee34b481d8cbe1a4eb751e5b121c9f00b68405c469",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/pilot_rules.py": "1da603e68a1c427231f491309a412c7cb005e2b460c4eccad436318b9484a326"
+  },
+  "blockers": [],
+  "checks": [
+    {
+      "name": "Actual schema",
+      "pass_": true,
+      "evidence": "Both modes use actual generation COMPLETE_SINGLE_YAW_FIXED_STREAM and score COMPLETE_SAVED_YAW_DIRECTION_DIAGNOSTIC, proper worker arrays/new_conditions/prescribed_geometry/steps/model fields and scorer targets/same_match_scores fields. Actual source keys agree."
+    },
+    {
+      "name": "Bound saved identity",
+      "pass_": true,
+      "evidence": "Contract fixed SHA; terminal receipts supplied by caller SHA; root binding checked against external binding hash and source map; NPY/NPZ file SHA, exact field sets, shape/dtype/body bytes/body SHA and finite values checked. No weight body opened."
+    },
+    {
+      "name": "No neural or feature rerun",
+      "pass_": true,
+      "evidence": "AST imports only stdlib and NumPy. No Torch/PIL/OpenCV, model/source execution, feature extraction or image reads. Generation verifier reads existing numeric arrays and RNG state JSON only after actual future invocation."
+    },
+    {
+      "name": "Four targets and unknown precedence",
+      "pass_": true,
+      "evidence": "Scorer target IDs require20,21,22,23 exactly. M,N,Nc,C counts/ratios retain zero denominators as None. All4 event uses any-None first; no filtering of missing targets. All-valid and common-FOV families remain distinct."
+    },
+    {
+      "name": "Independent arithmetic",
+      "pass_": true,
+      "evidence": "Scalar projection/hypot/quantile interpolation rederive matching residuals and paired sign counts; coverage checks and count inequalities preserved. Original frozen geometry uses same selected matched point rows, no fit or RANSAC."
+    },
+    {
+      "name": "Geometry and FP32 approximation",
+      "pass_": true,
+      "evidence": "H uses old/new actual FP32 rotations promoted to float64; independent scalar matrix products at1e-12. All integer grid mask bits checked. True inverse versus transpose is separate diagnostic only. local yaw2e-7 and independently derived rays/centering2e-5 are frozen."
+    },
+    {
+      "name": "RNG and model boundary",
+      "pass_": true,
+      "evidence": "Exactly50 new step traces, state signatures, actual common/entry/terminal JSON canonical hashes, noise bytes and local model snapshot metadata checked. Cross-process comparisons limited to values/modes. Consumed weight identity is existing receipt evidence, never independently reread model content."
+    },
+    {
+      "name": "Quantizer and complete arrays",
+      "pass_": true,
+      "evidence": "Requires all8_latents/targets_fp32/targets_uint8 exact shapes/dtypes. Independent finite NumPy clip/scale cast reproduces original saved quantizer output; Torch advisory branch not authoritative. No display alteration or new generation."
+    },
+    {
+      "name": "Limits and source-only compile",
+      "pass_": true,
+      "evidence": "Verifier syntax compiled using stdlib compile only. Own110-second boundary and2GiB ru_maxrss check; caller must impose120-second external timeout. No verifier execution, NumPy import, new result payload read or scientific result claimed."
+    }
+  ],
+  "limitations": [
+    "This PASS is source review, not actual numerical/RNG/model or scientific acceptance; root must bind actual worker/external/score receipts when executing.",
+    "N and Nc are recorded SIFT counts. Frozen scorer did not retain all unmatched feature coordinates, so feature extraction truth and common-FOV source membership cannot be independently reconstructed here. The program and PLAN explicitly disclose this.",
+    "Score mode does not decode/check PNG bytes; generation mode checks saved numeric pixel arrays. Planned prepare_visuals.py separately checks scorer PNG file/pixel SHA. Neither establishes correspondence truth.",
+    "Root should run generation verification successfully before score verification; the script accepts modes independently and does not itself require generation_01 PASS receipt in score mode.",
+    "H sign, event and full-mask comparisons are strict, despite scalar tolerance. Floating boundary discrepancies will produce preserved discrepancies and require inspection, not automatic tolerance relaxation.",
+    "Finite/shape guard failures or pathological None source coordinates can produce FAILED_PRESERVED; this is not silently converted to missing-positive success. The current SIFT producer emits finite source keypoint coordinates.",
+    "Metadata array descriptors establish saved bytes. They cannot prove unseen live model identities, actual consumer use, camera correctness, whole-image homography validity or novel methodology.",
+    "The installed venv numpy-1.26.4.dist-info directory exists, observed by metadata-only listing. Runtime NumPy import/version not executed by this review."
+  ],
+  "compile_only_pass": true,
+  "new_scientific_payload_reads": 0,
+  "model_loads": 0,
+  "verifier_executions": 0,
+  "source_modified": false
+}

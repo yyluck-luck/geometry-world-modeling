@@ -1,0 +1,65 @@
+{
+  "recorded_utc": "2026-09-10T16:03:06.250459+00:00",
+  "task": "Two nearest primary works for reinterpretation and frozen visual consumer hypotheses",
+  "work_count": 2,
+  "retrieval_time_bounds": {
+    "after_utc": "2026-09-10T15:56:17.694777+00:00",
+    "complete_by_utc": "2026-09-10T15:59:28+00:00",
+    "note": "Web requests individually not instrumented; bounds are preceding artifact time and final current-time checkpoint. iSAM2 local source retrieval has exact times below."
+  },
+  "queries": [
+    "iSAM2 incremental smoothing mapping relinearization original paper fixed lag marginalized variables nonlinear factors",
+    "CVPR 2025 3D-Mem scene memory visual snapshots frozen VLM memory retrieval official paper"
+  ],
+  "sources": [
+    {
+      "title": "iSAM2: Incremental Smoothing and Mapping with Fluid Relinearization and Incremental Variable Reordering",
+      "venue": "ICRA 2011, pp. 3281-3288",
+      "primary_urls": [
+        "https://www.cs.cmu.edu/~kaess/pub/Kaess11icra.html",
+        "https://www.cs.cmu.edu/~kaess/pub/Kaess11icra.pdf"
+      ],
+      "version": "8-page author-hosted ICRA 2011 PDF, locally bound by SHA",
+      "bytes": 1211926,
+      "sha256": "fc343f779a3dd8671a5acebac103b94b0a503eaa837a4ca654f366687272eed8",
+      "retrieval_started_utc": "2026-09-10T15:58:08.031316+00:00",
+      "retrieval_finished_utc": "2026-09-10T15:58:11.497435+00:00",
+      "local_file": "Kaess11icra.pdf",
+      "text_file": "Kaess11icra.txt",
+      "text_sha256": "51734340ca2681bfdcc4144c61c08ab95214dee27e633a37b25b3de7aacf8394",
+      "read_scope": "Partial: section III nonlinear factor model, IV algorithm introduction, Algorithms 2/3/5, section IV-C/D; local pdftotext lines 1250-1365 and 1485-1529. Text search for relinearization/marginal/algorithm terms; figures not visually inspected. Entire 8-page PDF acquired, but full paper NOT read.",
+      "not_read": "Complete experiments/proofs; implementation code; any fixed-lag marginalization implementation. No iSAM2 execution.",
+      "key_scope_limit": "Relinearizes original nonlinear factors in a growing graph; not a semantic detector revision, nor certified fixed-byte memory policy."
+    },
+    {
+      "title": "3D-Mem: 3D Scene Memory for Embodied Exploration and Reasoning",
+      "venue": "CVPR 2025, pp. 17294-17303, identity from official CVF indexed record",
+      "primary_urls": [
+        "https://openaccess.thecvf.com/content/CVPR2025/html/Yang_3D-Mem_3D_Scene_Memory_for_Embodied_Exploration_and_Reasoning_CVPR_2025_paper.html",
+        "https://arxiv.org/abs/2411.17735",
+        "https://arxiv.org/html/2411.17735v5"
+      ],
+      "version": "arXiv v5 dated 2025-04-04; not asserted byte-identical to CVF final PDF",
+      "read_scope": "Partial v5: section 3 algorithm 1 and construction/retrieval, web lines 107-202; section 4.1/4.2 input/consumer comparisons, lines 225-250; sections 7.3/8, lines 334-362; implementation lines 374-388. No image viewing, dataset, model or complete implementation read.",
+      "version_transition": "Initially read author v2, then checked metadata listing v5 and rechecked all final key mechanism/budget/consumer/limitation claims in v5. No v2 performance numbers adopted.",
+      "remote_bytes_saved": false,
+      "sha256": null,
+      "key_scope_limit": "Candidate union grows; K is retained object-category count, not fixed frame or total-byte count. Static-environment limitation explicit; GPT-4o and finetuned LLaVA branches are distinct."
+    }
+  ],
+  "failures": [
+    "web open author iSAM2 PDF timed out; one local curl request to identical official URL succeeded",
+    "web CVF 3D-Mem PDF returned 403; used author HTML, without equating bytes",
+    "direct CVF HTML open produced internal error; primary indexed CVF record supplied venue identity"
+  ],
+  "mathematical_inference_not_cited_as_implementation": "Boundary marginal distribution suffices only if new evidence depends only on boundary variables; delayed dependence on eliminated variables may require retained conditional/joint information. This is own conditional-probability analysis, not a fixed-lag source-code audit.",
+  "scope": {
+    "dataset_downloads": 0,
+    "new_real_data_reads": 0,
+    "model_runs": 0,
+    "new_toy_runs": 0,
+    "paid_model_calls": 0,
+    "main_ledger_edits": 0
+  },
+  "scientific_status": "NO_METHOD_SELECTED"
+}

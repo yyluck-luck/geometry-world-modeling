@@ -1,0 +1,241 @@
+{
+  "schema": "s44-c1-terminal-evidence-review-v1",
+  "status": "PASS_S44_C1_ARCHIVE_TRACE_METADATA_REVIEW",
+  "reviewed_utc": "2026-09-08T02:21:50.895165+00:00",
+  "reviewer_role": "/root/c2_generation_builder",
+  "generation_executor_role": "/root",
+  "review_scope": "Independent terminal review of the completed S44 C1 frozen-manifest, parent/worker receipts, trace metadata chain, archive metadata chain, archive manifest registry, source identities, and archive file sizes. No archive tensor/blob body, descriptor JSON body, or image body was opened; no image was decoded; no readback, score, model, renderer, or generation path was run.",
+  "manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/manifest.json",
+    "sha256": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+    "schema": "s44-c1-confirmation-two-batch-v1",
+    "status": "FROZEN_C1_BASELINE_CONFIRMATION_TWO_BATCH_EXECUTION",
+    "source_identity_count": 218,
+    "source_identity_mapping_sha256": "a24fffc251537789eca9ede6d0afd9a9d3d89b6d84a22cc40beb946571377570",
+    "source_bytes_rehashed": 2092020,
+    "all_218_source_sha256_recomputed_equal": true
+  },
+  "parent_bindings": {
+    "s40_manifest": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+      "declared_sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe",
+      "recomputed_sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe",
+      "equal": true
+    },
+    "s42_preregistration": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+      "declared_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+      "recomputed_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+      "equal": true
+    }
+  },
+  "evidence_sha256": {
+    "manifest": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+    "external_parent_receipt": "44753718ca666d134ac9500ffcd6ada6b0e7e4e6ce6cbfc3bfa9f50de85dcb18",
+    "worker_receipt": "5deea6956876f03d7b36ed6ab57f608f9613da79e133921d3ead0865196b18f0",
+    "archive_manifest": "9eb187c525db06b87d1203734298b772339b57c734f7aad6414f1be89f0c82ad",
+    "archive_events": "bc23310bff3f1df6aa7c5a29cf2b16246103976670f6554295c773a00da9dcd3",
+    "trace_events": "6651fac3672a6a83d74ffe34a1b973a47d99dd8e9a6e492fa2e6f2732d7d5cdb",
+    "observation_summary": "06fe7ac55c9d05d8700f160e29250b9899782934c396c45ac474963365cf76b1",
+    "generation_launcher_source": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b",
+    "full_resource_gate": "273df7deabf8bac5585fe8d8efffb5a2fa8cab32c7f2aaecc44b76c7cf2212c2",
+    "launch_ticket": "3da6e39958e365d926132263ef9029f0459c4243e51d411cc4ad9f07b319110f",
+    "metadata_gate": "b3cac99776784108bc52d905a343b962b06c8086a51d7116c2d9b990f26c0bfe",
+    "runtime_loading": "6e34d1c332da3962cdc6811c2460dbefc580a995ee532387781dd46cc423d03b",
+    "monitor": "26e7a2acb54888393596f67d50f2c056acf1c3d3aa5ee3f1b70753cfac7a841a",
+    "worker_stdout": "ed63fb6dbc8079bf1f0bcf380bfc16daa09d45051c534532c63950ab8ea22bae",
+    "worker_stderr": "ceb19af07d709e89dd13722fc2336fd04536e9c806783ec6937131de59c34ab4"
+  },
+  "checks": [
+    {
+      "id": "A01_EXACT_TERMINAL_BINDINGS",
+      "verdict": "PASS",
+      "evidence": "The external parent receipt has schema s44-c1-confirmation-launch-v1, terminal pending-review status, returncode 0, worker_spawned true, and binds the independently recomputed manifest, launcher, and worker-receipt SHA values. The worker receipt has schema s44-c1-confirmation-worker-v1, terminal pending-review status, one attempted/completed full-resource check, one runtime factory call, and binds the same manifest and launcher plus the independently recomputed trace, observation-summary, and archive-manifest SHA values. Both receipts record source_unchanged_at_close true."
+    },
+    {
+      "id": "A02_FROZEN_LINEAGE_AND_SOURCE_DOMAIN",
+      "verdict": "PASS",
+      "evidence": "The frozen manifest binds the independently recomputed S40 manifest SHA and S42 preregistration SHA. Both attached core-review receipt hashes and every nested S39 evidence hash were also recomputed equal. The final manifest, full-resource gate, trace session, archive_start event, and archive manifest carry the same 218-entry source-identity mapping. All 218 source files, totaling 2,092,020 bytes, were independently rehashed and matched. Component/model-weight bodies were not rehashed by this review."
+    },
+    {
+      "id": "A03_TRACE_CANONICAL_CHAIN",
+      "verdict": "PASS",
+      "evidence": "All 327 newline-terminated trace rows parsed. Sequence numbers are contiguous from 0 through 326, the first previous hash is 64 zeroes, every subsequent previous_sha256 equals the preceding row SHA, and every row SHA equals SHA-256 of its canonical sorted compact JSON after removing only sha256. Every row is recorded_execution. The chain ends at 0b9d53bf075e6170677fe8ae34d462ae859f42ecc31df8beab01784324cfdba4 with one session_end declaring two batches and no failure or operation_failure event."
+    },
+    {
+      "id": "A04_TRACE_EVENT_COUNTS_AND_BATCH_CLOSURE",
+      "verdict": "PASS",
+      "evidence": "The exact trace counts are session 1, observation 209, batch_begin 2, sample_call 2, sampler_enter 2, denoiser_call 100, sampler_return 2, sample_return 2, cache_commit 2, map_commit 2, batch_complete 2, and session_end 1. Each batch has 50 denoiser_call rows. The two batch_complete sequence/hash/time/retained-ID tuples exactly equal the parent receipt trace_budget_boundary, whose closure fields are session_closed true, seen_failure false, parsed_events 327, and pending_bytes 0."
+    },
+    {
+      "id": "A05_HISTORY_SELECTION_AND_RETENTION",
+      "verdict": "PASS",
+      "evidence": "Trace batch_begin metadata has history frame IDs [0] and [0,1,2,3,4], giving history-before lengths 1 and 5. The two cache_commit rows record history-after lengths 5 and 9. Selected context IDs are [0] and [0,2,4,1]. Both cache_commit and batch_complete records agree on retained IDs [1,2,3,4] and [5,6,7,8], whose concatenation is exactly 1 through 8. The SHA-bound observation summary repeats the same selected and retained IDs."
+    },
+    {
+      "id": "A06_ARCHIVE_CANONICAL_CHAIN_AND_REQUIRED_COUNTS",
+      "verdict": "PASS",
+      "evidence": "All 102 newline-terminated archive metadata rows parsed. Sequence and canonical previous/SHA links are valid from archive_start through archive_finalize, ending at 67a58d988d205b6a371225e563b7a602537c18d976488e1143d9a43cd768409f. The event structure is one archive_start, 50 capture_begin/capture_complete pairs, and one archive_finalize. Every pair has the same name and occurrence and a matching begin_seq. There are zero failure events. Completed-name counts equal archived_name_counts and satisfy every required count. The final event requests COMPLETE, reports scientific_status NOT_EVALUATED, and has no missing required names."
+    },
+    {
+      "id": "A07_ARCHIVE_MANIFEST_AND_REGISTRY",
+      "verdict": "PASS",
+      "evidence": "The archive manifest has status ARCHIVE_COMPLETE, recorded_execution evidence, scientific_status NOT_EVALUATED, the same caller-manifest SHA and 218 source identities, event_count 102, the recomputed terminal event SHA, failed_captures 0, and an empty missing_required_names object. It binds the independently recomputed observation-summary SHA. The descriptor registry contains 2,378 unique tensor entries; each registry key, blob path, descriptor identity, nbytes, registered byte hash, and companion descriptor path is internally consistent with the manifest registry. Descriptor JSON bodies and tensor blobs were not opened."
+    },
+    {
+      "id": "A08_ARCHIVE_FILE_SIZE_INVENTORY",
+      "verdict": "PASS_WITH_PAYLOAD_BOUNDARY",
+      "evidence": "Exactly 4,766 manifest-listed archive files were checked using path enumeration and lstat size only: 2,378 tensor blobs, 2,378 descriptor JSON files, 9 PNG files, and events.jsonl. The physical and manifest path sets are equal; no listed file is a symlink or nonregular file; all recorded sizes match; declared and observed totals are both 238,344,045 bytes. No listed tensor/blob, descriptor JSON, or image payload body was opened or rehashed."
+    },
+    {
+      "id": "A09_REVIEW_TIME_ORDER",
+      "verdict": "PASS",
+      "evidence": "The external receipt completed_utc is 2026-09-07T18:48:33.738498+00:00 and this review's timezone-aware reviewed_utc is 2026-09-08T02:21:50.895165+00:00, so the independent review occurred strictly after the recorded external completion."
+    }
+  ],
+  "derived_counts": {
+    "trace_rows": 327,
+    "trace_event_counts": {
+      "session": 1,
+      "observation": 209,
+      "batch_begin": 2,
+      "sample_call": 2,
+      "sampler_enter": 2,
+      "denoiser_call": 100,
+      "sampler_return": 2,
+      "sample_return": 2,
+      "cache_commit": 2,
+      "map_commit": 2,
+      "batch_complete": 2,
+      "session_end": 1
+    },
+    "history_before_lengths": [
+      1,
+      5
+    ],
+    "history_after_lengths": [
+      5,
+      9
+    ],
+    "selected_context_ids": [
+      [
+        0
+      ],
+      [
+        0,
+        2,
+        4,
+        1
+      ]
+    ],
+    "retained_frame_ids": [
+      [
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        5,
+        6,
+        7,
+        8
+      ]
+    ],
+    "batch_complete_events": [
+      {
+        "batch_id": "batch_1",
+        "ordinal": 0,
+        "event_seq": 164,
+        "event_sha256": "25d655678b5ad290c594597f19e5bedd042bb0e82c55c9e365c5a5875eb74c06",
+        "event_utc": "2026-09-07T18:26:18.719579+00:00",
+        "retained_frame_ids": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "batch_id": "batch_2",
+        "ordinal": 1,
+        "event_seq": 325,
+        "event_sha256": "f820760b92324fbefc6c19015fcd7cb93ec3682d1d14d07ace05bfb75a7077dd",
+        "event_utc": "2026-09-07T18:48:31.331744+00:00",
+        "retained_frame_ids": [
+          5,
+          6,
+          7,
+          8
+        ]
+      }
+    ],
+    "archive_metadata_events": 102,
+    "archive_event_counts": {
+      "archive_start": 1,
+      "capture_begin": 50,
+      "capture_complete": 50,
+      "archive_finalize": 1
+    },
+    "archive_required_events": {
+      "cache_commit": 2,
+      "condition_input": 2,
+      "condition_output": 2,
+      "context_output": 2,
+      "geometry_output": 2,
+      "initial_input": 1,
+      "initial_output": 1,
+      "integration_return": 1,
+      "map_commit": 2,
+      "navigator_begin": 3,
+      "navigator_return": 3,
+      "sample_output": 2,
+      "sampler_input": 2,
+      "sampler_output": 2
+    },
+    "archive_failure_events": 0,
+    "archive_failed_captures": 0,
+    "archive_missing_required_names": {},
+    "archive_files_stat_checked": 4766,
+    "archive_manifest_declared_file_bytes": 238344045,
+    "archive_observed_stat_bytes": 238344045,
+    "archive_size_mismatches": 0,
+    "archive_tensor_descriptors": 2378,
+    "archive_tensor_blob_files": 2378,
+    "archive_descriptor_json_files": 2378,
+    "archive_image_files": 9,
+    "source_identity_files_rehashed": 218,
+    "source_identity_bytes_rehashed": 2092020
+  },
+  "blocking_findings": [],
+  "claim_boundary": {
+    "established": [
+      "The terminal metadata evidence is internally bound to one frozen S44 C1 manifest, one external parent receipt, one worker receipt, one trace file, and one archive receipt/metadata chain.",
+      "The 327-row trace metadata chain closes two batches with recorded history progression 1 to 5 to 9, selected context IDs [0] then [0,2,4,1], and retained frame IDs exactly 1 through 8.",
+      "The 102-row archive metadata chain has 50 complete capture pairs, zero recorded failures, all required event counts, ARCHIVE_COMPLETE status, 2,378 registered tensor descriptors, and 4,766 manifest-listed files whose stat sizes match."
+    ],
+    "not_established": [
+      "The content hash or semantic correctness of any archived tensor/blob, descriptor JSON payload, or image payload.",
+      "Bitwise propagation from first-batch generated tensors into second-batch sampler inputs; this requires the separately authorized saved-output readback path.",
+      "Image decoding validity, image or video quality, temporal consistency, geometry correctness, model correctness, exact original SD2.1 baseline equivalence, performance gain, method gain, or novelty."
+    ]
+  },
+  "operations": {
+    "generation_runs": 0,
+    "readback_runs": 0,
+    "score_runs": 0,
+    "model_loads": 0,
+    "model_or_renderer_calls": 0,
+    "image_decodes": 0,
+    "archive_payload_bodies_read": 0,
+    "archive_tensor_blob_bodies_read": 0,
+    "archive_descriptor_json_bodies_read": 0,
+    "archive_image_bodies_read": 0,
+    "archive_payload_sha256_recomputations": 0,
+    "archive_file_size_stat_checks": 4766,
+    "source_file_sha256_recomputations": 218,
+    "component_weight_reads": 0,
+    "network_requests": 0,
+    "canonical_ledger_modified": false
+  }
+}

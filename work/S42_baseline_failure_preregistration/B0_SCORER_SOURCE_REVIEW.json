@@ -1,0 +1,101 @@
+{
+  "schema": "s42-b0-blind-scorer-source-review-v1",
+  "status": "PASS_S42_B0_BLIND_SCORER_SOURCE_REVIEW",
+  "verdict": "PASS_STATIC_SOURCE_REVIEW_NOT_EXECUTED",
+  "completed_utc": "2026-09-07T15:43:13Z",
+  "review_scope": "Third-candidate, different-author static review of the exact B0 blind scorer, scoring contract, frozen preregistration protocol, and revision receipt. This review authorizes only the next adversarial source-review gate; it is not a B0 execution or result.",
+  "scorer_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/score_b0_blind.py",
+  "scorer_sha256": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORING_CONTRACT.json",
+  "contract_sha256": "1143f700855ab32df3d703fc91b2ff8707ca3dc3e217407156be9247d677c11b",
+  "preregistration_protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+  "preregistration_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+  "revision_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_REBASE_V3_3_1_RECEIPT.json",
+  "revision_receipt_sha256": "d0f6b8e1e8961f63fb232af843ecaad06b38d841309c761294679388c7be1eca",
+  "executed": false,
+  "scorer_imported": false,
+  "s40_generated_images_viewed": false,
+  "s40_result_arrays_decoded": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "model_generation_renderer_readback_or_gate_runs": 0,
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "blocking_findings": [],
+  "reviewed_prior_blockers": {
+    "concurrent_attempt_race": "CLOSED",
+    "hash_to_memmap_TOCTOU": "CLOSED",
+    "missing_manifest_descriptor_registry_binding": "CLOSED",
+    "unscoped_template_like_blind_attestation": "CLOSED",
+    "failure_path_report_publication": "CLOSED"
+  },
+  "checks": {
+    "exact_identity_binding": {
+      "result": "PASS",
+      "evidence": "The current scorer embeds the exact contract and preregistration protocol hashes; the reviewed revision receipt binds the exact current scorer, contract, protocol, preregistration receipt, and retained blocking reviews."
+    },
+    "dual_source_review_gate": {
+      "result": "PASS",
+      "evidence": "Primary and adversarial reviews have fixed paths, distinct schemas and PASS statuses, must bind the same exact scorer/contract/protocol, must state no execution/viewing/array decoding and empty blockers, and require author plus both reviewers to be pairwise distinct."
+    },
+    "attempt_specific_blind_attestation": {
+      "result": "PASS",
+      "evidence": "Only the fixed non-template attestation is accepted. It binds attempt 01, the canonical output path, manifest, scorer, contract, both source-review paths and hashes, three exact false fields, the author-attestor role, and a timezone-aware UTC after both reviews and no later than score start."
+    },
+    "metadata_decoder_provenance": {
+      "result": "PASS",
+      "evidence": "List and tuple remain distinct; scalar labels require exact built-in value types with bool distinct from int; only raw kind=tensor creates TensorDescriptor; ordinary decoded dicts cannot pass the exact TensorDescriptor gate; PIL pixels recurse through the decoder."
+    },
+    "complete_archive_registry": {
+      "result": "PASS",
+      "evidence": "Before event decoding or numeric reads, the scorer requires the frozen complete 1951-entry tensor descriptor registry and 3912-entry file table, validates exact descriptor fields and canonical raw blob keys, binds body and sidecar manifest identities, and checks every registered body and sidecar for presence, regular-file type, no symlink, and registered size."
+    },
+    "event_descriptor_and_used_file_integrity": {
+      "result": "PASS",
+      "evidence": "Each used event TensorDescriptor must equal its complete manifest registry entry field-for-field before body open. Used body and sidecar identities, body hash, descriptor-plus-body hash, sidecar hash and value, shape, dtype, byte order, C order, canonical containment, regular-file type, and size remain enforced."
+    },
+    "same_FD_immutable_snapshot": {
+      "result": "PASS",
+      "evidence": "Each canonical used tensor body is opened once without following symlinks, read and hashed with pread through that FD into immutable bytes, checked for exact EOF and unchanged full fstat identity, and converted only from the retained immutable byte snapshot into a read-only NumPy view."
+    },
+    "closing_tensor_reverification": {
+      "result": "PASS",
+      "evidence": "After all camera and pixel calculations and before report construction, every still-open tensor FD is rechecked for full stat identity, fully reread and rehashed through the same FD, compared with its original snapshot hash, and matched to the current canonical path inode before close."
+    },
+    "exclusive_attempt_lease": {
+      "result": "PASS",
+      "evidence": "The fixed regular non-symlink lock is acquired with a nonblocking exclusive flock before attempt enumeration or staging creation and remains held through final-directory rename and parent-directory fsync. Existing staging, missing terminal receipts, sequence gaps, misbound receipts, or a prior valid attempt fail closed."
+    },
+    "atomic_staging_publication": {
+      "result": "PASS",
+      "evidence": "The canonical attempt directory remains absent during scoring. Create-only report and receipt files are individually fsynced inside a same-parent mode-0700 hidden staging directory, the staging directory is fsynced, and only the complete directory is atomically renamed and followed by parent fsync. Residual staging is retained and blocks retry."
+    },
+    "failure_has_no_report": {
+      "result": "PASS",
+      "evidence": "Both TechnicalInvalid and BaseException handlers unconditionally clear the in-memory report and force technically_valid=false. Report staging requires the conjunction of non-null report, the exact PASS status, and technically_valid=true; every other terminal state clears validity and requires report absence."
+    },
+    "frozen_primary_metric": {
+      "result": "PASS",
+      "evidence": "The primary pair remains ID0 to ID8 from final cache_commit occurrence 1; M_outer4 remains the four frozen 192x192 regions with 147456 pixels and 442368 RGB scalars; uint8 values are converted to float64 and divided by 255 before subtraction; the event remains unrounded MSE_M strictly greater than 0.01 and equality is not an event."
+    },
+    "frozen_diagnostics_and_copy_guard": {
+      "result": "PASS",
+      "evidence": "Generated-only pairs remain (1,7), (2,6), and (3,5), per-region and full-frame values remain diagnostics, and the copy guard rejects both all generated frames equaling ID0 and all generated frames being mutually byte-identical."
+    },
+    "camera_and_claim_boundary": {
+      "result": "PASS",
+      "evidence": "The two batch-to-cache c2w/K checks, frozen yaw sequence, fixed-K checks, ID8-to-ID0 closure, and 1e-6 tolerance remain unchanged. Their status is explicitly condition-only, visual camera obedience remains unevaluated, B0 remains one development row with cohort INCOMPLETE, and no memory, mean, repeatability, visual-quality, camera-obedience, or novelty claim is allowed."
+    },
+    "deadline": {
+      "result": "PASS",
+      "seconds": 300,
+      "evidence": "The fixed monotonic deadline is retained across identity hashing, event parsing, tensor snapshots, closing rehash, and staged report verification; a timeout cannot yield a valid report receipt."
+    }
+  },
+  "limitations": [
+    "This was a source and contract review only; no scorer, B0 metric, readback, model, generation, renderer, or gate was executed.",
+    "No S40 image, PNG, montage, tensor body, image payload body, or scientific result array was opened, decoded, mapped, or viewed.",
+    "This PASS does not establish that the scorer will return a technically valid result, that any discrepancy exists, that rendered pixels obey the requested camera, that visual quality is acceptable, or that any method is novel.",
+    "Execution remains blocked until a pairwise-independent adversarial source review also passes and the exact attempt-specific pre-score blindness attestation is truthfully created and hash-bound."
+  ],
+  "next_gate": "Obtain the independent adversarial static PASS for this exact scorer and contract. Only afterward may the exact attempt-01 blindness attestation be created; B0 execution remains a later separate gate."
+}

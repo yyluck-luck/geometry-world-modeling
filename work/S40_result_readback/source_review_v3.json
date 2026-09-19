@@ -1,0 +1,81 @@
+{
+  "schema": "S40_READBACK_INDEPENDENT_SOURCE_REVIEW_V3",
+  "status": "REVISION_REQUIRED",
+  "verdict": "REVISION_REQUIRED",
+  "reviewed_utc": "2026-09-07T12:40:20Z",
+  "reviewer": "/root/readback_schema_audit",
+  "review_scope": "Independent read-only line-by-line incremental review of the exact v3 readback source, protocol, revision receipt, preserved v2 review, and attempt01 failure receipts; archive event metadata only, with no tensor/image body read and no readback/model/gate execution.",
+  "bound_identities": {
+    "readback.py": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+    "PROTOCOL_DRAFT.md": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+    "revision_v3_receipt.json": "e382f67a6e59b830443b2a947a27e7285e87aef2b6701474888ac88171757424",
+    "source_review_v2.json": "ea599804589dc4c10b2ca65c972bbf1ae8a1c3c04c327f7605c5a45e2f08ec19",
+    "supervision_01/receipt.json": "f269dc2486478e65176c38445ab97251f31a5a4ac6c9f50cbd344a73daefd5da",
+    "executed_01/receipt.json": "4b762c3061d395a6767f319a553e681dbea8fe4d90bd49e5ac8a563d36bf35c6"
+  },
+  "incremental_reconstruction": {
+    "method": "Applied readback.py.v2.diff to the preserved v1 source through stdout only, then compared that reconstructed v2 stream with the submitted v3 source.",
+    "reconstructed_v2_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "delta_scope": "Only the context_time_indices block formerly at v2 lines 273-275 changed; surrounding source is byte-identical to reconstructed v2.",
+    "python_ast_parse": "PASS"
+  },
+  "code_delta_findings": {
+    "first_batch_exact_python_list": {
+      "verdict": "PASS",
+      "evidence": "readback.py lines 273-277 require j==0 to have exact built-in list value [0] and every element to have exact built-in int type. The type test rejects bool and NumPy integer subclasses."
+    },
+    "second_batch_tensor_descriptor": {
+      "verdict": "PASS",
+      "evidence": "readback.py lines 278-283 require the second representation to be a tensor descriptor, call the unchanged Reader.array path, and retain the one-dimensional integer-kind test before integer extraction."
+    },
+    "observed_schema_binding": {
+      "verdict": "PASS",
+      "evidence": "Frozen pipeline SHA 680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255 returns [0] at lines 631-632 and a torch tensor at lines 752-764. Archive event seq22, row SHA 30b9db7720d48e622b80bff8679191436209d8f630b0443e7d3ca84fc6e9a38a, stores a list containing scalar type int value 0; seq68, row SHA 83a6cfe9d4c78deb02d55b1ff635263d0fd212ec3f9d27377bcef5eabb7683c6, stores int64 tensor shape [4], tensor SHA 2a1119dcc2a2f3d1103985b60723071ec44ab4594d565dfb832141f07b2ea1d5."
+    },
+    "unchanged_checks": {
+      "verdict": "PASS",
+      "evidence": "Reader.array, Reader.descriptor, Reader.tree, FIELDS, archive and trace hash-chain checks, same-dtype bitwise comparisons, limited FP64-to-FP32 camera/K cast checks, cross-batch cache checks, and all post-ID uniqueness/range/order bindings are unchanged from reconstructed v2."
+    },
+    "failure_preservation": {
+      "verdict": "PASS",
+      "evidence": "supervision_01 and executed_01 remain present with the bound receipt SHAs; executed_01/report.json remains absent, matching revision_v3_receipt.json."
+    }
+  },
+  "blocking_findings": [
+    {
+      "id": "R1_PROTOCOL_ATTEMPT01_BODY_READ_BOUNDARY",
+      "severity": "BLOCKING",
+      "path": "work/S40_result_readback/PROTOCOL_DRAFT.md",
+      "line": 3,
+      "finding": "The protocol says attempt01 failed before reading pixels. That is not accurate under the project's byte-read boundary: readback.py lines 222-226 hash every archive tensor body and every archive file before reaching the failing ID parse at line 273.",
+      "receipt_evidence": {
+        "attempt01_identity_files": 5916,
+        "attempt01_identity_bytes": 244804717,
+        "archive_png_files_hashed": 9,
+        "archive_png_bytes_hashed": 5698754,
+        "archive_tensor_bin_files_hashed": 1951,
+        "archive_tensor_bin_bytes_hashed": 226619164
+      },
+      "required_correction": "State that attempt01 failed before the first saved tensor was successfully mapped as a NumPy comparison array and before any visual decoding, visual inspection, bitwise scientific comparison, or quality scoring. Also state that it had already streamed and hashed archive tensor/image file bodies for identity verification. Do not describe those body reads as zero."
+    }
+  ],
+  "nonblocking_observations": [
+    "revision_v3_receipt.json static_checks.archive_tensor_or_image_bodies_read=0 is acceptable only as a statement about the v3 source-editing activity itself; it must not be read as an attempt01 claim.",
+    "The new source code is technically suitable for the observed mixed representation. The present revision requirement is limited to the protocol evidence boundary and the identities that must change after correcting that protocol."
+  ],
+  "authorization": {
+    "update_outer_supervisor_pins": false,
+    "run_supervision_02_or_executed_02": false,
+    "reason": "The bound protocol needs one evidence-boundary correction and therefore a new SHA plus renewed independent review."
+  },
+  "operations": {
+    "source_or_protocol_modified_by_reviewer": false,
+    "readback_import_or_run": 0,
+    "model_gate_generation_renderer_or_scoring_runs": 0,
+    "tensor_or_image_body_reads_by_reviewer": 0,
+    "archive_event_metadata_reads": 1,
+    "attempt01_receipt_metadata_reads": 1,
+    "network_requests": 0,
+    "canonical_ledger_modified": false
+  }
+}

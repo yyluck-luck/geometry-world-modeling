@@ -1,0 +1,18 @@
+# C1 manifest freeze protocol
+
+The freeze tool is standard-library only. Before creating any protocol-compliant directory, it must validate the mode/output pairing and all mode-specific arguments, verify its pinned sources, load the metadata-only gate, verify the exact S40 and S42 parents, verify the four row-specific runtime-source hashes, verify the exact seed-43 YAML derivation, hash the full C1 JPEG without decoding it, and reject every filesystem entry at a reserved output location. Freshness uses `lexists`, so a broken symlink is occupied. A preflight failure is written to a unique non-authoritative failure record and cannot consume `freeze_attempt_01` or `review_attachment_01`.
+
+After preflight, the tool builds a complete bundle in a hidden create-exclusive staging directory. On macOS it publishes that directory with `renamex_np(..., RENAME_EXCL)`, which cannot replace an existing file, directory, or symlink. A failure bundle is retained under a unique non-authoritative name. In `prepare` mode the successful atomic publication contains exactly one `freeze_attempt_01/manifest_core.json` plus a terminal receipt. It may not create the scientific result root or an execution directory.
+
+The immutable core excludes only `review_receipts` from its canonical core hash. It carries the exact allowed-difference policy: input changes from `changi.jpg` to `jesus.jpg`; seed changes from 42 to 43 in the manifest, one-line-derived YAML, and all three RNG calls; while the output path, row labels, source identities, review bindings, and timestamps are administrative isolation fields. Every other component, config field, runtime, generation budget, trajectory, sampler, geometry, archive, and trace condition must equal S40.
+
+After preparation, two different-author JSON reviews must independently bind the same exact core hash:
+
+- source review status `PASS_S44_C1_GENERATION_SOURCE_REVIEW`;
+- runtime/freshness review status `READY_TO_ATTEMPT_S44_C1_BASELINE_GENERATION`.
+
+Both reviews must record `row=C1`, the exact variant object, `core_sha256`, `executed=false`, `model_or_scientific_imports=0`, `pixels_decoded=0`, and an empty `blocking_findings` list. Reviewers may statically execute the launcher's `compile_only=True` proof only in a source-isolated standard-library process; they may not invoke `main`, load a model, decode the C1 image, create the result root, or create an execution directory.
+
+In `attach` mode the tool verifies the two exact review files, requires distinct non-root reviewer roles, rechecks all parents/sources/input and output freshness, inserts only `review_receipts`, and verifies core-hash equality. It first validates the exact future manifest bytes through a temporary non-authoritative path. The staged metadata gate and terminal success receipt are written before the canonical manifest; the canonical `review_attachment_01/manifest.json` is the last file added to the staged bundle. The execution gate accepts only that exact canonical path after atomic directory publication and only when its sibling attach receipt has the exact success status, manifest/core/review identities, unchanged tool identity, and metadata-gate hash. A failed or partial attachment therefore leaves no manifest accepted by the launcher. Attach does not launch generation.
+
+Every post-staging failure is terminal for its uniquely retained failure bundle; every preflight failure has a unique retained record. No output is overwritten. A PASS from the freeze tool means only that the atomically published bundle is internally ready for a single separately launched attempt; it is not generation, readback, quality, method gain, or novelty evidence.

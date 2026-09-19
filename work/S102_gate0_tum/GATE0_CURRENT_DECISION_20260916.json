@@ -1,0 +1,46 @@
+{
+  "schema": "GATE0_CURRENT_DECISION_v1",
+  "recorded_at_local": "2026-09-16T01:36:11.321831+08:00",
+  "decision": "BLOCKED_FORMAL_BASELINE_PENDING_CONTRACT_FREEZE",
+  "evidence": {
+    "tum_fr3_long_office_household": {
+      "job": "588524",
+      "status": "CONDITIONAL_DATA_QUALIFICATION_ONLY",
+      "rgb_rows": 2585,
+      "depth_rows": 2509,
+      "groundtruth_rows": 8710,
+      "rgb_depth_pair_tolerance_seconds": 0.02,
+      "rgb_depth_pairs": 2488,
+      "rgb_depth_pair_rate": 0.9624758220502901,
+      "archive_sha256": "c7cd8e1afb87c80e5744a356214819b110fa09b4744fa4ba0cc2382f9ba59e9c",
+      "future_gt_isolation": "NOT_YET_FROZEN",
+      "independent_heldout_scene": "NOT_YET_ACQUIRED"
+    },
+    "icl_nuim_lr0": {
+      "status": "PASS_CONDITIONAL_SYNTHETIC_CONTROLLED_DATA_ACCESS_HELDOUT",
+      "formal_scope": "synthetic single-scene controlled evaluation only",
+      "metadata_exposed_before_freeze": true,
+      "zero_exposure_blind": false,
+      "scene_independence": false,
+      "formal_grc_allowed": false
+    },
+    "7scenes_chess": {
+      "archive_sha256": "d00b5b8f904123ec136768ee0ebd8f72aebb5473630fb5d8ec352e70ae4859d0",
+      "status": "ARCHIVE_ACQUIRED_RGB_DEPTH_CALIBRATION_UNQUALIFIED",
+      "not_formal_heldout": true
+    }
+  },
+  "blocking_items": [
+    "freeze camera intrinsics, distortion model, and coordinate convention for each selected source",
+    "freeze depth invalid-value rule and raw-to-metric-z conversion",
+    "freeze one-to-one RGB-depth pairing and timestamp/frame identity rule",
+    "freeze future query window and prevent selector/threshold code from reading future GT",
+    "acquire and hash an independent held-out scene with no pre-freeze metadata exposure",
+    "freeze candidate pool, budget, seed, checkpoint/config hashes, and output seal before scoring"
+  ],
+  "formal_experiment_rule": "Do not submit formal S103 VMem baseline or GRC/SOCF method scoring until every blocking item is PASS; development-only smoke and diagnostics remain allowed.",
+  "next_action": "Complete implementation and data-contract audit, then create a signed pre-run manifest for S103 selector-free baseline.",
+  "candidate_v2_status": "REJECTED_UNREVIEWED_DRAFT",
+  "current_candidate": "work/S102_gate0_tum/gate0_contract_candidate_v3.json",
+  "latest_correction": "work/S102_gate0_tum/GATE0_CANDIDATE_V2_RETRACTION_20260916.json"
+}

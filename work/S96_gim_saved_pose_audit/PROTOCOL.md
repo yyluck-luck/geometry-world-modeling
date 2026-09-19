@@ -1,0 +1,13 @@
+# S96（已保存TUM位姿上的GIM剪枝核谱审计）
+
+Scope: real saved measured-pose component computation, not RGB-D scoring, native MIND replication, generation, or GRC validation. Purpose: test whether the S95 broad-direction mathematical counterexample also appears under GIM's actual adaptive defaults on a fixed saved TUM trajectory. A healthy result constrains the claim just as much as an indefinite matrix would.
+
+Inputs: existing S93 freiburg1_xyz ground-truth file, 3000 expected rows; pinned unmodified GIM pruning.py and camera.py at 6d9b2090569e7d450d3baedc09ff82f662ad9ea2. Freeze SHA of source, input, runner and this protocol before calculation. No media, future labels, model weights, or network during execution.
+
+Four deterministic pools of 16 indices: round(linspace(0,2999,16)), first16, last16, first16 at stride60. These pools share a trajectory and are not independent scenes. No data-dependent resampling or bandwidth tuning after results. k=4. Primary: exact official high-level function defaults, including sigma_t=pool span/k, adaptive median-positive position/angle bandwidths, jitter=1e-4, force first/last. Sensitivity: temporal factor explicitly disabled. Uniform-k is a selector comparison only, not a geometric quality baseline.
+
+Adaptation: TUM qx,qy,qz,qw interpreted as camera-to-world quaternion; normalized with scipy Rotation; local +Z mapped through R as source code does. This is a stated convention and not a native MIND adapter claim. Stored metres converted to centimetres before official POSITION_SCALE=100 division. Row index is the source's time argument, not RGB video/latent index; timestamps are recorded, but not silently substituted. Common global rigid pose transformations leave pairwise distances and direction dot products unchanged. No RGB registration is inferred.
+
+Per pool and setting: kernel SHA, effective bandwidths, spectra before/after jitter, negative eigenvalue count threshold -1e-10, inverse diagonal and unclipped reciprocal conditional variances when invertible, official chosen source indices and uniform choice. Save all kernel arrays and failures. No repair to source or fabricated jitter. Separate primary and no-time sensitivity. CPU1, FP64 input, <60 seconds numerical work expected, no asserted model runtime.
+
+Pass means only source execution/measurement integrity, not PSD by construction. If no primary matrix is indefinite, report no observed primary defect in these four pools; do not expand to global PSD guarantee. If bad covariance appears, preserve output, do not treat chosen IDs or finite API return as valid MI. Do not run repaired/chordal kernel or tune parameters this round. Independent reviewer reconstructs matrices from frozen poses and formulas rather than author output prose.

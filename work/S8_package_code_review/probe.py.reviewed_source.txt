@@ -1,0 +1,40 @@
+"""Exercise Python hooks and native OS denials without reading original bytes."""
+import argparse,ctypes,errno,json,os,socket
+from pathlib import Path
+import sitecustomize
+ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+root=Path(os.environ['AUDIT_ROOT']);old=Path(os.environ['AUDIT_ORIGINAL']);workspace=Path(os.environ['AUDIT_OLD_WORKSPACE'])
+upstream_file=Path(json.loads((root/'results/S8_cut3r_cpu_v2/block0/run_metadata.json').read_text())['loaded_modules']['dust3r.model'])
+checks=[]
+def put(name,ok,detail=None):
+    checks.append(dict(name=name,passed=bool(ok),detail=detail))
+    if not ok:
+        args.output.write_text(json.dumps(dict(status='failed',checks=checks),indent=2)+'\n')
+        raise AssertionError(name)
+def denied(name,fn):
+    try:fn()
+    except PermissionError as e:put(name,True,dict(type=type(e).__name__,message=str(e)));return
+    raise AssertionError('Unexpected allowed operation: '+name)
+denied('Python original project read',lambda:(old/'AGENTS.md').open('rb'))
+denied('Python original upstream read',lambda:upstream_file.open('rb'))
+denied('Python extracted write',lambda:(root/'PACKAGE_README.md').open('ab'))
+denied('Python network',lambda:socket.create_connection(('127.0.0.1',9),timeout=.1))
+lib=ctypes.CDLL(None,use_errno=True);lib.open.argtypes=[ctypes.c_char_p,ctypes.c_int];lib.open.restype=ctypes.c_int
+for label,path,flags in [('OS original project read',old/'AGENTS.md',os.O_RDONLY),
+    ('OS original upstream read',upstream_file,os.O_RDONLY),
+    ('OS extracted write',root/'PACKAGE_README.md',os.O_WRONLY|os.O_APPEND)]:
+    ctypes.set_errno(0);fd=lib.open(os.fsencode(path),flags);err=ctypes.get_errno()
+    if fd>=0:lib.close(fd)
+    put(label,fd==-1 and err in (errno.EPERM,errno.EACCES),dict(returncode=fd,errno=err))
+lib.socket.argtypes=[ctypes.c_int,ctypes.c_int,ctypes.c_int];lib.socket.restype=ctypes.c_int
+lib.connect.argtypes=[ctypes.c_int,ctypes.c_void_p,ctypes.c_uint32];lib.connect.restype=ctypes.c_int
+# Darwin sockaddr_in: sin_len, sin_family, port (network order), IPv4, padding.
+address=ctypes.create_string_buffer(bytes([16,socket.AF_INET,0,9,127,0,0,1])+bytes(8))
+ctypes.set_errno(0);fd=lib.socket(socket.AF_INET,socket.SOCK_STREAM,0)
+if fd<0:result=-1;err=ctypes.get_errno();operation='socket'
+else:
+    ctypes.set_errno(0);result=lib.connect(fd,address,16);err=ctypes.get_errno();operation='connect';lib.close(fd)
+put('OS native network denied',result==-1 and err in (errno.EPERM,errno.EACCES),dict(operation=operation,returncode=result,errno=err))
+put('Packaged evidence readable',(root/'PACKAGE_README.md').read_bytes()!=b'')
+args.output.write_text(json.dumps(dict(status='passed',guard=str(sitecustomize.__file__),checks=checks),indent=2)+'\n')
+print('All',len(checks),'isolation boundary probes passed')

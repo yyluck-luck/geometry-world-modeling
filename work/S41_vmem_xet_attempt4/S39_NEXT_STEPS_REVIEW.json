@@ -1,0 +1,186 @@
+{
+  "schema": "S41_S39_NEXT_STEPS_REVIEW_V1",
+  "status": "READY_SERIAL_PLAYBOOK_BLOCKED_ON_ATTEMPT4_TERMINAL_SUCCESS",
+  "reviewer": "/root/vmem_recovery_diagnosis",
+  "completed_utc": "2026-09-07T05:51:24.092985+00:00",
+  "completed_asia_shanghai": "2026-09-07T13:51:24.093954+08:00",
+  "scope": {
+    "mode": "read_only_preparation_audit_except_new_review_files",
+    "downloads_started": 0,
+    "freeze_calls": 0,
+    "attach_calls": 0,
+    "gate_calls": 0,
+    "model_loads": 0,
+    "generation_calls": 0,
+    "weight_body_bytes_read": 0,
+    "canonical_ledger_modified": false
+  },
+  "source_bindings": {
+    "freeze_manifest.py": "e7c03af60ed4d50bd5a9a1fb40f12df360f390a7a7fce1fe6f907f74bd8fb6b1",
+    "FREEZE_PROTOCOL_DRAFT.md": "ca421b4bfe5cca5c89d0bf518a3ebf21cbff8e5303cccf3150f12c2fd874a9bf",
+    "s39_variant_gate.py": "cf667bdc0bc43f902d0dca3041c4dbf33a53d908ee4e5d13ebfba2f853a78f4e",
+    "load_components.py": "7b554276d5f00e6f14283a0c3a3d06bccda73b3c9dd2b6a9ef2514287732738e",
+    "PROTOCOL_DRAFT.md": "263f1f58b50291f567fb3dce706c1b58bd931fcb26c444aece16c3645f245cea",
+    "manifest_draft.json": "21443f4b2fdd7c91e166c55a6ed2855d397ae5ba71b49da4d7d417d443ff6ee2",
+    "attempt4_source": "a708d23cc0b64c8b3f5a23d427a6414a12fe1e1fb935beb8726b3e698102aa15",
+    "attempt4_protocol": "ba6b7befbbb4c0c4f94d958cd832c4b73d39cdc18de1a87badf10f431d2ddbea"
+  },
+  "observed_state": {
+    "observed_utc": "2026-09-07T05:51:24.092985+00:00",
+    "attempt4_receipt_status": "RUNNING",
+    "attempt4_running_receipt_sha256_snapshot_only": "7b9128d7612164f86a571daf3821088e849fd247005effb1fcf7217ee4ea2468",
+    "attempt4_target_exists": false,
+    "canonical_vmem_exists": false,
+    "freeze_attempt_01_exists": false,
+    "review_attachment_01_exists": false,
+    "metadata_check_01_exists": false,
+    "loading_attempt_01_exists": false,
+    "fixed_loading_output_exists": false,
+    "companions_status": "ALL_COMPANIONS_VERIFIED"
+  },
+  "verified_target_decision": {
+    "pass_attempt4_target_directly_as_vmem": true,
+    "target": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vmem_recovery/xet_attempt4_01/vmem_weights.pth",
+    "copy_to_canonical_required": false,
+    "reason": "The S39 freeze and runtime gates accept any absolute regular-file path and independently require the fixed byte count and complete SHA; no canonical-directory predicate exists.",
+    "expected_bytes": 5056346672,
+    "expected_sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+  },
+  "serial_steps": [
+    {
+      "step": 0,
+      "name": "attempt4_terminal_gate",
+      "requires": [
+        "VERIFIED_COMPLETE_ORIGINAL_WEIGHT",
+        "download_exit_code=0",
+        "actual size and SHA equal expected",
+        "file_stable_during_hash=true",
+        "child_still_alive=false",
+        "group_still_alive=false"
+      ],
+      "dynamic_values": [
+        "terminal receipt file SHA",
+        "terminal target path"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "step": 1,
+      "name": "prepare_frozen_core",
+      "command": "python3 -B freeze_manifest.py prepare --vmem <verified attempt4 target> --clip <verified CLIP path> --vae-directory <fixed ft-mse directory> --out <fresh freeze_attempt_N>",
+      "success_status": "CORE_FROZEN_AWAITING_REAL_REVIEWS",
+      "dynamic_values": [
+        "core_path",
+        "core_file_sha256",
+        "core_sha256",
+        "content_hashes_sha256"
+      ]
+    },
+    {
+      "step": 2,
+      "name": "two_independent_core_reviews",
+      "statuses": [
+        "PASS_S39_SOURCE_REVIEW",
+        "READY_TO_ATTEMPT_DECLARED_VARIANT_LOADING"
+      ],
+      "same_core_binding": "prepare receipt.core_sha256",
+      "different_authors_required": true,
+      "dynamic_values": [
+        "source review file SHA",
+        "runtime-freeze review file SHA"
+      ]
+    },
+    {
+      "step": 3,
+      "name": "attach_reviews",
+      "command": "python3 -B freeze_manifest.py attach-reviews --core <core_path> --core-sha256 <core_file_sha256> --source-review <path> --source-review-sha256 <file SHA> --runtime-freeze <path> --runtime-freeze-sha256 <file SHA> --out <fresh review_attachment_N>",
+      "success_status": "REVIEWS_ATTACHED_METADATA_GATE_PASSED",
+      "dynamic_values": [
+        "manifest_path",
+        "manifest_sha256",
+        "unchanged core_sha256"
+      ]
+    },
+    {
+      "step": 4,
+      "name": "metadata_gate",
+      "command": ".venv-cut3r/bin/python -B s39_variant_gate.py --manifest <actual attach manifest_path> --manifest-sha256 <manifest_sha256> --metadata-only --receipt <fresh receipt>",
+      "success_status": "PASS_METADATA_ONLY"
+    },
+    {
+      "step": 5,
+      "name": "bounded_loading_once",
+      "command": ".venv-cut3r/bin/python -B load_components.py --manifest <actual attach manifest_path> --manifest-sha256 <manifest_sha256> --execution-directory <fresh loading_attempt_N>",
+      "success_status": "VARIANT_LOADING_RETURNED_PENDING_INDEPENDENT_REVIEW",
+      "limits": {
+        "seconds": 1800,
+        "rss_bytes": 48318382080,
+        "threads": 8,
+        "minimum_free_bytes": 10737418240
+      },
+      "expected_evidence": [
+        "launch receipt",
+        "worker receipt",
+        "runtime_loading",
+        "full_resource_gate"
+      ]
+    },
+    {
+      "step": 6,
+      "name": "independent_loading_evidence_review",
+      "status": "PASS_S39_LOADING_EVIDENCE_REVIEW",
+      "different_from_loading_executor": true,
+      "bindings": [
+        "loading_manifest_sha256",
+        "resource_core_sha256",
+        "four exact evidence file SHAs"
+      ]
+    },
+    {
+      "step": 7,
+      "name": "handoff_to_new_s40_freeze_and_reviews",
+      "generation_authorized_by_s39_alone": false
+    }
+  ],
+  "sha_semantics": {
+    "core_file_sha256": "SHA-256 of manifest_core.json bytes; pass to attach-reviews --core-sha256",
+    "core_sha256": "Canonical JSON SHA excluding review_receipts; place in both core review JSON files and carry into S40",
+    "manifest_sha256": "SHA-256 of final attached manifest bytes; pass to metadata gate, loader, and S40 loading_manifest binding",
+    "review_file_sha256": "SHA-256 of each completed review JSON; pass to attach or downstream evidence binding"
+  },
+  "different_author_requirements": [
+    "Two distinct reviewers must separately approve the actual frozen core as source/core review and runtime-freeze review.",
+    "A reviewer different from the actual loading executor must review the four loading evidence files.",
+    "S40 later requires two reviews bound to its own actual frozen core; source-only historical reviews do not authorize it."
+  ],
+  "current_blockers": [
+    "Attempt4 is RUNNING and its named target is absent at the observation time.",
+    "No actual frozen core exists, so both required core-bound reviews are absent.",
+    "No final attached manifest or actual loading evidence exists."
+  ],
+  "stale_or_ambiguous_inputs": [
+    {
+      "path": "work/S39_component_variant/independent_review.json",
+      "problem": "Source review has core_sha256=null and cannot approve a future actual core."
+    },
+    {
+      "path": "work/S39_component_variant/freeze_independent_source_review.json",
+      "problem": "Freeze-tool review status is not an accepted runtime core-review status and core_sha256 is null."
+    },
+    {
+      "path": "work/S39_component_variant/PROTOCOL_DRAFT.md",
+      "problem": "Example manifest path is not where the new attach tool writes; use attach receipt.manifest_path."
+    },
+    {
+      "path": "work/S39_component_variant/FREEZE_PROTOCOL_DRAFT.md",
+      "problem": "Human-readable 'core SHA' wording can confuse core_file_sha256 with canonical core_sha256; source code requires the mapping documented here."
+    },
+    {
+      "path": "work/S40_declared_variant_generation/progress_handoff.json",
+      "problem": "Historical snapshot still calls attempt3/session71130 live; it is not current attempt4 state and must not select the old handle."
+    }
+  ],
+  "source_sha_conflicts_found": [],
+  "runtime_authorized_now": false,
+  "scientific_claim": "NONE"
+}

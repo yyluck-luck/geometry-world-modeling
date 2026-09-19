@@ -1,0 +1,125 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-preparation-receipt-v1",
+  "status": "SOURCE_CANDIDATE_FROZEN_UNBOUND_NOT_EXECUTABLE",
+  "author_role": "/root/c1_blind_score_builder",
+  "completed_utc": "2026-09-08T04:04:34Z",
+  "row": "C1",
+  "purpose": "Prepare, without formal execution or real C1 tensor access, the S42 section 5(3) numeric requested-c2w/K precondition.",
+  "source_candidate_frozen": true,
+  "source_identities": {
+    "camera_guard.py": "23a3318e5cfb5b8c44f14a1bc2d3e4f72222ac78213eac2d9aedf35c1575f178",
+    "PROTOCOL.md": "5055ff532a6a91d6c46e517835b5921d90dec339867c66d95721db6b333c7712",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "1808f64275885ef4cd30f9119fb86f0a183dce150ae97bd334a447de46faa7c1",
+    "synthetic_selftest.py": "02f881c7d3bfb3c50728e6c0128ed1f282f4a74f437abd3252d78a1ff7e4aae0"
+  },
+  "preparation_report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/PREPARATION_REPORT.md",
+    "sha256": "e61c631ae992c7d7676f9fce641aea00cb384cd1cb85bb13c5cf2cc0a68c4387"
+  },
+  "exact_scientific_reference_identities": {
+    "s42_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "reviewed_b0_source_sha256": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_max_abs_exact_source_segment_sha256": "5b19516bcaa6d650b7259d4e806266ab40762a358989190f2d3327fbaceb3fd4",
+    "b0_verify_requested_camera_conditions_exact_source_segment_sha256": "7dfa29e4bdaca569cf485b8c575f1d48f5dbcabb61011f6ab1998fea79b9a8e3",
+    "c1_generation_manifest_sha256": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+    "s45_result_review_sha256": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "frozen_numeric_contract": {
+    "ids": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "planned_yaw_degrees": [0, 1.25, 2.5, 3.75, 5, 3.75, 2.5, 1.25, 0],
+    "rotation": "LEFT_MULTIPLY_ID0_C2W_BY_POSITIVE_Y_ROTATION_WITH_POSITIVE_SIN_AT_0_2_AND_NEGATIVE_SIN_AT_2_0",
+    "numeric_type": "binary64",
+    "error": "maximum absolute elementwise difference",
+    "acceptance": "finite and <= 1e-6",
+    "cache_history": [5, 9],
+    "target_to_cache": {
+      "batch_input_occurrence_0_first_four": "cache_commit_occurrence_0_slots_1_to_4",
+      "batch_input_occurrence_1_first_four": "cache_commit_occurrence_1_slots_5_to_8"
+    },
+    "closure": "ID8 c2w and K each <= 1e-6 from ID0"
+  },
+  "cross_version_test_matrix": {
+    "system_python": {
+      "version": "3.13.0",
+      "flags": ["-I", "-B", "-S"],
+      "built_in": "PASS_SYNTHETIC_ONLY",
+      "independent": "PASS_STATIC_AND_SYNTHETIC_ONLY"
+    },
+    "venv_cut3r_python": {
+      "version": "3.12.14",
+      "flags": ["-I", "-B", "-S"],
+      "built_in": "PASS_SYNTHETIC_ONLY",
+      "independent": "PASS_STATIC_AND_SYNTHETIC_ONLY"
+    },
+    "same_version_independent_function_source_hashes": true,
+    "real_c1_inputs_used": false,
+    "formal_entry_invoked": false
+  },
+  "synthetic_checks": [
+    "python AST compilation",
+    "exact runner protocol/template/self-test binding",
+    "whole-file and cross-version B0 function-source identity",
+    "independent positive-Y left-multiply calculation",
+    "positive 0-to-5-to-0 trajectory",
+    "target-to-cache mismatch rejection",
+    "wrong-yaw-sign rejection",
+    "K-drift rejection",
+    "ID8 closure-failure rejection",
+    "nonfinite rejection",
+    "inclusive 1e-6 acceptance and strictly-over rejection",
+    "list/tuple and raw TensorDescriptor provenance",
+    "synthetic PIL/pixel subtree non-traversal",
+    "pixel-shaped tensor rejection before body open"
+  ],
+  "correction_history": {
+    "withdrawn_adversarial_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/SOURCE_REVIEW_ADVERSARIAL_BLOCKED.json",
+      "sha256": "04f8500d21bd92fa05ae843965c60797e29c9d042ce96197c3ab9f9500143cdd",
+      "status": "BLOCKED_SOURCE_CANDIDATE_WITHDRAWN"
+    },
+    "root_cross_version_correction": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/ROOT_CROSS_VERSION_CORRECTION_HISTORY.json",
+      "sha256": "2008c714c353d26d0d157a43ad867828502bcaf22e05c21902d41ee896047cbc",
+      "status": "BLOCKER_CONFIRMED_OLD_SOURCE_SET_WITHDRAWN_AND_CORRECTED"
+    }
+  },
+  "binding_template": {
+    "status": "UNBOUND_TEMPLATE_NOT_EXECUTABLE",
+    "placeholder_hashes": 14,
+    "known_exact_hashes": ["generation_manifest", "s45_result_review"],
+    "remaining_null_source_or_review_hashes": 6,
+    "remaining_null_terminal_readback_archive_hashes": 8
+  },
+  "formal_path_absence_checked_utc": "2026-09-08T04:04:34Z",
+  "formal_path_absence_method": "os.path.lexists for every fixed entry",
+  "formal_paths_absent": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/execution_01": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/.c1_numeric_camera_guard.lock": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/C1_CAMERA_GUARD_BINDING.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/SOURCE_REVIEW_PRIMARY.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/SOURCE_REVIEW_ADVERSARIAL.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/BINDING_REVIEW.json": true
+  },
+  "access_ledger": {
+    "real_c1_tensor_bodies_read": 0,
+    "real_c1_scientific_arrays_mapped_or_numerically_inspected": 0,
+    "pixel_or_image_bodies_opened": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_renderer_generation_runs": 0,
+    "formal_camera_guard_runs": 0,
+    "formal_attempt_paths_created": 0,
+    "s45_result_report_checks_inspected": false
+  },
+  "execution_blocked": true,
+  "remaining_execution_gates": [
+    "primary source review of this exact four-file source set by a role distinct from the author",
+    "adversarial source review of this exact four-file source set by a second distinct reviewer",
+    "binding author fills all 14 exact source/review/upstream hashes without changing source or mathematics",
+    "independent binding review by a fifth distinct role with zero C1 tensor/pixel access",
+    "single formal execution_01 numeric camera guard",
+    "independent S45B result review before downstream C1 scoring"
+  ],
+  "current_scientific_status": "NO_C1_NUMERIC_REQUESTED_POSE_K_RESULT_YET",
+  "evidence_boundary": "Source preparation and synthetic validation only; no pixel score, visual quality, rendered-pixel camera obedience, method gain, cohort conclusion, causal attribution, or novelty."
+}

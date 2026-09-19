@@ -1,0 +1,926 @@
+    Self-adapting confidence estimation for stereo
+
+                     Matteo Poggi, Filippo Aleotti, Fabio Tosi,
+                     Giulio Zaccaroni, and Stefano Mattoccia
+
+           University of Bologna, Viale del Risorgimento 2, Bologna, Italy
+
+
+
+       Abstract. Estimating the confidence of disparity maps inferred by a
+       stereo algorithm has become a very relevant task in the years, due to the
+       increasing number of applications leveraging such cue. Although self-
+       supervised learning has recently spread across many computer vision
+       tasks, it has been barely considered in the field of confidence estimation.
+       In this paper, we propose a flexible and lightweight solution enabling
+       self-adapting confidence estimation agnostic to the stereo algorithm or
+       network. Our approach relies on the minimum information available in
+       any stereo setup (i.e., the input stereo pair and the output disparity map)
+       to learn an effective confidence measure. This strategy allows us not only
+       a seamless integration with any stereo system, including consumer and
+       industrial devices equipped with undisclosed stereo perception methods,
+       but also, due to its self-adapting capability, for its out-of-the-box deploy-
+       ment in the field. Exhaustive experimental results with different standard
+       datasets support our claims, showing how our solution is the first-ever
+       enabling online learning of accurate confidence estimation for any stereo
+       system and without any requirement for the end-user.
+
+       Keywords: stereo matching, confidence, online adaptation
+
+
+
+
+1    Introduction
+
+Stereo is one of the most popular strategies to accurately perceive the 3D struc-
+ture of the scene through two synchronized cameras and several algorithms,
+either hand-designed or based on deep neural networks, exist. In many prac-
+tical applications, alongside with disparity inference, confidence estimation is
+often performed as well. Purposely, a wide range of methods based either on
+hand-crafted measures [18] or learning-based strategies [42] have been proposed.
+Recent works [60,21,13] showed how state-of-the-art networks processing cues
+available from any stereo setup, i.e. the input stereo pair and the output dispar-
+ity map, are substantially equivalent to those processing the entire cost volume
+[21], further supporting the evidence that the disparity map itself contains suf-
+ficient clues to identify outliers as initially proposed in [37,38]. Such a feature is
+highly desirable since it potentially paves the way for learning confidence esti-
+mation for any stereo camera even without any knowledge about the stereo al-
+gorithm/network deployed. This fact is very appealing since it frequently occurs
+2       M. Poggi et al.
+
+
+
+
+Fig. 1. Self-supervised confidence estimation. From left, reference image, dispar-
+ity from various algorithms and confidence estimated by self-supervised frameworks
+[61], [31] and ours. From top to bottom: Census-CBCA, MCCNN-fst-CBCA, Census-
+SGM and MCCNN-fst-SGM. Color encoding details in the supplementary material.
+
+
+
+
+with most industrial/off-the-shelf (e.g. Stereolabs ZED 2) or consumer devices
+(e.g. smartphones). Nonetheless, this opportunity was investigated only partially
+in the literature. Moreover, all these methods are strongly constrained to the need
+for ground truth depth labels acquired in the target domain. However, since
+achieving such labels is cumbersome and time-consuming, two self-supervised
+paradigms have been proposed in the literature [31,61]. Although these meth-
+ods proved that confidence estimation could be learned without needing active
+sensors, they have severe constraints. Individually, [31] requires static stereo se-
+quences while [61] needs access to the cost volume, rarely exposed in the case
+of off-the-shelf stereo sensors or not defined at all in most modern neural net-
+works [29,25,59]. As a consequence, both are not thought to handle adaptation,
+required to soften domain-shift issues. Thus, a solution for out-of-the-box de-
+ployment of self-adapting confidence estimation would be highly desirable for
+many practical applications. A notable example concerns smartphone (e.g. Ap-
+ple iPhone) nowadays equipped with multiple cameras and undisclosed stereo
+algorithms/networks deployed for augmented reality or other applications in un-
+predictable environments.
+    Therefore in this paper, inspired by recent works performing continuous
+learning [59,3] for depth estimation, we propose the first-ever solution for self-
+adaptation of a confidence measure unconstrained to the target stereo system.
+For this purpose, we deploy a novel loss function built upon cues available from
+the input stereo pair and the output disparity only, needing no additional infor-
+mation to learn/adapt to the sensed environment. Our solution is comparable,
+and often better, w.r.t known strategies requiring full access to the cost volume
+[61] or static scenes for training [31], as shown in Fig. 1 on a variety of algorithms.
+    Extensive experimental results on KITTI, Middlebury 2014, ETH3D and
+DrivingStereo datasets support the following main claims of our novel confi-
+dence estimation paradigm: 1) competitive (often, better) with state-of-the-art
+when trained in a conventional, offline manner and tested on KITTI; 2) supe-
+rior generalization capability on other datasets (e.g., Middlebury and ETH3D)
+                               Self-adapting confidence estimation for stereo    3
+
+compared to known self-supervised methods; 3) capable of online adaptation,
+outperforming competitors in unseen environments (e.g., DrivingStereo).
+
+
+2   Related work
+
+In this section, we review the literature concerning confidence measures and
+recent trends in stereo matching.
+    Confidence measures for stereo. Confidence measures have been, at first,
+reviewed and evaluated in [18] and, more recently, in [42] highlighting that two
+broad categories exist: hand-made and learned measures. The former class con-
+sists of conventional method computed typically from cost volume analysis such
+as the ratio between two minima, as in PKR [16], or, as more recently pro-
+posed, determining local properties of the disparity map like the number of
+pixels with the same disparity hypothesis (DA [37]). Concerning learned mea-
+sures [42], hand-made cues are usually combined and fed as input to a random
+forest classifier [14,53,32,33,22,37,43] or to a CNN [51,38,39,41,8,60,21,13] ap-
+propriately trained deploying depth labels. Learned methods may require 1) full
+access to the cost volume to extract hand-made features [14,53,32,33,22,41,39]
+or process the volume itself [21,13,23,24], 2) disparity maps for both left and
+right viewpoint [51] or 3) only the input image and its corresponding dispar-
+ity map [37,43,38,8,60]. These three requirements translate into harder to softer
+constraints at deployment, most of them usually not met by off-the-shelf stereo
+cameras since exposing only the input stereo pair and the output disparity map
+to the user. Latest works [21,13] showed that, although a CNN with access to
+the full cost volume can perform better than networks processing disparity and
+reference image only, the margin between the two approaches is small and in
+most cases negligible, at the cost of a much minor versatility of the former.
+    Applications of confidence measures. In addition to the traditional out-
+liers filtering task, many higher-level applications exploit such cue for different
+purposes. Again, two main categories exist, acting inside a stereo algorithm
+or outside it. Belonging to the former, Spyropoulos and Mordohai [53,55] esti-
+mate confidence and detect ground control points to improve global optimization.
+Park and Yoon [32,33] proposed a confidence-based modulation of the cost vol-
+ume applied before SGM optimization, Poggi and Mattoccia [37,43] reduced the
+streaking effects of the SGM [15] stereo algorithm by using a weighted sum of
+the scanlines according to a confidence measure. Schonberger et al. [49] act sim-
+ilarly, fusing multiple scanlines of SGM using a random forest classifier. Seki
+and Pollefeys [51] changed P1 and P2 penalties of SGM dynamically accord-
+ing to the estimated confidence. Methods acting outside the stereo algorithms
+have been proposed for stereo algorithm fusion [54,36], sensor fusion [27,34], and
+unsupervised adaptation of deep models for stereo matching [56,57].
+    Self-supervised confidence estimation. Self-supervised learning has been
+barely investigated for confidence estimation. Mostegel et al. [31] leverage stereo
+videos looking at consistencies and contradictions between the different view-
+points of a static scene in order to obtain correct and wrong candidates from
+4       M. Poggi et al.
+
+a given stereo algorithm. Tosi et al. [61] instead rely on traditional confidence
+measures to obtain these two sets according to a consensus among them.
+    Deep stereo and self-adaptation. At first, CNNs have replaced single
+steps in the stereo pipeline [47], such as cost computation [67,5,26], rapidly con-
+verging towards end-to-end solutions estimating dense disparity maps by means
+of 2D [29,25,19,66,52,65,66] or 3D networks [20,68,4,40,7]. The latest trend con-
+sists of training stereo networks from scratch using proxy labels [1,63] or casting
+disparity estimation as a continuous learning problem. A first work in this lat-
+ter direction is [71], while more recent ones further moved in the direction of
+real-time continuous adaptation [59] to new environments or meta-learning [58].
+
+
+3     Learning a confidence measure out-of-the-box
+
+This work aims at proposing a self-supervised paradigm suited for learning a
+confidence measure, unconstrained from the specific stereo method deployed
+and capable of self-adaptation. We first classify stereo systems into different
+categories according to the data they make available, and then we introduce a
+novel strategy compatible with all of them.
+
+
+3.1   Taxonomy of stereo matching systems
+
+In this section, we define three main broad categories of stereo matching solu-
+tions, each one characterized by different data made available during deployment.
+From now on, we will refer to a generic rectified stereo pair as (IL ,IR ), respec-
+tively made of left and right images, and to a generic stereo algorithm or deep
+network as S. In the remainder, to simplify notation, we omit (x, y) coordinates
+if not strictly necessary.
+    Black-box models. Given any stereo algorithm processing a stereo pair
+(IL ,IR ), we define the output disparity map, computed assuming IL as the ref-
+erence image, as DL = S(IL , IR ). This image triplet is the minimum amount
+of data available out of any stereo method, and we define as black-box all the
+systems making available only these cues. Such systems are highly representative
+of off-the-shelf stereo cameras (e.g., Stereolabs ZED 2) or stereo methods imple-
+mented in consumer devices (e.g., Apple iPhones). They neither allow end-users
+to access the implementation nor provide explicit ways (APIs) to call for it. For
+each (IL ,IR ) acquired in the field by the device, they provide the corresponding
+disparity map typically with undisclosed approaches based either on conven-
+tional stereo algorithms or deep networks. Hence, learning confidence measures
+for these systems is particularly challenging, yet appealing.
+    Gray-box models. Although black-box systems provide cues available in
+any stereo system, when explicit calls to the algorithm APIs are exposed, ad-
+ditional cues can be retrieved. Hence, we define a second family of systems for
+which, although it is given no access to the algorithm implementation or its
+intermediate data, explicit calls to the method itself are possible (e.g. stereo al-
+gorithms provided by pre-compiled libraries). Most deep stereo networks prevent
+                                Self-adapting confidence estimation for stereo     5
+
+the deployment of their internal representation since too abstract and substan-
+tially unintelligible, e.g. 2D architectures [29,25,19,66,52,65]. We define systems
+belonging to this class as gray-box, since multiple calls to S allow for retriev-
+ing additional cues. For instance, it is straightforward to compute the Left to
+Right Consistency (LRC) of the disparity maps, a popular strategy to obtain a
+confidence estimator, even if not explicitly provided by S itself in its original im-
+plementation. Given the possibility to call S two times, consistency checking can
+be performed analyzing DL and a second disparity map, namely DR obtained
+by assuming IR as the reference images. Defining ← the horizontal flipping
+operator, DR is obtained as follows:
+                                         ←−←
+                                           −−−−←−−−
+                                    DR = S(IR , IL )                             (1)
+
+Once obtained DR , the consistency between the two can be checked as
+
+                            LRC = |DL − π(DL , DR )| < δ                         (2)
+
+with π(a, b) a sampling operator, collecting values at coordinate a from b, and δ a
+threshold value (usually 1) above which DL and DR are considered inconsistent.
+Although less effective than other measures [18], it comes at a lower price.
+    White-box models. Finally, if the implementation of S is accessible, ad-
+ditional cues can be sourced by processing intermediate data structures, if mean-
+ingful. The preferred one is the cost volume V, containing matching costs V(x, y, d)
+for pixels at coordinates (x, y) and any disparity hypothesis d ∈ [0, dmax ]. This
+class of systems, referred to as white-boxes, enables computation of any con-
+fidence measure, either conventional [18] or learning-based [42,21,13]. Popular
+traditional confidence measures obtained from V are the Peak-Ratio (PKR) and
+Left-Right Difference (LRD) defined, respectively, as
+
+                  V(d2m )                            V(d2 ) − V(d1 )
+         PKR =                and    LRD =                                       (3)
+                   V(d1 )                    V(d1 ) − mind VR (x − d1 , y, d)
+with d1 , d2 and d2m , respectively, the disparity hypotheses corresponding to the
+minimum cost, the second minimum and the second local minima [18]. Regarding
+LRD, given the cost volume VR computed assuming IR as the reference image,
+for any pixel (x, y) costs are sampled at (x − d1 , y).
+    Motivations and challenges. Indeed, for the reasons outlined so far, black-
+box models represent the most challenging, yet general and appealing target
+when dealing with confidence estimation since their constraints prevent the de-
+ployment of most state-of-the-art measures [21,13], as well as self-supervised
+strategy existing in the literature [31,61]. Hence, first and foremost, we aim
+at devising a general-purpose strategy enabling self-supervised confidence esti-
+mation in such constrained settings. As a notable consequence, this fact paves
+the way to tackle the same task even for state-of-the-art CNNs. Finally, hav-
+ing achieved this goal, out-of-the-box learning of confidence estimation with any
+stereo setup and self-adaptation in any environment is at hand.
+6       M. Poggi et al.
+
+3.2   Self-supervision cues for black-box models
+In order to develop a self-supervised strategy suited for any stereo system, it is
+crucial to identify cues that are effective to source a robust supervision signal.
+According to the previous discussion, in the case of black-box models, we can rely
+on (IL , IR ) and DL only. In this circumstance, although relevant information is
+not available compared to other models, we introduce three terms to obtain the
+desired self-supervised signal from the meagre cues available.
+    Image reprojection error. In recent literature, several works proved how
+the reprojection across the two viewpoints available in a rectified stereo pair
+could be a powerful source of supervision, either for monocular [11,35,12] or
+stereo [70,59] depth estimation. Specifically, we can reproject IR on the reference
+image coordinates as I˜R = π(DL , IR ) Then, the difference between IL and
+warped right view I˜R appearance encodes how correct the reprojection is. To this
+aim, the most popular choice is a weighted sum between two terms, respectively
+SSIM [62] and absolute difference.
+              ∆(IL ,I˜R ) = α · (1 − SSIM(IL , I˜R )) + (1 − α)|IL − I˜R |         (4)
+
+with α usually tuned to 0.85 [11]. The higher it is, the more likely DL is wrong.
+By definition, matching pixels is particularly challenging in ambiguous regions,
+such as textureless portions of the image. To this aim, we first aim at detecting
+regions with rich texture, being more likely to be correctly estimated by S,
+by comparing ∆ computed between (IL , IR ) with the one after reprojection as
+T = ∆(IL ,IR ) > ∆(IL ,I˜R ) . In large ambiguous regions, ∆(IL ,IR ) will result equal
+(or even minor) than the reprojection error [12], thus identifying pixels on which
+stereo is prone to errors.
+    Agreement among neighboring matches. Since most regions of a dis-
+parity map should be smooth, variations in nearby pixels should be small except
+at depth boundaries. As highlighted in [37,43], DL itself allows for the extraction
+of meaningful cues to assess the quality of disparity assignments. Purposely, we
+rely on the disparity agreement between neighbouring pixels, defined as
+
+                                        HN ×N (d1 )
+                                  DA =                                          (5)
+                                          N ×N
+HN ×N is a histogram encoding, for each pixel (x, y), the number of neighbours
+in a N × N window having the same disparity d (in case of subpixel precision,
+within 1 pixel). In the absence of depth discontinuities, the majority of pixels in
+the neighbourhood should share the same, or very similar, disparity hypothesis.
+Hence, we define a second criterion to identify reliable stereo correspondences as
+A = DA > 0.5, assuming that more than half of the pixels in the neighbourhood
+share the same disparity. It is worth noting that this criterion is often not met
+in the presence of depth boundaries, even in case of correct disparities.
+    Uniqueness constraint. In an ideal frontal-parallel scene observed by a
+stereo camera in standard form, for each pixel in IL exists at most one match
+in IR and vice-versa. Leveraging this property, known as uniqueness, is partic-
+ularly useful [6] to detect outliers in occluded regions and represents a reliable
+                                    Self-adapting confidence estimation for stereo                    7
+
+         Census-CBMCA                                                          Census-SGM
+                                         Reference image
+
+
+
+
+  a)     b)    c)       d)   e)                                    a)     b)      c)        d)   e)
+
+
+Fig. 2. Effects of different criteria. Given the highlighted region, we show
+inliers (green) and outliers (red) guesses by using the following cues in multi-
+modal binary cross-entropy: a) T p , T q b) Ap , Aq c) U p , U q d) T p , Ap , U p , T q e)
+T p , Ap , U p , T q , Aq , U q . For black pixels, the considered configuration gives no guesses.
+
+
+alternative to LRC and LRD measures, not usable when dealing with black-box
+models. Uniqueness Constraint (UC) is encoded as
+                                       [
+                UC = [x − DL (x, y)] ∈
+                                     /   [(x + k) − DL (x + k, y)]       (6)
+                                                k
+
+with k ∈ [−d∗max , −1]∪[1, d∗max ] and d∗max = dmax −DL (x, y). In other words, the
+uniqueness for any pixel in IL holds if it does not collide in the target image with
+any other pixel, i.e., not matching the same pixel in IR matched by any other.
+We exploit this property to define our third criterion as U =UC. We conclude
+observing that, although effective at detecting mostly occlusions, the uniqueness
+constraint is often violated in the presence of slanted surfaces.
+
+3.3    Multi-modal Binary Cross Entropy
+Given the three criteria outlined above, we revise the traditional binary cross
+entropy loss to take into account multiple label hypotheses. We refer to this
+variant as Multi-modal Binary Cross Entropy (MBCE), defined as
+                                                              
+                            Y                   Y
+            LMBCE = −         p · log(o) +     q  · log(1 − o)        (7)
+                                  p∈P                      q∈Q
+
+with o the output of the neural network ∈ [0, 1], i.e. passed through a sigmoid
+activation, P and Q two sets of proxy labels derived respectively by a crite-
+rion being met or not. For instance, pixels satisfying the first criterion on image
+reprojection will have labels T p = 1, T q = 0 and vice versa when they do not.
+Unlike traditional binary cross entropy, where a single label y and its counter-
+part (1 − y) are used, we define disjoint sets of proxies allowing for a flexible
+configuration of the loss function according to the three criteria described so far.
+For instance, by setting P = [T p , Ap ] and Q = [T q ] we will train the network to
+detect good matches using image reprojection plus agreement and outliers using
+the former only. Adding elements to the sets P and Q reduces progressively the
+number of pixels considered correct or wrong, respectively. Fig. 2 shows this,
+highlighting how combining multiple guesses as in d) and e) for some pixels no
+8        M. Poggi et al.
+
+supervision is given when criteria do not match. We will report the impact of
+this and the different configurations in a thorough ablation study.
+
+
+4     Experimental results
+In this section, we report an exhaustive evaluation to assess the effectiveness of
+our strategy, referred to as Out-of-The-Box (OTB), by conducting three main ex-
+periments, respectively: 1) ablation study on the MBCE loss, 2) comparison with
+self-supervised approaches [31,61] in a conventional offline training and 3) an
+evaluation concerning online adaptation of OTB. Code for this latter experiment
+is available at http://github.com/mattpoggi/self-adapting-confidence.
+
+4.1     Implementation details
+We now report all the details to understand and reproduce our experiments fully.
+    Evaluation Protocol. To measure the effectiveness of the learned confi-
+dence measures, we compute the Area Under Curve (AUC) of the sparsification
+plots [18,42,60,21]. Given a disparity map, pixels are sorted in increasing order
+of confidence and gradually removed (e.g., 5% each time) from the disparity
+map. At each iteration, the error rate is computed over the sparse disparity map
+as the percentage of pixels having absolute error larger than τ . Plotting the
+error rate results in a sparsification curve, whose AUC quantitatively assesses
+the confidence effectiveness (the lower, the better). Optimal AUC is obtained by
+sampling the pixels in decreasing order of absolute error or as in [18].
+    Confidence networks. Since the goal of this work is to define an effective
+self-supervised strategy suited for online learning rather than proposing a novel
+architecture, in our experiments, we test our proposal to train existing networks.
+Purposely, we consider three architectures: CCNN [38], ConfNet and LGC [60]
+to carry out our experiments because 1) they process only disparity map and
+reference image, thus are suited to all methods from white-box to black-box,
+2) according to recent works [21,13], the most accurate one (LGC) is on par
+with state-of-the-art networks processing the cost volume and 3) the source
+code is fully available, conversely to [21,13]. Moreover, in ConfNet we replaced
+deconvolutions with bilinear upsampling followed by 3 × 3 convolutions and
+process DL only, significantly improving its performance and thus filling most of
+the gap with CCNN and LGC. We defined a training schedule for each network,
+kept constant in all experiments. For CCNN, we use batches of 128 patches for
+1M iterations, for ConfNet batches of single, 320×1216 crops for 25K iterations,
+finally for LGC batches of 128 patches for 300K iterations, starting from pre-
+trained CCNN and ConfNet models. We trained all networks with SGD optimizer
+and a constant learning rate of 0.001. For patch-based methods, proxy signals
+are computed offline on the full resolution image.
+    Datasets. We consider five standard datasets: KITTI 2012 [10], KITTI 2015
+[30], Middlebury 20141 [46], ETH3D [50] and DrivingStereo [64], setting τ re-
+1
+    We use the quarter resolution split as in previous works [42,60,21]
+                              Self-adapting confidence estimation for stereo    9
+
+spectively to 3, 3, 1, 1 and 3. Being ground truth required to assess performance,
+we refer to the training set of such datasets. To train confidence estimation net-
+works, we select the first 20 images from KITTI 2012 as in [42,60] for supervised
+training and the 400 images from the first 20 sequences of the KITTI 2012 mul-
+tiview extension used in [31,61] for self-supervised ones. To evaluate the trained
+confidence networks, we use the remaining 174 images from KITTI 2012 as the
+validation set and the totality of images available from KITTI 2015 for experi-
+ments on environments similar to the training set. Moreover, we also assess their
+generalization performance on the whole Middlebury 2014 and ETH3D datasets.
+In these experiments, only the KITTI 2012 images listed above are used for
+training, thus the networks are transferred without any fine-tuning. Finally, to
+test self-adaptation peculiar of OTB we use a sequence from the DrivingStereo
+dataset, namely 2018-10-25-07-37, made of about 7K frames.
+    Stereo algorithms. Following the recent literature [42,60,21], we evaluate
+the effectiveness of our strategy on a variety of stereo algorithms with differ-
+ent degrees of accuracy, in order to highlight how strong is our self-supervised
+paradigm in the presence of heterogenous disparity maps. We consider four main
+stereo algorithms deploying the code provided Zbontar and LeCun [67] under
+different settings. Specifically: Census-CBCA, Census-SGM, MCCNN-fst-CBCA
+and MCCNN-fst-SGM. The first two rely on a census-based matching cost com-
+putation, respectively, optimized by a Cross Based Cost Aggregation (CBCA)
+strategy [69] and SGM [15]. The latter two replace the census-based matching
+costs with predictions obtained by MCCNN-fst, for which we use pre-trained
+weights on KITTI 2012, 2015 and Middlebury provided by the authors and
+tested on the same datasets. For ETH3D, Middlebury weights have been used.
+No post-processing is applied to any output. Furthermore, to evaluate the im-
+pact of self-adaptation made possible by OTB with a real black-box method,
+we also consider two recent deep stereo network. We choose MADNet [59] and
+GANet [68], both trained on synthetic images [29] and then fine-tuned with
+ground truth on KITTI 2015, because of the availability of trained model and
+its accuracy-speed trade-off. Since fine-tuned on KITTI, we conduct experiments
+with MADNet and GANet on DrivingStereo only.
+    Competitors. We compare the proposed OTB strategy with existing meth-
+ods proposed by Mostegel et al. [31] (named SELF) and by Tosi et al. [61] (named
+WILD). The former reasons about contradictions on observations from multiple
+viewpoints: given a stereo sequence framing a static scene with a moving camera,
+DL and DR are computed for each pair, registered and checked for inconsisten-
+cies. Since it requires both DL and DR disparity maps, SELF is suited only
+for systems belonging to gray-box and white-box categories. Concerning WILD,
+it requires a pool of six confidence measures extracted from the cost volume
+to identify inliers and outliers according to heuristic thresholding on the mea-
+sures. Since it requires access to the cost volume, WILD is suited for white-box
+algorithms only. In contrast, among other advantages discussed next, it worth
+stressing that our OTB approach is suited for black-box systems and agnostic
+to the scene content, in contrast to SELF that requires static scenes.
+10          M. Poggi et al.
+
+                                                       KITTI 2012
+ Match cost                      Census  MCCNN-fst Census    MCCNN-fst Census MCCNN-fst
+ Aggregation                   CBCA SGM CBCA SGM CBCA SGM CBCA SGM CBCA SGM CBCA SGM
+ ∆I (IL , I˜R )                0.210   0.086   0.165   0.044   0.210   0.086   0.165   0.044   0.210   0.086   0.165   0.044
+ DA                            0.112   0.047   0.063   0.023   0.112   0.047   0.063   0.023   0.112   0.047   0.063   0.023
+ UC                            0.165   0.063   0.123   0.034   0.165   0.063   0.123   0.034   0.165   0.063   0.123   0.034
+ T p Ap U p       T q Aq U q             CCNN                   ConfNet                   LGC
+ X                X             0.080 0.045 0.047 0.018 0.077 0.033 0.045 0.014 0.082 0.058 0.046 0.026
+     X                X         0.105 0.045 0.073 0.023 0.087 0.035 0.049 0.017 0.110 0.040 0.074 0.022
+        X                X      0.111 0.035 0.087 0.022 0.101 0.038 0.065 0.020 0.114 0.035 0.077 0.020
+ X X              X             0.078 0.033 0.050 0.019 0.072 0.030 0.038 0.014 0.075 0.034 0.049 0.023
+ X X              X X           0.089 0.035 0.059 0.023 0.071 0.029 0.038 0.014 0.082 0.031 0.066 0.020
+ X      X         X             0.072 0.038 0.053 0.019 0.074 0.029 0.040 0.013 0.070 0.036 0.042 0.016
+ X      X         X      X      0.088 0.032 0.075 0.020 0.076 0.030 0.041 0.013 0.084 0.031 0.071 0.017
+ X X X            X            0.068 0.034 0.046 0.018 0.070 0.029 0.037 0.013 0.068 0.032 0.041 0.016
+ X X X            X X X         0.085 0.029 0.057 0.017 0.071 0.028 0.038 0.012 0.081 0.028 0.050 0.015
+
+                                                        Middlebury
+ Match cost                      Census  MCCNN-fst Census      MCCNN-fst Census MCCNN-fst
+ Aggregation                   CBCA SGM CBCA SGM CBCA SGM CBCA SGM CBCA SGM CBCA SGM
+ ∆I (IL , IR )                 0.190   0.180   0.179   0.134   0.190   0.180   0.179   0.134   0.190   0.180   0.179   0.134
+ DA                            0.161   0.168   0.099   0.087   0.161   0.168   0.099   0.087   0.161   0.168   0.099   0.087
+ U                             0.193   0.188   0.192   0.145   0.193   0.188   0.192   0.145   0.193   0.188   0.192   0.145
+ T p Ap U p T q Aq U q                   CCNN                   ConfNet                   LGC
+ X X X X                       0.116 0.123 0.087 0.077 0.133 0.112 0.087 0.067 0.127 0.111 0.090 0.064
+ X X X X X X                    0.153 0.146 0.095 0.081 0.134 0.122 0.095 0.069 0.138 0.142 0.099 0.080
+Table 1. Ablation study on the proposed multi-modal binary cross entropy.
+We report AUC scores for networks trained on KITTI 2012 (20 or 400 images) and
+tested on KITTI 2012 (174 images, top) and Middlebury (15 images, bottom).
+
+
+
+
+4.2      Ablation study
+
+At first, we study the impact of the different terms in the proposed self-supervised
+loss function. To this aim, on KITTI 2012 and as for other experiments, we train 9
+variants of each network for each of the four stereo algorithms. Then, we evaluate
+confidences on the KITTI 2012 dataset and, without retraining, on Middlebury
+2014. Table 1 collects the outcome of this evaluation, reporting on top results
+on KITTI 2012 and, at the bottom, on Middlebury. We report as baselines the
+performance of ∆(IL ,IR    ˜ ) , DA and UC. DA is computed on 5 × 5 windows.
+    On KITTI (top of the table), we first report the results achieved by train-
+ing the three networks selecting only one of the three cues used to distinguish
+between correct and wrong matches, i.e. [T p , T q ], [Ap , Aq ] and [U p , U q ] config-
+urations. We can notice that each of them outperforms the performance of the
+corresponding baseline used for supervision. This trend occurs on all the al-
+gorithms and for each network, showing the surprisingly robust capacity of the
+networks to learn how to estimate confidence better than a noisy supervision sig-
+nal used for training. In general, the models trained on [T p , T q ] outperforms the
+others, except rare cases (i.e. CCNN and LGC on Census-SGM, outperformed
+by [U p , U q ] setting). Although effective at detecting textureless and ambiguous
+regions, the reprojection fails at filtering outliers due to slanted surfaces and
+occlusions. Thus, we incrementally add a single criterion, i.e. Ap or U p to filter
+out false positives obtained by [T p , T q ] configuration. We incrementally add,
+on another configuration, the corresponding negative criterion to remove pixels
+                                           Self-adapting confidence estimation for stereo                        11
+
+                    Match cost                   Census                                MCCNN-fst
+                    Aggregation         CBCA                  SGM               CBCA                SGM
+                    KITTI split     2012      2015       2012      2015     2012      2015     2012      2015
+                    Badτ %        27.193    22.281     10.330     8.998   18.875    16.926    6.084     6.028
+                    LRD           0.096      0.080      0.033     0.032   0.080      0.077    0.017     0.023
+
+
+      Traditional
+                    PKR           0.106      0.089      0.028     0.029   0.065      0.062    0.010     0.017
+                    LRC           0.142      0.113      0.062     0.056   0.103      0.092    0.036     0.041
+                    ∆(IL ,I˜R )   0.210      0.175      0.086     0.079   0.165      0.150    0.044     0.041
+                    DA            0.112      0.090      0.047     0.046   0.063      0.059    0.023     0.028
+                    UC            0.165      0.131      0.063     0.058   0.123      0.111    0.034     0.037
+                    Supervised     0.059     0.046      0.018     0.017    0.031     0.032     0.009     0.012
+
+      CCNN
+                    WILD [61]      0.076     0.065     0.026     0.026     0.052     0.047    0.012     0.017
+                    SELF [31]      0.076     0.065      0.047     0.046   0.038     0.041     0.012      0.018
+                    OTB (Ours)    0.068     0.055       0.029     0.031    0.046     0.048     0.017     0.022
+                    Supervised     0.061     0.049      0.017     0.016    0.033     0.034     0.006     0.010
+
+      ConfNet
+                    WILD [61]      0.089     0.067     0.024     0.020     0.054     0.050    0.010     0.016
+                    SELF [31]      0.075     0.066     0.024      0.024    0.041     0.044     0.014    0.016
+                    OTB (Ours)    0.070     0.058       0.028     0.032   0.037     0.040      0.012     0.017
+                    Supervised     0.056     0.044      0.016     0.016    0.029     0.030     0.007     0.010
+
+      LGC
+                    WILD [61]      0.089     0.065     0.026     0.025     0.049     0.045    0.011     0.017
+                    SELF [31]      0.089     0.081     0.026      0.026    0.056     0.057     0.020     0.021
+                    OTB (Ours)    0.068     0.055       0.028     0.032   0.041     0.044      0.015     0.019
+                    Optimal       0.047      0.034      0.008     0.008   0.024      0.022    0.003     0.005
+Table 2. Evaluation on KITTI. We report AUC scores for networks trained on
+KITTI 2012 (20 or 400 images) and tested on 2012 (174 images) and 2015 (200 images).
+
+
+
+wrongly categorized as outliers by T q . In most cases, adding a single criterion to
+P is beneficial, while we can notice how introducing negative criteria degrades
+the performance on CBCA algorithms. This occurs because adding Aq or U q
+makes textureless regions no longer labelled as outliers, as shown in Fig. 2 left
+comparing patches d) and e). Finally, adding both Ap and U p produces the best
+overall results for CBCA methods. By introducing Aq and U q too we obtain
+better results only on SGM methods, since much more accurate than CBCA
+ones and thus more false outliers are introduced if Aq and U q are not used, as
+shown in Fig. 2 right, comparing d) and e). On the other hand, by testing the
+best configurations on Middlebury 2014, enabling all the positive criteria and
+only T q for negative allows for better generalization to unseen environments.
+
+4.3           Comparison with offline methods
+Having found the best configuration for the LMBCE loss, we compare our super-
+vision paradigm with known self-supervised approaches [31,61]. In our experi-
+ments, we obtain proxy labels for SELF and WILD using the code provided by
+the respective authors. We collect the outcome of these experiments in Tables 2
+and 3. We label with different colors methods ranging from stronger constraints
+(need for ground truth) to weaker (ours). For each architecture, stereo algorithm
+and evaluation set triplet we label in bold the best self-supervision approach,
+while in red the couple architecture/self-supervision on an entire evaluation set.
+    KITTI datasets. Table 2 collects evaluations on the KITTI 2012 and 2015
+datasets, respectively, using the 174 validation set from 2012 and the full 2015 set.
+We point out that all self-supervised strategies outperform traditional measures,
+reported on top as baselines, such as LRD, PKR, LRC and the cues used in our
+LMBCE loss, struggling only when dealing with the very accurate MCCNN-fst-
+SGM algorithm. Comparing the different architectures, we can notice how the
+12                 M. Poggi et al.
+
+                        Match cost                    Census                                MCCNN-fst
+                        Aggregation         CBCA                  SGM                CBCA               SGM
+                        Dataset        Midd      ETH         Midd      ETH      Midd      ETH      Midd      ETH
+                        Bad1 %        28.701    21.270     26.682     15.471   29.799    34.279  21.799     12.594
+                        LRD            0.117     0.082      0.113      0.059   0.107     0.185     0.075     0.051
+
+
+     Traditional
+                        PKR            0.124     0.086      0.112      0.056   0.095     0.181     0.059     0.042
+                        LRC            0.189     0.135      0.197      0.114   0.188     0.239     0.149     0.091
+                        ∆(IL ,I˜R )    0.190     0.162      0.180      0.119   0.179     0.257     0.134     0.097
+                        DA             0.161     0.119      0.168      0.093   0.099     0.159     0.087     0.047
+                        UC             0.193     0.148      0.188      0.114   0.192     0.264     0.145     0.096
+                        Supervised     0.110      0.096     0.118      0.076    0.079     0.138     0.068     0.046
+
+     CCNN
+                        WILD [61]      0.136      0.114     0.140      0.086    0.095     0.154     0.081     0.046
+                        SELF [31]      0.163      0.174     0.217      0.174    0.090     0.147     0.081     0.076
+                        OTB (Ours)    0.116      0.084     0.123      0.070    0.087     0.137     0.077     0.042
+                        Supervised     0.121      0.086     0.104      0.063    0.086     0.138     0.062     0.036
+
+     ConfNet
+                        WILD [61]     0.122       0.101     0.117     0.063     0.091     0.160     0.073     0.037
+                        SELF [31]      0.154      0.120     0.121      0.067    0.096     0.172     0.084     0.048
+                        OTB (Ours)     0.133     0.093     0.112       0.067   0.087     0.138     0.067     0.035
+                        Supervised     0.111      0.080     0.111      0.061    0.083     0.136     0.065     0.040
+
+     LGC
+                        WILD [61]      0.136      0.104     0.133      0.082    0.098     0.156     0.084     0.050
+                        SELF [31]      0.128      0.105     0.117      0.066    0.091     0.154     0.086     0.060
+                        OTB (Ours)    0.127      0.084     0.111      0.056    0.090     0.139     0.064     0.035
+                        Optimal        0.053     0.041      0.046      0.022   0.057     0.103     0.030     0.014
+Table 3. Generalization on Middlebury and ETH3D. We report AUC scores
+for networks trained on KITTI 2012 (20 or 400 images) and tested on Middlebury (15
+images) and ETH3D (27 images) without retraining or adaptation.
+
+
+
+
+Fig. 3. Qualitative results for generalization. From left: reference image, disparity
+by MCCNN-fst-SGM, ConfNet trained with [61], [31], our method and ground-truth.
+On top, Adirondack (Middlebury), at the bottom, Playground 3l (ETH3D).
+
+
+
+self-supervised paradigms break the hierarchy (i.e., self-supervised LGC is often
+outperformed by ConfNet). On Census-CBCA, our strategy always outperforms
+SELF and WILD when used to train any architecture. The same behaviour is
+confirmed on MCCNN-fst-CBCA, except for CCNN resulting better with SELF
+but with the best performance achieved by ConfNet trained with OTB. This
+outcome highlights the outstanding performance of OTB with noisy algorithms
+(about 27 and 19% error rates on the validation set), close to full supervision.
+On SGM algorithms, OTB results comparable with SELF and WILD, although
+sourcing supervision only from images and DL , thus in a much weaker form
+compared to the competitors. On three out of four algorithms, ConfNet results
+to be the most effective architecture when trained in a self-supervised manner.
+    Generalization on Middlebury and ETH3D. Table 3 reports results
+on the Middlebury 2014 and ETH3D datasets. The same networks evaluated
+so far (trained on KITTI 2012 images) are transferred here without retrain-
+ing or adaptation, enabling to assess the generalization properties of each net-
+work/supervision configuration. Not surprisingly, the margin between learned
+                                      Self-adapting confidence estimation for stereo               13
+
+                    Traditional                     Supervision
+  Algorithm   ∆(IL ,I˜R ) DA UC Supervised WILD [61] SELF [31] OTB OTB (online) Opt. Badτ %
+  Census-SGM   0.179 0.106 0.162  0.061     0.067      0.074    0.072 0.064     0.029 21.007
+  MADNet [59]  0.133 0.147 0.155  0.116       -        0.135    0.139 0.126     0.021 16.226
+  GANet [68]    0.019   0.018 0.025   0.017     -       0.021   0.019    0.015     0.001   2.897
+Table 4. Self-adaptation. We report AUC scores for networks trained on KITTI
+2012 (20 or 400 images) and tested on a DrivingStereo sequence (6905 frames).
+
+
+
+
+Fig. 4. Qualitative results on DrivingStereo. From left: reference image, disparity
+by Census-SGM, ConfNet trained with [61], [31], OTB and online-adapted OTB.
+
+
+and traditional measures is much smaller because of the domain shift. Nonethe-
+less, in many cases the performance is still in favor of learned approaches, with
+some exceptions. We point out that networks trained with OTB self-supervision
+always outperform SELF and WILD, except for ConfNet in two cases. More-
+over, networks trained with OTB generalize better than their fully supervised
+counterparts in some cases, mostly on the ETH3D dataset (e.g., CCNN with all
+algorithms, ConfNet with MCCNN-fst-SGM and LGC with both SGM meth-
+ods). Fig. 3 shows qualitative examples of this test.
+
+4.4    Self-adapting in-the-wild
+Finally, we conduct experiments aimed at assessing how effective our strategy is
+for self-adaptation of a confidence measure in unseen environments. Purposely,
+we simulate deployment in an autonomous driving scenario, selecting a sequence
+from the DrivingStereo dataset [64]. We use sequence 2018-10-25-07-37, contain-
+ing 6905 stereo pairs acquired in unconstrained (i.e., dynamic) environment. For
+this evaluation, we choose Census-SGM, MADNet and GANet. The former be-
+cause it represents the preferred choice for hardware implementation on custom
+stereo cameras [2,9,48,17,28,45,44]. The remaining two because well represent-
+ing modern end-to-end CNNs that are fast (MADNet) or yield state-of-the-art
+accuracy (GANet). For confidence networks we select ConfNet, because effective
+with accurate algorithms and well-suited for online adaptation.
+    In this experiment, we assume to have pre-trained versions of ConfNet with
+the different self-supervision paradigms, again on KITTI 2012. For OTB, we use
+[T p , Ap , U p , T q , Aq , U q ] for offline training and [T p , Ap , U p , T q ] during adapta-
+tion. When performing online adaptation (online entry), for each stereo pair the
+confidence is estimated and evaluated before loss computation (thus, supervi-
+sion only acts on the upcoming frames as in [59]). This way, ConfNet runs at
+0.09 seconds (11 FPS) against the 0.02 (50 FPS) without adaptation on Titan
+Xp, measuring network computations only. The learning rate is set to 0.0001
+during adaptation. Table 4 collects the outcome of this evaluation. We point out
+that WILD can not be deployed for MADNet and GANet since a meaningful
+14      M. Poggi et al.
+
+
+
+
+Fig. 5. Qualitative results with Apple iPhone XS. We show two examples of
+reference image and disparity map acquired with the iPhone XS, followed by estimated
+confidence map after few iterations of on-the-fly learning.
+
+
+cost volume is not available for the former or cannot be used straightforwardly
+for the latter. On the other hand, SELF would require (DL , DR ) for supervision,
+while MADNet and GANet provide only the former. By assuming networks as
+gray-boxes, we get rid of this issue at training time obtaining DR as shown in
+Eq. 1. Concerning SGM, OTB performs in between WILD and SELF. Never-
+theless, keeping continuous adaptation active on the whole sequence makes it
+outperform both. Concerning MADNet, SELF results more effective than OTB.
+Again, performing online adaptation makes OTB the best solution in this case as
+well. Finally, concerning GANet, learned measures perform worse than ∆(IL ,I˜R )
+and DA. Online adaptation results crucial for OTB to obtain the best results.
+To conclude, Fig. 4 shows qualitative examples for the SGM algorithm.
+    On-the-fly learning with black-box sensors. Finally we report, as quali-
+tative results, the outcome obtained by learning on-the-fly a confidence measure
+on disparity map sourced by an Apple iPhone XS, without any pre-training.
+Fig. 5 shows examples of acquired disparity and estimated confidence maps by
+ConfNet adapted online, detecting gross errors like on turtle’s shell.
+
+
+5    Conclusion
+In this paper, we have introduced a novel self-supervised paradigm aimed at
+learning from scratch a confidence measure for stereo. We leverage few, prin-
+cipled cues from the input stereo pair and the estimated disparity in order to
+source supervision signals in place of disparity ground truth labels. Being such
+cues available during deployment in-the-wild, our solution is suited for continu-
+ous online adaptation on any black-box framework. Experimental results proved
+that our strategy is equivalent or superior to existing self-supervised approaches
+and, conversely to them, allows for further improvements during deployment by
+leveraging the online self-adaptation process.
+    Acknowledgments. We gratefully acknowledge the support of NVIDIA
+Corporation with the donation of the Titan Xp GPU used for this research.
+                                Self-adapting confidence estimation for stereo       15
+
+References
+ 1. Aleotti, F., Tosi, F., Zhang, L., Poggi, M., Mattoccia, S.: Reversing the cycle:
+    self-supervised deep stereo through enhanced monocular distillation. In: European
+    Conference on Computer Vision (ECCV) (2020)
+ 2. Banz, C., Hesselbarth, S., Flatt, H., Blume, H., Pirsch, P.: Real-time stereo vision
+    system using semi-global matching disparity estimation: Architecture and fpga-
+    implementation. In: ICSAMOS. pp. 93–101 (2010)
+ 3. Casser, V., Pirk, S., Mahjourian, R., Angelova, A.: Depth prediction without the
+    sensors: Leveraging structure for unsupervised learning from monocular videos. In:
+    Thirty-Third AAAI Conference on Artificial Intelligence (AAAI-19). AAAI Press
+    (2019)
+ 4. Chang, J.R., Chen, Y.S.: Pyramid stereo matching network. In: The IEEE Con-
+    ference on Computer Vision and Pattern Recognition (CVPR). IEEE (June 2018)
+ 5. Chen, Z., Sun, X., Wang, L., Yu, Y., Huang, C.: A deep visual correspondence
+    embedding model for stereo matching costs. In: The IEEE International Conference
+    on Computer Vision (ICCV). IEEE (December 2015)
+ 6. Di Stefano, L., Marchionni, M., Mattoccia, S.: A fast area-based stereo matching
+    algorithm. Image and Vision Computing 22(12), 983–1005 (2004)
+ 7. Duggal, S., Wang, S., Ma, W.C., Hu, R., Urtasun, R.: Deeppruner: Learning effi-
+    cient stereo matching via differentiable patchmatch. In: IEEE International Con-
+    ference on Computer Vision (ICCV). pp. 4384–4393. IEEE (2019)
+ 8. Fu, Z., Fard, M.A.: Learning confidence measures by multi-modal convolutional
+    neural networks. In: 2018 IEEE Winter Conference on Applications of Computer
+    Vision (WACV). pp. 1321–1330. IEEE (2018)
+ 9. Gehrig, S.K., Eberli, F., Meyer, T.: A real-time low-power stereo vision engine
+    using semi-global matching. In: ICVS. pp. 134–143 (2009)
+10. Geiger, A., Lenz, P., Urtasun, R.: Are we ready for autonomous driving? The
+    KITTI vision benchmark suite. In: CVPR. IEEE (2012)
+11. Godard, C., Mac Aodha, O., Brostow, G.J.: Unsupervised monocular depth esti-
+    mation with left-right consistency. In: CVPR. IEEE (2017)
+12. Godard, C., Mac Aodha, O., Brostow, G.J.: Digging into self-supervised monocular
+    depth estimation. In: IEEE International Conference on Computer Vision (ICCV).
+    IEEE (2019)
+13. Gul, M.S.K., Bätz, M., Keinert, J.: Pixel-wise confidences for stereo disparities
+    using recurrent neural networks. In: British Machine Vision Conference (BMVC).
+    BMVA (2019)
+14. Haeusler, R., Nair, R., Kondermann, D.: Ensemble learning for confidence measures
+    in stereo vision. In: IEEE Conference on Computer Vision and Pattern Recognition
+    (CVPR). pp. 305–312. IEEE (2013)
+15. Hirschmuller, H.: Accurate and efficient stereo processing by semi-global match-
+    ing and mutual information. In: Computer Vision and Pattern Recognition, 2005.
+    CVPR 2005. IEEE Computer Society Conference on. vol. 2, pp. 807–814. IEEE
+    (2005)
+16. Hirschmüller, H., Innocent, P.R., Garibaldi, J.: Real-time correlation-based stereo
+    vision with reduced border errors. International Journal of Computer Vision 47(1-
+    3), 229–246 (2002)
+17. Honegger, D., Oleynikova, H., Pollefeys, M.: Real-time and low latency embedded
+    computer vision hardware based on a combination of fpga and mobile cpu. In:
+    IROS. IEEE (2014)
+16      M. Poggi et al.
+
+18. Hu, X., Mordohai, P.: A quantitative evaluation of confidence measures for stereo
+    vision. PAMI 34(11), 2121–2133 (2012)
+19. Ilg, E., Saikia, T., Keuper, M., Brox, T.: Occlusions, motion and depth boundaries
+    with a generic network for optical flow, disparity, or scene flow estimation. In:
+    European Conference on Computer Vision (ECCV). Springer (2018)
+20. Kendall, A., Martirosyan, H., Dasgupta, S., Henry, P., Kennedy, R., Bachrach, A.,
+    Bry, A.: End-to-end learning of geometry and context for deep stereo regression.
+    In: The IEEE International Conference on Computer Vision (ICCV). IEEE (Oct
+    2017)
+21. Kim, S., Kim, S., Min, D., Sohn, K.: Laf-net: Locally adaptive fusion networks for
+    stereo confidence estimation. In: The IEEE Conference on Computer Vision and
+    Pattern Recognition (CVPR). IEEE (June 2019)
+22. Kim, S., Min, D., Kim, S., Sohn, K.: Feature augmentation for learning confidence
+    measure in stereo matching. IEEE Transactions on Image Processing 26(12), 6019–
+    6033 (2017)
+23. Kim, S., Min, D., Kim, S., Sohn, K.: Unified confidence estimation networks for
+    robust stereo matching. IEEE Transactions on Image Processing 28(3), 1299–1313
+    (2019)
+24. Kim, S., Min, D., Kim, S., Sohn, K.: Adversarial confidence estimation networks
+    for robust stereo matching. IEEE Transactions on Image Processing (2020)
+25. Liang, Z., Feng, Y., Guo, Y., Liu, H., Chen, W., Qiao, L., Zhou, L., Zhang, J.:
+    Learning for disparity estimation through feature constancy. In: The IEEE Con-
+    ference on Computer Vision and Pattern Recognition (CVPR). IEEE (June 2018)
+26. Luo, W., Schwing, A.G., Urtasun, R.: Efficient deep learning for stereo matching.
+    In: IEEE Conference on Computer Vision and Pattern Recognition (CVPR). pp.
+    5695–5703. IEEE (2016)
+27. Marin, G., Zanuttigh, P., Mattoccia, S.: Reliable fusion of tof and stereo depth
+    driven by confidence measures. In: European Conference on Computer Vision. pp.
+    386–401. Springer (2016)
+28. Mattoccia, S., Poggi, M.: A passive rgbd sensor for accurate and real-time depth
+    sensing self-contained into an fpga. In: 9th ICDSC (2015)
+29. Mayer, N., Ilg, E., Hausser, P., Fischer, P., Cremers, D., Dosovitskiy, A., Brox,
+    T.: A large dataset to train convolutional networks for disparity, optical flow, and
+    scene flow estimation. In: The IEEE Conference on Computer Vision and Pattern
+    Recognition (CVPR). IEEE (June 2016)
+30. Menze, M., Geiger, A.: Object scene flow for autonomous vehicles. In: Conference
+    on Computer Vision and Pattern Recognition (CVPR). IEEE (2015)
+31. Mostegel, C., Rumpler, M., Fraundorfer, F., Bischof, H.: Using self-contradiction to
+    learn confidence measures in stereo vision. In: The IEEE Conference on Computer
+    Vision and Pattern Recognition (CVPR). IEEE (June 2016)
+32. Park, M.G., Yoon, K.J.: Leveraging stereo matching with learning-based confi-
+    dence measures. In: IEEE Conference on Computer Vision and Pattern Recogni-
+    tion (CVPR). pp. 101–109. IEEE (2015)
+33. Park, M.G., Yoon, K.J.: Learning and selecting confidence measures for robust
+    stereo matching. IEEE transactions on pattern analysis and machine intelligence
+    41(6), 1397–1411 (2018)
+34. Poggi, M., Agresti, G., Tosi, F., Zanuttigh, P., Mattoccia, S.: Confidence estimation
+    for tof and stereo sensors and its application to depth data fusion. IEEE Sensors
+    Journal (2019)
+                                  Self-adapting confidence estimation for stereo        17
+
+35. Poggi, M., Aleotti, F., Tosi, F., Mattoccia, S.: Towards real-time unsupervised
+    monocular depth estimation on CPU. In: IEEE/JRS Conference on Intelligent
+    Robots and Systems (IROS). IEEE (2018)
+36. Poggi, M., Mattoccia, S.: Deep stereo fusion: combining multiple disparity hy-
+    potheses with deep-learning. In: International Conference on 3D Vision (3DV).
+    pp. 138–147. IEEE (2016)
+37. Poggi, M., Mattoccia, S.: Learning a general-purpose confidence measure based on
+    o (1) features and a smarter aggregation strategy for semi global matching. In:
+    International Conference on 3D Vision (3DV). pp. 509–518. IEEE (2016)
+38. Poggi, M., Mattoccia, S.: Learning from scratch a confidence measure. In: British
+    Machine Vision Conference (BMVC). BMVA (2016)
+39. Poggi, M., Mattoccia, S.: Learning to predict stereo reliability enforcing local con-
+    sistency of confidence maps. In: IEEE Conference on Computer Vision and Pattern
+    Recognition (CVPR). pp. 2452–2461. IEEE (2017)
+40. Poggi, M., Pallotti, D., Tosi, F., Mattoccia, S.: Guided stereo matching. In:
+    IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
+    IEEE (2019)
+41. Poggi, M., Tosi, F., Mattoccia, S.: Even more confident predictions with deep
+    machine-learning. In: IEEE Conference on Computer Vision and Pattern Recogni-
+    tion Workshops. pp. 76–84. IEEE (2017)
+42. Poggi, M., Tosi, F., Mattoccia, S.: Quantitative evaluation of confidence measures
+    in a machine learning world. In: IEEE International Conference on Computer Vi-
+    sion (ICCV). pp. 5228–5237. IEEE (2017)
+43. Poggi, M., Tosi, F., Mattoccia, S.: Learning a confidence measure in the dispar-
+    ity domain from o (1) features. Computer Vision and Image Understanding 193,
+    102905 (2020)
+44. Rahnama, O., Cavallari, T., Golodetz, S., Tonioni, A., Joy, T., Di Stefano, L.,
+    Walker, S., Torr, P.H.: Real-time highly accurate dense depth on a power bud-
+    get using an fpga-cpu hybrid soc. IEEE Transactions on Circuits and Systems II:
+    Express Briefs 66(5), 773–777 (2019)
+45. Rahnama, O., Cavalleri, T., Golodetz, S., Walker, S., Torr, P.: R3sgm: Real-time
+    raster-respecting semi-global matching for power-constrained systems. In: 2018 In-
+    ternational Conference on Field-Programmable Technology (FPT). pp. 102–109.
+    IEEE, IEEE (2018)
+46. Scharstein, D., Hirschmüller, H., Kitajima, Y., Krathwohl, G., Nešić, N., Wang, X.,
+    Westling, P.: High-resolution stereo datasets with subpixel-accurate ground truth.
+    In: German conference on pattern recognition. pp. 31–42. Springer, Springer (2014)
+47. Scharstein, D., Szeliski, R.: A taxonomy and evaluation of dense two-frame stereo
+    correspondence algorithms. International journal of computer vision 47(1-3), 7–42
+    (2002)
+48. Schmid, K., Hirschmuller, H.: Stereo vision and imu based real-time ego-motion and
+    depth image computation on a handheld device. In: IEEE International Conference
+    on Robotics and Automation (ICRA). IEEE (2013)
+49. Schonberger, J.L., Sinha, S.N., Pollefeys, M.: Learning to fuse proposals from mul-
+    tiple scanline optimizations in semi-global matching. In: European Conference on
+    Computer Vision (ECCV). pp. 739–755. Springer (2018)
+50. Schops, T., Schonberger, J.L., Galliani, S., Sattler, T., Schindler, K., Pollefeys, M.,
+    Geiger, A.: A multi-view stereo benchmark with high-resolution images and multi-
+    camera videos. In: IEEE Conference on Computer Vision and Pattern Recognition
+    (CVPR). pp. 3260–3269. IEEE (2017)
+18      M. Poggi et al.
+
+51. Seki, A., Pollefeys, M.: Patch based confidence prediction for dense disparity map.
+    In: British Machine Vision Conference (BMVC). vol. 2, p. 4. BMVA (2016)
+52. Song, X., Zhao, X., Hu, H., Fang, L.: Edgestereo: A context integrated residual
+    pyramid network for stereo matching. In: 14th Asian Conference on Computer
+    Vision (ACCV) (2018)
+53. Spyropoulos, A., Komodakis, N., Mordohai, P.: Learning to detect ground control
+    points for improving the accuracy of stereo matching. In: IEEE Conference on
+    Computer Vision and Pattern Recognition (CVPR). pp. 1621–1628. IEEE (2014)
+54. Spyropoulos, A., Mordohai, P.: Ensemble classifier for combining stereo matching
+    algorithms. In: 2015 International Conference on 3D Vision. pp. 73–81. IEEE, IEEE
+    (2015)
+55. Spyropoulos, A., Mordohai, P.: Correctness prediction, accuracy improvement and
+    generalization of stereo matching using supervised learning. International Journal
+    of Computer Vision 118(3), 300–318 (2016)
+56. Tonioni, A., Poggi, M., Mattoccia, S., Di Stefano, L.: Unsupervised adaptation for
+    deep stereo. In: The IEEE International Conference on Computer Vision (ICCV).
+    IEEE (Oct 2017)
+57. Tonioni, A., Poggi, M., Mattoccia, S., Di Stefano, L.: Unsupervised domain adap-
+    tation for depth prediction from images. IEEE Transactions on Pattern Analysis
+    and Machine Intelligence (2019)
+58. Tonioni, A., Rahnama, O., Joy, T., Di Stefano, L., Thalaiyasingam, A., Torr, P.:
+    Learning to adapt for stereo. In: The IEEE Conference on Computer Vision and
+    Pattern Recognition (CVPR). IEEE (June 2019)
+59. Tonioni, A., Tosi, F., Poggi, M., Mattoccia, S., Di Stefano, L.: Real-time self-
+    adaptive deep stereo. In: IEEE Conference on Computer Vision and Pattern Recog-
+    nition (CVPR). IEEE (June 2019)
+60. Tosi, F., Poggi, M., Benincasa, A., Mattoccia, S.: Beyond local reasoning for stereo
+    confidence estimation with deep learning. In: European Conference on Computer
+    Vision (ECCV). pp. 319–334. Springer (2018)
+61. Tosi, F., Poggi, M., Tonioni, A., Di Stefano, L., Mattoccia, S.: Learning confidence
+    measures in the wild. In: British Machine Vision Conference (BMVC). BMVA
+    (Sept 2017)
+62. Wang, Z., Bovik, A.C., Sheikh, H.R., Simoncelli, E.P.: Image quality assessment:
+    from error visibility to structural similarity. IEEE transactions on image processing
+    13(4), 600–612 (2004)
+63. Watson, J., Mac Aodha, O., Turmukhambetov, D., Brostow, G.J., Firman, M.:
+    Learning stereo from single images. In: European Conference on Computer Vision
+    (ECCV). Springer (2020)
+64. Yang, G., Song, X., Huang, C., Deng, Z., Shi, J., Zhou, B.: Drivingstereo: A large-
+    scale dataset for stereo matching in autonomous driving scenarios. In: IEEE Con-
+    ference on Computer Vision and Pattern Recognition (CVPR). IEEE (2019)
+65. Yang, G., Zhao, H., Shi, J., Deng, Z., Jia, J.: Segstereo: Exploiting semantic in-
+    formation for disparity estimation. In: 15th European Conference on Computer
+    Vision (ECCV). Springer (2018)
+66. Yin, Z., Darrell, T., Yu, F.: Hierarchical discrete distribution decomposition for
+    match density estimation. In: IEEE Conference on Computer Vision and Pattern
+    Recognition (CVPR). pp. 6044–6053. IEEE (2019)
+67. Zbontar, J., LeCun, Y.: Stereo matching by training a convolutional neural network
+    to compare image patches. Journal of Machine Learning Research 17(1-32), 2
+    (2016)
+                                Self-adapting confidence estimation for stereo      19
+
+68. Zhang, F., Prisacariu, V., Yang, R., Torr, P.H.: Ga-net: Guided aggregation net for
+    end-to-end stereo matching. In: IEEE Conference on Computer Vision and Pattern
+    Recognition (CVPR). pp. 185–194. IEEE (2019)
+69. Zhang, K., Lu, J., Lafruit, G.: Cross-based local stereo matching using orthogonal
+    integral images. IEEE transactions on circuits and systems for video technology
+    19(7), 1073–1079 (2009)
+70. Zhang, Z., Cui, Z., Xu, C., Jie, Z., Li, X., Yang, J.: Joint task-recursive learn-
+    ing for semantic segmentation and depth estimation. In: European Conference on
+    Computer Vision (ECCV). pp. 235–251. Springer (2018)
+71. Zhong, Y., Li, H., Dai, Y.: Open-world stereo video matching with deep rnn. In:
+    European Conference on Computer Vision (ECCV). Springer (2018)
+

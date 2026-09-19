@@ -1,0 +1,67 @@
+{
+  "recorded_utc": "2026-09-10T17:00:45.869607+00:00",
+  "task": "Primary measurement evidence for source-depth plus requested-camera reprojection; no experiment execution",
+  "clock_start_utc": "2026-09-10T16:55:02+00:00",
+  "last_source_check_clock_utc": "2026-09-10T17:00:08+00:00",
+  "primary_sources": [
+    {
+      "title": "TUM RGB-D File Formats",
+      "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats",
+      "version": "Live official HTML; no publication/revision time inferred",
+      "read_scope": "Web lines455-506: RGB/depth representation, trajectory, unprojection snippet, fr2 calibration, pre-registration, undistortion recommendation, prescaled depth. Reused and reread local docs/S8_DATA_SOURCE_REVIEW.md sections camera/depth/time before web verification. Not complete website or original sensor measurements.",
+      "remote_body_saved": false,
+      "sha256": null
+    },
+    {
+      "title": "LoFTR official geometry helper",
+      "url": "https://raw.githubusercontent.com/zju3dv/LoFTR/master/src/loftr/utils/geometry.py",
+      "version": "Dynamic master at read time; commit NOT pinned",
+      "read_scope": "Full returned file, web lines0-48 (49 lines): warp_kpts unproject-transform-project, image-boundary mask and relative target-depth consistency. No caller, training/evaluation pipeline, or model executed/read.",
+      "remote_body_saved": false,
+      "sha256": null
+    }
+  ],
+  "retrieval": "Directly opened two known primary URLs; revisited same source ranges, no broad paper search",
+  "local_scope": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S81_anchor_depth_reprojection/MEASUREMENT_NEAREST_WORK.md",
+      "bytes": 7683,
+      "sha256": "3f5cf310b3397f068736373053c821d07e5cb4a0c466d7f98dedb3f2c9ad2761"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S81_anchor_depth_reprojection/MEASUREMENT_NEAREST_WORK_DRAFT_BEFORE_DIRECTION_FIX.md",
+      "bytes": 7157,
+      "sha256": "c660d68348d458df7c341e1cc16a371f6122bf6f467e47fa5e7d143b3df595b4"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S8_DATA_SOURCE_REVIEW.md",
+      "bytes": 7701,
+      "sha256": "4fe0ba59bcc46a45954e570cd60579184f6c646c254f47a694ae5bbc4c9831c4"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S80_lightglue_observer/S80_RESULTS.md",
+      "bytes": 5026,
+      "sha256": "818ad92c96c0f081b41633b3dc8704f1a757104d2288157a72b73b71bcd10620"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S80_lightglue_observer/run_observer.py",
+      "bytes": 26024,
+      "sha256": "99b65cde2e0604b7179907e9a40e52d6d5240c7c670290ad5232a4e6f44a68cd"
+    }
+  ],
+  "implementation_check": "S80 run_observer.py lines91-113 read; each residual row contains target direction, source direction, and mean. Threshold summaries use column2 mean.",
+  "correction": "Initially overextended target-side epipolar lower bound to S80 symmetric-mean threshold; corrected before final delivery and notified root. Original draft preserved; no array computation performed.",
+  "scientific_claim_boundary": "Standard reprojection is not innovative; depth-induced along-line constraint is conditional geometric analysis. No information-necessity or dynamic-memory result.",
+  "scope_counts": {
+    "primary_works": 2,
+    "new_primary_work": 1,
+    "revisited_existing_primary_work": 1,
+    "new_data_downloads": 0,
+    "image_depth_arrays_read": 0,
+    "model_runs": 0,
+    "toy_runs": 0,
+    "main_ledger_edits": 0
+  },
+  "status": "NO_METHOD_SELECTED",
+  "dynamic_design_status": "FROZEN_NOT_EXECUTABLE"
+}

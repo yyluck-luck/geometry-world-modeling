@@ -1,0 +1,109 @@
+{
+  "schema": "s25-complete-loop-local-state-v1",
+  "persistent_loop_fields": [
+    "state_feat",
+    "state_pos",
+    "init_state_feat",
+    "mem",
+    "init_mem",
+    "prev_reset",
+    "prev_candidate_state_feat",
+    "prev_feat_i",
+    "state_cov",
+    "kalman_stats",
+    "device"
+  ],
+  "freeze_s_group": [
+    "state_feat",
+    "state_cov",
+    "kalman_stats",
+    "prev_candidate_state_feat",
+    "prev_feat_i"
+  ],
+  "freeze_m_group": [
+    "mem"
+  ],
+  "structural_fields": [
+    "state_pos",
+    "init_state_feat",
+    "init_mem",
+    "prev_reset",
+    "device"
+  ],
+  "resume_controls": [
+    "next_index",
+    "frame_ids"
+  ],
+  "next_index_rule": "type is int (not bool), >=1, equals len(complete unique prefix frame_ids)",
+  "recomputed_and_verified": {
+    "update_type": "filt3r",
+    "need_attn_for_update": false
+  },
+  "pre_capture_anchor": "immediately after ress.append(res_cpu), before Kalman/state/M commit",
+  "post_capture_anchor": "after _apply_stream_reset, prev_reset assignment, and _advance_prev_buffers",
+  "current_head": "one computation shared by all four branch checkpoints; immutable evidence",
+  "actions": {
+    "normal": {
+      "S_and_aux": "post",
+      "M": "post"
+    },
+    "freeze_s_aux": {
+      "S_and_aux": "pre",
+      "M": "post"
+    },
+    "freeze_m": {
+      "S_and_aux": "post",
+      "M": "pre"
+    },
+    "freeze_all": {
+      "S_and_aux": "pre",
+      "M": "pre"
+    }
+  },
+  "runtime_snapshot_beyond_loop_locals": [
+    "named_buffers",
+    "RoPE.cache",
+    "PositionGetter.cache_positions",
+    "torch_cpu_rng",
+    "python_rng",
+    "numpy_rng_if_loaded"
+  ],
+  "guarded_runtime_identity": [
+    "bound source SHAs",
+    "signed RoPE function source and identity",
+    "RoPE base=100 F0=1",
+    "parameters identity/version",
+    "effective hparams",
+    "original per-module training flags",
+    "audited method identities"
+  ],
+  "unsupported": [
+    "reset",
+    "update suppression",
+    "GPU",
+    "batch size >1",
+    "cross-process resume",
+    "active dropout/stochastic depth",
+    "training BatchNorm",
+    "external observation hooks",
+    "automatic event/horizon selection",
+    "multi-frame write-freezing policy"
+  ],
+  "upstream_output_only_not_checkpoint": [
+    "ress",
+    "all_state_args (always empty in lighter)"
+  ],
+  "ephemeral_current_frame": [
+    "feat_i",
+    "new_state_feat",
+    "new_mem",
+    "dec",
+    "head_input",
+    "res",
+    "res_cpu"
+  ],
+  "numerical_compatibility": "NOT_RUN",
+  "future_causal_forwards_from_rgb": "K+1+4H, K>=1 H>=1",
+  "future_full_compatibility_plus_four_branches_forwards": "3(K+1)+6H",
+  "experiment_decision": "pending parent natural-failure evidence gate and protocol freeze"
+}

@@ -1,0 +1,168 @@
+{
+  "schema": "gate0-v2-window-isolation-regression-v1",
+  "recorded_at_utc": "2026-09-15T17:58:57.893058+00:00",
+  "validator_sha256": "dbae13a507088d8aca422ee9191f2c41f377d8b125c8c28ffe6b569336ae9d97",
+  "script_sha256": "daa22be93a7cb4589f0f7cc54e2b5bd34af618b6dddbc35d3a48737894d96cf7",
+  "scope": "Synthetic software regressions only. No research data, model, SSH, GPU or job dispatch.",
+  "status": "PASS",
+  "passed": 16,
+  "total": 16,
+  "cases": [
+    {
+      "name": "valid four-plus-four scoped development fixture; no prediction artifacts",
+      "passed": true,
+      "actual_status": "PRE_RUN_READY",
+      "expected_error": null,
+      "errors": []
+    },
+    {
+      "name": "same bare frame IDs in different scenes remain distinct; shared command bundle accepted",
+      "passed": true,
+      "actual_status": "PRE_RUN_READY",
+      "expected_error": null,
+      "errors": []
+    },
+    {
+      "name": "history payload identity differs from frozen window",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "predictor history identities do not exactly match",
+      "errors": [
+        "predictor history identities do not exactly match declared windows",
+        "each declared history frame needs exactly one RGB record"
+      ]
+    },
+    {
+      "name": "scorer frame identity differs from frozen window",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "scorer target identities do not exactly match",
+      "errors": [
+        "scorer target identities do not exactly match declared windows",
+        "each declared target frame needs exactly one future RGB record"
+      ]
+    },
+    {
+      "name": "different paths cannot disguise same history/outcome identity",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "predictor history and scorer targets overlap by full identity",
+      "errors": [
+        "scorer target identities do not exactly match declared windows",
+        "each declared target frame needs exactly one future RGB record",
+        "predictor history and scorer targets overlap by full identity"
+      ]
+    },
+    {
+      "name": "command camera must address an actual declared target",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "command camera identities do not exactly match",
+      "errors": [
+        "command camera identities do not exactly match declared targets"
+      ]
+    },
+    {
+      "name": "window needs sequence identity",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "window dataset/scene/sequence identity missing",
+      "errors": [
+        "window dataset/scene/sequence identity missing",
+        "predictor history identities do not exactly match declared windows",
+        "each declared history frame needs exactly one RGB record",
+        "scorer target identities do not exactly match declared windows",
+        "each declared target frame needs exactly one future RGB record",
+        "command camera identities do not exactly match declared targets"
+      ]
+    },
+    {
+      "name": "normalized duplicate frame IDs rejected",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "duplicate normalized frame identities",
+      "errors": [
+        "window contains duplicate normalized frame identities",
+        "predictor history identities do not exactly match declared windows",
+        "each declared history frame needs exactly one RGB record",
+        "window history count differs from candidate budget"
+      ]
+    },
+    {
+      "name": "output budget cannot differ from effective four targets",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "output budget differs from effective target frame count",
+      "errors": [
+        "output budget differs from effective target frame count"
+      ]
+    },
+    {
+      "name": "selection count cannot differ from effective four context frames",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "selection budget differs from effective context frame count",
+      "errors": [
+        "selection budget differs from effective context frame count"
+      ]
+    },
+    {
+      "name": "window cannot add a fifth target while config produces four",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "window target count differs from effective config",
+      "errors": [
+        "window target count differs from effective config",
+        "scorer target identities do not exactly match declared windows",
+        "each declared target frame needs exactly one future RGB record",
+        "command camera identities do not exactly match declared targets"
+      ]
+    },
+    {
+      "name": "old isolation receipt cannot approve replacement wrapper",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "isolation probe does not bind current predictor wrapper",
+      "errors": [
+        "isolation probe does not bind current predictor wrapper",
+        "runtime does not bind current predictor wrapper"
+      ]
+    },
+    {
+      "name": "isolation must bind current outcome manifest",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "isolation probe does not bind current scorer/outcome manifest",
+      "errors": [
+        "isolation probe does not bind current scorer/outcome manifest"
+      ]
+    },
+    {
+      "name": "isolation must bind current runtime definition",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "isolation probe does not bind runtime configuration",
+      "errors": [
+        "isolation probe does not bind runtime configuration"
+      ]
+    },
+    {
+      "name": "boundary identifier cannot be silently replaced",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "isolation/runtime execution boundary identifier mismatch",
+      "errors": [
+        "isolation/runtime execution boundary identifier mismatch"
+      ]
+    },
+    {
+      "name": "probe must attest exact staging root",
+      "passed": true,
+      "actual_status": "BLOCKED",
+      "expected_error": "isolation probe does not bind the current predictor staging root",
+      "errors": [
+        "isolation probe does not bind the current predictor staging root"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,580 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/geometry-world-modeling/s42-confirmatory-manifest.schema.json",
+  "title": "S42 VMem consumer audit confirmatory execution manifest",
+  "description": "Validation schema only. It supplies no sample size, threshold, effect, or result. Every required value must be frozen before confirmatory arm outputs are viewed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "frozen_at",
+    "protocol_sha256",
+    "root_protocol_sha256",
+    "reconciliation_sha256",
+    "status",
+    "splits",
+    "units",
+    "metrics",
+    "thresholds",
+    "sample_size_plan",
+    "arms",
+    "pairing_and_randomization",
+    "multiplicity",
+    "material_invariants",
+    "stopping_rules",
+    "analysis",
+    "independent_prerun_review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "frozen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocol_sha256": {
+      "const": "5e194397c52fae4630e5badfd868f50335a09e0d5820d3cfe3dff07b623449e6"
+    },
+    "root_protocol_sha256": {
+      "const": "fd07dfc743f9a0c3f350f5d719936b74d5d902f3f10910c1a0b30b8ecda4059a"
+    },
+    "reconciliation_sha256": {
+      "const": "2cda8410dcc32fe1bfde9de249c78b9f45bf75bc77c3730f6843f45220219958"
+    },
+    "status": {
+      "const": "CONFIRMATORY_FROZEN"
+    },
+    "splits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "split_level",
+        "calibration_manifest_sha256",
+        "confirmatory_eligibility_rule",
+        "confirmatory_eligibility_rule_sha256",
+        "confirmatory_unit_list_sha256",
+        "no_outcome_based_selection"
+      ],
+      "properties": {
+        "split_level": {
+          "enum": ["scene", "within_scene_episode"]
+        },
+        "calibration_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "confirmatory_eligibility_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confirmatory_eligibility_rule_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "confirmatory_unit_list_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "no_outcome_based_selection": {
+          "const": true
+        }
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intervention_unit",
+        "independent_cluster",
+        "n_scene_confirmatory",
+        "episodes_per_scene",
+        "n_seed_pair_per_episode",
+        "n_a0_replay_per_episode",
+        "pixels_frames_and_seeds_are_not_independent_n"
+      ],
+      "properties": {
+        "intervention_unit": {
+          "const": "scene_x_revisit_episode"
+        },
+        "independent_cluster": {
+          "const": "scene"
+        },
+        "n_scene_confirmatory": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "episodes_per_scene": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "n_seed_pair_per_episode": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "n_a0_replay_per_episode": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pixels_frames_and_seeds_are_not_independent_n": {
+          "const": true
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revisit_loss",
+        "output_distance",
+        "camera_guardrail",
+        "quality_guardrail",
+        "global_style_diagnostic"
+      ],
+      "properties": {
+        "revisit_loss": {
+          "$ref": "#/$defs/metric"
+        },
+        "output_distance": {
+          "$ref": "#/$defs/metric"
+        },
+        "camera_guardrail": {
+          "$ref": "#/$defs/metric"
+        },
+        "quality_guardrail": {
+          "$ref": "#/$defs/metric"
+        },
+        "global_style_diagnostic": {
+          "$ref": "#/$defs/metric"
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tau_numeric",
+        "tau_replay",
+        "tau_output",
+        "delta_revisit",
+        "delta_direction",
+        "delta_localization",
+        "delta_interaction",
+        "camera_noninferiority_margin",
+        "quality_noninferiority_margin"
+      ],
+      "properties": {
+        "tau_numeric": {
+          "$ref": "#/$defs/threshold"
+        },
+        "tau_replay": {
+          "$ref": "#/$defs/threshold"
+        },
+        "tau_output": {
+          "$ref": "#/$defs/threshold"
+        },
+        "delta_revisit": {
+          "$ref": "#/$defs/threshold"
+        },
+        "delta_direction": {
+          "$ref": "#/$defs/threshold"
+        },
+        "delta_localization": {
+          "$ref": "#/$defs/threshold"
+        },
+        "delta_interaction": {
+          "$ref": "#/$defs/threshold"
+        },
+        "camera_noninferiority_margin": {
+          "$ref": "#/$defs/threshold"
+        },
+        "quality_noninferiority_margin": {
+          "$ref": "#/$defs/threshold"
+        }
+      }
+    },
+    "sample_size_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "simulation_script_sha256",
+        "calibration_variance_file_sha256",
+        "familywise_alpha",
+        "target_power",
+        "ci_halfwidth_targets_sha256",
+        "chosen_design_output_sha256",
+        "uses_conservative_variance",
+        "no_posthoc_power"
+      ],
+      "properties": {
+        "method": {
+          "const": "hierarchical_paired_simulation_with_holm_gatekeeping"
+        },
+        "simulation_script_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "calibration_variance_file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "familywise_alpha": {
+          "const": 0.05
+        },
+        "target_power": {
+          "type": "number",
+          "minimum": 0.8,
+          "exclusiveMaximum": 1
+        },
+        "ci_halfwidth_targets_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "chosen_design_output_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "uses_conservative_variance": {
+          "const": true
+        },
+        "no_posthoc_power": {
+          "const": true
+        }
+      }
+    },
+    "arms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["g1", "g2", "run_f_stage", "arm_implementation_hashes"],
+      "properties": {
+        "g1": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "A0"},
+            {"const": "A1"}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "g2": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "A2"},
+            {"const": "A3"},
+            {"const": "A4"},
+            {"const": "A5"}
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "run_f_stage": {
+          "type": "boolean"
+        },
+        "f_stage": {
+          "$ref": "#/$defs/fStage"
+        },
+        "arm_implementation_hashes": {
+          "type": "object",
+          "minProperties": 6,
+          "additionalProperties": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "run_f_stage": {"const": true}
+            }
+          },
+          "then": {
+            "required": ["f_stage"]
+          }
+        }
+      ]
+    },
+    "pairing_and_randomization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_noise_tensor_list_sha256",
+        "blocked_arm_order_sha256",
+        "analysis_blinded_arm_codes_sha256",
+        "fresh_state_between_arms",
+        "roi_and_masks_frozen_before_outputs"
+      ],
+      "properties": {
+        "actual_noise_tensor_list_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "blocked_arm_order_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "analysis_blinded_arm_codes_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fresh_state_between_arms": {
+          "const": true
+        },
+        "roi_and_masks_frozen_before_outputs": {
+          "const": true
+        }
+      }
+    },
+    "multiplicity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate", "method", "familywise_alpha", "claim_family", "unrun_claims_retained"],
+      "properties": {
+        "gate": {
+          "const": "G1_intersection_union_before_main_family"
+        },
+        "method": {
+          "const": "Holm"
+        },
+        "familywise_alpha": {
+          "const": 0.05
+        },
+        "claim_family": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "A2_vs_A0"},
+            {"const": "A3_vs_A0"},
+            {"const": "A4_vs_A0"},
+            {"const": "A5_vs_A0"},
+            {"const": "A2_equivalent_A3"},
+            {"const": "F_COHERENT"},
+            {"const": "F_CLIP_BRANCH"},
+            {"const": "F_REPLACE_BRANCH"},
+            {"const": "F_INTERACTION"}
+          ],
+          "minItems": 9,
+          "maxItems": 9
+        },
+        "unrun_claims_retained": {
+          "const": true
+        }
+      }
+    },
+    "material_invariants": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Map from every frozen invariant name to the file containing its expected value or SHA-256.",
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      }
+    },
+    "stopping_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineering_stop_spec_sha256",
+        "scientific_gate_spec_sha256",
+        "compute_budget_spec_sha256",
+        "no_efficacy_peeking",
+        "no_optional_sample_extension"
+      ],
+      "properties": {
+        "engineering_stop_spec_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scientific_gate_spec_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "compute_budget_spec_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "no_efficacy_peeking": {
+          "const": true
+        },
+        "no_optional_sample_extension": {
+          "const": true
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_estimator",
+        "cluster_level",
+        "bootstrap_repetitions",
+        "analysis_random_seed",
+        "confidence_interval_method",
+        "pvalue_method",
+        "analysis_script_sha256",
+        "invalid_run_rule_sha256",
+        "all_results_reported"
+      ],
+      "properties": {
+        "primary_estimator": {
+          "const": "scene_equal_weighted_mean_of_episode_level_paired_differences"
+        },
+        "cluster_level": {
+          "const": "scene"
+        },
+        "bootstrap_repetitions": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "analysis_random_seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "confidence_interval_method": {
+          "const": "paired_hierarchical_scene_then_episode_cluster_bootstrap"
+        },
+        "pvalue_method": {
+          "const": "null_centered_scene_cluster_bootstrap"
+        },
+        "analysis_script_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "invalid_run_rule_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "all_results_reported": {
+          "const": true
+        }
+      }
+    },
+    "independent_prerun_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer_id", "review_receipt_sha256", "saw_arm_outputs", "verdict"],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "saw_arm_outputs": {
+          "const": false
+        },
+        "verdict": {
+          "const": "PASS"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "direction", "definition_file_sha256", "implementation_sha256", "aggregation", "missing_rule"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "enum": ["higher_is_better", "lower_is_better", "distance_nonnegative", "diagnostic_only"]
+        },
+        "definition_file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "implementation_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "aggregation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "direction", "rationale", "provenance_sha256", "frozen_without_confirmatory_outputs"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "enum": ["absolute", "positive_improvement", "equivalence_half_width", "noninferiority_loss", "localization_lift", "signed_two_sided"]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "frozen_without_confirmatory_outputs": {
+          "const": true
+        }
+      }
+    },
+    "fStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arms",
+        "observed_source_list_sha256",
+        "minimum_preregistered_edits_per_source",
+        "edit_manifest_sha256",
+        "geometry_stability_check_sha256",
+        "support_mask_manifest_sha256",
+        "signed_representation_sha256",
+        "d_entry_source_contrast_sha256",
+        "f00_equals_a0_check",
+        "f10_f01_are_cross_path_conflict"
+      ],
+      "properties": {
+        "arms": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "F00"},
+            {"const": "F10"},
+            {"const": "F01"},
+            {"const": "F11"}
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "observed_source_list_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "minimum_preregistered_edits_per_source": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "edit_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "geometry_stability_check_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "support_mask_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "signed_representation_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "d_entry_source_contrast_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "f00_equals_a0_check": {
+          "const": true
+        },
+        "f10_f01_are_cross_path_conflict": {
+          "const": true
+        }
+      }
+    }
+  }
+}

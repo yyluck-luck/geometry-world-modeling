@@ -1,0 +1,256 @@
+{
+  "schema": "s45b-c1-nonconsuming-preflight-diagnosis-v8",
+  "status": "BLOCKED_V8_FROZEN_SOURCE_UPSTREAM_SCHEMA_ADAPTATION",
+  "started_utc": "2026-09-08T12:08:39.184632+00:00",
+  "completed_utc": "2026-09-08T12:08:39.389702+00:00",
+  "reviewer_role": "/root/c1_v8_binding_review",
+  "reviewer_task_id": "/root/c1_v8_binding_review",
+  "reviewer_turn_id": "c1-v8-nonconsuming-preflight-diagnosis-2026-09-08T12:08:39.389702+00:00",
+  "original_orchestration_returncode": 2,
+  "original_stdout_and_stderr_empty": true,
+  "original_readonly_preflight_failure": {
+    "type": "ValueError",
+    "message": "S45 terminal binding does not bind this C1 terminal/archive set",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/binding_review_evidence/diagnose_nonconsuming_preflight_v8.py\", line 57, in <module>\n    worker.formal_preflight(sup.worker_namespace(args),fd,parent_identity)\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/camera_guard.py\", line 1503, in formal_preflight\n    docs, upstream_records = verify_upstream(binding, deadline)\n                             ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/camera_guard.py\", line 707, in verify_upstream\n    require(\n    ~~~~~~~^\n        terminal.get(\"schema\") == \"s45-c1-terminal-binding-v1\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<10 lines>...\n        \"S45 terminal binding does not bind this C1 terminal/archive set\",\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/camera_guard.py\", line 114, in require\n    raise ValueError(message)\nValueError: S45 terminal binding does not bind this C1 terminal/archive set\n"
+  },
+  "upstream_predicate_audit": [
+    {
+      "message": "C1 manifest contract differs",
+      "predicate_count": 4,
+      "false_conditions": []
+    },
+    {
+      "message": "C1 generation terminal receipt is not a clean successful terminal record",
+      "predicate_count": 9,
+      "false_conditions": []
+    },
+    {
+      "message": "C1 generation worker receipt is incomplete or names another archive",
+      "predicate_count": 8,
+      "false_conditions": []
+    },
+    {
+      "message": "S45 terminal binding does not bind this C1 terminal/archive set",
+      "predicate_count": 11,
+      "false_conditions": [
+        {
+          "condition": "refs.get('external_receipt', {}).get('sha256') == upstream['generation_terminal_receipt']['sha256']",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "refs.get('external_receipt', {}).get('path') == str(C1_GENERATION_RECEIPT)",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "refs.get('worker_receipt', {}).get('sha256') == upstream['generation_worker_receipt']['sha256']",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "refs.get('worker_receipt', {}).get('path') == str(C1_GENERATION_WORKER_RECEIPT)",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "refs.get('archive_manifest', {}).get('sha256') == upstream['archive_manifest']['sha256']",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "refs.get('archive_manifest', {}).get('path') == str(C1_ARCHIVE_MANIFEST)",
+          "actual_evaluation": false
+        }
+      ]
+    },
+    {
+      "message": "S45 supervisor receipt is not the exact successful C1 readback",
+      "predicate_count": 13,
+      "false_conditions": []
+    },
+    {
+      "message": "S45 worker receipt does not have its narrow saved-output PASS",
+      "predicate_count": 7,
+      "false_conditions": []
+    },
+    {
+      "message": "S45 worker identity set does not bind the archive manifest/events used here",
+      "predicate_count": 2,
+      "false_conditions": []
+    },
+    {
+      "message": "S45 report is not the exact narrow C1 identity/cache result",
+      "predicate_count": 6,
+      "false_conditions": [
+        {
+          "condition": "report.get('schema') == 's45-c1-real-saved-output-readback-v1'",
+          "actual_evaluation": false
+        },
+        {
+          "condition": "report.get('status') == 'PASS_SAVED_C1_IDENTITIES_AND_CACHE_CONSUMPTION_ONLY'",
+          "actual_evaluation": false
+        }
+      ]
+    },
+    {
+      "message": "S45 result review is missing, unbound, or incorrectly treats pose/K as already passed",
+      "predicate_count": 17,
+      "false_conditions": []
+    },
+    {
+      "message": "C1 full archive is incomplete or names another event chain",
+      "predicate_count": 8,
+      "false_conditions": []
+    }
+  ],
+  "blocking_findings": [
+    {
+      "id": "V8_SCHEMA_01",
+      "source": "camera_guard.py:706",
+      "finding": "The already frozen S45 terminal binding stores external_receipt, worker_receipt and archive_manifest at top level. V8 mistakenly reads a nonexistent references wrapper, causing six exact path/hash predicates to fail.",
+      "minimal_fix": "In a new source version, bind refs to terminal itself. Preserve all existing paths and digests."
+    },
+    {
+      "id": "V8_SCHEMA_02",
+      "source": "camera_guard.py:758",
+      "finding": "The already frozen report has no schema or status keys. Those are worker-receipt fields. The original S45 report instead emits saved_quantity_consumption_status and pixel_identity_status; its SHA is already bound by worker/supervisor/result-review.",
+      "minimal_fix": "In a new source version, validate the two actual report sentinel fields and retain all row, manifest, cache-count, no-quality, hash and review checks. Do not insert invented fields into historical report."
+    }
+  ],
+  "original_schema_evidence": {
+    "terminal_binding_has_references": false,
+    "terminal_binding_top_level_reference_keys": [
+      "external_receipt",
+      "worker_receipt",
+      "archive_manifest"
+    ],
+    "report_has_schema": false,
+    "report_has_status": false,
+    "report_saved_quantity_consumption_status": "VERIFIED_BY_IDENTITY_BOUND_ARCHIVED_ARRAY_CHAIN_IF_THIS_REPORT_PASSES",
+    "report_pixel_identity_status": "ARCHIVED_PIL_PIXEL_TENSORS_AND_ARCHIVE_FILE_BYTES_IDENTITY_ONLY",
+    "original_emitter_source": "work/S45_c1_result_readback/readback.py:170-201"
+  },
+  "diagnostic_in_memory_repair": {
+    "status": "PASS_DIAGNOSTIC_IN_MEMORY_READ_ONLY_PREFLIGHT_ONLY",
+    "changes": [
+      {
+        "old": "refs = terminal.get('references', {})",
+        "new": "refs = terminal"
+      },
+      {
+        "old": "report.get('schema') == 's45-c1-real-saved-output-readback-v1'",
+        "new": "report.get('saved_quantity_consumption_status') == 'VERIFIED_BY_IDENTITY_BOUND_ARCHIVED_ARRAY_CHAIN_IF_THIS_REPORT_PASSES'"
+      },
+      {
+        "old": "report.get('status') == 'PASS_SAVED_C1_IDENTITIES_AND_CACHE_CONSUMPTION_ONLY'",
+        "new": "report.get('pixel_identity_status') == 'ARCHIVED_PIL_PIXEL_TENSORS_AND_ARCHIVE_FILE_BYTES_IDENTITY_ONLY'"
+      }
+    ],
+    "patched_function_sha256": "49abb8bd67ae2fd2fa0140d414208445cc41d39326e6fd115a060d4de6f3317f",
+    "bound_text_record_count": 26,
+    "event_summary": {
+      "event_count": 102,
+      "last_event_sha256": "67a58d988d205b6a371225e563b7a602537c18d976488e1143d9a43cd768409f"
+    },
+    "capture_group_names": [
+      "batch_input",
+      "cache_commit"
+    ],
+    "same_records_complete": true,
+    "runtime_capability_preflight_called": false,
+    "formal_supervision_called": false
+  },
+  "source_and_input_identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/supervise_camera_guard.py": {
+      "sha256": "2f9b64ecf8fe262f46d1cf7e4c5b823aa6d6498f6fec70d7d5f66a62ebafa752",
+      "bytes": 141001
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/camera_guard.py": {
+      "sha256": "fce7afb1a74bdc8c590c1470b0a53740b83dc295cd9571ccb91cda078f3ddf0e",
+      "bytes": 90356
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/resumption_20260908/C1_V8_FORMAL_ORCHESTRATION.json": {
+      "sha256": "d03c4c6e32e33b4690a14e9605cfbc7121870316c646edb7daed8d0ee222ecbc",
+      "bytes": 1813
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/C1_CAMERA_GUARD_BINDING_V8.json": {
+      "sha256": "4a71cb5620a4164bd681ce7d844d26c018c1e7597586e7339f1c1f2afed58ae9",
+      "bytes": 10315
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/SOURCE_REVIEW_PRIMARY_V8.json": {
+      "sha256": "916319349f8bb85ef2dad55b8c55e4ae87b091e359541383588386708dcf17f6",
+      "bytes": 13260
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/SOURCE_REVIEW_ADVERSARIAL_V8.json": {
+      "sha256": "afdd2c13eaa8e89e021e0fd4312257cb68b180ace7f3dbcfcd00784896111b83",
+      "bytes": 13257
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/BINDING_REVIEW_V8.json": {
+      "sha256": "aeee71127577f284aa31f80e5f5b8f2b26bba5d07ac30565923814ea2eccd220",
+      "bytes": 10583
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v8/GOVERNANCE_ATTESTATION_V8.json": {
+      "sha256": "42d9f0f64cfe848a820fc4388d487ef5b5939c857c2cf4ef1c6a480abe07fe16",
+      "bytes": 3991
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/manifest.json": {
+      "sha256": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+      "bytes": 55798
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/execution_01/receipt.json": {
+      "sha256": "44753718ca666d134ac9500ffcd6ada6b0e7e4e6ce6cbfc3bfa9f50de85dcb18",
+      "bytes": 3307
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/execution_01/worker_receipt.json": {
+      "sha256": "5deea6956876f03d7b36ed6ab57f608f9613da79e133921d3ead0865196b18f0",
+      "bytes": 1161
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/terminal_binding_01.json": {
+      "sha256": "2645a1593baaf949546c18acd4a9fabfad9e039c84cad572bd9ad41af1e9285c",
+      "bytes": 3645
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/supervision_01/receipt.json": {
+      "sha256": "801798bd89f9ffc06025652e1af4abeb533a9bcda503cdfb80857824a353d611",
+      "bytes": 29171
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/executed_01/receipt.json": {
+      "sha256": "54b457212fc0128c3fe8c59d9549d7b2f25e26bc8e5778ca38edae868c8201a1",
+      "bytes": 3098161
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/executed_01/report.json": {
+      "sha256": "423e5fb85ea092ba613ff71d28671f89f7df365eb29be8ca1c8f9a950662df47",
+      "bytes": 39055
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/supervision_01/independent_result_review.json": {
+      "sha256": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c",
+      "bytes": 19449
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S44_C1_confirmation_generation/archive/manifest.json": {
+      "sha256": "9eb187c525db06b87d1203734298b772339b57c734f7aad6414f1be89f0c82ad",
+      "bytes": 1842673
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S44_C1_confirmation_generation/archive/events.jsonl": {
+      "sha256": "bc23310bff3f1df6aa7c5a29cf2b16246103976670f6554295c773a00da9dcd3",
+      "bytes": 5402090
+    }
+  },
+  "formal_paths_before": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false
+  },
+  "formal_paths_after": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false
+  },
+  "execution_boundary": {
+    "new_formal_supervision_calls": 0,
+    "runtime_capability_calls": 0,
+    "attempt_lock_or_output_directory_created": false,
+    "real_camera_tensor_or_array_bodies_read": 0,
+    "image_body_files_opened": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_calls": 0,
+    "frozen_source_or_input_files_modified": 0
+  },
+  "interpretation": "The input binding hashes and role/time links are correct, but source-level V8 parsing is incompatible with two existing upstream document schemas. The earlier binding review remains a preserved identity-only PASS; it does not establish executable preflight. V8 currently cannot execute. The hypothetical in-memory metadata fix passes to the existing precommit text/event boundary, not to tensor reads, runtime capability, numeric results, or visual scoring.",
+  "next_step": "Create the smallest new source version adapting only the two documented upstream schemas and required version identities; reuse the observed text fixtures for an ordinary metadata integration regression, then follow existing fresh review/binding rules. Preserve V8 and all original failure artifacts. No additional security mechanism is needed."
+}

@@ -1,0 +1,138 @@
+# S12：同候选数量的来源记忆筛选与姿态筛选对照
+
+## 问题与定位
+
+问题：在同一批20张历史照片中，两种规则都先留下14个不同候选，再用相同姿态排序和NMS选4张，来源记忆筛选是否比直接保留近姿态候选得到更高的实测支持率？
+
+这是已看过S7/S8数据后的探索性补充对照。规则在新pose14选择计算前固定，不能称新的盲测、独立场景泛化或事前注册的原S7/S8主实验。姿态规则也使用预测相机几何，不能叫“有几何对无几何”。同候选数量和同输出数量不等于同计算成本。本实验不评估新颖算法，不执行覆盖贪心候选、不恢复固定查询缓存B。
+
+旧official是几何来源票权筛14，然后只按姿态距离排序和NMS；它不是按票权直接选最终4张。此前all20_nms保留20个候选，其与official的策略级比较有效，但不能单独归因于同候选数量下的筛选规则。
+
+## 固定样本与主比较
+
+- 全部S7/S8已存三块各四查询q20–23，共24个相关已见查询，包含S7开发块。
+- S7 B1/B2的8查询与S8 B0/B1/B2的12查询分别报告；S7 B0的4开发查询单列。两个场景不合并成总体显著性估计。
+- 主比较固定A0P0、stride8的原来源14候选NMS结果减去新姿态14候选NMS结果。正值表示来源记忆规则的支持率较高；负值表示姿态规则较高。
+- A0P1/A1P0/A1P1及stride12均完整列为相关地图变体/敏感性，不按结果选择更漂亮的图为主结果，不平均四图冒称扩大样本。
+- pose14不依赖地图或采样密度，每个查询只新算一次，共24次新decision_trace。既有official/candidate_no_nms/all20_nms/all20_no_nms均读保存选择；不重跑其渲染或选择。四类旧结果只用于归因边界和评分核验，不新调参。
+
+## 唯一新筛选规则
+
+1. 输入固定为原封存24个预测相机pose中的前20历史与一个query。使用原optical_to_vmem轴翻转与average_camera_pose规范化，即使单个query也不跳过四元数平均路径。
+2. 对frame ID 0..19按升序，使用原geodesic_distance，以FP64相机张量和平移权重0.1计算20个query距离，转成FP32后用原Torch默认argsort。必须逐值匹配既有all20 trace的20距离及全部排序；24个查询已存无并列，出现FP32并列、非有限值或不一致立即停止，不改排序策略或换样本。
+3. 取该排序的前14个不同ID作为新候选集合，再按frame ID升序构造每个count=1的counts。后半段仍由原decision_trace执行FP32距离排序与NMS；不得用FP64排序或新的stable/tie-break规则。
+4. 初始阈值保持完整原20历史的既有值；按原initial_nms_threshold从前5历史的10个成对距离取排序后第5项（从0计）重新核对。不能按新的14候选重估。
+5. 原strict distance<threshold、阈值除1.2、1e-5停止条件、重复扫描和fallback保持。实际访问的历史pair距离用原FP64 geodesic计算并记录，不能从旧steps缺失项填零或推测。新分支是本轮实际计算，不说只读JSON就天然包含全部分支。
+6. 每个新选择必须恰为4个不同合法历史ID，且都在本query固定14候选集合内。记录原候选和新候选的交集，但不强求同一候选ID集合，因为待比较的处理正是候选成员筛选规则。
+
+可按AST提取原函数以隔离模型、渲染和其余导入；提取函数体必须与原AST相同，保存提取身份。不得修改原文件、原NMS或S10候选。只构造执行姿态距离所需的对象，不加载surfel地图或占位视频latent来冒充完整生成。
+
+## 选择封存与评分
+
+先生成全部24份新候选/距离/完整NMS trace，保存完成时间和每文件SHA，写出总选择封存记录，再解码评分NPZ。虽然操作者已看过旧GT结论，新的执行入口仍把选择与测量访问分开，避免新选择直接使用support；不据此伪称全部GT从未见过。
+
+评分只复用S7/S8各六case、q20–23已有query_scoring.npz中的support和valid（共48份）。不得解码原照片、测量depth/GT轨迹、调用模型或重算投影/测量支持。逐查询核两密度的support/valid相同。
+
+对一组4个selected ID，计数为`sum(any(support[selected], axis=0) & valid)`，分母为同query的`sum(valid)`；先逐查询求比，再对规定split等权平均。所有support应为20历史同尺寸布尔阵列，valid为对应二维布尔mask，valid非空。不得用common_four/diagonal作分母，不将未覆盖像素当正确。
+
+用这一计数重算旧全部四图、两密度、四种读出的支持率，并严格匹配旧records（S8另核已存整数分子/分母），才接受新pose14评分。原支持定义仍是50mm一致测量支持并集；不是视频美观、质量或相机控制指标。
+
+逐查询输出：20排序距离、14候选、有序4ID、完整NMS steps及新距离调用记录、旧四类ID/分子/分母、新pose14分子/分母、来源14减pose14的百分点差、候选交集、选集合/顺序改变。每scene/split/map/stride汇总查询数、两规则平均、平均差、升/降/相同数量和换集合数量；按块给出描述表，不做显著性检验、置信区间或新提速比。
+
+## 冻结、运行与退出
+
+新入口、协议、未改原函数来源、既有选择/pose、48评分NPZ、records/metadata及独立设计/实现审查文件以SHA绑定。最终执行冻结另由根任务写出，晚于静态审查、早于任何新pose14选择。前置可读JSON/文件哈希/NPZ字段与形状，但不能预先计算新pose14结果或以效果挑规则。
+
+CPU，沿用Python3.12.14、NumPy2.3.5、Torch2.7.0、SciPy1.16.2，明确FP64距离/FP32排序；600秒、16GiB为整流程软预算，不是OS隔离或性能比较。仅新results/S12_matched_budget目录；已存在则停止，不覆盖。
+
+保存实际起止时点、选择封存时点、评分开始时点、版本、源/输入前后SHA、源/输入ZIP及成员清单。任何身份、排序、阈值、维度、旧分数或选择条件不符立即记失败，保留现场；不得删条件或放宽标准后覆盖旧结果。运行后由不同作者重新打开实际选择与保存测量，对候选规则、NMS和支持统计作有界独立核验，不重跑模型/renderer。
+
+## 允许的结论
+
+结果只回答这批已见查询、这套测量支持代理中，同14候选/4输出/NMS规则下，两种候选筛选策略谁高、在哪些查询有差异。即使某一场景全胜，也不等于普遍优越、来源关联准确、完整VMem视频变好或可形成新论文方法；普通覆盖互补候选的新颖性单独审查。若新pose14与既有all20_nms恰好相同，照实报告，不能事后改变14或NMS去制造差异。
+
+## 执行合同（与入口逐字段一致）
+
+```s12-matched-budget-json
+{
+  "schema": "s12-matched-budget-v1",
+  "stages": [
+    "S7",
+    "S8"
+  ],
+  "blocks": [
+    0,
+    1,
+    2
+  ],
+  "queries": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "strides": [
+    8,
+    12
+  ],
+  "arms": [
+    "A0P0",
+    "A0P1",
+    "A1P0",
+    "A1P1"
+  ],
+  "readouts": [
+    "official",
+    "candidate_no_nms",
+    "all20_nms",
+    "all20_no_nms"
+  ],
+  "unique_queries": 24,
+  "new_decision_trace_calls": 24,
+  "old_decision_trace_calls": 0,
+  "history_count": 20,
+  "candidate_count": 14,
+  "context_count": 4,
+  "input_files": 76,
+  "execution_sources": 4,
+  "scoring_files": 48,
+  "old_readout_scores": 768,
+  "old_all20_upper_bounds": 48,
+  "paired_map_conditions": 192,
+  "main_arm": "A0P0",
+  "main_stride": 8,
+  "difference": "geometry14_minus_pose14_percentage_points",
+  "reporting_strata": [
+    "S7_development_4",
+    "S7_test_8",
+    "S8_test_12"
+  ],
+  "selection_order": "stage_then_block_then_query",
+  "translation_weight": 0.1,
+  "distance_dtype": "float64",
+  "sorting_dtype": "float32",
+  "sort": "torch_default_argsort_no_ties",
+  "candidate_counts": "nearest14_set_then_frame_id_ascending_each_count1",
+  "initial_threshold": "original_first5_10_pairs_sorted_index5",
+  "all_choices_sealed_before_scoring_decode": true,
+  "exact_old_score_gate": true,
+  "device": "cpu",
+  "torch_threads": 8,
+  "torch_interop_threads": 8,
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "torch": "2.7.0",
+    "scipy": "1.16.2"
+  },
+  "wall_budget_seconds": 600,
+  "peak_rss_budget_bytes": 17179869184,
+  "resource_limit": "soft",
+  "performance_timing": false,
+  "renderer_calls": 0,
+  "model_calls": 0,
+  "raw_pixels_allowed": false,
+  "gt_pose_values_allowed": false,
+  "scope": "exploratory_matched_candidate_budget_on_24_seen_queries"
+}
+```

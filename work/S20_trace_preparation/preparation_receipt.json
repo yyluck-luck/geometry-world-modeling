@@ -1,0 +1,110 @@
+{
+  "schema": "s20-trace-preparation-v1",
+  "status": "READY_FOR_THIRD_AUTHOR_FINAL_REVIEW_NOT_INTEGRATED",
+  "completed_utc": "2026-09-06T12:52:23.858891+00:00",
+  "evidence_kind": "source_review_and_synthetic_tests_only",
+  "files": {
+    "src/s20_generation_trace.py": {
+      "sha256": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57",
+      "bytes": 28718
+    },
+    "docs/S20_GENERATION_TRACE_CONTRACT.md": {
+      "sha256": "d7be737383fa2436d1e6f74aec3ad1505af873a79bb3b001679b1e7fb3d77300",
+      "bytes": 12065
+    },
+    "work/S20_trace_preparation/artificial_checks.py": {
+      "sha256": "c87414914ce1473ee91882f8101f49d071653b708fe6529aafaeeb621b4e10d2",
+      "bytes": 11766
+    },
+    "work/S20_trace_preparation/artificial_checks_v1.py": {
+      "sha256": "c763516cd9056e022476034072680d8b44d38bc4ea2b792e8ed1c1da2446621b",
+      "bytes": 10873
+    },
+    "work/S20_trace_preparation/trace_v1_before_schema_edges.py": {
+      "sha256": "6371aa67b816a7f2003f99aafe9261c4d7cbbe261cbc7551716e7069c1aaa900",
+      "bytes": 27354
+    },
+    "work/S20_trace_preparation/trace_v2_before_torch_ids.py": {
+      "sha256": "6f1bfc23fc4494dff004ba24bf8bab355af66350f51e3c8cdba1a617848fdca8",
+      "bytes": 28391
+    },
+    "work/S20_trace_preparation/artificial_v1/receipt.json": {
+      "sha256": "e6e68fd654deb3c067786e0a10d9733009de842a840bfb4b637d3b0debdd9af9",
+      "bytes": 2291
+    },
+    "work/S20_trace_preparation/artificial_v2/receipt.json": {
+      "sha256": "373e5f87504d649d12ebae7746fdf4abd7149cf3a1ad06c0f6611f3f0f7f3107",
+      "bytes": 2432
+    },
+    "work/S20_trace_preparation/original_interface_checks.py": {
+      "sha256": "6bd825fd4dcd888a0e5c1d43f7d8af54d2781598cab3c57a2f621c120b008802",
+      "bytes": 8362
+    },
+    "work/S20_trace_preparation/original_cpu_interface_v1/receipt.json": {
+      "sha256": "c789a103fff3aa72d4925320c00bd1b234fd6ddfb03aba47a54a4f11be878bc1",
+      "bytes": 2277
+    },
+    "work/S20_trace_preparation/original_cpu_interface_v1/extracted_do_sample.py": {
+      "sha256": "df295b8a0990abef8c9819c93e1e99aca661ada7991241d39b34d6530d75e677",
+      "bytes": 1604
+    }
+  },
+  "original_vmem_commit": "39291e4f272f6b4f270691d930926ab5930f942e",
+  "original_vmem_tracked_changes": false,
+  "original_source_identities": {
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/pipeline.py": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/utils/util.py": "0b71dcf6d4a43109d785f49d9c6def37b1256c4d189ab9438bfb185f3099f013",
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/sampling.py": "dc07ca0ba571ba5fb48f9856515d2cb7dea25254008a6f8b315538817f352b24",
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/configs/inference/inference.yaml": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3"
+  },
+  "test_versions": [
+    {
+      "path": "work/S20_trace_preparation/artificial_v1/receipt.json",
+      "check_count": 29,
+      "seconds": 0.5983012500219047,
+      "scope": "first author fake do_sample fixture; previous module identity preserved"
+    },
+    {
+      "path": "work/S20_trace_preparation/artificial_v2/receipt.json",
+      "check_count": 32,
+      "seconds": 0.6248284999746829,
+      "scope": "failure/schema edges on prior module; previous identity preserved"
+    },
+    {
+      "path": "work/S20_trace_preparation/original_cpu_interface_v1/receipt.json",
+      "check_count": 15,
+      "seconds": 0.6082849999947939,
+      "scope": "final-module actual isolated CPU do_sample AST, synthetic sampler/AE/denoiser; only necessary Torch ID and original interface checks"
+    }
+  ],
+  "third_author_finding": {
+    "issue": "original later context IDs are rank1 integer Torch Tensor; prior Integral-only parser would reject them",
+    "found_by": "s15b_prefix_runner static source review",
+    "resolution": "explicit rank1 integral Torch Tensor normalization; order/duplicate preservation; float/bool/rank2 rejection",
+    "observed_actual_model_failure": false
+  },
+  "boundaries": {
+    "actual_model_calls": 0,
+    "model_checkpoint_reads": 0,
+    "real_RGB_reads": 0,
+    "GT_reads": 0,
+    "NPZ_reads": 0,
+    "original_full_pipeline_imported": false,
+    "original_loop_integration": false,
+    "synthetic_interface_calls": 2,
+    "causal_effect_proven": false,
+    "novelty_claim": false,
+    "pil_pixels_authenticated": false,
+    "condition_cache_output_payloads": "SHA identity only; full output archives require later producer",
+    "saved_raw_payloads": "initial noise, supported RNG states, full Surfel fields/sources",
+    "sampler_scale": "input cfg scalar, not final per-frame guider factor",
+    "callbacks": "actual denoiser delegate calls, not asserted model-forward count",
+    "gradient_scope": "module unchanged; original app no_grad permitted via inner enable_grad; global inference_mode over geometry forbidden"
+  },
+  "skills_applied": {
+    "/Users/rocket/.codex/skills/vibe-research-workflow/SKILL.md": "bounded implementation, old tests retained, independent author review before later real freeze",
+    "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md": "construct validity: observed cache conditioning != causal influence; synthetic != video"
+  },
+  "writes": "only new src/s20_generation_trace.py, docs/S20_GENERATION_TRACE_CONTRACT.md and work/S20_trace_preparation; no canonical ledger/memory or original checkout edits",
+  "next": "different-author final source/contract review; root freeze preparation; later separate producer integration and real execution"
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "s45b-c1-v10-source-only-author-receipt-v1",
+  "status": "PASS_V10_FIVE_SOURCE_FREEZE_AND_SIX_AUTHOR_TESTS",
+  "completed_utc": "2026-09-08T13:04:30.203731+00:00",
+  "author_role": "/root/c2_v5_lifecycle_review",
+  "frozen_source_set_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/FROZEN_SOURCE_SET.json",
+  "frozen_source_set_sha256": "2b80f5b017445e3c12290dc70d535623eeb3476a10761746f6ef11759cf0116a",
+  "source_identities": {
+    "camera_guard.py": "96d07f6f0c1c8c8bdfd1be57eb5725315b1dd340fbf25aec1c879066f7b9193b",
+    "supervise_camera_guard.py": "92793f1a250f24e1a275a2a7995a21929a3b63be7da23481eeddd81de897f306",
+    "PROTOCOL.md": "397e19d08d129cfbaf986ea5c5e9f8b96113652a93a7babed84d623fa5ad1126",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "1f6220af9889e2008168684435ef19306f0ed7ece88c3b2d1c8e6410a80c06bf",
+    "synthetic_selftest.py": "56c7fee2235e8c4180e9aa4bdc71889a914abd369e83b37fb15117f2180d7f48"
+  },
+  "tests": [
+    {
+      "python": "/opt/homebrew/bin/python3.13",
+      "entrypoint": "camera_guard.py --synthetic-self-test",
+      "returncode": 0,
+      "status": "PASS_SYNTHETIC_ONLY",
+      "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+    },
+    {
+      "python": "/opt/homebrew/bin/python3.13",
+      "entrypoint": "supervise_camera_guard.py --synthetic-self-test",
+      "returncode": 0,
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "stdout_sha256": "ff075656e1b46be9a45acd3fffb5c1ba0500e13e2f82f9bb41beef8d5e9ee77d"
+    },
+    {
+      "python": "/opt/homebrew/bin/python3.13",
+      "entrypoint": "synthetic_selftest.py",
+      "returncode": 0,
+      "status": "PASS_V10_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+      "stdout_sha256": "88b1d369bca04ae2f90f7c0d88194a612bc207e322dbdfdd69e4774555244589"
+    },
+    {
+      "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python (3.12.14)",
+      "entrypoint": "camera_guard.py --synthetic-self-test",
+      "returncode": 0,
+      "status": "PASS_SYNTHETIC_ONLY",
+      "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+    },
+    {
+      "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python (3.12.14)",
+      "entrypoint": "supervise_camera_guard.py --synthetic-self-test",
+      "returncode": 0,
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "stdout_sha256": "bf7b5a8da26db14b2ba00aee26b245be7ec40d2ce9955202cc95199e70642da0"
+    },
+    {
+      "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python (3.12.14)",
+      "entrypoint": "synthetic_selftest.py",
+      "returncode": 0,
+      "status": "PASS_V10_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+      "stdout_sha256": "863529348a66671e1dc619cb7ab9927dbecb1f1beb2271c7a7962e7c87a44193"
+    }
+  ],
+  "all_six_returncode_zero": true,
+  "all_six_stderr_empty": true,
+  "empty_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "actual_text_regression": {
+    "v9_report_sha256": "c064b8cde12d389c4a75502abb335c74612a03a69181c4ea86046c8ddd516797",
+    "v9_failure_diagnosis_sha256": "7ea7e614ec5731c087f96a5edca8717433b3b01d08bf26b36a33b48d28571949",
+    "v9_rejection_reproduced": true,
+    "v10_legitimate_single_K_3x3_passed": true,
+    "v10_bad_shape_2x2_rejected": true,
+    "real_camera_tensor_body_bytes_read": 0
+  },
+  "operations": {
+    "binding_created": false,
+    "source_reviews_created_by_author": 0,
+    "formal_preflight_or_guard_runs": 0,
+    "v10_lock_or_execution_paths_created": 0,
+    "real_tensor_body_bytes_read": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_renderer_generation_calls": 0
+  },
+  "authorization_effect": "NONE_SOURCE_ONLY_AWAITING_TWO_FRESH_NONAUTHOR_REVIEWS",
+  "next_gate": "Primary review by /root/c2_generation_builder and adversarial review by /root/c1_v8_binding_review for these exact five hashes; only afterward may /root create the V10 binding."
+}

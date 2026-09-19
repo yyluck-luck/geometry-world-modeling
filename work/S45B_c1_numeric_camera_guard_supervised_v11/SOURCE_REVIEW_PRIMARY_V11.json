@@ -1,0 +1,336 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v4",
+  "review_kind": "primary",
+  "status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V11",
+  "verdict": "PASS_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "author_role": "/root/execution_resumption_audit",
+  "reviewer_role": "/root/figure_repo_reading_resume",
+  "reviewer_task_id": "/root/figure_repo_reading_resume",
+  "reviewer_turn_id": "C1_V11_PRIMARY_20260908T141500_FREEZE_REVIEW",
+  "completed_utc": "2026-09-08T14:30:49.293875+00:00",
+  "reviewer_turn_id_semantics": "Declared task-turn label for this fresh review; external orchestrator must correlate it with this agent delivery. It is not a fabricated Codex internal UUID or self-authentication.",
+  "reviewed_identities": {
+    "camera_guard.py": "a57adb49f89f891b7442edaee8614bb8a797bd4daa5b31887aef7d1d98359838",
+    "supervise_camera_guard.py": "4d0c746dd03ae5bca8b858026623f18abf9788c33e2bc79a0f8c41ceddfbb16a",
+    "PROTOCOL.md": "c198fdae8cbbb5c6a6bba278f753a8208dfc8c85ac8271c837e4f16eb46f055d",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "a55d4a62ecc1fd151167b2ed76289a660255bbefae6cd3a5f313e7d05eb3e593",
+    "synthetic_selftest.py": "d65a6ed11dba59237d8d82e70e6bbb6e6ef914e5ed918bd7af775a36cbdf02b4",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "frozen_source_set_sha256": "d6ce6e1d4752a6537479bc5d210ede183a359ea6d42e671aa2317e8367648b6e",
+  "source_only_author_receipt_sha256": "d2ac5e50646a4a32e1a65048067f0ee999ebdeaf31aaba81c64ab45ee199b4c8",
+  "reviewer_independence": {
+    "both_source_authors": [
+      "/root/c2_v5_lifecycle_review",
+      "/root/execution_resumption_audit"
+    ],
+    "reviewer_is_either_source_author": false,
+    "reviewer_modified_candidate_sources": false,
+    "previous_version_votes_inherited": false,
+    "prior_V10_primary_used_only_as_field_schema_example": true
+  },
+  "executed": false,
+  "formal_runner_calls": 0,
+  "c1_tensor_bodies_read": 0,
+  "c1_tensor_body_bytes_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "real_scientific_arrays_mapped": 0,
+  "model_renderer_generation_calls": 0,
+  "formal_paths_created": 0,
+  "binding_or_governance_artifacts_created": 0,
+  "blocking_findings": [],
+  "source_review_scope": {
+    "five_source_set_covered": [
+      "camera_guard.py",
+      "supervise_camera_guard.py",
+      "PROTOCOL.md",
+      "C1_CAMERA_GUARD_BINDING_TEMPLATE.json",
+      "synthetic_selftest.py"
+    ],
+    "method": "Full bytes and SHA identity checks for all five sources, complete AST parsing and V10-to-V11 structural comparison for the three Python files, complete protocol/template and synthetic_selftest reading, and direct line-by-line review of changed production functions plus their numeric, provenance, preflight, writer/reader, collection, publication and close callers. This is a focused source review, not a claim that every unchanged comment in 6,216 Python lines was reread sentence by sentence.",
+    "direct_core_source_ranges": {
+      "camera_guard.py": [
+        [
+          1,
+          110
+        ],
+        [
+          401,
+          656
+        ],
+        [
+          955,
+          1240
+        ],
+        [
+          1485,
+          1635
+        ],
+        [
+          1670,
+          1953
+        ]
+      ],
+      "supervise_camera_guard.py": [
+        [
+          199,
+          922
+        ],
+        [
+          1493,
+          1757
+        ],
+        [
+          1796,
+          2218
+        ],
+        [
+          2270,
+          2628
+        ]
+      ],
+      "synthetic_selftest.py": [
+        [
+          1,
+          808
+        ]
+      ]
+    },
+    "structural_comparison": "Worker: all 56 top-level definitions unchanged after version-label normalization; changed pins and disclosed author role verified. Supervisor: 77 of 83 definitions unchanged under that comparison; all six changed/new definitions were reviewed directly or as complete source diffs. Supervisor non-definition AST unchanged after version normalization. No missing source function was replaced with an inherited PASS vote.",
+    "historical_metadata_limit": "Read preserved V8/V9/V10 JSON and S45 event text only through the existing finite integration entrypoint, and V10 failure diagnosis directly. Existing source/reference identity files are source metadata. No .bin, image body, camera body or model weight was opened by this review."
+  },
+  "findings": [
+    {
+      "id": "P1_V10_FAILURE_EXACTLY_EXPLAINED",
+      "verdict": "PASS",
+      "evidence": "Both fresh integration runs reproduce the actual V10 report JSON mismatch: all shared record fields, body and SHA equal; only prebound_identity and read_channel were extra. Thus worker exit 0 / supervisor exit 2 was not evidence of a failed numeric threshold and is preserved as a failed historical attempt.",
+      "diagnosis_sha256": "0938cd8561a6d1f60a1d5396eb84aebec881bf8e3415ad7a4a4b7a04fd8386c6",
+      "historical_report_sha256": "8766fba74df4ec05964afb65d8e7ac02745f3fc2accb50268ec123839ccf04ab"
+    },
+    {
+      "id": "P2_STRICT_PREBOUND_COMPATIBILITY",
+      "verdict": "PASS",
+      "evidence": "verify_regular_lease dispatches recognized prebound leases to their original held-FD reader. Required lease keys, matching name/path, exact prebound inode tuple/read-channel, nlink=1, expected body SHA and full record/body equality remain required. Ordinary regular leases retain their existing full equality verifier; no projection drops the two provenance fields."
+    },
+    {
+      "id": "P3_ORDINARY_POSITIVE_PRODUCTION_FUNCTION_CHAIN",
+      "verdict": "PASS_SYNTHETIC_FUNCTION_CHAIN_ONLY",
+      "evidence": "Both Python versions actually execute create_prebound_worker_artifact -> worker.write_prebound_json -> verify_prebound_worker_artifact -> validate_complete_worker_artifacts -> collect_evidence_bundle -> ordinary supervisor/barrier leases -> publish_terminal_seal -> held source and control FD closes -> build_external_pass_seal. Production formal_supervision calls those same functions in the inspected order. Synthetic CLI processes exited 0; this is not a formal_supervision launch or a real C1 terminal result.",
+      "full_success_status": "PASS_V11_DISPOSABLE_PREBOUND_FULL_PRODUCTION_FUNCTION_PATH"
+    },
+    {
+      "id": "P4_NUMERIC_AND_SCHEMA_SCOPE_RETAINED",
+      "verdict": "PASS",
+      "evidence": "Final-cache ID0 anchor, left-multiplied Y rotation, [0,1.25,2.5,3.75,5,3.75,2.5,1.25,0] yaw, continuity of cache 5 then 9, first four target IDs per occurrence, fixed K, homogeneous row, ID8 closure, finite values and inclusive 1e-6 max-absolute tolerance retained. 40-field report and 36-field receipt schema plus HMAC retained. Valid single 3x3 K accepted while 2x2 remains rejected. Existing 12 anchor-boundary cases, raw-descriptor provenance and pixel pre-open rejection pass."
+    },
+    {
+      "id": "P5_TERMINAL_AUTHORITY_AND_RUNTIME_RETAINED",
+      "verdict": "PASS_WITH_DECLARED_PLATFORM_BOUNDARY",
+      "evidence": "No worker report or canonical candidate carries authoritative PASS. Parent revalidates full evidence while FDs held, unlinks staging, verifies final single-link identity, completes required source/control closes, then constructs only exact stdout PASS. Actual supervisor process exit 0 and independent result review remain required externally. Existing substitution, HMAC, signal, fsync/close, output/time/memory and no-fork tests pass in both interpreters. No source guard was relaxed to obtain the positive path."
+    },
+    {
+      "id": "P6_FRESH_SOURCE_IDENTITIES_AND_TESTS",
+      "verdict": "PASS",
+      "evidence": "Author receipt/freeze hashes matched supplied final handoff. All 12 reviewed identities matched current source/metadata files. Six reviewer-owned subprocess calls completed with exit 0 and empty stderr; all five source SHAs unchanged after tests. Formal execution/binding/governance paths absent."
+    }
+  ],
+  "fresh_tests": [
+    {
+      "python_label": "py313",
+      "entry": "worker",
+      "argv": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/camera_guard.py",
+        "--synthetic-self-test"
+      ],
+      "started_utc": "2026-09-08T14:26:37.989750+00:00",
+      "completed_utc": "2026-09-08T14:26:38.028807+00:00",
+      "elapsed_seconds": 0.039368583005853,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_worker.stdout.json",
+        "sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+        "bytes": 512
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_worker.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_SYNTHETIC_ONLY"
+    },
+    {
+      "python_label": "py313",
+      "entry": "supervisor",
+      "argv": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/supervise_camera_guard.py",
+        "--synthetic-self-test"
+      ],
+      "started_utc": "2026-09-08T14:26:38.029255+00:00",
+      "completed_utc": "2026-09-08T14:26:39.000446+00:00",
+      "elapsed_seconds": 0.9716080829966813,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_supervisor.stdout.json",
+        "sha256": "534e23257d5c99e92758609faf88e132f594956e16d66316ae7eb80c729797c3",
+        "bytes": 9148
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_supervisor.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY"
+    },
+    {
+      "python_label": "py313",
+      "entry": "integration",
+      "argv": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/synthetic_selftest.py"
+      ],
+      "started_utc": "2026-09-08T14:26:39.000889+00:00",
+      "completed_utc": "2026-09-08T14:26:40.319869+00:00",
+      "elapsed_seconds": 1.3194624169846065,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_integration.stdout.json",
+        "sha256": "e39328f9a955e4d6fda87a87fb6d1f32a966a5ed281fbdd74f6a75a2b1aba3c2",
+        "bytes": 10252
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py313_integration.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_V11_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY"
+    },
+    {
+      "python_label": "py312",
+      "entry": "worker",
+      "argv": [
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/camera_guard.py",
+        "--synthetic-self-test"
+      ],
+      "started_utc": "2026-09-08T14:26:40.320380+00:00",
+      "completed_utc": "2026-09-08T14:26:40.354978+00:00",
+      "elapsed_seconds": 0.035024666984099895,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_worker.stdout.json",
+        "sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+        "bytes": 512
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_worker.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_SYNTHETIC_ONLY"
+    },
+    {
+      "python_label": "py312",
+      "entry": "supervisor",
+      "argv": [
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/supervise_camera_guard.py",
+        "--synthetic-self-test"
+      ],
+      "started_utc": "2026-09-08T14:26:40.355433+00:00",
+      "completed_utc": "2026-09-08T14:26:41.338567+00:00",
+      "elapsed_seconds": 0.983639208949171,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_supervisor.stdout.json",
+        "sha256": "bfe29de50cecf976ec41bc684f3db6f4be012a3c689503cded514fcd061e2d53",
+        "bytes": 9044
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_supervisor.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY"
+    },
+    {
+      "python_label": "py312",
+      "entry": "integration",
+      "argv": [
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+        "-I",
+        "-B",
+        "-S",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/synthetic_selftest.py"
+      ],
+      "started_utc": "2026-09-08T14:26:41.339101+00:00",
+      "completed_utc": "2026-09-08T14:26:42.673876+00:00",
+      "elapsed_seconds": 1.3352440829621628,
+      "returncode": 0,
+      "stdout": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_integration.stdout.json",
+        "sha256": "7d6c34f1b89d5750584e64a4882130778664ceade9139179826499153cd180d2",
+        "bytes": 10234
+      },
+      "stderr": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/py312_integration.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "status": "PASS_V11_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY"
+    }
+  ],
+  "known_limits_required_by_protocol": [
+    "Formal containment is macOS-specific and depends on runtime-proven sandbox_init Seatbelt and libproc behavior. Missing/changed behavior blocks before the one-use attempt; no fallback.",
+    "Memory is a fail-closed acceptance and kill monitor, not a kernel memory allocation reservation.",
+    "External governance issuer identity and complete stdout/actual process-exit capture remain orchestration trust boundaries. Same Unix account and declared role strings cannot cryptographically authenticate independent agents.",
+    "The disposable positive chain validates production functions on generated descriptors/matrices; it does not independently execute every line of formal_supervision, consume a C1 attempt, prove generated pixels obey camera inputs, or establish scientific gain."
+  ],
+  "evidence_files": {
+    "SIX_ENTRYPOINT_RESULTS.json": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/SIX_ENTRYPOINT_RESULTS.json",
+      "sha256": "815296cc837e0b3569f1c7dd0dd48aabb54ba85a39ebdf00f1eab2013a886cfb"
+    },
+    "SOURCE_STRUCTURE_COMPARISON.json": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/SOURCE_STRUCTURE_COMPARISON.json",
+      "sha256": "ff956f78dd641d593d8e747834f977259931848a7dcdbe3a296a9b3139622e8a"
+    },
+    "REVIEWED_IDENTITIES_VERIFIED.json": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v11/primary_review_evidence/REVIEWED_IDENTITIES_VERIFIED.json",
+      "sha256": "1fc0e09e86d5025d8471d9cad17e9edf96443f8cd0197e126b185209a80fe440"
+    }
+  },
+  "formal_state_at_review_completion": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V11.json": false,
+    "BINDING_REVIEW_V11.json": false,
+    "GOVERNANCE_ATTESTATION_V11.json": false
+  },
+  "authorization_effect": "SOURCE_REVIEW_ONLY_NO_BINDING_NO_FORMAL_ATTEMPT_NO_SCORE_NO_IMAGE_INSPECTION_NO_METHOD_OR_NOVELTY_AUTHORIZATION",
+  "publication_rule": "All self-checks completed before this canonical report is delivered. Report chmod 0444 and final SHA explicitly handed to root. Subsequent correction must be a separate erratum; never mutate this delivered document."
+}

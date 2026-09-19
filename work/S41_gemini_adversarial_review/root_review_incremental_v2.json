@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "review_type": "read_only_incremental_regression_review",
+  "reviewed_at": "2026-09-07T13:59:22+08:00",
+  "target": {
+    "path": "work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md",
+    "sha256": "141512f16a5133446c6cd521efe0a4c69e3fa2c0bde27bb607a2c5e8f1926c55"
+  },
+  "prior_review": {
+    "path": "work/S41_gemini_adversarial_review/root_review_incremental.json",
+    "sha256": "aca74f0f12bc7996cb10c413d64893ed2d808a6d5094d5e174d60853a88c9e5b"
+  },
+  "coordinated_protocol": {
+    "path": "work/S41_clip_mean_innovation_audit/AUDIT.md",
+    "sha256": "922f708a3b319e98fd5b84116a9a298df349d86700c26aded83e8ce279617475"
+  },
+  "verdict": "REVISION_REQUIRED",
+  "verdict_reason": "All six requested R1-R6 corrections are materially present and correctly bounded. Three remaining attribution issues prevent PASS: Gate 1 does not yet separate any CLIP influence from directionally relevant improvement or harm, the no-improvement conclusion for A2-A5 conflicts with the case where zero-CLIP A1 itself improves the natural failure, and F10/F01 are cross-path-inconsistent interventions whose interaction and admissible image counterfactual are not yet defined tightly enough.",
+  "scope_and_non_actions": {
+    "read_only_root_review": true,
+    "model_loaded": false,
+    "model_forward_run": false,
+    "video_generated": false,
+    "root_report_modified": false,
+    "main_ledger_modified": false
+  },
+  "regression_checks": [
+    {
+      "requirement": "training evidence wording",
+      "status": "PASS",
+      "evidence": "Line 74 now states that the released checkpoint/interface validates the mean-then-single-token path and that no released evidence was found for adaptation to K/V length greater than 1. It no longer claims absolute knowledge of every training batch."
+    },
+    {
+      "requirement": "A0-A5 canonical labels",
+      "status": "PASS",
+      "evidence": "Lines 63-67 fix A0/A1 plus A2 nearest, A3 farthest, A4 medoid, and A5 Surfel-vote mean consistently with AUDIT.md."
+    },
+    {
+      "requirement": "cannot-skip logic",
+      "status": "PASS",
+      "evidence": "Lines 67-69 explicitly say A2 failure cannot skip A4, A2/A4 failure cannot skip A5, and A2 approximately equal to A3 does not terminate A4/A5."
+    },
+    {
+      "requirement": "upstream-pool versus delivered-information fairness",
+      "status": "PASS",
+      "evidence": "Line 65 distinguishes the same frozen candidate pool, one-token interface, and downstream budget from deliberately different information delivered to the denoiser."
+    },
+    {
+      "requirement": "F00/F10/F01/F11 source-image factorial",
+      "status": "PASS_WITH_REMAINING_QUALIFICATION",
+      "evidence": "Lines 78-89 define the four cells, hold pose/K/Plucker/noise and unrelated sources fixed, and forbid raw cross-path magnitude ranking. The remaining qualification is that F10/F01 intentionally disagree across appearance paths and the counterfactual must preserve geometry."
+    },
+    {
+      "requirement": "samples_z provenance",
+      "status": "PASS",
+      "evidence": "Line 78 correctly restricts the first clean test to an observed source, distinguishes its VAE-encoded latent from a generated source stored as samples_z, and relegates any generated-source delta transfer to a declared stress test."
+    },
+    {
+      "requirement": "S_Rperm boundary",
+      "status": "PASS",
+      "evidence": "Line 107 limits S_Rperm to a fixed history-slot permutation of four latent channels with mask retained, states that it breaks image-camera and image-time binding, and forbids both dominance inference and unused-path inference."
+    },
+    {
+      "requirement": "S_Pperm and duplicated Plucker boundary",
+      "status": "PASS",
+      "evidence": "Line 108 requires simultaneous Plucker permutation in concat and dense_vector and consistent treatment in conditional c and unconditional uc while keeping mask channels fixed."
+    },
+    {
+      "requirement": "stress tests excluded from main matrix",
+      "status": "PASS",
+      "evidence": "Lines 105-111 keep S_Rperm/S_Pperm/S_RPperm outside A0-A5, label all as OOD correspondence stress, deny joint same-information fairness, and forbid path-dominance ranking."
+    },
+    {
+      "requirement": "evidence boundary",
+      "status": "PASS",
+      "evidence": "Lines 3 and 113-117 continue to report zero model loads, zero real generated videos, and zero performance improvements for this review."
+    }
+  ],
+  "remaining_required_modifications": [
+    {
+      "id": "V2-R1",
+      "severity": "MAJOR",
+      "location": "lines 58-61 and 67",
+      "issue": "Gate 1 currently passes whenever A1 differs from A0 beyond a tolerance. A difference only proves that the CLIP path influences output. It does not show that the influence concerns the pre-registered revisit failure, that its direction is beneficial or harmful, or that averaging is the cause. Sending every global-style-only difference into all A2-A5 arms wastes the intended cheap gate.",
+      "exact_change": "After line 61 add a two-part Gate 1 interpretation: '(i) Influence: any paired A1-A0 output delta above exact-replay tolerance shows only that crossattn has an effect. (ii) Failure relevance: proceed to A2-A5 only if A1-A0 also changes the pre-registered revisit-region outcome beyond its tolerance, with direction and camera/quality trade-offs reported; a global style-only change stops the local-identity/mean branch.' Also state that A1 improvement implicates the presence/content of the global CLIP condition, not averaging specifically.",
+      "reason": "This restores the requested order: first establish CLIP influence, then establish relevance to the natural failure, then test mean-specific alternatives."
+    },
+    {
+      "id": "V2-R2",
+      "severity": "MAJOR",
+      "location": "line 71",
+      "issue": "The conclusion 'A2-A5 all fail to improve, therefore reject mean as the demonstrated main cause' is incomplete and can contradict Gate 1. If A1 zero-CLIP robustly improves the natural failure while A2-A5 do not, there is evidence that the global CLIP condition is harmful, although the evidence does not distinguish arithmetic mean from encoder granularity or the entire crossattn condition.",
+      "exact_change": "Replace line 71 with conditional logic: 'If A1 does not improve the pre-registered failure and A2-A5 also show no robust improvement, there is no evidence that mean is the main cause. If A1 improves but A2-A5 do not, conclude only that the current global CLIP conditioning may be harmful; the mean-specific explanation remains unresolved. If A1 worsens while ordinary single-token arms do not improve, current CLIP conditioning is useful and the harmful-mean story is rejected.'",
+      "reason": "A zero-path intervention and alternative aggregators answer different causal questions and cannot be collapsed into one no-improvement rule."
+    },
+    {
+      "id": "V2-R3",
+      "severity": "MAJOR",
+      "location": "lines 78-89 and 95-103",
+      "issue": "F10 and F01 isolate paths by giving CLIP and replace mutually inconsistent versions of the same source. They are therefore controlled branch interventions but also off-manifold cross-condition conflicts. An artifact or large effect cannot by itself establish the path's natural contribution. F11 is the only coherent counterfactual appearance pair.",
+      "exact_change": "Add after the factorial table: 'F10/F01 deliberately create disagreement between the two appearance paths. Treat them as branch-response interventions, not performance baselines; large artifacts may reflect cross-condition conflict. F11 is the coherent counterfactual. Interpret a branch effect only when its direction/localization is reproduced under more than one pre-registered low-severity counterfactual and is consistent with F11.'",
+      "reason": "This gives the factorial a valid diagnostic interpretation without pretending its single-path cells lie on the model's natural joint-condition distribution."
+    },
+    {
+      "id": "V2-R4",
+      "severity": "MAJOR",
+      "location": "line 78",
+      "issue": "The source-image counterfactual is frozen before outputs, but its admissible content is unspecified. If it changes object shape, visibility, camera cues, or scene geometry, keeping pose/K, Plucker, and the support region M_i fixed becomes internally inconsistent and invalidates localization.",
+      "exact_change": "Require the first counterfactual to be a pre-registered local appearance-only or photometric edit inside a stored source mask that leaves camera, scene geometry, visibility support, and retrieval IDs unchanged. Save the original image hash, counterfactual image hash, edit-mask hash, edit procedure/parameters, and a geometry-stability check defined before generation. Any edit that changes geometry or support must be labeled a stress test and cannot use the original M_i for localization.",
+      "reason": "The evaluation geometry must remain valid for a source-to-region appearance response claim."
+    },
+    {
+      "id": "V2-R5",
+      "severity": "MINOR",
+      "location": "line 89",
+      "issue": "'F10 x F01 interaction' names an interaction but does not define it. Non-negative distance maps D_i alone do not provide a signed factorial contrast and cannot distinguish redundancy from synergy reliably.",
+      "exact_change": "For each pre-registered scalar outcome Y, define Interaction_Y = (Y11 - Y01) - (Y10 - Y00) = Y11 - Y10 - Y01 + Y00, with direction fixed in advance. If a spatial interaction map is reported, compute the same signed contrast in one fixed output/feature representation before taking any norm; do not derive the interaction by subtracting non-negative distance magnitudes after the fact.",
+      "reason": "This makes complementarity/redundancy testable and prevents an undefined interaction claim."
+    },
+    {
+      "id": "V2-R6",
+      "severity": "MINOR",
+      "location": "line 47 heading and line 76",
+      "issue": "The heading says 'two-level minimal experiment' while the document now has Gate 0, Gate 1, Gate 2a/2b, a factorial audit, and optional stresses. 'Gate 2 leaves headroom' is not operationally defined.",
+      "exact_change": "Rename the heading to 'staged minimal decision tree'. Define Section 6 entry as: a verified natural failure, exact A0 replay, a Gate-1 effect relevant to the frozen revisit outcome, and at least one pre-registered source-related contrast that remains unexplained by simple quality/camera trade-offs. If the intent is to allow Section 6 without an A2-A5 improvement, state that explicitly and call it a consumer-diagnostic branch rather than method headroom.",
+      "reason": "This removes an internal naming mismatch and makes the expensive source-to-region audit's entry condition executable."
+    }
+  ],
+  "logical_outcome_table_requested": [
+    {
+      "observed_pattern": "A1 approximately equals A0",
+      "allowed_conclusion": "No detected CLIP-path influence under the tested condition; stop the mean line."
+    },
+    {
+      "observed_pattern": "A1 differs only in global style, not the frozen revisit outcome",
+      "allowed_conclusion": "CLIP influences global appearance but is not shown relevant to the local revisit failure; stop the local-identity branch before A2-A5."
+    },
+    {
+      "observed_pattern": "A1 improves the frozen failure; A2-A5 do not",
+      "allowed_conclusion": "Current global CLIP conditioning may be harmful; arithmetic mean, encoder granularity, and crossattn-path presence remain confounded."
+    },
+    {
+      "observed_pattern": "A1 worsens; one of A2-A5 improves over A0 with no trade-off",
+      "allowed_conclusion": "CLIP is useful and an ordinary aggregation baseline is stronger; use it as the baseline and make no novelty claim."
+    },
+    {
+      "observed_pattern": "A2 is similar to A3",
+      "allowed_conclusion": "No target-direction evidence from the single-source contrast; still run A4/A5 for the complete aggregation audit."
+    },
+    {
+      "observed_pattern": "S_Rperm has a large effect",
+      "allowed_conclusion": "Sensitivity to latent-slot binding or contradictory conditions only; no replace-dominance conclusion."
+    }
+  ],
+  "pass_conditions_for_next_revision": [
+    "Gate 1 distinguishes output influence, failure relevance, and improvement/harm direction.",
+    "The A1-improves/A2-A5-fail case no longer contradicts the mean-cause conclusion.",
+    "F10/F01 are explicitly labeled cross-path-inconsistent branch interventions and F11 is labeled coherent.",
+    "The counterfactual is restricted to geometry-preserving appearance edits with immutable edit evidence.",
+    "The factorial interaction is defined as a signed contrast on a pre-registered outcome or representation.",
+    "Section 6 has an operational entry condition and the stage heading matches the actual decision tree."
+  ],
+  "final_assessment": "The requested R1-R6 regression has passed, including the samples_z and permutation safeguards. The remaining revisions concern causal interpretation inside the newly added decision tree. No source-path or literature verdict needs to be reopened."
+}

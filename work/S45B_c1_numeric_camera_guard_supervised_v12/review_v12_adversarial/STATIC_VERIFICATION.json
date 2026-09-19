@@ -1,0 +1,71 @@
+{
+  "reviewed_identities": {
+    "camera_guard.py": "02114d4a845bd83e3dcd35f663bf64f2a75eb5fb17fc0f3515b84222bd51281f",
+    "supervise_camera_guard.py": "179184084bbaabf5e5c7c6f6332f7a44f8292dcbeda993370642d585cfd6380c",
+    "PROTOCOL.md": "25f30e22fa14a745135393744b1d969ed1ffecc0378ba344efd4b72b45bec739",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "b5eee02b5aadc9339feb0f618ee8c6ab565074f101b413b23fb5a729f4da6bfe",
+    "synthetic_selftest.py": "ab04c655c2bfdd385befda30e24417baac35c2bb327de2785f161ed84fe05666",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "verified_static_files": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/camera_guard.py": "02114d4a845bd83e3dcd35f663bf64f2a75eb5fb17fc0f3515b84222bd51281f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/supervise_camera_guard.py": "179184084bbaabf5e5c7c6f6332f7a44f8292dcbeda993370642d585cfd6380c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/PROTOCOL.md": "25f30e22fa14a745135393744b1d969ed1ffecc0378ba344efd4b72b45bec739",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "b5eee02b5aadc9339feb0f618ee8c6ab565074f101b413b23fb5a729f4da6bfe",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/synthetic_selftest.py": "ab04c655c2bfdd385befda30e24417baac35c2bb327de2785f161ed84fe05666",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/score_b0_blind.py": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORER_SOURCE_REVIEW.json": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORER_SOURCE_REVIEW_ADVERSARIAL.json": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/readback.py": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45_c1_result_readback/supervise_readback.py": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78"
+  },
+  "formal_tail_and_cleanup_calls": [
+    {
+      "name": "verify_loaded_worker_lease",
+      "line": 1971
+    },
+    {
+      "name": "publish_terminal_seal",
+      "line": 2205
+    },
+    {
+      "name": "verify_loaded_worker_lease",
+      "line": 2221
+    },
+    {
+      "name": "close_loaded_worker_lease",
+      "line": 2222
+    },
+    {
+      "name": "close_terminal_control_fds",
+      "line": 2224
+    },
+    {
+      "name": "emit_external_pass_seal",
+      "line": 2229
+    },
+    {
+      "name": "emit_supervisor_failure_diagnostic",
+      "line": 2234
+    },
+    {
+      "name": "close_loaded_worker_lease",
+      "line": 2254
+    }
+  ],
+  "formal_tail_source": "\n        verify_loaded_worker_lease(worker, args.worker_sha256)\n        close_loaded_worker_lease(worker)\n        phase = \"FINAL_FILESYSTEM_CONTROL_FD_CLOSE\"\n        close_terminal_control_fds(output_fd, lock_fd, parent_fd)\n        output_fd = None\n        lock_fd = None\n        parent_fd = None\n        phase = \"EXTERNAL_HELD_FD_AUTHORITY_EMISSION\"\n        return emit_external_pass_seal(\n            worker, terminal_observation, args.self_sha256, args.worker_sha256,\n            lock_sha256, args.governance_attestation_sha256,\n        )\n    except BaseException as error:\n        emit_supervisor_failure_diagnostic(phase, error)\n        if process is not None and process.returncode is None:\n            terminate_exact_process(process.pid)\n            try:\n                waited_pid, status, _ = os.wait4(process.pid, 0)\n                if waited_pid == process.pid:\n                    process.returncode = os.waitstatus_to_exitcode(status)\n            except BaseException:\n                pass\n        if output_fd is not None:\n            write_supervisor_failure(worker, output_fd, phase, error, details)\n        return 2\n",
+  "shared_emitter_source": "def emit_external_pass_seal(\n    worker, terminal_observation, supervisor_sha256, worker_sha256,\n    attempt_lock_sha256, governance_attestation_sha256, stream=None,\n):\n    \"\"\"The shared final production write/flush/return path, after required closes.\"\"\"\n    if stream is None:\n        stream = sys.stdout\n    external_authority = build_external_pass_seal(\n        terminal_observation, supervisor_sha256, worker_sha256,\n        attempt_lock_sha256, governance_attestation_sha256,\n    )\n    external_body = encoded_json(external_authority)\n    require(0 < len(external_body) <= MAX_STDOUT_BYTES,\n            \"External terminal record exceeds the existing stdout bound\")\n    worker.write_all(stream.fileno(), external_body)\n    stream.flush()\n    return 0",
+  "failure_diagnostic_source": "def emit_supervisor_failure_diagnostic(phase, error):\n    \"\"\"Best-effort bounded stderr for failures even after all result FDs close.\"\"\"\n    try:\n        value = {\n            \"schema\": \"s45b-c1-supervisor-stderr-failure-v1\",\n            \"status\": \"FAILED_SUPERVISOR_NO_VALID_EXIT_GATED_SEAL\",\n            \"failed_phase\": str(phase)[:64],\n            \"error_type\": type(error).__name__[:64],\n            \"error\": str(error)[:256],\n            \"passed\": False,\n            \"terminal_authority\": False,\n        }\n        body = encoded_json(value)\n        require(len(body) <= 4096, \"Failure diagnostic exceeds its byte bound\")\n        fd = sys.stderr.fileno()\n        offset = 0\n        while offset < len(body):\n            written = os.write(fd, body[offset:])\n            if written <= 0:\n                return False\n            offset += written\n        sys.stderr.flush()\n        return True\n    except BaseException:\n        # An unavailable stderr never upgrades failure to a valid terminal seal.\n        return False",
+  "bare_undefined_write_all_calls": 0,
+  "worker_write_all_exists": true,
+  "old_failure_diagnosis_sha256": "de304196f0d715bf158bfd9149472293c145638c8cedabd40307413a67789377",
+  "real_body_bytes_read": 0,
+  "formal_calls": 0
+}

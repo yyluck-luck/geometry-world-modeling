@@ -1,0 +1,44 @@
+{
+  "status": "PASS_V2_SHAPE_ONLY_SOURCE_PRE_REVIEW",
+  "passed": true,
+  "reviewed_utc": "2026-09-06T20:00:23.761742+00:00",
+  "runner_sha256": "5222035721dafe55bff1d0aaaf62de110df9b97db3e285af5c2412a26b4f45bf",
+  "candidate_sha256": "1869e38fc316a0260d35ac07391ad68fd36323794d252f3359f2a135798461d1",
+  "reviewed_identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/recompute.py": "5222035721dafe55bff1d0aaaf62de110df9b97db3e285af5c2412a26b4f45bf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/candidate.json": "1869e38fc316a0260d35ac07391ad68fd36323794d252f3359f2a135798461d1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/prepare_candidate.py": "a4b10ae91de456abce2ed9aa57909d5fab54165c52f90a932be5392ad2f7b3ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/protocol.md": "1dc4bb691a31c983f00c93e1bd9b04e46be99e22809da3c7a1cdc7fff12277d4",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/shape_only.diff": "e9033d513eb924a1cb149aef210805ebca6005771b398144c6d5775fa8b01424",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review_v2/correction_receipt.json": "7f07dec1dc7ef96355e54369da1d9d2a02a9414c75b8a801dcb61e202b33f063",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review/recompute.py": "65fcc7a732c3d60552f963169d3d9a181c80d11912ba114acb39b450abde8c13",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_numeric_review/receipt.json": "e78a2762eec2d7813d4445e7cd59220d1495d1b79ca1b78e7900a8f9d4b04839",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S32_independent_execution/review/stderr.txt": "f2810b1f8aceda79f645193973ee17d7f1ad8efc631c64826739e947cff66cf6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_interface_preparation/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11"
+  },
+  "single_change": {
+    "old": "a.shape==z.shape==(GRID,)",
+    "new": "a.shape==z.shape==(384,512)",
+    "other_runner_bytes_unchanged": true
+  },
+  "checks": [
+    "Original optimizer initializes each registered im_depthmaps leaf as torch.randn(H,W); _set_depthmap explicitly views imshapes before assignment",
+    "Earlier reviewer wrongly required a flattened registered leaf; correction is source schema, not scientific tolerance or method change",
+    "2D leaves preserve all196608 pixels: exp.astype64.reshape384x512 is identity shape; z-a remains pointwise aligned",
+    "raw.flat/change.flat, min/max, fsum/GRID, np.abs and tobytes apply to complete unchanged row-major arrays",
+    "Endpoint/frame ratio path independent of raw rank; first-before and last-after trace links and all tolerances unchanged",
+    "Helper validate_raw still checks actual saved metadata shape/dtype/tensor SHA; no flattening conversion of saved data",
+    "Own HERE changes to v2 folder naturally; ROOT remains project; unchanged prepare binds actual v2 runner/protocol; all candidate source identities match",
+    "Original FAILED receipt/source remain present and unchanged; this is separate full saved-data re-review attempt"
+  ],
+  "blocking_findings": [],
+  "actual_access": {
+    "source_or_JSON_only": true,
+    "real_NPZ_bytes": 0,
+    "RGB_bytes": 0,
+    "sensor_GT_PNG_bytes": 0,
+    "GT_pose_text_bytes": 0,
+    "model_GA_MST_backward": 0
+  },
+  "scope": "Static incremental source review only; no claim that v2 numerical execution has passed"
+}

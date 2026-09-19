@@ -1,0 +1,85 @@
+{
+  "schema": "S86_SAVED_OUTPUT_SCORING_V1",
+  "prepared_utc": "2026-09-10T21:31:19.182367+00:00",
+  "status": "SOURCE_ONLY_PREPARED_NOT_EXECUTED",
+  "scorer_sha256": "1ec930bf6f3bb24265efbae3c5095a563d74a14d9451bb23c628625b803ac055",
+  "generation_contract": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/CONTRACT.json",
+    "bytes": 8083,
+    "sha256": "954c4353745280d5d3f48ac9db124b8a23aa877e1c59e9ecdd13f399416e844f"
+  },
+  "generation_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/execution_01",
+  "output_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/scoring_01",
+  "numpy_version": "1.26.4",
+  "argv": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "-I",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/score_outputs.py"
+  ],
+  "reference": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/scoring_01/transformed_targets_uint8.npy",
+    "bytes": 3981440,
+    "sha256": "e144e842fc36c795baa05841761670555a21bc7b9c36e0a56b8440b6a2324442"
+  },
+  "generation_scoring_rules": {
+    "reference_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/scoring_01/transformed_targets_uint8.npy",
+    "reference_bytes": 3981440,
+    "reference_sha256": "e144e842fc36c795baa05841761670555a21bc7b9c36e0a56b8440b6a2324442",
+    "reference_read_after": "All generation outputs closed and hashed; no reference bytes in generation",
+    "primary": "Each emitted uint8 RGB squared error divided by255^2; all576x576x3 channels each frame; average all4 frames equally",
+    "primary_signed_contrast": "MSE(Gguide)-MSE(Gterminal); negative favors Gguide. Also always report Gguide-G0 and Gguide-Gpaste.",
+    "frame_channel_denominator": 995328,
+    "total_channel_denominator": 3981312,
+    "exact_numerator": "int64 SSE; signed total SSE differences exact; no inferential significance threshold",
+    "secondaries": "Same fixed S85 image mask support and hole MSE, full denominators; empty region NA; no border metric",
+    "no_adjustments": [
+      "registration",
+      "exposure adjustment",
+      "pixel selection",
+      "target dropping",
+      "scale fitting",
+      "post hoc primary choice"
+    ],
+    "incomplete": "Any missing frame, nonfinite raw, failed emission consistency => incomplete comparison; no zero filling or reduced frame average",
+    "independent_review": "Different author offline saved fusion/Euler/emission/RNG review and independent scoring arithmetic; no real-model replay required"
+  },
+  "arm_order": [
+    "G0",
+    "Gpaste",
+    "Gterminal",
+    "Gguide"
+  ],
+  "target_order": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "completion_gate": "Require final generation RECEIPT exact complete status, all4 arm receipts matching global receipt and completed statuses, no unrun arms, two full chains, shared actual RNG, G0 terminal replay and derived RNG checks. Write INPUT_BINDING.json with actual final generation SHA and all array descriptors before any scoring array bytes. Recheck final receipt before reference and after scoring.",
+  "read_boundary": "Only generation JSON, four raw FP32/uint8 target bundles, generation saved image_mask, and fixed accepted transformed S70 reference; no original RGB, model, geometry NPZ or weights. Validate all16 emission conversions before reading reference bytes.",
+  "emission_validation": "Independent NumPy implementation: CHW->HWC; original min<-0.1 branch (x+1)/2; multiply255,clip0..255,astypeuint8 truncation; compare all bytes. Gpaste additionally must already be RGB01. Quantizer target order/range/branch metadata checked.",
+  "metrics": {
+    "primary": "Per-frame int64 SSE/(995328*65025), complete4-target equal mean = totalSSE/(3981312*65025).",
+    "regions": "Fixed saved bool image mask: support and complement hole. Each region pixel denominator explicit, channel denominator3*pixels; per-frame empty MSE null (CSV blank).",
+    "secondary_aggregation": "Report both equally weighted complete4-frame regional mean (null if any frame region empty; no dropping) and separately pooled regional MSE over total channels. These weight frames differently and are labelled.",
+    "contrasts": "All12 guide-control target pairs and 3 full4-frame contrasts for Gterminal/G0/Gpaste. Full primary differences use exact signed totalSSE/denominator; negative favors guide. Regional summedSSE/pooled signs are not substituted for equal-frame mean signs.",
+    "scientific_inference": "Descriptive only: one already exposed scene,4 correlated targets,1noise stream. No significance, physical accuracy, perceptual benefit or novelty claim."
+  },
+  "expected_outputs": {
+    "FRAME_SCORES.csv": 16,
+    "FRAME_SCORES.json": 16,
+    "ARM_SUMMARY.json": "4 arms × full/support/hole",
+    "CONTRASTS.json": "3 full4-frame comparisons and12 per-target comparisons",
+    "INPUT_BINDING.json": "actual generation final SHA before scoring array reads",
+    "RECEIPT.json": "actual times,read hashes,16 emission checks,output hashes,status/errors"
+  },
+  "limits": {
+    "seconds": 120,
+    "peak_rss_bytes": 1073741824,
+    "output_bytes": 8388608,
+    "enforcement": "SIGALRM wall time; RSS/output sampled during scoring; not kernel hard caps"
+  },
+  "failure_policy": "Any incomplete generation, missing/changed file, wrong schema, nonfinite raw or emission mismatch stops comparison; preserve partial CSV/receipt, no zero fill/no reduced-frame averaging/no automatic retries.",
+  "review_status": "Await root source review and complete real generation before one execution. No arrays have been read or scorer run during preparation.",
+  "new_method_validated": false
+}

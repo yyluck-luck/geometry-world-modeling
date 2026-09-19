@@ -1,0 +1,5 @@
+def get_depthmaps_repaired(self, raw=False):
+    res = torch.stack(list(self.im_depthmaps)).float().exp()
+    if not raw:
+        res = [dm[:h * w].view(h, w) for dm, (h, w) in zip(res, self.imshapes)]
+    return res

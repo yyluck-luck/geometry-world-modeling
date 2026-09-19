@@ -1,0 +1,275 @@
+Internal Error ()
+citeturn316view0 [wordlim: 200] Source: open({"ref_id":"https://arxiv.org/html/2603.03482v3","lineno":null}); Total lines: 1
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training (https://arxiv.org/html/2509.26645v4)
+citeturn316view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn314view2","lineno":385}); Total lines: 854
+L380: {}{}{}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}}}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}\hss}\lxSVG@discardpath\lxSVG@closescope \hss}}\lxSVG@closescope\endpgfpicture}}}$$  |  | (6)
+L381: The gradient is defined as a linear combination of the observation values $\mathbf{V}_{\mathbf{X}_{t}}\in\mathbb{R}^{(h\times w)\times c}$, weighted by the softmax alignment scores $\texttt{softmax}(\mathbf{Q}_{\mathbf{S}_{t-1}}\mathbf{K}_{\mathbf{X}_{t}}^{\top})\in\mathbb{R}^{n\times(h\times w)}$ between the state query $\mathbf{Q}_{\mathbf{S}_{t-1}}\in\mathbb{R}^{n\times c}$ and the observation key $\mathbf{K}_{\mathbf{X}_{t}}\in\mathbb{R}^{(h\times w)\times c}$.
+L382: Conceptually, the gradient function leverages cross-attention alignment between state query and observation key to determine where to write, assigning the corresponding observation value as what to write to each state token. This formulation has been demonstrated to be effective [cite36†91 ] for learning emergent functional 3D/4D alignment by implicitly matching cross-view context [cite104†16 ].
+L383: However, the softmax operation limits CUT3R’s ability to balance retaining historical information with incorporating new inputs, as it forces the model to fully adapt to the latest observations. Specifically, because softmax weights are normalized to sum to $1.0$ along the observation-token dimension, the model always prioritizes new information $\mathbf{X}_{t}$ over the historical state ${\mathbf{S}_{t-1}}$, leading to catastrophic forgetting.
+L384: This forgetting also reflects the structural discrepancy relative to standard TTT: the lack of a flexible learning rate (effectively, a constant $\beta_{t}=1.0$). Consequently, we are motivated to introduce a state update weight that serves as a gating mechanism to explicitly control memory plasticity.
+L385: #### 3.3 Confidence-Guided State Update Rule
+L386: 
+L387: Our core idea is to utilize alignment confidence between memory and observation to guide state updates. Figure cite133†4 provides an overview of TTT3R. This confidence constitutes an adaptive per-token state update weight, serving as the per-token learning rate function in the TTT formulation [cite67†97 ].
+L388: Recall that the cross-attention (i.e., $\mathbf{Q}_{\mathbf{S}_{t-1}}{\mathbf{K}^{\top}_{\mathbf{X}_{t}}}$) aggregates information along the spatial dimension $m=\{1,\dots,h\}\times\{1,\dots,w\}$ of the image into $n$ state tokens. This process yields normalized attention weights for each state token, which are then used to compute a weighted sum over the value tokens $\mathbf{V}_{\mathbf{X}_{t}}$.
+L389: To address the forgetting issue, we retain the original attention formulation but introduce a per-token learning rate $\beta_{t}\in\mathbb{R}^{n\times 1}$, derived from the alignment confidence between the state queries $\mathbf{Q}_{\mathbf{S}_{t-1}}$ and the observation keys $\mathbf{K}_{\mathbf{X}_{t}}$:
+L390:  | $\displaystyle\beta_{t}=\sigma(\textstyle{\sum_{m}}\mathbf{Q}_{\mathbf{S}_{t-1}}{\mathbf{K}^{\top}_{\mathbf{X}_{t}}})$  |  | (7)
+L391: 
+L392: To simplify notation, we define the summation $\sum_{m}$ to be normalized, thus representing a mean: $\sum_{m}\equiv\frac{1}{m}\sum_{i=1}^{m}$. This learning rate can act as a soft gate in gated attention, incorporating it into the attention output allows for better long-context extrapolation [cite134†59 ]. Consequently, the full closed-form state update rule is given by:
+L393:  | $$\mspace{-50mu}\texttt{Update}(\mathbf{S}_{t-1},\mathbf{X}_{t})=\mathbf{S}_{t-1}-\mathchoice{\hbox to57.48pt{\vbox to14.89pt{\pgfpicture\makeatletter\hbox{\hskip 28.7392pt\lower-4.94444pt\hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} \lxSVG@begingroup@{stroke=#000000} \lxSVG@begingroup@{fill=#000000} \lxSVG@setlinewidth{\the\pgflinewidth}\lxSVG@begingroup@{stroke-width=0.4pt} \lx@inpgf@ignorespaces\nullfont\lxSVG@begingroup@{_scopebegin=1} \lxSVG@closescope \hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} {}{
+L394: {{}}\lx@inpgf@ignorespaces\hbox{\hbox{{\lxSVG@begingroup@{_scopebegin=1} {{}{}{{
+L395: {}{}}}{
+L396: {}{}}
+L397: {{}{{\lx@inpgf@ignorespaces}}}{{}{\lx@inpgf@ignorespaces}}{}{{}{\lx@inpgf@ignorespaces}}
+L398: {\lx@inpgf@ignorespaces
+L399: }{{{{\lx@inpgf@ignorespaces}}\lxSVG@begingroup@{_scopebegin=1} \lxSVG@transformcm{1.0}{0.0}{0.0}{1.0}{-28.7392pt}{0.0pt}\lxSVG@begingroup@{transform=matrix(1.0 0.0 0.0 1.0 -39.77 0)} \pgfsys@hbox{60}\lxSVG@closescope }}}
+L400: \lxSVG@closescope }}}
+L401: }
+L402: \lxSVG@closescope \hbox to0.0pt{}{{
+L403: {}{}{}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}}}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}\hss}\lxSVG@discardpath\lxSVG@closescope \hss}}\lxSVG@closescope\endpgfpicture}}}{\hbox to57.48pt{\vbox to14.89pt{\pgfpicture\makeatletter\hbox{\hskip 28.7392pt\lower-4.94444pt\hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} \lxSVG@begingroup@{stroke=#000000} \lxSVG@begingroup@{fill=#000000} \lxSVG@setlinewidth{\the\pgflinewidth}\lxSVG@begingroup@{stroke-width=0.4pt} \lx@inpgf@ignorespaces\nullfont\lxSVG@begingroup@{_scopebegin=1} \lxSVG@closescope \hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} {}{
+L404: {{}}\lx@inpgf@ignorespaces\hbox{\hbox{{\lxSVG@begingroup@{_scopebegin=1} {{}{}{{
+L405: {}{}}}{
+L406: {}{}}
+L407: {{}{{\lx@inpgf@ignorespaces}}}{{}{\lx@inpgf@ignorespaces}}{}{{}{\lx@inpgf@ignorespaces}}
+L408: {\lx@inpgf@ignorespaces
+L409: }{{{{\lx@inpgf@ignorespaces}}\lxSVG@begingroup@{_scopebegin=1} \lxSVG@transformcm{1.0}{0.0}{0.0}{1.0}{-28.7392pt}{0.0pt}\lxSVG@begingroup@{transform=matrix(1.0 0.0 0.0 1.0 -39.77 0)} \pgfsys@hbox{60}\lxSVG@closescope }}}
+L410: \lxSVG@closescope }}}
+L411: }
+L412: \lxSVG@closescope \hbox to0.0pt{}{{
+L413: {}{}{}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}}}{\lx@inpgf@ignorespaces}{\lx@inpgf@ignorespaces}\hss}\lxSVG@discardpath\lxSVG@closescope \hss}}\lxSVG@closescope\endpgfpicture}}}{\hbox to45.89pt{\vbox to12.22pt{\pgfpicture\makeatletter\hbox{\hskip 22.94336pt\lower-4.3611pt\hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} \lxSVG@begingroup@{stroke=#000000} \lxSVG@begingroup@{fill=#000000} \lxSVG@setlinewidth{\the\pgflinewidth}\lxSVG@begingroup@{stroke-width=0.4pt} \lx@inpgf@ignorespaces\nullfont\lxSVG@begingroup@{_scopebegin=1} \lxSVG@closescope \hbox to0.0pt{\lxSVG@begingroup@{_scopebegin=1} {}{
+L414: {{}}\lx@inpgf@ignorespaces\hbox{\hbox{{\lxSVG@begingroup@{_scopebegin=1} {{}{}{{
+L415: {}{}}}{
+L416: {}{}}
+L417: {{}{{\lx@inpgf@ignorespaces}}}{{}{\lx@inpgf@ignorespaces}}{}{{}{\lx@inpgf@ignorespaces}}
+L418: {\lx@inpgf@ignorespaces
+--------------------------------------------------------------------------------
+1Introduction (https://arxiv.org/html/2510.03198v1)
+citeturn316view2 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn314view3","lineno":154}); Total lines: 369
+L117: where $\mathcal{T}_{\text{fixed}}$ represents the fixed $L/2$ recent temporal context frames, $\mathcal{M}_{\text{spatial}}$ represents long-term spatial memory retrieved by our Geometry-indexed Spatial Memory cite12†3.4 , and $\mathcal{T}_{\text{extended}}$ represents additional temporal frames from earlier time steps. This dynamic allocation enables the model to leverage the most appropriate memory source for each generation scenario.
+L118: Inspired by Figure cite38†1 , we apply different memory strategies to different datasets: spatial memory for synthetic dataset (cite41†Fan et al., 2022 ) with frequent area revisiting, and extended temporal context for VPT dataset (cite40†Baker et al., 2022 ) with new scene generation.
+L119: 
+L120: Algorithm 1 Chained Forward Training (CFT)
+L121: 
+L122: 0:  Video $\mathbf{x}$, conditioning inputs $\mathcal{C}$, forward steps $T$, window size $W$, model $\epsilon_{\theta}$
+L123: 1:  Initialize $\mathcal{F}_{\text{pred}}\leftarrow\emptyset$, $\mathcal{L}_{\text{total}}\leftarrow 0$
+L124: 
+L125: 2:  for $j=0$ to $T-1$ do
+L126: 
+L127: 3:   Construct window $\mathcal{W}_{j}$:
+L128: 
+L129: 4:   for $k\in[j,j+W-1]$ do
+L130: 
+L131: 5:    if $k\in\mathcal{F}_{\text{pred}}$ then
+L132: 
+L133: 6:     $\mathcal{W}_{j}[k-j]\leftarrow\mathcal{F}_{\text{pred}}[k]$ {Use predicted frame}
+L134: 
+L135: 7:    else
+L136: 
+L137: 8:     $\mathcal{W}_{j}[k-j]\leftarrow\mathbf{x}_{k}$ {Use ground truth frame}
+L138: 
+L139: 9:    end if
+L140: 
+L141: 10:   end for
+L142: 11:   Compute $\mathcal{L}_{j}\leftarrow\|\epsilon-\epsilon_{\theta}(\mathcal{W}_{j},\mathcal{C}_{j},t)\|^{2}$, update $\mathcal{L}_{\text{total}}\leftarrow\mathcal{L}_{\text{total}}+\mathcal{L}_{j}$
+L143: 
+L144: 12:   if $j<T-1$ then
+L145: 
+L146: 13:    $\hat{\mathbf{x}}_{j+W-1}\leftarrow\text{denoise}(\mathcal{W}_{j},\mathcal{C}_{j})$ {Generate with fewer steps, no gradients}
+L147: 
+L148: 14:    $\mathcal{F}_{\text{pred}}[j+W-1]\leftarrow\hat{\mathbf{x}}_{j+W-1}$ {Store for next window}
+L149: 
+L150: 15:   end if
+L151: 
+L152: 16:  end for
+L153: 17:  return $\mathcal{L}_{\text{chain}}\leftarrow\mathcal{L}_{\text{total}}/T$
+L154: Chained Forward Training. We introduce Chained Forward Training (CFT) to enhance our hybrid training strategy. CFT sequentially processes temporal windows where predicted frames from earlier windows are incorporated into subsequent windows, creating cascading dependencies across the sequence. Details are shown in Algorithm cite77†1 . At each step $j$, we construct a temporal window $\mathcal{W}_{j}$ spanning frames $[j,j+W-1]$.
+L155: For each frame position $k$ within this range, the window contains either ground-truth frames $\mathbf{x}_{k}$ (if not previously predicted) or predicted frames $\hat{\mathbf{x}}_{k}$ (if generated in earlier steps). The conditioning inputs $\mathcal{C}_{j}=\{\mathcal{A}_{j},\mathcal{P}_{j},\mathcal{M}_{\text{spatial}}\}$ comprise actions $\mathcal{A}_{j}$, poses $\mathcal{P}_{j}$, and spatial memory $\mathcal{M}_{\text{spatial}}$ retrieved for the current window. The training objective is:
+L156:  | $$\mathcal{L}_{\text{chain}}=\frac{1}{T}\sum_{j=0}^{T-1}\mathbb{E}_{t,\epsilon}\left[\|\epsilon-\epsilon_{\theta}(\mathcal{W}_{j}(\mathbf{x},\hat{\mathbf{x}}),\mathcal{C}_{j},t)\|^{2}\right],\quad t\sim\text{Uniform}(0,T_{\text{noise}}),\epsilon\sim\mathcal{N}(0,\mathbf{I})$$  |  | (4)
+L157: This approach extends autoregressive training with model rollouts, where larger pose variations created by chained predictions cause inaccuracies to propagate from earlier windows, encouraging the model to rely on spatial memory for maintaining consistency across revisited areas. Additionally, by replacing ground truth temporal context with the model’s own predictions during training, this approach helps reduce accumulation errors that typically arise during autoregressive inference.
+L158: ### 3.4 Geometry-indexed Spatial Memory
+L159: Our Geometry-indexed Spatial Memory maintains explicit 3D scene geometry to enable efficient retrieval of long-term historical visual information based on spatial relationships. The core idea is to build a global point cloud representation where each 3D point is linked to its source frame, creating traceable connections back to the original visual observations.
+L160: The system operates through two key components: Point-to-Frame Retrieval for identifying spatially relevant historical frames, and Incremental 3D Reconstruction that continuously updates scene representations using predicted depth maps and pose-derived camera extrinsics.
+L161: Point-to-Frame Retrieval. For each current frame, we project the global point cloud to the current camera pose and analyze the source frame indices of visible points to identify the most relevant historical frames:
+L162: 
+L163:  | $$\mathcal{H}_{t}=\arg\max_{k=1,...,8}\text{Count}({\text{source}(p_{i}):p_{i}\in\mathcal{P}_{\text{visible}}^{t}})$$  |  | (5)
+L164: where $\mathcal{P}_{\text{visible}}^{t}$ represents the set of points visible under the current camera pose for frame $t$, $\text{source}(p_{i})$ denotes the source frame index of point $p_{i}$, and $\mathcal{H}_{t}$ contains the top-8 most frequently referenced historical frames among the visible points. This retrieval mechanism maintains $O(1)$ complexity regardless of sequence length, enabling scalable processing.
+L165: Incremental 3D Reconstruction. We adopt a selective reconstruction approach that dynamically determines keyframes based on spatial information content. A frame qualifies as a keyframe when it either reveals previously unobserved regions or when insufficient historical context exists:
+L166: 
+L167:  | $$\text{IsKeyframe}(t)=\text{NovelCoverage}(I_{t},\mathcal{G}_{\text{global}})\ \textbf{or}\ (|\mathcal{H}_{t}|<\tau_{\text{hist}})$$  |  | (6)
+L168: where $\text{NovelCoverage}(I_{t},\mathcal{G}_{\text{global}})$ evaluates whether the current frame $I_{t}$ contributes sufficient new spatial coverage relative to the existing global geometry $\mathcal{G}_{\text{global}}$ by rendering the global point cloud from the current pose, and $\tau_{\text{hist}}=L/2$ serves as the minimum historical frame count threshold.
+L169: Upon reaching window capacity, we jointly process keyframes, historical frames selected via Point-to-Frame Retrieval for improved geometric consistency, and overlapping frames from the previous window that provide depth scale reference for aligning the new window.
+L170: VGGT generates relative depth maps and confidence scores for each frame in this window, followed by our cross-window scale alignment module (detailed in Appendix cite21†A.1 ) that establishes consistent depth scale across windows through correspondence analysis in overlapping regions. 3D geometry is reconstructed through depth map back-projection using extrinsics derived from quaternion-composed poses:
+--------------------------------------------------------------------------------
+Mitigating Compounding Error via Video Representation Regularization (https://arxiv.org/html/2607.27036v1)
+citeturn316view3 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn314view4","lineno":127}); Total lines: 295
+L120: To validate that effective rank is a uniquely informative indicator—and not merely one of many correlated signals—we also conduct a comparison against a suite of alternative diagnostics, including standard image quality metrics such as SSIM, PSNR and LPIPS. Crucially, none of these alternatives consistently pinpoints the collapse frame.
+L121: ### 3.3 More Data Cannot Cure Error Accumulation
+L122: Another central finding of our investigation is that naïvely scaling up the training set does not alleviate error accumulation in long video generation. Following the experimental protocol of VRag (cite72†Chen et al., 2026 ), we curate a dataset of 18,000 Minecraft gameplay sequences, each spanning 1,200 frames. We train a single epoch on this dataset—deliberately avoiding multiple passes to rule out overfitting—and save checkpoints at regular intervals throughout training.
+L123: For each checkpoint we perform long-video inference and measure the effective rank of the generated sequences as a proxy for temporal diversity and structural coherence.
+L124: Figure 3: We trained for one epoch on the 18k training set using the vanilla diffusion forcing method and calculated the Erank corresponding to these checkpoints. We observed that the Erank values at step 4000 and step 8000 are generally higher and maintain stability over longer durations. In contrast, increasing the number of training steps not only reduces the overall Erank but also accelerates its degradation during long-range reasoning.
+L125: The results are shown in Figure cite94†3 . Strikingly, the effective rank peaks after exposure to only $\sim$10% of the training data; every subsequent checkpoint exhibits a monotonic decline. The ability to leverage large-scale data for improved generalization has long been regarded as a defining strength of video generation models.
+L126: Our experiment challenges this assumption in the context of autoregressive generation: error accumulation is not a data-scarcity problem that can be remedied by collecting more trajectories. Instead, it reflects a structural limitation of the generation paradigm itself, motivating the architectural intervention we introduce in the following section.
+L127: ## 4 Video Representation Regularization
+L128: ### 4.1 Effective Rank Degradation in Long-term Training
+L129: 
+L130: Motivated by the observations in the previous section, our core objective is to improve the effective rank (erank) of the diffusion model over long-term training. Given a hidden state matrix $\mathbf{H}\in\mathbb{R}^{n\times d}$, erank is defined as
+L131: 
+L132:  | $$\text{erank}(\mathbf{H})=\exp\!\left(-\sum_{i=1}^{r}p_{i}\log p_{i}\right),\qquad p_{i}=\frac{\sigma_{i}(\mathbf{H})}{\displaystyle\sum_{j=1}^{r}\sigma_{j}(\mathbf{H})},$$  |  | (4)
+L133: where $\sigma_{i}(\mathbf{H})$ denotes the $i$-th singular value of $\mathbf{H}$ and $r$ is its rank. To maintain a high erank throughout training, we impose a representation regularization loss on the hidden states, encouraging a more uniform singular value distribution.
+L134: ### 4.2 Formulation of Video Representation Regularization
+L135: 
+L136: We argue that the anomalous decreasing trend of effective rank (erank) as training steps increase stems from shortcut learning in autoregressive diffusion models. When frame contents change mildly, directly copying adjacent frames enables smooth temporal consistency and favorable generation quality. Nevertheless, such frame-copying behavior erodes the amount of valid information contained within latent representations.
+L137: To preserve representation robustness and deter the model from over-relying on trivial shortcuts, a straightforward solution is to introduce regularization. To this end, we propose Video Representation Regularization (VRR). Given an n-layer DiT model $D$, let $x$ denote a video clip input with frame-wise independent noise levels and $y$ denote its corresponding ground-truth video clip. Let $H_{1},...,H_{n}$ represent the hidden states from each layer. The overall training objective is formulated as:
+L138:  | $$\mathcal{L}=\mathcal{L}_{\text{DF}}(D(x),y)+\sum_{i}\lambda_{i}\mathcal{L}_{\text{reg}}(H_{i})$$  |
+L139: 
+L140: where $\mathcal{L}_{\text{DF}}$ stands for the vanilla Diffusion Forcing loss, $\lambda_{i}$ denotes the regularization weight coefficient, and $\mathcal{L}_{\text{reg}}$ refers to the regularization function.
+L141: In this work, we primarily adopt Sigreg and Uniformity loss as our regularization functions. Sigreg regularizes by constraining vectors to an isotropic Gaussian, whereas Uniformity Loss regularizes by constraining vectors to follow a uniform distribution. We also experiment with classic representation regularization terms including Barlow Twins and VICReg. Additionally, we conduct ablation studies that directly utilize effective rank as the regularization function.
+L142: Detailed experimental results are presented in Section cite29†5.4 .
+L143: ## 5 Experiments
+L144: 
+L145: ### 5.1 Experimental Setup
+L146: #### Datasets
+L147: For Minecraft experiments, we use MineRL (cite95†Guss et al., 2019 ) to generate 18,000 training sequences following the protocols in VRAG (cite72†Chen et al., 2026 ). Each video contains 1,200 frames. For evaluation, we reserve 20 sequences from the dataset, which are sufficiently long to assess error accumulation in the diffusion model. During inference, we feed the model 100 frames of ground-truth video as the prompt, and the model generates the subsequent 1100 frames.
+L148: Across all experiments, the window size of the DiT model is set to 20 frames.
+L149: #### Evaluation
+L150: 
+L151: We adopt VBench (cite96†Huang et al., 2024 ) as our evaluation metric. VBench covers multiple assessment dimensions including text-to-video alignment, human characters, object motion, and background consistency, none of which are relevant to the Minecraft setting. For this reason, we primarily refer to two dimensions: imaging quality and aesthetic quality. These two metrics mainly evaluate whether the frames contain noise or suffer from visual collapse.
+L152: #### Baseline
+L153: In addition to Diffusion Forcing, we also implement two baselines, namely Frame Anchor and SVI (cite82†Li et al., 2026 ). Frame Anchor has been adopted in numerous studies as a strategy to mitigate compounding error (cite80†Khachatryan et al., 2023 ; cite81†Weng et al., 2024 ). Its core mechanism involves inserting one completely clean frame as an anchor into the sliding window.
+L154: SVI improves the model’s robustness against compounding error by recapturing errors generated during training and incorporating them into the training samples.
+--------------------------------------------------------------------------------
+[2603.03482] Beyond Pixel Histories: World Models with Persistent 3D State (https://arxiv.org/abs/2603.03482)
+citeturn316view4 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn315view0","lineno":42}); Total lines: 163
+L17: To address this, we present PERSIST, a new paradigm of world model which simulates the evolution of a latent 3D scene: environment, camera, and renderer. This allows us to synthesise new frames with persistent spatial memory and consistent geometry. Both quantitative metrics and a qualitative user study show substantial improvements in spatial memory, 3D consistency, and long-horizon stability over existing methods, enabling coherent, evolving 3D worlds.
+L18: We further demonstrate novel capabilities, including synthesising diverse 3D environments from a single image, as well as enabling fine-grained, geometry-aware control over generated experiences by supporting environment editing and specification directly in 3D space. Project page: cite16†this https URL†francelico.github.io L19: Comments:  | Accepted to the International Conference on Machine Learning (ICML) 2026. To appear in the Proceedings of Machine Learning Research (PMLR). 9 pages
+L20: Subjects:  | Computer Vision and Pattern Recognition (cs.CV); Artificial Intelligence (cs.AI); Machine Learning (cs.LG)
+L21: Cite as:  | cite17†arXiv:2603.03482 [cs.CV]
+L22:    | (or cite18†arXiv:2603.03482v2 [cs.CV] for this version)
+L23:    | cite19†https://doi.org/10.48550/arXiv.2603.03482†doi.org arXiv-issued DOI via DataCite
+L24: ## Submission history
+L25: 
+L26: From: Samuel Garcin [cite20†view email ]
+L27: cite5†[v1] Tue, 3 Mar 2026 19:58:31 UTC (19,623 KB)
+L28: [v2] Wed, 3 Jun 2026 14:11:45 UTC (15,543 KB)
+L29: 
+L30: Full-text links:
+L31: 
+L32: ## Access Paper:
+L33: 
+L34: View a PDF of the paper titled Beyond Pixel Histories: World Models with Persistent 3D State, by Samuel Garcin and 7 other authors
+L35: 
+L36:   * cite14†View PDF L37:   * cite15†HTML (experimental) L38:   * cite21†TeX Source L39: 
+L40: cite22†view license L41: ### Current browse context:
+L42: 
+L43: cs.CV
+L44: 
+L45: cite23†< prev |   cite24†next > L46: 
+L47: cite25†new | cite26†recent | cite27†2026-03 L48: 
+L49: Change to browse by:
+L50: 
+L51: cite28†cs L52: cite29†cs.AI L53: cite30†cs.LG L54: 
+L55: ### References & Citations
+L56: 
+L57:   * cite31†NASA ADS†ui.adsabs.harvard.edu L58:   * cite32†Google Scholar†scholar.google.com L59:   * cite33†Semantic Scholar†api.semanticscholar.org L60: 
+L61: [Button: export BibTeX citation] Loading...
+L62: 
+L63: ## BibTeX formatted citation
+L64: 
+L65: [Button: ×]
+L66: 
+L67: loading...
+L68: 
+L69: Data provided by:
+L70: 
+L71: ### Bookmark
+L72: 
+L73: [Input] Bibliographic Tools
+L74: # Bibliographic and Citation Tools
+L75: 
+L76: [Input] Bibliographic Explorer Toggle
+L77: 
+L78: Bibliographic Explorer (cite34†What is the Explorer?†info.arxiv.org )
+L79: 
+L80: [Input] Connected Papers Toggle
+L81: 
+L82: Connected Papers (cite35†What is Connected Papers?†www.connectedpapers.com )
+L83: 
+L84: [Input] Litmaps Toggle
+L85: 
+L86: Litmaps (cite36†What is Litmaps?†www.litmaps.co )
+L87: 
+L88: [Input] scite.ai Toggle
+L89: 
+L90: scite Smart Citations (cite37†What are Smart Citations?†www.scite.ai )
+L91: 
+L92: [Input] Code, Data, Media
+L93: # Code, Data and Media Associated with this Article
+L94: 
+L95: [Input] alphaXiv Toggle
+L96: 
+L97: alphaXiv (cite38†What is alphaXiv?†alphaxiv.org )
+L98: 
+L99: [Input] Links to Code Toggle
+L100: 
+L101: CatalyzeX Code Finder for Papers (cite39†What is CatalyzeX?†www.catalyzex.com )
+L102: 
+L103: [Input] DagsHub Toggle
+L104: 
+L105: DagsHub (cite40†What is DagsHub?†dagshub.com )
+L106: 
+L107: [Input] GotitPub Toggle
+L108: 
+L109: Gotit.pub (cite41†What is GotitPub?†gotit.pub )
+L110: 
+L111: [Input] Huggingface Toggle
+L112: 
+L113: Hugging Face (cite42†What is Huggingface?†huggingface.co )
+L114: 
+L115: [Input] ScienceCast Toggle
+L116: ScienceCast (cite43†What is ScienceCast?†sciencecast.org )
+L117: 
+L118: [Input] Demos
+L119: # Demos
+L120: 
+L121: [Input] Replicate Toggle
+L122: 
+L123: Replicate (cite44†What is Replicate?†replicate.com )
+L124: 
+L125: [Input] Spaces Toggle
+L126: 
+L127: Hugging Face Spaces (cite45†What is Spaces?†huggingface.co )
+L128: 
+L129: [Input] Spaces Toggle
+L130: 
+L131: TXYZ.AI (cite46†What is TXYZ.AI?†txyz.ai )
+L132: 
+L133: [Input] Related Papers
+L134: # Recommenders and Search Tools
+L135: 
+L136: [Input] Link to Influence Flower
+L137: 
+L138: Influence Flower (cite47†What are Influence Flowers?†influencemap.cmlab.dev )
+L139: 
+L140: [Input] Core recommender toggle
+L141: 
+L142: CORE Recommender (cite48†What is CORE?†core.ac.uk )
+L143: 
+L144:   * Author
+L145:   * Venue
+L146:   * Institution
+L147:   * Topic
+L148: 
+L149: [Input] About arXivLabs
+L150: # arXivLabs: experimental projects with community collaborators
+L151: 
+L152: arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+L153: 
+L154: Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+L155: Have an idea for a project that will add value for arXiv's community? cite49†Learn more about arXivLabs†info.arxiv.org .
+L156: 
+L157: cite50†Which authors of this paper are endorsers? | Disable MathJax (cite51†What is MathJax?†info.arxiv.org )
+L158: 
+L159: We gratefully acknowledge support from our major funders, cite52†member institutions†info.arxiv.org , , and all contributors.
+L160: cite53†About†info.arxiv.org · cite54†Help†info.arxiv.org · cite55†Contact†info.arxiv.org · cite56†Subscribe†info.arxiv.org · cite57†Copyright†info.arxiv.org · cite58†Privacy†info.arxiv.org · cite59†Accessibility†info.arxiv.org · cite60†Operational Status (opens in new tab)†status.arxiv.org L161: 
+L162: Major funding support from
+

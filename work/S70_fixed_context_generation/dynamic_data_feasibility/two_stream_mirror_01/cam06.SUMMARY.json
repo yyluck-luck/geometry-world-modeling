@@ -1,0 +1,98 @@
+{
+  "camera": "cam06",
+  "probe_runs": [
+    {
+      "label": "streams",
+      "argv": [
+        "/opt/homebrew/bin/ffprobe",
+        "-v",
+        "error",
+        "-threads",
+        "1",
+        "-show_format",
+        "-show_streams",
+        "-of",
+        "json",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/dynamic_data_feasibility/two_stream_mirror_01/cam06.mp4"
+      ],
+      "started_utc": "2026-09-09T03:50:55.882466+00:00",
+      "completed_utc": "2026-09-09T03:50:55.967087+00:00",
+      "returncode": 0,
+      "stdout": {
+        "file": "cam06.streams.json",
+        "bytes": 2737,
+        "sha256": "0f526e60c3f15fd7899fe7e16c66f7f4dd01eabf0779f4201a749b3c3a7ef843"
+      },
+      "stderr": {
+        "file": "cam06.streams.stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "frames",
+      "argv": [
+        "/opt/homebrew/bin/ffprobe",
+        "-v",
+        "error",
+        "-threads",
+        "1",
+        "-select_streams",
+        "v:0",
+        "-show_frames",
+        "-show_entries",
+        "frame=media_type,stream_index,key_frame,pts,pts_time,best_effort_timestamp,best_effort_timestamp_time,pkt_dts,pkt_dts_time,duration,duration_time,pkt_duration,pkt_duration_time",
+        "-of",
+        "json",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/dynamic_data_feasibility/two_stream_mirror_01/cam06.mp4"
+      ],
+      "started_utc": "2026-09-09T03:50:55.967647+00:00",
+      "completed_utc": "2026-09-09T03:51:02.906693+00:00",
+      "returncode": 0,
+      "stdout": {
+        "file": "cam06.frames.json",
+        "bytes": 124490,
+        "sha256": "c0321027c45ad72c7e8f009951817fe94d0eb9c7770d8a169546fed4b9b3cd19"
+      },
+      "stderr": {
+        "file": "cam06.frames.stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "video_fields": {
+    "codec_name": "h264",
+    "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+    "profile": "High",
+    "codec_type": "video",
+    "width": 2704,
+    "height": 2028,
+    "coded_width": 2704,
+    "coded_height": 2028,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "30/1",
+    "avg_frame_rate": "30/1",
+    "time_base": "1/15360",
+    "start_pts": 0,
+    "start_time": "0.000000",
+    "duration_ts": 153600,
+    "duration": "10.000000",
+    "nb_frames": "300",
+    "bit_rate": "51571311"
+  },
+  "audio_streams_identified_only": [],
+  "frame_count": 300,
+  "pts_all_present": true,
+  "pts_strictly_increasing": true,
+  "pts_unique_count": 300,
+  "first_pts": 0,
+  "last_pts": 153088,
+  "first_pts_seconds_exact": "0",
+  "last_pts_seconds_exact": "299/30",
+  "delta_pts_histogram": {
+    "512": 299
+  },
+  "declared_frame_count_matches_observed": true,
+  "scope": "ffprobe video frame traversal may decode video internally; only timing metadata retained. No pixel export/view. Audio streams identified, not decoded."
+}

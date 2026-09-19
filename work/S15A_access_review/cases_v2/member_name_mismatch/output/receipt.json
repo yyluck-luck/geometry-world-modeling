@@ -1,0 +1,50 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:47:18.170895+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:47:18.171077+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/144",
+        "Content-Length": "30",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:47:18.171098+00:00",
+      "bytes": 30,
+      "sha256": "b5790b71bbfa64b30328e6f2c0eefa2f3c49b54ff2e20250fcda9bb960672aee"
+    },
+    {
+      "started_utc": "2026-09-06T09:47:18.171161+00:00",
+      "requested_range": "bytes=30-65",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 30-65/144",
+        "Content-Length": "36",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:47:18.171179+00:00",
+      "bytes": 36,
+      "sha256": "e6d5cfa9dfc7847938b2d91ea8822a5b4eb96d17558667c9446225477f6d9f24"
+    }
+  ],
+  "members": [],
+  "body_bytes": 66,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "865b9ce970f3a03dd74a6f95a488c9d6b03d78f9085d6e2c5c546874a9742273",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases_v2/member_name_mismatch/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 144,
+  "error": "ValueError('member name mismatch')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 116, in execute\n    data = unpack_member(header,rest,entry,c['max_member_uncompressed_bytes'])\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 52, in unpack_member\n    require(name == entry['name'], 'member name mismatch')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: member name mismatch\n",
+  "ended_utc": "2026-09-06T09:47:18.171437+00:00"
+}

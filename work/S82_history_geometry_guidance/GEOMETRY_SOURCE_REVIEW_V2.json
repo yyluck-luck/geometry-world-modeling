@@ -1,0 +1,35 @@
+{
+  "status": "PASS_MINIMAL_V2_FIX_FOR_ONE_NEW_BOUNDED_ATTEMPT",
+  "recorded_utc": "2026-09-10T18:20:43.510144+00:00",
+  "runner_sha256": "71ca5a3002cef34c423a6729deb2d80e076795aa268eb5009f55bab97f75621c",
+  "contract_sha256": "4a065747329578ac13340510d938ccd24a6a2e7614d77a32b3553fdaf212d50a",
+  "blockers": [],
+  "exact_diff_checked": true,
+  "runner_changes": [
+    "new V2 contract",
+    "new execution_geometry_02 directory",
+    "read model.head_type instead of replaced backbone config",
+    "label backbone_config and record head type/class"
+  ],
+  "contract_changed_fields_only": [
+    "created_utc",
+    "output_directory",
+    "revision",
+    "runner_sha256",
+    "schema"
+  ],
+  "unchanged": "RGB identities/order, model/checkpoint/RoPE/math, source identities, inference masks/update/revisit, output head schema, resource budget",
+  "source_reason": "original dust3r/model.py:230-240 replaces config through CrocoConfig parent; :497-508 writes actual self.head_type before head_factory",
+  "reviewer_v1_miss": "V1 source review missed the runtime config ownership distinction; original PASS remains a pre-execution record, not proof of success",
+  "first_attempt": "execution_geometry_01 preserved by root: loaded and decoded but no forward; first failure is technical, not geometry-quality result",
+  "old_runner_and_contract_unchanged": true,
+  "second_attempt_count_scope": "contract is one bounded V2 attempt; cumulative attempts if executed=2",
+  "tests_this_revision": "exact text replacement/diff, JSON identity comparison, AST parse only; no new dependency load or synthetic suite",
+  "real_output_files_read": 0,
+  "model_instantiations": 0,
+  "model_forwards": 0,
+  "RGB_or_depth_decodes": 0,
+  "output_checker_sha256": "6c8ab60aa9b222b05583041101bb8a18efb94911ff364add882f47faed57c6f2",
+  "output_checker_compatible": "takes explicit contract path/SHA; no dependence on full_model_config; use V2 contract and execution02 when root authorizes output read",
+  "scope": "root may run V2 once after readback; no optimizer/render/new-generation authorization"
+}

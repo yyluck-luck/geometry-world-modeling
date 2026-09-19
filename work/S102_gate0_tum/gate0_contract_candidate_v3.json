@@ -1,0 +1,257 @@
+{
+  "schema": "gwm-gate0-contract-v1",
+  "contract_version": 1,
+  "created_at_local": "2026-09-16T01:36:11.321831+08:00",
+  "created_at_note": "Actual write time from Python clock; previous draft times corrected separately.",
+  "status": "BLOCKED",
+  "formal_experiment_eligibility": "BLOCKED",
+  "purpose": "Pre-run contract for the first formal selector-free VMem long-horizon baseline and any later GRC/SOCF comparison.",
+  "scope": {
+    "formal_baseline": "VMem selector-free baseline only after every required section is PASS",
+    "method_scoring": "GRC/SOCF scoring is prohibited by this contract until the baseline and independent held-out identity are frozen",
+    "evidence_boundary": "This file records qualification and protocol state; it contains no model prediction, future score, or method claim."
+  },
+  "sources": {
+    "candidate_scene": {
+      "name": "TUM RGB-D Freiburg3 long office household",
+      "remote_archive": "/home/yliutz/datasets/tum_fr3_long_office/rgbd_dataset_freiburg3_long_office_household.tgz",
+      "archive_bytes": 1483556251,
+      "archive_sha256": "c7cd8e1afb87c80e5744a356214819b110fa09b4744fa4ba0cc2382f9ba59e9c",
+      "qualification_receipt": "work/S102_gate0_tum/remote_receipts_588524/RESULTS.json",
+      "qualification_status": "CONDITIONAL_DATA_QUALIFICATION_ONLY",
+      "metadata_exposure_before_freeze": true
+    },
+    "synthetic_candidate": {
+      "name": "ICL-NUIM lr0",
+      "role": "development synthetic controlled evaluation only",
+      "status": "CONDITIONAL_SYNTHETIC_CONTROLLED_DATA_ACCESS_HELDOUT",
+      "metadata_exposure_before_freeze": true,
+      "independent_scene": false,
+      "formal_grc_allowed": false
+    }
+  },
+  "sections": {
+    "camera": {
+      "status": "BLOCKED",
+      "required": [
+        "image_width_px",
+        "image_height_px",
+        "intrinsic_matrix_K",
+        "distortion_model",
+        "distortion_coefficients",
+        "pixel_center_convention",
+        "transform_direction"
+      ],
+      "values": {
+        "image_width_px": null,
+        "image_height_px": null,
+        "intrinsic_matrix_K": null,
+        "distortion_model": null,
+        "distortion_coefficients": null,
+        "pixel_center_convention": null,
+        "transform_direction": null
+      },
+      "blocking_reason": "Camera intrinsics, distortion, pixel-center convention, and transform direction are not frozen for the formal selected source."
+    },
+    "depth": {
+      "status": "BLOCKED",
+      "required": [
+        "raw_dtype",
+        "invalid_value_rule",
+        "raw_to_metric_scale",
+        "depth_interpretation",
+        "depth_to_metric_z_equation"
+      ],
+      "values": {
+        "raw_dtype": "uint16 (qualification sample only)",
+        "invalid_value_rule": null,
+        "raw_to_metric_scale": null,
+        "depth_interpretation": null,
+        "depth_to_metric_z_equation": null
+      },
+      "blocking_reason": "The sample dtype is known, but invalid-value handling, scale, and optical-axis/radial semantics are not frozen."
+    },
+    "rgb_depth_pairing": {
+      "status": "BLOCKED",
+      "required": [
+        "pairing_rule",
+        "timestamp_tolerance_seconds",
+        "tie_break_rule",
+        "one_to_one_enforcement",
+        "dropped_rgb_count",
+        "dropped_depth_count",
+        "duplicate_count"
+      ],
+      "qualification": {
+        "timestamp_tolerance_seconds": 0.02,
+        "rgb_rows": 2585,
+        "depth_rows": 2509,
+        "pairs_within_tolerance": 2488,
+        "pair_rate": 0.9624758220502901
+      },
+      "values": {
+        "pairing_rule": null,
+        "timestamp_tolerance_seconds": null,
+        "tie_break_rule": null,
+        "one_to_one_enforcement": null,
+        "dropped_rgb_count": null,
+        "dropped_depth_count": null,
+        "duplicate_count": null
+      },
+      "blocking_reason": "A candidate 20 ms pairing was measured, but the deterministic one-to-one rule and complete drop/duplicate accounting are not frozen."
+    },
+    "pose": {
+      "status": "BLOCKED",
+      "required": [
+        "pose_source",
+        "timestamp_or_frame_identity",
+        "quaternion_order",
+        "translation_units",
+        "transform_direction"
+      ],
+      "values": {
+        "pose_source": null,
+        "timestamp_or_frame_identity": null,
+        "quaternion_order": null,
+        "translation_units": null,
+        "transform_direction": null
+      },
+      "blocking_reason": "Pose semantics and frame identity are not yet frozen; frame indices must not be treated as hardware timestamps."
+    },
+    "future_gt_isolation": {
+      "status": "BLOCKED",
+      "required": [
+        "history_window_definition",
+        "calibration_window_definition",
+        "future_query_window_definition",
+        "selector_visible_inputs",
+        "scorer_only_inputs",
+        "prediction_output_hash_before_gt_open",
+        "future_rgb_depth_pose_gt_not_read_before_seal"
+      ],
+      "values": {
+        "history_window_definition": null,
+        "calibration_window_definition": null,
+        "future_query_window_definition": null,
+        "selector_visible_inputs": [
+          "history observations",
+          "candidate metadata frozen before run"
+        ],
+        "scorer_only_inputs": [
+          "future RGB",
+          "future depth",
+          "future pose/GT"
+        ],
+        "prediction_output_hash_before_gt_open": false,
+        "future_rgb_depth_pose_gt_not_read_before_seal": false
+      },
+      "blocking_reason": "The future query split and sealed scorer handoff have not been frozen."
+    },
+    "heldout_identity": {
+      "status": "BLOCKED",
+      "required": [
+        "independent_scene_name",
+        "archive_sha256",
+        "manifest_sha256",
+        "zero_exposure_before_freeze",
+        "cross_scene_role"
+      ],
+      "values": {
+        "independent_scene_name": null,
+        "archive_sha256": null,
+        "manifest_sha256": null,
+        "zero_exposure_before_freeze": false,
+        "cross_scene_role": null
+      },
+      "blocking_reason": "No independent zero-exposure held-out scene has been acquired and hashed. TUM and ICL-NUIM entries are development/conditional candidates."
+    },
+    "fair_budget": {
+      "status": "BLOCKED",
+      "required": [
+        "candidate_pool_definition",
+        "selection_budget_k",
+        "context_length",
+        "output_count",
+        "sampling_steps",
+        "seed_and_rng_policy",
+        "resolution",
+        "dtype",
+        "runtime_budget_seconds",
+        "selector_comparison_rule"
+      ],
+      "values": {
+        "candidate_pool_definition": null,
+        "selection_budget_k": null,
+        "context_length": null,
+        "output_count": null,
+        "sampling_steps": null,
+        "seed_and_rng_policy": null,
+        "resolution": null,
+        "dtype": null,
+        "runtime_budget_seconds": null,
+        "selector_comparison_rule": "same candidate pool, k, context, outputs, seed/RNG, resolution, dtype, and runtime budget"
+      },
+      "blocking_reason": "The formal baseline and selector budgets are not frozen in a signed pre-run manifest."
+    },
+    "checkpoints_and_code": {
+      "status": "BLOCKED",
+      "required": [
+        "vmem_checkpoint",
+        "cut3r_checkpoint_if_used",
+        "source_commit",
+        "config_sha256"
+      ],
+      "values": {
+        "vmem_checkpoint": {
+          "path": "/home/yliutz/gwm_weights_20260915/vmem.ckpt",
+          "bytes": 5056346672,
+          "sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4",
+          "verified_remote": true
+        },
+        "cut3r_checkpoint_if_used": {
+          "path": "/home/yliutz/gwm_weights_20260915/cut3r.pth",
+          "bytes": 3173761006,
+          "sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103",
+          "verified_remote": true
+        },
+        "source_commit": null,
+        "config_sha256": null
+      },
+      "blocking_reason": "Checkpoint bytes and hashes are verified, but the exact source commit and formal config hash are not signed together with this run contract."
+    },
+    "independent_readback": {
+      "status": "BLOCKED",
+      "required": [
+        "verifier_source",
+        "verifier_hash",
+        "post_run_manifest_recompute",
+        "metric_recompute",
+        "output_seal_check"
+      ],
+      "values": {
+        "verifier_source": null,
+        "verifier_hash": null,
+        "post_run_manifest_recompute": false,
+        "metric_recompute": false,
+        "output_seal_check": false
+      },
+      "blocking_reason": "The independent verifier and post-run seal are to be bound after the pre-run manifest is frozen."
+    }
+  },
+  "acceptance": {
+    "formal_baseline_can_start_only_if": "every sections.<name>.status is PASS and formal_experiment_eligibility is explicitly changed to PASS in a new signed contract revision",
+    "method_scoring_can_start_only_if": "formal baseline is complete, future GT is isolated, and the same-pool fixed-budget comparison contract is independently reviewed",
+    "blocked_contract_is_not_an_experiment": true
+  },
+  "evidence": [
+    "work/S102_gate0_tum/remote_receipts_588524/RESULTS.json",
+    "work/S102_gate0_tum/GATE0_CURRENT_DECISION_20260916.json",
+    "work/S102_gate0_tum/IMPLEMENTATION_AND_DATA_CONTRACT_AUDIT_20260916.md",
+    "work/S103_h800_model_load_smoke/remote_receipts_588459/RECEIPT.json",
+    "work/S104_h800_cut3r_calibration/remote_receipts_586719/RECEIPT.json",
+    "work/S102_gate0_tum/GATE0_CANDIDATE_V2_RETRACTION_20260916.json"
+  ],
+  "next_action": "Separate pre-run/post-run obligations, qualify a registered RGB-D source, bind effective model config and real checkpoint paths.",
+  "revision": "candidate-v3-correction-blocked",
+  "supersedes": "gate0_contract_candidate_v2.json"
+}

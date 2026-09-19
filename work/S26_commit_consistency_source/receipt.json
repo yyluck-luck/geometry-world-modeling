@@ -1,0 +1,77 @@
+{
+  "schema": "s26-commit-consistency-source-only-v1",
+  "recorded_utc": "2026-09-06T15:41:11.151470+00:00",
+  "source_commit": "39291e4f272f6b4f270691d930926ab5930f942e",
+  "source_identity_checks_passed": true,
+  "source_file_count": 7,
+  "reviewed_source_identities": {
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/pipeline.py": {
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/surfel_inference.py": {
+      "sha256": "8a348645cd387147c35635f0a6b432d85bcf844e3839bd5a000d8147a85b17d5",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py": {
+      "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/base_opt.py": {
+      "sha256": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/init_im_poses.py": {
+      "sha256": "b3f59fbf32fd9690e63551ac14dc957edef9145bb3d5544fcb53a6eb3758bb21",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/configs/inference/inference.yaml": {
+      "sha256": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3",
+      "matches_pinned_commit": true
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/utils/util.py": {
+      "sha256": "0b71dcf6d4a43109d785f49d9c6def37b1256c4d189ab9438bfb185f3099f013",
+      "matches_pinned_commit": true
+    }
+  },
+  "observations": {
+    "surfel_Ks_attribute_lines": [
+      122,
+      141,
+      637,
+      995
+    ],
+    "normal_focal_cache_operation": "extend all N output focal snapshots each reconstruction",
+    "query_focal_operation": "0.65 * mean(all historical reconstruction snapshots)",
+    "prepare_output_preset_focal_calls": 0,
+    "geometry_call_keyword_names": [
+      "poses",
+      "depths",
+      "lr",
+      "niter",
+      "visualize",
+      "device"
+    ],
+    "normal_merge_geometric_field_attribute_stores": [],
+    "undo_surfel_Ks_references": 0
+  },
+  "model_instantiations": 0,
+  "model_forwards": 0,
+  "GA_runs": 0,
+  "RGB_or_GT_arrays_read": false,
+  "S24_S26_predictions_or_scores_read": false,
+  "torch_or_numpy_imported": false,
+  "source_files_modified": 0,
+  "main_ledger_modified": false,
+  "report_sha256": "f38f16e6cc9c203c67f4c77f98f8edcc33829cb23bb89e6a96e5fa9546488dee",
+  "audit_script_sha256": "7a893169174a91daae19742b2f06cf94eb0acf4d89ac09a23a1a88f454cd33c9",
+  "evidence_level": "SOURCE_ONLY; possible change is not an observed error or benefit",
+  "verdict": "Two distinct testable mechanisms; future zero-GA saved-output diagnostic before new method or intervention",
+  "correction_history": [
+    {
+      "initial_static_check": "expected preset_depth/preset_pose at lines 188/190",
+      "outcome": "AssertionError in source-only audit; no numerical import or model/GA/data access",
+      "verified_correction": "nl and AST confirm actual call lines 187/189; fixed line assertions only"
+    }
+  ]
+}

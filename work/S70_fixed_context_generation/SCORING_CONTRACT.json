@@ -1,0 +1,111 @@
+{
+  "schema": "s70-fixed-four-emitted-rgb-scoring-contract-v1",
+  "frozen_utc": "2026-09-09T02:43:13.210615+00:00",
+  "evidence_kind": "prospective_contract_no_new_pixels_read",
+  "target_ids": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "arms": {
+    "A0": [
+      19,
+      18,
+      13,
+      12
+    ],
+    "A1": [
+      19,
+      18,
+      13,
+      12
+    ],
+    "B": [
+      19,
+      18,
+      14,
+      13
+    ]
+  },
+  "targets": [
+    {
+      "id": 20,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.063426.png",
+      "sha256": "0551c248bdd3d4c1e485392e9883675f54470597497772beeb9ebd775670a991",
+      "native_wh": [
+        640,
+        480
+      ]
+    },
+    {
+      "id": 21,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.463477.png",
+      "sha256": "c3623ecdba3305a25f3f8f0ad31a0b232a13094ec832e53fe9703bc8fd78ed11",
+      "native_wh": [
+        640,
+        480
+      ]
+    },
+    {
+      "id": 22,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.799623.png",
+      "sha256": "f8211be43e9a826111088dbd1885a162ed2874f787f0520e4cca3604363948da",
+      "native_wh": [
+        640,
+        480
+      ]
+    },
+    {
+      "id": 23,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868173.199628.png",
+      "sha256": "4ae66610502ec747d65c293be54503bc18ddcc331ea78be8d758218bd11eea43",
+      "native_wh": [
+        640,
+        480
+      ]
+    }
+  ],
+  "metadata_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/INPUTS.json",
+    "sha256": "9b66b2f7b4449e11f400c342068d069e95b96caae84e659dc497123cb5e5238f"
+  },
+  "original_util": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py",
+    "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e"
+  },
+  "original_preprocess_helpers": [
+    "get_wh_with_fixed_shortest_side",
+    "get_resizing_factor",
+    "load_img_and_K",
+    "transform_img_and_K"
+  ],
+  "versions": {
+    "numpy": "1.26.4",
+    "torch": "2.7.0",
+    "torchvision": "0.22.0",
+    "pillow": "10.3.0"
+  },
+  "reference_preprocess": "Original load_img_and_K(BytesIO(PNG),size=None,K=None,device=cpu) then transform_img_and_K(x,(576,576),mode=crop,K=None): FP32 area interpolation, native640x480 ->768x576, center crop left96/top0. Known [-1,1] output converts with (x+1)/2, clips[0,1], multiplies255 and truncates uint8; preserve transformed uint8 references. No PIL resampling or image alignment.",
+  "prediction_emission": "Use original tensor_to_pil-emitted targets_uint8; independently verify from targets_fp32: transpose CHW toHWC, if min<-0.1 use (x+1)/2 else unchanged; multiply255 then clip[0,255] and truncate uint8. Preserve perframe branch/min/max; do not replace with unconditional normalization.",
+  "primary_metric": "For each full4x576x576x3 normalized uint8 pair: cast each to float64, divide by255, mean squared difference; primary L is arithmetic mean of4 complete frame MSEs. No ROI, validity mask, alignment, exposure correction or selection.",
+  "signed_comparison": "delta_B_minus_A0=L(B)-L(A0); positive supports lower emitted-RGB error for A0 in this fixed case; negative supports B. Zero means equal on this metric. No significance/generalization inference.",
+  "secondary_metrics": [
+    "per-frame PSNR=-10log10(MSE) with peak1",
+    "PSNR_from_mean_frame_MSE=-10log10(L), not mean_frame_PSNR",
+    "A0/A1 and A0/B emitted-image pixel MSE as output-difference diagnostics"
+  ],
+  "exact_zero_psnr_json": "string Infinity, with MSE retained as0; do not drop frame",
+  "replay_rule": "Exact shape/dtype and C-order bytes for all8_latents.npy plus all4 targets_fp32.npy; check emitted uint8 too. One repeat is not a variance estimate. Failed replay means no context-effect attribution, even when descriptive scores exist.",
+  "prediction_direction": "Exploratory old higher-support A0 is expected to reduce reference error versus B; require complete fixed evidence and positive delta_B_minus_A0. No result-driven threshold, seed, target or arm replacement; a nonpositive delta ends this fixed-case support-to-emitted-RGB-benefit motivation. Positive delta alone is not a geometric mechanism or novel method.",
+  "reference_access_order": "Generation and independent generation-result verification precede scoring access; targets are historically seen and GT cameras used, never claim blind/online test.",
+  "output": "scoring_01/receipt.json plus transformed_targets_uint8.npy and per-target PNGs; create-only, preserve failures",
+  "limits": [
+    "one known short sequence and4 correlated targets;2 A executions are repeats, not independent samples",
+    "ft-mse VAE variant; originalSD2.1equivalenceUNKNOWN",
+    "approximate intrinsics, no extra undistortion and RGB-time pose interpolation",
+    "A/B changes full ordered context, camera normalization, latent slots, embedding and guidance descendants; not isolated scale/content/retrieval",
+    "pixel error rewards some blurring and does not establish perceptual quality, geometry, long-horizon consistency or algorithm novelty"
+  ],
+  "new_method_validated": false
+}

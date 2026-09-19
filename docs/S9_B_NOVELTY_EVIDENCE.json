@@ -1,0 +1,341 @@
+{
+  "status": "BOUNDED_PRIMARY_SOURCE_REVIEW_COMPLETE",
+  "session_started_utc": "2026-09-05T20:19:08+00:00",
+  "completed_utc": "2026-09-05T20:28:58.122951+00:00",
+  "timezone": "Asia/Shanghai",
+  "search_timestamp_scope": "Search queries occurred within this session; individual web-query wall times were not separately captured. HTTP receipt timestamps bind actual successful/failed fetches. No invented per-query exact times.",
+  "candidate_scope": "B: fixed query camera and fixed point groups/source identities; geometry updates; preserve the unmodified implementation's final ordered top-4 frame IDs by conservative dependency/visibility/vote/NMS checks with full fallback.",
+  "verdict": "GENERIC_CACHING_AND_EXACT_INCREMENTAL_RETRIEVAL_HAVE_STRONG_PRIOR_ART; NARROW_FULL_CHAIN_NOVELTY_AND_RUNTIME_VALUE_UNESTABLISHED",
+  "not_an_idea_evaluator_score": true,
+  "experiments_run": false,
+  "keyword_groups": [
+    {
+      "id": "visibility",
+      "goal": "保守/精确可见性与增量粒度，主动查旧缓存反例",
+      "queries": [
+        "incremental exact visibility computation dynamic scene conservative Teller Hanrahan visibility global illumination",
+        "\"incremental\" \"visibility\" \"top-k\" surfel memory retrieval",
+        "\"Temporally Coherent Conservative Visibility\" paper author pdf",
+        "\"Global Visibility Algorithms for Illumination Computations\" Teller Hanrahan 1993",
+        "\"surfel\" \"incremental\" \"visibility\" exact cache"
+      ]
+    },
+    {
+      "id": "ranking_diversity_nms",
+      "goal": "标量 top-k 与下游多样性/NMS 的精确维护先例",
+      "queries": [
+        "materialized top k maintenance updates exact result diversity non maximum suppression",
+        "\"exact\" \"incremental\" \"non-maximum suppression\" cache",
+        "\"continuous\" \"diversified top-k\" \"exact\"",
+        "\"incremental\" \"non maximum suppression\" \"exact\"",
+        "\"top-k\" \"diversity\" \"maintenance\" dynamic queries"
+      ]
+    },
+    {
+      "id": "geometry_memory",
+      "goal": "近期直接同对象的几何记忆检索、缓存及 NMS",
+      "queries": [
+        "geometry memory video generation reference frame retrieval visibility cache incremental VMem FreeScale GIM World",
+        "\"VMem\" \"cache\" \"retrieval\" \"exact\"",
+        "\"geometry\" \"memory retrieval\" \"cache\" \"NMS\"",
+        "\"incremental\" \"exact\" \"reference\" \"retrieval\" \"video\" geometry memory",
+        "\"cache\" \"visibility\" \"reference frame\" \"selection\" video generation",
+        "COVRAG residual coverage memory retrieval video generation arxiv"
+      ]
+    }
+  ],
+  "core_sources": [
+    {
+      "id": "teller1993",
+      "title": "Global Visibility Algorithms for Illumination Computations",
+      "authors": [
+        "Seth Teller",
+        "Pat Hanrahan"
+      ],
+      "year": 1993,
+      "venue_status": "SIGGRAPH 1993 / Computer Graphics, pp. 239–246; DOI 10.1145/166117.166148",
+      "urls": [
+        "https://graphics.stanford.edu/papers/visglob/",
+        "https://graphics.stanford.edu/papers/visglob/visglobillum.ps.Z",
+        "https://people.csail.mit.edu/teller/pubs/visglobillum.pdf",
+        "https://people.csail.mit.edu/teller/pubs/pubs.html",
+        "https://api.crossref.org/works/10.1145/166117.166148"
+      ],
+      "raw_file": "visglobillum.ps.Z",
+      "text_file": "visglobillum_stanford.txt",
+      "read_scope": "§1, §§3–6, especially §6.1–6.3; author PDF 8 pages opened; Stanford PS fully downloaded and converted locally. Not an independent verification of all geometric proofs.",
+      "mechanism": "用空间单元/portal、区域对遮挡候选表与连接区域的 tube；层次 radiosity 把 patch 细分时，子对的遮挡候选从父表继承并再分类。已判完全可见/不可见必须正确；未决可保守返回 partial。",
+      "object_granularity_setting": "光照传输的面片区域对；增量单位是层次细分，不是本轮 B 的 surfel 位置移动或固定相机离散最前像素身份。",
+      "exactness_boundary": "保守分类的已确定标签正确；不是所有像素都取得精确可见 ID，也不直接提供动态点移动后的 z-buffer 更新算法。",
+      "b_implication": "“能证明则跳过、不能证明则继续处理”的可见性思想已有；B 不能据此声称首创保守证书，也不能将该旧方法误称为已完整解决 B。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/visglobillum.ps.Z",
+        "bytes": 287157,
+        "sha256": "7d7f80f2f3d7f70d4c50b0c5b0cd93d87527ebf7b51772bf32b93ac4285d104a"
+      }
+    },
+    {
+      "id": "yi2003",
+      "title": "Efficient Maintenance of Materialized Top-k Views",
+      "authors": [
+        "Ke Yi",
+        "Hai Yu",
+        "Jun Yang",
+        "Gangqiang Xia",
+        "Yuguo Chen"
+      ],
+      "year": 2003,
+      "venue_status": "ICDE 2003, pp. 189–200; DOI 10.1109/ICDE.2003.1260792",
+      "urls": [
+        "https://www.cse.ust.hk/~yike/topk/icde03.pdf",
+        "https://api.crossref.org/works/10.1109/ICDE.2003.1260792",
+        "https://experts.illinois.edu/en/publications/efficient-maintenance-of-materialized-top-k-views/"
+      ],
+      "raw_file": "topk/icde03.pdf",
+      "text_file": "topk/icde03.txt",
+      "read_scope": "§3 pp. 2–3, §§4.1–4.6 pp. 4–6, §6.3/6.4, §7/Fig. 7 p. 10, introduction/related work/conclusion; page numbers are author-PDF pages, not proceedings pages. Independent teammate verification; proof appendices not fully checked.",
+      "mechanism": "收到 (id,new value) 标量更新，维护不少于 k 的精确辅助 top-k′ 池；低于池底的池外项可忽略，池不足 k 才从基表 refill；可按观测成本调整池大小。",
+      "object_granularity_setting": "元组身份和标量排序；新分数作为输入。未处理从几何移动计算像素可见性/来源票数，也未处理后续 NMS。",
+      "exactness_boundary": "返回 top-k 的正确性是精确的；高概率/随机更新模型限定的是 refill 效率。不能把某些更新模型下的摊销界直接搬到相关的几何更新。",
+      "b_implication": "缓存候选、阈值忽略、失败全查和精确结果均已有。B 若只维护票数 top-k，属于很强的普通移植风险。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/topk/icde03.pdf",
+        "bytes": 231918,
+        "sha256": "fe8ad447527cdfab657705ac649f0fb702fb21cea855ca377328c4beffa23ebb"
+      }
+    },
+    {
+      "id": "gkorgkas2015",
+      "title": "Finding the Most Diverse Products using Preference Queries",
+      "authors": [
+        "Orestis Gkorgkas",
+        "Akrivi Vlachou",
+        "Christos Doulkeridis",
+        "Kjetil Nørvåg"
+      ],
+      "year": 2015,
+      "venue_status": "EDBT 2015; DOI 10.5441/002/edbt.2015.19",
+      "urls": [
+        "https://openproceedings.org/2015/conf/edbt/paper-176.pdf"
+      ],
+      "raw_file": "topk/edbt2015_diverse_products.pdf",
+      "text_file": "topk/edbt2015_diverse_products.txt",
+      "read_scope": "§6.2/Algorithm 3, printed p. 210 (PDF p. 6); §7, printed p. 211 (PDF p. 7). Teammate read and synthesis agent independently reread §7 text.",
+      "mechanism": "Stopk 以采样偏好查询形成近似 reverse-top-k 中心，再做多样性选择；保存已算查询的第 k 分数，新产品不越过任何阈值可安全忽略。",
+      "object_granularity_setting": "产品/偏好插入与集合多样性；不是相机几何、可见性或 greedy NMS。",
+      "exactness_boundary": "无影响门保证同重跑 Stopk；越过阈值后的局部中心更新明确不保证同重跑结果。底层多样性算法本身含近似。",
+      "b_implication": "连“保守门通过就保证复杂检索结果同重跑”的叙事也已有。不能把论文的安全分支扩大成全程精确维护，也不能把它叫 NMS。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/topk/edbt2015_diverse_products.pdf",
+        "bytes": 2873166,
+        "sha256": "58c11a5531ffa43769e6614797c82a7152368ecad9c9b27dbe34e1e1942b320e"
+      }
+    },
+    {
+      "id": "vmem2025",
+      "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "authors": [
+        "Runjia Li",
+        "Philip Torr",
+        "Andrea Vedaldi",
+        "Tomas Jakab"
+      ],
+      "year": 2025,
+      "venue_status": "ICCV 2025; inspected author arXiv v3 dated 2025-08-14; final CVF full PDF not independently read in this bounded task",
+      "urls": [
+        "https://arxiv.org/html/2506.18903v3",
+        "https://github.com/runjiali-rl/vmem/blob/39291e4f272f6b4f270691d930926ab5930f942e/modeling/pipeline.py"
+      ],
+      "raw_file": "vmem_arxiv_v3.html",
+      "text_file": "vmem_arxiv_v3.txt",
+      "read_scope": "§3, especially §3.1 Reading from the memory and Fig. 2; official pinned code blob opened, local provenance checked. Full call-timing audit belongs to the root task.",
+      "mechanism": "论文描述以平均目标相机渲染带来源 view ID 的 surfel，考虑深度遮挡；按可见像素中来源频次排序，再以相近姿态的 NMS 取参考。实际默认代码平均哪些目标位姿，需单独核源码，不能从论文推断为整段平均。",
+      "object_granularity_setting": "交互视频历史帧检索；写入几何/来源后，下一目标相机可改变。是 B 所要严格保持的已有消费者组合。",
+      "exactness_boundary": "所读方法段定义原选择器，未给位置更新后保持原有序 top-4 的增量证书。是否存在其他版本实现不由此排除。",
+      "b_implication": "几何→来源票数→NMS 不是 B 新造的机制；B 必须绑定真实实现的取整、遮挡、并列和逐步抑制语义。固定查询重复调用的实际机会需调用时序证据。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/vmem_arxiv_v3.html",
+        "bytes": 264191,
+        "sha256": "50808186a54348be44ac701a645be329e69bb3e9022714c6c7c5f1e234271f13"
+      }
+    },
+    {
+      "id": "covrag2026",
+      "title": "Retrieve What’s Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation",
+      "authors": [
+        "Minseok Joo",
+        "Dogyun Park",
+        "Taehoon Lee",
+        "Kyujin Lee",
+        "Hyunwoo J. Kim"
+      ],
+      "year": 2026,
+      "venue_status": "Original arXiv preprint 2606.02479v1, 2026-06-01; no conference acceptance verified",
+      "urls": [
+        "https://arxiv.org/html/2606.02479v1"
+      ],
+      "raw_file": "covrag_arxiv_v1.html",
+      "text_file": "covrag_arxiv_v1.txt",
+      "read_scope": "§4.1–4.3, Eq. 2–4 and Algorithm 1; not a code or experimental reproduction.",
+      "mechanism": "用源深度与姿态 warp 为目标二值覆盖；逐次取对剩余未覆盖区域增益最大的历史帧。滑动窗口估计新帧几何并缓存深度，历史深度可用于后续目标 warp。",
+      "object_granularity_setting": "同属视频世界模型的几何历史参考检索。缓存的是深度估计，目标覆盖及贪心准则仍随查询变化。",
+      "exactness_boundary": "这在改变参考选择准则；不是维护原 VMem 的有序四帧。其有界窗口限制几何推理成本，不等于全部覆盖计算/检索成本恒定。Eq. 2 的二值投影也不能等同 VMem 最前 surfel 投票。",
+      "b_implication": "“缓存几何以节省记忆检索”已经是直接同对象近邻。B 的可主张差异只能是相同完整消费者输出的精确计算维护，尚未证明其新颖性或价值。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/covrag_arxiv_v1.html",
+        "bytes": 262436,
+        "sha256": "a95bc73710488c700924cc80ede4ae969054249c77127786a04537dcdc90830d"
+      }
+    }
+  ],
+  "additional_screened_sources": [
+    {
+      "id": "anchorweave2026",
+      "title": "AnchorWeave: World-Consistent Video Generation with Retrieved Local Spatial Memories",
+      "authors": [
+        "Zun Wang",
+        "Han Lin",
+        "Jaehong Yoon",
+        "Jaemin Cho",
+        "Yue Zhang",
+        "Mohit Bansal"
+      ],
+      "year": 2026,
+      "date_version": "2026-02-16 / arXiv 2602.14941v1",
+      "url": "https://arxiv.org/html/2602.14941v1",
+      "raw_file": "anchorweave_arxiv_v1.html",
+      "sections": "§3.2–3.5; Appendix B/Algorithm 1",
+      "disposition": "第二个近期直接同对象近邻：各帧局部点云独立存储、只重建新帧；FoV 筛选后按新增可见覆盖贪心选 anchor。改变存储/选择机制，不证明原 VMem 有序结果保持。正文与附录对初始 anchor 的措辞不一致，本评估不据此推断具体初始 ID。未核会议接收。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/anchorweave_arxiv_v1.html",
+        "bytes": 284699,
+        "sha256": "144eb6933817ca613afc93513ca0d9f0c55ae3bb4566a24beba38aa67d6f6653"
+      }
+    },
+    {
+      "id": "i3dm2026",
+      "title": "I3DM: Implicit 3D-aware Memory Retrieval and Injection for Consistent Video Scene Generation",
+      "authors": [
+        "Jia Li",
+        "Han Yan",
+        "Yihang Chen",
+        "Siqi Li",
+        "Xibin Song",
+        "Yifu Wang",
+        "Jianfei Cai",
+        "Tien-Tsin Wong",
+        "Pan Ji"
+      ],
+      "year": 2026,
+      "date_version": "2026-03-24 / arXiv 2603.23413v1",
+      "url": "https://arxiv.org/html/2603.23413v1",
+      "raw_file": "i3dm_arxiv_v1.html",
+      "sections": "§3.2 and maximum-coverage appendix",
+      "disposition": "读完机制后未列核心五篇：由前馈新视角模型特征预测 patch 不确定性，再贪心覆盖选历史；改变评分/注入，没有核到固定原选择器的精确维护证书。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/i3dm_arxiv_v1.html",
+        "bytes": 298038,
+        "sha256": "203f086e38f2ef66952a04f87bead16bf9ac68b92dd76aad35b16ac0c881c4ca"
+      }
+    },
+    {
+      "id": "freescale2026",
+      "title": "FreeScale: Scaling 3D Scenes via Certainty-Aware Free-View Generation",
+      "authors": [
+        "Chenhan Jiang",
+        "Yu Chen",
+        "Qingwen Zhang",
+        "Jifei Song",
+        "Songcen Xu",
+        "Dit-Yan Yeung",
+        "Jiankang Deng"
+      ],
+      "year": 2026,
+      "date_version": "2026-04-12 / arXiv 2604.10512v1",
+      "url": "https://arxiv.org/html/2604.10512v1",
+      "raw_file": "freescale_arxiv_v1.html",
+      "sections": "§4.1.2 and §7.1 Virtual Viewpoints Selection",
+      "disposition": "几何可见性与 certainty 构成图分数，排序后按 WIoU 做 NMS；是组合先例，但选择对象是为扩充 3D 场景生成的虚拟视点，非精确维护历史参考帧。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/freescale_arxiv_v1.html",
+        "bytes": 281089,
+        "sha256": "4272a4662b17b8f45a63a9756c904bf5131fce69e4c8be4afead96add4ce836f"
+      }
+    },
+    {
+      "id": "gimworld2026",
+      "title": "Geometry-Aware Implicit Memory for Video World Models",
+      "authors": [
+        "Zhengxuan Wei",
+        "Xu Guo",
+        "Xinghui Li",
+        "Xunzhi Xiang",
+        "Min Wei",
+        "Yiran Zhu",
+        "Qiulin Wang",
+        "Xintao Wang",
+        "Pengfei Wan",
+        "Xiangwang Hou",
+        "Qi Fan"
+      ],
+      "year": 2026,
+      "date_version": "2026-06-01 / arXiv 2606.02436v1",
+      "url": "https://arxiv.org/html/2606.02436v1",
+      "raw_file": "gim_world_arxiv_v1.html",
+      "sections": "§3.4–3.5",
+      "disposition": "姿态/时间核的互信息贪心 pruning 与隐式记忆；已核到不同检索准则，不据此声称解决原几何投票/NMS 的精确维护。",
+      "raw_archive": {
+        "path": "work/s9_b_sources/gim_world_arxiv_v1.html",
+        "bytes": 271291,
+        "sha256": "d62a366481103209990fbb60b6585c44546c69a20c98ae2ea3454ff819d582a3"
+      }
+    }
+  ],
+  "primary_archive_manifest": {
+    "path": "work/s9_b_sources/source_manifest.json",
+    "bytes": 7157,
+    "sha256": "867c55b462012ff2d6df204de6c71a16c1739e13e1a88f4761f15a02e28e29a8"
+  },
+  "local_original_source": {
+    "repository": "https://github.com/runjiali-rl/vmem",
+    "commit": "39291e4f272f6b4f270691d930926ab5930f942e",
+    "pipeline": {
+      "path": "vendor/vmem_snapshot/modeling/pipeline.py",
+      "bytes": 62176,
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e"
+    },
+    "provenance": {
+      "path": "vendor/provenance.json",
+      "bytes": 1005,
+      "sha256": "04b8396239321c3c7021d4140cab61cdbbc2756f1001c99b250836a451e8e0b9"
+    },
+    "origin": "Existing pinned local official snapshot, not a successful new raw HTTP download. GitHub blob was opened; raw HTTP fetch failed SSL EOF."
+  },
+  "source_corrections": [
+    "Stanford web-page title differs from actual paper title. Downloaded author paper header says SIGGRAPH 94 pp.443–450, inconsistent with author bibliography and publisher-deposited Crossref DOI (1993 pp.239–246); bibliography here follows the latter, while preserving the conflicting original bytes.",
+    "ICDE Crossref fetched record has null issued year; institutional author bibliography supplies 2003. DBLP XML HTTP 503 is preserved, not claimed successful.",
+    "COVRAG/AnchorWeave and other 2026 items are original preprints; keyword or manuscript template is not treated as conference acceptance."
+  ],
+  "access_limits": [
+    "Stanford initial guessed visglob.ps.Z failed; actual linked visglobillum.ps.Z succeeded.",
+    "ACM DOI web endpoint errored and Crossref web open was blocked; direct Crossref HTTP JSON succeeded and was archived.",
+    "VMem CVF endpoint returned 403; inspected arXiv v3 full method and official local pinned source instead.",
+    "VMem new raw GitHub request SSL EOF; preserved failed receipt and use explicitly identified prior local source.",
+    "AnchorWeave guessed project URL returned 404; arXiv full text succeeded.",
+    "EDBT web PDF endpoint timed out; direct full PDF HTTP download and text extraction succeeded.",
+    "No full-paper proof/experiment reproduction; only specified full-text method sections support the reported mechanisms. No paper performance metric is imported."
+  ],
+  "required_falsifiers_and_baselines": [
+    "Verify genuine repeated fixed-query consumers between writes, rather than imposing extra queries merely to make cache useful.",
+    "Compare to unchanged-input cache, ordinary conservative dirty-pixel/tile rerendering plus full original selector, and incremental votes plus full original NMS.",
+    "Require exact final ordered IDs under baseline floating-point, tie and NMS semantics; fourth/fifth raw-vote margin alone is insufficient.",
+    "Measure entire cost including dependency maintenance, invalidations, fallbacks, memory and all query changes; do not count only skipped calls.",
+    "If position updates cross pixel/depth/tie thresholds or point/source/camera identities change, handle or invalidate explicitly.",
+    "S7/S8 already seen data are regressions, not unseen confirmation. Finite zero discrepancies do not replace a correctness argument."
+  ],
+  "unknowns": [
+    "This bounded search did not verify an exact full geometry→votes→ordered greedy-NMS maintenance algorithm under the precise B setting; it does not establish absence or novelty.",
+    "Usefulness of fixed-camera/fixed-group setting in real VMem call timing is under separate root source audit.",
+    "No acceleration, cache pass rate, consumer time share or video outcome has been measured for B."
+  ]
+}

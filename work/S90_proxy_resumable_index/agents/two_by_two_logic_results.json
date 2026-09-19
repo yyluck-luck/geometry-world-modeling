@@ -1,0 +1,78 @@
+{
+  "created_utc": "2026-09-11T15:54:38.294919+00:00",
+  "type": "synthetic_logic_only",
+  "scenario_A": {
+    "tables": {
+      "low_risk_memory": [
+        [
+          0.2,
+          0.3
+        ],
+        [
+          0.1,
+          0.2
+        ]
+      ],
+      "high_risk_memory": [
+        [
+          0.6,
+          0.7
+        ],
+        [
+          0.5,
+          0.6
+        ]
+      ]
+    },
+    "interactions": {
+      "low_risk_memory": 2.7755575615628914e-17,
+      "high_risk_memory": 0.0
+    },
+    "mean_loss": {
+      "low_risk_memory": 0.2,
+      "high_risk_memory": 0.6
+    },
+    "claim": "A lower-risk memory can improve future loss with zero 2x2 interaction."
+  },
+  "scenario_B": {
+    "tables": {
+      "memory_A": [
+        [
+          0.3,
+          0.3
+        ],
+        [
+          0.3,
+          0.3
+        ]
+      ],
+      "memory_B": [
+        [
+          0.1,
+          0.5
+        ],
+        [
+          0.5,
+          0.1
+        ]
+      ]
+    },
+    "interactions": {
+      "memory_A": 0.0,
+      "memory_B": -0.8
+    },
+    "mean_loss": {
+      "memory_A": 0.3,
+      "memory_B": 0.3
+    },
+    "claim": "A nonzero 2x2 interaction can occur without a memory-level mean-loss benefit."
+  },
+  "assertions": {
+    "scenario_A_interactions_zero": true,
+    "scenario_A_low_risk_better": true,
+    "scenario_B_interaction_exists": true,
+    "scenario_B_no_memory_mean_benefit": true
+  },
+  "interpretation": "A 2x2 interaction is a controlled diagnostic contrast. It is neither necessary nor sufficient for a memory policy to lower held-out future geometry loss.",
+  "not_scientific_evidence": true
+}

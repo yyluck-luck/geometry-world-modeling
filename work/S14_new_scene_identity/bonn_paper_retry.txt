@@ -1,0 +1,577 @@
+                                                         ReFusion: 3D Reconstruction in Dynamic Environments
+                                                               for RGB-D Cameras Exploiting Residuals
+                                               Emanuele Palazzolo                  Jens Behley             Philipp Lottes          Philippe Giguère          Cyrill Stachniss
+
+
+                                            Abstract— Mapping and localization are essential capabilities
+                                         of robotic systems. Although the majority of mapping systems
+                                         focus on static environments, the deployment in real-world sit-
+                                         uations requires them to handle dynamic objects. In this paper,
+                                         we propose an approach for an RGB-D sensor that is able to
+
+
+
+
+arXiv:1905.02082v3 [cs.RO] 29 Aug 2019
+                                         consistently map scenes containing multiple dynamic elements.
+                                         For localization and mapping, we employ an efficient direct                                 Input data
+                                         tracking on the truncated signed distance function (TSDF) and
+                                         leverage color information encoded in the TSDF to estimate the
+                                         pose of the sensor. The TSDF is efficiently represented using
+                                         voxel hashing, with most computations parallelized on a GPU.
+                                         For detecting dynamics, we exploit the residuals obtained after
+                                         an initial registration, together with the explicit modeling of
+                                         free space in the model. We evaluate our approach on existing
+                                         datasets, and provide a new dataset showing highly dynamic
+                                         scenes. These experiments show that our approach often surpass
+                                                                                                                                 Reprojected model
+                                         other state-of-the-art dense SLAM methods. We make available
+                                         our dataset with the ground truth for both the trajectory of
+                                         the RGB-D sensor obtained by a motion capture system and
+                                         the model of the static environment using a high-precision
+                                         terrestrial laser scanner. Finally, we release our approach as
+                                         open source code.
+
+                                                                  I. I NTRODUCTION
+                                                                                                                                                  3D model
+                                            Mapping and localization are essential capabilities of
+                                         robotic systems operating in real-world environments. Si-                    Fig. 1: Result of our approach. Top: RGB frames from our dataset
+                                         multaneous localization and mapping, or SLAM, is usually                     containing dynamics. Center: Reconstructed model without dynam-
+                                         solved in an alternating fashion, where one determines the                   ics reprojected onto the two frames from above. Bottom: Final mesh
+                                                                                                                      without the dynamics.
+                                         pose w.r.t. the map built so far and then use the estimated
+                                         pose to update the map. SLAM is especially challenging in
+                                                                                                                      application such as virtual and augmented reality. Moreover,
+                                         dynamic environments, since a robot needs to build a consis-
+                                                                                                                      the TSDF representation can be useful for planning, since it
+                                         tent map. This entails estimating simultaneously which parts
+                                                                                                                      provides, by definition, the distance to the closest obstacle.
+                                         of the environment are static or moving. In particular, moving
+                                                                                                                         The main contribution of this paper is a novel and efficient
+                                         objects may cause wrong correspondences, deteriorate the
+                                                                                                                      SLAM algorithm, based on a TSDF representation, that is
+                                         ability to estimate correct poses and hence corrupt the map.
+                                                                                                                      robust to dynamics via pure geometric filtering. It is inspired
+                                            In this paper, we propose ReFusion: a novel approach for
+                                                                                                                      by the work of Canelhas et al. [3] combined with voxel
+                                         dense indoor mapping that is robust to dynamic elements.
+                                                                                                                      hashing [10]. We propose to detect dynamics by exploiting
+                                         Our approach is completely geometric, and does not rely
+                                                                                                                      the residuals obtained from the registration, in combination
+                                         on an explicit semantic interpretation of the scene. More
+                                                                                                                      with the explicit representation of free space in the environ-
+                                         specifically, we do not employ a deep neural network to
+                                                                                                                      ment. This allows our approach to be class agnostic, i.e.,
+                                         detect specific dynamic classes, in contrast to other recent
+                                                                                                                      it does not rely on a detector trained on specific categories
+                                         approaches [13], [1]. In contrast to other recent purely
+                                                                                                                      of dynamic objects. Moreover, the dynamic objects are not
+                                         geometric approaches [12], [14], we do not represent the
+                                                                                                                      explicitly tracked, therefore our approach is not limited by
+                                         model using surfels, but in the form of a truncated sign dis-
+                                                                                                                      the number of moving objects or by their speed. Fig. 1 shows
+                                         tance function (TSDF). This allows our technique to directly
+                                                                                                                      two example RGB frames from a dynamic scene and the
+                                         generate a mesh of the environment, which can be useful in
+                                                                                                                      resulting model built by our approach.
+                                           Emanuele Palazzolo, Jens Behley, Philipp Lottes and Cyrill Stachniss are      We evaluated ReFusion on the TUM RGB-D dataset [17],
+                                         with the University of Bonn, Germany. Philippe Giguère is with the Laval    as well as on our own dataset, showing the versatility and
+                                         University, Québec, Canada.                                                 robustness of our approach, reaching in several scenes equal
+                                           This work has partly been supported by the DFG under the grant number
+                                         FOR 1505: Mapping on Demand, under the grant number BE 5996/1-1, and         or better performance than other dense SLAM approaches.
+                                         under Germany’s Excellence Strategy, EXC-2070 - 390732324 (PhenoRob).        In addition, we publicly release our dataset, containing 24
+highly-dynamic scenes recorded with an RGB-D sensor,
+together with ground truth trajectories obtained using a
+motion capture system. Furthermore, we provide a ground                                                             Mask
+truth 3D model of the static parts of the environment in                                 3D Reconstruction
+                                                                                             SDF
+the form of a high resolution point cloud acquired with a
+                                                                                                                Mask
+terrestrial laser scanner. To the best of our knowledge, this is         RGB-D
+the first dataset containing dynamic scenes that also includes
+                                                                                                             Residuals
+the ground truth model for the static part of the environment.                            Pose Estimation
+                                                                                                                             Dynamics
+                                                                                                                           Identiﬁcation
+Finally, we publicly share the open source implementation
+                                                                                                   Depth
+of our approach.
+   In sum, we make two key claims: our RGB-D mapping               Fig. 2: Overview of our approach. Given data from the RGB-D
+                                                                   sensor, we first perform an initial pose estimation. Then, we use the
+approach (i) is robust to dynamic elements in the environ-
+                                                                   obtained residuals, together with the depth information, to identify
+ment and provides a camera tracking performance on par or          dynamic parts of the scene. The filtered images are then used to
+better than state-of-the-art dense SLAM approaches, and (ii)       refine the pose T w.r.t. the TSDF given by our 3D reconstruction.
+provides a dense 3D model that contains only the static parts      With the updated sensor pose, we finally integrate the measurements
+of the environment, which is more accurate than other state-       into our 3D reconstruction of the environment.
+of-the-art approaches when compared to the ground truth
+model.                                                             the environment explicitly [7], [14] and filter these before
+                                                                   the integration into the model. Keller et al. [7] use outliers
+                    II. R ELATED W ORK                             in point correspondences during ICP as seed for segmen-
+   With the advent of inexpensive RGB-D cameras, many              tation of dynamics. Corresponding model surfels inside the
+approaches for mapping using such sensors were proposed            segments are then marked as unstable. In contrast, Rünz et
+[15], [20]. The seminal paper of Newcombe et al. [9] showed        al. [12] explicitly track moving objects given by a segmenta-
+the prospects of TSDF-based RGB-D mapping by generating            tion process using either motion or semantic cues provided
+accurate, high detailed maps using only depth information.         by class-agnostic object proposals [11]. Scona et al. [14]
+It paved the way for several improvements increasing the           extend ElasticFusion [19] to incorporate only clusters that
+versatility and fidelity of RGB-D mapping. As the approach         correspond to the static environment. Distinguishing static
+relies on a fixed voxel grid, volumes that can be mapped           and dynamic parts of the environment is achieved by jointly
+are limited. Subsequent approaches explore compression of          estimating the camera pose and whether clusters are static
+this grid. For instance, Steinbrücker et al. [16] use an Octree   or dynamic. Bescos et al. [1] combine a geometric approach
+instead of a voxel grid. Nießner et al. [10], on the other hand,   with a deep learning segmentation to enable removal of
+propose to only allocate voxel blocks close to the mapped          dynamics in an ORB-SLAM2 system [8]. Similarly, Rünz
+surface, and address them in constant time via hashing.            et al. [13] exploit deep learning segmentation, refined with
+Kähler et al. [6] extend the idea of voxel hashing by using       a geometric approach, to detect objects. In addition, they
+a hierarchy of voxel blocks with different resolutions. To         reconstruct and track detected objects independently.
+alleviate the need for raycasting for generating the model            In contrast to the aforementioned approaches, we propose
+image for registration, Canelhas et al. [3] and Bylow et al. [2]   a mapping approach robust to dynamics which relies on
+propose to directly exploit the TSDF for evaluation of the         the residuals from the registration and on the detected free
+residuals and computation of the jacobians within the error        space. In this way, our approach is able to detect any kind
+minimization.                                                      of dynamics without relying on specific classes or models,
+   Besides using a TSDF, another popular representation of         and without explicitly tracking dynamic objects.
+the model are surfels, which are disks with a normal and a                               III. O UR A PPROACH
+radius. Keller et al. [7] use surfels to represent the model of       Fig. 2 illustrates the key processing steps of the proposed
+the environment. Whelan et al. [19] extend the approach with       approach. Given the color and depth information of an RGB-
+a deformation graph, which allows for long-range corrections       D sensor, like Microsoft’s Kinect, we first perform an initial
+of the map via loop closures.                                      pose estimation by exploiting directly the TSDF of our
+   An alternative approach was proposed by Della Corte et          model representation. By observing the residuals obtained
+al. [5]. Their approach registers two consecutive RGB-D            from such registration, we detect the dynamic elements in
+frames directly upon each other by minimizing the photomet-        the scene. With the filtered sensor information, where we
+ric error. They integrate multiple cues such as depth, color       discard regions containing dynamics, we further refine the
+and normal information in a unified way. Other approaches          pose of the sensor. With this refined estimated pose, we then
+exploit image sequences [?], [?].                                  integrate the sensor measurements, i.e., depth and color, into
+   Usually, mapping approaches assume a static environment         the model.
+and therefore handle moving objects mostly through outliers
+rejection. By discarding information that disagrees with the       A. Model Representation
+current measurements, one can handle implicitly dynamic              In our approach, we represent the model of the environ-
+objects [9]. Other approaches model the dynamic parts of           ment using a truncated signed distance function (TSDF) as
+originally proposed by Curless and Levoy [4]. We briefly               form using the Lie algebra representation ξ ∈ se3 , which
+recap it here for the sake of a self-contained description. The        can be converted into the corresponding rigid transformation
+idea is to represent the world with a 3D voxel grid in which           T0 ∈ SE(3) using the exponential map T0 = exp(ξ̂), where
+each voxel contains a SDF value. The SDF is a function                 ξ̂ is the corresponding skew symmetric matrix of ξ.
+VSDF (x) : R3 → R that returns, given a point in space,                   To represent the current model, we use a voxel-based
+its signed distance to the nearest surface. This distance is           representation, where we store in each voxel the TSDF value
+positive if the point is in front of the surface and negative          and color information. We define the functions VSDF (x) and
+otherwise. In this way, the surface is implicitly represented          VI (x) that return respectively the SDF and the intensity from
+by the set of points for which VSDF (x) = 0. In practice,              the model at position x. We obtain the intensity value I from
+the SDF values are truncated to a given maximum value.                 the RGB color information stored in the voxels, i.e., I =
+In addition to the TSDF, each voxel contains a weight that             0.2126R+0.7152G+0.0722B. We furthermore use trilinear
+represents how reliable the SDF value is at that location,             interpolation on the SDF and intensity of neighboring voxels
+as well as the color obtained by projecting it onto the                to alleviate discretization effects of the voxel grid.
+RGB image. The weight allows us to update each voxel                      As mentioned before, we directly exploit the TSDF to
+using a running weighted average, leading to an improved               define the error function, since it directly represents the
+robustness to outliers [4]. The color information enables both         distance of a point to the nearest surface of the model. We
+the texturing of the mesh and the use of intensity information         define the error function relative to the depth as:
+during the registration.                                                                          N
+   In our implementation, we do not preallocate a 3D voxel
+                                                                                                  X                              2
+                                                                                 Ed (ξ̂)    =           VSDF exp(ξ̂)Txi            ,   (2)
+grid of a fixed size. Instead, we allocate voxel dynamically                                      i=1
+                                                                                                      |        {z                 }
+                                                                                                                   ri
+and index them using a spatial hashing function, similarly
+to Nießner et al. [10]. Representing the world sparsely by             where N is the number of pixels in the image, and xi , i ∈
+only allocating the needed blocks of voxels enables the                1, . . . , N , is the 3D point corresponding to the i-th pixel
+reconstruction of larger scenes, while eliminating the need            pi , computed using Eq. (1). The value ri corresponds to the
+for restricting the maximum size of the scene in advance.              residual for the i-th pixel.
+Note that we process every voxel in parallel on the GPU,                  We additionally use the color information to improve
+since the voxels are assumed to be mutually independent,               the alignment. In contrast to most of the state-of-the-art
+leading to a considerable speed-up of the computations.                approaches [19], [18], we do not render a synthetic view
+                                                                       from the model. Instead, we directly operate on the intensity
+B. Pose Estimation                                                     obtained from the color information stored in the voxels.
+   For estimating the pose of the sensor, we use a point-to-           We define the error function relative to the intensity as the
+implicit approach as proposed independently by Canelhas et             photometric error between the intensity of the pixels of the
+al. [3] and Bylow et al. [2]. In contrast to KinectFusion [9]          current image and the intensity of the corresponding voxels
+and similar methods, our approach does not generate syn-               in the model:
+thetic views from the model. Instead, we use an alternative                                 N
+                                                                                            X                                2
+technique and directly align an incoming point cloud from                     Ec (ξ̂)   =              VI exp(ξ̂)Txi − I(pi ) ,        (3)
+the sensor to the SDF, since the SDF provides by definition                                     i=1
+the distance of a point to the closest surface, i.e., it is possible   and the joint error function is given by:
+to directly use the SDF value as an error function. In addition
+to the existing point-to-implicit techniques, we exploit the                            E(ξ̂)     =     Ed (ξ̂) + wc Ec (ξ̂),          (4)
+color information contained in the model to improve the                with wc weighting the contribution of the intensity informa-
+alignment.                                                             tion w.r.t. the depth information.
+   Each frame of an RGB-D sensor consists    of a>depth image           We solve this least-squares problem using Levenberg-
+and a color image. Given a pixel p = u v , we define                   Marquardt on three different coarse-to-fine sub-sampling of
+the functions D(p) : R2 → R and I(p) : R2 → R, which                   the input images to speed-up convergence. We furthermore
+map a pixel to its depth and its intensity, respectively.              exploit the GPU by processing each pixel in parallel to
+   We denote by x the 3D point resulting from the back-                further accelerate the minimization process.
+projection of a pixel p:
+                              u−c                                    C. Dynamics Detection
+                                 fx D(p)
+                                   x
+                                                                          To detect dynamic parts of the environment, we first
+                    x =  v−c      y
+                                 fy D(p) 
+                                             ,                   (1)
+                                          
+                                                                       perform an initial registration of the current RGB-D frame
+                                  D(p)                                 with respect to the model, as described in Sec. III-B. After
+                                                                       registration, we compute for each pixel pi its residual ri w.r.t.
+where cx , cy , fx and fy are the intrinsic parameters of the
+                                                                       the model as defined in Eq. (2) and illustrated in Fig. 3b. We
+camera, assuming a pinhole camera model.
+                                                                       select a threshold:
+  We represent a camera pose as a 3D transformation T ∈
+SE(3). A small rigid-body motion can be written in minimal                                            t = γτ 2 ,                       (5)
+                                                                                     Static
+
+
+                                                                                                                              Dynamic
+
+
+
+         (a) RGB Image                      (b) Residuals
+
+                                                                      Fig. 4: Histogram of residuals obtained after the registration of an
+                                                                      image containing dynamic elements. The red ellipse highlights the
+                                                                      residuals resulting from the dynamic parts. By considering only
+                                                                      pixels with residuals under the threshold t, we can identify the
+                                                                      dynamic parts of the image.
+
+                                                                      not differ more than a threshold θ. Finally, the mask is dilated
+                                                                      again to cover eventual border pixels left out by the floodfill.
+          (c) Raw mask                     (d) Final mask             Fig. 3d shows the resulting mask after all the processing
+                                                                      steps. We then perform a second registration without masked
+Fig. 3: Steps of the mask creation. (a) Example RGB frame. (b)
+Residuals obtained from the registration. (c) Initial mask obtained   pixels and we integrate the RGB-D information ignoring the
+from the residual. (d) Final refined mask after floodfill.            masked pixels into the model using the newly obtained pose.
+                                                                      Note that, since our method performs a second registration
+                                                                      step, the registration takes up to twice as long compared to
+ Algorithm 1: floodfill for generating MD .                           the approach ignoring dynamics.
+  Input: pixels of residual mask MR                                   D. Carving of Model and Free Space Management
+  Result: Mask MD
+                                                                         One weakness of TSDF approaches is that they cannot
+  Let Q be a queue containing all the pixels to be
+                                                                      keep track of perceived free space. However, being aware of
+   masked.
+                                                                      the previously measured free space is a way to reject dynamic
+  Let N (p) be the set of neighbors of pixel p
+                                                                      objects, as opposed to detecting them from their motion.
+  Add all pixels from MR to queue Q
+                                                                      We follow a rather simple rule: a voxel that was found to
+  while Q 6= ∅ do
+                                                                      be reliably empty can never contain a static object. Indeed,
+     Add all pixels inside Q to MD
+                                                                      if a new range image points to a voxel being occupied, it
+     foreach p ∈ Q do
+                                                                      can only be so because a dynamic object has entered it.
+         foreach n ∈ N (p) do
+                                                                      Therefore, we can safely reject it. Doing so, we sidestep the
+             if ||D(p) − D(n)|| < θ · D(p) then
+                                                                      notoriously difficult problem of tracking dynamic moving
+                 Add n to Q if n ∈/ MD
+                                                                      points, as done in [12], [13]. We mark as free every non-
+             end
+                                                                      occluded voxel in the camera frustum outside the truncation
+         end
+                                                                      region (up to a clipping plane). Note that this is particularly
+         Remove p from Q
+                                                                      helpful in case of measurements of points that are too far
+     end
+                                                                      from the sensor to be integrated into the TSDF. In our current
+  end
+                                                                      implementation, we assign to free voxels an SDF value equal
+                                                                      to the truncation distance τ . Doing this for every voxel in
+where τ is the truncation distance used in our TSDF repre-            the frustum is suboptimal in terms of memory consumption.
+sentation and γ is a value between 0 (everything is masked)           Improvement by maintaining an octree-based representation
+and 1 (nothing is masked). Fig. 4 shows a histogram of                of the free space is left as future work.
+the residuals obtained after the initial registration of one             Another consideration regarding free space is that if a
+image. The figure shows how most of the residuals con-                previously static object moves, its voxels must be removed
+centrate below a certain value, except the ones belonging to          from the map. This corresponds to the fact that if a voxel pre-
+dynamic parts of the environment. Every residual exceeding            viously mapped as static is detected as empty subsequently,
+t contributes to the creation of a binary mask, see Fig. 3c.          this voxel used to contain a dynamic object and should,
+Such threshold-based segmentation is often not perfect and            therefore, be marked as free. This behavior is automatically
+may fail to capture the whole dynamic object. Since we have           achieved by the TSDF representation, i.e., we update the
+depth information available, we use the eroded mask MR to             SDF stored in the voxel by performing a weighted average
+initialize a depth-aware flood fill algorithm, summarized in          between the current value and the truncation distance τ .
+Alg. 1, similar to the region growing approaches used in [7],         Therefore, if a voxel is detected as free long enough, it will
+[13]. We add neighbors to a region as long as their depth does        be reliably marked as free.
+                                                                    TABLE I: Parameters of our approach used in all experiments.
+
+                                                                                     Parameter                 Value
+                                                                                      Voxel size              0.01 m
+                                                                                Truncation distance τ         0.1 m
+                                                                                     Weight wc                0.025
+                                                                                Floodfill threshold θ         0.007
+                                                                             Residual threshold weight γ        0.5
+
+               (a)                           (b)
+                                                                                IV. E XPERIMENTAL E VALUATION
+Fig. 5: (a) Raw depth from the RGB-D sensor. (b) Our virtual
+refined depth from 10 adjacent frames. (~0.3 s delay)
+                                                                      The main contribution of this work is a TSDF-based map-
+                                                                   ping approach that is able to operate in environments with
+E. Limitations and Handling Invalid Measurements                   the presence of highly dynamic elements by relying solely
+                                                                   on geometric information, i.e., our approach is completely
+   Marking free voxels in the camera frustum is effective as       class agnostic and does not require tracking of objects. Our
+long as we know from the sensor that those regions of space        experiments show the capabilities of our method and support
+are empty. However, common commercial RGB-D cameras                our key claims, which are: (i) our approach is robust to
+return depth images that contain invalid measurements, i.e.,       dynamic elements in the environment and provides a camera
+pixels with a value of zero, as exemplarily shown by black         tracking performance on par or better than state-of-the-art
+pixels in Fig. 5a. These measurements are invalid either           dense SLAM approaches, and (ii) provides a dense 3D model
+because they are out-of-range or because they are not mea-         that contains only the static parts of the environment, which
+surable, e.g., because of scattering media, reflecting surfaces,   is more accurate than other state-of-the-art approaches when
+etc. For our approach to work in every possible case, it           compared to the ground truth model.
+is necessary to distinguish between out-of-range and non-             We provide comparisons with StaticFusion (SF) [14],
+measurable values. Two methods to handle such cases are            DynaSLAM (DS) [1] and MaskFusion (MF) [13]. As our
+possible.                                                          approach does not rely on deep neural networks, we make
+   The first one is to make no distinction and not consider        a distinction in our comparison between the pure geomet-
+zero values, as it is commonly done in other RGB-D mapping         ric approach of DynaSLAM (G) and the combined deep
+approaches. In this case, our approach will work correctly         neural network+geometric approach (N+G). We tested all
+when the whole scene is in the range of the depth sensor.          approaches on the dynamic scenes of the TUM RGB-D
+A limitation of our approach is that in case there are out-of-     dataset [17], as well as on our dataset, designed to contain
+range values, dynamic objects could be incorrectly added to        highly dynamic scenes. We obtained the reported results
+the model, thus affecting its quality.                             by using the open source implementations available for the
+   The second method is to “correct” non-measurable values         different approaches, with the exception of MaskFusion,
+if possible. To this end, we create a temporary model from         where we only report results from the paper [13].
+n consecutive frames and generate virtual depths from the             In all experiments, we used the default parameters pro-
+registered poses. Then, we fill in the original depth images       vided by the open source implementations and the same
+by replacing every zero value with the corresponding value         holds for our approach, see Tab. I for details. Our default
+of the virtual depth. In this way, non-measurable values           parameters have been determined empirically by trial and
+are usally reduced thanks to the multiple observation. The         error, but similar values gave comparable results.
+remaining values are assumed to come from out-of-range                In the presented tables, we separate the approaches that
+measurements of the camera and are replaced with a high            rely solely on geometric information, from approaches that
+fixed depth value. Fig. 5b shows an example of a virtual           rely also on neural networks. We highlight in bold the best
+depth image obtained with this technique. However, this so-        result among the first category of approaches, as we focus
+lution assumes that nothing appears closer than the minimum        mainly at class agnostic approaches.
+range of the depth sensor. This assumption can be removed
+in case we add an additional sensor, e.g., a simple sonar          A. Performance on TUM RGB-D Dataset
+on top of the RGB-D sensor, that detects whether there are            The first experiment shows the performance of our ap-
+objects too close to the camera. Moreover, a disadvantage of       proach with the TUM RGB-D dataset [17].
+this method is that the actual model is then generated with           Note that, since the depth information from these se-
+a delay of n frames, which might be suboptimal for some            quences contains out-of-range values, we used the approach
+robotics applications.                                             described in Sec. III-E to obtaine a refined depth, with the
+   In the following experiments, we employ the second              temporary model created from n = 10 consecutive frames,
+option for modeling the sequences of the TUM RGB-D                 which corresponds to a model delayed approximately 0.3 s.
+dataset, since the depth images contain out-of-range values.          Tab. II shows the results of all considered approaches on
+For the sequences of our dataset, we employ the first option,      six sequences of the TUM dataset. From this table, it is clear
+since the recorded depth is always within the valid range of       that DynaSLAM outperforms the other methods. However,
+the depth sensor.                                                  DynaSLAM is a feature-based approach and, in contrast to
+                                                                                                                                            Dynamic object
+                                                                                                                                            (not removed)
+
+
+
+Fig. 6: Final mesh obtained using our approach on the walk-
+ing static sequence, in which two people are continuously walking   Fig. 7: Final mesh obtained using our approach on the walking xyz
+through the scene.                                                  sequence. In this sequence, the camera follows the person on
+                                                                    the right at the beginning and then never revisits that location.
+                                                                    Therefore, the person is added in the model.
+TABLE II: Absolute Trajectory Error (RMS) [m] on dynamic scenes
+                                                                                                             Relative Translational Error
+of TUM dataset.
+
+
+
+
+                                                                     Translational Error [m]
+                                                                                               0.4
+                      Ours     SF     DS (G)   DS (N+G)    MF
+  Dense approach       3       3        7         7         3                                  0.3
+
+    sitting static    0.009   0.014   0.009     0.007     0.021
+     sitting xyz      0.040   0.039   0.009     0.015     0.031                                0.2
+ sitting halfsphere   0.110   0.041   0.017     0.028     0.052
+   walking static     0.017   0.015   0.014     0.007     0.035                                0.1
+    walking xyz       0.099   0.093   0.085     0.017     0.104
+ walking halfsphere   0.104   0.681   0.084     0.026     0.106
+                                                                                               0.0
+       Max            0.110   0.681   0.085     0.028     0.106
+                                                                                                     0   5         10       15      20        25
+                                                                                                                        Time [s]
+the other approaches, does not provide a dense model. The
+                                                                    Fig. 8: Relative translational error over time for the walking xyz
+three dense mapping approaches show in most of the cases            sequence. In this plot it is visible how the relative error is partic-
+similar results, except for the sequence walking halfsphere,        ularly high at the beginning of the sequence, when the camera is
+where StaticFusion lost track due to the excess of dynamic          tracking the person. After the first four seconds, the error drops
+elements at the beginning of the sequence, and the sequence         substantially.
+sitting halfsphere, where our approach shows worse perfor-
+mance. In terms of 3D reconstruction, our approach is always        truth trajectories. Additionally a Leica BLK360 terrestrial
+able to create a consistent mesh of the environment, see            laser scanner was used to obtain a ground truth 3D pointcloud
+Fig. 6 for an example.                                              of the static environment.
+   The only case where the model built by our approach                 Tab. III shows the performance of different approaches
+shows artifacts is on the walking xyz sequence, where a             on our scenes. The variety of sequences show interesting
+person remains in the model, see Fig. 7. This happens               phenomena. For example, on the scenes where the dynamic
+because the person is tracked by the cameraman at the               component is a uniformly colored balloon, DynaSLAM
+beginning of the sequence and the location where the person         outperforms the dense approaches, because it cannot detect
+stops is never revisited again. Therefore, the algorithm cannot     features on the balloon, which therefore does not affect the
+know that the voxels in that location are actually free. This       SLAM performance. Our approach performs best on scenes
+is confirmed by Fig. 8, which shows the relative position           crowded with people, which are among the most challeng-
+error versus the elapsed time. It is evident from the figure        ing if no semantic segmentation algorithm is available. On
+that in the first four seconds, i.e., when the camera tracks the    sequences that involve the manipulation of boxes, the algo-
+person, the error is particularly high. In sum, we are on par       rithms have mixed results, with our approach being better in
+with state-of-the-art dense mapping approaches in terms of          about half of the cases and DynaSLAM being better on the
+tracking, but we use a completely different technique based         other half. Note that DynaSLAM with the combined neural
+on TSDF instead of surfels.                                         network and geometric approach performs the best in most
+                                                                    cases. This is due to the heavy bias of having people in every
+B. Performance on Bonn RGB-D Dynamic Dataset                        sequence of our dataset, therefore the segmentation of people
+   The second set of experiments consists of the comparison         always helps the algorithm achieving better results. However,
+between the algorithms on our dataset. Our dataset includes         the worst performance of our approach is on par with the
+24 highly dynamic scenes, where people perform different            worst performance of DynaSLAM (N+G) and substantially
+tasks, such as manipulating boxes or playing with balloons,         better than the other geometric approaches, showing that our
+see Fig. 9 for some example RGB frames. These tasks                 approach is more robust to failure. This is a desirable quality
+often obstruct the camera, creating particularly challenging        when deploying robotic systems. Finally, as discussed in the
+situation for mapping approaches. We recorded the dataset           previous section, our approach is able to build a consistent
+using an ASUS Xtion Pro LIVE sensor, combined with an               model of the environment in most of the cases, see Fig. 1
+Optitrack Prime 13 motion capture system for the ground             for an example of model from the scene crowd3.
+                                                                  ground truth.
+                                                                     For a qualitative impression, Fig. 10 shows the two models
+                                                                  of the scene crowd3 where the points have been colored
+                                                                  according to their distance to the closest point in the ground
+                                                                  truth model. In Fig. 10c, one can see that some dynamic
+                                                                  elements are still present in the final model, represented by
+ Fig. 9: Example RGB frames from our highly dynamic dataset.      the red points highlighted by the arrow. In contrast, the model
+                                                                  from our approach does not show such artifacts caused by
+TABLE III: Absolute Trajectory Error (RMS) [m] on our dataset.
+                                                                  dynamic objects.
+In this table, we shorten obstructing box with o box and nonob-      For a quantitative evaluation, Fig. 11 shows the cumulative
+structing box with no box.                                        percentage of points at a certain distance from the ground
+                                                                  truth for the models of the two considered sequences. The
+                          Ours     SF     DS (G)   DS (N+G)
+                                                                  plots show in both cases that the reconstructed model by our
+      Dense approach       3       3        7         7           approach is more accurate.
+            balloon       0.175   0.233   0.050     0.030            In summary, our evaluation shows that our method is
+            balloon2      0.254   0.293   0.142     0.029         able to robustly track an RGB-D sensor in highly dynamic
+       balloon tracking   0.302   0.221   0.156     0.049
+      balloon tracking2   0.322   0.366   0.192     0.035         environments. At the same time, it provides a consistent and
+              crowd       0.204   3.586   1.065     0.016         accurate model of the static part of the environment.
+             crowd2       0.155   0.215   1.217     0.031
+             crowd3       0.137   0.168   0.835     0.038                        V. DATASET AND S OURCE C ODE
+       kidnapping box     0.148   0.336   0.026     0.029
+      kidnapping box2     0.161   0.263   0.033     0.035            Our Bonn RGB-D dynamic dataset is available at
+       moving no box      0.071   0.141   0.317     0.232         the URL: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-
+      moving no box2      0.179   0.364   0.052     0.039
+        moving o box      0.343   0.331   0.544     0.044
+                                                                  dataset. The source code of our approach is available at the
+       moving o box2      0.528   0.309   0.589     0.263         URL: https://github.com/PRBonn/refusion.
+       person tracking    0.289   0.484   0.714     0.061
+      person tracking2    0.463   0.626   0.817     0.078                                  VI. C ONCLUSION
+        placing no box    0.106   0.125   0.645     0.575
+       placing no box2    0.141   0.177   0.027     0.021             We presented ReFusion: a TSDF-based mapping approach
+       placing no box3    0.174   0.256   0.327     0.058         able to track the pose of the camera in dynamic environments
+        placing o box     0.571   0.330   0.267     0.255         and build a consistent 3D model of the static world. Our
+      removing no box     0.041   0.136   0.016     0.016
+     removing no box2     0.111   0.129   0.022     0.021         approach tracks the sensor by exploiting directly the TSDF
+       removing o box     0.222   0.334   0.362     0.291         information and the color information encoded in voxel
+          synchronous     0.441   0.446   0.977     0.015         blocks that are only allocated when needed. Our method
+         synchronous2     0.022   0.027   0.887     0.009
+                                                                  filters dynamics using an algorithm based on the residuals
+           Max            0.571   3.586   1.217     0.575         from the registration and the representation of free space. We
+                                                                  evaluated our approach on the popular TUM RGB-D dataset,
+C. Model Accuracy                                                 as well as on our Bonn RGB-D dynamic dataset, and pro-
+   The last set of experiments shows that our approach            vided comparisons to other state-of-the-art techniques. Our
+provides an accurate, dense 3D model that contains only the       experiments show that our approach leads to an improved
+static parts of the environment.                                  pose estimation in the presence of dynamic elements in the
+   To perform such experiments, we first built a high reso-       environment, compared to other state-of-the-art dense SLAM
+lution point cloud of the static part of our test environment     approaches. Finally, we publicly release our own dataset, as
+(Fig. 12a) using a professional terrestrial laser scanner, the    well as our open-source implementation of the approach.
+Leica BLK360 (Fig. 12b). We then aligned the point cloud to                             ACKNOWLEDGMENTS
+our motion capture system’s reference frame using tilt and
+turn targets (Fig. 12c) that we located with both the laser          We thank Raluca Scona for the assistance in running
+scanner and the motion capture system. Fig. 10a shows a           StaticFusion and Berta Bescos for the assistance in run-
+section of our ground truth point cloud.                          ning DynaSLAM. Furthermore, we thank Jannik Janßen,
+   To align the model created by the algorithms to our ground     Xieyuanli Chen, Nived Chebrolu, Igor Bogoslavskyi, Julio
+truth, we transformed it from the reference frame of the          Pastrana, Peeyush Kumar, Lorenzo Nardi, and Olga Vysotska
+RGB-D sensor, to the reference frame of the motion capture        for supporting the Bonn RGB-D dynamic dataset acquisition.
+system. We aligned the two frames using the calibration                                       R EFERENCES
+setup shown in Fig. 12d, where the markers positioned in
+                                                                   [1] B. Bescos, J.M. Fcil, J. Civera, and J. Neira. DynaSLAM: Tracking,
+the environment were known in both reference frames.                   Mapping, and Inpainting in Dynamic Scenes. IEEE Robotics and
+   We compare the models built by our algorithm and by                 Automation Letters (RA-L), 3(4):4076–4083, 2018.
+StaticFusion [14] for the sequences crowd3 and remov-              [2] E. Bylow, J. Sturm, C. Kerl, F. Kahl, and D. Cremers. Real-
+                                                                       Time Camera Tracking and 3D Reconstruction Using Signed Distance
+ing nonobstructing box w.r.t. the ground truth. For each point         Functions. In Proc. of Robotics: Science and Systems (RSS), volume 2,
+of the evaluated model, we measure its distance from the               2013.
+                                                                                                                                                                               0.4m
+
+
+
+
+                                                                                                                                                           Dynamics            0
+
+                                                                   (a) Ground truth point cloud           (b) ReFusion (our approach)               (c) StaticFusion
+Fig. 10: Models from our approach and StaticFusion of the scene crowd3 compared against the ground truth. The points of the models
+are colored according to their distance from the ground truth. The arrow highlights the dynamic parts of the scene still present in the
+model from StaticFusion
+
+                                                                         Sequence: crowd3
+
+
+
+
+   Cumulative % of Points Cumulative % of Points
+                                                   100
+
+                                                    75
+
+                                                    50
+
+                                                                                                  StaticFusion
+                                                    25
+                                                                                                  ReFusion (ours)
+
+
+                                                         0.0       0.1       0.2       0.3          0.4          0.5
+                                                               Sequence: removing nonobstructing box
+                                                                            Distance [m]                                                      (a)                                     (b)
+                                                   100
+
+                                                    80
+
+                                                    60
+
+                                                    40
+                                                                                                  StaticFusion
+                                                    20                                            ReFusion (ours)
+
+
+                                                         0.0       0.1       0.2       0.3          0.4          0.5
+                                                                            Distance [m]
+Fig. 11: Plot of the cumulative percentage of points (y axis) at a                                                                            (c)                                     (d)
+specific distance from the ground truth 3D model (x axis). The                                                              Fig. 12: (a) Our test environment. (b) Terrestrial laser scanner. (c)
+higher the percentage of points towards a zero distance the better.                                                         Tilt and turn target. (d) Calibration setup used to align the sensor’s
+                                                                                                                            reference frame with the motion capture system’s one.
+ [3] D. Canelhas, T. Stoyanov, and A. Lilienthal. SDF tracker: A parallel
+     algorithm for on-line pose estimation and scene reconstruction from
+                                                                                                                            [12] M. Runz and L. Agapito. Co-Fusion: Real-Time Segmentation,
+     depth images. In Proc. of the IEEE/RSJ Intl. Conf. on Intelligent
+                                                                                                                                 Tracking and Fusion of Multiple Objects. In Proc. of the IEEE
+     Robots and Systems (IROS), pages 3671–3676, 2013.
+                                                                                                                                 Intl. Conf. on Robotics & Automation (ICRA), 2017.
+ [4] B. Curless and M. Levoy. A volumetric method for building complex
+                                                                                                                            [13] M. Rünz, M. Buffier, and L. Agapito. MaskFusion: Real-Time Recog-
+     models from range images. In Proc. of the Intl. Conf. on Computer
+                                                                                                                                 nition, Tracking and Reconstruction of Multiple Moving Objects.
+     Graphics and Interactive Techniques (SIGGRAPH), pages 303–312.
+                                                                                                                                 In Proc. of the Intl. Symposium on Mixed and Augmented Reality
+     ACM, 1996.
+                                                                                                                                 (ISMAR), pages 10–20, 2018.
+ [5] B. Della Corte, I. Bogoslavskyi, C. Stachniss, and G. Grisetti. A
+     General Framework for Flexible Multi-Cue Photometric Point Cloud                                                       [14] R. Scona, M. Jaimez, Y.R. Petillot, M. Fallon, and D. Cremers.
+     Registration. In Proc. of the IEEE Intl. Conf. on Robotics &                                                                Staticfusion: Background reconstruction for dense rgb-d slam in dy-
+     Automation (ICRA), 2018.                                                                                                    namic environments. In Proc. of the IEEE Intl. Conf. on Robotics &
+ [6] O. Kähler, V. Prisacariu, J. Valentin, and D. Murray. Hierarchical Voxel                                                   Automation (ICRA), 2018.
+     Block Hashing for Efficient Integration of Depth Images. In Proc. of                                                   [15] C. Stachniss, J. Leonard, and S. Thrun. Springer Handbook of
+     the IEEE Intl. Conf. on Robotics & Automation (ICRA), 2016.                                                                 Robotics, 2nd edition, chapter Chapt. 46: Simultaneous Localization
+ [7] M. Keller, D. Lefloch, M. Lambers, and S. Izadi. Real-time 3D                                                               and Mapping. Springer Verlag, 2016.
+     Reconstruction in Dynamic Scenes using Point-based Fusion. In                                                          [16] F. Steinbrücker, J. Sturm, and D. Cremers. Volumetric 3D Mapping
+     Proc. of the Intl. Conf. on 3D Vision (3DV), pages 1–8, 2013.                                                               in Real-Time on a CPU. In Proc. of the IEEE Intl. Conf. on Robotics
+ [8] R. Mur-Artal and J.D. Tardós. ORB-SLAM2: An Open-Source SLAM                                                               & Automation (ICRA), 2014.
+     System for Monocular, Stereo, and RGB-D Cameras. IEEE Trans. on                                                        [17] J. Sturm, N. Engelhard, F. Endres, W. Burgard, and D. Cremers. A
+     Robotics (TRO), 2017.                                                                                                       Benchmark for the Evaluation of RGB-D SLAM Systems. In Proc. of
+ [9] R. A. Newcombe, S. Izadi, O. Hilliges, D. Molyneaux, D. Kim, A. J.                                                          the IEEE/RSJ Intl. Conf. on Intelligent Robots and Systems (IROS),
+     Davison, P. Kohli, J. Shotton, S. Hodges, and A. Fitzgibbon. Kinect-                                                        2012.
+     Fusion: Real-Time Dense Surface Mapping and Tracking. In Proc. of                                                      [18] A.S. Vempati, I. Gilitschenski, J. Nieto, P. Beardsley, and R. Siegwart.
+     the Intl. Symposium on Mixed and Augmented Reality (ISMAR), pages                                                           Onboard Real-time Dense Reconstruction of Large-scale Environ-
+     127–136, 2011.                                                                                                              ments for UAV. In Proc. of the IEEE/RSJ Intl. Conf. on Intelligent
+[10] M. Nießner, M. Zollhöfer, S. Izadi, and M. Stamminger. Real-time 3D                                                        Robots and Systems (IROS), 2017.
+     Reconstruction at Scale using Voxel Hashing. Proc. of the SIGGRAPH                                                     [19] T. Whelan, S. Leutenegger, R. S. Moreno, B. Glocker, and A. Davison.
+     Asia, 32(6), 2013.                                                                                                          ElasticFusion: Dense SLAM Without A Pose Graph. In Proc. of
+[11] P.O. Pinheiro, T. Lin, R. Collobert, and P. Dollár. Learning to Refine                                                     Robotics: Science and Systems (RSS), 2015.
+     Object Segments. In Proc. of the Europ. Conf. on Computer Vision                                                       [20] M. Zollhöfer, P. Stotko, A. Görlitz, C. Theobalt, M. Nießner, R. Klein,
+     (ECCV), pages 75–91, 2016.                                                                                                  and A. Kolb. State of the Art on 3D Reconstruction with RGB-
+D Cameras. In Eurographics - State-of-the-Art Reports (STARs),
+volume 37, 2018.
+

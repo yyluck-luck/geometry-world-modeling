@@ -1,0 +1,725 @@
+                      BAD SLAM: Bundle Adjusted Direct RGB-D SLAM
+
+                   Thomas Schöps1      Torsten Sattler2   Marc Pollefeys1,3
+ 1
+   Department of Computer Science, ETH Zürich 2 Chalmers University of Technology                                  3
+                                                                                                                        Microsoft
+
+
+                        Abstract
+
+   A key component of Simultaneous Localization and Map-
+ping (SLAM) systems is the joint optimization of the esti-
+mated 3D map and camera trajectory. Bundle adjustment
+(BA) is the gold standard for this. Due to the large num-
+ber of variables in dense RGB-D SLAM, previous work has
+focused on approximating BA. In contrast, in this paper we
+present a novel, fast direct BA formulation which we imple-
+ment in a real-time dense RGB-D SLAM algorithm.
+   In addition, we show that direct RGB-D SLAM systems
+are highly sensitive to rolling shutter, RGB and depth sensor
+synchronization, and calibration errors. In order to facili-      Figure 1. Scene from our benchmark reconstructed in real-time
+tate state-of-the-art research on direct RGB-D SLAM, we           with ca. 335’000 surfels, with keyframes and estimated trajectory.
+propose a novel, well-calibrated benchmark for this task
+that uses synchronized global shutter RGB and depth cam-          common such as pose graph optimization [11, 30, 34, 60] or
+eras. It includes a training set, a test set without public       deformable geometry [67–69] (c.f . Sec. 2). In this paper,
+ground truth, and an online evaluation service. We observe        we demonstrate that direct alternating BA on dense RGB-D
+that the ranking of methods changes on this dataset com-          data is feasible in real-time, using a single GPU. We pro-
+pared to existing ones, and our proposed algorithm out-           pose a novel, practical BA algorithm, carefully designed to
+performs all other evaluated SLAM methods. Our bench-             run in real-time in scenes such as the one in Fig. 1.
+mark and our open source SLAM algorithm are available                Experiments on the TUM RGB-D benchmark [61] show
+at: www.eth3d.net                                                 the benefit of direct BA over approximate methods. How-
+                                                                  ever, the feature-based ORB-SLAM2 [44] outperforms all
+                                                                  direct methods. This is likely caused by effects such as
+1. Introduction
+                                                                  rolling shutter [10], asynchronous RGB and depth frames,
+    SLAM is the problem of simultaneously building a 3D           and depth distortion. We believe that such problems are
+model of a scene and determining the pose of a camera in          better solved in hardware than in software. For example,
+the scene. This for example enables augmented reality [32]        handling rolling shutter is computationally complex [53,56]
+and perception for self-driving cars [64]. Modern SLAM            and introduces degenerate cases [1]. We thus introduce a
+systems consist of two parts [32]: A front-end that tracks        novel benchmark for RGB-D SLAM that was recorded with
+the camera pose in real-time, and a back-end that jointly         accurately calibrated, synchronized global shutter cameras.
+optimizes the 3D map and the previous camera poses. The           On this dataset, ORB-SLAM2 is outperformed by our di-
+gold standard for the back-end optimization is bundle ad-         rect BA approach, while DVO-SLAM [30] performs on a
+justment (BA) [62]: optimization of all parameters of the         similar level as ORB-SLAM2. Our benchmark is available
+reconstructed model and the cameras.                              online with public leaderboards for a training and a test set.
+    BA algorithms are widely used with sparse features, e.g.,        In summary, our contributions are: i) A novel, fast al-
+[7, 44, 54]. These however discard most of the image infor-       gorithm for direct BA, implemented in an RGB-D SLAM
+mation. Direct [10, 45, 46, 69] approaches can make use of        system which outperforms existing approaches. ii) A well-
+all data. For a dense reconstruction, this introduces many        calibrated benchmark dataset for RGB-D SLAM, but also
+variables that need to be optimized. Thus, a common as-           monocular and stereo visual-inertial SLAM. In contrast to
+sumption is that full BA is infeasible in real-time for di-       previous datasets, ours uses synchronized global shutter
+rect and dense methods [27]. Instead, approximations are          cameras, removing the need to model effects such as rolling
+
+
+
+                                                                134
+shutter. We show that the ranking of RGB-D SLAM meth-              propose an offline algorithm with a mesh-based object rep-
+ods changes on this dataset compared to existing datasets.         resentation. This requires frequent remeshing, contributing
+iii) A leaderboard for our benchmark, and our SLAM sys-            to a high runtime. In another offline algorithm, Goldlücke et
+tem as open source, available at www.eth3d.net.                    al. [23] optimize for (super-resolved) appearance and cam-
+                                                                   era calibration, while leaving the initial geometry constant
+2. Related Work                                                    aside from creating a displacement map.
+                                                                       SDF-2-SDF [59] performs pairwise alignment of signed
+   The main technical contribution of our work is a real-
+                                                                   distance functions (SDFs). A final offline BA step refines
+time capable direct BA strategy for RGB-D data. This sec-
+                                                                   keyframe poses and a fused reconstructed SDF. In contrast
+tion thus focuses on optimization strategies used for SLAM.
+                                                                   to our method, SDF-2-SDF considers geometry only. Fur-
+We also shortly discuss benchmarks for RGB-D SLAM.
+                                                                   thermore, the discretization into voxels limits its accuracy.
+Frame-to-model tracking algorithms track the motion of                 Yan et al. [70] use surfels as map representation. They
+the camera with respect to the 3D model built so far. Ex-          propose an optimization scheme similar to direct BA, which
+amples include voxel-based KinectFusion-style approaches           however combines pose graph optimization with some di-
+[28, 45, 47], similar methods based on surfel representa-          rect structure and pose updates only.
+tions [29, 35, 36], as well as some keyframe-based tech-               The geometric term of our direct BA approach is sim-
+niques [39–43]. However, the camera poses are never re-            ilar to multiview ICP [14]. However, instead of matching
+fined, leading to drift in the estimated trajectory over time.     frames to a global reconstruction, multiview ICP builds on
+Map deformation can be done explicitly when a loop is              pairwise matching, requiring to take all overlapping pairs
+detected. For example, Kintinuous [68] deforms the recon-          into account for using all information. Furthermore, multi-
+structed mesh for loop closing. Similar approaches are used        view ICP does not refine the geometry.
+by [67] and ElasticFusion [69]. However, while such a de-              Both Alismail et al. [2] and DSO [10] propose direct BA
+formation can approximately improve the model, it does not         approaches for visual odometry. Only few keyframes which
+accurately take into account all available information.            are temporally close to the current frame and the 3D points
+Pose graph optimization methods [9, 11, 30, 34, 60, 65]            visible in them are optimized. DSO has been extended with
+build a graph of simplified constraints on the relative trans-     loop closure handling, but only using pose graph optimiza-
+formation between camera pairs. This is then used to refine        tion without BA [20]. As one key difference to these works,
+the camera poses. This reduces the size of the optimization        we propose a direct BA approach for global consistency in
+problem, but also only approximates BA.                            SLAM, instead of restricting it to odometry only. Our ap-
+                                                                   proach runs in real-time, which is made possible by alter-
+Fragment-based optimization fuses together chunks of               nating between optimizing poses and geometry to limit the
+frames into fragments and then optimizes the global (rigid)        size of the individual optimization problems.
+fragment alignment [6,15,27,49]. This enables efficient op-
+timization of the map and cameras due to the low number of         Benchmarking RGB-D SLAM. Tab. 1 shows a compari-
+variables [27]. Yet, the intra-fragment structure and poses        son of our new benchmark with existing datasets. Ours par-
+are typically fixed, i.e., only approximate BA is performed.       ticularly stands out in providing real RGB-D data with syn-
+                                                                   chronized global-shutter cameras. In contrast to other real-
+Indirect (feature-based) BA. Typically, SLAM meth-
+                                                                   world RGB-D datasets, ours also provides full IMU data.
+ods perform indirect BA on a sparse set of keypoints
+                                                                   Furthermore, to our knowledge, ours is the first real-world
+only, optimizing the reprojection error of the reconstructed
+                                                                   RGB-D SLAM benchmark with a public online leaderboard
+points. BundleFusion [7] performs global SIFT [38] key-
+                                                                   on a test set for which ground truth is withheld. Aside
+point matching in real-time. Direct image alignment is used
+                                                                   from RGB-D SLAM, (visual-inertial) monocular and stereo
+within small chunks of frames, and as a post-processing step
+                                                                   SLAM methods can also be evaluated on our benchmark.
+on the whole reconstruction. [16, 17] combine direct local-
+                                                                   We provide online leaderboards for these tasks as well.
+ization of image patches with indirect BA optimizing the
+reprojection error. Henry et al. [25] use depth to extend the
+keypoint reprojection error. A similar formulation is also         3. Direct RGB-D Bundle Adjustment
+used by ORB-SLAM2 [44]. It significantly outperforms all               As is common for SLAM algorithms, our method con-
+current direct RGB-D SLAM systems on existing datasets             sists of a front-end and a back-end (c.f . Fig. 2). The front-
+as it is less sensitive to unmodeled geometric distortions.        end tracks the motion of the RGB-D camera in real-time. It
+However, our experiments show that our dense BA strategy           thus provides initial estimates for camera poses and scene
+outperforms ORB-SLAM2 on well-calibrated data.                     geometry. The back-end, running at a lower frequency [32],
+Direct BA optimizes the camera and scene parameters by             then refines both the camera trajectory and the geometry to
+minimizing a photometric error. Delaunoy & Pollefeys [8]           build a consistent 3D map. The core technical contribution
+
+
+
+                                                                 135
+        Method                      Real data       RGB-D         Stereo      Global shutter    Sync’ed cameras   IMU    Accurate GT   Geometry GT   Benchmark
+        TUM RGB-D [61]                 X              X                                                            (1)       X                          (2)
+        TUM VI [57]                    X                             X                X               X             X        X
+        TUM Mono [12]                  X                                              X               -
+        CoRBS [66]                     X               X                                                                     X              X
+        ICL-NUIM [24]                                  X                              X               X                      X             (3)
+        VIPER Odometry [51]                                                           X               -                      X                          X
+        InteriorNet [37]                               X             X                X               X            X         X             X
+        KITTI Odometry [21]               X           (4)            X                X               X            X                                    X
+        EuRoC MAV [3]                     X                          X                X               X            X          X            (5)
+        Ours                              X            X             X                X               X            X         (6)                        X
+
+Table 1. Comparison of selected existing datasets with our new benchmark. Notes on numbered entries: (1) Accelerometer but not
+gyroscope measurements are available. (2) While this dataset has a test set, it is not well suited for benchmarking since it shows the
+same scenes as the training set, and there is no online leaderboard. (3) Available in an extended version of the dataset [6]. (4) Sparse
+measurements of a spinning laser scanner are available. (5) Structure ground truth is available for some of the sequences. (6) A motion
+capturing system is used for all but a few training datasets, for which GT is obtained using Structure-from-Motion (c.f . Sec. 5).
+              Front-end                                      Back-end
+                                          Model (KFs, surfels)
+                                                                                                 no expensive topology updating is required during BA.
+Input: RGB-D camera                                                      Direct BA
+             image                                                                                   Naively optimizing 3D surfel positions during BA can
+  Track wrt. last KF                                             Continuous optimization:
+                                                                 poses, surfels, intrinsics      lead to problems. RGB-D sensors provide measurements
+ New KF? yes        Loop detected? no
+      no                      yes
+                                                                   Discrete surfel updates:      in weakly textured regions with little variation in geome-
+                                                                 creation, merging, deletion
+                Pose graph optimization                                                          try, e.g., white walls. In these regions, neither photometric
+      Figure 2. Approach overview. KF stands for keyframe.                                       nor geometric descriptors constrain all degrees of freedom,
+of this paper is a novel Bundle Adjustment (BA) strategy for                                     allowing some surfels to arbitrarily move within a surface.
+direct RGB-D SLAM, used in the back-end. In the follow-                                              To prevent potential artefacts, e.g., holes, we thus restrict
+ing, we describe this strategy in detail. The front-end, which                                   the movement of the surfels during optimization. [10] pro-
+follows common practice, is briefly discussed in Sec. 4.                                         poses to fix a surfel’s pixel position in its keyframe and to
+    Our BA strategy is based on a set of key concepts: We                                        only optimize its (inverse) depth. In practice, we encoun-
+use both geometric constraints, based on the recorded depth                                      tered problems when using this parameterization in combi-
+images, and photometric constraints. The latter use gradi-                                       nation with the point-to-plane residuals typically used for
+ents rather than raw pixel intensities to be robust to pho-                                      RGB-D SLAM [73]. For silhouettes and object bound-
+tometric changes. To enable efficient optimization, our ap-                                      aries in particular, the parameterization leads to intersect-
+proach alternates between refining the 3D map and the cam-                                       ing the plane and a nearly parallel viewing ray, which is
+era poses to minimize the number of parameters considered                                        ill-conditioned. Correspondingly, we observed that the op-
+at each point in time (c.f . Alg. 1). As a result, ours is the                                   timization moved some surfels to wrong locations.
+first dense BA approach for RGB-D SLAM that runs in real-                                            Our solution is moving surfels along the surfel normal
+time for smaller scenes. In the following, we first describe                                     directions only, and only using measurements having simi-
+our data representation before detailing the cost function we                                    lar normals to optimize them. This provides a sensible di-
+optimize and the optimization procedure itself.                                                  rection of optimization while avoiding ill-defined residuals.
+                                                                                                 As position and normal optimization is alternated, surfels
+3.1. Data Representation                                                                         are not restricted to move along their initial normal only.
+    We represent the scene geometry with dense surfels and                                       3.2. Cost Function
+use keyframes to reduce the amount of input data for BA.
+    A keyframe is defined by an RGB-D frame and its 6DOF                                             Our goal is to optimize the parameters of the model de-
+camera pose. We use a shared intrinsic calibration for all                                       fined in Sec. 3.1 to maximize consistency. These parame-
+keyframes, where we separately model the color and depth                                         ters are the surfel attributes, keyframe poses, and optionally
+sensors as pinhole cameras. Optionally, we also model                                            camera intrinsics, while measurements are the (mostly) raw
+depth image deformations, which is important to improve                                          RGB-D input data stored in the keyframes. The cost could
+the depth quality of typical consumer depth cameras [72].                                        be measured per element of the model (i.e., surfel), or of the
+    A surfel s in our method is an oriented disc defined by                                      input (i.e., pixel). Since one pixel can correspond to multi-
+a 3D center point ps , a surface normal vector ns , a radius                                     ple surfels, a non-diagonal Hessian matrix may result in the
+rs , and a scalar visual descriptor ds . We chose surfels as a                                   latter case during optimization. For efficiency reasons, we
+scene representation as they can be efficiently fused and up-                                    thus use the model-based approach in this work.
+dated by BA, and can be quickly deformed to adapt to loop                                            The cost is thus computed by projecting each surfel into
+closures [69]. In contrast to voxel-based scene represen-                                        each keyframe to establish correspondences with pixel mea-
+tations (e.g., [45]), surfels can easily represent thin surfaces                                 surements. Geometric and photometric residuals measure
+and scene detail of arbitrary scale. In contrast to meshes [8],                                  how well the surfel models the depth and color at its corre-
+
+
+
+                                                                                               136
+sponding image positions. The goal of the optimization is              changes while offering a wide basin of convergence and en-
+to maximize photometric and geometric consistency.                     abling efficient optimization. We use simple intensity gra-
+   Mathematically, we define the cost as follows. Let K be             dient magnitudes, calculated in a geometrically consistent
+the set of all keyframes and let Sk be the set of all surfels          way. This approach is similar in principle to the pose re-
+that have a corresponding measurement in keyframe k ∈ K.               finement in [55]. However, [55] uses several points to com-
+To robustly handle outliers, the geometric and photomet-               pute one residual, which prevents fast geometry optimiza-
+ric residuals rgeom and rphoto are weighted with Tukey’s               tion since the resulting Hessian for surfel optimization is
+biweight and the Huber robust loss function, respectively,             not diagonal. Instead, for one residual we sample the image
+with weighting parameter 10 for both functions. The photo-             at the projections of the surfel center ps and of two fixed
+metric residuals are furthermore weighted by wphoto = 10−2             points s1 , s2 on the boundary of the same surfel’s disc. The
+to prefer depth information. The resulting cost function is a          surfel disc radius rs resembles the pixel sampling of the
+sum of geometric
+               X andXphotometric terms:                                highest-resolution image observing the surfel, c.f . the ra-
+                                   −1
+                                                   
+  C(K, S) =               ρTukey σD    rgeom (s, k) +          (1)     dius update in Sec. 3.3. s1 and s2 are chosen such that the
+               k∈K s∈Sk                                              directions s1 −ps and s2 −ps are orthogonal. Then the gra-
+                          wphoto ρHuber σp−1 rphoto (s, k)      .
+                                                                       dient magnitude is computed and compared to ds to obtain:
+Here, σD and σp are standard deviations of the geometric                                                                
+                                                                                           I(πI,k (s1 )) − I(πI,k (ps ))
+and photometric measurements. They are used to normalize                 rphoto (s, k) =                                   − d . (4)
+                                                                                           I(πI,k (s2 )) − I(πI,k (ps )) 2 s
+the individual residuals, which we explain in the following.
+Geometric residuals. Point-to-plane data associations are              Here, πI,k is the projection function for the RGB image and
+commonly used for RGB-D SLAM [73] and are known to                     I(·) the bilinearly interpolated image intensity.
+work well for ICP [5]. We thus define rgeom analogously:                   The uncertainty σp (c.f . Eq. 1) of the photometric mea-
+                          T −1                                        surements depends on many factors. Some of them, e.g.,
+  rgeom (s, k) = TkG ns (πD,k      (π̂D,k (TkG ps ))−TkG ps ) (2)
+                                                                       reflections or illumination changes during the capture pro-
+Here, π̂D,k maps a 3D point in the local coordinate system             cess, are hard to model mathematically. For simplicity, we
+of keyframe k to the center of the corresponding depth im-                                          1
+                                                                       thus empirically set σp to 180  (for intensities in [0, 1]).
+                         −1
+age pixel. In return, πD,k    maps a depth pixel to its 3D point
+in the keyframe’s local coordinate system via its measured             Surfel-measurement correspondence estimation. Eq. 1
+depth dm . The transformation TkG maps the position ps and             compares the surfels in the map to their corresponding
+normal ns of a surfel s from the global map coordinate sys-            RGB-D measurements in the keyframes. We establish these
+tem G to the local coordinate system of keyframe k. Intu-              correspondences by projecting the surfel centers into the
+itively, Eq. 2 computes the distance between the surfel and            keyframes. To filter outliers, we only establish a correspon-
+measurement positions along the surfel’s normal direction.             dence between a surfel s and its pixel projection in keyframe
+    The resulting residual is normalized using an estimate             k if: i) ps projects to a pixel that has a depth measurement.
+σD of its standard deviation. To derive this, we apply un-             In practice this also discards observations at very oblique
+certainty propagation of the measurement uncertainties. For            angles, since depth cameras will usually discard measure-
+a well-calibrated camera, it is reasonable to assume that the          ments there. ii) The depth of the measurement and the
+measurement uncertainty is purely in the depth direction.              projected surfel is similar enough. Similarity is measured
+Many depth cameras use stereo matching on infrared im-                 via the weight of the depth residual in the optimization,
+                                                                                                                        ∂ρ    (r)
+ages to compute depth maps. In this case, the depth error              i.e., we only establish a correspondence if 1r Tukey∂r     > 0
+grows quadratically with the depth dm and can be shown to              with r := rgeom (s, k). iii) The surfel normal is similar to
+be δd2m (bf )−1 [18], which we use as a model for the stan-            the depth measurement’s normal (estimated by finite differ-
+dard deviation σdm . Here, b is the baseline in meters, i.e.,          ences in the depth image) and points towards the camera.
+the camera-camera distance for active stereo, or the camera-
+projector distance for structured light. f is the focal length         3.3. Optimization
+in pixels, and δ is the expected stereo matching error in pix-             We perform BA by optimizing for the cost in Eq. 1. Sim-
+els, which we set to 0.1. Applying uncertainty propagation             ilar to sparse SfM [54], where additional points are trian-
+                         ∂r
+                2
+(in this case: σD  = ( ∂dgeom
+                            m
+                              )2 σd2m ) then leads to:                 gulated and existing points are merged after BA, we inter-
+                       2
+                     d              T                                 leave the cost optimization with several discrete surfel up-
+             σD = δ m TkG ns πk (TkG ps ) .                   (3)
+                      bf                                               date steps. Changing keyframe poses can otherwise result
+The depth uncertainty depends on the sensor type; a differ-            in scene parts not being covered by surfels.
+ent model should be used for e.g., time-of-flight sensors.                 Both the numbers of surfels and keyframes quickly be-
+Photometric residuals. For rphoto , we compare the sur-                come large. Jointly optimizing all parameters using a
+fel’s descriptor ds to the surfel’s projection into the im-            second-order method such as Gauss-Newton thus quickly
+age. The descriptor should be robust against photometric               becomes slow, even when using the Schur complement. We
+
+
+
+                                                                     137
+thus use alternating optimization, which can still perform        positions and descriptors is very helpful for improved con-
+competitively for strongly connected problems [62].               vergence speed. Since different surfels are independent, this
+   Our optimization scheme, stated in Alg. 1, performs a          only involves solving a 2×2 matrix for each surfel.
+number of iterations up to a maximum or until convergence.        Surfel merging. Surfel creation often generates unneces-
+Within each iteration, alternating steps optimize the cost in     sary surfels for noisy measurements, which get denoised by
+Eq. 1 and update the surfels. Each step is detailed below.        their first position optimization. Thus, after position opti-
+Algorithm 1 Surfel-based alternating direct BA scheme             mization in the first iteration of the BA scheme, we merge
+ 1: for all keyframes do Create missing surfels                   surfels with similar attributes. Two surfels s1 and s2 are
+ 2: for i ∈ [1, max iteration count] do                           merged if their normals are within 40◦ of each other, and
+ 3:     Update surfel normals                                     their positions are closer than 4 · 0.8 · min(rs1 , rs2 ). The
+ 4:     Optimize surfel positions and descriptors                 factor 4 corresponds to the cell size for surfel creation and
+ 5:     if i = 1 then Merge similar surfels
+ 6:     Optimize keyframe poses
+                                                                  0.8 is the merge threshold. For finding merge candidates
+ 7:     Optimize camera intrinsics (optionally)                   quickly, we project the surfels into all keyframes and con-
+ 8:     if no keyframe moved then break                           sider surfels projecting to the same cell for merging.
+ 9: for all keyframes which moved in the last loop do
+10:     Merge similar surfels                                     Keyframe pose optimization. We optimize the poses of all
+11: Delete outlier surfels; Update surfel radii                   keyframes by applying the Gauss-Newton method to Eq. 1.
+                                                                  Pose updates ǫ are parametrized as local updates in the Lie
+Surfel creation. In a first step, we attempt to create new        algebra se(3). Thus, the transformation TkG from the global
+surfels for all keyframes. We partition the keyframes into        coordinates to the local coordinates of keyframe k is up-
+4×4 pixel cells. If no pixel in a cell corresponds to an ex-      dated as Tgk · exp(ǫ̂). Local updates ensure that rotation
+isting surfel, we randomly choose one depth measurement           updates are well-defined [13]. Since keyframes are inde-
+within the cell to create a new surfel s. Its attributes are      pendent, this results in a standard direct pose refinement for
+computed from the pixel p it is created from: ps is set to        each keyframe (similar to e.g. [29, 30, 41]).
+TG    −1
+   k πD,k (p). ns is computed via centered finite differences     Camera intrinsics optimization. If the RGB-D camera
+on the depth image. rs is defined as the minimum distance         is not accurately calibrated, we can optionally optimize the
+between ps and the 3D points of the 4-neighborhood of p.          camera intrinsics. We only do this for evaluation on existing
+ds is initialized to the first term in Eq. 4. Only pixels for     datasets; our new dataset does not require this step. Again,
+which all neighboring pixels have a depth measurement are         we use the Gauss-Newton method to minimize Eq. 1, now
+considered when creating new surfels.                             optimizing the intrinsic parameters while fixing all others.
+    Further, we only use pixels that pass the following out-      We use separate pinhole models for the color and depth
+lier filter: We project the pixel’s 3D point into each other      camera and also model depth deformation. We use the depth
+keyframe. We count the number of times nC the point               offset model from [26], which relates true inverse depths
+projects to a corresponding measurement, and the number           dtrue to distorted inverse depths ddist for every pixel (x, y) as
+of free-space violations nV , i.e., how often the point lies
+in front of a keyframe’s depth map. A pixel is consid-                dtrue (x, y) = ddist (x, y) + Dδ (x, y) · eα0 −α1 ddist (x,y) . (5)
+ered an outlier if nC < nmin or nV > nC . nmin is set to          We drop α0 as changing it has the same effect as changing
+min(3, 1 + ⌊0.2|K|⌋), avoiding optimization on incomplete         Dδ for all pixels correspondingly. The remaining parame-
+surfel models while the number of keyframes |K| is small.         ters are α1 and a parameter image Dδ . The part of the Hes-
+Surfel normal updates. For efficiency reasons, we treat           sian corresponding to Dδ is a diagonal matrix. The Schur
+surfel normals (which mainly only impact the directions in        complement can thus be used to very efficiently solve this
+which surfels are allowed to move) as auxiliary variables.        matrix despite its large size. We estimate Dδ at a quarter of
+Instead of deriving an update step from the cost function         the image resolution, corresponding to the surfel creation
+(which may require adding a normal residual in addition to        cell size, and use nearest-neighbor access to keep the Hes-
+rgeom and rphoto ), we thus use an update which is designed       sian diagonal. This approach allows us to quickly optimize
+to be efficient: We average the normals of all corresponding      for camera intrinsics and especially depth deformation.
+measurements, followed by re-normalization to unit length.        Surfel cleanup and radius update. As is common in
+Surfel position and descriptor optimization. After up-            sparse SfM [54], we filter outlier surfels based on the same
+dating normals ns , surfel positions ps and descriptors ds        criteria used to detect outliers during surfel creation. In ad-
+are jointly optimized by applying a Gauss-Newton iteration        dition, the radius of each surfel is updated to the minimum
+to Eq. 1. We only allow surfels to move along their nor-          radius of all its corresponding measurements. Intuitively,
+mal directions. A surfel position is thus parametrized as         this corresponds to using the highest resolution under which
+ps + t · ns and we optimize for t. Joint optimization of          the point is observed when computing its descriptor.
+
+
+
+                                                                138
+                                                                                                fr1/desk fr2/xyz fr3/office avg. rank
+4. RGB-D SLAM Front-End                                                      BundleFusion [7] 1.6 (1) 1.1 (3) 2.2 (4)       2.7 (2)
+                                                                             DVO SLAM [30] 2.1 (5) 1.8 (6) 3.5 (8)          6.3 (6)
+   The main technical contribution of this paper is the dense                ElasticFusion [69] 2.0 (4) 1.1 (3) 1.7 (2)     3.0 (4)
+                                                                             Kintinuous [68]    3.7 (8) 2.9 (9) 3.0 (6)     7.7 (8)
+direct BA approach presented in the previous section, which                  MRSMap [60]        4.3 (9) 2.0 (7) 4.2 (9)     8.3 (9)
+forms the back-end of our RGB-D SLAM approach. The                           ORB-SLAM2 [44] 1.6 (1) 0.4 (1) 1.0 (1)         1.0 (1)
+                                                                             PSM SLAM [70] 1.6           -       3.1        -
+following describes our front-end responsible for real-time                  RGB-D SLAM [9] 2.3 (6) 0.8 (2) 3.2 (7)         5.0 (5)
+camera pose tracking and loop closure detection.                             VoxelHashing [47] 2.3 (6) 2.2 (8) 2.3 (5)      6.3 (6)
+                                                                             Ours (fixed intr.) 3.6      1.2     2.5        -
+Preprocessing. As is common, a bilateral filter is used to                   Ours               1.7 (3) 1.1 (3) 1.7 (2)     2.7 (2)
+smooth the depth map, and large depth measurements are             Table 2. ATE RMSE results in cm on TUM RGB-D datasets (rank
+removed. The filter parameters depend on the camera used.          in brackets). Ours achieves the second best average rank af-
+                                                                   ter ORB-SLAM2 and alongside BundleFusion. Results for other
+Odometry. Once a new RGB-D frame becomes available,                methods are as reported in [7], [70] and [44]. Our results without
+we first estimate its pose relative to the last keyframe via       intrinsics and depth deformation optimization are clearly worse,
+standard direct photometric and geometric image alignment          showing that this is necessary for these datasets.
+in SE(3) [29, 30, 41]. For robustness against illumination                                    clean        async         rs       async & rs
+changes, we use intensity gradients rather than pixel inten-                                avg. med.    avg. med.   avg. med.    avg. med.
+                                                                       BundleFusion [7]     0.34 0.22    1.10 1.14   1.10 1.02    1.48 1.40
+sities for tracking. The odometry’s purpose is to provide              DVO SLAM [30]        0.32 0.23    2.33 0.72   5.10 1.37    4.94 1.39
+good initial keyframe poses and it can be exchanged easily.            ElasticFusion [69]   1.11 0.90    1.98 1.17   2.70 1.77    3.19 2.52
+                                                                       ORB-SLAM2 [44]       0.47 0.30    0.60 0.40   3.25 1.57    3.49 1.55
+Interaction with BA. We do not address keyframe selec-                 Ours                 0.15 0.02    0.40 0.21   0.99 0.87    1.01 0.98
+
+tion in this work and thus simply select every 10th frame          Table 3. ATE RMSE [cm] averages and medians for seven syn-
+as a keyframe. After a new keyframe is created, we test for        thetic datasets per category. Asynchronous RGB-D frames (async)
+loop closures with previous parts of the trajectory, as de-        and rolling shutter (rs) both worsen the results.
+tailed below, before passing it to the BA back-end. If a new       tory error (ATE) results (as used in [61]; smaller is better)
+keyframe is created before these iterations finish, we skip        for different SLAM methods on some commonly used se-
+the remaining ones to keep up real-time operation.                 quences. As a first observation, our optional intrinsics and
+Loop closure detection. We use a standard bag-of-words             depth distortion optimization strongly improves our results
+approach [19] based on binary features [4] to identify the         on these datasets. This shows that the depth camera’s in-
+keyframe m most similar to the latest keyframe k. We get           accurate (internal) calibration affects SLAM methods and
+an initial estimate of the keyframes’ relative pose from the       should be calibrated for good results. Furthermore, we ob-
+resulting keypoint matches. This pose is then refined us-          serve that ORB-SLAM2 [44] as an indirect method clearly
+ing direct alignment. We also use direct alignment to align        outperforms all direct methods on these datasets, including
+keyframe k to the keyframes m − 1 and m + 1. If these              ours, which shares the second average rank with Bundle-
+estimates are sufficiently consistent based on thresholding        Fusion [7]. As part of the reason for this, [10] shows that
+their translation and angle differences, we accept the loop        ORB-SLAM2 is less affected by rolling shutter, as exhib-
+closure. We use the averaged relative pose in a pose graph         ited by the camera used in this dataset, than direct meth-
+optimization step to obtain an initial correction for the tra-     ods. Further, the camera’s depth and color streams are not
+jectory, followed by applying our BA strategy.                     synchronized. These effects, together with the depth distor-
+   It should be noted that as a general limitation of direct       tion observed above, introduce further geometric distortions
+image alignment and thus direct BA, the convergence re-            which may strongly affect direct methods. We aim to eval-
+gion is small [50]. Thus it is for example conceivable that a      uate the effect of distortions in the following.
+pose graph optimization step upon a loop detection pushes          Impact of distortions. While the geometric distortions in
+old keyframes out of their convergence region. However,            the cameras may be hard to model accurately, we can iso-
+we did not observe this in our final system. If it became          late the effect of asynchronous RGB-D frames and rolling
+an issue, we think that future work might try to couple di-        shutter in synthetic datasets. We create such datasets by
+rect BA with a well-converging but inaccurate method. This         making dense 3D reconstructions of scenes from the TUM
+way, it could stay close to the solution of the other method       RGB-D dataset [61] and rendering them with their origi-
+and is thus likely to converge, while acting as a refinement.      nal (continuously interpolated) trajectory. We render each
+                                                                   dataset in four variations: a ’clean’ variant and variants with
+5. Benchmark Dataset                                               rolling shutter and asynchronous frames, both individually
+                                                                   and combined. For rolling shutter of both the color and
+Motivation. As motivation for recording a new RGB-                 depth camera, we use the estimated shutter times (time off-
+D SLAM benchmark, we discuss results on the popular                set between first and last scanline readout) for the Kinect v1
+TUM RGB-D dataset [61]. Tab. 2 shows absolute trajec-              from [52]: ca. 30.5 ms for the depth camera and ca. 26.1
+
+
+
+                                                                 139
+                                                                           In contrast to datasets with typical consumer depth cam-
+                                                                        eras our camera is well-calibrated, which includes the cal-
+                                                                        ibration used internally for depth estimation. We refer to
+                                                                        the supplementary material for additional information and
+                                                                        experiments on the dataset’s recording and calibration.
+Figure 3. Example images (top) and depth maps (bottom) from our
+dataset, showing some of its variety including still scenes, moving     6. Evaluation
+objects, darkness, a planar scene requiring photometric tracking,
+and outdoor scenes. No white balancing is used.                         Test environment. We used a PC with an Intel Core i7
+                                                                        6700K and an MSI Geforce GTX 1080 Gaming X 8G. Our
+ms for the color camera. For asynchronous frames, we use                BA scheme was implemented on the GPU using CUDA 8.0.
+the worst case in the sense that a color image is rendered at               For quantitative evaluation, we focus on the absolute tra-
+the middle point in time between two successive depth im-               jectory RMSE with SE(3) alignment (SE(3) ATE RMSE,
+ages. All other offsets would yield depth/color pairs which             c.f . [61]), since this focuses on the SLAM (instead of odom-
+are closer in time. Results are shown in Tab. 3. In con-                etry) performance. Additional results for other metrics are
+trast to the TUM RGB-D results, our method outperforms                  provided in the supplementary material. SE(3) ATE RMSE
+all others on these datasets, suggesting that more effects,             is computed by first aligning the estimated trajectory to the
+such as depth distortion, need to be simulated for obtaining            ground truth with a transformation in SE(3) by matching
+realistic results. However, we can still make the observation           poses with the same timestamp and applying the Umeyama
+that both evaluated effects significantly degrade the SLAM              method [63]. Then, the RMSE of the translational differ-
+results when not modeled. Since modeling all of these ef-               ences between all matched poses is computed.
+fects in a direct SLAM system is laborious and may lead to              Ablation study. We evaluate the contributions of dif-
+high runtimes [53, 56] and degeneracies [1], we think that              ferent components of our algorithm to the final results in
+they are better addressed in hardware. Thus, we recorded a              Fig. 5 (top). Clearly, the geometric residuals rgeom strongly
+novel RGB-D SLAM benchmark using better hardware.                       help, since the results for using photometric residuals rphoto
+Our benchmark. For data recording, we mounted syn-                      only are much worse. In addition, the plots show that BA
+chronized global shutter cameras [22] together with an Asus             clearly improves upon running only the front-end of our
+Xtion Live Pro, using the Xtion’s infrared emitter together             method. While the remaining differences are smaller, it can
+with our cameras. Color and depth images are recorded                   be observed that using both types of residuals (”Default”)
+at exactly the same points in time, such that no temporal               performs better than using only depth residuals. Further-
+smoothness assumption is needed to use both for estimating              more, we evaluate an offline (but close to real-time) variant
+one camera pose. Like e.g. [31, 33, 48, 71], we use active              of our algorithm for which we never skip BA iterations and
+stereo: By doing stereo depth estimation on two IR cam-                 perform 25 BA iterations after dataset playback finished.
+eras, the stereo algorithm takes advantage of both the ac-              As expected, this performs slightly better than the real-time
+tive illumination and ambient infrared light. Ground truth              settings. Finally, we also evaluate a preconditioned con-
+poses are mostly recorded by a motion capturing system. A               jugate gradient (PCG) solver on the Gauss-Newton update
+few of the training datasets are recorded outside of this sys-          equation in place of our alternating optimization scheme.
+tem for more diversity. Ground truth for those is given by              It performs very similar, but slightly worse than the alter-
+Structure-from-Motion on the benchmark cameras as well                  nating optimization. Since individual iterations take longer,
+as additional cameras on the rig, on videos that cover the              more BA iterations are skipped in this variant (c.f . Sec. 4).
+dataset sequence multiple times. These datasets are kept in             Parameter values. We evaluate the keyframe creation fre-
+a separate category since they are likely to be less accurate.          quency in Fig. 5 (bottom left), where the number of frames
+   Our SLAM benchmark consists of 61 training and 35 test               per keyframe is stated for each graph. In this evaluation, se-
+datasets. Fig. 3 shows example images from our datasets.                lecting keyframes more frequently always performs better
+All sequences are shown in the supplementary video.                     than selecting less keyframes, despite possibly reducing the
+   Currently, it is common practice in RGB-D SLAM eval-                 number of BA iterations in the real-time setting. However,
+uation to subselect (and thus potentially cherry-pick) a                the memory use also rises linearly with more keyframes.
+small number of datasets, e.g., from the training set of the               The cell size for surfel creation is evaluated in Fig. 5
+TUM RGB-D dataset [61] (see e.g., [7, 58,69]). Since these              (bottom right). A smaller cell size yields denser scene re-
+datasets come with ground truth, it is furthermore unclear              constructions and thus higher memory use. It can improve
+to what extent the methods overfit on them. By providing                accuracy since more geometry is considered, but also in-
+a benchmark with non-public ground truth and an online                  creases computational demands. This can slow down con-
+leaderboard (analogous to [21]), we hope to improve this.               vergence of BA. According to the plotted results, in prac-
+
+
+
+                                                                      140
+                     750                                        Surfel count                                                                                                                                                                 300000             Surfel creation
+                                                                                                                                                                                                                                                                Geometry optimization
+
+ Time [ms]                                                                                                                                                                                                                                            Surfels
+                     500                                                                                                                                                                                                                     200000             Surfel merge and list compaction in loop
+                                                                                                                                                                                                                                                                Pose optimization
+                     250                                                                                                                                                                                                                     100000             Surfel deletion and radius update
+                                                                                                                                                                                                                                                                Final surfel merge and list compaction
+                                     0                                                                                                                                                                                                       0
+                                                                      20          40                                                      60                                  80           100                120        140       160
+
+Figure 4. Runtime of our BA scheme in ms for the dataset shown in Fig. 1 (without skipping any BA iterations). The number of keyframes
+is shown on the x-axis. Since we create one keyframe every 10 frames for ∼27 Hz input, 370 ms of processing time are available for each
+keyframe; if BA takes longer, iterations are skipped in real-time mode. The spike in the surfel count corresponds to a loop closure.
+                                                      40                                                                                                            40                                              by most algorithms, while hard datasets are not solved well
+
+                                   #successful runs                                                                                              #successful runs
+                                                                                              Legend for left plot:
+                                                                                                                 rgeom only
+
+
+                                                      20
+                                                                                                                 rphoto only
+                                                                                                                 Default                                            20
+                                                                                                                                                                                                                    by any algorithm. The remaining ones are of medium diffi-
+                                                                                          Legend for right plot:
+                                                                                                                                                                                                                    culty. In addition, the ’SfM’ category for training datasets
+                                                      0
+                                                           0           1         2
+                                                                                                             Front-end only
+                                                                                                             Offline
+                                                                                                                                                                     0
+                                                                                                                                                                         0           1         2
+                                                                                                                                                                                                                    contains datasets with SfM ground truth (c.f . Sec. 5). Our
+                                                                                                             PCG solver
+                                                               SE3 ATE RMSE [cm]                             Default                                                         SE3 ATE RMSE [cm]                      method significantly outperforms the others, yielding su-
+                       40                                                                                                            40                                                                             perior results on medium datasets and being very reliable
+
+  #successful runs                                                                                                #successful runs
+                                                                                                        5                                                                                        2×2
+                                                                                                        10                                                                                       4×4                on easy datasets. While no direct algorithm was able to
+                       20                                                                               15                           20                                                          8×8
+                                                                                                        20                                                                                       16 × 16            beat ORB-SLAM2 on the TUM RGB-D dataset, here it is
+                                                                                                        25                                                                                       32 × 32
+                               0
+                                                                                                        30
+                                                                                                                                      0
+                                                                                                                                                                                                 64 × 64
+                                                                                                                                                                                                                    outperformed by our method. DVO SLAM performs bet-
+                                                 0             1         2                                                                0            1         2
+                                                       SE3 ATE RMSE [cm]                                                                       SE3 ATE RMSE [cm]                                                    ter than ORB-SLAM2 on the training set, but worse on the
+Figure 5. Ablation study (top row), keyframe interval evaluation                                                                                                                                                    test set. The hard datasets provide open challenges for fu-
+(bottom left), and surfel sparsity evaluation (bottom right). In                                                                                                                                                    ture work. Common reasons for failure include textureless
+each plot, for a given threshold on the ATE RMSE (x-axis), the                                                                                                                                                      scenes with ambiguous structure, fast camera motion, and
+graphs show the number of training datasets from our benchmark                                                                                                                                                      moving objects. Thus, while we believe that our algorithm
+for which the evaluated variant has a smaller error.                                                                                                                                                                can obtain very accurate results, it would still require for
+                                                                 Training                                                                      Test
+                                        40                                                                                                                                                                          example the use of an IMU or of larger field of view to
+
+                #successful runs                                                     #successful runs
+                                                                                                                                                                                      BundleFusion
+                                                                                                        20
+                                                                                                                                                                                      DVO SLAM                      increase the whole system’s robustness in these cases. It
+                                        20                                                                                                                                            ElasticFusion
+                                                                                                        10
+                                                                                                                                                                                      ORB-SLAM2
+                                                                                                                                                                                                                    should also be noted that scalability is not considered in the
+                                                0                                                        0
+                                                                                                                                                                                      BAD SLAM                      evaluation above; some methods do not require a GPU.
+                                                      0              5                                       0             5
+                                                           SE3 ATE RMSE [cm]                                     SE3 ATE RMSE [cm]                                                                                  Runtime. Fig. 4 shows the runtime of the different parts
+Figure 6. Evaluation on our benchmark’s training and test datasets.                                                                                                                                                 of our BA scheme on an example dataset of our benchmark.
+For a given threshold on the ATE RMSE (x-axis), the graphs show                                                                                                                                                     The time used by odometry is negligible. Keyframe pose
+the number of datasets for which the method has a smaller error.
+                                                                                                                                                                                                       10.0
+                                                                                                                                                                                                                    and geometry optimization take up the most time.
+                                                                      Easy                              Medium                                                               Hard      SfM
+ BAD SLAM                                                                                                                                                                                              7.5
+ BundleFusion
+   DVO SLAM                                                                                                                                                                                            5.0          7. Conclusion
+  ElasticFusion                                                                                                                                                                                        2.5
+ ORB-SLAM2
+                                                                                                                                                                                                       0.0             We presented a novel RGB-D SLAM method with a real-
+                                                                           Easy                          Medium                                                               Hard                     10.0         time direct BA back-end using surfels. This allows to use
+ BAD SLAM
+ BundleFusion
+                                                                                                                                                                                                       7.5
+                                                                                                                                                                                                                    rich information during global optimization, resulting in
+                                                                                                                                                                                                       5.0
+   DVO SLAM                                                                                                                                                                                                         very accurate trajectories. To avoid unmodeled geometric
+  ElasticFusion                                                                                                                                                                                        2.5
+ ORB-SLAM2                                                                                                                                                                                                          distortion, we present an RGB-D SLAM benchmark with
+                                                                                                                                                                                                       0.0
+
+Figure 7. Complete SE(3) ATE RMSE evaluation results on the
+                                                                                                                                                                                                                    synchronized global shutter cameras. On this benchmark,
+training (top) and test (bottom) datasets of our benchmark in cm.                                                                                                                                                   direct methods like ours and DVO SLAM [30] perform
+Each column visualizes the results for one dataset. We show three                                                                                                                                                   significantly better compared to the indirect ORB-SLAM2
+runs per dataset for non-deterministic methods.                                                                                                                                                                     [44] than on existing datasets. We believe this to be very
+                                                                                                                                                                                                                    interesting for the community since it shows that existing
+tice, varying the cell size between 2 × 2 and 8 × 8 shows                                                                                                                                                           datasets only give a partial picture of the SLAM algorithms’
+little effect overall. The results degrade for larger cell sizes.                                                                                                                                                   performance. The benchmark also contains hard sequences
+Evaluation on the proposed benchmark. We compare                                                                                                                                                                    as open challenges for (visual-only) RGB-D SLAM. For ex-
+against state-of-the-art (non-inertial) RGB-D SLAM meth-                                                                                                                                                            ample, using silhouettes or initializing depth measurements
+ods for which source code is available. For all methods,                                                                                                                                                            from RGB images might help solving them. As future work,
+parameters are tuned on the training datasets only. Fig. 6                                                                                                                                                          one might also apply standard techniques such as windowed
+shows cumulative results, while Fig. 7 visualizes individ-                                                                                                                                                          BA to keep up real-time BA for longer sequences.
+ual results on all datasets. We qualitatively classified the                                                                                                                                                        Acknowledgements. Thomas Schöps was supported by a Google
+datasets as easy, medium, or hard: Easy datasets are solved                                                                                                                                                         PhD Fellowship.
+
+
+
+
+                                                                                                                                                                                                                141
+References                                                             [19] Dorian Gálvez-López and Juan D. Tardós. Bags of binary
+                                                                            words for fast place recognition in image sequences. IEEE
+ [1] Cenek Albl, Akihiro Sugimoto, and Tomas Pajdla. Degen-                 Transactions on Robotics, 28(5):1188–1197, October 2012.
+     eracies in Rolling Shutter SfM. In ECCV, 2016. 1, 7                    6
+ [2] Hatem Alismail, Brett Browning, and Simon Lucey. Photo-           [20] Xiang Gao, Rui Wang, Nikolaus Demmel, and Daniel Cre-
+     metric bundle adjustment for vision-based SLAM. In ACCV,               mers. LDSO: Direct sparse odometry with loop closure. In
+     2016. 2                                                                IROS, 2018. 2
+ [3] Michael Burri, Janosch Nikolic, Pascal Gohl, Thomas
+                                                                       [21] Andreas Geiger, Philip Lenz, Christoph Stiller, and Raquel
+     Schneider, Joern Rehder, Sammy Omari, Markus W. Achte-
+                                                                            Urtasun. Vision meets robotics: The KITTI dataset. IJRR,
+     lik, and Roland Siegwart. The EuRoC micro aerial vehicle
+                                                                            32(11):1231–1237, 2013. 3, 7
+     datasets. IJRR, 2016. 3
+                                                                       [22] Pascal Gohl, Dominik Honegger, Sammy Omari, Markus
+ [4] Michael Calonder, Vincent Lepetit, Christoph Strecha, and
+                                                                            Achtelik, Marc Pollefeys, and Roland Siegwart. Omnidirec-
+     Pascal Fua. BRIEF: Binary Robust Independent Elementary
+                                                                            tional visual obstacle detection using embedded FPGA. In
+     Features. In ECCV, 2010. 6
+                                                                            IROS, 2015. 7
+ [5] Yang Chen and Gérard Medioni. Object modelling by regis-
+                                                                       [23] Bastian Goldlücke, Mathieu Aubry, Kalin Kolev, and Daniel
+     tration of multiple range images. Image and vision comput-
+                                                                            Cremers. A super-resolution framework for high-accuracy
+     ing, 10(3):145–155, 1992. 4
+                                                                            multiview reconstruction. IJCV, 106(2):172–191, 2014. 2
+ [6] Sungjoon Choi, Qian-Yi Zhou, and Vladlen Koltun. Robust
+                                                                       [24] Ankur Handa, Thomas Whelan, John McDonald, and An-
+     reconstruction of indoor scenes. In CVPR, 2015. 2, 3
+                                                                            drew J. Davison. A benchmark for RGB-D visual odometry,
+ [7] Angela Dai, Matthias Nießner, Michael Zollhöfer, Shahram
+                                                                            3D reconstruction and SLAM. In ICRA, 2014. 3
+     Izadi, and Christian Theobalt. BundleFusion: Real-time
+                                                                       [25] Peter Henry, Michael Krainin, Evan Herbst, Xiaofeng Ren,
+     globally consistent 3D reconstruction using on-the-fly sur-
+                                                                            and Dieter Fox. RGB-D mapping: Using Kinect-style depth
+     face re-integration. ACM Transactions on Graphics (TOG),
+                                                                            cameras for dense 3D modeling of indoor environments.
+     36(3):24, 2017. 1, 2, 6, 7
+                                                                            IJRR, 31(5):647–663, 2012. 2
+ [8] Amaël Delaunoy and Marc Pollefeys. Photometric bundle
+     adjustment for dense multi-view 3D modeling. In CVPR,             [26] Daniel Herrera, Juho Kannala, and Janne Heikkilä. Joint
+     2014. 2, 3                                                             depth and color camera calibration with distortion correc-
+                                                                            tion. PAMI, 34(10):2058–2064, 2012. 5
+ [9] Felix Endres, Jürgen Hess, Nikolas Engelhard, Jürgen Sturm,
+     Daniel Cremers, and Wolfram Burgard. An evaluation of the         [27] Olaf Kähler, Victor A. Prisacariu, and David W. Murray.
+     RGB-D SLAM system. In ICRA, 2012. 2, 6                                 Real-time large-scale dense 3D reconstruction with loop clo-
+[10] Jakob Engel, Vladlen Koltun, and Daniel Cremers. Direct                sure. In ECCV, 2016. 1, 2
+     sparse odometry. PAMI, 40(3):611–625, 2018. 1, 2, 3, 6            [28] Olaf Kähler, Victor A. Prisacariu, Julien Valentin, and David
+[11] Jakob Engel, Thomas Schöps, and Daniel Cremers. LSD-                  Murray. Hierarchical voxel block hashing for efficient inte-
+     SLAM: Large-scale direct monocular SLAM. In ECCV,                      gration of depth images. RA-L, 1(1):192 – 197, 2016. 2
+     2014. 1, 2                                                        [29] Maik Keller, Damien Lefloch, Martin Lambers, Shahram
+[12] Jakob Engel, Vladyslav Usenko, and Daniel Cremers. A                   Izadi, Tim Weyrich, and Andreas Kolb. Real-time 3D re-
+     photometrically calibrated benchmark for monocular visual              construction in dynamic scenes using point-based fusion. In
+     odometry. In arXiv:1607.02555, 2016. 3                                 3DV, 2013. 2, 5, 6
+[13] Chris Engels, Henrik Stewénius, and David Nistér. Bundle        [30] Christian Kerl, Jürgen Sturm, and Daniel Cremers. Dense
+     Adjustment Rules. In Photogrammetric Computer Vision,                  visual SLAM for RGB-D cameras. In IROS, 2013. 1, 2, 5,
+     2006. 5                                                                6, 8
+[14] Simone Fantoni, Umberto Castellani, and Andrea Fusiello.          [31] Leonid Keselman, John Iselin Woodfill, Anders Grunnet-
+     Accurate and automatic alignment of range surfaces. In                 Jepsen, and Achintya Bhowmik. Intel RealSense stereo-
+     3DIMPVT, 2012. 2                                                       scopic depth cameras. arXiv preprint arXiv:1705.05548,
+[15] Nicola Fioraio, Jonathan Taylor, Andrew Fitzgibbon, Luigi              2017. 7
+     Di Stefano, and Shahram Izadi. Large-scale and drift-free         [32] Georg Klein and David Murray. Parallel tracking and map-
+     surface reconstruction using online subvolume registration.            ping for small AR workspaces. In ISMAR, 2007. 1, 2
+     In CVPR, 2015. 2                                                  [33] Kurt Konolige. Projected texture stereo. In ICRA, 2010. 7
+[16] Christian Forster, Zichao Zhang, Michael Gassner, Manuel          [34] Gim Hee Lee, Friedrich Fraundorfer, and Marc Polle-
+     Werlberger, and Davide Scaramuzza. SVO: Semidirect                     feys. Structureless Pose-Graph Loop-Closure with a Multi-
+     visual odometry for monocular and multicamera systems.                 Camera System on a Self-Driving Car. In IROS, 2013. 1,
+     IEEE Transactions on Robotics, 33(2):249–265, 2017. 2                  2
+[17] Yasutaka Furukawa and Jean Ponce. Accurate camera cali-           [35] Damien Lefloch, Markus Kluge, Hamed Sarbolandi, Tim
+     bration from multi-view stereo and bundle adjustment. IJCV,            Weyrich, and Andreas Kolb. Comprehensive use of curvature
+     84(3):257–268, 2009. 2                                                 for robust and accurate online surface reconstruction. PAMI,
+[18] David Gallup, Jan-Michael Frahm, Philippos Mordohai, and               39(12):2349–2365, December 2017. 2
+     Marc Pollefeys. Variable Baseline/Resolution Stereo. In           [36] Damien Lefloch, Tim Weyrich, and Andreas Kolb.
+     CVPR, 2008. 4                                                          Anisotropic point-based fusion. In International Conference
+
+
+
+
+                                                                     142
+     on Information Fusion (FUSION), pages 2121–2128, July              [55] Thomas Schöps, Johannes L. Schönberger, Silvano Galliani,
+     2015. 2                                                                 Torsten Sattler, Konrad Schindler, Marc Pollefeys, and An-
+[37] Wenbin Li, Sajad Saeedi, John McCormac, Ronald Clark,                   dreas Geiger. A multi-view stereo benchmark with high-
+     Dimos Tzoumanikas, Qing Ye, Yuzhong Huang, Rui Tang,                    resolution images and multi-camera videos. In CVPR, 2017.
+     and Stefan Leutenegger. InteriorNet: Mega-scale multi-                  4
+     sensor photo-realistic indoor scenes dataset. In BMVC, 2018.       [56] David Schubert, Nikolaus Demmel, Vladyslav Usenko, Jörg
+     3                                                                       Stuckler, and Daniel Cremers. Direct sparse odometry with
+[38] David G. Lowe. Distinctive image features from scale-                   rolling shutter. In ECCV, 2018. 1, 7
+     invariant keypoints. IJCV, 60(2):91–110, 2004. 2                   [57] David Schubert, Thore Goll, Nikolaus Demmel, Vladyslav
+[39] Maxime Meilland, Christian Barat, and Andrew Comport.                   Usenko, Jörg Stueckler, and Daniel Cremers. The TUM VI
+     3D high dynamic range dense visual SLAM and its applica-                benchmark for evaluating visual-inertial odometry. In IROS,
+     tion to real-time object re-lighting. In ISMAR, 2013. 2                 2018. 3
+[40] Maxime Meilland, Andrew Comport, and Patrick Rives.                [58] Yifei Shi, Kai Xu, Matthias Niessner, Szymon Rusinkiewicz,
+     Real-time dense visual tracking under large lighting varia-             and Thomas Funkhouser. PlaneMatch: Patch coplanarity
+     tions. In BMVC, 2011. 2                                                 prediction for robust RGB-D registration. In ECCV, 2018.
+[41] Maxime Meilland and Andrew I. Comport. On unifying key-                 7
+     frame and voxel-based dense visual SLAM at large scales. In        [59] Miroslava Slavcheva, Wadim Kehl, Nassir Navab, and Slo-
+     IROS, 2013. 2, 5, 6                                                     bodan Ilic. SDF-2-SDF: Highly accurate 3D object recon-
+[42] Maxime Meilland and Andrew I. Comport. Super-resolution                 struction. In ECCV, 2016. 2
+     3D tracking and mapping. In ICRA, 2013. 2                          [60] Jörg Stückler and Sven Behnke. Multi-resolution surfel maps
+[43] Maxime Meilland, Tom Drummond, and Andrew I. Com-                       for efficient dense 3D modeling and tracking. Journal of Vi-
+     port. A unified rolling shutter and motion blur model for 3D            sual Communication and Image Representation, 25(1):137–
+     visual registration. In ICCV, 2013. 2                                   147, 2014. 1, 2, 6
+[44] Raul Mur-Artal and Juan D. Tardós. ORB-SLAM2: An                  [61] Jürgen Sturm, Nikolas Engelhard, Felix Endres, Wolfram
+     open-source SLAM system for monocular, stereo, and RGB-                 Burgard, and Daniel Cremers. A benchmark for the eval-
+     D cameras. IEEE Transactions on Robotics, 33(5):1255–                   uation of RGB-D SLAM systems. In IROS, 2012. 1, 3, 6,
+     1262, 2017. 1, 2, 6, 8                                                  7
+[45] Richard A. Newcombe, Shahram Izadi, Otmar Hilliges,                [62] Bill Triggs, Philip F. McLauchlan, Richard I. Hartley, and
+     David Molyneaux, David Kim, Andrew J. Davison, Push-                    Andrew W. Fitzgibbon. Bundle adjustment – a modern
+     meet Kohi, Jamie Shotton, Steve Hodges, and Andrew                      synthesis. In International workshop on vision algorithms,
+     Fitzgibbon. KinectFusion: Real-time dense surface mapping               pages 298–372. Springer, 1999. 1, 5
+     and tracking. In ISMAR, 2011. 1, 2, 3                              [63] Shinji Umeyama. Least-squares estimation of transformation
+[46] Richard A. Newcombe, Steven J. Lovegrove, and Andrew J.                 parameters between two point patterns. PAMI, 13(4):376–
+     Davison. DTAM: Dense tracking and mapping in real-time.                 380, 1991. 7
+     In ICCV, 2011. 1                                                   [64] Antoni Rosinol Vidal, Henri Rebecq, Timo Horstschae-
+[47] Matthias Nießner, Michael Zollhöfer, Shahram Izadi, and                fer, and Davide Scaramuzza. Ultimate SLAM? Combining
+     Marc Stamminger. Real-time 3D reconstruction at scale us-               Events, Images, and IMU for Robust Visual SLAM in HDR
+     ing voxel hashing. In SIGGRAPH Asia, 2013. 2, 6                         and High-Speed Scenarios. IEEE Robotics and Automation
+[48] H. K. Nishihara. PRISM: A practical real-time imaging                   Letters, 3(2):994–1001, 2018. 1
+     stereo matcher. In Technical Report A.I. Memo 780, MIT,            [65] Hao Wang, Jun Wang, and Liang Wang. Online reconstruc-
+     Cambridge, MA, 1984. 7                                                  tion of indoor scenes from RGB-D streams. In CVPR, 2016.
+[49] Jaesik Park, Qian-Yi Zhou, and Vladlen Koltun. Colored                  2
+     point cloud registration revisited. In ICCV, 2017. 2               [66] Oliver Wasenmüller, Marcel Meyer, and Didier Stricker.
+[50] Seonwook Park, Thomas Schöps, and Marc Pollefeys. Illu-                CoRBS: Comprehensive RGB-D benchmark for SLAM us-
+     mination change robustness in direct visual SLAM. In ICRA,              ing Kinect v2. In WACV, 2016. 3
+     2017. 6                                                            [67] Thibaut Weise, Thomas Wismer, Bastian Leibe, and Luc
+[51] Stephan R. Richter, Zeeshan Hayder, and Vladlen Koltun.                 Van Gool. Online loop closure for real-time interactive 3D
+     Playing for benchmarks. In ICCV, 2017. 3                                scanning. CVIU, 115(5):635–648, 2011. 1, 2
+[52] Erik Ringaby and Per-Erik Forssén. Scan rectification for         [68] Thomas Whelan, Michael Kaess, Hordur Johannsson, Mau-
+     structured light range sensors with rolling shutters. In ICCV,          rice Fallon, John J. Leonard, and John McDonald. Real-
+     2011. 6                                                                 time large scale dense RGB-D SLAM with volumetric fu-
+[53] Olivier Saurer, Marc Pollefeys, and Gim Hee Lee. Sparse to              sion. IJRR, 2014. 1, 2, 6
+     Dense 3D Reconstruction from Rolling Shutter Images. In            [69] Thomas Whelan, Stefan Leutenegger, Renato F. Salas-
+     CVPR, 2016. 1, 7                                                        Moreno, Ben Glocker, and Andrew J. Davison. ElasticFu-
+[54] Johannes L. Schönberger and Jan-Michael Frahm. Structure-              sion: Dense SLAM without a pose graph. In RSS, 2015. 1,
+     from-Motion Revisited. In CVPR, 2016. 1, 4, 5                           2, 3, 6, 7
+
+
+
+
+                                                                      143
+[70] Zhixin Yan, Mao Ye, and Liu Ren. Dense visual SLAM with
+     probabilistic surfel map. TVCG, 23(11):2389–2398, 2017.
+     2, 6
+[71] Yinda Zhang, Sameh Khamis, Christoph Rhemann, Julien
+     Valentin, Adarsh Kowdle, Vladimir Tankovich, Michael
+     Schoenberg, Shahram Izadi, Thomas Funkhouser, and Sean
+     Fanello. ActiveStereoNet: End-to-end self-supervised learn-
+     ing for active stereo systems. In ECCV, 2018. 7
+[72] Qian-Yi Zhou and Vladlen Koltun. Simultaneous local-
+     ization and calibration: Self-calibration of consumer depth
+     cameras. In CVPR, 2014. 3
+[73] Michael Zollhöfer, Patrick Stotko, Andreas Görlitz, Chris-
+     tian Theobalt, Matthias Nießner, Reinhard Klein, and An-
+     dreas Kolb. State of the art on 3D reconstruction with RGB-
+     D cameras. In Eurographics, 2018. 3, 4
+
+
+
+
+                                                                    144
+

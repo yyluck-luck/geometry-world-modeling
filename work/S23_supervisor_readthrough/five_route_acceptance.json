@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "recorded_at_utc": "2026-09-06T13:59:45.228258+00:00",
+  "recorded_at_asia_shanghai": "2026-09-06T21:59:45.228258+08:00",
+  "source_commit": "207bc6f7a1aa107e544099c2c7cc86816fba9628",
+  "applies_to": "Each of five logical innovation routes; actual concurrent execution remains resource-limited.",
+  "route_template": {
+    "route_id": null,
+    "author_agent": null,
+    "created_at_utc": null,
+    "hypothesis_version": null,
+    "status": "proposed_unvalidated",
+    "required_fields": {
+      "important_failure": null,
+      "falsifiable_hypothesis": null,
+      "nearest_prior_art": null,
+      "mechanism_difference": null,
+      "legal_inputs": null,
+      "minimal_discriminating_test": null,
+      "fairness_and_completeness": null,
+      "decision": null,
+      "local_feasibility_and_downstream": null,
+      "independent_confirmation": null
+    }
+  },
+  "field_definitions": [
+    {
+      "id": "important_failure",
+      "question_zh": "强基线在哪个必要条件下失败，该失败为何影响原 proposal？",
+      "evidence": [
+        "real input identity and timestamps",
+        "complete relevant curves",
+        "failure definition",
+        "downstream consequence or explicitly untested consequence"
+      ]
+    },
+    {
+      "id": "falsifiable_hypothesis",
+      "question_zh": "修改何对象、用何允许信息、通过何机制改善何输出，何时应无效？",
+      "evidence": [
+        "one-sentence mechanism hypothesis",
+        "predicted positive and null conditions"
+      ]
+    },
+    {
+      "id": "nearest_prior_art",
+      "question_zh": "最近 3–5 个近邻工作的机制与本候选有何差别？",
+      "evidence": [
+        "primary paper or official code",
+        "location and retrieval receipt",
+        "object/mechanism/input-granularity/setting comparison"
+      ],
+      "warning": "Search not finding a duplicate does not establish firstness; never invent 3-5 citations to satisfy a count."
+    },
+    {
+      "id": "mechanism_difference",
+      "question_zh": "去掉新部件退化成什么，何种简单替代解释可能同样有效？",
+      "evidence": [
+        "state/action/formula/interface difference",
+        "simple competing explanation or matched null control"
+      ]
+    },
+    {
+      "id": "legal_inputs",
+      "question_zh": "推理信息在当时是否可得，是否使用 GT、未来帧或测试标签？",
+      "evidence": [
+        "input allowlist",
+        "causal timing",
+        "GT scoring boundary",
+        "oracle label where applicable"
+      ]
+    },
+    {
+      "id": "minimal_discriminating_test",
+      "question_zh": "哪个最低成本干预可以区分本机制与替代解释？",
+      "evidence": [
+        "hypothesis",
+        "comparison",
+        "variables",
+        "controls",
+        "metrics",
+        "pre-run selection rule",
+        "stop conditions"
+      ]
+    },
+    {
+      "id": "fairness_and_completeness",
+      "question_zh": "基线、预算和精度适配是否公平，是否保留所有冻结条件及失败？",
+      "evidence": [
+        "source version",
+        "manifest",
+        "patch",
+        "compatibility receipt",
+        "runtime and memory",
+        "all frozen outcomes including failures and nulls"
+      ]
+    },
+    {
+      "id": "decision",
+      "question_zh": "结果支持、否定或尚不能判定什么，下一步为何值得做？",
+      "evidence": [
+        "continue/revise/reject/defer",
+        "reason tied to evidence",
+        "preserved rejected versions"
+      ]
+    },
+    {
+      "id": "local_feasibility_and_downstream",
+      "question_zh": "本地先执行什么，如何接回几何相关指标和生成消费者？",
+      "evidence": [
+        "local command or experiment interface",
+        "resource limit",
+        "integration path",
+        "unresolved generation dependency"
+      ]
+    },
+    {
+      "id": "independent_confirmation",
+      "question_zh": "如何避免在已见场景上选条件并把它当盲测？",
+      "evidence": [
+        "exploration/confirmation split",
+        "frozen rule",
+        "independent-condition plan or actual receipt"
+      ]
+    }
+  ],
+  "gate_order": [
+    {
+      "id": "G0",
+      "name": "Observed problem and hypothesis",
+      "advance_if": "Real condition and important failure are identified, or an explicit plan will test whether the hypothesized failure exists.",
+      "cannot_claim": "A residual by itself proves memory failure or generated-video degradation."
+    },
+    {
+      "id": "G1",
+      "name": "Prior-art and fatal-flaw audit",
+      "advance_if": "Mechanism difference is precise and no unrepairable flaw, known direct duplicate, or current data-refuted premise invalidates this version.",
+      "cannot_claim": "A favorable self-score proves novelty or top-venue quality."
+    },
+    {
+      "id": "G2",
+      "name": "Frozen minimal discriminating experiment",
+      "advance_if": "Inputs, comparison, control, metric, decision and stop conditions are committed before new test execution.",
+      "cannot_claim": "Previously inspected TUM results are blinded confirmation."
+    },
+    {
+      "id": "G3",
+      "name": "Real mechanism evidence",
+      "advance_if": "Actual runs distinguish the proposed mechanism from key simpler explanations with transparent costs, nulls, and scope.",
+      "cannot_claim": "A local geometry gain equals full generative-system improvement."
+    },
+    {
+      "id": "G4",
+      "name": "Generalization and proposal integration",
+      "advance_if": "Claim-matched independent conditions and the relevant generation consumer confirm utility, with strongest nearby baselines and complete evidence.",
+      "cannot_claim": "Internal gate passage guarantees external acceptance or an advisor response."
+    }
+  ],
+  "decision_enum": [
+    "continue",
+    "revise",
+    "reject",
+    "defer"
+  ],
+  "decision_rules": {
+    "fatal_flaw_rule": "Use evidence and repairability, not the contradictory upstream automatic MAJOR-count rule.",
+    "untested_rule": "An untested but coherent candidate may proceed to a low-cost falsifier; untested does not mean disproven.",
+    "rejected_rule": "Do not revive a rejected mechanism by renaming it. A materially changed premise requires an explicit version and new test.",
+    "replication_rule": "Repeat where randomness, sampling, or relevant noise can affect conclusions; do not mechanically repeat deterministic runs.",
+    "failure_rule": "Preserve failed runs and missing/null data; never relabel synthetic or oracle results as real deployable improvement.",
+    "permissions_rule": "The user authorized local research. Do not add approval gates inferred from vague skill wording; do not claim personal user comprehension, hours, or endorsement."
+  },
+  "project_state_cutoff_utc": "2026-09-06T13:45:05.014983+00:00",
+  "shared_baseline_context": {
+    "existing_methods": [
+      "CUT3R",
+      "TTT3R",
+      "FILT3R"
+    ],
+    "data": "Previously seen TUM fr2_desk 300-frame segment",
+    "generation_completed": false,
+    "project_new_method_established": false,
+    "independent_author_metric_audit_completed": false
+  }
+}

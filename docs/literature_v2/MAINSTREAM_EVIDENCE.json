@@ -1,0 +1,824 @@
+{
+  "schema_version": 1,
+  "research_brief": "docs/LITERATURE_RESEARCH_BRIEF_V2.md",
+  "branch": "主流方法：geometry-aware world model × persistent/spatial memory",
+  "search_started_utc": "2026-09-05T15:56:54Z",
+  "last_completed_source_retrieval_utc": "2026-09-05T16:05:51Z",
+  "recorded_at_utc": "2026-09-05 16:29:39 UTC",
+  "timezone": "Asia/Shanghai",
+  "timing_note": "检索跨越本地午夜：2026-09-05 23:56:54至2026-09-06 00:05:51；之后因用户消息中断、恢复整理。记录时间不是搜索耗时。中断的最后一次调用不计完成证据。",
+  "methods": [
+    "独立先广搜，再根据论文名/引用网络窄搜，最后进行反证/近期盲点查漏。",
+    "每篇先核完整标题/作者，再读原论文有关章节与表格。",
+    "可用论文均为VERIFIED，但只限下列具体主张；这不代表复现成功或同设定公平性已全部验证。",
+    "未扩展研究实验、未修改协议/记忆、未观看并测量论文视频，也未调用Claude模型。"
+  ],
+  "coverage_note": "8条核心覆盖几何重建、几何索引、全局融合、局部几何、3D patch、隐式几何监督、3D latent memory。2条边界补充避免把三维记忆视为唯一原因。并非所有研究小方向都已完成三篇覆盖；整个三分支综述需父任务合并审查。",
+  "exclusions": [
+    {
+      "item": "第三方文章、HuggingFace AI摘要、alphaXiv解读、聚合榜单",
+      "reason": "仅用作发现线索；机制和数值只据原论文/官方作者资源。"
+    },
+    {
+      "item": "AbdelStark/mosaicmem Rust项目",
+      "reason": "搜索结果自称synthetic scaffold，非官方实现，不作为真实模型复现证据。"
+    },
+    {
+      "item": "WorldDirector、FILT3R、TTT3R、Gen3C、Voyager、WorldMem、StarGen、Context-as-Memory",
+      "reason": "本分支仅作已发现/被引线索，未完成独立两步主张核验，不使用它们的独立技术断言；相邻或评价分支可另核。TTT3R作为AnchorWeave论文声明的上游归属可描述。"
+    },
+    {
+      "item": "LSM-World搜索索引Mirage名称",
+      "reason": "保留版本差异；细节及Table3/4来自v2，不混用名称。"
+    },
+    {
+      "item": "AnchorWeave正文90%与附录80%去噪控制范围",
+      "reason": "原文不一致，未选择某值作为已定实现。"
+    },
+    {
+      "item": "GIM项目页",
+      "reason": "web返回不可安全打开；未绕过。论文全文仍可验证限定主张。"
+    },
+    {
+      "item": "未核实权重下载和MPS执行",
+      "reason": "有代码链接不等于checkpoint可下载、依赖齐全、Apple设备可运行。"
+    }
+  ],
+  "residual_blindspots": [
+    "尚未在所有核心代码中逐行核对paper-to-code差异。",
+    "尚未对引用图作完整前向/后向计量；只沿实际发现的高相关链条追踪。",
+    "没有检索到完整四段因果实验不等于这种工作不存在。",
+    "近期工作多为arXiv预印本，会议身份未核的明确保留未核状态。"
+  ],
+  "queries": [
+    {
+      "round": "wide",
+      "time": {
+        "current_time": "2026-09-05 15:56:54 UTC"
+      },
+      "queries": [
+        "geometry aware world model persistent spatial memory video generation VMem CUT3R 2025 2026",
+        "world models long term 3D spatial memory camera controlled video 2026",
+        "VMem consistent interactive video scene generation spatial memory CUT3R"
+      ]
+    },
+    {
+      "round": "narrow-title-verification",
+      "time": {
+        "current_time": "2026-09-05 15:57:12 UTC"
+      },
+      "queries": [
+        "\"Continuous 3D Perception Model with Persistent State\" CUT3R",
+        "\"Latent Spatial Memory for Video World Models\" Wang",
+        "\"Geometry-Aware Implicit Memory for Video World Models\"",
+        "\"MosaicMem: Hybrid Spatial Memory for Controllable Video World Models\""
+      ]
+    },
+    {
+      "round": "narrow-citation-and-recency",
+      "time": {
+        "current_time": "2026-09-05 15:57:29 UTC"
+      },
+      "queries": [
+        "\"PERSIST: World Models with Persistent 3D State\"",
+        "\"Addressable Memory for Video World Models\"",
+        "\"Video World Models with Long-term Spatial Memory\" Spatia",
+        "\"VMem\" \"Gen3C\" memory 2026"
+      ]
+    },
+    {
+      "round": "claim-verification-fulltext",
+      "time": {
+        "current_time": "2026-09-05 15:58:02 UTC"
+      },
+      "urls": [
+        "https://arxiv.org/html/2506.18903",
+        "https://arxiv.org/html/2501.12387",
+        "https://arxiv.org/html/2506.05284",
+        "https://arxiv.org/html/2606.09828",
+        "https://arxiv.org/html/2606.02436",
+        "https://arxiv.org/html/2603.17117",
+        "https://arxiv.org/html/2603.03482",
+        "https://arxiv.org/html/2608.07408"
+      ]
+    },
+    {
+      "round": "blindspot-and-falsification",
+      "time": {
+        "current_time": "2026-09-05 15:58:43 UTC"
+      },
+      "queries": [
+        "\"Spatia: Video Generation with Updatable Spatial Memory\"",
+        "\"AnchorWeave: World-Consistent Video Generation with Retrieved Local Spatial Memories\"",
+        "\"VMem\" \"geometry\" \"noise\"",
+        "\"CUT3R\" \"persistent\" \"2026\" memory"
+      ]
+    },
+    {
+      "round": "claim-verification-fulltext",
+      "time": {
+        "current_time": "2026-09-05 15:59:11 UTC"
+      },
+      "urls": [
+        "https://arxiv.org/html/2512.15716",
+        "https://arxiv.org/html/2602.14941"
+      ]
+    },
+    {
+      "round": "resource-and-version-check",
+      "time": {
+        "current_time": "2026-09-05 16:05:51 UTC"
+      },
+      "urls": [
+        "https://arxiv.org/abs/{corpus_ids}",
+        "https://microsoft.github.io/LatentSpatialMemory/",
+        "https://spmem.github.io/",
+        "https://gim-world.github.io/"
+      ],
+      "notes": "GIM project page web safety error; no bypass attempted. Followed official code/project links for LSM, SPMem, AnchorWeave."
+    }
+  ],
+  "works": [
+    {
+      "id": "VMEM",
+      "role": "core",
+      "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "authors": [
+        "Runjia Li",
+        "Philip Torr",
+        "Andrea Vedaldi",
+        "Tomas Jakab"
+      ],
+      "first_posted": "2025-06-23",
+      "version": "2506.18903v3",
+      "version_date": "2025-08-14",
+      "venue": "ICCV 2025",
+      "existence_url": "https://arxiv.org/abs/2506.18903",
+      "fulltext_url": "https://arxiv.org/html/2506.18903v3",
+      "resource_urls": [
+        "https://v-mem.github.io/",
+        "https://github.com/runjiali-rl/vmem"
+      ],
+      "verification": {
+        "step1": "arXiv元数据、CVF论文和作者项目页的完整标题与四位作者相符。",
+        "step2": "已查§3.1、§4.1–4.4、Table4、Appendix C/D；以下主张与对应原文相符。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "粗surfel几何索引＋历史RGB/相机库",
+        "write": "CUT3R等估计点图；距离及法线阈值匹配，匹配时增加来源帧集合并丢弃新surfel；否则新建。",
+        "read": "从目标块平均pose渲染带来源的可见surfels；按像素覆盖投票并做pose NMS后选参考帧。",
+        "generator": "SEVA；主实验为LoRA微调K=4、M=4。"
+      },
+      "claims": [
+        {
+          "claim": "几何在这里主要负责选择历史RGB，不直接充当最终场景颜色渲染；作者明确提出只需足以选对参考的粗几何。",
+          "locator": "§1, §3.1"
+        },
+        {
+          "claim": "Table4在K=4时比较Temporal、Camera Distance、FOV、VMem，VMem的PSNR=14.82，camera-distance=13.27；这支持该评测中检索策略对生成的作用。",
+          "locator": "§4.4, Table4"
+        },
+        {
+          "claim": "K=17时VMem的rotation distance=0.892高于camera-distance=0.821；不能说所有指标全面最好。",
+          "locator": "Table4"
+        },
+        {
+          "claim": "官方论文桥接包含冻结用户相机、冻结旧深度的优化过程，独立CUT3R前向不能直接等同该步骤。",
+          "locator": "Appendix C"
+        }
+      ],
+      "conditions": [
+        "RealEstate10K及Tanks-and-Temples的cycle trajectories；返回路径为原路逆行。",
+        "K=4与K=17属于不同生成器配置；12倍速度数字包含上下文减少及LoRA适配，不能归为surfel更新规则的单因素效果。"
+      ],
+      "limitations": [
+        "Appendix D承认轨迹简单、遮挡有限，低层图像相似指标不等同真实多视图一致性。",
+        "本文未找到对连续几何误差幅值→来源关联→最终选帧→视频质量的独立剂量消融；这是本轮检索范围陈述。"
+      ],
+      "rq_support": {
+        "RQ1": "直接给出关联、写入、渲染选帧机制。",
+        "RQ2": "给出检索策略→生成指标消融；不提供改善点误差必改善生成的证据。",
+        "RQ3": "论文代码可定位组件；生成/微调成本与CPU组件核验分开。"
+      },
+      "relations": [
+        "使用CUT3R几何和SEVA生成；论文讨论Gen3C、WorldMem、StarGen作为相邻方法。",
+        "与AnchorWeave不同：保存surfels是为了取RGB参考，而后者渲染多个局部点云作为生成条件。"
+      ],
+      "availability": "已核官方项目和仓库存在；未下载或运行其生成权重。"
+    },
+    {
+      "id": "CUT3R",
+      "role": "core",
+      "title": "Continuous 3D Perception Model with Persistent State",
+      "authors": [
+        "Qianqian Wang",
+        "Yifei Zhang",
+        "Aleksander Holynski",
+        "Alexei A. Efros",
+        "Angjoo Kanazawa"
+      ],
+      "first_posted": "2025-01-21",
+      "version": "2501.12387v1",
+      "version_date": "2025-01-21",
+      "venue": "CVPR 2025",
+      "existence_url": "https://arxiv.org/abs/2501.12387",
+      "fulltext_url": "https://arxiv.org/html/2501.12387v1",
+      "resource_urls": [
+        "https://cut3r.github.io/",
+        "https://github.com/CUT3R/CUT3R"
+      ],
+      "verification": {
+        "step1": "作者项目、CVF论文及arXiv完整标题和五位作者一致。",
+        "step2": "核对Abstract、state update/readout、作者项目Online vs Revisiting和论文Limitations。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "固定的学习潜在state tokens",
+        "write": "每张RGB图像tokens与state交互，递归更新state。",
+        "read": "由图像/state读出pointmaps和camera；虚拟相机raymap可查询未观察结构。",
+        "generator": "几何回归网络，非视频扩散生成器。"
+      },
+      "claims": [
+        {
+          "claim": "模型提供在线共同坐标pointmaps与相机预测；动态/静态图像流及照片集合均为论文任务。",
+          "locator": "Abstract, Method"
+        },
+        {
+          "claim": "作者revisiting设置先看全序列，再冻结最终state重算同序列；该设置有全序列上下文。",
+          "locator": "作者项目页State Analysis"
+        },
+        {
+          "claim": "作者承认无global alignment时极长序列可漂移，远离已有视角的确定性结构预测可能模糊。",
+          "locator": "Limitations"
+        }
+      ],
+      "conditions": [
+        "在线前向与看完全部数据后的revisiting是不同上下文条件。",
+        "论文几何任务结果不含surfel历史参考选择或视频生成质量。"
+      ],
+      "limitations": [
+        "学习state更新能力不保证逐帧误差单调下降。",
+        "本轮不将论文最终模型精度等同本项目224 linear中间检查点。"
+      ],
+      "rq_support": {
+        "RQ1": "提供学习几何和隐式持续状态的上游。",
+        "RQ2": "只到重建/相机层，不能独立支持生成因果链。",
+        "RQ3": "官方代码/权重入口允许组件实验；硬件兼容性须本机另验。"
+      },
+      "relations": [
+        "被VMem与SPMem作为上游几何来源；AnchorWeave采用后继TTT3R线索。"
+      ],
+      "availability": "官方项目和仓库存在；本分支未运行模型。"
+    },
+    {
+      "id": "SPMEM",
+      "role": "core",
+      "title": "Video World Models with Long-term Spatial Memory",
+      "authors": [
+        "Tong Wu",
+        "Shuai Yang",
+        "Ryan Po",
+        "Yinghao Xu",
+        "Ziwei Liu",
+        "Dahua Lin",
+        "Gordon Wetzstein"
+      ],
+      "first_posted": "2025-06-05",
+      "version": "2506.05284v1",
+      "version_date": "2025-06-05",
+      "venue": "NeurIPS 2025",
+      "existence_url": "https://arxiv.org/abs/2506.05284",
+      "fulltext_url": "https://arxiv.org/html/2506.05284v1",
+      "resource_urls": [
+        "https://spmem.github.io/",
+        "https://github.com/spmem/spmem",
+        "https://proceedings.neurips.cc/paper_files/paper/2025/file/467655d26fcc207bca08915dc91964c6-Paper-Conference.pdf"
+      ],
+      "verification": {
+        "step1": "arXiv及NeurIPS官方论文完整标题/作者一致。",
+        "step2": "核对§3.2公式2、§4.4、作者项目及当前仓库README。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "静态全局point cloud/TSDF＋近期working frames＋稀疏episodic frames",
+        "write": "论文用CUT3R在线点图，TSDF标准加权平均融合静态结构。",
+        "read": "几何渲染作为空间条件，近期帧负责运动连续性，稀疏历史帧补细节。",
+        "generator": "CogVideoX框架"
+      },
+      "claims": [
+        {
+          "claim": "TSDF更新公式是既有加权平均；论文三种记忆各承担空间、短期动态和远期细节角色。",
+          "locator": "§3.2 Eq2"
+        },
+        {
+          "claim": "移除working/episodic memory的生成消融支持两者作用，不能直接推出TSDF更准确必导致更好检索。",
+          "locator": "§4.4, Figure5"
+        },
+        {
+          "claim": "截至本轮官方spmem/spmem公开了推理、训练、TSDF目录及数据/权重链接；当前README列出Depth-Anything-3依赖。",
+          "locator": "官方仓库README"
+        }
+      ],
+      "conditions": [
+        "数据构建时Mega-SaM处理完整视频；推理阶段论文用CUT3R。训练标注与在线输入需区分。",
+        "静态点云并不保存动态对象的完整演化状态。"
+      ],
+      "limitations": [
+        "论文关于TSDF抑制动态内容的描述不是任意动态/位姿误差条件的保证。",
+        "AnchorWeave写作时称SPMem未开源，不能据此断言2026-09仍未开源。",
+        "NeurIPS2025会议信息优先于当前仓库BibTeX中year=2026的出版年字段；引用时明确所指版本。"
+      ],
+      "rq_support": {
+        "RQ1": "已有将多次估计融合为静态记忆的直接先例。",
+        "RQ2": "模块消融检验生成条件互补；尚非关联/检索分层因果实验。",
+        "RQ3": "官方资源已公开，未验证本机推理或链接可下载性。"
+      },
+      "relations": [
+        "不是Spatia（2512.15716）；两者标题和作者均不同。",
+        "AnchorWeave对其作CogVideoX重实现，后者比较不等于运行当前官方代码。"
+      ],
+      "availability": "仓库/资源链接已读；未下载权重，未审查实际推理代码与论文的一致性。"
+    },
+    {
+      "id": "SPATIA",
+      "role": "core",
+      "title": "Spatia: Video Generation with Updatable Spatial Memory",
+      "authors": [
+        "Jinjing Zhao",
+        "Fangyun Wei",
+        "Zhening Liu",
+        "Hongyang Zhang",
+        "Chang Xu",
+        "Yan Lu"
+      ],
+      "first_posted": "2025-12-17",
+      "version": "2512.15716v1",
+      "version_date": "2025-12-17",
+      "venue": "CVPR 2026（存在官方CVF论文）",
+      "existence_url": "https://arxiv.org/abs/2512.15716",
+      "fulltext_url": "https://arxiv.org/html/2512.15716v1",
+      "resource_urls": [
+        "https://zhaojingjing713.github.io/Spatia/",
+        "https://openaccess.thecvf.com/content/CVPR2026/papers/Zhao_Spatia_Video_Generation_with_Updatable_Spatial_Memory_CVPR_2026_paper.pdf"
+      ],
+      "verification": {
+        "step1": "arXiv标题/六位作者匹配，CVF正式论文存在。",
+        "step2": "以下数值按arXiv v1核对§3.1/3.2、Table4/5/7；未逐字比较CVF版全部数值。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "静态场景point cloud＋历史参考帧",
+        "write": "MapAnything估计/更新全局场景，排除动态实体；点云可体素化降采样。",
+        "read": "渲染目标相机轨迹的场景视频＋空间重合参考帧。",
+        "generator": "Wan2.2与ControlNet"
+      },
+      "claims": [
+        {
+          "claim": "Table4有scene projection和reference frames的2×2消融：仅参考帧LPIPS_C=0.393，基线0.379；二者联合0.213。",
+          "locator": "Table4"
+        },
+        {
+          "claim": "体素尺寸0.01→0.07米时PSNR18.58→15.97，支持该数据上密度/细粒度条件的作用。",
+          "locator": "Table7"
+        },
+        {
+          "claim": "密度实验改变采样信息量，不是同密度下几何坐标准确性的消融。",
+          "locator": "Table7的实验操作；此为证据解释"
+        }
+      ],
+      "conditions": [
+        "空间记忆消融在WorldScore子集闭环；密度实验在RealEstate测试集与GT视频成对比较。",
+        "参考数、生成器条件、动态静态分离是多个可改变因素。"
+      ],
+      "limitations": [
+        "局部指标并非所有模块单独加上都改善；不能忽略参考帧单独的负例。",
+        "存在跨帧平均/更新功能本身已不是新的研究问题。"
+      ],
+      "rq_support": {
+        "RQ1": "显式更新和参考帧同时存在的近邻方法。",
+        "RQ2": "2×2消融和密度结果可指导分开评估各层；不能用密度代表误差。",
+        "RQ3": "已定位论文/项目；本分支未核权重可下载性和MPS运行。"
+      },
+      "relations": [
+        "与SPMem不同；被AnchorWeave与LSM-World讨论。"
+      ],
+      "availability": "论文全文可读；只确认项目URL在论文中，未进行本机复现。"
+    },
+    {
+      "id": "ANCHORWEAVE",
+      "role": "core-nearest",
+      "title": "AnchorWeave: World-Consistent Video Generation with Retrieved Local Spatial Memories",
+      "authors": [
+        "Zun Wang",
+        "Han Lin",
+        "Jaehong Yoon",
+        "Jaemin Cho",
+        "Yue Zhang",
+        "Mohit Bansal"
+      ],
+      "first_posted": "2026-02-16",
+      "version": "2602.14941v1",
+      "version_date": "2026-02-16",
+      "venue": "arXiv预印本；未另确认会议接收",
+      "existence_url": "https://arxiv.org/abs/2602.14941",
+      "fulltext_url": "https://arxiv.org/html/2602.14941v1",
+      "resource_urls": [
+        "https://zunwang1.github.io/AnchorWeave"
+      ],
+      "verification": {
+        "step1": "完整标题查询后，arXiv与作者项目的六位作者一致。",
+        "step2": "核对§3.2–3.5、§4.1/4.3、Table2/3、Appendix A/B/C；下面保留具体对照条件。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "逐帧局部point cloud及pose；放入共同世界坐标但各自独立保存",
+        "write": "TTT3R估计新帧局部几何；新生成帧追加到记忆库，避免单一全局融合。",
+        "read": "每8帧chunk以FOV预筛，再贪心增加可见覆盖，最多K=4局部anchor；多anchor attention与pose-guided fusion。",
+        "generator": "CogVideoX-I2V-5B和Wan2.2-TI2V-5B；训练新增控制器"
+      },
+      "claims": [
+        {
+          "claim": "直接把跨视图depth/pose不一致造成全局融合条件污染作为动机；局部记忆在生成条件端共同处理差异。",
+          "locator": "Abstract, §3.2"
+        },
+        {
+          "claim": "Table2全局/局部条件PSNR=16.31/20.96；同时全局条件为单anchor、局部为multi-anchor，因此不是只改变几何误差的单因素结论。",
+          "locator": "Table2, §4.3"
+        },
+        {
+          "claim": "Figure5/§4.3中简单平均的是多个anchor条件；pose-conditioned fusion更好，不能当作surfel坐标均值融合失败的直接证据。",
+          "locator": "Figure5, §4.3"
+        },
+        {
+          "claim": "定量主测500视频，每视频70帧中49为target、剩余21为可检索history；这为partial-revisit条件，未保证21帧时间均早于49帧。",
+          "locator": "§4.1"
+        },
+        {
+          "claim": "训练写明8×H100约一天；正文控制器在前90%去噪步骤使用，附录写80%，存在待澄清实现差异。",
+          "locator": "§4.1, Appendix A.1"
+        }
+      ],
+      "conditions": [
+        "Table3随K=1/2/4同时增加参考预算（最多6/12/24帧），不是固定预算检索策略比较。",
+        "Context-as-Memory、SPMem为作者重实现；后者使用TTT3R＋CogVideoX，勿称当前官方模型结果。",
+        "Appendix B正文称首rendered frame优先，伪代码初始化P_latest；具体初始anchor实现需查代码。"
+      ],
+      "limitations": [
+        "没有由本文已查表格隔离“几何误差本身→来源关联→选帧→生成”的全部中介变量。",
+        "公开项目展示three×81-frame轨迹是作者生成案例；本轮未观看/复现全部视频。",
+        "Table2 SSIM列按53.45/67.27呈现，Table3按0.6145/0.6435/0.6727；数字引用须保留原表尺度或明确归一化。"
+      ],
+      "rq_support": {
+        "RQ1": "当前最贴近几何误差、记忆结构与检索联合设计的工作。",
+        "RQ2": "有局部/全局和控制器消融，但几何与anchor数量的交织需明确。",
+        "RQ3": "新模型训练明显超出单机组件诊断规模；可先复核贪心检索与输入控制。"
+      },
+      "relations": [
+        "与VMem同做几何辅助检索，但把局部renderings作为直接条件。",
+        "明确引用Spatia、SPMem、TTT3R；不等同于验证surfel均值更新。"
+      ],
+      "availability": "作者项目存在Code按钮；跟进Code的最后一次工具调用被中断，未把具体仓库或权重可用状态记为已核实。"
+    },
+    {
+      "id": "MOSAICMEM",
+      "role": "core",
+      "title": "MosaicMem: Hybrid Spatial Memory for Controllable Video World Models",
+      "authors": [
+        "Wei Yu",
+        "Runjia Qian",
+        "Yumeng Li",
+        "Liquan Wang",
+        "Songheng Yin",
+        "Sri Siddarth Chakaravarthy P",
+        "Dennis Anthony",
+        "Yang Ye",
+        "Yidi Li",
+        "Weiwei Wan",
+        "Animesh Garg"
+      ],
+      "first_posted": "2026-03-17",
+      "version": "2603.17117v1",
+      "version_date": "2026-03-17",
+      "venue": "arXiv预印本；未另确认会议接收",
+      "existence_url": "https://arxiv.org/abs/2603.17117",
+      "fulltext_url": "https://arxiv.org/html/2603.17117v1",
+      "resource_urls": [],
+      "verification": {
+        "step1": "完整标题查询并以arXiv核对十一位作者。",
+        "step2": "核对Abstract、§2、§3、§4.2，尤其保留两个warping分支的不同表现。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "带3D位置的patch记忆",
+        "write": "将patch提升到3D保存，用patch-and-compose提供对齐条件。",
+        "read": "针对查询视角取patch并组合；Warped Latent和Warped RoPE补对齐。",
+        "generator": "视频扩散＋PRoPE相机条件"
+      },
+      "claims": [
+        {
+          "claim": "作者同时处理相机遵循、历史复用和动态变化；显式3D patch与原生成条件结合。",
+          "locator": "Abstract, §2"
+        },
+        {
+          "claim": "§4.2报告Warped Latent的相机运动更准，但视觉和memory retrieval弱于Warped RoPE；后者又在自回归图像边缘重复生成新物体。",
+          "locator": "§4.2"
+        },
+        {
+          "claim": "大相机运动会使单独Mosaic Memory检索不到足够patch，不能把有3D索引等同有充分条件。",
+          "locator": "§4.2"
+        }
+      ],
+      "conditions": [
+        "数据含UE5、游戏、真实第一人称和Sekai；depth/pose以DA3或VIPE估计并过滤低质项。",
+        "估计几何标注不是完全无噪真值。"
+      ],
+      "limitations": [
+        "这里memory retrieval性能由其生成评测定义，不能直接等同离散top-K帧ID正确率。",
+        "非官方Rust搜索结果自称synthetic scaffold，不作为官方实现或实验证据。"
+      ],
+      "rq_support": {
+        "RQ1": "3D patch而非整帧或全局surface的记忆路线。",
+        "RQ2": "相机控制较好但其它质量较差的明确取舍，反对单指标代替全部结果。",
+        "RQ3": "公开论文可读；本轮未确认官方代码/权重和本机可行性。"
+      },
+      "relations": [
+        "与AnchorWeave都利用局部对齐；前者重点patch组合和动态能力，后者保留逐帧局部点云并多anchor条件融合。"
+      ],
+      "availability": "只核实论文；没有采用搜索结果中的非官方Rust项目。"
+    },
+    {
+      "id": "GIMWORLD",
+      "role": "core",
+      "title": "Geometry-Aware Implicit Memory for Video World Models",
+      "authors": [
+        "Zhengxuan Wei",
+        "Xu Guo",
+        "Xinghui Li",
+        "Xunzhi Xiang",
+        "Min Wei",
+        "Yiran Zhu",
+        "Qiulin Wang",
+        "Xintao Wang",
+        "Pengfei Wan",
+        "Xiangwang Hou",
+        "Qi Fan"
+      ],
+      "first_posted": "2026-06-01",
+      "version": "2606.02436v1",
+      "version_date": "2026-06-01",
+      "venue": "arXiv预印本；未另确认会议接收",
+      "existence_url": "https://arxiv.org/abs/2606.02436",
+      "fulltext_url": "https://arxiv.org/html/2606.02436v1",
+      "resource_urls": [
+        "https://gim-world.github.io/"
+      ],
+      "verification": {
+        "step1": "完整标题查询，arXiv作者字段与正文署名一致。",
+        "step2": "核对§3.2–3.5、§4.1、Table1/2/3/4；只使用表内与条件相符的数值。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "固定数量implicit memory tokens",
+        "write": "轻量encoder把带pose的历史压缩为state；训练用可由camera查询的head对齐VGGT几何特征。",
+        "read": "几何teacher/head推理时丢弃；GP互信息贪心历史pruning限制编码成本。",
+        "generator": "记忆encoder/geometry head/backbone联合训练"
+      },
+      "claims": [
+        {
+          "claim": "Table2的memory geometry监督将Reproj.58.80→81.70，而MSE0.0628→0.0614，改善幅度因指标而不同。",
+          "locator": "Table2"
+        },
+        {
+          "claim": "Table3在K=200相同预算下比较Uniform、Camera FPS、MI greedy，明确把历史选择规则单独作为实验因素。",
+          "locator": "Table3"
+        },
+        {
+          "claim": "训练/测试为MIND的100第一人称及100第三人称UE5片段，按50/50拆分，每个评测片段前约四分之一作为context。",
+          "locator": "§4.1"
+        }
+      ],
+      "conditions": [
+        "前置context不是单图起步；合成UE5视频不是实际RGB-D测量。",
+        "Table1的第一人称translation RPE，Context-as-Memory0.0235低于GIM0.0247，因此不能写全面最优。"
+      ],
+      "limitations": [
+        "几何feature监督不是测量级depth精度提升的直接证明。",
+        "正文Table2段落将0.4823称作比较起点，那是Geometry Forcing行；无geometry行为0.5028。引用数值应按表格辨别。",
+        "项目URL被web工具判为不可安全打开；没有绕过，论文核验不受影响，代码/权重不宣称可用。"
+      ],
+      "rq_support": {
+        "RQ1": "几何可约束隐式记忆，非必须维护显式点图。",
+        "RQ2": "同预算pruning及监督位置消融是可参考的区分设计。",
+        "RQ3": "全文与评测定义可读；本轮未确认可运行资源。"
+      },
+      "relations": [
+        "不同于VMem/AnchorWeave在推理时依赖显式几何；GIM将几何知识在训练时压入latent memory。"
+      ],
+      "availability": "arXiv全文可读；作者项目打开失败，未核代码/权重。"
+    },
+    {
+      "id": "LSMWORLD",
+      "role": "core",
+      "title": "Latent Spatial Memory for Video World Models",
+      "authors": [
+        "Weijie Wang",
+        "Haoyu Zhao",
+        "Yifan Yang",
+        "Feng Chen",
+        "Zeyu Zhang",
+        "Yefei He",
+        "Zicheng Duan",
+        "Donny Y. Chen",
+        "Yuqing Yang",
+        "Bohan Zhuang"
+      ],
+      "first_posted": "2026-06-08",
+      "version": "2606.09828v2",
+      "version_date": "2026-08-27",
+      "venue": "arXiv预印本；未另确认会议接收",
+      "existence_url": "https://arxiv.org/abs/2606.09828",
+      "fulltext_url": "https://arxiv.org/html/2606.09828v2",
+      "resource_urls": [
+        "https://microsoft.github.io/LatentSpatialMemory/",
+        "https://github.com/microsoft/LatentSpatialMemory"
+      ],
+      "verification": {
+        "step1": "完整标题查询并核对arXiv十位作者，v2页及项目称LSM-World。",
+        "step2": "核对v2 §4、§5.3 Table3/4、Limitations和当前官方README。",
+        "grade": "VERIFIED",
+        "correction": "搜索索引摘要仍称Mirage；以2026-08-27 v2的LSM-World为准，不混用v1名称与v2消融。"
+      },
+      "method_signature": {
+        "representation": "世界坐标中的3D latent tokens",
+        "write": "将原生VAE网格latent按depth反投影；过滤动态/天空后跨chunk写入。",
+        "read": "直接在latent分辨率投影/warp，供ControlNet-style branch使用。",
+        "generator": "Wan2.2-TI2V-5B＋side branch及LoRA"
+      },
+      "claims": [
+        {
+          "claim": "Table3保持backbone/training，RGB-cache替换相对latent-cache降低WorldScore平均70.36→67.71；测试的是表示和条件路径。",
+          "locator": "§5.3 Table3"
+        },
+        {
+          "claim": "Table4只换depth source，DA3/MapAnything/UniDepth平均70.36/69.66/69.13；作者称变化温和，支持对若干重建器的鲁棒性。",
+          "locator": "§5.3 Table4"
+        },
+        {
+          "claim": "去掉dynamic filter大幅降低其3D/photo consistency；论文明确不会跨chunk保存动态actor状态。",
+          "locator": "Table3, Limitations"
+        }
+      ],
+      "conditions": [
+        "depth-source表没有同时给出独立真实depth误差，不能把它当深度精度与生成质量的量化单调函数。",
+        "缓存效率倍数为特定模型/设置的作者测量，不是M3 Max实测。"
+      ],
+      "limitations": [
+        "只能支持静态场景结构记忆的主要收益，不支持完整动态世界状态持久性。",
+        "当前README列出训练及依赖自有vace/lora checkpoint的推理入口；未证实权重已可直接下载。"
+      ],
+      "rq_support": {
+        "RQ1": "显式3D索引可承载latent特征，更新/读取与RGB点云不同。",
+        "RQ2": "最近直接检查depth source的相关工作，但不隔离来源关联/选帧中介。",
+        "RQ3": "当前代码可浏览；训练或端到端推理没有本机证据。"
+      },
+      "relations": [
+        "项目/论文比较Spatia、Voyager、Gen3C、VMem；代码致谢Spatia。",
+        "不同于GIM固定隐式state，LSM仍有显式3D坐标和depth-guided读写。"
+      ],
+      "availability": "官方仓库及训练/推理命令可读；未下载checkpoint、未执行。"
+    },
+    {
+      "id": "PERSIST",
+      "role": "boundary-complement",
+      "title": "Beyond Pixel Histories: World Models with Persistent 3D State",
+      "authors": [
+        "Samuel Garcin",
+        "Thomas Walker",
+        "Steven McDonagh",
+        "Tim Pearce",
+        "Hakan Bilen",
+        "Tianyu He",
+        "Kaixin Wang",
+        "Jiang Bian"
+      ],
+      "first_posted": "2026-03-03",
+      "version": "2603.03482v2",
+      "version_date": "2026-06-03",
+      "venue": "ICML 2026（作者项目标注）",
+      "existence_url": "https://arxiv.org/abs/2603.03482",
+      "fulltext_url": "https://arxiv.org/html/2603.03482v2",
+      "resource_urls": [
+        "https://francelico.github.io/persist.github.io/",
+        "https://github.com/francelico/PERSIST"
+      ],
+      "verification": {
+        "step1": "初始搜索别名PERSIST后校正为arXiv完整标题，八位作者匹配项目。",
+        "step2": "核对模型分解、作者项目实验域和Appendix E限制。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "随动作演化的3D voxel latent world",
+        "write": "world-frame模型预测3D状态演化，camera模型预测相机。",
+        "read": "将3D world latents投影给pixel生成模型。",
+        "generator": "world/camera/pixel多阶段世界模型"
+      },
+      "claims": [
+        {
+          "claim": "在Minecraft-inspired voxel环境中模拟3D状态，有长期稳定及用户研究证据。",
+          "locator": "作者项目, Experiments"
+        },
+        {
+          "claim": "训练依赖ground-truth 3D监督；作者限制部分明确此条件限制可用数据域。",
+          "locator": "Appendix E"
+        },
+        {
+          "claim": "作者仍报告长时间生成质量衰退，归因为训练真值条件与推理自预测条件的差异。",
+          "locator": "Appendix E"
+        }
+      ],
+      "conditions": [
+        "体素模拟器及3D监督条件；不能直接迁移为真实单目照片世界生成已解决。"
+      ],
+      "limitations": [
+        "完整动态世界state方法不等同于以生成图像估计静态surfel记忆。"
+      ],
+      "rq_support": {
+        "RQ1": "拓宽记忆表示到主动演化3D状态。",
+        "RQ2": "结果有数据域及监督前提，不能归因于单一融合规则。",
+        "RQ3": "代码公开；本轮未运行或核验MPS。"
+      },
+      "relations": [
+        "与LSM静态cache形成任务边界对照；不作为本项目直接同设定baseline。"
+      ],
+      "availability": "作者项目和官方仓库已查；未运行。"
+    },
+    {
+      "id": "WORLDTRACE",
+      "role": "boundary-counterexample",
+      "title": "Addressable Memory for Video World Models",
+      "authors": [
+        "Xindi Wu",
+        "Sven Elflein",
+        "James Lucas",
+        "Olga Russakovsky",
+        "Laura Leal-Taixé",
+        "Despoina Paschalidou",
+        "Jonathan Lorraine",
+        "Aljoša Ošep"
+      ],
+      "first_posted": "2026-08-07",
+      "version": "2608.07408v1",
+      "version_date": "2026-08-07",
+      "venue": "arXiv预印本；NVIDIA页称ICML/F2S workshop，未认定ICML主会",
+      "existence_url": "https://arxiv.org/abs/2608.07408",
+      "fulltext_url": "https://arxiv.org/html/2608.07408v1",
+      "resource_urls": [
+        "https://research.nvidia.com/publication/2026-08_addressable-memory-video-world-models"
+      ],
+      "verification": {
+        "step1": "完整标题和八位作者由arXiv及NVIDIA原作者机构页面核对。",
+        "step2": "核对Abstract、方法与Appendix H.1；仅用与评测架构相关的机制断言。",
+        "grade": "VERIFIED"
+      },
+      "method_signature": {
+        "representation": "固定预算KV-cache summaries/landmarks",
+        "write": "Field在去RoPE相位空间压缩；Landmark保存检测到的scene-entry痕迹。",
+        "read": "给summary槽分配训练范围内的虚拟temporal RoPE位置以恢复attention寻址。",
+        "generator": "不重训的autoregressive video backbone"
+      },
+      "claims": [
+        {
+          "claim": "在被测架构中，超过训练范围的temporal RoPE可使已经缓存的内容难以读到；直接平均旋转后keys还会混入不兼容相位。",
+          "locator": "Abstract, §2–3"
+        },
+        {
+          "claim": "模型只改变cache内容/虚拟位置，不修改权重；依赖temporal RoPE和已知local attention window。",
+          "locator": "Appendix H.1"
+        },
+        {
+          "claim": "固定槽数仍有损；Landmark未捕获的场景、超过槽数的旧场景不可保证重访回忆。",
+          "locator": "Appendix H.1"
+        }
+      ],
+      "conditions": [
+        "针对KV-attention读写；不是对VMem surfel索引错误的实证。",
+        "作者实测A100 80GB，不能据training-free推断M3可完整运行。"
+      ],
+      "limitations": [
+        "这里只证明非几何机制也会造成长期遗忘，不支持所有video model的失败均来自RoPE。",
+        "另有Closed-Loop标题workshop稿，不与本次arXiv版本混记。"
+      ],
+      "rq_support": {
+        "RQ1": "记忆失败可能来自读出地址而非几何存储本身。",
+        "RQ2": "保留内容与成功读出应分开测，是对几何单因解释的边界反例。",
+        "RQ3": "可复核数学/小型cache实验；完整生成未验证本机。"
+      },
+      "relations": [
+        "作为显式几何路线外的反例补充，不占最接近三维记忆方法排名。"
+      ],
+      "availability": "原论文和机构页可读；未下载代码/权重或执行。"
+    }
+  ],
+  "file_completed_at_utc": "2026-09-05T16:32:36.386329+00:00"
+}

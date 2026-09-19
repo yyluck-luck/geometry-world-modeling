@@ -1,0 +1,27 @@
+{
+  "reviewed_utc": "2026-09-07T04:24:20.270747+00:00",
+  "review_kind": "independent static source review only; no import/test/network/download",
+  "source": "work/S39_auth_recovery/download_original_low_concurrency_attempt3.py",
+  "source_sha256": "af3fa6881ebad48d46752b12970ddd0f87954dabbd8e738cc0555ba944993d01",
+  "helper_sha256": "e303d1be1c4dfa512a180363aafd08c7b488721d7a26e8b1451d82ccd5e812ca",
+  "verdict": "NEEDS_PROCESS_GROUP_CLEANUP_CORRECTION",
+  "checks": {
+    "fresh_child_receives_confirmed_hf_xet_1_6_0_environment": "PASS",
+    "companion_all_verified_status_precedes_Popen": "PASS",
+    "stdout_stderr_and_errors_pass_helper_redaction": "PASS_STATIC_FOR_HTTP_URL_QUERIES_AND_HF_TOKEN_PATTERN",
+    "1800s_monotonic_download_and_full_hash_checks": "PASS_WITH_15S_MAX_CLEANUP_GRACE",
+    "full_size_SHA_and_file_stability_required_for_success": "PASS",
+    "process_group_survivor_cleanup": "NEEDS_CORRECTION"
+  },
+  "finding": {
+    "severity": "necessary exception-path correction",
+    "location": "finally: if child is not None and child.poll() is None; break after child.wait",
+    "issue": "The leader may have exited while a same-group descendant remains alive or holds stdout open. Cleanup is skipped when leader is already reaped, and may terminate early after TERM kills only the leader. This does not guarantee all descendants are stopped on the external deadline.",
+    "requested_change": "Probe the stored process group independently of leader poll; TERM the existing group, then check group existence and KILL survivors if needed. Record group_still_alive. Handle ProcessLookupError as group absent."
+  },
+  "runtime_validation": false,
+  "network_requests": 0,
+  "models_run": 0,
+  "script_modified": false,
+  "main_ledger_modified": false
+}

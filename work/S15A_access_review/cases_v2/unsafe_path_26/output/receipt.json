@@ -1,0 +1,50 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:47:18.173067+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:47:18.173239+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/150",
+        "Content-Length": "30",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:47:18.173260+00:00",
+      "bytes": 30,
+      "sha256": "0082cb2abc6ae3f41325085f215fe07e3fc75e669216c5c7cc84a1e50f5cf4d4"
+    },
+    {
+      "started_utc": "2026-09-06T09:47:18.173335+00:00",
+      "requested_range": "bytes=30-68",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 30-68/150",
+        "Content-Length": "39",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:47:18.173351+00:00",
+      "bytes": 39,
+      "sha256": "bb4e94bf133b3cdfdb5f52e986366665aa376edd816675a6fd1cb55dab8dd877"
+    }
+  ],
+  "members": [],
+  "body_bytes": 69,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "f82777cd43c1c05f94156735664519974d72191019762497bc276cec5a42fa59",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases_v2/unsafe_path_26/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 150,
+  "error": "ValueError('unsafe member path')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 116, in execute\n    data = unpack_member(header,rest,entry,c['max_member_uncompressed_bytes'])\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 54, in unpack_member\n    require(not path.is_absolute() and '..' not in path.parts and '\\\\' not in name and not name.endswith('/'), 'unsafe member path')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: unsafe member path\n",
+  "ended_utc": "2026-09-06T09:47:18.173795+00:00"
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "s35-launcher-independent-source-review-v1",
+  "status": "REVISION_REQUIRED_EXTERNAL_TIMING",
+  "passed": false,
+  "reviewed_utc": "2026-09-06T23:03:41.653895+00:00",
+  "reviewer": "/root/supervisor_full_readthrough",
+  "runner_sha256": "da1d6585720028063d2b4341525bf3c2ad89faafd1c8ed7e4905fc8013fe4d58",
+  "reviewed_original_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launch_original.py",
+  "preserved_reviewed_source": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/history_launcher_timing_revision/launch_original.py",
+  "identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/history_launcher_timing_revision/launch_original.py": "da1d6585720028063d2b4341525bf3c2ad89faafd1c8ed7e4905fc8013fe4d58",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launcher_contract.md": "e85052cb8d61e1edb55b285808ddaf8d3f1f891284d38b70f6131fe0d31b96f5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/resource_gate.py": "c949f85573b8fa23db59c8782354608cb6ca1334ea782712fcd9c334337df759",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/runtime_factory.py": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/integrate_original.py": "adf819e1cda3de4f830d2c3e5776664591607a0109d50f59cdc1addeb684b0ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57"
+  },
+  "full_read": [
+    "launch_original.py at da1d658 before root revision; identical preserved history now bound",
+    "launcher_contract.md"
+  ],
+  "necessary_revisions": [
+    {
+      "id": "phase2_boundary",
+      "location": "parent polling loop: phase2_start = previous_poll; previous_poll = now near loop end",
+      "problem": "A batch_complete can occur after the previous trace read but before its RSS/disk/monitor work completes. The stored previous_poll can therefore be later than the actual event, contradicting the documented conservative phase boundary and marginally extending phase2 allowance.",
+      "fix": "Retain monotonic start of each trace.poll; on first discovery use previous trace-poll start or t0 on first poll, independent of RSS bookkeeping."
+    },
+    {
+      "id": "maximum_poll_gap",
+      "location": "maximum_poll_gap_seconds computed on loop entry against previous loop work-end timestamp",
+      "problem": "This omits the current trace parsing and RSS/disk sample work, so it does not measure the documented complete resource sampling interval.",
+      "fix": "Measure consecutive actual RSS/disk sample completion timestamps; keep it separate from conservative trace boundary timing."
+    }
+  ],
+  "other_checks": {
+    "parent_missing_gate": "Parent metadata-only before psutil/Popen; worker full manifest/review/source/input/component checks before trace/science import; one full weight-hash pass.",
+    "runtime_route": "Same actual stable run_original signature and matching gate/trace/archive factories; no retry, reseed or reloaded second batch.",
+    "trace_boundary": "Incremental canonical seq/previous/SHA plus manifest/evidence-kind and actual retained1..4/history5 then5..8/history9. Boundary parser expressly not full science verifier.",
+    "process_limits": "Fresh process session, PID/create_time tracking, tree RSS and disk samples, TERM then KILL and preserved return/wait evidence. Monitor errors fail closed.",
+    "completion_scope": "Closed trace/archive or worker exit0 only PENDING_INDEPENDENT_REVIEW; failure/limit/residual descendants prevent external completed status.",
+    "fresh_outputs": "Fresh execution/output roots and exclusive terminal files; no successful-phase re-execution."
+  },
+  "validation": {
+    "python_executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "python_version": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "ast_parse_and_in_memory_compile": "PASS",
+    "module_import_or_launcher_execution": false,
+    "array_weight_image_gt_read": false,
+    "artificial_tests_executed": 0,
+    "scientific_runs": 0,
+    "network_requests": 0
+  },
+  "whole_run_approved": false,
+  "source_files_modified": false,
+  "receipt_write_note": "First metadata write attempt failed before creating any file because root had already preserved and revised the reviewed source. This receipt binds the identical old source in history, not the new version."
+}

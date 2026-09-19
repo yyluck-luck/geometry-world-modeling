@@ -1,0 +1,80 @@
+{
+  "completed_utc": "2026-09-08T13:15:37.806535+00:00",
+  "details": {
+    "fork_bound_execution": {
+      "interpreter_binding_sha256": "83fc9327c31ccbfbb4cc499c42f70718215c01f37c2b5f38f99dd5dc58bf4cae",
+      "interpreter_process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+      "ordinary_interpreter_path_reopened": false,
+      "ordinary_worker_path_reopened": false,
+      "schema": "s45b-v10-fork-bound-worker-execution-v1",
+      "worker_source": {
+        "bytes": 90476,
+        "device": 16777234,
+        "inode": 262359363,
+        "mode": 33188,
+        "sha256": "96d07f6f0c1c8c8bdfd1be57eb5725315b1dd340fbf25aec1c879066f7b9193b"
+      }
+    },
+    "memory_limit_exceeded": false,
+    "memory_monitor_failed": false,
+    "no_fork_sandbox_preflight_sha256": "86996731e1fa8e4bcd787187b846778d513cd6e38501776fb8afb21286b65a2d",
+    "output_limit_exceeded": false,
+    "resource_usage": {
+      "cpu_limit_seconds": 120,
+      "elapsed_seconds": 0.14864566700998694,
+      "expected_process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "max_observed_memory_bytes": 63062016,
+      "memory_mechanism": "Darwin proc_pid_rusage V4 plus exact-pid wait4 high-water evidence",
+      "memory_monitor_samples": 7,
+      "peak_phys_footprint_bytes": 59507024,
+      "peak_resident_size_bytes": 62095360,
+      "process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "rss_limit_bytes": 2147483648,
+      "stderr_bytes": 0,
+      "stderr_limit_bytes": 65536,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_limit_bytes": 65536,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "system_cpu_seconds": 0.017109,
+      "time_limit_seconds": 300.0,
+      "user_cpu_seconds": 0.106182,
+      "wait4_peak_rss_bytes": 63062016
+    },
+    "timed_out": false,
+    "worker_pid": 31636,
+    "worker_returncode": 0,
+    "worker_source": {
+      "bytes": 90476,
+      "lstat": {
+        "ctime_ns": 1788872391436923208,
+        "device": 16777234,
+        "inode": 262359363,
+        "mode": 33188,
+        "mtime_ns": 1788872391436923208,
+        "nlink": 1,
+        "size": 90476,
+        "type": "regular"
+      },
+      "no_process_creation_audit": {
+        "audit_sha256": "bf53be7553cd02e6c05073ebddf7b55c2ea340977ec07ef4b5a2f21c586e99dc",
+        "status": "PASS_EXACT_WORKER_NO_PROCESS_CREATION_AST"
+      },
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/camera_guard.py",
+      "sha256": "96d07f6f0c1c8c8bdfd1be57eb5725315b1dd340fbf25aec1c879066f7b9193b"
+    }
+  },
+  "error": "Held artifact lease changed: report.json",
+  "error_type": "ValueError",
+  "failed_phase": "WORKER_EVIDENCE_AND_SOURCE_REVALIDATION",
+  "images_viewed": 0,
+  "model_renderer_generation_runs": 0,
+  "passed": false,
+  "pixel_bodies_opened": 0,
+  "pixels_decoded": 0,
+  "schema": "s45b-c1-numeric-camera-guard-supervisor-failure-v1",
+  "status": "FAILED_OR_PARTIAL_C1_NUMERIC_CAMERA_SUPERVISION",
+  "terminal_authority": false,
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/supervise_camera_guard.py\", line 1954, in formal_supervision\n    initial_bundle = collect_evidence_bundle(\n        worker, parent_fd, HERE, parent_identity,\n    ...<2 lines>...\n        leases, sorted(leases),\n    )\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/supervise_camera_guard.py\", line 543, in collect_evidence_bundle\n    name: verify_regular_lease(\n          ~~~~~~~~~~~~~~~~~~~~^\n        output_fd, Path(parent_path) / output_name, lease,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        expected_nlinks.get(name, 1),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/supervise_camera_guard.py\", line 379, in verify_regular_lease\n    require(record == lease[\"record\"] and body == lease[\"body\"],\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            \"Held artifact lease changed: \" + lease[\"record\"][\"name\"])\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/supervise_camera_guard.py\", line 107, in require\n    raise ValueError(message)\nValueError: Held artifact lease changed: report.json\n"
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "id": "automation",
+  "kind": "heartbeat",
+  "name": "每30分钟科研流程检查与接续",
+  "prompt": "继续本任务中已获用户授权的 Geometry-aware World Modeling 科研项目，项目位于 /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling。每次先读 AGENTS.md、RESEARCH_MEMORY.md、RESEARCH_LOG.md 最新条目和 docs/RESEARCH_WORKFLOW_CHECKLIST.md，核已有实验、下载进程和agent产物，避免重复成功实验。先执行科研流程检查，再继续最重要且本机可做的下一步。\n\n逐项核查：1. 当前阶段是否实际读并应用HKUSTDial/Supervisor-Skills相关技能，明确步骤、证据和未完成项；适用时使用 /Users/rocket/.claude/skills 下的本地科学批判、头脑风暴等skills，不调用Claude模型或CLI。2. 创新是否有具体假设、最相近原始论文对照、可推翻预测和公平基线，不把普通覆盖/门控/校准/工程优化或oracle包装成已成立的新方法。3. 新实验是否有输入和代码身份、GT隔离、样本与预算合同、运行前审读/冻结、失败保留和独立复核；旧结果的探索不能冒称未见测试。4. 是否使用适合当前问题的本机工具、数值脚本、已有Python环境以及必要的网络原文检索，保留真实调用与来源；无需要时注明原因，不为工具数量重复下载、模型或无关绘图。5. 独立可并行的实质子任务是否用多个agents，清楚区分作者自检与独立审计。6. 每次开始、完成、失败、纠错、转向是否以实际发生/记录时间、动作、结果、证据和下一步写主账。7. 主记忆、交接入口和用户快照是否对应当前真实状态。\n\n每轮将七项状态、证据、问题、纠正和下一步追加到 workflow_checks.jsonl，并通过 scripts/research_log.py 追加可读主账，更新RESEARCH_MEMORY.md。未通过项在已授权范围内修正后继续；未经证实的创新保持待验证，不保证老师反应。使用本机CPU/MPS和现有数据/权重，保留原proposal、旧报告、失败目录与冻结材料；区分合成、实测RGB-D、学习几何、检索组件和完整视频。用户是新手，解释用简单中文。输出交付快照在本任务workspace的outputs，主账在科研项目。\n\n用户已要求自主推进，不逐步重复询问；不发送邮件或导师消息，不申请需要提交个人信息的模型权限，不编造科研结果、学习工时、导师会议或最终提交。后续工作以主记忆为准，不固守旧阶段。常规无变化的检查只留本地记录；有实质结果、重要失败、阶段完成或必须由用户操作的问题时告知。完成全部可自主执行工作且无值得继续检查的事项时，记录仍缺的真实外部证据并停止此接续。",
+  "status": "ACTIVE",
+  "rrule": "RRULE:FREQ=MINUTELY;INTERVAL=30",
+  "target_thread_id": "01a071cd-ee82-7e03-a421-4f092ae4a13a",
+  "created_at": 1788618791960,
+  "updated_at": 1788666079473
+}

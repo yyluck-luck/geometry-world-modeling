@@ -1,0 +1,53 @@
+{
+  "schema": "s90-resumable-tar-index-v1",
+  "created_utc": "2026-09-11T09:57:00+00:00",
+  "purpose": "locate a matched JSON/RGB/depth basename using tar headers only",
+  "archive_commit": "855627f73a6fdd4db7fa150097a576f6e890c569",
+  "archive_name": "abc.tar",
+  "archive_bytes": 12064450560,
+  "scene": "00000",
+  "start_offset": 12605440,
+  "proxy": "http://127.0.0.1:7897",
+  "max_new_headers_per_invocation": 64,
+  "max_new_headers_total": 256,
+  "wall_seconds_per_invocation": 300,
+  "connect_timeout_seconds": 10,
+  "request_timeout_seconds": 25,
+  "transport_body_cap_bytes": 512,
+  "retry": 0,
+  "redirect_cap": 5,
+  "allowed_final_hosts": [
+    "huggingface.co",
+    "us.aws.cdn.hf.co"
+  ],
+  "stop": [
+    "first complete JSON/RGB/depth view in verified prefix",
+    "first out-of-scene header",
+    "first zero tar block",
+    "64 successful headers in one invocation",
+    "256 successful new headers total",
+    "300 cooperative seconds in one invocation",
+    "first transport, HTTP, range, length, tar, boundary, or duplicate error"
+  ],
+  "checkpoint_policy": "at-least-once network semantics; atomic INFLIGHT journal reconciles the common crash window, and offset+header hash mismatches are rejected",
+  "selection": "smallest complete five-digit basename in the verified scanned prefix, format development only",
+  "payload_policy": "tar headers only; no JSON/RGB/depth/segmentation bodies and no model execution",
+  "bindings": {
+    "s89_plan": {
+      "relative_path": "../../S89_matched_view_index/INDEX_PLAN.json",
+      "sha256": "d71131607884af528db294a94d82cd4d0c5255f33f11a3496a2a2b5d030f5917"
+    },
+    "s88_receipt": {
+      "relative_path": "../../S88_independent_geometry_data/rtmv_range_02/RECEIPT.json",
+      "sha256": "4582349f3e2283f4c9cc893d4dbc0ad6138d05c72a1b1232306b2da18eda3867"
+    },
+    "s90_probe_receipt": {
+      "relative_path": "../probe_01/RECEIPT.json",
+      "sha256": "e6c3159889cd78050a46a90b9887a6b6d5954f4e5836f92ff13281ee103009d2"
+    },
+    "s90_probe_header": {
+      "relative_path": "../probe_01/header.bin",
+      "sha256": "3a4453fbc7f6703e7c66490509243387986f91b376ac43bce1aee6db0ffe8f17"
+    }
+  }
+}

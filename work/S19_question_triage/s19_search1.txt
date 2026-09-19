@@ -1,0 +1,423 @@
+ICLR 2026 the 2nd Workshop on World Models (https://openreview.net/pdf/3ac33aeb6714efb99364fae4bc63238a8b62e5c0.pdf)
+citeturn312search12 [wordlim: 200] Published: 5 months ago; ICLR 2026 the 2nd Workshop on World Models ... To narrow the gap, we propose EvoWorld, a generative world model with explicit 3D reconstructed memory.Unlike conventional approaches that generate frames independently or rely solely on short-term dependencies, EvoWorld explicitly reconstructs and updates a 3D point cloud representation of the scene, which we term explicit 3D memory. ... • We propose a framework for evolving world generation that builds and updates an explicit 3D memory from generated videos.The reconstructed 3D geometry mitigates error accumulation, ensuring spatial consistency over time.
+The problem becomes even more evident when generating long video sequences, especially in looping scenarios where the camera returns to a previously visited location. During long or looping trajectories, geometry drifts: an agent revisiting a location (Fig. 1) finds its surroundings altered. This reveals a critical gap: the generated scene can change arbitrarily without an explicit memory of the environment.
+
+To narrow the gap, we propose EvoWorld, a generative world model with explicit 3D reconstructed memory. Unlike conventional approaches that generate frames independently or rely solely on short-term dependencies, EvoWorld explicitly reconstructs and updates a 3D point cloud representation of the scene, which we term explicit 3D memory. This explicit 3D memory provides structural priors that help maintain 3D consistency even over extended sequences.
+
+Our key insight is to use an explicit 3D memory as a guiding prior for video generation. As new frames are synthesized, this memory is dynamically updated via VGGT (Wang et al., 2025) in a feed-forward manner and projected onto future viewpoints to condition the generator. To enable fine-grained view control in 360° panoramic generation, we further introduce a spherical Plücker embedding to encode camera parameters. By explicitly incorporating the spatial cues projected from 3D memory, EvoWorld enhances realism, reduces temporal inconsistencies, and enables more controllable scene exploration. Crucially, EvoWorld alleviates the drifting problem, ensuring that previously visited locations remain consistent even when revisited later in the sequence.
+
+We curate the first thorough dataset, Spatial360, for long-range and looping exploration across simulated outdoor (Unity and UE5), Habitat indoor, and real-world scenes. We demonstrate that EvoWorld significantly outperforms state-of-the-art methods in both visual fidelity and 3D consistency.
+
+Our contributions are summarized as follows:
+
+• We propose a framework for evolving world generation that builds and updates an explicit 3D memory from generated videos. The reconstructed 3D geometry mitigates error accumulation, ensuring spatial consistency over time.
+--------------------------------------------------------------------------------
+Under review as a conference paper at ICLR 2026 (https://openreview.net/pdf?id=jdoW4zmDg3)
+citeturn312search13 [wordlim: 200] Published: 11 months ago; Under review as a conference paper at ICLR 2026 ... To address this core challenge, we introduce DeepVerse, a novel autoregressive world model that ... error accumulation (drift) by enforcing geometric constraints on spatial correlations. ... to combat long-term forgetting, we propose a global 4D memory bank that stores all historical ... generated sequences, ensuring spatiotemporal continuity in autoregressive generation.
+methods. Specifically, shifting the predictive target from pixels to 4D states inherently mitigates
+error accumulation (drift) by enforcing geometric constraints on spatial correlations. Furthermore,
+to combat long-term forgetting, we propose a global 4D memory bank that stores all historical
+states aligned to a common initial coordinate frame. During inference, DeepVerse retrieves relevant
+past states from this memory based on similarity to the current viewpoint. This retrieved context
+conditions the next prediction, ensuring the model maintains spatiotemporal coherence over extended
+sequences without catastrophic forgetting.
+To sum up, our contributions can be summarized as follows:
+079
+080
+081
+082
+083
+084
+085
+086
+087
+088
+089
+090
+• We introduce DeepVerse, an autoregressive framework for 4D world modeling, establishing
+foundational guidelines for architectural design in future interactive world model development.
+• We innovatively incorporate 4D information into an autoregressive world modeling framework. --------------------------------------------------------------------------------
+GitHub - Brack-Wang/raymap3r: This is the official implementation of RayMap3R. (ECCV 2026) · GitHub (https://github.com/Brack-Wang/raymap3r)
+citeturn312search0 [wordlim: 200] Crawled: last month; Streaming 3D Reconstruction for Dynamic Scenes.Existing streaming methods such as CUT3R and TTT3R can suffer from camera drift caused by moving objects. ... If you find this repository useful, please give it a star🌟 and consider citing our paper! ...   * State-Aware Smoothing — Adaptively smooths trajectories using acceleration and state change magnitude as an uncertainty signal ...     @article{wang2026raymap3r, ...       journal={arXiv preprint arXiv:2603.20588},
+
+### 🎉 Accepted by ECCV 2026 🎉
+
+Streaming 3D Reconstruction for Dynamic Scenes. Existing streaming methods such as CUT3R and TTT3R can suffer from camera drift caused by moving objects. RayMap3R identifies and suppresses dynamic regions at inference time without additional training or external models.
+
+If you find this repository useful, please give it a star🌟 and consider citing our paper!
+
+* * *
+
+## Overview
+
+Streaming feed-forward 3D reconstruction enables real-time joint estimation of scene geometry and camera poses from RGB images. However, without explicit dynamic reasoning, streaming models can be affected by moving objects, causing artifacts and drift.
+
+RayMap3R is a training-free streaming framework that addresses this by exploiting a key observation: RayMap predictions exhibit a static-scene bias. When only camera rays are provided without the actual image, the model reconstructs only the static background and ignores dynamic objects. We leverage this bias to identify and suppress dynamic regions at inference time.
+    cd src/croco/models/curope && python setup.py build_ext --inplace && cd -
+
+### Weights
+
+RayMap3R is training-free and reuses the public CUT3R checkpoint. Download `cut3r_512_dpt_4_64.pth` from CUT3R and place it under `weights/`:
+    
+    `weights/cut3r_512_dpt_4_64.pth
+    `
+
+### Run inference
+    
+    python infer.py \
+        --frames_dir /path/to/frames \
+        --weights weights/cut3r_512_dpt_4_64.pth \
+        --output_dir ./output \
+        --size 512
+
+Pass a directory of RGB frames (sorted lexicographically) to `--frames_dir`, or a video file to `--video`. Outputs (per-frame depth / confidence / color, camera intrinsics & poses, the camera trajectory, and a fused world point cloud `.ply`) are written to `--output_dir`. The run is headless (no viewer required).
+
+RayMap3R is fully automatic: during a short warm-up it measures camera rotation per sequence and selects the per-frame update rule and state-aware smoothing accordingly, then applies the dual-branch staticness gate (Sec. 3). No flags are needed.
+
+* * *
+
+## Citation
+
+If you find this work useful, please consider citing:
+    
+    @article{wang2026raymap3r,
+      title={RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction},
+      author={Wang, Feiran and Shang, Zezhou and Liu, Gaowen and Yan, Yan},
+      journal={arXiv preprint arXiv:2603.20588},
+      year={2026}
+    }
+
+* * *
+
+## Acknowledgements
+
+We thank the authors of CUT3R, TTT3R and DUST3R for their excellent work.
+
+## License
+
+This project is released under the MIT License.
+
+## About
+
+This is the official implementation of RayMap3R. (ECCV 2026)
+
+raymap3r.github.io/
+
+### Resources
+
+Readme
+
+License
+
+Activity
+
+### Stars
+
+15 stars
+
+### Watchers
+
+1 watching
+
+### Forks
+
+1 fork--------------------------------------------------------------------------------
+[2607.27036] Mitigating Compounding Error via Video Representation Regularization - Academus scientific article reader (https://academ.us/article/2607.27036/)
+citeturn312search1 [wordlim: 200] Published: last month; Crawled: 2 days ago; July 29, 2026 ... Our work establishes the first connection between autoregressive video drifting and model internal representations, adopts erank as a quantitative metric for error accumulation, reveals counterintuitive scaling limitations for video world models, and presents a simple yet effective regularization strategy to improve long video generation robustness. ... In contrast, a context consisting of merely tens of frames is sufficient to exhaust the GPU memory of a video world model. ... Nevertheless, these generated frames are inherently imperfect, which leads to rapid deterioration in video quality after tens of iterative generation steps, a phenomenon termed error accumulation, also referred to as drift, exposure bias, or compounding error.
+# Mitigating Compounding Error via Video Representation Regularization
+
+Taiye Chen, Qi Zhang, Yisen Wang^{1}
+Peking University
+
+July 29, 2026
+
+* * *
+
+#### Abstract
+
+Video diffusion-based world models enable long autoregressive video generation for robotics, autonomous driving and simulation tasks, yet sliding-window autoregressive inference suffers from severe error accumulation that degrades frame quality over time. Although this phenomenon has been widely observed, the underlying mechanism of compounding error and how to achieve stable long-horizon generation remain largely unresolved. In this paper, we investigate the internal representation dynamics of video world models and discover that compounding error is tightly coupled with dimensional collapse of hidden representations. Specifically, the effective rank of model representations sharply decreases at the onset of generation drift, revealing a strong connection between representational degradation and long-term rollout instability. Furthermore, we find that pure training data scaling fails to boost model resistance to error drift, contradicting mainstream scaling paradigms. --------------------------------------------------------------------------------
+PERSIST: World Models with Persistent 3D State (https://francelico.github.io/persist.github.io/)
+citeturn312search2 [wordlim: 200] Crawled: 2 months ago; ICML 2026 ... Interactive world models continually generate video by responding to a user's actions, enabling open-ended generation capabilities. ... This allows us to synthesize new frames with persistent spatial memory and consistent geometry. ... We further demonstrate novel capabilities, including synthesising diverse 3D environments from a single image, as well as enabling fine-grained, geometry-aware control over generated experiences by supporting environment editing and specification directly in 3D space. ... To investigate this question, we study world model learning in a Minecraft-inspired voxel environment.
+# Beyond Pixel Histories:
+World Models with Persistent 3D State
+
+Samuel Garcin^{*}^{1}^{†}, Thomas Walker^{*}^{1}^{†}, Steven McDonagh^{1}, Tim Pearce^{2}, Hakan Bilen^{1}, Tianyu He^{2},
+Kaixin Wang^{2}^{†}^{‡}, Jiang Bian^{2}
+
+## 
+ICML 2026
+
+^{1}University of Edinburgh, ^{2}Microsoft Research
+^{†}Corresponding Authors, ^{‡}Team Lead
+*Equal Contribution
+
+Paper Code arXiv 🤗 Models
+
+## Abstract
+
+Interactive world models continually generate video by responding to a user's actions, enabling open-ended generation capabilities. However, existing models typically lack a 3D representation of the environment, meaning 3D consistency must be implicitly learned from data, and spatial memory is restricted to limited temporal context windows. --------------------------------------------------------------------------------
+Matrix-Game 3.0: Real-Time and Streaming Interactive World Model with Long-Horizon Memory | alphaXiv (https://www.alphaxiv.org/abs/2604.08995v1)
+citeturn312search3 [wordlim: 200] Published: 4 months ago; Crawled: 4 days ago; A fundamental problem in interactive video generation is error accumulation. ... where $\hat{x}^i$x^i is the generated latent and $x^i$x i is the clean ground-truth latent at index $i$i. ... These provide the model with a mathematical description of the relative camera geometry between the current frame and the retrieved memory, helping it understand how textures and objects should shift as the viewpoint changes.
+## Error-Aware Architecture for Stable Rollouts
+
+A fundamental problem in interactive video generation is error accumulation. When a model generates a frame, any small imperfection becomes part of the "history" used to predict the next frame. Over hundreds of steps, these small errors compound, leading to visual artifacts or a complete breakdown of the scene.
+
+Matrix-Game 3.0 uses a Diffusion Transformer (DiT) architecture designed for self-correction. During training, the model maintains an error buffer $E$E. This buffer collects the residual $\delta$δ, defined as the difference between the model's prediction and the ground truth:
+
+$$\delta = \hat{x}^i - x^i$$δ=x^i−x i
+
+where $\hat{x}^i$x^i is the generated latent and $x^i$x i is the clean ground-truth latent at index $i$i. The model then injects a perturbed version of the history, $\tilde{x}^i = x^i + \gamma \delta$x~i=x i+γ δ, back into the training process. This forces the model to learn how to produce stable, clean outputs even when its previous inputs are slightly "noisy" or imperfect.
+--------------------------------------------------------------------------------
+TeleWorld: Towards Dynamic Multimodal (https://www.znakschoola.ru/?_=%2Fpdf%2F2601.00051%23UE7DkG0PaBHZOakR54g1Wl8%3D)
+citeturn312search14 [wordlim: 200] Published: 6 months ago; Third, a world model needs to retain a certain memory of the generated world, which is ... memory remains a significant difficulty in the video generation path toward world models. ... error accumulation from the frame level to the segment level, enabling stable, high-quality generation over
+First, due to the structural limitations of multi-step denoising pipelines in video diffusion models, video
+generation is heavily restricted in meeting the real-time generation and interaction requirements of a world
+model. Second, long-term video generation still faces significant challenges with temporal consistency over
+extended durations. Extended world exploration and interaction often suffer from error accumulation and
+quality degradation. Third, a world model needs to retain a certain memory of the generated world, which is
+inherently four-dimensional—spanning the three dimensions of space and the dynamic dimension of time, just
+as human perception of the world. Existing world models and video generation approaches often only capture
+memory from past video sequences or three-dimensional representations, while achieving four-dimensional
+memory remains a significant difficulty in the video generation path toward world models. Finally, high-
+quality video generation models are typically computationally expensive, making it difficult to train and
+--------------------------------------------------------------------------------
+<visual_element id="e1"> (https://manifoldai.cn/assets/file/WorldScape.pdf)
+citeturn312search15 [wordlim: 200] Published: 5 months ago; Yet, state-of-the-art models [4, 5, 22] with high visual fidelity typically require minutes to generate a single video, far from real-time usage. ... In interactive world modeling, memory ensures that content generated over time remains part of a single, continuous world [24, 25]. ... Furthermore, to enable real-time autoregressive generation, we design a distillation architecture that converts the trained interactive and 3D-consistent full-sequence model into a fast causal diffusion model, using sliding-window self forcing to address both latency and error accumulation.Finally, to preserve long-range spatial memory during streaming interaction, we develop a memory-aware KV cache optimization framework with geometry-guided cache selection and hierarchical memory management, maintaining 3D coherence under bounded memory.
+However, how to efficiently propagate geometric knowledge in streaming generation remains underexplored.
+
+To address these challenges, we propose WorldScape, an autoregressive diffusion-based world modeling framework that achieves interactive, spatially consistent, real-time, and memory-aware video generation, as shown in Figure 1. We start from a full-sequence diffusion foundation model and first introduce a unified interaction-aware conditioning scheme that enables visual generation control for both spatial navigation and hand manipulation, achieving universal interactive capability. To enhance 3D spatial consistency in video generation, we then propose a spatial-aware consistency training framework that jointly optimizes flow matching with depth and rendering supervision derived from 3D Gaussian Splatting, effectively integrating geometric priors into the generative process. Furthermore, to enable real-time autoregressive generation, we design a distillation architecture that converts the trained interactive and 3D-consistent full-sequence model into a fast causal diffusion model, using sliding-window self forcing to address both latency and error accumulation. Finally, to preserve long-range spatial memory during streaming interaction, we develop a memory-aware KV cache optimization framework with geometry-guided cache selection and hierarchical memory management, maintaining 3D coherence under bounded memory. Taken together, our contributions lie in building an interactive world model that simultaneously achieves (1) unified navigation–manipulation control, (2) 3D spatial consistency, (3) real-time interaction of 16 FPS on a single H100 GPU, and (4) memory-preserving streaming generation.
+
+2--------------------------------------------------------------------------------
+Geometry-Aware Rotary Position Embedding for Consistent Video World Model (https://thrlvemurket.com/?_=%2Fpdf%2F2602.07854%232LHwtQTrZ4XkLaecG94sHNc%3D)
+citeturn312search16 [wordlim: 200] Published: 6 months ago; Submission and Formatting Instructions for ICML 2026 ... Model ... (2) Error accumulation in teacher-forcing models. ... At inference time, each frame is autoregressively conditioned on previously generated ... HY-WorldPlay maintains plausible appearance but exhibits geometric drift—building structures shift position upon ... layout, demonstrating strong long-term spatial memory.
+exceed the constant angular velocity seen during training. As a consequence, our model under-rotates (e.g., achieving ∼80°
+when 180° is requested), producing a large LCE at the return pose. HY-WorldPlay is trained on data with variable frame
+rates and employs Dual Action conditioning with RL-based post-training (WorldCompass) to explicitly optimize action
+following, making it more robust to such speed variation.
+(2) Error accumulation in teacher-forcing models. Our model is trained with teacher forcing, where the ground-truth
+context is provided during training. At inference time, each frame is autoregressively conditioned on previously generated
+frames, so errors compound over the longer sequences required by large-angle trajectories. HY-WorldPlay mitigates this
+through Context Forcing distillation and 4-step denoising with self-correction, substantially reducing error accumulation.
+These limitations are system-level and can be addressed independently of ViewRope. Combining ViewRope with advanced
+training strategies such as self-forcing (Huang et al., 2025b) and RL-based action post-training is a promising direction for
+--------------------------------------------------------------------------------
+Spatially Grounded Multiscale World Models for Multi-Agent AI Co-Scientists in Drug Discovery (https://sungsoo.github.io/2026/08/24/spatial-intelligence-world-models-ai-co-scientist-drug-discovery.html)
+citeturn312search4 [wordlim: 200] Published: last week; Crawled: 5 days ago; Spatial hallucination, model bias, long-horizon rollout error, cross-scale gap, hidden confounder를 다루지 않으면 world model은 정교한 자기확증 엔진이 될 수 있다. ... 존재하지 않는 transition law 안에서 self-consistent simulation을 반복할 수 있다.
+
+##### Uncertainty
+
+같은 biased model로 10만 번 가상실험해도 10만 번 틀릴 수 있다.
+
+##### Spatial hallucination
+
+존재하지 않는 residue contact, 불가능한 distance, stereochemistry 오류가 자연어로 생성될 수 있다.
+
+##### World-model hallucination
+
+존재하지 않는 transition law 안에서 self-consistent simulation을 반복할 수 있다.
+
+##### Hidden confounders
+
+batch, donor, cell cycle, culture condition을 biological law로 오인할 수 있다.
+
+##### Counterfactual generalization
+
+new target + new scaffold + new mutation + new cell type 조합이 핵심 난제다.
+
+##### Spatial–causal gap
+
+공간적으로 가깝다는 사실이 causal relation을 의미하지 않는다.
+
+Critical failure mode
+
+가장 위험한 시스템은 incoherent한 AI가 아니라, 틀린 세계 안에서 매우 일관되게 reasoning하는 AI다. World Model Falsifier와 외부 실험이 필요한 이유가 여기에 있다.
+
+§13 · Research Questions
+
+### 정확도보다 world-model falsifiability를 묻는다
+--------------------------------------------------------------------------------
+VWDC-07 — Closed-Loop Reality Feedback, Safe Policy Adaptation, and Transport-Aware Continual Worlds · Logic Matrix (https://unboundedaxiom.org/p/lm-003128/)
+citeturn312search5 [wordlim: 200] Published: 2 weeks ago; Crawled: today; Self-confirming feedback loop ... \text{model appears increasingly validated}. ... Two policies/world models are observationally identical on the region visited by current policy:
+}$$no observed failure+no exposure⇒safety.​
+
+* * *
+
+# 11. Self-confirming feedback loop
+
+A dangerous loop can be:
+
+$$\boxed{
+\text{policy predicts region unsafe}
+\to
+\text{never visits region}
+\to
+\text{collects no contradictory data}
+\to
+\text{retraining preserves belief}.
+}$$policy predicts region unsafe→never visits region→collects no contradictory data→retraining preserves belief.​
+
+The reverse can also occur:
+
+$$\boxed{
+\text{policy visits only easy/safe regions}
+\to
+\text{feedback looks excellent}
+\to
+\text{model appears increasingly validated}.
+}$$policy visits only easy/safe regions→feedback looks excellent→model appears increasingly validated.​
+
+* * *
+
+# 12. VWDC07-N3 — Self-confirming deployment loop no-go
+
+## Counterexample
+
+Two policies/world models are observationally identical on the region visited by current policy:
+
+$$\mathcal Z_{\mathrm{visit}}.$$Z visit​.
+
+Outside this region:
+
+  * World A is safe;
+  * World B contains catastrophic failure.
+
+The current policy never leaves:
+--------------------------------------------------------------------------------
+DROID-SLAM in the Wild (https://openaccess.thecvf.com/content/CVPR2026/papers/Li_DROID-SLAM_in_the_Wild_CVPR_2026_paper.pdf)
+citeturn312search17 [wordlim: 200] Published: 3 months ago; Uncertainty-aware ... CUT3R [53] andTTT3R [7] further advance feed-forward reconstruction by
+and then iteratively update the dynamic uncertainty map by leveraging multi-view feature consistency. Specifically, feature consistency
+is measured by the cosine similarity between features of image Ii and its corresponding features in image Ij, where the rigid-motion
+correspondences pij are derived using the current pose and depth estimates.
+8 × W
+it maintains two state variables: camera pose Gt ∈SE(3),
+inverse depth dt ∈R
+H
+8 . In addition, it constructs the
+frame-graph (V, E) to represent co-visibility across frames,
+where an edge (i, j) ∈E means that the images Ii and
+Ij overlap. The set of camera poses {Gt}N
+t=0 and inverse
+depths {dt}N
+t=0 are iteratively updated through the differen-
+tiable BA layer, operating on a set of image pairs (Ii, Ij).
+Differential Bundle Adjustment. For each pair of images
+(Ii, Ij), we can derive the rigid-motion correspondence as:
+from the attention maps of DUSt3R [54]. However, these
+methods are restricted to short sequences. CUT3R [53] and
+TTT3R [7] further advance feed-forward reconstruction by
+--------------------------------------------------------------------------------
+(PDF) Equilibrium World Models (https://www.researchgate.net/publication/407506717_Equilibrium_World_Models)
+citeturn312search6 [wordlim: 200] Published: 2 months ago; Crawled: last week; therefore moves the computed object from self-conﬁrmation toward rational expectations on the ... The second is methodological: a structural world model that widens the support of equi- ... At 𝜅=0, where 𝜇 𝜅=𝜇 𝜋 𝜃, (12) is exactly the self-conﬁrming objective (6), the world model
+must satisfy the model’s restrictions, so each reach deﬁnes a distinct ﬁxed point rather than a
+
+sharper estimate of one target. At zero additional reach the object is the computational analogue
+
+of a self-conﬁrming equilibrium (Fudenberg and Levine,1993;Sargent,1999), certiﬁed only on the
+
+policy’s own simulated experience; as coverage expands and the approximation, continuation, and
+
+optimization errors vanish, the same residual conditions come to hold on the coverage-certiﬁed
+
+region, that is, on the part of the reachable state space the audit deliberately covers. Coverage
+
+therefore moves the computed object from self-conﬁrmation toward rational expectations on the
+
+audited region, a conditional limit the theory below makes precise.
+
+Contributions. The paper makes three contributions. The ﬁrst is conceptual: it identiﬁes path-
+
+wise residual minimization as a form of computational self-conﬁrmation, a failure of certiﬁcation
+
+driven by the endogenous support of the training distribution rather than by rare-event extrapola-
+Section 3.7 the three world objects, and the development that follows specializes to the state-only
+
+continuation 
+
+𝑊 𝜓(𝑥).
+
+3.3 Components and invariants
+
+The tuple EWM 𝜅 above collects the six components of an EWM; we now state which are held ﬁxed
+
+and which vary across economic models. Three are ﬁxed by the economic model itself, the problem
+
+speciﬁcation that any residual-based solver of the kind in Algorithm 1 already inherits: the policy
+
+𝜋 𝜃, the exact transition Γ, and the exact residual 𝑅. The other three, the coverage measure 𝜇 𝜅, the
+
+world component, and the exact-residual audit, are what an EWM adds, and they form a modular
+
+reliability architecture rather than a single device.
+
+What never changes in an EWM. Whatever the economic model, four things are invariant in
+
+an EWM as we formulate it, and together they are what keeps imagining oﬀ-path from drifting
+
+into a self-conﬁrming ﬁction: (i) the transition Γ is never learned, every imagined next state being
+the feedback the introduction identiﬁes as the source of distributional runaway; imposing the
+
+residual on a designer-controlled support removes it, but we oﬀer this only as an interpretation
+
+of the measured robustness, not a theorem); the amortization index 𝐴(𝜏)(the per-step wall-clock
+
+speed-up the audited continuation surrogate buys over exact quadrature) has its growth with the
+
+model dimension accounted for by Proposition 5, while its numerical value is a measured constant.
+
+(iii) “Self-conﬁrming” is exact only at 𝜅=0, and only when the perception gap is closed on the
+
+path. With 𝜇 𝜅 equal to the ergodic measure 𝜇 𝜋 𝜃, the outer loop self-consistent, and the perception
+
+gap closed there (𝜂 𝜅(𝜃)=0, so 
+
+𝑊 𝜓=𝑄 𝜋 𝜃 and 𝑅 𝐻=0 𝜇 𝜋 𝜃-a.s.), the ﬁxed point is a Sargent
+
+self-conﬁrming equilibrium in the literal sense, the agent’s belief being conﬁrmed on the events
+
+its behavior visits. Without those equalities it is a coverage-conﬁrmed projection-best-response
+--------------------------------------------------------------------------------
+Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026 | egordmitriev.dev (https://egordmitriev.dev/blog/2026-05-24-vio-drones-2026)
+citeturn312search7 [wordlim: 200] Published: 3 months ago; Crawled: 3 weeks ago; A handful of CVPR 2026 and ICRA 2027 submissions tackle the IMU-tight-coupling story for VGGT and CUT3R (Wang et al., CVPR 2025) explicitly.CUT3R is the streaming variant of MASt3R: instead of pure pairwise inference (which forgets everything between calls), CUT3R maintains a continuous temporal state across frames as a small set of persistent tokens that get updated each new frame. ... The result is that the model can do incremental online reconstruction at near-MASt3R quality without the pair-by-pair re-computation, which is the obvious enabler for real-time VIO.
+Matching switches from Hamming distance to cosine similarity on 256-D float descriptors; the matching topology, back-end bundle adjustment, covisibility graph, DBoW2 place recognition, and multi-map merging are bit-identical to ORB-SLAM3. Most of the robustness gain at roughly half the inference cost of MASt3R-SLAM, and you inherit five years of back-end bug fixes for free. Lowest-risk integration in the cluster precisely because the swap is local: if the foundation descriptor is worse on some scene, the system degrades to “ORB-SLAM3 with slightly worse features” rather than failing in a novel way.
+
+A handful of CVPR 2026 and ICRA 2027 submissions tackle the IMU-tight-coupling story for VGGT and CUT3R (Wang et al., CVPR 2025) explicitly. CUT3R is the streaming variant of MASt3R: instead of pure pairwise inference (which forgets everything between calls), CUT3R maintains a continuous temporal state across frames as a small set of persistent tokens that get updated each new frame. The architectural delta is one extra cross-attention block that lets the per-frame tokens read from and write to the persistent-state tokens. The result is that the model can do incremental online reconstruction at near-MASt3R quality without the pair-by-pair re-computation, which is the obvious enabler for real-time VIO. Half a dozen labs are racing each other to publish IMU-coupled CUT3R; the field will be churning over the next year.
+
+> Worth noting: the 18-month sprint from DUSt3R (CVPR 2024) to MASt3R-Fusion (Sep 2025) to a half-dozen IMU-coupled follow-ups (May 2026) is the same colonization-of-design-space pattern the V3 post observed in the cross-view cluster. Same root cause: one foundation model opens up cheap downstream integration in N tasks. Three months between the model and the first downstream paper; another nine months and the design space is mostly explored.
+
+--------------------------------------------------------------------------------
+(PDF) World Models: A Comprehensive Survey of Understanding, Predicting, and Acting in the Physical and Social World (https://www.researchgate.net/publication/406609094_World_Models_A_Comprehensive_Survey_of_Understanding_Predicting_and_Acting_in_the_Physical_and_Social_World)
+citeturn312search8 [wordlim: 200] Published: 2 months ago; Crawled: last month; Preprints and early-stage research may not have been peer reviewed yet. ... foundation models, predictive world models, model-based reinforcement learning, video generation, ... Long-horizon consistency and error accumulation. ... hierarchical models that predict at multiple temporal scales, and memory mechanisms that anchor ... Section 6.2 is the ﬁeld’s answer, with NeRF and Gaussian-splatting world models making geometry
+
+causation [334,137], physics-informed objectives and diﬀerentiable physics [270], and counterfactual
+
+evaluation that scores a model on imagined interventions rather than passive prediction.
+
+Long-horizon consistency and error accumulation. As established in Section 7.1, sequential
+
+models compound their own errors, so simulated futures drift, lose objects, and break continuity
+
+over long rollouts. That is fatal for the multi-step planning that motivates world models in the ﬁrst
+
+place. Mitigations include global and chunked generation that avoids step-wise conditioning [37,14],
+
+hierarchical models that predict at multiple temporal scales, and memory mechanisms that anchor
+
+long-range consistency [368].
+
+3D ﬁdelity and spatial grounding. Many high-ﬁdelity models reason in 2D and lack the geo-
+
+metric consistency an embodied agent needs, producing futures that look right but do not cohere
+
+in space. The migration toward occupancy, point-cloud, and rendering-based representations of
+
+Section 6.2 is the ﬁeld’s answer, with NeRF and Gaussian-splatting world models making geometry
+--------------------------------------------------------------------------------
+A survey of world models for physical AI with uncertainty representation and control | Discover Artificial Intelligence | Springer Nature Link (https://link.springer.com/article/10.1007/s44163-026-02122-1)
+citeturn312search9 [wordlim: 200] Published: 3 days ago; Crawled: today; Li et al. [1] organize embodied world models according to functionality, temporal modeling, and spatial representation, while also discussing datasets, evaluation metrics, physical consistency, and long-horizon error accumulation. ... Throughout the paper, the term “world model” refers to these learning-based predictive models unless stated otherwise. ... Sensing and actuation delays can be addressed through recurrent memory, history-augmented states, explicit delay variables, or continuous-time state propagation between observations. ... In this section we summarize key open challenges and outline technically grounded research directions.We emphasize issues that repeatedly appear in practice across model-based RL and robotics: compounding error and distribution shift, physics and constraint consistency, data efficiency under nonstationarity, and safety under real-world risk [6, 103]. ... Visual subgoal generation and time-agnostic prediction reduce the burden on precise step-by-step rollout accuracy, focusing instead on predictable milestones [109, 110].
+--------------------------------------------------------------------------------
+Paper-Notes-en/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md at main · zhaoyang97/Paper-Notes-en · GitHub (https://github.com/zhaoyang97/Paper-Notes-en/blob/main/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md)
+citeturn312search10 [wordlim: 200] Published: 4 months ago; Crawled: last month; title  | [Paper Note] TTT3R: 3D Reconstruction as Test-Time Trainingdescription  | [ICLR 2026][3D Vision][Online 3D reconstruction] The state update of the recurrent 3D reconstruction model CUT3R is reformulated as a test-time online learning problem. ... For real-time streaming reconstruction, recurrent architectures (RNNs) such as CUT3R serve as attractive alternatives by compressing history into a fixed-length state with $O(1)$ complexity and constant memory.
+--------------------------------------------------------------------------------
+Section 36.3: Error accumulation and horizon | Building Embodied AI: From Perception to Autonomous Action (https://embodiedbook.icsgen-ai.org/part-8-world-models-and-model-based-embodied-ai/module-36-predicting-the-future/section-36.3.html)
+citeturn312search11 [wordlim: 200] Crawled: 4 weeks ago; # Section 36.3: Error accumulation and horizon ... A delivery robot's world model is off by two centimeters per step. ... If the true dynamics are \(f\) and the learned model is \(\hat f\), then a one-step state error of size \(\varepsilon\) can grow after \(H\) rollout steps roughly like
+

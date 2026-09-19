@@ -1,0 +1,189 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v1",
+  "review_kind": "adversarial",
+  "status": "BLOCKED_S45B_C1_NUMERIC_CAMERA_GUARD_SOURCE_REVIEW",
+  "verdict": "BLOCKED_SOURCE_NOT_EXECUTED",
+  "author_role": "/root/c1_blind_score_builder",
+  "reviewer_role": "/root/s45b_adversarial_reviewer_v4",
+  "completed_utc": "2026-09-08T05:19:25+00:00",
+  "time_basis": "Current UTC clock was captured immediately before writing this review; no historical duration is inferred.",
+  "reviewed_identities": {
+    "camera_guard.py": "285f9b64f6ad53f14c21f725ff1884b632ef7766d63bf6e43af780b716160bb4",
+    "PROTOCOL.md": "514fb18d5b2446ac50393fbe6c5fda34dd7b771356c037ff789e20710f49abcb",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "a2d8aa4e686523db15044f28c1d7f39e1ff50f73f4485b303bd7b31247b2dc1a",
+    "synthetic_selftest.py": "2d3674998103073fc3e884b3432f7d385bf432d4bfc7b8d51c4477ebaefc81aa"
+  },
+  "review_scope": {
+    "question": "Can this exact source set safely authorize the single formal C1 requested-camera numeric guard after later binding?",
+    "method": "Independent full source/protocol review plus adversarial executions confined to isolated temporary directories and pure synthetic data.",
+    "python_interpreters": [
+      "CPython 3.13.0",
+      "CPython 3.12.14 from .venv-cut3r"
+    ],
+    "candidate_files_modified": false,
+    "formal_binding_created": false,
+    "formal_attempt_executed": false
+  },
+  "attack_checklist": [
+    {
+      "id": "A01_FROZEN_SOURCE_HASHES",
+      "attack": "Recompute all four requested source identities before and after review.",
+      "result": "PASS",
+      "observation": "All four SHA-256 values matched the assigned frozen values at both checks."
+    },
+    {
+      "id": "A02_CROSS_VERSION_STATIC_AND_SYNTHETIC",
+      "attack": "Run the built-in and independent synthetic suites under CPython 3.13.0 and 3.12.14.",
+      "result": "PASS",
+      "observation": "Four isolated runs returned code 0; the exact B0 function-source hashes were stable across both interpreters."
+    },
+    {
+      "id": "A03_PREFLIGHT_BEFORE_ATTEMPT_COMMIT",
+      "attack": "Inspect formal control flow and exercise the synthetic non-consuming rejection model.",
+      "result": "PASS",
+      "observation": "formal_preflight is called before commit_attempt_lease, and the synthetic rejection left no lock or staging entry."
+    },
+    {
+      "id": "A04_ATOMIC_FAIL_CLOSED_ATTEMPT_COMMIT",
+      "attack": "Inject a post-link parent-directory fsync error during a synthetic lease commit.",
+      "result": "PASS",
+      "observation": "The operation raised and still left a parseable fail-closed permanent lock receipt; no second scientific attempt was authorized."
+    },
+    {
+      "id": "A05_DUPLICATE_ATTEMPT",
+      "attack": "Commit the same synthetic fixed lock twice.",
+      "result": "PASS",
+      "observation": "The second commit was rejected."
+    },
+    {
+      "id": "A06_LOCK_UNLINK_RECREATE",
+      "attack": "Unlink the permanent lock path, create a different inode at the same name, and verify against the held FD.",
+      "result": "PASS",
+      "observation": "verify_lock_lease rejected the replacement."
+    },
+    {
+      "id": "A07_LOCK_HARDLINK_AND_SYMLINK",
+      "attack": "Add a hardlink to a committed lock and separately pre-place a symlink at the fixed lock name.",
+      "result": "PASS",
+      "observation": "The added hardlink was detected through st_nlink and the pre-existing symlink prevented commit."
+    },
+    {
+      "id": "A08_PARENT_DIRECTORY_SWAP",
+      "attack": "Rename the opened parent directory and recreate another directory at the canonical path.",
+      "result": "PASS",
+      "observation": "verify_directory_lease detected the device/inode mismatch."
+    },
+    {
+      "id": "A09_SAME_FD_HASH_AND_PARSE",
+      "attack": "Trace every JSON/event read and attempt to identify a hash-then-path-reopen parser.",
+      "result": "PASS",
+      "observation": "file_snapshot returns the exact bytes that read_json and selected_event_captures parse; tensor bodies are decoded from the same held FD snapshot."
+    },
+    {
+      "id": "A10_PREEXISTING_OUTPUT_ALIAS",
+      "attack": "Pre-place symlink and hardlink entries at a synthetic receipt path.",
+      "result": "PASS",
+      "observation": "O_EXCL rejected both aliases without overwriting their targets."
+    },
+    {
+      "id": "A11_POST_RECEIPT_OUTPUT_DIRECTORY_SWAP",
+      "attack": "After a synthetic PASS receipt write, rename the held output directory and create a replacement at the canonical output name, then execute the same final lock-only check used by the candidate.",
+      "result": "BLOCKER",
+      "observation": "The lock check passed although the canonical output pathname referred to a different inode and no longer contained the written receipt. The omitted output-directory lease check would have detected the swap."
+    },
+    {
+      "id": "A12_POST_WRITE_RECEIPT_DURABILITY_ERROR",
+      "attack": "Raise a synthetic error on the directory fsync after write_new_at has written and closed a PASS receipt body.",
+      "result": "BLOCKER",
+      "observation": "write_new_at raised, but a complete JSON body with passed=true remained visible. The receipt has no externally sealed field proving that write_new_at returned successfully."
+    },
+    {
+      "id": "A13_SIGNAL_INTERRUPTION_AFTER_PASS_PUBLICATION",
+      "attack": "In a synthetic child process, commit the default-failure lock, write a complete PASS receipt, and deliver SIGKILL before a final validation or normal return.",
+      "result": "BLOCKER",
+      "observation": "The durable state contained the unchanged default-failure lock, a complete PASS receipt, and no lock_close_failure.json. That is the same evidence tuple the protocol proposes to hand to the later reviewer, but it does not prove the guard reached its final check or returned 0."
+    },
+    {
+      "id": "A14_REPORT_RECEIPT_ORDER",
+      "attack": "Inspect nominal success ordering and late lock-failure handling.",
+      "result": "PARTIAL",
+      "observation": "The report is correctly marked pending and tensor/source checks precede its write. However, terminal PASS is published before the final lock check and process return, so the overall terminal publication is not atomic."
+    },
+    {
+      "id": "A15_TENSOR_CLOSE_FAILURE",
+      "attack": "Decode a synthetic 4x4 float tensor, mutate its body through another FD, and close with verification.",
+      "result": "PASS",
+      "observation": "Close verification rejected the mutation and retained truthful opened=1 and close_verified=0 counters."
+    },
+    {
+      "id": "A16_PIXEL_EXCLUSION",
+      "attack": "Place a forbidden PIL pixel subtree beside selected camera fields and pass a pixel-sized tensor descriptor to the camera decoder.",
+      "result": "PASS",
+      "observation": "The selector ignored the pixel subtree and the fixed shape/byte gate rejected the pixel-sized descriptor before any body open."
+    },
+    {
+      "id": "A17_CAMERA_MATH_AND_THRESHOLD",
+      "attack": "Compare the candidate against an independently transcribed left-multiply Y rotation and test wrong sign, target/cache mismatch, K drift, closure, nonfinite values, exactly 1e-6, and strictly greater than 1e-6.",
+      "result": "PASS",
+      "observation": "The reference error was 0.0; the inclusive boundary passed and every negative case was rejected."
+    }
+  ],
+  "blocking_findings": [
+    {
+      "id": "B1_TERMINAL_PASS_CAN_PRECEDE_UNAMBIGUOUS_PROCESS_SUCCESS",
+      "severity": "BLOCKER",
+      "source_locations": [
+        "camera_guard.py:1486",
+        "camera_guard.py:1487-1514"
+      ],
+      "finding": "receipt.json can already contain passed=true before the final lock revalidation and before main returns. SIGKILL, SIGTERM, host loss, os.close failure, or directory-fsync failure in this window can leave a complete PASS receipt with an unchanged default lock and no failure marker. There is no independently written supervisor exit receipt or terminal success seal, so a later file-only reviewer cannot distinguish that interrupted state from normal completion.",
+      "required_fix": "Keep the worker receipt pending and add a separately supervised terminal commit that is written only after the worker exit code is observed and the lock, output-directory inode, receipt inode/content, and absence of failure markers are revalidated. Any worker-only PASS must remain non-authoritative."
+    },
+    {
+      "id": "B2_CANONICAL_OUTPUT_LEASE_AND_ARTIFACTS_NOT_REVALIDATED_AFTER_RECEIPT",
+      "severity": "BLOCKER",
+      "source_locations": [
+        "camera_guard.py:1486-1516"
+      ],
+      "finding": "On the nominal success path, the code performs only verify_lock_lease after writing receipt.json. It does not re-run verify_directory_lease for execution_01 and does not retain or revalidate the report/receipt file identities. A synthetic rename-and-recreate attack changed the canonical execution_01 inode after receipt publication; the candidate's final lock check still passed, so its success path can return while the canonical evidence directory is missing or replaced.",
+      "required_fix": "Retain exact output/report/receipt inode leases through terminal sealing, revalidate the canonical output directory and artifacts after the final write, and bind them into the external supervisor terminal receipt."
+    }
+  ],
+  "nonblocking_findings": [
+    {
+      "id": "N1_OUTPUT_CREATION_EXCEPTIONS_USE_ONLY_THE_PERMANENT_LOCK_RECEIPT",
+      "finding": "create_output_lease runs before the committed_formal_run try block. A failure after mkdir can therefore leave only the structured permanent failure lock and a partial output directory, contrary to the protocol sentence that every ordinary post-commit failure receives receipt.json. This remains fail-closed, but the protocol and implementation should be aligned during the required redesign."
+    }
+  ],
+  "access_ledger": {
+    "candidate_source_files_read": 4,
+    "b0_reference_source_read_by_synthetic_test": true,
+    "real_c1_manifest_opened": 0,
+    "real_c1_receipts_opened": 0,
+    "real_c1_archive_events_opened": 0,
+    "real_c1_tensor_bodies_read": 0,
+    "real_scientific_arrays_mapped": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_calls": 0,
+    "generation_or_renderer_runs": 0,
+    "formal_binding_paths_created": 0,
+    "formal_lock_paths_created": 0,
+    "formal_execution_paths_created": 0,
+    "synthetic_data_only": true,
+    "temporary_directories_only": true
+  },
+  "executed": false,
+  "c1_tensor_bodies_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "authorization_effect": {
+    "source_review_pass": false,
+    "binding_authorized": false,
+    "formal_execution_authorized": false,
+    "blind_score_authorized": false,
+    "pixel_or_image_access_authorized": false,
+    "required_next_state": "Revise terminal publication and output-lease sealing, freeze a new source identity set, and obtain two fresh different-author source reviews. This blocked review can never authorize a later revision."
+  },
+  "evidence_boundary": "This is a source-only adversarial engineering review. It establishes no C1 camera validity, score, image quality, rendered-camera obedience, method gain, causal claim, novelty, or publication-level result."
+}

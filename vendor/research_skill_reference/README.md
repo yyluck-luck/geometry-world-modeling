@@ -1,0 +1,1 @@
+引用审查实际使用的本地Supervisor-Skills参考文件副本。原位置为 /Users/rocket/.codex/skills/deep-research/references/citation-protocol.md；deep-research SKILL元数据许可CC-BY-4.0，作者项目HKUSTDial/Supervisor-Skills。内容未改，SHA256=b892b55431215c45273636adf29dd366b44c133b399f91d0ccec20aa0cc833e1。仅供重现审查规范，不代表本项目发明该流程。

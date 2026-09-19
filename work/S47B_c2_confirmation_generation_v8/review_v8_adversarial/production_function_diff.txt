@@ -1,0 +1,38 @@
+--- V7/generation_gate.py:require_launch_authorization
++++ V8/generation_gate.py:require_launch_authorization
+@@ -1,6 +1,7 @@
+ def require_launch_authorization(manifest, expected):
+     """Validate the fixed post-review authorization before any published gate passes."""
+     document, authorization_sha, authorization_identity = read_json_snapshot(LAUNCH_AUTHORIZATION, 'Fixed read-only C2 launch authorization')
++    authorization_identity = {key: authorization_identity[key] for key in ('device', 'inode', 'size', 'mode')}
+     require(authorization_identity['mode'] & 146 == 0, 'Fixed C2 launch authorization is writable')
+     require(manifest.get('source_identities', {}).get(str(AUTHORIZATION_TOOL)) == sha(AUTHORIZATION_TOOL), 'C2 authorization tool is outside or differs from the frozen source domain')
+     require(isinstance(document.get('reviews'), dict) and set(document['reviews']) == set(FINAL_REVIEW_STATUSES), 'C2 launch authorization does not bind exactly two terminal reviews')
+--- V7/create_launch_authorization.py:main
++++ V8/create_launch_authorization.py:main
+@@ -32,7 +32,7 @@
+         require(supplied == bindings, 'Caller launch bindings differ from the published bundle')
+         prepared = gate.require_successful_prepare_bundle(core_file_sha256_value=bindings['core_file_sha256'], core_sha256_value=bindings['core_sha256'], receipt_sha256_value=bindings['prepare_receipt_sha256'])
+         review_hashes = {'final_attachment': args.final_attachment_review_sha256, 'launch_readiness': args.launch_readiness_review_sha256}
+-        review_documents = {kind: read_json(gate.FINAL_REVIEW_PATHS[kind], review_hashes[kind], kind + ' review') for kind in gate.FINAL_REVIEW_STATUSES}
++        review_documents = {kind: read_review_json(gate.FINAL_REVIEW_PATHS[kind], review_hashes[kind], kind + ' review') for kind in gate.FINAL_REVIEW_STATUSES}
+         created_utc = datetime.now(timezone.utc).isoformat()
+         document = gate.build_launch_authorization_document(bindings=bindings, attachment_completed_utc=attachment_completed_utc, review_documents=review_documents, review_hashes=review_hashes, created_utc=created_utc, tool_sha256=tool_source_sha)
+         retained_controls = [DirectoryLease.open(gate.PREPARE_ROOT), DirectoryLease.open(gate.ATTACHMENT_ROOT)]
+@@ -57,7 +57,7 @@
+         current_bindings, current_attachment_utc = gate.launch_review_bindings(manifest, args.manifest_sha256)
+         require(current_bindings == bindings and current_attachment_utc == attachment_completed_utc, 'C2 attachment changed before authorization')
+         for kind, path in gate.FINAL_REVIEW_PATHS.items():
+-            current_review = read_json(path, review_hashes[kind], kind + ' review')
++            current_review = read_review_json(path, review_hashes[kind], kind + ' review')
+             require(current_review == review_documents[kind], kind + ' review snapshot changed before authorization')
+         for control in retained_controls:
+             control.validate()
+--- V7/create_launch_authorization.py:read_review_json
++++ V8/create_launch_authorization.py:read_review_json
+@@ -0,0 +1,5 @@
++def read_review_json(path, expected, label):
++    """Consume a terminal review only when its publisher sealed it read-only."""
++    payload, identity = verified_bytes(Path(path).absolute(), expected, label)
++    require(stat.S_IMODE(identity.st_mode) & 146 == 0, 'Final launch review must be published read-only before authorization: ' + str(path))
++    return json.loads(payload)

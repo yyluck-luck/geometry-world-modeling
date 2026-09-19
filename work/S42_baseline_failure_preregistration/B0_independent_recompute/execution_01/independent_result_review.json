@@ -1,0 +1,254 @@
+{
+  "schema": "s42-b0-independent-recompute-result-review-v1",
+  "status": "PASS_S42_B0_INDEPENDENT_RECOMPUTE_RESULT_REVIEW",
+  "verdict": "PASS_SEALED_JSON_RESULT_REVIEW_NO_PIXEL_RECOMPUTATION",
+  "reviewer_role": "/root/b0_recompute_result_review",
+  "source_author_role": "/root",
+  "completed_utc": "2026-09-07T16:29:49.660668+00:00",
+  "review_scope": "Independent post-execution review of the sealed B0 numeric-recomputation receipt and report, using JSON records and source identities only.",
+  "inputs": {
+    "recomputer_source": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/recompute_b0.py",
+      "sha256": "0b91de7f35eb5e128aad81128657861ae5218b37ccbba78e4f8c282b1a61c741"
+    },
+    "protocol": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/PROTOCOL.md",
+      "sha256": "e3086d3ea373295b83f08dbba919d016a96243e31ebf15142bb609de0d68f0b7"
+    },
+    "primary_source_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/SOURCE_REVIEW.json",
+      "sha256": "4a186cc0c25cc14bedeebde7ccb73afd074dbdedb7084f78584b900617b0981f"
+    },
+    "adversarial_source_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/SOURCE_REVIEW_ADVERSARIAL.json",
+      "sha256": "bd6db9fe833b6741da37a6a4f987271ceabcb622489e3552e64f36f5c4574c85"
+    },
+    "execution_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/execution_01/receipt.json",
+      "sha256": "afba7d0cdf45c26d2cb10dfbadaa1c38cf8e4ce750d6f65ab61cf3459a735011"
+    },
+    "execution_report": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/execution_01/report.json",
+      "sha256": "0108c80b841aecd786db8ee3d2e7c20bf9d5ea1f57be296ebd5a13706c51e267"
+    },
+    "sealed_b0_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/receipt.json",
+      "sha256": "93c90e24e404aa1f87e111ed3a7c79d51de9d9bf35babd060ac807af9d99f2ad"
+    },
+    "sealed_b0_report": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/report.json",
+      "sha256": "13b190b126e925ae18f43728781c323d5cece8d9a591b73e6e9bf3a865aa8a8e"
+    }
+  },
+  "checks": {
+    "artifact_identity": {
+      "passed": true,
+      "all_eight_actual_sha256_values_equal_the_bound_values": true,
+      "execution_receipt_binds_exact_execution_report_path_and_sha256": true,
+      "execution_receipt_and_report_bind_exact_source_protocol_primary_review_and_sealed_b0_inputs": true
+    },
+    "source_review_gates": {
+      "passed": true,
+      "primary_schema": "s42-b0-independent-recompute-source-review-v1",
+      "primary_status": "PASS_S42_B0_INDEPENDENT_RECOMPUTE_SOURCE_REVIEW",
+      "primary_blocking_findings": [],
+      "primary_reviewer_role": "/root/readback_schema_audit",
+      "adversarial_schema": "s42-b0-independent-recompute-adversarial-source-review-v1",
+      "adversarial_status": "PASS_S42_B0_INDEPENDENT_RECOMPUTE_ADVERSARIAL_SOURCE_REVIEW",
+      "adversarial_blocking_findings": [],
+      "both_static_reviews_precede_execution": true
+    },
+    "execution_receipt_and_report": {
+      "passed": true,
+      "receipt_schema": "s42-b0-independent-recompute-receipt-v1",
+      "report_schema": "s42-b0-independent-recompute-report-v1",
+      "status": "PASS_EXACT_B0_NUMERIC_RECOMPUTE",
+      "audit_completed": true,
+      "exact_match": true,
+      "mismatch_count": 0,
+      "report_mismatches": [],
+      "elapsed_seconds": 0.14803404203848913,
+      "deadline_seconds": 300
+    },
+    "output_create_only_shape": {
+      "passed": true,
+      "execution_01_was_a_real_non_symlink_directory": true,
+      "pre_review_entries_were_exactly": [
+        "receipt.json",
+        "report.json"
+      ],
+      "receipt_and_report_were_regular_non_symlink_files": true,
+      "same_parent_staging_entries_after_execution": 0,
+      "this_review_target_did_not_exist_before_create": true
+    },
+    "nine_authoritative_pixel_identities": {
+      "passed": true,
+      "count": 9,
+      "ids_in_order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "identity_fields": [
+        "id",
+        "tensor_descriptor_sha256",
+        "tensor_body_sha256",
+        "blob"
+      ],
+      "execution_report_identities_exactly_equal_sealed_b0_report_identities": true,
+      "pixel_payload_bodies_opened_for_this_result_review": 0
+    },
+    "metric_exactness": {
+      "passed": true,
+      "records_compared": 9,
+      "comparison_rule": "The execution and sealed JSON doubles were compared by exact Python float hexadecimal identity; each saved MSE decimal was also checked against its saved hexadecimal value.",
+      "records": {
+        "primary_M_outer4_ID0_ID8": {
+          "mse_float64": 0.005278160708699555,
+          "mse_float64_hex": "0x1.59e8d7a07c4e9p-8",
+          "psnr_db_float64": 22.77517390576968,
+          "psnr_db_float64_hex": "0x1.6c671cc0dfe4dp+4",
+          "pixels": 147456,
+          "rgb_scalars": 442368,
+          "exactly_equal": true
+        },
+        "full_frame_ID0_ID8": {
+          "mse_float64": 0.004389557269540995,
+          "mse_float64_hex": "0x1.1fac8ceaa6247p-8",
+          "psnr_db_float64": 23.575792804620775,
+          "psnr_db_float64_hex": "0x1.7936728411e4cp+4",
+          "pixels": 331776,
+          "rgb_scalars": 995328,
+          "exactly_equal": true
+        },
+        "region_R1": {
+          "mse_float64": 0.005023336849831617,
+          "mse_float64_hex": "0x1.49359b7ca0227p-8",
+          "psnr_db_float64": 22.990076983847388,
+          "psnr_db_float64_hex": "0x1.6fd75af6a2598p+4",
+          "pixels": 36864,
+          "rgb_scalars": 110592,
+          "exactly_equal": true
+        },
+        "region_R2": {
+          "mse_float64": 0.003201145509606348,
+          "mse_float64_hex": "0x1.a3949e8c07bc5p-9",
+          "psnr_db_float64": 24.946945843429585,
+          "psnr_db_float64_hex": "0x1.8f26b0af49cfbp+4",
+          "pixels": 36864,
+          "rgb_scalars": 110592,
+          "exactly_equal": true
+        },
+        "region_R3": {
+          "mse_float64": 0.008694576493905478,
+          "mse_float64_hex": "0x1.1ce764d8d187ep-7",
+          "psnr_db_float64": 20.60751567294309,
+          "psnr_db_float64_hex": "0x1.49b8625ab1917p+4",
+          "pixels": 36864,
+          "rgb_scalars": 110592,
+          "exactly_equal": true
+        },
+        "region_R4": {
+          "mse_float64": 0.004193583981454782,
+          "mse_float64_hex": "0x1.12d4aa0daa2a3p-8",
+          "psnr_db_float64": 23.774146553013004,
+          "psnr_db_float64_hex": "0x1.7c62e77ef8082p+4",
+          "pixels": 36864,
+          "rgb_scalars": 110592,
+          "exactly_equal": true
+        },
+        "generated_pair_ID1_ID7": {
+          "mse_float64": 0.00023267425133406667,
+          "mse_float64_hex": "0x1.e7f4099a6d9fap-13",
+          "psnr_db_float64": 36.33251674823535,
+          "psnr_db_float64_hex": "0x1.22a8fe8a78584p+5",
+          "pixels": 147456,
+          "rgb_scalars": 442368,
+          "exactly_equal": true
+        },
+        "generated_pair_ID2_ID6": {
+          "mse_float64": 0.00025384224856314164,
+          "mse_float64_hex": "0x1.0a2c427ea7da8p-12",
+          "psnr_db_float64": 35.95436093861318,
+          "psnr_db_float64_hex": "0x1.1fa287fcdf634p+5",
+          "pixels": 147456,
+          "rgb_scalars": 442368,
+          "exactly_equal": true
+        },
+        "generated_pair_ID3_ID5": {
+          "mse_float64": 0.003711953735742663,
+          "mse_float64_hex": "0x1.e6887fcc6e65bp-9",
+          "psnr_db_float64": 24.30397445286387,
+          "psnr_db_float64_hex": "0x1.84dd1450ddeacp+4",
+          "pixels": 147456,
+          "rgb_scalars": 442368,
+          "exactly_equal": true
+        }
+      },
+      "copy_guard_pass": true
+    },
+    "event_and_status_implications": {
+      "passed": true,
+      "frozen_expression": "unrounded primary MSE > 0.01",
+      "unrounded_primary_mse": 0.005278160708699555,
+      "threshold": 0.01,
+      "threshold_equality": false,
+      "event": false,
+      "sealed_row_event": false,
+      "sealed_row_status": "B0_TECHNICALLY_VALID_NO_SEVERE_DISCREPANCY_EVENT",
+      "sealed_cohort_status": "INCOMPLETE",
+      "interpretation_cap": "B0_SINGLE_ROW_NO_EVENT_C1_C2_STILL_REQUIRED",
+      "C1_and_C2_remain_mandatory": true
+    },
+    "temporal_ordering": {
+      "passed": true,
+      "sealed_b0_completed_utc": "2026-09-07T15:47:16.970225+00:00",
+      "adversarial_source_review_completed_utc": "2026-09-07T16:18:24Z",
+      "primary_source_review_completed_utc": "2026-09-07T16:19:22Z",
+      "execution_started_utc": "2026-09-07T16:24:35.941069+00:00",
+      "report_completed_utc": "2026-09-07T16:24:36.089088+00:00",
+      "receipt_completed_utc": "2026-09-07T16:24:36.089100+00:00",
+      "ordering": "sealed B0 and both source reviews completed before execution; report completed after execution start and before terminal receipt"
+    },
+    "execution_and_review_boundary": {
+      "passed": true,
+      "sealed_execution_receipt_images_viewed_or_emitted": 0,
+      "sealed_execution_report_images_viewed_or_emitted": 0,
+      "sealed_execution_receipt_model_generation_renderer_readback_calls": 0,
+      "sealed_execution_report_model_generation_renderer_readback_calls": 0,
+      "recomputer_source_run_or_imported_by_this_reviewer": false,
+      "primary_scorer_run_or_imported_by_this_reviewer": false,
+      "pixel_or_image_payload_bodies_read_by_this_reviewer": false,
+      "pixel_values_recomputed_by_this_reviewer": false,
+      "images_or_montages_viewed_by_this_reviewer": false,
+      "review_inputs_limited_to_json_records_source_text_protocol_text_file_metadata_and_hashes": true
+    },
+    "claim_boundary": {
+      "passed": true,
+      "supported": "The independent implementation's numeric records exactly agree with the sealed B0 report for the frozen nine records and event/status fields.",
+      "not_supported": [
+        "visual quality",
+        "rendered camera obedience",
+        "whole-video correctness",
+        "repeatability",
+        "C1/C2 cohort confirmation",
+        "causal attribution",
+        "method gain",
+        "novelty"
+      ]
+    }
+  },
+  "blocking_findings": [],
+  "limitations": [
+    "This result review compared the sealed JSON values and identities; it did not reread the nine pixel bodies or independently repeat the pixel arithmetic.",
+    "The zero-call and zero-image statements are supported by the bound source reviews and sealed execution counters; this review did not perform operating-system-level process tracing.",
+    "A B0 no-event result cannot complete the preregistered three-scene decision. C1 and C2 remain mandatory."
+  ],
+  "next_gate": "Proceed to the separately frozen and independently reviewed C1 and C2 runs; do not claim a cohort result, causal mechanism, method gain, or novelty from B0 alone."
+}

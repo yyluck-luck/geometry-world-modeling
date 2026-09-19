@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "reviewed_md_bytes": 6880,
+  "scope": "Read-only source/report review. No rerun of original functions or synthetic trace. Full stub boundary and pre-transform query limitations now correct.",
+  "sources": {
+    "vendor_pipeline_sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+    "vendor_provenance_sha256": "04b8396239321c3c7021d4140cab61cdbbc2756f1001c99b250836a451e8e0b9"
+  },
+  "initial_review": {
+    "sha256": "f8fc35575db8eae737cdc7687d6bed32833c0e2d1b2f4012d11c8460ee12e5e4",
+    "utc": "2026-09-05T20:34:23.030499+00:00",
+    "issues": [
+      {
+        "id": "source_url",
+        "finding": "Report official URL uses liguang0115/VMem; pinned vendor provenance uses runjiali-rl/vmem.",
+        "required": "Use provenance repository URL with unchanged commit."
+      },
+      {
+        "id": "candidate_multiplicity",
+        "finding": "Line 492 passes n=min(context+10,k), hence n<=k. Distribution k>n chooses n entries with count1; k=n returns all1. No repeated candidates arise from this active invocation.",
+        "required": "Replace 14 slots/possibly repeated candidates with at most14 source candidates, each selected source once, for pinned default context4. Distinguish unused helper branch from active pipeline."
+      },
+      {
+        "id": "source_membership_guard",
+        "finding": "Line820 checks current_timestep not in membership. Successful match need not change a membership already containing this timestep.",
+        "required": "Say a successful match appends the timestep only if not already recorded."
+      }
+    ]
+  },
+  "reviewed_utc": "2026-09-05T20:35:15.155288+00:00",
+  "reviewed_md_sha256": "718a77e106e94f34977d66bc88f5c2af7362f6cca94e2652da843d2a3a0d1592",
+  "all_three_corrections_verified": true,
+  "remaining_required_fixes": []
+}

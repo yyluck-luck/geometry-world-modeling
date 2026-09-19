@@ -1,0 +1,22 @@
+**最新完成：S73已有生成图的固定几何与匹配可用性比较，已通过不同作者算术复核。** 成功运行2026-09-09T07:35:18.832018–07:35:19.894425Z，外部1.062418秒return0；读取9张旧PNG4,075,371B，0新模型/权重。真实19锚点1239特征，全部4真实对照+8生成行保留。真实/A0/B匹配数分别为20:323/249/275，21:160/195/241，22:80/86/38，23:75/38/28；生成全部1150个接受匹配均>10px，真实中位1.342/3.162/1.412/4.225px，A0中位21.655/75.693/146.125/210.102px，B为27.668/64.210/124.604/224.644px。完整[结果报告](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S73_GENERATED_GEOMETRY_RESULT.md>)和[结果图](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S73_generated_fixed_geometry/visuals_01/S73_support_and_error.png>)已保存并实际查看。
+
+**结论边界：** 生成对应与指定几何有明显不符，但匹配真假、内容形变、近似标定、相机行为和组件/领域问题仍混杂。真实23的95分位121.103px保留。三方共同锚点92/48/6/0，因此两臂all4配对事件均UNKNOWN；目标22只有6点/3格。缺失不当0误差，不删目标23，不把匹配数当物理可见性。不估算实际生成相机、不作因果或显著性结论。
+
+**实际核验与失败：** 07:38:24Z不同作者以原相机/K世界光线三重积和保存坐标独立复算309项通过，最大算术差6.6791e−13px；12行1788匹配是同一场景，非独立样本。源审和运行文件以ROOT_RESULT_ACCEPTANCE.json绑定。首次07:32:21Z因root包装器解析venv链接导致cv2导入失败、0科学读取；execution_01/external_01原件保留。measure_v2.py仅改execution_02输出目录，合同不变，修正启动路径后成功。不要重跑成功S70–S73。
+
+**当前唯一优先下一步：** 固定真实匹配的错误相机标签敏感性对照20↔23、21↔22；同时报告符号不变归一化F差异，保留全部点/目标/缺失，不按结果挑排列、不拟合F/K、不重匹配。先冻结新协议，此步尚未执行。即使正确标签残差更低，也只证明观察器区分这组替代几何；随后据竞争解释选择最小模型对照，避免无限诊断。
+
+**专职创新检索：** 活跃科研固定一名英文原文检索agent，另一名独立源审/数值复核；本轮连续有限批次已交付CameraCtrl真实误差底线、固定F可辨识反例、EgoSim/GEN3C/VIVID近邻和源码。普通极线attention、遮罩、条件门控、多对应/self回退均已有先例，不作为新方法。VIVID固定commit a6b7f65c67815e698f2ee85bcf00f935200fd5ae的联合softmax是信息分配，不是校准的无匹配概率；重复同一token能改总质量的反例仅属经典数学。后续候选仍须实质差别、明确目标与强对照。每批时间/URL/读取范围见work/S73_generated_fixed_geometry/innovation_sources；未调用Claude模型，未新问Gemini。v2.5原则已记录用户专职agent要求，任务休眠不虚称持续运行。
+
+**科学状态不变：NO_METHOD_SELECTED，novelty_authorization=NONE，new_method_validated=false。** proposal处于可信基线与失败分析，创新机制/跨场景长程确认/消融/论文贡献未完成；不按阅读批数估PhD或CCF A完成比例。M3 Max64GB，本机推进、无远程GPU；无导师消息发送授权。
+
+关键既有证据与保护边界：
+
+- S70完整真实生成三臂各50步，4439.151532秒，A0/A1全部latent/raw/uint8精确重放；平均MSE A0=A1 .13116666776908745，B .12528866263799618，B−A−.005878005131091268，较高几何支持A受益事件false。全16图已看；S73只复用其中旧图。原SD2.1 VAE身份UNKNOWN，使用声明ft-mse变体；目标已曝光，A/B内容顺序规范化混杂。见docs/S70_FIXED_CONTEXT_RESULT.md。
+- S71全12对旧图诊断、不同作者305项算术和全8图查看完成，重复对照0位移；目标23只有3/7真参考对生成匹配，不足H估计。S72四真实对照638匹配、原Torch预处理/S68tensorSHA一致，125项独立算术完成。实际数据fr2_desk；S71引用fr1标定适用性错误已纠正，旧来源/快照保留，原近似ROS K未改。见docs/S71_FRAMING_DIAGNOSIS_RESULT.md、docs/S72_REAL_CONTROL_RESULT.md及work/S72_fixed_requested_geometry/S71_DATASET_ERRATA.md。
+- B0/C1均原固定事件false，原C2 V9第二批前空检索失败，原三行协议不完整；S64单位修复是声明工程变体，不替代旧C2，不构成新方法。S66九帧已真实评分/独立复算/全图查看，主误差 .0006382446123931144、事件false，与S70不同任务指标不可比较。
+- S67固定集合无selectedID/context变化；S68五历史实际CPU编码、S69 GT光学相机与原条件接口均完成且独立核验。S57旧观察器y/z翻转错误标签已撤回，不复活旧结论。S48/RAIMA完整同步数据与算力合同仍不满足；PC-DPM硬共享权重等旧方向已否决/与近邻重叠。
+- 动态支线FloWM仅原代码/配置CPU准备，未实际加载权重或模型执行；Coffee Martini两流已下载校验，cam06前5秒10历史截图已看，人在操纵容器，不满足当前被动遮挡运动假设；cam00/t>=5s未看。不要称已进行动态生成实验。详细状态在本阶段保存的CURRENT_STATUS_before_S73备份与先前交接。
+- 用户指定learning_research四文本及8核心外链、绘图库110文本等实际阅读范围在前轮记录；绘图库media/外链未全部查看，不能宣称所有字节通读。Supervisor handbook2.3、vibe-research-workflow、本地Claude科学批判与figure-designer用于本轮具体步骤。
+
+最新实际流程检查2026-09-09T07:51:25.937174Z，距前次31.028848分钟；07:20轮54.387876分钟的延迟也保留。当前阶段识别为S73_COMPLETE，下一到期08:21:25.937174Z，不以计划30分钟声称历史准点完成。主账只经scripts/research_log.py追加；各次失败、输出和旧协议不覆盖。当前科研摘要已压缩，完整上一版保存在本阶段CURRENT_STATUS_before_S73文件，所有原阶段报告继续有效。

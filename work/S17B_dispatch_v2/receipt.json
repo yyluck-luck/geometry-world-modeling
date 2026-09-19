@@ -1,0 +1,68 @@
+{
+  "started_utc": "2026-09-06T11:23:07.486186+00:00",
+  "status": "FAILED",
+  "operations": [
+    {
+      "name": "freeze",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/freeze_s17b_dpt.py",
+        "--download-receipt",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17A_checkpoint_remaining_v2/receipt.json",
+        "--peer-review",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_review/review_receipt.json",
+        "--root-review",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_root_review/receipt.json"
+      ],
+      "started_utc": "2026-09-06T11:26:52.674876+00:00",
+      "completed_utc": "2026-09-06T11:26:55.513996+00:00",
+      "returncode": 0
+    },
+    {
+      "name": "controlled_model",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/run_s14d_controlled.py",
+        "--manifest",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_EXECUTION_MANIFEST.json",
+        "--output",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S17B_dpt_two_frames",
+        "--control",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_execution/model"
+      ],
+      "started_utc": "2026-09-06T11:26:55.516116+00:00",
+      "completed_utc": "2026-09-06T11:27:09.169359+00:00",
+      "returncode": 0
+    },
+    {
+      "name": "independent_verify",
+      "command": [
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv/bin/python",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/verify_s17b_dpt_history.py",
+        "--manifest",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_EXECUTION_MANIFEST.json",
+        "--manifest-sha256",
+        "f9fe025e2a389e2a679ebc3dbfbd4257bd9611c73d29b94b3f68a302565ff298",
+        "--seal",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_OUTPUT_SEAL.json",
+        "--seal-sha256",
+        "8cbd9496e9f04740eed60a9a723ae16f659ab0f8b9e9db7563b13f9d5d94748f",
+        "--run-dir",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S17B_dpt_two_frames",
+        "--caller-receipt",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_execution/model/caller_receipt.json",
+        "--output",
+        "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S17B_dpt_independent"
+      ],
+      "started_utc": "2026-09-06T11:27:09.182277+00:00",
+      "completed_utc": "2026-09-06T11:27:10.655581+00:00",
+      "returncode": 1
+    }
+  ],
+  "model_dispatches": 1,
+  "updated_utc": "2026-09-06T11:27:10.660422+00:00",
+  "phase": "independent_verify",
+  "error": "RuntimeError('independent_verify returned 1; original evidence preserved')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/dispatch_s17b_after_download_v2.py\", line 46, in main\n    run('independent_verify',[str(R/'.venv/bin/python'),str(R/'scripts/verify_s17b_dpt_history.py'),'--manifest',str(manifest),'--manifest-sha256',sha(manifest),'--seal',str(seal),'--seal-sha256',sha(seal),'--run-dir',str(result_dir),'--caller-receipt',str(caller),'--output',str(verify)])\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/dispatch_s17b_after_download_v2.py\", line 21, in run\n    if result.returncode:raise RuntimeError(f'{name} returned {result.returncode}; original evidence preserved')\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: independent_verify returned 1; original evidence preserved\n",
+  "completed_utc": "2026-09-06T11:27:10.660419+00:00"
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "s40-freeze-tool-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "passed": false,
+  "reviewer": "/root/gemini_third_review_verifier",
+  "completed_utc": "2026-09-07T06:47:17.933052+00:00",
+  "completed_asia_shanghai": "2026-09-07T14:47:17.933052+08:00",
+  "reviewed_identities": {
+    "freeze_s40_manifest.py": "a2cb1056fe7a9a2224e995d103b0fba067d860661036cb8f86318475516ead06",
+    "FREEZE_PROTOCOL.md": "f971bce7d5f01ca4a08e5b10594b25e06733ad8c6c9b832b928637889a841e85",
+    "manifest_candidate.json": "d3515e5ff2da0843da6bbfcdb4e13105c513e10202653561259485f65d547543",
+    "generation_gate.py": "ca16d8be631898e0200b14fcd0a19fd2d8bc6b91f32da4f5ada6038103ba7b14",
+    "s39_variant_gate.py": "cf667bdc0bc43f902d0dca3041c4dbf33a53d908ee4e5d13ebfba2f853a78f4e",
+    "s39_load_components.py": "7b554276d5f00e6f14283a0c3a3d06bccda73b3c9dd2b6a9ef2514287732738e"
+  },
+  "review_scope": {
+    "mode": "independent_static_source_and_protocol_review",
+    "prepare_calls": 0,
+    "attach_calls": 0,
+    "generation_gate_calls": 0,
+    "model_imports": 0,
+    "model_constructors": 0,
+    "model_forwards": 0,
+    "component_weight_body_bytes_read": 0,
+    "input_image_bytes_read": 0,
+    "pixels_decoded": 0,
+    "scientific_arrays_read": 0,
+    "generation_calls": 0,
+    "network_requests": 0,
+    "canonical_ledger_modified": false,
+    "source_files_modified": false,
+    "only_new_file": "work/S40_declared_variant_generation/freeze_tool_source_review.json"
+  },
+  "verified_controls": {
+    "candidate_sha_pin_matches_actual_file": true,
+    "generation_gate_sha_pin_matches_actual_file": true,
+    "freeze_tool_and_protocol_requested_sha_match_actual_files": true,
+    "freeze_tool_imports_standard_library_only": true,
+    "generation_gate_import_chain_is_standard_library_only": true,
+    "prepare_and_attach_never_call_the_full_s40_resource_gate": true,
+    "prepare_and_attach_do_not_start_a_worker_or_model": true,
+    "prepare_does_not_read_any_of_the_five_component_bodies": true,
+    "prepare_copies_components_config_and_input_only_from_the_hash_verified_s39_manifest": true,
+    "prepare_computes_all_s39_manifest_evidence_and_loading_review_file_hashes_itself": true,
+    "s39_metadata_gate_is_required": true,
+    "s39_launch_worker_runtime_loading_and_full_resource_gate_are_all_required_and_cross_bound": true,
+    "s39_loading_review_status_variant_manifest_core_and_four_evidence_hashes_are_required": true,
+    "all_state_dict_and_vae_loading_information_checks_are_retained": true,
+    "two_s40_review_files_must_have_distinct_statuses_and_bind_the_same_variant_and_core_sha": true,
+    "core_file_sha_and_canonical_core_sha_have_separate_uses": true,
+    "review_receipts_are_excluded_from_the_canonical_core_sha_to_avoid_a_hash_cycle": true,
+    "attach_runs_the_s40_metadata_gate_after_writing_the_final_manifest": true,
+    "exclusive_freeze_output_creation_and_failure_receipt_finally_path_exist": true,
+    "unreviewed_core_does_not_authorize_generation": true
+  },
+  "blocking_findings": [
+    {
+      "id": "R1_RESERVED_OUTPUT_ALIAS_CAN_FALSE_PASS_ATTACH_METADATA",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_s40_manifest.py:248-249",
+        "freeze_s40_manifest.py:165-218",
+        "generation_gate.py:71-82",
+        "FREEZE_PROTOCOL.md:7-11"
+      ],
+      "problem": "main creates arbitrary --out before attach_reviews reads the core. The attach path never requires --out to be disjoint from core.output_root or HERE/execution_01 and never rechecks that those two reserved roots remain absent. generation_gate.read_frozen only requires output_root to be absolute. Therefore --out can equal or lie inside results/S40_declared_variant_generation or work/S40_declared_variant_generation/execution_01; creating the attachment directory makes a reserved future-run root non-fresh, yet attach can still return S40_REVIEWS_ATTACHED_METADATA_GATE_PASSED. The unchanged launcher will later reject the supposedly ready manifest before execution.",
+      "required_fix": "Before output.mkdir, resolve the fixed generation output root and future execution root and reject any --out equal to, inside, or containing either reserved root. Check both reserved roots are absent before creating --out. Recheck their absence in both prepare and attach immediately before publishing a success receipt or final manifest. Keep the launcher's own freshness checks as the final runtime guard.",
+      "pass_condition": "No prepare or attach invocation can create or reuse either reserved run root, and attach cannot report metadata-passed while either reserved run root exists."
+    },
+    {
+      "id": "R2_ATTACH_DOES_NOT_REBIND_FREEZE_PREPARATION_TO_ACTIVE_S39_RECORDS",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_s40_manifest.py:120-134",
+        "freeze_s40_manifest.py:176-183",
+        "generation_gate.py:85-128"
+      ],
+      "problem": "prepare duplicates the actual S39 manifest, four evidence records, and loading review under freeze_preparation.actual_s39_records. attach checks only the preparation schema, candidate_sha256, and tool_sources. generation_gate.loading_chain validates the active top-level bindings but ignores the duplicated freeze_preparation payload. A manually changed core can therefore carry contradictory candidate_path or actual_s39_records provenance and still pass attachment when its two reviews bind that contradictory core.",
+      "required_fix": "In attach_reviews require an exact freeze_preparation key set and value equality: candidate_path must equal the fixed absolute CANDIDATE path; candidate_sha256 and tool_sources must match; actual_s39_records must exactly equal a reconstruction from core.s39_loading_manifest, core.s39_loading_evidence, and core.s39_loading_review; and the recorded zero-body-read, zero-pixel-decode, zero-scientific-import fields must have their fixed values. Then call loading_chain on those same active records.",
+      "pass_condition": "The provenance copy inside freeze_preparation cannot disagree with any active S39 binding accepted by loading_chain."
+    }
+  ],
+  "nonblocking_boundaries": [
+    "The gate validates two different review roles and different required statuses, but human author independence is an external orchestration property rather than an authenticated property of these JSON files.",
+    "The S39 metadata and loading-chain checks hash small source, evidence, review, config, and input-image bytes; they do not decode the image or read any GB-scale component body.",
+    "A successful future metadata gate would remain a pre-execution identity check, not evidence of generation, video quality, exact-original VAE equivalence, or innovation."
+  ],
+  "authorization": {
+    "prepare_authorized_by_this_review": false,
+    "attach_authorized_by_this_review": false,
+    "model_loading_authorized": false,
+    "generation_authorized": false,
+    "required_next_step": "Revise the two blocking controls without changing scientific settings, publish new source and protocol SHA-256 identities, and obtain a new independent source review before prepare."
+  },
+  "verdict": "REVISION_REQUIRED before S40 prepare or attach; no model or scientific execution was performed."
+}

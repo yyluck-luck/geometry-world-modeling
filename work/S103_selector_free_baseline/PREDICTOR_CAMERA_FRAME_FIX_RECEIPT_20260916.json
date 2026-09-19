@@ -1,0 +1,48 @@
+{
+  "schema": "gwm-s103-predictor-camera-frame-fix-v1",
+  "recorded_at_local": "2026-09-16T21:44:00+08:00",
+  "status": "PASS_SOFTWARE_AND_EXACT_BOUNDARY",
+  "defect": "The superseded wrapper centered/scaled only the four history C2W matrices and then appended four raw query C2W matrices. The pinned official VMem pipeline concatenates context and target cameras before a single common centering/scaling operation.",
+  "impact_if_unfixed": "History and query cameras would occupy inconsistent coordinate frames, so generated views could not be interpreted as predictions at the declared command cameras.",
+  "official_source": {
+    "path": "/home/yliutz/gwm_source_transport_20260915/vmem/modeling/pipeline.py",
+    "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "behavior": "context and target C2W are concatenated before get_translation_scaling_factor"
+  },
+  "fix": "Concatenate all eight raw C2W matrices first, call the official common centering/scaling method exactly once, and assert that all pairwise relative translations are preserved by the common translation.",
+  "historical_artifacts_preserved_at": "work/S103_selector_free_baseline/history_before_all8_camera_centering_fix_20260916/",
+  "new_predictor": {
+    "path": "work/S103_selector_free_baseline/predictor_s103.py",
+    "bytes": 10435,
+    "sha256": "75af8cad1de25ea7e43ad90c6c7bd89de33d7aa86da50afe8735da612a11189f"
+  },
+  "regressions": {
+    "gate0_validator": "11/11 PASS",
+    "review_order": "6/6 PASS",
+    "predictor_static_contract": "12/12 PASS",
+    "scorer_chain": "4/4 PASS",
+    "formal_chain": "11/11 PASS",
+    "launch_guard": "PASS"
+  },
+  "runtime_binding_v3_sha256": "7b635f37f3af25bf27b20a2707e2a8dac2fa9765c25ca91750d270dcda41a007",
+  "replacement_exact_isolation": {
+    "job_id": "591500",
+    "node": "dgx-21",
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "elapsed": "00:00:30",
+    "receipt_sha256": "d3152f127fd6ca4c6aa6194dcc8fb29b0367cf786e52799e0dd0f91b7368a605"
+  },
+  "replacement_base_contract": {
+    "path": "work/S103_selector_free_baseline/window_scene13_w001_20260916/GATE0_CONTRACT_CANDIDATE_v7.json",
+    "sha256": "283104de8cdd43cda9f6bc31c3c9f73bc5c5b7de8c4ad109e1857ad1c8658ec0",
+    "base_protocol_sha256": "ec7530ce949a80a944178515c6505d05d1bc425adc0574776f5e2ec80b088b9f",
+    "status": "BLOCKED_INDEPENDENT_REVIEWS_ONLY"
+  },
+  "formal_bundle_created": false,
+  "model_loaded": false,
+  "model_forward": false,
+  "future_outcome_opened": false,
+  "scoring_run": false,
+  "scientific_result": false
+}

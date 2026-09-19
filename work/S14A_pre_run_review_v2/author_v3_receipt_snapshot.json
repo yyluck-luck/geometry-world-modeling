@@ -1,0 +1,142 @@
+{
+  "started_utc": "2026-09-06T04:00:53.647649+00:00",
+  "status": "passed",
+  "scope": "Artificial inputs only, same-author boundary checks; no independent review",
+  "extractor_sha256": "cb550ce7a61ca4c40a9fd7a257a75aa9bc1b6445a905f4e648a96c1e979e8d0e",
+  "checker_sha256": "e6f1795c1ef83cffab1d7da2993cc74e710a36a64002be08e19a776d2f125101",
+  "environment": {
+    "python": "3.13.0 (main, Oct  7 2024, 05:02:14) [Clang 16.0.0 (clang-1600.0.26.3)]",
+    "executable": "/opt/homebrew/opt/python@3.13/bin/python3.13",
+    "platform": "macOS-26.7-arm64-arm-64bit-Mach-O"
+  },
+  "real_experimental_files_opened": 0,
+  "real_feature_rows": 0,
+  "checks": [
+    {
+      "name": "weights_hand_calculated_uniform_sparse_singleton",
+      "passed": true
+    },
+    {
+      "name": "weights_empty_rejected",
+      "passed": true,
+      "rejected": "Empty weights"
+    },
+    {
+      "name": "weights_all_zero_rejected",
+      "passed": true,
+      "rejected": "Nonpositive/nonfinite weight sum"
+    },
+    {
+      "name": "weights_duplicate_id_rejected",
+      "passed": true,
+      "rejected": "Duplicate ID: weight IDs"
+    },
+    {
+      "name": "weights_nan_rejected",
+      "passed": true,
+      "rejected": "Nonfinite/negative source weight"
+    },
+    {
+      "name": "weights_negative_rejected",
+      "passed": true,
+      "rejected": "Nonfinite/negative source weight"
+    },
+    {
+      "name": "row_15_features_against_hand_values",
+      "passed": true
+    },
+    {
+      "name": "fp32_nonclose_gap_regression_and_saved_feature",
+      "passed": true
+    },
+    {
+      "name": "fp32_ties_even_subnormal_and_wide_exponents",
+      "passed": true
+    },
+    {
+      "name": "fp64_only_weight_rejected",
+      "passed": true,
+      "rejected": "Saved value is not exactly binary32: 14th source weight"
+    },
+    {
+      "name": "fp32_weight_outside_unit_range_rejected",
+      "passed": true,
+      "rejected": "Outside source-weight range [0,1]: 14th source weight"
+    },
+    {
+      "name": "fp32_descending_order_violation_rejected",
+      "passed": true,
+      "rejected": "Source weights are not descending"
+    },
+    {
+      "name": "fp32_saved_gap_wrong_value_rejected",
+      "passed": true,
+      "rejected": "Saved FP32 14/15 source weight gap mismatch"
+    },
+    {
+      "name": "fp64_saved_gap_rejected",
+      "passed": true,
+      "rejected": "Saved value is not exactly binary32: saved source weight gap"
+    },
+    {
+      "name": "selected_missing_pair_rejected",
+      "passed": true,
+      "rejected": "Missing/duplicate selected pair in accepted step"
+    },
+    {
+      "name": "selected_duplicate_id_rejected",
+      "passed": true,
+      "rejected": "Duplicate ID: selected"
+    },
+    {
+      "name": "selected_nonfinite_pair_rejected",
+      "passed": true,
+      "rejected": "Nonfinite/negative saved pair distance"
+    },
+    {
+      "name": "fallback_without_accepted_pair_proof_rejected",
+      "passed": true,
+      "rejected": "NMS fallback has no complete accepted-pair proof"
+    },
+    {
+      "name": "duplicate_json_keys_rejected",
+      "passed": true,
+      "rejected": "Duplicate JSON key: x"
+    },
+    {
+      "name": "wrong_file_hash_rejected",
+      "passed": true,
+      "rejected": "Input SHA mismatch: /var/folders/xq/c5f0p5c10z1dcyg8qf780f_m0000gn/T/s14a-artificial-abmf99sm/artificial.json"
+    },
+    {
+      "name": "correct_file_hash_accepted",
+      "passed": true
+    },
+    {
+      "name": "exact_path_domain_accepted_without_opening",
+      "passed": true
+    },
+    {
+      "name": "wrong_source_hash_rejected",
+      "passed": true,
+      "rejected": "Extractor source SHA mismatch"
+    },
+    {
+      "name": "nonallowlisted_path_rejected_without_opening",
+      "passed": true,
+      "rejected": "Forbidden/duplicate input path"
+    },
+    {
+      "name": "duplicate_manifest_input_rejected",
+      "passed": true,
+      "rejected": "Forbidden/duplicate input path"
+    },
+    {
+      "name": "existing_output_rejected_before_manifest_read",
+      "passed": true,
+      "rejected": "Output directory already exists; choose a new directory"
+    }
+  ],
+  "check_count": 26,
+  "completed_utc": "2026-09-06T04:00:53.661208+00:00"
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "s35-component-source-review-v1",
+  "status": "PASS_COMPONENT_SOURCE_REVIEW_ONLY_INTEGRATION_PENDING",
+  "passed": true,
+  "reviewed_utc": "2026-09-06T22:53:23.850660+00:00",
+  "reviewer": "/root/supervisor_full_readthrough",
+  "python_executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+  "python_version": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/resource_gate.py": "681ad8da7bfd98fd4b9af912c2b9a0abec7772db6f533b65dd4acbd420ea2601",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/runtime_factory.py": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_outputs.py": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_contract.md": "c82dfac465ff85b943e6e6c0a68a6a1f8ffb65f30d538eb23ad3640d3863dbd3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/source_manifest_archive.json": "76e7f761b3d6e964f2661145eac2815956559739994d9b040c2edd0aaa2abc14",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/review_requirements.md": "6c22e264f6adc9677bcb56811931316f0368d9ef72fb6435eeea5a61c8174b78",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/autoencoder.py": "ccb94f107fd07302fa34593f7b840b3066f73548fe800e647eccfd66da473807",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/conditioner.py": "b79eb0cf4d94345a720a9a844c7daa6206b0a9234d714b7f9f23a9571c7c5fc1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/model.py": "43b82c734f264a2e0e0a242dbd2d42855fe4e794cc25c0d433d6ef1b0dc54150",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/add_ckpt_path.py": "40c45aec68241a855e4a09e6a7c95aeadb4ff6fc5fa40568ee98b586b5dc6d5a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/navigation.py": "6d267365d5dcccf9f7cd6d535f19f80521f60a9634dffb35b9af398407389fcf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/configs/inference/inference.yaml": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/open_clip/factory.py": "7143ea320245fe1fe9eea8c2da3f1057a72e7697553cbe2d8227dcfce6846113",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/open_clip/pretrained.py": "acdf736017cde24c7746c663ad652d3cdc3fd575987840358bc88f06eaca5b85",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57"
+  },
+  "full_read": [
+    "resource_gate.py",
+    "runtime_factory.py",
+    "archive_outputs.py",
+    "archive_contract.md",
+    "source_manifest_archive.json"
+  ],
+  "supporting_source_scope": "Original pipeline constructor/initialization, VAE and CLIP full modules, CUT3R load_model and add_ckpt_path, Navigator init/interpolation, app input call sites, OpenCLIP checkpoint/local-path/pretrained branches, original config and canonical tensor codec only; no claim of full third-party package review. Original S20 source manifest domain inspected, not a repeated all-file review.",
+  "checks": {
+    "resource_gate_prior_review_binding_findings": "RESOLVED: review statuses and approved core excluding receipts, exact required original/new source domain, separate VAE identities; validate_gate matches manifest component paths/sizes/hashes and source domain.",
+    "metadata_only_scope": "Explicit non-authorizing metadata schema cannot pass validate_gate; no component bytes or photo bytes read by metadata_only branch.",
+    "all_metadata_before_large_hash": "All component existence/size/identity, source/review/input file metadata precedes component SHA loop. Source content hashes are small.",
+    "original_constructors": "Single original VMemPipeline with original four component construction, local assets and exact loader signature guards; incomplete loaded keys stop execution.",
+    "local_vae": "Same original wrapper and original VAE config/parameter directory, no alternate checkpoint; original latent mean and .18215 scaling retained. Additional output_loading_info is diagnostic; actual full weights not tested.",
+    "local_clip": "Original ViT-H-14 create_model_and_transforms with local pretrained path calls same checkpoint route; fixed original conditioner preprocess used. Original laion tag has no QuickGELU architecture override.",
+    "original_input_navigation": "Original load_img_and_K + transform_img_and_K, original default K and 4-frame Navigator, fresh dedicated cwd confines original visualization removal.",
+    "rng": "Factory seeds once after imports and before original constructors; archive no RNG draws/getters/seed. Original constructor draws are retained.",
+    "archive_bits": "Existing S20 canonical tensor bytes, full dtype/shape/bytes sidecars; sync pre/post caller snapshots and content-addressed O_EXCL; live originals never replaced. PIL pixel+PNG saving is serialization, not neural encoding.",
+    "archive_failures": "Partial durable prefix and caller rethrow contract; ARCHIVE_COMPLETE and closed trace never claim technical generation.",
+    "syntax": "Actual Python 3.12 AST parse and in-memory compile of 3 current modules PASS; imports and constructors not executed."
+  },
+  "nonblocking_followup_for_full_manifest": [
+    "Prefer exact original inference.yaml path/SHA, or explicitly review its full frozen bytes: runtime currently checks only a subset of YAML controls; cfg/cfg_min/camera_scale/shrink and other untouched original settings must remain fixed. Parent notified.",
+    "Future full source/runtime review must bind actual launcher and integration call paths and scientific package/module origins; this component-only verdict does not approve an unreviewed run manifest."
+  ],
+  "limits": {
+    "whole_integration_approved": false,
+    "manifest_core_approved": false,
+    "real_run_authorized": false,
+    "module_imports_executed": 0,
+    "model_constructors_executed": 0,
+    "weight_rgb_gt_npz_bytes_read": 0,
+    "synthetic_interface_runs": 0,
+    "scientific_runs": 0,
+    "network_requests": 0,
+    "source_files_edited": false
+  },
+  "historical_review_preserved": "resource_gate_initial_review.json remains unchanged; resolved source findings do not erase its original draft result."
+}

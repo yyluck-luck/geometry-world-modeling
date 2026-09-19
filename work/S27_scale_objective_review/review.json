@@ -1,0 +1,132 @@
+{
+  "status": "COMPLETED_SOURCE_THEORY_AND_TINY_ARTIFICIAL_REVIEW_NOT_REAL_ROOT_CAUSE",
+  "recorded_utc": "2026-09-06T16:32:47.394554+00:00",
+  "author": "research_novelty_routes; separate from root source-diagnosis author",
+  "scope": {
+    "true_models": 0,
+    "true_GA_runs": 0,
+    "optimizer_steps": 0,
+    "true_GT_file_reads": 0,
+    "true_output_npz_or_camera_array_reads": 0,
+    "existing_summary_scores_seen": "Newest project log contains S26B error summary; not blind. No such numbers used in proof.",
+    "executed": "Only artificial_checks.py; two exact AST-extracted helpers and deterministic tiny tensors; no full optimizer instantiation."
+  },
+  "principal_findings": [
+    {
+      "claim": "l1_dist is weighted per-point Euclidean norm, not coordinatewise L1",
+      "basis": "commons.py:78-79; optimizer.py:269-288",
+      "status": "SOURCE_CONFIRMED"
+    },
+    {
+      "claim": "Known pose forces norm_pw_scale=False but pair log-scale and translation remain free; factor1 is not pair scale1",
+      "basis": "optimizer.py:102-121;base_opt.py:163-169,266-285",
+      "status": "SOURCE_CONFIRMED"
+    },
+    {
+      "claim": "Common center C, all depths free, fixed focal/pp/rotation/weights: d_prime=alpha*d, s_prime=alpha*s, t_prime=C+alpha*(t-C) gives L_prime=alpha*L",
+      "status": "REAL_ARITHMETIC_PROOF_AND_TINY_TENSOR_CHECK",
+      "limitation": "Not finite-alpha-zero optimum or optimizer trajectory; correct raw translation mapping required for arbitrary C."
+    },
+    {
+      "claim": "Nonzero centers add (1-alpha)*(camera_center-C) to the alpha-scaled residual, giving a weighted baseline bound; short baseline alone is insufficient",
+      "status": "PROOF_PLUS_COUNTEREXAMPLE",
+      "limitation": "Nonnegative weights needed for loss/bound interpretation; actual baseline or B not read."
+    },
+    {
+      "claim": "Fixed old depth prevents global all-depth scaling; old residual includes (1-alpha)*(Xold-C)",
+      "status": "PROOF_AND_TINY_CHECK",
+      "limitation": "Does not eliminate all focal or degenerate-anchor possibilities."
+    },
+    {
+      "claim": "ParameterStack detach/new-Parameter disconnects original im_depthmaps gradients along shown get_depthmaps path",
+      "status": "SOURCE_AND_EXACT_HELPER_ARTIFICIAL_AUTOGRAD_CONFIRMED",
+      "limitation": "No actual saved-run gradient history read. MST directly sets initial new depths; flags do not establish actual Adam updates."
+    }
+  ],
+  "peer_source_memo_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27_scale_diagnosis_source/audit.md",
+    "sha256": "d836688a80f3df228544269446a3181b4929b8712d436e20f83f44dfe4596678",
+    "read_in_full": true,
+    "agreement": "Loss definition, free pair scale, center residual identity, baseline limits and old-depth restriction agree",
+    "wording_remaining_at_snapshot": [],
+    "requested_correction": "Trainable depth describes requires_grad declaration and mathematical feasible values, not verified actual Adam updates; preserve gradient-disconnection finding. Parent notified.",
+    "not_reaudited": "Full camera normalization/navigation path and actual runtime module history are inherited from peer, not independently repeated here."
+  },
+  "artificial_execution": {
+    "command": ".venv-cut3r/bin/python work/S27_scale_objective_review/artificial_checks.py",
+    "observed_exit_code": 0,
+    "started_utc": "2026-09-06T16:28:15.801572+00:00",
+    "completed_utc": "2026-09-06T16:28:15.816035+00:00",
+    "status": "PASS_ARTIFICIAL_MATH_AND_HELPER_CHECKS_ONLY",
+    "cpu_torch_threads": 1,
+    "claimed_real_replicates": 0
+  },
+  "next_falsifiable_checks": [
+    "Under exact unchanged helper path, original depth gradients should be absent; any real nonzero gradient requires another source path.",
+    "Valid all-free/common-center/fixed-intrinsic feasible family must give first-degree homogeneity.",
+    "Do not apply all-depth scaling to fixed-old8 domain.",
+    "Root-owned next actual step can record zero-Adam MST and one backward; this review did not run it."
+  ],
+  "ordinary_controls_not_innovation": [
+    "Restore intended autograd depth path while preserving fixed-old constraints; check actual gradients and parameter changes.",
+    "Explicit legitimate-source scale anchor or mean-log-scale constraint or nondegenerate old depth anchor.",
+    "norm_pw_scale=True fixes geometric-mean pair scale to0.5 and changes initialization factors; not automatically correct meter scale."
+  ],
+  "coordination": {
+    "extra_sanity_subtask": "Spawned once then interrupted on root request; no completed result received or used. Not counted as validation.",
+    "main_ledger_modified": false,
+    "upstream_or_frozen_code_modified": false
+  },
+  "identities_at_review": {
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py": {
+      "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+      "size_bytes": 12212
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/base_opt.py": {
+      "sha256": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+      "size_bytes": 20800
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/commons.py": {
+      "sha256": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+      "size_bytes": 2339
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/cloud_opt/dust3r_opt/init_im_poses.py": {
+      "sha256": "b3f59fbf32fd9690e63551ac14dc957edef9145bb3d5544fcb53a6eb3758bb21",
+      "size_bytes": 11896
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/surfel_inference.py": {
+      "sha256": "8a348645cd387147c35635f0a6b432d85bcf844e3839bd5a000d8147a85b17d5",
+      "size_bytes": 17511
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/src/dust3r/model.py": {
+      "sha256": "a828d35b9bf0a2f573c5266b02ad1dc0265b719198ac9ee510b55fea2bea8109",
+      "size_bytes": 40789
+    },
+    "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/extern/CUT3R/src/dust3r/heads/postprocess.py": {
+      "sha256": "1053c35f0962f91ad8b985a702dd5c2cff4fd94ff92d96340ff7a8dbabe81384",
+      "size_bytes": 4689
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27_scale_diagnosis_source/audit.md": {
+      "sha256": "d836688a80f3df228544269446a3181b4929b8712d436e20f83f44dfe4596678",
+      "size_bytes": 13373
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27_scale_objective_review/artificial_checks.py": {
+      "sha256": "18558150cc02a839a9fe0516c60f65c6a46a803cfbf35422d71059eb2234937f",
+      "size_bytes": 6120
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27_scale_objective_review/artificial_checks.json": {
+      "sha256": "e14bb2d90559c72c898c14123c687b77e8707014c11960b5b00a280078ddd3d8",
+      "size_bytes": 3138
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27_scale_objective_review/review.md": {
+      "sha256": "0ada4bf23b9af7929b3a93b19b589c82ba48eed26acf664d04b71d4e21090c22",
+      "size_bytes": 10363
+    }
+  },
+  "skill_application": {
+    "Supervisor_handbook_2_2": "Reuse prior full read: concrete baseline problem, mechanism and falsifiers before method claims",
+    "Claude_scientific_critical_thinking": "Reuse prior actual read: source/math/real-run evidence boundaries, counterexamples, confounding",
+    "new_survey_claimed": false
+  },
+  "metadata_writer_note": "First attempt to construct this JSON had a Python quoting SyntaxError before execution; corrected metadata writer only. No artificial numerical check or experiment rerun."
+}

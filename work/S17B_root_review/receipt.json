@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-09-06T11:10:29.446683+00:00",
+  "status": "READY_AFTER_DOWNLOAD_PASS",
+  "reviewer": "root",
+  "identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/run_s17b_dpt_history.py": "3e13b4b083bded29efe867d8b8582e3734f96132161cf446f43dc6041288e217",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/verify_s17b_dpt_history.py": "a55d092c91ec70d0ab5b46a8a31d4b4c42582b273c2a6e50ae75aaff09b23376",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/freeze_s17b_dpt.py": "3e968f12ca05db1f90788c6b843d54ce28a48c24b5ddbba17866cc7a28405468",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/run_s14d_controlled.py": "b58d57ddd78355cc28893ce9c5771b843a0859548443e02727aedf7355dc0a0e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_DPT_TWO_FRAME_PROTOCOL.md": "ded495fcb073c36764c09b17388b04d459f29777de14237ed0faa2650d5075a8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_CODE_REVIEW_AND_VERIFICATION.md": "7d0984acecdd56795305c4f8bc2215ed5c24f90f4c6aa0ee3796200ad7b5042f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_review/review_receipt.json": "988f970f2060f5f7abfb38e495c7deb6a8479ff1e91230ad437f2d7ae8a2d28a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_preparation/artificial_checks.json": "f76b97b3c16d8f8df4b542981f38e507496c30d94d7209e25de9cf66eb38ed50"
+  },
+  "scope": "Read all producer functions, protocol, external monitor, peer review and independent verifier core. No real images/model/GT read in this review.",
+  "findings": [
+    "Exactly original known Bonn indices 0/1, 512 loader native384x512, actual DPT and encoder hooks.",
+    "Exactly12head+5state+2pose arrays, raw predictions preserved before numerical validation; failed outputs retained.",
+    "Original signed RoPE adapter retained, new CPU preflight adapter not silently substituted.",
+    "Official loader patch class normalization checked; architecture is recorded, independent verifier also checks output_mode.",
+    "CPU8 FP32 seed0 600s32GiB external sampler, not operating-system hard isolation.",
+    "Independent verifier imports NumPy/SciPy only; byte hashes including complete weight are distinguished from decode/deserialization.",
+    "Freezer requires full author SHA/size, ZIP CRC, both review identities, fresh directories; no model loading during freeze."
+  ],
+  "limitations": [
+    "Real512 inference not yet run; actual checkpoint globals/schema may still fail and must remain recorded.",
+    "Not an independent external team, no accuracy or video claim."
+  ],
+  "checkpoint_deserializations": 0,
+  "image_decodes": 0,
+  "model_calls": 0
+}

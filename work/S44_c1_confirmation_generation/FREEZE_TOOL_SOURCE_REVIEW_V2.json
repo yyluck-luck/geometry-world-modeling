@@ -1,0 +1,168 @@
+{
+  "schema": "s44-c1-freeze-tool-source-review-v2",
+  "status": "PASS_S44_C1_FREEZE_TOOL_SOURCE_REVIEW",
+  "reviewed_utc": "2026-09-07T17:23:58.530518+00:00",
+  "author_role": "/root",
+  "reviewer_role": "/root/c1_revised_source_audit",
+  "review_mode": "independent_read_only_static_control_flow_hash_ast_and_source_domain_review",
+  "reviewed_files": {
+    "generation_gate.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/generation_gate.py",
+      "sha256": "961b9550f5ea438a338eb24ba9f36dd18f22d7f0719f9b54109e182755ab43dc"
+    },
+    "runtime_adapter.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/runtime_adapter.py",
+      "sha256": "afedaadca7bff62616368541d980a28f24131e1256eafef7af81275aa09dfb4e"
+    },
+    "launch_generation.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/launch_generation.py",
+      "sha256": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b"
+    },
+    "PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/PROTOCOL.md",
+      "sha256": "77c72263f6f58f77e5990a7db1557773013b9b84b14fb040f20faaaae6e701b5"
+    },
+    "FREEZE_PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_PROTOCOL.md",
+      "sha256": "aa103a3fa58f03a5969be754f5f55abba11d0f3966386d5a9c02445035e1defe"
+    },
+    "freeze_c1_manifest.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/freeze_c1_manifest.py",
+      "sha256": "c91400d5b00362507f01379ebaab8fb768fcff9be97cc2f066f1e7548e11c732"
+    },
+    "inference_seed43.yaml": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/inference_seed43.yaml",
+      "sha256": "2fb88eb0a15c449b876386df5c9c0d2aad8da43c6be5aeccbd9b8d72be1908aa"
+    }
+  },
+  "prior_review_disposition": {
+    "obsolete_pass": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW.json",
+      "sha256": "1e868b63d293105c49ceb302eccb9c6a18079fc3d3b36dc997c01bd4022d276c",
+      "disposition": "INVALIDATED_RETAINED_NO_AUTHORIZATION_EFFECT"
+    },
+    "blocking_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW_BLOCKED.json",
+      "sha256": "98a30033c03b238210952ba71fd1ad6c220b769c013c9443faba933c47766e38",
+      "disposition": "R1_R2_R3_CLOSED_ONLY_FOR_THE_CURRENT_REVIEWED_HASH_SET"
+    },
+    "blocking_correction": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW_CORRECTION_BLOCKED.json",
+      "sha256": "8d971a70fcafb83af94a87905ef0d965b0f60f54d49cb9179eccd4b2d844ae6e",
+      "disposition": "HISTORICAL_BLOCKER_RECORD_RETAINED"
+    }
+  },
+  "resolved_blocking_findings": [
+    {
+      "id": "R1_FORMAL_MANIFEST_PUBLISHED_BEFORE_ATTACH_SUCCESS",
+      "status": "CLOSED_FOR_CURRENT_HASH_SET",
+      "evidence": "Attach validates the exact future manifest through a temporary non-authoritative path. In the hidden staged bundle it writes metadata_gate.json and the completed success receipt before manifest.json. The manifest is the final staged-file mutation. The complete directory is then published atomically without replacement. The execution gate accepts only the resolved canonical review_attachment_01/manifest.json and requires its sibling success receipt, exact manifest/core/review/tool/protocol bindings, and the sibling metadata hash and content. Any staged manifest retained after an exception is outside the canonical path and is rejected.",
+      "source_locations": [
+        "freeze_c1_manifest.py:250-270",
+        "freeze_c1_manifest.py:273-307",
+        "freeze_c1_manifest.py:388-418",
+        "generation_gate.py:286-334",
+        "generation_gate.py:435-445"
+      ]
+    },
+    {
+      "id": "R2_PREFLIGHT_AFTER_FORMAL_DIRECTORY_CREATION",
+      "status": "CLOSED_FOR_CURRENT_HASH_SET",
+      "evidence": "The tool validates the exact mode/output pairing, all mode-specific arguments, formal-output absence, renamex_np availability, pinned sources and protocols, parent/input/config identities, reserved-root freshness, and either the full core builder or full attachment candidate before creating a hidden stage. It rechecks state-dependent freshness after staging and publishes the formal directory only after the complete bundle exists. Preflight failure writes only a uniquely named non-authoritative JSON record.",
+      "source_locations": [
+        "freeze_c1_manifest.py:310-328",
+        "freeze_c1_manifest.py:331-332",
+        "freeze_c1_manifest.py:362-390",
+        "freeze_c1_manifest.py:415-418"
+      ]
+    },
+    {
+      "id": "R3_BROKEN_SYMLINK_FRESHNESS_FALSE_PASS",
+      "status": "CLOSED_FOR_CURRENT_HASH_SET",
+      "evidence": "Every reserved-path check uses os.path.lexists, so files, directories, symlinks, and broken symlinks are occupied. Hidden staging uses create-exclusive mkdtemp. Formal publication uses macOS renamex_np with RENAME_EXCL 0x00000004 after a point-in-time lexists check, containing the remaining check-to-publication race without replacement.",
+      "source_locations": [
+        "freeze_c1_manifest.py:79-81",
+        "freeze_c1_manifest.py:84-101",
+        "freeze_c1_manifest.py:133-135",
+        "freeze_c1_manifest.py:366-390"
+      ]
+    }
+  ],
+  "additional_checks": {
+    "all_requested_current_hashes_match": true,
+    "base_s40_manifest": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+      "sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe"
+    },
+    "s42_preregistration": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+      "sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+    },
+    "source_domain": {
+      "inherited_s39_count": 214,
+      "c1_row_source_count": 218,
+      "added_exact_c1_sources": 4,
+      "all_218_current_hashes_match": true,
+      "base_s40_source_count_for_comparison": 218
+    },
+    "seed_43": {
+      "s40_config_bytes": 879,
+      "c1_config_bytes": 880,
+      "exact_byte_relation": "S40_CONFIG_REPLACE_UNIQUE_SEED_42_WITH_43_THEN_APPEND_ONE_NEWLINE",
+      "all_parent_integer_42_sites": [
+        [74, 20],
+        [74, 39],
+        [74, 61],
+        [78, 29]
+      ],
+      "site_meanings": [
+        "random.seed",
+        "numpy.random.seed",
+        "torch.manual_seed",
+        "config.seed equality guard"
+      ],
+      "runtime_inverse_full_ast_equal": true
+    },
+    "launcher_derivation": {
+      "parent_sha256": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+      "resource_gate_routes": 2,
+      "runtime_factory_routes": 1,
+      "here_assignments": 1,
+      "reversible_full_ast_equal": true,
+      "budget_and_trace_boundary_math_unchanged": true
+    },
+    "exception_path_audit": {
+      "preflight_failure_can_publish_formal_directory": false,
+      "post_staging_failure_can_publish_executable_canonical_manifest": false,
+      "failed_stage_is_retained_only_under_unique_non_authoritative_path": true,
+      "formal_publication_can_replace_existing_entry": false
+    },
+    "fresh_state_observed_at_review": {
+      "freeze_attempt_01_lexists": false,
+      "review_attachment_01_lexists": false,
+      "execution_01_lexists": false,
+      "scientific_output_root_lexists": false
+    }
+  },
+  "blocking_findings": [],
+  "authorization_effect": "THE_CURRENT_HASH_SET_PASSES_THE_STATIC_FREEZE_TOOL_SOURCE GATE FOR A SEPARATE PREPARE ATTEMPT ONLY",
+  "executed": false,
+  "freeze_main_calls": 0,
+  "prepare_calls": 0,
+  "attach_calls": 0,
+  "launcher_main_calls": 0,
+  "runtime_creation_calls": 0,
+  "model_or_scientific_imports": 0,
+  "component_bodies_read": 0,
+  "input_body_bytes_hashed": 663677,
+  "pixels_decoded": 0,
+  "images_opened": 0,
+  "generation_calls": 0,
+  "static_standard_library_checks": {
+    "source_domain_hash_check": true,
+    "runtime_derivation_callable_built_without_calling_it": true,
+    "launcher_compile_only_proof": true,
+    "scientific_modules_loaded": []
+  },
+  "scientific_claim_boundary": "This is a source-readiness review. It is not a freeze execution, attached review bundle, model load, image decode, generation, readback, quality result, method gain, or novelty result."
+}

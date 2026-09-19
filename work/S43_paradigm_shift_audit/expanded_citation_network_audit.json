@@ -1,0 +1,885 @@
+{
+  "schema_version": "1.0",
+  "audit_id": "S43-EXPANDED-CITATION-NETWORK-20260908",
+  "generated_at_utc": "2026-09-07T17:36:27Z",
+  "generated_at_local": "2026-09-08T01:36:27+08:00",
+  "timezone": "Asia/Shanghai",
+  "status": "KEEP_CONDITIONAL_AFTER_EXPANDED_NETWORK_AUDIT",
+  "novelty_authorization": "NONE",
+  "candidate": "Fixed-state, all-consumer-path causal intervention on one runtime-selected memory item, localized to a pre-treatment geometry support against a mask-area baseline, with the item-level causal score predicting natural revisit failure or benefit.",
+  "evidence_policy": {
+    "scientific_claim_sources": [
+      "author paper",
+      "official project page",
+      "official code repository",
+      "official author homepage"
+    ],
+    "discovery_only_sources": [
+      "Semantic Scholar Graph API",
+      "OpenAlex API"
+    ],
+    "negative_search_rule": "NO_IN_CHECKED_SOURCE means no matching method was identified in the explicitly audited accessible sources. It does not mean the method does not exist.",
+    "unpublished_rule": "An author-homepage In Progress entry without a public paper or code is an UNPUBLISHED_SIGNAL and is NOT_ASSESSABLE on all contract criteria.",
+    "novelty_rule": "Absence from the checked set does not authorize first, novel, no-prior-work, or CCF-A-level claims."
+  },
+  "status_vocabulary": {
+    "FULL": "The checked primary method explicitly satisfies the complete criterion.",
+    "PARTIAL": "The work contains an adjacent capability but misses at least one required constraint.",
+    "ANALOGUE_ONLY": "A strict analogue exists in another task, but it does not directly satisfy the world-model memory contract.",
+    "NO_IN_CHECKED_SOURCE": "No satisfying method was identified in the checked primary-source scope; not an existence claim.",
+    "NOT_ASSESSABLE": "No public method and experiment are available for assessment."
+  },
+  "contract_criteria": [
+    {
+      "id": "C1",
+      "name": "runtime_selected_single_item_intervention",
+      "definition": "Intervene on one memory item that was actually selected in an ordinary runtime execution, rather than disabling a whole module, all context, or an arbitrary hidden component."
+    },
+    {
+      "id": "C2",
+      "name": "all_relevant_state_fixed",
+      "definition": "Hold prompt, pose, intrinsics, selected IDs and order, non-target memory, latents or actual sampling noise, RNG, sampler, and other relevant state fixed, with exact replay establishing the null distribution."
+    },
+    {
+      "id": "C3",
+      "name": "source_coherent_all_consumer_paths",
+      "definition": "Apply the same source change coherently through every real consumer path; single-path CLIP, latent, KV, or attention-edge interventions are diagnostic only."
+    },
+    {
+      "id": "C4",
+      "name": "pretreatment_geometry_localization_and_area_baseline",
+      "definition": "Localize output causal change to a source geometry support frozen before intervention and show concentration beyond a mask-area or equivalent chance baseline."
+    },
+    {
+      "id": "C5",
+      "name": "predicts_natural_revisit_failure_or_benefit",
+      "definition": "Show that the item-level causal score predicts unmanipulated natural revisit failure or benefit with paired, incremental, or calibrated evidence."
+    }
+  ],
+  "target_papers": [
+    {
+      "id": "vlb_2605_24624",
+      "title": "Vision-Language Binding in In-Context Image Generation",
+      "arxiv_id": "2605.24624",
+      "version_checked": "v1",
+      "submission_date": "2026-05-23",
+      "authors": [
+        "Chris Ge",
+        "Rohit Gandikota",
+        "Antonio Torralba",
+        "Tamar Rott Shaham"
+      ],
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2605.24624",
+        "html": "https://arxiv.org/html/2605.24624",
+        "project": "https://chrisg777.github.io/i2i-interp/",
+        "code": "https://github.com/ChrisG777/i2i-interp"
+      },
+      "local_pdf_sha256": "ec17bf1deffcc4468cd160df2f2c3da7686cd870e1d5f8bc2e225a7fe8503836",
+      "official_code_snapshot": {
+        "commit": "dca0b97d2788b099933d0b121001cefc6c099762",
+        "commit_time": "2026-08-26T14:18:01-07:00",
+        "commit_subject": "Add new experiments and evaluation tooling"
+      },
+      "primary_capabilities": [
+        "T2I Lens decodes intermediate text-token activations through a T2I path.",
+        "Attention Knockout severs selected reference-to-text or reference-to-image attention edges.",
+        "I2I-to-I2I patching transfers text-token activations from a source reference run to a target reference run.",
+        "The paper reports 2875 image-editing tasks and uses different source and target noise seeds.",
+        "Official code reconstructs target baseline and patched target with the same target seed, prompt, reference, and dimensions.",
+        "Reference-text binding is localized to text-sequence padding tokens.",
+        "The paper explicitly notes incomplete patching and possible secondary or backup paths."
+      ],
+      "post_paper_official_code_signal": {
+        "name": "repair_amplify",
+        "interpretation": "The later repository triages failed style transfers and amplifies selected causal paths, connecting mechanism analysis to attempted repair.",
+        "record_counts_observed": {
+          "baseline_census_rows": 450,
+          "strict_failure_rows": 130,
+          "subject_failure_rows": 31,
+          "amplification_census_rows": 390,
+          "rescue_rows": 54
+        },
+        "claim_boundary": "No unified repair rate is computed because task pools and grading conditions differ across files. This remains I2I path amplification, not natural world-model revisit prediction."
+      },
+      "contract_assessment": {
+        "C1": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "The intervention target is a reference image or text-token activation in image editing, not one runtime-selected historical world-memory item."
+        },
+        "C2": {
+          "status": "ANALOGUE_ONLY",
+          "reason": "The target run fixes target seed, prompt, reference, and dimensions, which is a strong causal analogue, but it is not a full world-model replay with retrieval set, poses, caches, and all other memory consumers fixed."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Text-token patching leaves the target reference path active; knockout targets selected edges. The paper itself indicates backup or secondary paths."
+        },
+        "C4": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Padding-token localization is sequence localization, not output localization to a pre-treatment 3D geometry support with area baseline."
+        },
+        "C5": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "The main study and later repair-amplify files do not establish preregistered prediction of natural video-world-model revisit failure or benefit."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    },
+    {
+      "id": "mosaicmem_2603_17117",
+      "title": "MosaicMem: Hybrid Spatial Memory for Controllable Video World Models",
+      "arxiv_id": "2603.17117",
+      "version_checked": "v1",
+      "submission_date": "2026-03-17",
+      "authors": [
+        "Wei Yu",
+        "Runjia Qian",
+        "Yumeng Li",
+        "Liquan Wang",
+        "Songheng Yin",
+        "Sri Siddarth Chakaravarthy P",
+        "Dennis Anthony",
+        "Yang Ye",
+        "Yidi Li",
+        "Weiwei Wan",
+        "Animesh Garg"
+      ],
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2603.17117",
+        "html": "https://arxiv.org/html/2603.17117",
+        "project": "https://mosaicmem.github.io/mosaicmem/",
+        "code": null
+      },
+      "code_publication_status": "The official project page displayed Code (Coming) at the evidence freeze. No official V1 repository link was retrieved.",
+      "local_pdf_sha256": "cdb0c9c4401775f1ca050c123095ce2f4f9aa9eb8311a76b363018346ff15e3e",
+      "primary_capabilities": [
+        "Localized patches are lifted into 3D using depth, intrinsics, and pose and reprojected into the target view.",
+        "Warped RoPE and Warped Latent align retrieved memory with target latents.",
+        "The system supports sparse and dense retrieval, deletion, duplication, relocation, scene stitching, minute-scale navigation, and autoregressive rollouts.",
+        "Consistency Score uses SSIM, PSNR, and LPIPS inside annotated corresponding regions.",
+        "Reported failure modes include insufficient retrieval under large camera motion and boundary object artifacts under Warped RoPE."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "PARTIAL",
+          "reason": "Patch-level retrieval and manipulation exist, but no matched causal intervention on one patch actually selected during an ordinary run is reported."
+        },
+        "C2": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No item-level exact replay freezes retrieval IDs, all other memory, noise or RNG, pose, and all relevant state."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "The checked paper does not establish a coherent same-source intervention through every memory consumer path."
+        },
+        "C4": {
+          "status": "PARTIAL",
+          "reason": "Pre-existing patch geometry and region-restricted consistency metrics exist, but there is no causal output-difference concentration test against support area."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "Natural revisit benefits and system-level failures are reported, but no per-item causal score predicts which natural revisit fails or benefits."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    },
+    {
+      "id": "car_2606_23105",
+      "title": "Compression and Retrieval: Implicit Memory Retrieval for Video World Models",
+      "arxiv_id": "2606.23105",
+      "version_checked": "v1",
+      "submission_date": "2026-06-22",
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2606.23105",
+        "html": "https://arxiv.org/html/2606.23105",
+        "project_and_code": "https://github.com/Orange-3DV-Team/CaR"
+      },
+      "local_pdf_sha256": "5385a8ced32607991cdc6e3d4dd6179dcd740668acb6e8fbed6dc97fad1a0206",
+      "official_code_snapshot": {
+        "commit": "8823c03544dfdd9a98966451e24b97fd5ad7ab76",
+        "commit_time": "2026-08-14T19:06:07+08:00",
+        "commit_subject": "Clarify SceneFly dataset scale",
+        "release_boundary": "Inference is public. The frozen README still lists training and parts of the checkpoint or full SceneFly release as future work."
+      },
+      "primary_capabilities": [
+        "Compressed whole-history context is queried through attention with relative camera pose.",
+        "The A-B-C-B-D-B-A trajectory visualizes stronger attention for view-close context clips.",
+        "Revisit performance is evaluated with PSNR, SSIM, LPIPS, and FVD."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Retrieval is a continuous attention distribution over compressed context, and no one selected item is causally intervened on."
+        },
+        "C2": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No item-level fixed-state exact replay protocol is reported."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No coherent all-consumer-path source intervention is reported."
+        },
+        "C4": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Attention visualizations and camera relations are not a pre-treatment output-effect mask test with an area baseline."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "The paper evaluates natural or constructed revisits, but does not predict them using a per-item causal score."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    },
+    {
+      "id": "dreamx_2606_16993",
+      "title": "DreamX-World 1.0: A General-Purpose Interactive World Model",
+      "arxiv_id": "2606.16993",
+      "version_checked": "v1",
+      "submission_date": "2026-06-15",
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2606.16993",
+        "html": "https://arxiv.org/html/2606.16993",
+        "project": "https://amap-ml.github.io/DreamX_World/",
+        "code": "https://github.com/AMAP-ML/DreamX-World",
+        "model": "https://huggingface.co/GD-ML/DreamX-World-5B"
+      },
+      "local_pdf_sha256": "8524f77fb6c10071f6098a285abf086b13f6a7a117ddcaf3470c2ca3d90bc122",
+      "official_code_snapshot": {
+        "commit": "a1f4c6e5e45600718e5236955f2e0702e53fc275",
+        "commit_time": "2026-07-23T17:44:29+08:00",
+        "commit_subject": "update README.md"
+      },
+      "primary_capabilities": [
+        "Camera-geometry overlap retrieves non-local memory frames.",
+        "Memory, recent context, and target latents share the conditioning stream.",
+        "Residual Recycling perturbs conditioning tokens while leaving the target clean to improve robustness to imperfect memory latents.",
+        "Revisit evaluation covers pixel, perceptual, semantic, place-recognition, and geometric consistency.",
+        "Non-revisit pairs with a matched temporal-gap distribution provide a behavioral baseline."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "PARTIAL",
+          "reason": "Runtime geometry selection exists, but no causal intervention on one selected memory frame is reported."
+        },
+        "C2": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No per-item exact replay freezing all relevant state is reported."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No source-coherent intervention across every consumer path is reported."
+        },
+        "C4": {
+          "status": "PARTIAL",
+          "reason": "Geometry drives retrieval and evaluation includes geometric similarity, but no causal output effect is localized to a frozen source support against area."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "Natural revisit and imperfect-memory behavior are directly evaluated, but not predicted by a per-item causal score."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    }
+  ],
+  "pressure_neighbors": [
+    {
+      "id": "matrix_game_3_5_2608_29910",
+      "title": "Matrix-Game 3.5: Enhancing Real-Time Streaming Interactive World Models with Patch Memory",
+      "role": [
+        "MosaicMem forward citation",
+        "MosaicMem author-recent primary source",
+        "strongest public pressure"
+      ],
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2608.29910",
+        "html": "https://arxiv.org/html/2608.29910",
+        "project": "https://matrix-game-v3-5.github.io/",
+        "code": "https://github.com/Riemann-Dynamics/Matrix-Game-3.5"
+      },
+      "capabilities": [
+        "Explicit 3D patch memory with per-patch geometric reprojection.",
+        "Z-buffer selection of a visible surface for each target cell.",
+        "Aligned memory canvas with reverse mapping to source frame and original patch location.",
+        "Patch memory, context, anchor, target, and dynamic-subject reference tokens in one pose-aware self-attention sequence.",
+        "Fixed initial state, camera trajectory, prompt, and random seed for a whole reference-prefix ablation.",
+        "Subject masks and static-dynamic disentanglement.",
+        "Minute-scale long-horizon revisit demonstrations."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "PARTIAL",
+          "reason": "Selected patch provenance exists, but the causal ablation removes an entire dynamic-subject reference prefix rather than one selected patch or source."
+        },
+        "C2": {
+          "status": "PARTIAL",
+          "reason": "The reference-prefix ablation explicitly fixes initial state, camera trajectory, prompt, and seed, but it is not an item-level exact replay over the full memory state."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Multiple patch, context, and reference paths can carry related evidence; no one-source all-path intervention is established."
+        },
+        "C4": {
+          "status": "PARTIAL",
+          "reason": "The aligned canvas and reverse map provide pre-treatment support and provenance, but no causal effect-concentration versus area test is reported."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "Long-horizon recall and ablation effects are shown, but no per-item causal score predicts natural revisit failure or benefit."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false,
+      "pressure_conclusion": "Patch provenance, geometry support, unified attention, and fixed-seed module ablation cannot be claimed as separate novelties. Only the joint source-total-effect, geometry-localized, natural-error-predictive contract remains differentiating in the checked scope."
+    },
+    {
+      "id": "r2m_bench_2608_27328",
+      "title": "R2M-Bench: Evaluating Revisit Memory via Relative Consistency in Interactive Video World Models",
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2608.27328",
+        "html": "https://arxiv.org/html/2608.27328"
+      },
+      "capabilities": [
+        "300 benchmark instances.",
+        "Same-rollout gap-matched baseline and short-range controls.",
+        "MemoryGain, dynamic range, and Normalized Memory Ratio.",
+        "Five families covering appearance, scene identity, object identity, local geometry, and persistent state."
+      ],
+      "explicit_claim_boundary": "The paper states that positive MemoryGain should not be interpreted as a causal estimate of an internal memory mechanism and that system differences confound retrieval conclusions.",
+      "contract_assessment": {
+        "C1": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Behavioral benchmark only."
+        },
+        "C2": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Same-rollout controls are not an item-level internal intervention replay."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No internal source intervention."
+        },
+        "C4": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "Local-geometry metrics are observable evaluation, not causal source-support localization."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "It supplies strong natural revisit outcomes and baselines, but not a per-item causal predictor."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    },
+    {
+      "id": "reworld_2608_23565",
+      "title": "ReWorld: An Interactive World Model with Long-Horizon Memory",
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2608.23565",
+        "html": "https://arxiv.org/html/2608.23565"
+      },
+      "capabilities": [
+        "Pose-indexed MRoPE implicit memory.",
+        "Bounded KV landmark consolidation and pose retrieval.",
+        "Palindrome revisit protocol with matched prompts, fixed seed, and common camera intent.",
+        "SSIM, LPIPS, DINO, and ORB revisit metrics."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No one selected landmark or chunk is causally intervened on."
+        },
+        "C2": {
+          "status": "PARTIAL",
+          "reason": "The evaluation fixes seed and intent, but no full item-level exact replay is reported."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No all-consumer-path source intervention."
+        },
+        "C4": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No pre-treatment geometry effect mask and area baseline."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "Strong natural revisit protocol, but no per-source causal score prediction."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false
+    },
+    {
+      "id": "statebench_2609_03673",
+      "title": "Do Video Generators Track the World Across Segments? A Benchmark and Method for World-State Reasoning in Video Continuation",
+      "primary_sources": {
+        "paper": "https://arxiv.org/abs/2609.03673",
+        "html": "https://arxiv.org/html/2609.03673"
+      },
+      "capabilities": [
+        "Separates observation memory from physical world-state reasoning.",
+        "Uses hidden or ambiguous boundary state and future actions that reveal the required state.",
+        "Covers visibility, location, containment, transformation, surface or material state, quantity, and agent-object relations."
+      ],
+      "contract_assessment": {
+        "C1": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No single internal memory-item causal intervention."
+        },
+        "C2": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No fixed internal item replay."
+        },
+        "C3": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No source-coherent all-path intervention."
+        },
+        "C4": {
+          "status": "NO_IN_CHECKED_SOURCE",
+          "reason": "No geometry support effect localization."
+        },
+        "C5": {
+          "status": "PARTIAL",
+          "reason": "It provides natural state-failure labels but does not predict them from an item-level causal memory score."
+        }
+      },
+      "full_contract_criteria_met": 0,
+      "joint_contract_met": false,
+      "design_implication": "Future natural-error labels must separate failure to consume valid memory from consumption of stale memory and failure of state-update reasoning."
+    }
+  ],
+  "backward_network": {
+    "vision_language_binding": {
+      "official_bibliography_numbered_records": 25,
+      "screening_scope": "All 25 titles and their use in the target paper were screened. The most methodologically adjacent primary papers were checked more closely.",
+      "closest_primary_sources": [
+        {
+          "title": "Localizing and Editing Knowledge in Text-to-Image Generative Models",
+          "url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/4bfcebedf7a2967c410b64670f27f904-Abstract-Conference.html"
+        },
+        {
+          "title": "How to Use and Interpret Activation Patching",
+          "url": "https://arxiv.org/abs/2404.15255"
+        },
+        {
+          "title": "I2AM: Interpreting Image-to-Image Latent Diffusion Models via Bi-Attribution Maps",
+          "url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/c4a59e985de8b134328f41a47bc7dfac-Abstract-Conference.html"
+        },
+        {
+          "title": "ConceptAttention",
+          "url": "https://arxiv.org/abs/2502.04320"
+        },
+        {
+          "title": "Follow the Flow",
+          "url": "https://arxiv.org/abs/2504.01137"
+        },
+        {
+          "title": "Diffusion Lens",
+          "url": "https://aclanthology.org/2024.acl-long.524/"
+        },
+        {
+          "title": "Padding Tone",
+          "url": "https://aclanthology.org/2025.naacl-long.389/"
+        },
+        {
+          "title": "What's in the Image? A Deep-Dive into the Vision of Vision Language Models",
+          "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Kaduri_Whats_in_the_Image_A_Deep-Dive_into_the_Vision_of_Vision_CVPR_2025_paper.html"
+        }
+      ],
+      "joint_contract_found": false,
+      "claim_boundary": "No audited backward source was identified as satisfying the full five-condition video-memory contract. This is limited to the stated screening scope."
+    },
+    "mosaicmem": {
+      "official_bibliography_numbered_records": 49,
+      "semantic_scholar_reference_count": 46,
+      "count_explanation": "The official PDF has 49 numbered entries; the discovery index reports 46 matched or deduplicated references. The primary PDF count is used as the bibliography fact.",
+      "screening_scope": "All 49 official bibliography titles and use contexts were screened; ten closest memory and geometry works were checked at primary sources.",
+      "closest_primary_sources": [
+        {
+          "title": "Spatia: Video Generation with Updatable Spatial Memory",
+          "url": "https://arxiv.org/abs/2512.15716"
+        },
+        {
+          "title": "WorldPack: Compressed Memory Improves Spatial Consistency in Video World Modeling",
+          "url": "https://arxiv.org/abs/2512.02473"
+        },
+        {
+          "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+          "url": "https://arxiv.org/abs/2506.18903"
+        },
+        {
+          "title": "Video World Models with Long-term Spatial Memory",
+          "url": "https://arxiv.org/abs/2506.05284"
+        },
+        {
+          "title": "Context as Memory",
+          "url": "https://arxiv.org/abs/2506.03141"
+        },
+        {
+          "title": "WORLDMEM",
+          "url": "https://arxiv.org/abs/2504.12369"
+        },
+        {
+          "title": "Gen3C",
+          "url": "https://arxiv.org/abs/2503.03751"
+        },
+        {
+          "title": "RELIC",
+          "url": "https://arxiv.org/abs/2512.04040"
+        },
+        {
+          "title": "Cameras as Relative Positional Encoding",
+          "url": "https://arxiv.org/abs/2507.10496"
+        },
+        {
+          "title": "Positional Encoding Field",
+          "url": "https://arxiv.org/abs/2510.20385"
+        }
+      ],
+      "joint_contract_found": false,
+      "claim_boundary": "No audited backward source was identified as satisfying all five conditions. This does not prove that no equivalent work exists."
+    }
+  },
+  "forward_network": {
+    "discovery_only": true,
+    "snapshot_interpretation": "Counts and lists are interface returns at the freeze, not exhaustive citation claims. Scientific capabilities were judged only from primary paper or official sources.",
+    "index_snapshots": {
+      "semantic_scholar": {
+        "api": "https://api.semanticscholar.org/graph/v1/",
+        "vision_language_binding": {
+          "metadata_result": "HTTP_429",
+          "separate_citations_endpoint_result": "empty_data_observed",
+          "reliable_zero_citation_claim": false
+        },
+        "mosaicmem": {
+          "citation_records_returned": 14,
+          "reference_count_metadata": 46
+        },
+        "car": {
+          "citation_records_returned": 1
+        },
+        "dreamx": {
+          "citation_records_returned": 19
+        }
+      },
+      "openalex": {
+        "api": "https://api.openalex.org/works",
+        "records_updated_date": "2026-07-28",
+        "cited_by_count": {
+          "2605.24624": 0,
+          "2603.17117": 0,
+          "2606.23105": 0,
+          "2606.16993": 0
+        },
+        "interpretation": "The snapshot predates multiple August and September works returned elsewhere and is treated as stale or incomplete for current forward discovery."
+      }
+    },
+    "mosaicmem_discovered_citing_candidates": [
+      {
+        "arxiv_id": "2609.02886",
+        "title": "SolarWM: Open Data and Scalable Training for Long-Horizon Video World Models"
+      },
+      {
+        "arxiv_id": "2608.29910",
+        "title": "Matrix-Game 3.5: Enhancing Real-Time Streaming Interactive World Models with Patch Memory"
+      },
+      {
+        "arxiv_id": "2608.25927",
+        "title": "Code World Model: Coding Agent as World Brain"
+      },
+      {
+        "arxiv_id": "2608.07408",
+        "title": "Addressable Memory for Video World Models"
+      },
+      {
+        "arxiv_id": "2607.21594",
+        "title": "Streaming Multi-Agent Autoregressive Diffusion Model with World State Registers"
+      },
+      {
+        "arxiv_id": "2607.15667",
+        "title": "PE-Field 4D: Video Generation Models as Canvas"
+      },
+      {
+        "arxiv_id": "2606.16993",
+        "title": "DreamX-World 1.0: A General-Purpose Interactive World Model"
+      },
+      {
+        "arxiv_id": "2606.11129",
+        "title": "WorldOlympiad: Can Your World Model Survive a Triathlon?"
+      },
+      {
+        "arxiv_id": "2606.02436",
+        "title": "Geometry-Aware Implicit Memory for Video World Models"
+      },
+      {
+        "arxiv_id": "2606.01590",
+        "title": "Effective Multi-sensor Conditioning for Street-view Novel-view Synthesis"
+      },
+      {
+        "arxiv_id": "2606.01164",
+        "title": "Towards Interactive Video World Modeling: Frontiers, Challenges, Benchmarks, and Future Trends"
+      },
+      {
+        "arxiv_id": "2605.25333",
+        "title": "Teaching Video Generators to Remember: Eliciting Dynamic Memory for Out-of-Sight State Evolution"
+      },
+      {
+        "arxiv_id": "2605.15178",
+        "title": "SANA-WM: Efficient Minute-Scale World Modeling with Hybrid Linear Diffusion Transformer"
+      },
+      {
+        "arxiv_id": "2604.08995",
+        "title": "Matrix-Game 3.0: Real-Time and Streaming Interactive World Model with Long-Horizon Memory"
+      }
+    ],
+    "mosaicmem_screening": {
+      "title_and_abstract_primary_screened": 14,
+      "method_level_high_relevance_checked": [
+        "Matrix-Game 3.5",
+        "DreamX-World 1.0",
+        "Addressable Memory for Video World Models",
+        "Geometry-Aware Implicit Memory for Video World Models",
+        "ReMind"
+      ],
+      "joint_contract_found": false
+    },
+    "car_discovered_citing_candidates": [
+      {
+        "arxiv_id": "2608.27328",
+        "title": "R2M-Bench: Evaluating Revisit Memory via Relative Consistency in Interactive Video World Models",
+        "primary_url": "https://arxiv.org/abs/2608.27328"
+      }
+    ],
+    "dreamx_discovered_citing_candidates": [
+      {
+        "arxiv_id": "2609.03557",
+        "title": "Building Pretraining Data for World Models: An Unreal Engine-Based Pipeline for Action-Conditioned Video Generation"
+      },
+      {
+        "arxiv_id": "2609.03673",
+        "title": "Do Video Generators Track the World Across Segments? A Benchmark and Method for World-State Reasoning in Video Continuation"
+      },
+      {
+        "arxiv_id": "2609.02886",
+        "title": "SolarWM: Open Data and Scalable Training for Long-Horizon Video World Models"
+      },
+      {
+        "arxiv_id": "2608.31106",
+        "title": "DreamX-Creator: Democratizing Native Audio-Video Generation at 2K Resolution"
+      },
+      {
+        "arxiv_id": "2608.29910",
+        "title": "Matrix-Game 3.5: Enhancing Real-Time Streaming Interactive World Models with Patch Memory"
+      },
+      {
+        "arxiv_id": "2608.27168",
+        "title": "Magpie: Real-Time World Renderer for Interactive Games"
+      },
+      {
+        "arxiv_id": "2608.25927",
+        "title": "Code World Model: Coding Agent as World Brain"
+      },
+      {
+        "arxiv_id": "2608.23070",
+        "title": "From Generation to Simulation: How Far Are World Models from Being True Simulators?"
+      },
+      {
+        "arxiv_id": "2608.23565",
+        "title": "ReWorld: An Interactive World Model with Long-Horizon Memory"
+      },
+      {
+        "arxiv_id": "2608.23189",
+        "title": "EchoWM: Open and Enterable Omnimodal World Models"
+      },
+      {
+        "arxiv_id": "2608.23383",
+        "title": "Long-Horizon Audio-Visual Generation for Persistent Stories and Interactive Worlds"
+      },
+      {
+        "arxiv_id": "2608.16859",
+        "title": "HarnessEval-W: Agentifying the Evaluation of Visual Worlds"
+      },
+      {
+        "arxiv_id": "2608.14022",
+        "title": "ForgeWM: Progressive Causal Training for Few-Step Action-Conditioned Video World Models"
+      },
+      {
+        "arxiv_id": "2608.13489",
+        "title": "DreamX-Phi 1.0: Action-Conditioned Video World Model for Robotic Manipulation"
+      },
+      {
+        "arxiv_id": "2607.26037",
+        "title": "Wonder: Video World Model Done Better"
+      },
+      {
+        "arxiv_id": "2607.14076",
+        "title": "From Pixels to States: Rethinking Interactive World Models as Game Engines"
+      },
+      {
+        "arxiv_id": "2607.07534",
+        "title": "Infinite Worlds with Versatile Interactions"
+      },
+      {
+        "arxiv_id": "2606.30292",
+        "title": "DreamForge-World 0.1 Preview: A Low-Compute Real-Time Controllable World Model"
+      },
+      {
+        "arxiv_id": "2604.21686",
+        "title": "WorldMark: A Unified Benchmark Suite for Interactive Video World Models"
+      }
+    ],
+    "dreamx_screening": {
+      "title_and_abstract_primary_screened": 19,
+      "method_level_full_text_checked": [
+        "Matrix-Game 3.5",
+        "ReWorld",
+        "Do Video Generators Track the World Across Segments?",
+        "R2M-Bench"
+      ],
+      "joint_contract_found": false
+    },
+    "vision_language_binding_forward_scope": {
+      "reliable_candidate_enumeration_available": false,
+      "reason": "The metadata request was rate-limited and the separate empty citation response conflicts with the general incompleteness of rapidly changing 2026 indexes. No zero-citation conclusion is made."
+    }
+  },
+  "author_recent_work": {
+    "vision_language_binding_authors": [
+      {
+        "title": "Gaze Heads: How VLMs Look at What They Describe",
+        "arxiv_id": "2606.14703",
+        "primary_url": "https://arxiv.org/abs/2606.14703",
+        "project_url": "https://gaze.baulab.info/",
+        "relevance": "Region-following attention heads and inference-time causal attention-mask redirection provide strong region-level causal-routing precedent in VLM text generation.",
+        "contract_boundary": "No video memory item, natural revisit, pre-treatment 3D support, area baseline, or five-condition joint contract."
+      },
+      {
+        "title": "Distilling Diversity and Control in Diffusion Models",
+        "arxiv_id": "2503.10637",
+        "primary_url": "https://arxiv.org/abs/2503.10637",
+        "relevance": "Causal localization of a first-timestep diversity bottleneck and intervention-based repair.",
+        "contract_boundary": "No runtime memory-source audit."
+      }
+    ],
+    "author_pages_checked": [
+      "https://chrisg777.github.io/",
+      "https://rohitgandikota.github.io/",
+      "https://tamarott.github.io/",
+      "https://github.com/gnosisyuw/gnosisyuw.github.io/blob/main/content/papers.js"
+    ],
+    "mosaicmem_authors": [
+      {
+        "title": "Matrix-Game 3.5: Enhancing Real-Time Streaming Interactive World Models with Patch Memory",
+        "arxiv_id": "2608.29910",
+        "primary_url": "https://arxiv.org/abs/2608.29910",
+        "authors_overlapping_mosaicmem": [
+          "Runjia Qian",
+          "Wei Yu"
+        ],
+        "classification": "PUBLIC_PRIMARY_STRONGEST_PRESSURE"
+      }
+    ]
+  },
+  "unpublished_signals": [
+    {
+      "id": "mosaicmem_v2_author_homepage_signal",
+      "title": "MosaicMem V2: Object-Centric Controllability on a Memory Canvas for AI Game Worlds",
+      "authors": [
+        "Wei Yu",
+        "Runjia Qian",
+        "Dennis Anthony",
+        "Yumeng Li",
+        "Weiwei Wan",
+        "Animesh Garg"
+      ],
+      "venue_field": "In Progress",
+      "source": "https://github.com/gnosisyuw/gnosisyuw.github.io/blob/main/content/papers.js",
+      "source_repository_snapshot": {
+        "repo_head": "f61d2619cbf0d45761a6fef725c00756a105dab1",
+        "papers_js_blob": "a25aa36d576dbb52f62ddfd77d2d6ba2d2745da3",
+        "latest_file_commit": "281ee746593892f7b49a176b6aa3afa3d853ce6d",
+        "latest_file_commit_date": "2026-04-09"
+      },
+      "homepage_abstract_signal": "Object-centric controllable generation on a persistent memory canvas, targeting interactive AI game world creation.",
+      "public_artifact_fields": {
+        "url": null,
+        "paper": null,
+        "code": null,
+        "media_present": true
+      },
+      "classification": "UNPUBLISHED_SIGNAL",
+      "assessment": "NOT_ASSESSABLE",
+      "contract_assessment": {
+        "C1": "NOT_ASSESSABLE",
+        "C2": "NOT_ASSESSABLE",
+        "C3": "NOT_ASSESSABLE",
+        "C4": "NOT_ASSESSABLE",
+        "C5": "NOT_ASSESSABLE"
+      },
+      "search_boundary": "Exact-title searches of arXiv and GitHub did not retrieve an official public paper or code at the evidence freeze. This does not assert that no private or later artifact exists.",
+      "monitoring_priority": "HIGHEST",
+      "kill_trigger": "Immediately re-audit if a public version reports a single-object or single-patch source-coherent replay, geometry effect concentration with a mask-area baseline, natural revisit prediction, or especially all of these with fixed state and all consumer paths."
+    }
+  ],
+  "joint_contract_summary": {
+    "public_primary_sources_with_all_five_full": 0,
+    "interpretation": "No public primary source in the explicitly audited set was identified as satisfying all five conditions.",
+    "not_an_existence_claim": true,
+    "strongest_component_precedents": {
+      "fixed_target_causal_path_patching": "Vision-Language Binding",
+      "patch_geometry_and_provenance": "MosaicMem and Matrix-Game 3.5",
+      "natural_revisit_and_gap_matched_behavior": "DreamX-World, ReWorld, and R2M-Bench",
+      "observation_memory_vs_world_state": "StateBench"
+    }
+  },
+  "verdict": {
+    "decision": "KEEP_CONDITIONAL_AFTER_EXPANDED_NETWORK_AUDIT",
+    "novelty_authorization": "NONE",
+    "reason": "The expanded backward, forward, and author-recent primary-source audit did not identify a public method satisfying the full five-condition contract. Matrix-Game 3.5 sharply narrows the gap, and unpublished MosaicMem V2 is a high-priority unassessable risk.",
+    "allowed_claim": "The five-condition joint contract was not identified in the stated accessible primary-source scope.",
+    "forbidden_claims": [
+      "first",
+      "novel",
+      "no prior work",
+      "the field has no equivalent method",
+      "CCF-A level has been achieved"
+    ],
+    "next_decisive_requirements": [
+      "Exact-replay null distribution.",
+      "One memory source selected by an ordinary runtime run.",
+      "F00, F10, F01, and F11 with F11 minus F00 as the main total-effect contrast.",
+      "Pre-intervention geometry support and support-area baseline.",
+      "Within-support, outside-support, total-effect, and paired uncertainty estimates.",
+      "Incremental prediction of natural revisit error or benefit from the item causal score.",
+      "R2M MemoryGain, dynamic range, and NMR as behavioral baselines.",
+      "A stale-but-geometrically-valid memory control to separate memory consumption from state-update reasoning.",
+      "Matrix-Game 3.5 patch provenance and fixed-seed module ablation as strong baselines."
+    ],
+    "reassessment_triggers": [
+      "A later public primary source satisfies all five criteria.",
+      "MosaicMem V2 becomes public and exposes the relevant item-level protocol.",
+      "Exact replay variance is comparable to the candidate effect.",
+      "The geometry-localization confidence bound does not exceed area baseline.",
+      "The item causal score does not predict natural revisit error or benefit."
+    ]
+  },
+  "limitations": [
+    "Forward-citation indexes are incomplete, inconsistent, and rapidly changing; their returned lists are not exhaustive.",
+    "Vision-Language Binding forward enumeration was not reliable because of an HTTP 429 and an empty endpoint response that cannot support a zero claim.",
+    "MosaicMem V1 official code was still marked Coming on its project page, limiting code-level inspection.",
+    "CaR public release completeness is limited by repository TODO items.",
+    "Title and abstract screening is shallower than full-method review for lower-pressure forward candidates.",
+    "MosaicMem V2 has no public paper or code and cannot be scientifically assessed.",
+    "No experimental novelty or performance claim is authorized by this literature audit."
+  ],
+  "artifacts": {
+    "markdown": "work/S43_paradigm_shift_audit/EXPANDED_CITATION_NETWORK_AUDIT.md",
+    "json": "work/S43_paradigm_shift_audit/expanded_citation_network_audit.json",
+    "existing_v2_modified": false,
+    "main_research_log_modified": false
+  }
+}

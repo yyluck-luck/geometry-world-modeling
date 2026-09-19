@@ -1,0 +1,127 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v1",
+  "review_kind": "primary",
+  "status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SOURCE_REVIEW",
+  "verdict": "PASS_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T05:09:58.160191+00:00",
+  "author_role": "/root/c1_blind_score_builder",
+  "reviewer_role": "/root/s45b_primary_reviewer_v4",
+  "reviewed_identities": {
+    "camera_guard.py": "285f9b64f6ad53f14c21f725ff1884b632ef7766d63bf6e43af780b716160bb4",
+    "PROTOCOL.md": "514fb18d5b2446ac50393fbe6c5fda34dd7b771356c037ff789e20710f49abcb",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "a2d8aa4e686523db15044f28c1d7f39e1ff50f73f4485b303bd7b31247b2dc1a",
+    "synthetic_selftest.py": "2d3674998103073fc3e884b3432f7d385bf432d4bfc7b8d51c4477ebaefc81aa",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "candidate_identity_check": {
+    "all_four_frozen_sha256_match": true,
+    "candidate_files_modified_by_reviewer": false,
+    "candidate_set_reviewed_as_one_atomic_source_version": true
+  },
+  "isolated_synthetic_tests": {
+    "isolation_flags": [
+      "-I",
+      "-B",
+      "-S"
+    ],
+    "python_3_12_14": {
+      "camera_guard_builtin": "PASS_SYNTHETIC_ONLY",
+      "independent_selftest": "PASS_STATIC_AND_SYNTHETIC_ONLY",
+      "max_reference_error": 0.0
+    },
+    "python_3_13_0": {
+      "camera_guard_builtin": "PASS_SYNTHETIC_ONLY",
+      "independent_selftest": "PASS_STATIC_AND_SYNTHETIC_ONLY",
+      "max_reference_error": 0.0
+    },
+    "successful_runs": 4,
+    "formal_runner_calls": 0,
+    "formal_paths_created": 0
+  },
+  "check_results": {
+    "attempt_lifecycle": {
+      "status": "PASS",
+      "finding": "All source, review, binding, upstream-metadata and complete event-chain checks occur in non-consuming preflight. The one-use scientific attempt is committed only afterward by atomically linking a fully written and fsynced fail-closed JSON receipt to the fixed permanent lock pathname. A second commit is rejected and automatic retries are zero."
+    },
+    "structured_failure_receipt": {
+      "status": "PASS",
+      "finding": "At the hard-link commit point the permanent lock already contains a parseable FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_RECEIPT record with supplied identities and zero-access counters. Any interruption after commit therefore retains an authoritative structured failure record even if execution_01 or its terminal receipt cannot be completed."
+    },
+    "lock_and_directory_leases": {
+      "status": "PASS",
+      "finding": "The source directory is held by one directory FD plus advisory flock and is checked against its canonical pathname identity. The permanent lock is held by one FD and revalidated by pathname, device, inode, mode, regular-file type, nlink==1, exact size and content SHA at eight committed trust boundaries. Synthetic unlink-and-recreate of the pathname is rejected. The formal output directory is likewise held and rechecked by FD/path identity."
+    },
+    "same_fd_hash_and_parse": {
+      "status": "PASS",
+      "finding": "JSON files are parsed from the exact byte snapshot that was hashed through one O_NOFOLLOW FD. The selected event chain is independently hashed and parsed from one snapshot; later scans only revalidate the frozen identity. Selected tensor bodies are read and re-read through held FDs. No scientific value depends on a hash-then-unverified-reopen path."
+    },
+    "symlink_and_hardlink_resistance": {
+      "status": "PASS",
+      "finding": "Broken and live symlinks block formal-path creation; source, metadata, body and sidecar opens use O_NOFOLLOW and FD/path identity checks. Lock and create-new output files require a single link. Read-only frozen inputs may already have another hard link, but their SHA plus device/inode, size, mtime and ctime are revalidated, and used tensor bodies are re-read before sealing; any link or content mutation changes the checked identity and fails closed."
+    },
+    "tensor_close_and_late_failure": {
+      "status": "PASS",
+      "finding": "A numeric success is not published as a terminal PASS until every opened camera tensor has been re-read, rehashed, path-inode checked, sidecar checked and closed. Failure accounting keeps opened, bytes-read and close-verified counts distinct. A lock mismatch before terminal write forces a failed receipt; a mismatch after receipt write creates lock_close_failure.json that explicitly invalidates the earlier receipt."
+    },
+    "pixel_and_model_exclusion": {
+      "status": "PASS",
+      "finding": "Only batch_input.target_c2ws, batch_input.target_Ks, cache_commit.cache.c2ws and cache_commit.cache.Ks are selected. Raw tensor provenance, exact camera/K ranks and a 4096-byte cap are checked before body open. PIL/PNG, pixel, condition, sampler, renderer, model and generation paths are never selected or imported. A synthetic pixel-shaped descriptor is rejected before snapshot."
+    },
+    "numeric_camera_contract": {
+      "status": "PASS",
+      "finding": "The implementation enforces cache lengths 5 then 9, preservation of IDs 0-4, batch-target mapping to IDs 1-8, finite float32/float64 values, ID0 homogeneous row, fixed K, and ID8-to-ID0 closure. The expected pose uses the reviewed B0 left-multiplied positive Y rotation with the frozen yaw sequence and inclusive max-absolute tolerance <=1e-6. Independent transcription agrees exactly on both local Python versions."
+    },
+    "cross_python_source_binding": {
+      "status": "PASS",
+      "finding": "The full B0 source SHA and complete-line source-segment hashes for max_abs and verify_requested_camera_conditions replace version-sensitive ast.dump identities. Python 3.12.14 and 3.13.0 produce the same accepted identities and synthetic results."
+    },
+    "role_time_hash_gate": {
+      "status": "PASS",
+      "finding": "Formal mode requires exact primary and adversarial review identities, pairwise distinct source author/reviewer roles, a later distinct binding author and reviewer, timezone-aware UTC ordering, exact fixed upstream paths and SHA values, and an independently reviewed terminal result before downstream use."
+    },
+    "result_claim_boundary": {
+      "status": "PASS",
+      "finding": "The strongest possible result is explicitly limited to requested archived c2w/K input-condition validity. Report status remains pending until the terminal receipt; pixel score, image quality, rendered-camera obedience, method gain, causal attribution and novelty remain NOT_EVALUATED."
+    }
+  },
+  "blockers": [],
+  "blocking_findings": [],
+  "access_ledger": {
+    "candidate_files_read": [
+      "camera_guard.py",
+      "PROTOCOL.md",
+      "C1_CAMERA_GUARD_BINDING_TEMPLATE.json",
+      "synthetic_selftest.py"
+    ],
+    "non_c1_static_dependencies_hashed": [
+      "S42 PROTOCOL.md",
+      "S42 score_b0_blind.py",
+      "S42 B0_SCORER_SOURCE_REVIEW.json",
+      "S42 B0_SCORER_SOURCE_REVIEW_ADVERSARIAL.json",
+      "S45 readback.py",
+      "S45 supervise_readback.py"
+    ],
+    "b0_function_source_lines_inspected": true,
+    "real_c1_manifest_opened": 0,
+    "real_c1_receipts_opened": 0,
+    "real_c1_archive_events_opened": 0,
+    "real_c1_tensor_bodies_opened": 0,
+    "real_c1_image_or_pixel_bodies_opened": 0,
+    "binding_files_opened": 0,
+    "model_or_generation_calls": 0,
+    "formal_runner_calls": 0,
+    "formal_binding_lock_or_execution_paths_created": 0
+  },
+  "authorization_effect": "NARROW_PRIMARY_SOURCE_PASS_ONLY. This file can satisfy only the primary half of the source-review gate for the exact reviewed identities. It does not authorize creation of a formal binding, lock, execution, tensor read, blind score, pixel view, scientific conclusion, method claim or novelty by itself. A distinct adversarial PASS, separately authored frozen binding, independent binding review, single formal execution, and independent result review remain mandatory.",
+  "executed": false,
+  "c1_tensor_bodies_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "scientific_claim_boundary": "Source review plus isolated synthetic evidence only. No real C1 manifest, receipt, event chain, tensor body, image, pixel, score or model output was opened. This review establishes no camera-guard result, C1 row validity, quality result, method gain, causal effect, novelty or publication evidence."
+}

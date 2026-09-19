@@ -1,0 +1,84 @@
+{
+  "schema": "gwm-source-only-acquisition-proposal-v1",
+  "created_at_local": "2026-09-16T01:36:55+08:00",
+  "timestamp_source": "clock.curr_time at document preparation",
+  "status": "SCENE13_AND_SCENE14_ARCHIVES_HASHED_SOURCE_CONTRACT_PENDING",
+  "dataset": "RGB-D Scenes v2 scene_13 in the author-distributed 3DMatch conversion",
+  "selected_scene": "rgbd-scenes-v2-scene_13",
+  "selection_rule": "Root requested scene_13 after source-format discovery. No images, geometry values, predictions, or scores were used to select it. The published archive-size metadata was seen during discovery; do not call selection metadata-blind.",
+  "archive_url_exact_official_href": "http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_13.zip",
+  "archive_url_evidence": "href in the official 3DMatch HTML, retrieved without requesting the ZIP",
+  "proposed_remote_archive_path": "/home/yliutz/datasets/heldout_3dmatch_scene13/rgbd-scenes-v2-scene_13.zip",
+  "archive_bytes": null,
+  "archive_sha256": null,
+  "archive_requested_by_this_agent": false,
+  "archive_listing_read_by_this_agent": false,
+  "frame_depth_pose_values_read_by_this_agent": false,
+  "sources": {
+    "converted_dataset_page": "https://3dmatch.cs.princeton.edu/",
+    "original_dataset_page": "https://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/",
+    "original_readme": "https://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/README.txt",
+    "original_site_use_notice": "https://rgbd-dataset.cs.washington.edu/dataset.html",
+    "official_3dmatch_split": "https://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/split.txt"
+  },
+  "use_terms_evidence": {
+    "notice_exact_excerpt": "for non-commercial research/educational use only",
+    "notice_scope_as_written": "The parent UW page labels its notice RGB-D Object Dataset; the specific v2 page and v2 README do not repeat a separate license grant.",
+    "specific_v2_license_identifier": null,
+    "citation_requested_by_v2_readme": "Kevin Lai, Liefeng Bo, and Dieter Fox. Unsupervised Feature Learning for 3D Scene Labeling. ICRA 2014.",
+    "research_use_plan": "Non-commercial academic research; preserve original attribution and downloaded terms. Do not label this CC-BY, CC0, or freely redistributable.",
+    "scope_caveat": "The parent notice is evidence of stated educational intent, not an invented SPDX license. If a more specific included license is found during authorized qualification, record it before redistribution. No author contact or redistribution is authorized by this proposal."
+  },
+  "author_documented_format": {
+    "rgb": "frame-XXXXXX.color.png; 24-bit PNG RGB",
+    "depth": "frame-XXXXXX.depth.png; 16-bit PNG; aligned to corresponding color; millimeters; invalid=0",
+    "depth_meters_equation": "depth_m = raw_depth / 1000, where raw_depth > 0",
+    "camera_intrinsics": "camera-intrinsics.txt; author page calls it depth camera intrinsics, 3x3 homogeneous matrix",
+    "camera_intrinsics_numeric_values": null,
+    "pose": "frame-XXXXXX.pose.txt; camera-to-world; 4x4 homogeneous matrix; translation in meters",
+    "frame_association": "same frame-XXXXXX stem within seq-XX; no hardware timestamp claim",
+    "pixel_center_convention": "UNVERIFIED in conversion code; do not import TUM or raw 7-Scenes convention",
+    "z_vs_radial": "UNVERIFIED for this converted archive; verify official conversion/fusion implementation before numeric metric qualification",
+    "distortion_and_registration_provenance": "Author page states aligned RGB-depth but does not document the complete calibration/registration transformation on that page; bind conversion/source-code evidence where needed"
+  },
+  "lineage_and_claim_limits": {
+    "original_pose_provenance": "UW v2 README says camera poses are estimated by RGB-D Mapping; original scenes reconstructed with Patch Volumes Mapping. These are reference pose estimates, not independent motion-capture ground truth.",
+    "three_d_match_split_membership": "TRAINING (verified in official split.txt)",
+    "project_exposure_status": "This agent accessed public documentation and split names only. Global project pre-exposure status must be checked against its inventory.",
+    "pretrained_model_exposure_status": "UNKNOWN; no assertion that VMem, CUT3R, or another geometry estimator was not trained on this scene or its source dataset.",
+    "scene_independence": "Distinct dataset/source from TUM, subject to provenance/duplicate verification; different seq-XX files within scene_13 are not independent scenes.",
+    "supported_candidate_scope": "Static camera-conditioned future-view geometry evaluation with sensor depth and estimated reference poses, after qualification.",
+    "unsupported_claims": [
+      "dynamic scene-change recovery",
+      "motion-capture-level pose accuracy",
+      "cross-scene generalization from one scene",
+      "zero pretraining exposure",
+      "method validity or novelty from acquisition"
+    ]
+  },
+  "next_execution_after_root_freeze": [
+    "Record acquisition protocol hash before requesting archive bytes.",
+    "Download exactly this archive on SuperPOD in tmux/screen; preserve transfer log and exit status, then record archive bytes and SHA-256.",
+    "List archive structure without decoding future data; freeze deterministic frame-stem membership and disjoint history/query windows.",
+    "Qualify only designated development/history data for shapes, finite pose values, K, invalid values, units, projection and pixel convention; do not choose new windows by model scores.",
+    "Expose only the predeclared query camera commands to the camera-conditioned predictor; keep future RGB/depth outcomes scorer-only and seal predictions first.",
+    "Bind provenance, limitations, predictor/scorer boundary and budgets into the new Gate0 candidate; an archive hash alone is not PASS."
+  ],
+  "formal_experiment_eligibility": "NOT_GRANTED",
+  "new_method_validated": false,
+  "novelty_authorization": "NONE",
+  "root_freeze_recorded_at_utc": "2026-09-15T17:38:32Z",
+  "root_freeze_recorded_at_local": "2026-09-16T01:38:32+08:00",
+  "archive_requested_by_root": false,
+  "additional_heldout_candidate": {
+    "scene": "rgbd-scenes-v2-scene_14",
+    "archive_url_exact_official_href": "http://3dvision.princeton.edu/projects/2016/3DMatch/downloads/rgbd-datasets/rgbd-scenes-v2-scene_14.zip",
+    "remote_archive_path": "/home/yliutz/datasets/heldout_3dmatch_scene14/rgbd-scenes-v2-scene_14.zip",
+    "freeze_recorded_at_local": "2026-09-16T01:40:49+08:00",
+    "status": "ARCHIVE_HASHED_BEFORE_EXTRACTION",
+    "role": "independent scene-heldout candidate; scene_13 for calibration only",
+    "archive_bytes": 239153034,
+    "archive_sha256": "d3011fe0c00c133b31899ed24c7bf49a00541a0c39d218c3b5647b3d781531b6",
+    "hash_recorded_at_local": "2026-09-16T01:42:00+08:00"
+  }
+}

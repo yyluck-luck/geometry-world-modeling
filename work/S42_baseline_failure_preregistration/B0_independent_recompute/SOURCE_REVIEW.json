@@ -1,0 +1,133 @@
+{
+  "schema": "s42-b0-independent-recompute-source-review-v1",
+  "status": "PASS_S42_B0_INDEPENDENT_RECOMPUTE_SOURCE_REVIEW",
+  "verdict": "PASS_STATIC_SOURCE_REVIEW_NOT_EXECUTED",
+  "completed_utc": "2026-09-07T16:19:22Z",
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/recompute_b0.py",
+  "source_sha256": "0b91de7f35eb5e128aad81128657861ae5218b37ccbba78e4f8c282b1a61c741",
+  "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/PROTOCOL.md",
+  "protocol_sha256": "e3086d3ea373295b83f08dbba919d016a96243e31ebf15142bb609de0d68f0b7",
+  "sealed_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/receipt.json",
+  "sealed_receipt_sha256": "93c90e24e404aa1f87e111ed3a7c79d51de9d9bf35babd060ac807af9d99f2ad",
+  "sealed_report_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/report.json",
+  "sealed_report_sha256": "13b190b126e925ae18f43728781c323d5cece8d9a591b73e6e9bf3a865aa8a8e",
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "executed": false,
+  "payload_read": false,
+  "images_viewed": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "blocking_findings": [],
+  "checks": {
+    "independent_implementation": {
+      "passed": true,
+      "does_not_import_or_call_primary_b0_scorer": true,
+      "does_not_call_model_generation_renderer_readback_or_image_api": true,
+      "fixed_numpy_version": "1.26.4",
+      "reviewer_differs_from_source_author": true
+    },
+    "frozen_identity_gate": {
+      "passed": true,
+      "caller_bound_self_sha_required": true,
+      "embedded_protocol_sha_required": true,
+      "create_only_exact_source_review_required_before_payload_access": true,
+      "sealed_receipt_and_report_paths_and_sha256_fixed": true,
+      "sealed_receipt_must_bind_attempt_01_and_exact_report_sha": true,
+      "source_protocol_review_receipt_and_report_rehashed_before_result_seal": true
+    },
+    "nine_authoritative_report_blobs": {
+      "passed": true,
+      "exact_identity_count": 9,
+      "required_id_order": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      "identity_key_set_exact": true,
+      "descriptor_sha256_binds_canonical_blob_filename": true,
+      "body_sha256_verified_over_same_snapshot_bytes": true,
+      "blob_must_be_canonical_absolute_regular_non_symlink_under_report_archive_tensor_directory": true
+    },
+    "immutable_fd_and_array_boundary": {
+      "passed": true,
+      "open_flags_include_read_only_cloexec_and_nofollow_when_available": true,
+      "opened_fd_inode_equals_canonical_path_inode": true,
+      "exact_body_bytes": 995328,
+      "snapshot_dtype": "little-endian uint8",
+      "snapshot_shape": [576, 576, 3],
+      "array_view_read_only": true,
+      "all_nine_fds_remain_open_until_closing_fstat_rehash_and_path_inode_check": true,
+      "closing_verified_fd_count": 9
+    },
+    "frozen_numeric_semantics": {
+      "passed": true,
+      "primary_pair": [0, 8],
+      "conversion": "uint8 to float64 independently, then divide by 255.0",
+      "square_and_sum_dtype": "float64",
+      "m_outer4_regions": {
+        "R1": [0, 192, 0, 192],
+        "R2": [0, 192, 384, 576],
+        "R3": [192, 384, 0, 192],
+        "R4": [192, 384, 384, 576]
+      },
+      "m_outer4_pixels": 147456,
+      "m_outer4_rgb_scalars": 442368,
+      "full_frame_pixels": 331776,
+      "full_frame_rgb_scalars": 995328,
+      "fixed_generated_only_pairs": [[1, 7], [2, 6], [3, 5]],
+      "strict_event_expression": "unrounded primary MSE > 0.01",
+      "threshold_equality_is_not_an_event": true,
+      "copy_guard_uses_report_bound_snapshot_hashes": true
+    },
+    "exact_report_comparison": {
+      "passed": true,
+      "primary_metric_record_compared": true,
+      "all_four_region_metric_records_compared": true,
+      "full_frame_metric_record_compared": true,
+      "all_three_fixed_pair_metric_records_compared": true,
+      "sealed_mse_numeric_value_self_checked_against_sealed_hex": true,
+      "recomputed_mse_compared_by_float_hex": true,
+      "finite_psnr_compared_by_float_hex": true,
+      "zero_psnr_none_and_positive_infinity_marker_compared": true,
+      "pixel_and_rgb_scalar_counts_compared": true,
+      "event_equality_row_event_and_row_status_compared": true,
+      "any_difference_retained_as_named_mismatch": true
+    },
+    "previous_blockers_closed": {
+      "full_frame_is_recomputed_and_exactly_compared": true,
+      "operational_failure_is_not_promoted_to_execution_01": true,
+      "macos_renamex_np_rename_excl_supplies_atomic_no_replace": true,
+      "broken_symlink_destination_is_detected_by_lexists": true,
+      "every_receipt_is_initialized_with_numeric_only_scientific_scope_and_claim_boundary": true
+    },
+    "one_shot_and_failure_semantics": {
+      "passed": true,
+      "fixed_nonblocking_lock": true,
+      "only_execution_01_is_terminal_output": true,
+      "any_existing_destination_entry_or_staging_entry_blocks_start": true,
+      "staging_mode": "0700",
+      "report_and_receipt_are_create_only_and_fsynced": true,
+      "completed_pass_or_mismatch_only_is_atomically_published": true,
+      "operational_failure_has_no_numeric_report_and_retains_hidden_staging": true,
+      "publication_is_same_parent_and_no_replace": true,
+      "parent_directory_is_fsynced_after_publication": true
+    },
+    "claim_boundary": {
+      "passed": true,
+      "scope": "Independent numeric comparison with one sealed B0 report only.",
+      "does_not_support": [
+        "Visual quality",
+        "Rendered camera obedience",
+        "Whole-video correctness",
+        "Repeatability",
+        "C1/C2 cohort confirmation",
+        "Causal attribution",
+        "Method gain",
+        "Novelty"
+      ]
+    }
+  },
+  "limitations": [
+    "This was a static source and protocol review only.",
+    "The recomputer was not run or imported.",
+    "No sealed tensor or image payload body was read or decoded.",
+    "No image or montage was viewed.",
+    "PASS authorizes only the separately controlled one-shot numeric recomputation described by the bound protocol; it is not an execution or numeric-result verdict."
+  ]
+}

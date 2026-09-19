@@ -1,0 +1,63 @@
+{
+  "schema": "s15a-curl-transport-pre-review-v1",
+  "completed_utc": "2026-09-06T09:59:31.982550+00:00",
+  "status": "PASS_FOR_FINAL_ORIGINAL_TWO_RGB_MEMBERS",
+  "contract_sha256": "3ebaafd57a676904f2f19d551fe1a3d8d3ae1fa8cc3e1ac46b5e9ac5f8e112c2",
+  "source_sha256": "907f4bbcb06611c7c55ac38d21daed65348d68190e0e9984f37b184324a38274",
+  "checks": [
+    {
+      "name": "Final original two members only",
+      "passed": true
+    },
+    {
+      "name": "Four requests and bounded response budget",
+      "passed": true
+    },
+    {
+      "name": "Same frozen url",
+      "passed": true
+    },
+    {
+      "name": "Same frozen archive_total_bytes",
+      "passed": true
+    },
+    {
+      "name": "Same frozen central_directory_offset",
+      "passed": true
+    },
+    {
+      "name": "Same frozen etag",
+      "passed": true
+    },
+    {
+      "name": "Same frozen last_modified",
+      "passed": true
+    },
+    {
+      "name": "Same frozen inventory_sha256",
+      "passed": true
+    },
+    {
+      "name": "Same frozen samples_sha256",
+      "passed": true
+    },
+    {
+      "name": "Same frozen protocol_v2_sha256",
+      "passed": true
+    },
+    {
+      "name": "Current curl source SHA",
+      "passed": true
+    },
+    {
+      "name": "Reviewed existing parser SHA",
+      "passed": true
+    }
+  ],
+  "mock_check_receipt": "work/S15A_curl_review/checks.json",
+  "mock_check_sha256": "3baaaeb1c1113c85748bd0779be827f61e790cbdfc578f03d522f8cb3fa2f695",
+  "real_network_requests": 0,
+  "real_PNG_reads": 0,
+  "model_calls": 0,
+  "scope": "Transport difference only; old ZIP parser retained. Seven mock cases, including stored/deflate success, malformed range/source/status and bounded overlong body. Curl command ignores curlrc, forces retry zero and redirect zero, HTTPS only, 25s limit, max-filesize length+1. Unlike urllib header-first logic, curl may store a bounded body before rejecting bad status/identity; this remains within declared body budget. Actual curl version 8.7.1 SecureTransport read locally. Streaming max-filesize behavior relies on installed curl implementation/manual, not a network test. Historical pre-curl requests reported as 24+10+7=41; no claim42 completed."
+}

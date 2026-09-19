@@ -1,0 +1,20 @@
+# Public transport candidate for the same two MP4 files
+
+**Found: a third-party Hugging Face transport candidate with matching advertised lengths and successful anonymous HEAD for both files. Media identity remains unverified.** Search began 2026-09-09 03:40:47 UTC; successful HEAD completed 03:44:05 UTC. No media body, archive, model, private account or token was read. Original download failures and camera choices remain intact.
+
+Host: `huggingface.co`, repository [`Spatial1ntelligence/Preprocessed_Neu3D`](https://huggingface.co/datasets/Spatial1ntelligence/Preprocessed_Neu3D/tree/main/coffee_martini). It is **not established as an original-author host**; treat it as third-party. HEAD reports revision `cb729cfe56b76fa811ceff1716910a6002db8327`.
+
+| File | Revision-pinned candidate URL | Original ZIP uncompressed length / CRC32 | Actual anonymous HEAD |
+|---|---|---|---|
+| cam00 | [coffee_martini/cam00.mp4](https://huggingface.co/datasets/Spatial1ntelligence/Preprocessed_Neu3D/resolve/cb729cfe56b76fa811ceff1716910a6002db8327/coffee_martini/cam00.mp4) | 66,440,149 B / `8eadec32` | Current `main` HEAD: 302→200; final Content-Length 66,440,149; video/mp4; byte ranges |
+| cam06 | [coffee_martini/cam06.mp4](https://huggingface.co/datasets/Spatial1ntelligence/Preprocessed_Neu3D/resolve/cb729cfe56b76fa811ceff1716910a6002db8327/coffee_martini/cam06.mp4) | 64,468,940 B / `ca4382d1` | Current `main` HEAD: 302→200; final Content-Length 64,468,940; video/mp4; byte ranges |
+
+The public [directory API](https://huggingface.co/api/datasets/Spatial1ntelligence/Preprocessed_Neu3D/tree/main/coffee_martini) listed those same lengths. HEAD's linked file SHA256 values are respectively `09cc8b695b78ef13d7e02a3a8a1e7e4f5a9f915730c4515c7cc9bcd06c843ad9` and `3a5cb2acd5266d23c83d7dbd16c10b69da10eac73b689011e275b0da33695f0d`. These are mirror-advertised identities, not independently measured body hashes. The API also lists the already accepted pose SHA `b82479fe530b6bf6792c718276aa69bd499a5ee777491eb5da66121c4247cf50`; that agreement is corroboration, not proof of video equivalence.
+
+The actual successful requests used `main`, and its response supplied the revision above; the revision-pinned URLs are derived stable candidates, not separately HEAD-tested. Python urllib HEAD failed with TLS EOF for both files; a separate bounded curl HEAD succeeded with no body. Both observations are retained locally. Total advertised MP4 bytes are 130,909,089; nothing was downloaded from either media URL.
+
+If root later authorizes transfer, retain the original accepted ZIP catalog as the identity authority: both exact uncompressed lengths and CRCs must match, and record actual body SHA256 against the mirror's declared SHA as an additional check. A match is ordinary transport-consistency evidence; CRC alone is not a cryptographic authenticity proof. Do not adopt this mirror's processed images, transforms or point clouds, change cameras, or decode future pixels under this metadata-only task.
+
+License source remains the original [Neural 3D Video repository/license](https://github.com/facebookresearch/Neural_3D_Video/blob/main/LICENSE): **CC-BY-NC 4.0**. The mirror's 21-byte [README](https://huggingface.co/datasets/Spatial1ntelligence/Preprocessed_Neu3D/raw/main/README.md) only declares `license: mit`; this conflicts with the original dataset notice and does not establish relicensing authority. Keep the original dataset notice and provenance.
+
+Other inspected leads were rejected: `2inf/Neural-3D-Video-Dataset` contains cropped/resized JPG samples with a different license label; `andrewbxy/ERFGS-Neu3D` exposes PNG frames and reconstruction metadata, not the required MP4s in the inspected scene directory; `rpzhou/Neu3D-Annotation` is annotations; the LeeXiangNO1 lead could not be certified by the bounded API checks. The original project page still points its Data link to the GitHub release; no separate original-author media host was identified. These are bounded search findings, not proof that no other mirror exists.

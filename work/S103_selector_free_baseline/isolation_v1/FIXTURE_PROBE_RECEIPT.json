@@ -1,0 +1,109 @@
+{
+  "schema": "gwm-isolation-fixture-driver-v1",
+  "scope": "synthetic_fixture_login_node_only",
+  "recorded_at_utc": "2026-09-15T17:59:02.394923+00:00",
+  "host": "slogin-02",
+  "slurm_job_id": null,
+  "raw_command": [
+    "/usr/bin/python3",
+    "/home/yliutz/gwm_isolation_v1_20260916/isolated_predictor.py",
+    "--policy",
+    "/home/yliutz/gwm_isolation_v1_20260916/fixture_policy.json",
+    "--receipt",
+    "/home/yliutz/gwm_isolation_v1_20260916/FIXTURE_LAUNCH_RECEIPT.json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"schema\": \"gwm-isolation-fixture-probe-v1\",\n  \"scope\": \"synthetic_fixture_login_node_only\",\n  \"pid\": 1,\n  \"attempts\": [\n    {\n      \"label\": \"allowed_history\",\n      \"path\": \"/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/history.txt\",\n      \"expected_open\": true,\n      \"opened\": true,\n      \"pass\": true,\n      \"error\": null,\n      \"fixture_content\": \"SYNTHETIC_ALLOWED_HISTORY\\n\"\n    },\n    {\n      \"label\": \"denied_outcome\",\n      \"path\": \"/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt\",\n      \"expected_open\": false,\n      \"opened\": false,\n      \"pass\": true,\n      \"error\": {\n        \"type\": \"FileNotFoundError\",\n        \"errno\": 2,\n        \"message\": \"[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt'\"\n      },\n      \"fixture_content\": null\n    },\n    {\n      \"label\": \"denied_archive\",\n      \"path\": \"/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/whole_archive.zip\",\n      \"expected_open\": false,\n      \"opened\": false,\n      \"pass\": true,\n      \"error\": {\n        \"type\": \"FileNotFoundError\",\n        \"errno\": 2,\n        \"message\": \"[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/whole_archive.zip'\"\n      },\n      \"fixture_content\": null\n    },\n    {\n      \"label\": \"denied_symlink\",\n      \"path\": \"/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/outcome_link.txt\",\n      \"expected_open\": false,\n      \"opened\": false,\n      \"pass\": true,\n      \"error\": {\n        \"type\": \"FileNotFoundError\",\n        \"errno\": 2,\n        \"message\": \"[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/outcome_link.txt'\"\n      },\n      \"fixture_content\": null\n    },\n    {\n      \"label\": \"denied_proc_root_escape\",\n      \"path\": \"/proc/1/root/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt\",\n      \"expected_open\": false,\n      \"opened\": false,\n      \"pass\": true,\n      \"error\": {\n        \"type\": \"FileNotFoundError\",\n        \"errno\": 2,\n        \"message\": \"[Errno 2] No such file or directory: '/proc/1/root/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt'\"\n      },\n      \"fixture_content\": null\n    }\n  ],\n  \"capabilities\": {\n    \"CapEff\": \"0000000000000000\",\n    \"CapPrm\": \"0000000000000000\",\n    \"CapBnd\": \"0000000000000000\",\n    \"NoNewPrivs\": \"1\"\n  },\n  \"caps_dropped\": true,\n  \"real_data_read\": false,\n  \"gpu_used\": false,\n  \"passed\": true\n}\n",
+  "stderr": "{\"event\": \"ISOLATION_ENTERED\", \"pid\": 1, \"execution_boundary_id\": \"namespace-fixture-d8a2fc57df9941f283ce952872599ba6\", \"capabilities_dropped\": true, \"private_proc\": true, \"network_namespace\": true}\n",
+  "probe_result": {
+    "schema": "gwm-isolation-fixture-probe-v1",
+    "scope": "synthetic_fixture_login_node_only",
+    "pid": 1,
+    "attempts": [
+      {
+        "label": "allowed_history",
+        "path": "/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/history.txt",
+        "expected_open": true,
+        "opened": true,
+        "pass": true,
+        "error": null,
+        "fixture_content": "SYNTHETIC_ALLOWED_HISTORY\n"
+      },
+      {
+        "label": "denied_outcome",
+        "path": "/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt",
+        "expected_open": false,
+        "opened": false,
+        "pass": true,
+        "error": {
+          "type": "FileNotFoundError",
+          "errno": 2,
+          "message": "[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt'"
+        },
+        "fixture_content": null
+      },
+      {
+        "label": "denied_archive",
+        "path": "/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/whole_archive.zip",
+        "expected_open": false,
+        "opened": false,
+        "pass": true,
+        "error": {
+          "type": "FileNotFoundError",
+          "errno": 2,
+          "message": "[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/whole_archive.zip'"
+        },
+        "fixture_content": null
+      },
+      {
+        "label": "denied_symlink",
+        "path": "/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/outcome_link.txt",
+        "expected_open": false,
+        "opened": false,
+        "pass": true,
+        "error": {
+          "type": "FileNotFoundError",
+          "errno": 2,
+          "message": "[Errno 2] No such file or directory: '/home/yliutz/gwm_isolation_v1_20260916/fixture_staged/outcome_link.txt'"
+        },
+        "fixture_content": null
+      },
+      {
+        "label": "denied_proc_root_escape",
+        "path": "/proc/1/root/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt",
+        "expected_open": false,
+        "opened": false,
+        "pass": true,
+        "error": {
+          "type": "FileNotFoundError",
+          "errno": 2,
+          "message": "[Errno 2] No such file or directory: '/proc/1/root/home/yliutz/gwm_isolation_v1_20260916/fixture_outcomes/outcome.txt'"
+        },
+        "fixture_content": null
+      }
+    ],
+    "capabilities": {
+      "CapEff": "0000000000000000",
+      "CapPrm": "0000000000000000",
+      "CapBnd": "0000000000000000",
+      "NoNewPrivs": "1"
+    },
+    "caps_dropped": true,
+    "real_data_read": false,
+    "gpu_used": false,
+    "passed": true
+  },
+  "predictor_wrapper_sha256": "80522a400ad01f71f5745e31b4efce918ef3e273ec3d39679a7ad056828e6849",
+  "execution_boundary_id": "namespace-fixture-d8a2fc57df9941f283ce952872599ba6",
+  "predictor_inputs_sha256": "a73bc73a633ea72aa63f777e6d6d08110d7e74a51cca395803328750a311337a",
+  "scorer_inputs_sha256": "aefe7c88f728ab11d834f27c7a566a67da5f4573c6b7a7dad553aa847d278f59",
+  "runtime_binding_sha256": "a72d94be523ce08a44d98d1a7224e3d4f0913e17ec6f8ed61eea4fd6966faa93",
+  "allowed_history_probe_passed": true,
+  "denied_outcome_probe_passed": true,
+  "full_archive_unavailable": true,
+  "actual_open_tests_passed": true,
+  "production_acceptance": false,
+  "compute_node_tested": false,
+  "gpu_job_submitted": false,
+  "real_data_read": false
+}

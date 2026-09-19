@@ -1,0 +1,40 @@
+{
+  "status": "PASS_MINIMAL_V3_FIX_FOR_ONE_NEW_BOUNDED_ATTEMPT",
+  "recorded_utc": "2026-09-10T18:24:55.905140+00:00",
+  "runner_sha256": "e789370a0f7871238596a30ceae02c01567b25fadc38f0a6e9304ca69eb20eb3",
+  "contract_sha256": "2b08a75003468ced7b15ea92d4b8c01c00e7f532d0893dcde0958d4fd33d45f1",
+  "blockers": [],
+  "non_blocking_limitations": [
+    {
+      "field": "termination_by_supervisor",
+      "finding": "failure in supervision is not equivalent to an actual termination signal: exit-time wall or ru_maxrss checks may set failure after natural exit",
+      "required_interpretation": "On failure, use actual exit code, failure cause and signal event path; do not report a kill from this boolean alone",
+      "why_not_execution_blocker": "does not alter model/input/math, budget rejection or artifact preservation; a metadata interpretation limitation"
+    }
+  ],
+  "exact_diff_only": true,
+  "changed_contract_fields": [
+    "created_utc",
+    "output_directory",
+    "revision",
+    "runner_sha256",
+    "schema"
+  ],
+  "fixes": {
+    "backbone_config_repr": "repr yields text even when nested functools.partial exists; no downstream numerical use",
+    "load_counter": "flush after increment persists attempted model load before call, not proof of completed load",
+    "missing_receipt": "FAILED_NO_FINAL_RECEIPT and worker exit code correctly distinguish no final worker receipt; boolean limitation separately preserved"
+  },
+  "unchanged": "input identities/order, models/checkpoint/math, recurrent flags, output heads, resource limits, source files",
+  "cumulative_attempt_if_run": 3,
+  "old_v2_runner_sha256": "71ca5a3002cef34c423a6729deb2d80e076795aa268eb5009f55bab97f75621c",
+  "old_v2_contract_sha256": "4a065747329578ac13340510d938ccd24a6a2e7614d77a32b3553fdaf212d50a",
+  "tests_this_revision": "source diff plus exact text transformation/JSON field comparison/AST parse; no runtime model/array test",
+  "real_output_files_read": 0,
+  "model_instantiations": 0,
+  "model_forwards": 0,
+  "RGB_or_depth_decodes": 0,
+  "output_checker_sha256": "6c8ab60aa9b222b05583041101bb8a18efb94911ff364add882f47faed57c6f2",
+  "output_checker_compatible": "explicit V3 contract/path; neither backbone config field required",
+  "scope": "root may explicitly start V3 once after review; no automatic retry, optimizer, render, GT scoring or generation"
+}

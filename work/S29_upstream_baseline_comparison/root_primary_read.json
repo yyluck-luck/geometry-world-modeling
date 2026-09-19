@@ -1,0 +1,8 @@
+{
+  "read_utc": "2026-09-06T17:41:24.937401+00:00",
+  "reader": "root",
+  "tool": "web.open",
+  "url": "https://raw.githubusercontent.com/naver/dust3r/4c24a6ebf04809f2cfe59915e51779c8984aaa40/dust3r/cloud_opt/optimizer.py",
+  "scope": "Full 224-line web response; constructor/getter/helper and preset_pose traced",
+  "finding": "Official constructor registers stacked depth; getter uses registered tensor directly. Local VMem keeps separate leaves and restacks via helper inside getter. Official preset_pose also ends norm_pw_scale=False. S28 restores gradient semantics only; not the whole official optimizer. No model/array execution or complete git history audit."
+}

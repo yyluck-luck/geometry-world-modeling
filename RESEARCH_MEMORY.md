@@ -1,0 +1,934 @@
+## 2026-09-16T12:49:05+08:00 — GPU隔离镜像卡点解除（合成探针通过）；下一步仍是合同而不是跑模型
+
+**用户问题：** "GPU 侧需要你或 ITSC 确认能否拿到可固定的镜像/registry 权限——你不能确认吗？" 本轮实际去确认了，结论：**技术上可以自己确认，不需要 ITSC 开权限**；只有一个"要不要花 1.5GB 下载"的决定需要用户点头（用户选择了"现在就做"）。
+
+**自己确认到的事实（登录节点 slogin-02，只读探测 + 官方文档）：**
+1. `module load apptainer` 后可用 `apptainer 1.1.9`（`/cm/local/apps/apptainer/current/bin/apptainer`，同时提供 `singularity`）。
+2. 登录节点**有**到容器 registry 的出网：`ghcr.io`→405、`registry-1.docker.io`→401、`quay.io`→401、`nvcr.io`→401、`pypi.org`→200（401/405 是标准的"可达但需令牌"响应）。
+3. **匿名令牌可以解析并固定 digest**（不下载任何层）：`nvidia/cuda:12.6.3-runtime-ubuntu22.04` → index `sha256:63a18dd805367dacfb077aeced8384ab2fb569598ec5f5f5220c3f90a5c23650`，amd64 `sha256:4cf7f8137bdeeb099b1f2de126e505aa1f01b6e4471d13faf93727a9bf83d539`，压缩层共 1529.9 MB。
+4. `$HOME` 200G/剩 148G，足够放 SIF；`/cm/shared` 12P。
+5. 登录节点 `enroot` 不可用（配置指向 `/raid/local`，权限拒绝）——与旧回执一致；Pyxis 属于作业时路径。
+6. 官方文档（HKUST ITSO Apptainer 页 + HPC Handbook Enroot/Pyxis 页）确认：注册表镜像可由用户自行取得，`.sif` 放 home，用 `apptainer exec --nv` 在 SLURM 作业里运行；Pyxis `--container-image` 也支持作业时拉取（NGC 需用 `nvcr.io#org/image` 语法）。**没有任何"需要 ITSC 预先批准镜像"的说法。**
+
+**本轮实际执行（用户批准后）：**
+- 在持久 tmux `gwm-pull` 中按 digest 拉取：`apptainer pull --force` → `pull_exit=0`，`real 2m33s`，SIF 1,526,910,976 bytes，`sha256=5a79221373914393c844cc92c32c89e722003591431f3545fc674c0739c59dd0`，存于 `/home/yliutz/gwm-images/`（**项目树之外**，避免 rsync 回传 1.5GB）。
+- 合成探针作业 **589607**（`gwm-img-isolation`，partition normal、account mscitspod2026、1 GPU）在 **dgx-21 COMPLETED，28 秒，exit 0:0**，由持久 tmux `gwm-img-probe` 提交。
+- 通过项：绑定解释器 `~/.conda/envs/gwm-cut3r-py311-20260915/bin/python3.11` 在镜像内可执行；staged 输入只读可读；**未绑定的 sentinel 与项目根目录在容器内不可见**；`/` 与 stage 绑定只读；`torch 2.7.0+cu126` 在 **NVIDIA H800**（driver 580.159.03）上完成 1024×1024 CUDA matmul，峰值 53.5 MB。`model_access=false`、`dataset_access=false`、`ground_truth_access=false`、`forward_completed=false`。
+
+**边界与未做：** 这是基础设施证据，不是 Gate0 通过、不是安全边界（挂载策略只限制冻结预测器"能读什么"，不防恶意代码）、不是科学结果。计算节点缺 `squashfuse`/`fuse2fs`，每次 `exec` 都会把 SIF 转成临时 sandbox，正式作业前需实测启动开销。`/tmp` 容器内可写（已如实记录）。未跑任何 VMem forward、未读数据/GT、未评分。
+
+**Gate0 仍未通过，剩余缺件不变：** 有效 v4 合同、scorer、独立 verifier、完整窗口 manifest 与命令相机来源，然后才是 validator `PRE_RUN_READY` + formal launch guard receipt。`new_method_validated=false`；`novelty_authorization=NONE`。
+
+**证据：** `work/S103_selector_free_baseline/gpu_image_isolation_20260916/COMPUTE_ISOLATION_RECEIPT_20260916.json`（协议 `README.md`、原始输出 `remote_receipts_589607/`）；状态文档已更新 `docs/GATE0_AND_GPU_START_STATUS_20260916.md`、`docs/RESEARCH_HANDOFF_CURRENT.md`。
+
+## 2026-09-16T12:00:00+08:00 — 本机↔SuperPOD 进度对齐（双向合并）；逐项记录实际改动
+
+**任务：** 用户要求确保本机研究进度与服务器（`yliutz@superpod.ust.hk:~/geometry-world-modeling`）一致，并记录改了什么。SSH 此前被本机 Clash(fake-IP, 198.18.0.165) 干扰而时断时续；连接恢复后执行下列**双向**同步。备份目录：`tmp/sync_backup_20260916/`。
+
+**对齐前的真实差异（实测，非估计）：**
+
+| 项 | 本机 | 服务器 |
+|---|---|---|
+| 总体积 | 69 GB | 670 MB |
+| `data/`、`results/` | 33G + 28G | 不存在 |
+| `work/` | 6.2 GB、429 目录 | 202 MB、435 目录 |
+| 主账事件 | 1993 条（末条 09-16 11:20） | 1844 条（末条 09-15 21:46） |
+
+**已执行的三步（实际改动）：**
+
+1. **主账合并（服务器→本机）。** 逐条比对 (occurred_at, action, outcome) 后发现**服务器独有 14 条本机缺失的事件**，逐条补入并按时间排序。主账 1993 → **2007 条**；`RESEARCH_LOG.md` 用项目自带 `research_log.py:render()` 重建。备份：`tmp/sync_backup_20260916/research_events.jsonl.{local,remote}_backup`。合并脚本 `tmp/merge_remote_ledger.py`（合并前全量备份、拒绝写入更小账本、拒绝重复 id、写完回读校验）。
+   - 补入的关键事实：① 项目根目录 `2606.09803v1.pdf` 即 **Echo-Memory**（受控记忆研究；三评测支路经常互相矛盾，replay 不是"记住世界"的充分代理）；② **GRC 选择机制已被 GIM-World（arXiv:2606.02436，南大+快手Kling）第3.4节 Information-Guided Pruning 发表**，原 GRC 轴需更换；③ ICL-NUIM `depth_semantics` 由待换算变为**实测确认**（K: fx=481.20/fy=−480.00/cx=319.50/cy=239.50，深度 z=raw/5000，位姿 c2w 直接使用）；④ TUM fr3_long_office_household 逐项独立复算通过；⑤ S104 封存预测只读结构检查与评分协议草案（均未评分、未读预测-真值数字）。
+
+2. **拉取服务器独有目录到本机。** `work/S104_cut3r_icl_rgb_calibration/`（服务器独有，89 文件、97 MB，含 ICL-NUIM 校准、创新扫描、作业回执）已完整拉回本机。
+
+3. **本机→服务器整体推送。** 同步前 dry-run：要传 20814 文件、6.37 GB，**0 个删除**。分两阶段：非 `work/` 部分（1275 文件、210 传输、约 8 秒）完成；`work/`（约 6 GB）后台 `rsync` 执行。
+   - 排除项：`data/`、`results/`、`tmp/`、`.venv*`、`tools/deepseek-harness/{runtime,state}`、`__pycache__`、`.DS_Store`。
+   - 服务器仍不保留 `data/`、`results/`（33G+28G，非本次同步目标）。
+
+**环境事实（本次核实）：**
+- 服务器登录节点本次为 **slogin-02**（旧文档写 slogin-01；同类登录节点，仅编号不同）。
+- 工作方式：**本机 Mac 为主要工作台**，SuperPOD H800 为已授权远程算力；远程作业须走已记录的 SSH/Slurm 契约与证据门。服务器旧 `AGENTS.md`/`RESEARCH_PRINCIPLES.md` 写"工作机=slogin-01、本树是残缺副本"，属登录节点时期旧表述；本机 `RESEARCH_PRINCIPLES` 为 **v2.12（2026-09-16T00:55）**，是更新版本，已随本次推送覆盖服务器副本；服务器旧版本存于本机备份。
+- 本机 `~/bin/dsh-web` 已建立（SSH 隧道映射远程 dsh Web，端口 3099）；`~/bin` 已加入 `~/.zshrc` PATH（备份 `~/.zshrc.bak-before-binpath`）。远程 dsh 版本 0.1.5-rc.1，位于 `~/.local/node-v26.8.2-linux-x64/bin/dsh`。
+
+**最终核对结果（已完成）：** 全部推送完成后，用 `rsync --checksum --delete --dry-run` 做内容级校验：**仍有差异的文件 0、远程多余条目 0**（total size 6374939265 B）。7 个顶层关键文件本机/服务器字节数逐一相同（research_events.jsonl 2146168、RESEARCH_LOG.md 1198817、RESEARCH_MEMORY.md 162980、AGENTS.md 2401、RESEARCH_PRINCIPLES.md 36628、workflow_checks.jsonl 2248252、PROGRESS_REPORT_20260916.txt 13042）。服务器 `work/` 由 202M 增至约 6.6G、448 个目录，与本机一致。校验记录：`tmp/final_diff.txt`。
+
+**传输中断与续传（如实记录）：** 首次 `work/` 后台推送在约 2.6G 处被 `Connection reset by peer` 中断（Clash/网络导致），已保留为失败记录；改为 `--partial` 加 `ServerAliveInterval=20/CountMax=10/TCPKeepAlive` 后断点续传成功（18347 文件、4419397674 B）。
+
+**未做 / 边界：** 未同步 `data/`、`results/`；未删除本机任何大文件；未改动任何既有实验结果、协议或报告。本次是文件与记录对齐，**不是**新实验、不是方法验证。创新状态仍为 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+**已知隐患（本次发现，未修）：** 本机项目目录内**没有** `.git`；但 `/Users/rocket`（整个用户主目录）是一个 git 仓库，暂存区已有 776 个主目录之外的条目且 0 提交。直接在该仓库 commit 会误提交无关文件。建议在项目内单独 `git init` 并配 `.gitignore`（排除 `data/`、`results/`、`work/` 及大二进制）。
+
+## 2026-09-16T01:57:28.641097+08:00 — Gemini/Computer 实际接口订正
+
+本轮已找到并实际调用本机 Computer 插件（node_repl + @oai/sky）；操作 Codex 应用时返回明确限制：“Computer Use is not allowed to use the app 'com.openai.codex' for safety reasons.” 没有绕过限制，也未从本任务向 Gemini 发送问题。此前仅凭工具名缺失推断无法使用的判断不完整。另一研究任务已通过其 Browser 接口保存 Gemini 审查摘要，报告可见模式为 Pro Extended，数字版本3.1未确认；新咨询已转交该可用任务。数据适配、实际输入隔离和创新实验设计三个代理已接续。证据：`work/gemini_capability_20260916/CURRENT_CHECK_20260916T015728+0800.json`。
+
+## 2026-09-16T01:43:12.338590+08:00 — Gate0 attack: corrected 7-Scenes rejection and acquired 3DMatch scene archives
+
+Independent audit rejected candidate-v2 PASS labels: 7-Scenes RGB/depth are explicitly uncalibrated, the effective VMem config is 576x576 with 4+4 frames and seed 42, the substring future-path guard is bypassable, and the validator mixes pre-run readiness with post-run acceptance. Candidate-v2 is preserved and formally retracted in `work/S102_gate0_tum/GATE0_CANDIDATE_V2_RETRACTION_20260916.json`; candidate-v3 and current decision remain BLOCKED. The new `validate_gate0_v2.py` separates PRE_RUN_READY from PREDICTION_SEALED/POST_RUN_ACCEPTED and passes 7 synthetic software checks only.
+
+The 7-Scenes Chess archive is real and hashed (`d00b5b8f...`), but remains an unqualified raw RGB-D candidate. After a source-only freeze, 3DMatch RGB-D Scenes v2 scene_13 was downloaded and hashed (`9fa3b934...`, 180MB) and scene_14 was downloaded and hashed (`d3011fe0...`, 239153034 bytes) through remote tmux; no model/score was run. Scene_13 has one sequence, so it is calibration/development only; scene_14 is the independent scene candidate. Both use estimated mapping poses and still require source-specific adapter/lineage checks.
+
+Remote H800/tmux/Slurm preflight is complete with corrected checkpoint names and launcher hash checks; no formal job was submitted. Current next gate work: extract/audit scene_13/14 source contracts, build staged allowlist isolation and effective VMem manifest, then qualify PRE_RUN_READY. Formal baseline and GRC/SOCF scoring remain unauthorized until the corrected contract and calibrated heldout evidence pass.
+
+Gemini 3.1 Pro Extended was not called this turn because no Computer Use/browser-control tool was exposed and macOS AX trust was false; capability receipt is `work/gemini_capability_20260916/RECEIPT.json`. This is an interface limitation, not evidence about Gemini service availability.
+
+## 2026-09-16T01:36:11.321831+08:00 — Gate0 candidate correction and Gemini interface check
+
+7-Scenes Chess archive has been downloaded and hashed on SuperPOD, but official uncalibrated RGB/depth prevents treating it as a qualified metric-reprojection heldout source. Candidate v2 PASS fields were unreviewed and are retracted by `work/S102_gate0_tum/GATE0_CANDIDATE_V2_RETRACTION_20260916.json`; candidate v3 and current decision remain BLOCKED. Incorrect hand-entered document timestamps are corrected using birth times and the event ledger. Pre-run/post-run Gate0 circularity, actual model config and checkpoint paths are being audited. Computer plugin was explicitly requested; current tool/skill discovery and local AX probe did not yield a usable interface, so no Gemini prompt has been sent this turn.
+
+## 2026-09-16T00:25:59+08:00 — Parallel pre-Gate innovation pilots started
+
+已启动三个并行代理：SOCF-A 源级冲突诊断、重影机制诊断、CVaR/DLV pilot 准备。它们只能使用既有开发/合成材料，不得读取 held-out future outcomes；正式创新实验仍需 Gate 0、数据合同和预测封存。20 分钟自动计划已同步为“先收集这些回执，再冻结 Gate 0 与 S103”。
+
+## 2026-09-16T00:23:00+08:00 — Full no-data VMem model-load smoke passed
+
+H800 Slurm job 588459 成功完成完整 VMem 无数据加载：VMemModel、AutoEncoder、CLIPConditioner、ARCroco3DStereo 均从已校验权重加载，24.60 秒、峰值显存 7.884 GB；没有读取数据、未来 GT 或执行 forward。自动化计划已同步更新，下一步是冻结 S103 实现与数据合同、正式运行 Gate 0；创新候选仍按 SOCF-A/FGB-Future 路线保持未验证。
+
+## 2026-09-16T00:16:16+08:00 — All promising innovation directions ranked
+
+并行创新、理论和审稿代理完成了全量重排。当前最强条件方法候选是 SOCF-A（联合源级几何冲突 + abstention），最稳妥的论文问题是 FGB-Future（固定预算下检验历史是否改善独立未来 RGB-D/pose 状态）。反事实来源干预和重影机制分解优先作为测量/诊断；CVaR、DLV、分歧加权/写入准入作为条件候选；异构代价选择只作系统分析。原始 GRC-Memory 因 GIM-World、Mem-World、Future Forcing 等近邻覆盖，暂判 Reject and Pivot。完整排名见 `work/agents/INNOVATION_SYNTHESIS_20260916.md`。所有候选仍未验证。
+
+## 2026-09-15T23:48:38+08:00 — No-data model-load smoke dependency repair
+
+S103 no-data smoke job 588242 已完成 VMem、VAE、CLIP 与 CUT3R 权重加载，但在导入 CUT3R 可视化依赖 `viser` 时失败；未读取任何数据或 GT。已在隔离远程环境安装 `viser` 与 `trimesh`，同一脚本重新提交为 job 588321，目前运行中。该步骤仍是基础设施验证，不能替代 VMem forward 或正式实验。
+
+## 2026-09-15T23:34:13+08:00 — VMem checkpoint transfer completed; no-data smoke resubmitted
+
+远程 VMem 权重已完整传输并通过 SHA-256 校验（5,056,346,672 bytes，SHA 与本地声明一致）。随后提交 S103 no-data H800 model-load smoke：job 588215 在 CUT3R 权重的 PyTorch weights_only 安全限制处失败，未访问数据；已对两个 SHA 已核验 checkpoint 做窄范围兼容补丁并提交 job 588242。尚未运行 VMem forward、视频或 GRC。
+
+## 2026-09-15T22:43:47+08:00 — 20-minute research heartbeat activated
+
+根据上一轮真实结果（S104 CUT3R H800 前向成功、VMem 权重仍在传输），已将现有科研自动化从每30分钟改为每20分钟。后续每次检查都必须先读取最新账本和计划，再按最新状态决定：监控/续传权重、核验远端 SHA、Gate 0、无数据模型加载、冻结 S103，随后才允许正式基线和 GRC 对照。自动化同时保留创新检索、红队审查、代理容量如实记录和“完成全部 GPU 实验后再统一分析”的约束。
+
+## 2026-09-15T22:12:02+08:00 — S104 CUT3R H800 component inference completed; remote innovation reports synchronized
+
+已通过 SSH 连接 HKUST SuperPod 并完成真正的 H800 组件实验：Slurm job 586699 成功编译并导入 CUT3R cuRoPE，job 586719 使用固定四张历史 RGB（id 1/31/61/91）完成 CUT3R 前向。回执显示模型 SHA 与声明权重一致，forward 10.663 秒、峰值显存 3.642 GB、设备 NVIDIA H800；depth、pose、GT 均未读取。这是组件可运行性证据，不是 VMem 长时程基线，也不支持 GRC 方法效果。
+
+远程工作区最近新增 `S104_cut3r_icl_rgb_calibration/INNOVATION_SCAN_20260915.md` 与 `INNOVATION_IDEAS_20260915.md`，已复制到本地 `work/remote_innovation_20260915/`。其排重结论显示 GIM-World、Mem-World、Future Forcing、R2M-Bench 等已占据原始 GRC 组合；较有区分度的待证伪方向转向误差相关结构、CVaR 尾部风险、记忆失效/准入和重影机制分解。所有候选仍保持 `novelty_authorization=NONE`、`new_method_validated=false`。
+
+VMem 权重仍只有 2,666,266,624 / 5,056,346,672 bytes，SHA 未完成；本地已启动可恢复 rsync。Gate 0 和实现审查仍是正式 VMem 运行前置条件。
+
+## 2026-09-15T12:56:31+08:00 — Continuous innovation and full agent staffing enabled
+
+The 30-minute heartbeat prompt now requires a bounded innovation-search or red-team agent whenever capacity permits, with separate roles for primary-source novelty scanning, skeptical review, and H800 execution. Current live child agents: `innovation_continuous`, `innovation_redteam_continuous`, and `gpu_execution_preflight`; all are running with distinct scopes. The previous translation agent completed the four English protocol copies and was released.
+
+The scheduler remains active and was updated through the app automation tool. The remote VMem transfer is still partial; no VMem baseline or formal GRC experiment has run.
+
+## 2026-09-15T12:51:39+08:00 — Parallel innovation and GPU plan artifacts
+
+Three bounded agents were dispatched. The innovation review checked ViewRope, Spatia, GIM-World, and WorldTrace source claims and narrowed the primary candidate to SOCF-A (replacement-direction conflict plus abstention); FVR remains a secondary candidate. Both remain unvalidated, with explicit pilot and kill criteria. The H800 agent created and syntax-checked a plan-only CUT3R RGB-only component runner under `work/S104_h800_cut3r_calibration/`; it has not been submitted and does not access depth, pose, or GT. The translation agent is working on faithful English copies of four critical protocols.
+
+The English plan registry was corrected to avoid speculative S92-S100 meanings; verified archived entrypoints are named by full paths and prospective work uses P01-P18. The remote VMem checkpoint transfer remains partial, so no model or formal GRC run is accepted.
+
+## 2026-09-15T12:36:03+08:00 — English research-plan registry and scheduler rewrite
+
+Per user request, all active plan instructions are now restated in English in `docs/RESEARCH_PLANS_EN.md`; scheduler-specific instructions are in `docs/RESEARCH_AUTOMATION_CONFIG_EN.md`. The registry preserves S0–S103 identifiers, proposal alignment, evidence gates, innovation falsification requirements, and the current H800 queue. Historical Chinese plans and Chinese beginner summaries remain unchanged as evidence. No scientific result or novelty status changed. The remote weight transfer is still incomplete; no VMem/GRC model run has started.
+
+Next: finish/resume transfer, verify every remote checkpoint hash, run a no-data model-load smoke, then proceed to the frozen calibration/development VMem baseline only after the implementation audit.
+
+## 当前接续入口（记录UTC 2026-09-15T01:54:30Z）
+
+2026-09-15 09:54本地推进：完成 ICL-NUIM 官方相机/深度合同审查。TUM 官方文件格式明确 640×480 RGB-D、16-bit 深度因子5000、0为缺失、RGB-depth 预配准、轨迹字段；ICL 官方 MATLAB 源码明确 native `.depth` 是 radial distance，需 radial→z，且 MATLAB 1-index 中心320.5/240.5对应0-index 319.5/239.5。新增合同说明、三项纯算术单测及SHA回执；单测仅证明实现公式自洽，0数据/0GT/0模型，Gate0仍阻断。详见 `work/S102_gate0/ICL_CAMERA_DEPTH_CONTRACT_REVIEW_20260915.md`、`ICL_CONTRACT_ALGEBRA_CHECK.json` 和 `official_camera_sources_20260915/`。
+
+2026-09-15 10:02本地推进：SSH恢复并核验Slurm job584548为COMPLETED exit0；imageio2.31.1已安装，PyTorch2.7.0+cu126、torchvision0.22.0、numpy1.26.4、scipy1.16.2、transformers4.48.3、accelerate1.4.0、cv2 4.11.0、imageio2.31.1、diffusers0.32.2九项基础import通过。回执已复制到 `work/S101_env_bootstrap/remote_receipts_584548/` 并更新 `SUBMISSION.json`。这只证明环境包可用，尚未导入VMem项目、加载权重、运行模型或读取数据/GT。
+
+2026-09-15 10:35本地推进：完整源码包上传SuperPOD后SHA与196个tar条目核对通过。首次项目探针误用系统Python3.10，纠正为个人Python3.11绝对路径后确认缺kornia；585714完成直接依赖安装，kornia/open_clip/matplotlib/torcheval导入通过。重跑无GT项目探针后 `modeling`、`modeling.pipeline`、`conditioner`、`autoencoder`、`utils` 全部IMPORT_OK。仍未构造模型、加载权重、读取数据/GT或运行科学实验；下一步是最小GPU smoke和Gate0样本资格审计。
+
+2026-09-15 10:52本地推进：H800 GPU smoke 修正后 job585971 在 dgx-09 完成 exit0；H800 81559 MiB、CUDA可用、torch2.7.0+cu126、1024矩阵乘通过；加入 `vmem` 与 `extern/CUT3R` 双 PYTHONPATH 后五个 VMem 项目模块全部 IMPORT_OK。585900/585928 的路径错误均保留。该结果只证明GPU环境和代码导入，不是模型/科学实验；0数据、0GT、0权重。下一步进入 ICL Gate0 小样本解码和合同审计，资格门通过前不运行正式GRC。
+
+2026-09-15 10:59本地推进：ICL Gate0 小样本解码 job586074 完成。服务器归档中 id 1、2、3、750、1508 的5对 RGB/depth 全部存在；RGB均640×480 RGB PNG，depth均640×480 I;16 PNG，uint16样本无零值。该步骤仅用于合同资格，未用未来GT选择、未运行模型；完整归档、split、相机坐标和GT隔离仍需审计，Gate0继续阻断。
+
+SSH 至 SuperPOD 仍在服务端版本交换前关闭，584548 imageio 修复作业状态未知；没有重复提交或修改代理/VPN/私钥。恢复后先取回作业回执，再上传196文件完整源码包并做远端无GT项目import；取得归档后先做小样本 dtype/尺寸/单位/时间抽样，未通过 Gate0 前禁止正式 GRC。
+
+## 当前接续入口（记录UTC 2026-09-14T23:10:04Z）
+
+2026-09-15 09:18本地补充：SSH verbose将失败定位在服务端版本交换之前，未到账号/密钥认证。系统DNS与UDP公共DNS都返回198.18.0.84，经utun9/198.18.0.1；HTTPS DNS返回143.89.184.2，向该IP只读TCP探针同样约5秒后空banner。可确认连接链含本地隧道/代理，不能确认哪端关闭；未改VPN/代理/密钥。详见`work/S101_env_bootstrap/TRANSPORT_DIAGNOSIS_20260915.json`。继续取584548回执，不反复改依赖排查连接错误。
+
+已创建并安装个人Python3.11环境；584449 resolver成功、584494安装成功但imageio缺失，584548修复已提交。两轮SSH均连接关闭，584548状态未知，禁止重复安装。此次连接输出只证明SSH传输失败，不能归因学校服务器或模型。旧各环境与共享base记录仅为历史。
+
+已准备完整无数据/权重源码包：`work/S101_env_bootstrap/source_transport_v1/`，196文件、357741B、196个哈希与S40保存清单一致。`vendor/vmem_snapshot`只有7个审计文件，不可作为完整源码上传。实际代码还需kornia/open_clip等，九包probe不能支持“VMem只缺imageio/diffusers”的结论。SSH恢复后先取584548回执，再上传完整源码包并运行不构造模型的离线import检查。正式GRC仍未运行，创新候选未验证。本轮子agent接续因thread limit失败，root本地完成源码包，不宣称agents在运行。
+
+## S91R-C修正：保存数据控制审查停止GRC方法主张
+
+更新UTC：2026-09-12T07:47:23+00:00（北京时间15:47:23）。S91R-C对上一段S91R saved-data先导复算做了固定控制审查。原先“32个组合/每方法32”表述不准确：实际是2方法×4目标×4来源=32个分层，每方法16个；原脚本的风险分位边界还使用了future-valid掩码，已在C审查中改为先用过去候选的全部finite/positive像素定边界，再应用未来有效性。
+
+控制审查结果：4个目标的有符号未来AbsRel改善（never−all_new）均值分别为−0.014472、−0.007696、−0.005395、−0.006582；all_new虽然在像素层面改善比例为0.5948、0.6317、0.6467、0.6459，但总体平均误差变差。加入disagreement的留一目标预测相对基础控制的ΔR²平均约+0.01463且4/4为正，但两个方法在同一目标上的source identity相同比例只有约4.35%–5.49%，因此不能解释成同一记忆条目的因果收益或GRC方法效果。按预先停止规则，当前 saved-data 不支持GRC-Memory方法主张；S91仍为Gate0阻断，必须等合格未见RGB-D/相机配对后再做同身份、固定预算比较。
+
+证据：work/S91R_saved_future_error_reanalysis/CONTROL_AUDIT_PROTOCOL.md、CONTROL_AUDIT_REPORT.md、control_audit_results.json、control_audit_recheck.json、verify_s91r_control_audit.py。\n\n## S91R（已保存历史候选与未来深度误差回顾性复算）：先导信号，不是新方法验证
+
+更新UTC：2026-09-12T07:25:40.995135+00:00；北京时间：2026-09-12T15:25:40.995135+08:00。在不联网、不调用新模型的条件下，对已保存的 S15B proposal、目标预测和传感器深度进行固定公式复算。结果显示：old/new 几何相对不一致度与未来目标深度 AbsRel 在 `never` 和 `all_new` 两条保存消费者输出上均呈正向描述性相关；`never` 组合范围约0.088–0.633，`all_new`约0.154–0.497。独立脚本对32个 method×target×source 组合复算通过。
+
+证据：`work/S91R_saved_future_error_reanalysis/PROTOCOL.md`、`RESULTS.md`、`results.json`、`verify_s91r.py`、`risk_future_correlation.png`。
+
+边界：这是一个已经暴露的单段 TUM 数据上的 saved-data reanalysis，不是未见测试、跨场景实验、GRC-Memory验证或新模型运行。正相关可能来自来源、覆盖率、confidence、位姿和场景结构混杂；必须在 Gate 0 合格数据上与 recent/random/pose/coverage/utility/confidence 等同预算基线比较。
+
+下一步：把它作为 GRC-Pilot 的先导信号；Gate 0 通过前不把它写成创新成立，也不启动新的未来答案评分。
+
+<!-- S90_INNOVATION_UPDATE_BEGIN -->
+## S90继续：昨天猜测已改成可证伪矩阵，第二轮创新检索完成（记录UTC 2026-09-12T07:01:24.542432+00:00）
+
+用户要求继续使用全部Agent并完成昨天猜测与创新点。本轮实际并行交付：`agents/yesterday_hypotheses_matrix_20260912.md`、`agents/innovation_retrieval_round2_20260912.md`、`agents/yesterday_progress_audit_20260912.md`和`agents/advisor_oral_brief_20260912.md`。新增原文核验R2M-Bench、WorldPack、GIM-World和CAP；未找到完整“逐历史未来几何风险+固定预算保证”方案，但结论仍UNKNOWN，不授权新颖性。
+
+四个候选已分层：GRC待独立未来真值；反事实是有符号未来损失测量协议；2×2是重影诊断而非GRC验证；变点方向因动态数据缺口暂缓。S86/S87实际结果和NO_METHOD_SELECTED状态不变。报告更新入口：`work/S90_proxy_resumable_index/YESTERDAY_HYPOTHESES_AND_INNOVATION_UPDATE_20260912.md`及用户快照`outputs/创新候选逐条核验_S90_2026-09-12/`。
+
+下一项研究门保持：先完成并复审S90索引工程，Gate0数据资格，再做2×2和小型同预算GRC pilot。没有新模型/网络数据/未来几何评分。
+<!-- S90_INNOVATION_UPDATE_END -->
+
+<!-- S90_CURRENT_BEGIN -->
+## S90当前：对话与附件30项核验完成，GRC仍未验证（更新UTC 2026-09-11T16:07:34.254982+00:00）
+
+本段优先于下方历史S89状态。最新完整核验：`work/S90_proxy_resumable_index/DIALOGUE_CLAIM_AUDIT.md`。三个Agent实际并行核数学/近邻/附件，root完成独立有理数复算，见`ROOT_DIALOGUE_AUDIT_RECEIPT.json`。没有新真实模型/图像/几何评分。
+
+- S86/S87真实局部基线仍成立；S87普通末端.75的MSE0.05116758低于多步0.05242222，只否定该例多步必要性，非GRC/几何优势；target22失败保留。
+- 原GRC高分与已成立新颖性撤回。GIM已有geometry+MI+固定预算，差异须落到可验证的未来几何帮助。CRC缺单调策略损失等前提，不能给每条记忆上界。互信息目标不天然泄漏；测试读真实未来才泄漏。Σq对一般集合损失无自动保证，但union bound仍合法。
+- 两个新增人工例已执行，root Fraction复算：2×2交互非记忆收益必要/充分条件；风险阈值收紧可令下游损失增加。全部是合成逻辑，非方法效果。2×2用于重影诊断，与GRC直接风险→future benefit试验分开。
+- COVRAG/WorldTrace/GIM已有历史记录，非本轮首次发现；SWIM变点说法无对应证据。旧主综述WorldTrace链接正确，本轮Agent曾误读，已更正。旧root七项测试被加固版本覆盖/2×2初版未备份的来源缺口均记录，不假装完美复现。
+- S90一条512B传输已恢复：代理7897、HTTP206/TLS0，00000/00134.depth.exr头，3.592271秒。0新RGB/EXR正文。索引脚本仅静态审查REVISE，尚未执行；下一偏移12605440。
+
+下一项实质任务：修`index_rtmv_resumable.py`的归档绑定、512B失败正文边界、HTTPS与断点链/崩溃语义；不同作者复审后冻结有限索引预算，取得开发配对核EXR/相机/单位。新数据不沿用旧场景底图，静态视角ID不当动态时间。随后冻结直接风险—未来帮助小实验；2×2并行作为独立诊断支线。当前`NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false`。
+
+旧176页LaTeX/PDF是S89截点，未被本轮改写；本轮交付为详细Markdown核验、原始JSON和源码快照。检查超时如实OVERDUE，不把中断间隔当工作小时。
+<!-- S90_CURRENT_END -->
+
+<!-- S89_CURRENT_BEGIN -->
+## S89当前：两次数据接续受TLS阻断；8页教学增补及176页连续版已核验（UTC 2026-09-11T01:41:37.711993+00:00）
+
+S88已经取得的7头+相机JSON与S87真实生成结果均保留。S89从11460608续索引的两次不同TLS栈尝试分别1.460404秒/0.533428秒，均1请求/0新正文/0新头；第二次没有HTTP响应，不声称到达CDN。旧6个不完整视角组保留，完整三件套0/selected=null仅表示尚未取得，不证明数据缺失。两批失败分别44/25项不同作者记录核验接受，见work/S89_matched_view_index/ROOT_INDEX_ACCEPTANCE.json。0新模型/几何评分。
+
+创新源审新增GeoNeRF(CVPR2022)/GeCoNeRF(ICML2023)，分离独立落点、可见性与颜色；数学反例说明cycle=0可同时落点错20px。生成RGB的重复/缺失需全部记录，warp身份/深度不能当生成物体真值；旧观察器控制无新风险不重跑。RTMV仅作静态投影/混合反证，不能替代长期动态与实拍泛化；8数字ID不是连续轨迹。NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+新8页以零基础手算、真实target22完整失败图、S86/S87十策略均值、S88数据/相机含义、S89失败与proposal/5问答解释；本机LaTeX、不同作者内容和root全8页视觉通过。与原168页合为176页，全部页文字/尺寸/绘制内容一致，4处衔接渲染像素一致，旧稿不改。用户目录：/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_科研同步增补_S89_2026-09-11。最终文件及复制回读以FINAL_DELIVERY_INDEX.json为准。
+
+下一步先恢复可达HTTPS路径，再按原身份从11460608续索引，勿盲重复两批、勿禁用证书校验；随后固定一个开发视角/有重叠的源—目标配对核真实EXR语义，再决定8视角实验。具体NEXT_PAYLOAD_DEVELOPMENT_PLAN.md与innovation/RTMV_SCOPE_AND_NEXT_DECISION.md。三子岗本批均实际完成，未声称后台无限检索。
+<!-- S89_CURRENT_END -->
+
+<!-- S88_CURRENT_BEGIN -->
+## S88当前：RTMV原相机JSON实际取回并独立核验；尚无新图像/深度实验（UTC 2026-09-11T01:10:40.076049+00:00）
+
+S87数值/24新图/12页新报告及168页连续版已经交付且保持不变。本轮从独立数据与竞争解释推进，0新模型/生成/图像评分，NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+RTMV作者重发布abc.tar固定commit855627f73a6fdd4db7fa150097a576f6e890c569，整包发布大小12,064,450,560B。第一次探针因302说明正文1032B超过本机512B传输cap而rc56、0正文；不是TLS/Range失败。v2经不同作者源审后真实16.344068秒，8逻辑Range（7头+JSON）均精确206，共193483B，取得00000/00108.json。没有下载全档/全档SHA验算，也没读RGB/EXR正文。JSON完整字节含objects已解析，但只分析camera_data，不能说从未接触GT字节。
+
+JSON1600²、focal1931.371337890625、principal800；cam2world/view按转置使用。root与不同作者106项字节/偏移/标量相机复核通过；V×C残差7.64e-8仅内部算术，不是物理精度。ROOT_METADATA_ACCEPTANCE.json记录边界。作者生成源码支持depth bounce0、中心采样、矩阵逐列导出；归档实际构建/EXR通道行序/无效值/同场景多视角静态性仍未核。不用巨大scene_bbox猜尺度，不把Wisp筛选当GT定义。
+
+创新岗新增FWD(CVPR2022)/PMRF(ICLR2025)原文和固定代码：错误几何与软混合可能共同产重影，固定blend不是已知posterior mean。只保留未来几何来源×RGB .75/1的2x2诊断，外部源几何为oracle额外信息；普通可信几何复制若解决则停止新融合主张。尚未执行这个新实验。
+
+具体接续：work/S88_independent_geometry_data/NEXT_MATCHED_VIEW_INDEX_PLAN.md。先从已核JSON末尾的下一tar头有界索引，不请求旧7头；定位同basenameJSON/RGB/depth，再另冻实际读取/单位检查预算。不重跑S86/S87，也不盲下载PointOdyssey/RTMV整包或TinyNeRF。PointOdyssey作者资产许可评论已恢复但同步小片段仍未知。三子岗本批完成后收束，不假称后台持续研究。
+
+七项检查UTC2026-09-11T01:10:40.076049+00:00，实际间隔26.339105分钟，ON_TIME；本轮起始34.456495分钟OVERDUE保留。科研正文S88_RESULTS.md及全部来源/失败/核验随新S88用户快照交付；168页不追溯改写。
+<!-- S88_CURRENT_END -->
+
+<!-- S87_CURRENT_BEGIN -->
+## S87当前：普通末端反例经实算与独立复算确认，仍有重影；12页新报告及168页连续版已核验交付（交付记录UTC 2026-09-11T00:09:52.340028+00:00）
+
+本段优先于下面历史当前状态。唯一执行UTC23:37:54–23:38:48，科学进程53.741317292秒，3次VAE全8槽解码/24chunk+3组RGB派生，0新完整链/0新几何/编码。固定强度.5/.75/1×两族，全部24新行+旧S86原16引用。独立派生50字段精确通过/0.53309秒，直方图与Fraction1969精确比较/309展示浮点通过/0.19463秒，max展示差1.38778e-17；不重跑VAE复核。root接受work/S87_terminal_strength_audit/ROOT_RESULT_ACCEPTANCE.json。
+
+六新策略全图四帧MSE：Gpaste .5=.0650333576694、.75=.0533606667251、1=.0560597908739；Gterminal .5=.0675577687885、.75=.0511675816620、1=.0525320458852。Gterminal.75 SSE13246509800低于旧Gguide13571317266，精确差−324807466。**STOP_NECESSITY_CLAIM：取得本例RGB分数不需要多步引导。** 这不是纯时机/等累计剂量因果识别，也不是跨场景验证、速度纪录或新方法。只有20/21/23的全图误差较低，22较高(.07483243对.06826439)，全部保留。
+
+root实际看了全部24张576原尺寸新图和4张总览（工具总览显示2048×971，文件2952×1400）。.5/.75明显叠加，.75四目标仍有重影；1更接近投影主轮廓但点状破碎、孔洞接缝/底部原生成残留等保留。不把清晰或低MSE当几何真值。ROOT_VISUAL_ACCEPTANCE.json记录非盲观察范围与每目标现象。
+
+创新原文/数学：SHAPE_FAILURE_MECHANISM_REVIEW.md、BEGINNER_MECHANISM_EXPLANATION.md解释条件均值/误差与形状、两像素反例及soft非一概错误。HARD_SELECTION_FOLLOWUP_FEASIBILITY.md仅source-only普通RGB选择草案，0新执行；不继续S87强度细扫，下一先核独立相机/物体位置的评价与可用数据，再判断普通hard诊断是否有必要。保持NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+报告同步（实际交付更新UTC 2026-09-11T00:05:24.632791+00:00）：新增12页LaTeX已本机双遍编译；root实看全部12页，不同作者核24行/公式/成本和边界通过，无溢出/缺字警告。与原156页合成168页，逐页文字/尺寸/绘制内容等源、4关键页源/合并渲染像素一致，root接受，已复制回读SHA一致。连续入口：/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/最新连续阅读版/完整汇报_含S87实际结果_168页.pdf；全部数据/PNG/源LaTeX/证据：/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/S87_09月11日末端反证与详细讲解。旧156页及各历史截点不改。完整交付以FINAL_DELIVERY_INDEX及其清单为准。
+
+下一科研任务：NEXT_SCIENTIFIC_DECISION.md已核旧S73/S74/S77/S80/S81正负控制实际存在，不重复验证。PointOdyssey官方3个元数据请求暂未定位可单独获取的同刻多视角片段；最小HF数据包3,324,284,510字节，未下载，具体同步索引、场景独立性和数据许可冲突未核清。下一批只有限访问已观察到的官方入口，不启动新生成。真实传感器参照与模拟器真值分开。
+
+第二批实际3请求已核Drive目的页只见整包和官方repo问题元数据，另1请求TLS失败；共6请求/2批，仍未定位具体同步序列。未取得新图像/NPZ/数据包，许可冲突与划分独立性保留。见NEXT_DATA_ACCESS_CHECK_02.md；用户问题不是作者数据声明。
+
+最新七项检查UTC 2026-09-11T00:09:52.340028+00:00，实际间隔22.630301分钟，ON_TIME；前两次OVERDUE记录不改。报告与科研本批已闭合，下一按独立数据入口推进；不重跑已成功的S86/S87。
+<!-- S87_CURRENT_END -->
+
+<!-- S85_CURRENT_BEGIN -->
+
+<!-- S86_CURRENT_BEGIN -->
+## 当前：S86四臂真实结果接受；MSE下降但明显重影，156页报告和全部实际数据已交付（UTC 2026-09-10T22:29:31.388829+00:00）
+
+本段优先于下方历史当前状态。S86已于UTC2026-09-10 22:14完成，原监督/科学进程已正常退出，不再等待或重跑。两条完整50步链G0/Gguide及同G0派生Gpaste/Gterminal全部封存；科学总2636.981462042秒，监督2640.523644708秒，树峰值17.17GiB。原VMem流程/权重+声明ft-mse VAE，原SD2.1VAE身份UNKNOWN；CPU FP32/8线程/576，固定history19/18/13/12、target20–23、同真实随机流、avg8支持mask、λ=.25。所有50步Gguide raw/used保存，不冻结干预后代。G0与事前绑定S70 A0完整noise/latent/raw/uint8/RNG精确兼容。
+
+只运行一次正式评分。完整4帧发图uint8全图归一化MSE：G0=0.13116666776908745，Gpaste=0.09096801252375357，Gterminal=0.09819160239669339，Gguide=0.05242222252907684。事前主差guide−terminal=−0.045769379867616554；对G0/paste亦均负。四目标全图/支持/洞区的三对比全部同方向，完整16行及分母位于scoring_01。不同作者保存量复核123字段PASS/maxdiff0；统计直方图/Fraction复核821精确比较、174浮点展示PASS/maxdiff1.38778e−17。ROOT_RESULT_ACCEPTANCE.json仅接受描述性RGB分数和保存量，不是外部复现或新方法确认。
+
+已导出33PNG并root实际看全总览及全部32张576原尺寸图，字节/像素读回通过。**Gguide在20有双影，21–23明显重影、涂抹和形状模糊。MSE下降与可见缺陷同时成立，不能说全面画质更好。** 人工观察非盲、无量化感知评分。ROOT_VISUAL_ACCEPTANCE.json只验图内容/版面。单已见静态场景、四相关帧、一次噪声不能证明动态/长期/跨场景；50次vs1次累计干预/传播混杂、VAE全局耦合和近邻前例都保留。
+
+科研接续：S86_RESULT_TO_INNOVATION_DECISION.md接受已有基线作用、拒绝软融合算子新颖性；下一项设计为有限普通末端强度反证(.5/.75/1)，复用已存G0末态，先独立审冻结，未运行。它只否证‘达到本次MSE需要多步’，不把事后选最小值当验证成绩，不继续细扫。NVS源码/理论边界、时机剂量数学、长期候选及DynaBench缺项已保存；动态数据可行性UNKNOWN且不阻碍本批完成。保持NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+报告同步：10页《S85_S86_从投影到生成强对照_教学增补.pdf》、tex、全16对/4目标CSV和8问答34文件已交付0回读差，目录outputs/导师汇报_深入讲解第二版_2026-09-10/S85_S86_09月11日原理与生成对照/。其05:34截点不变。新4页实际结果报告已全页/内容验收，连同全部保存数组/33图和证据实际复制279文件，316228194字节，回读0差。156页连续版已合并并核全部页文本/尺寸、9页源/合并渲染，见RESULT_REPORT_DELIVERY_COMPLETION.json。最新用户入口：/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/最新连续阅读版/完整汇报_含S86实际结果_156页.pdf；新包：/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/S86_09月11日四臂实际结果。旧142/10页不改。
+
+当前三子岗分别实际结果PDF、结果解释审查、创新反证协议；状态按真实消息核。Gemini Pro Extended本轮通过CUA真实英文审查，错误被独立数学/原文否决；本机Python/原模型/LaTeX/Poppler已实际使用。最近七项检查UTC22:30:41（实际间隔25.706688分钟），下一须不晚于23:00:41；主账按真实时间追加，时间不是学生工时。
+
+报告交付闭合记录UTC 2026-09-10T22:41:42.632813+00:00；S87设计已通过不同作者草案审查，N1候选集合/平局定义修订由root确认；正式执行器、合同和源码前审待完成，0新执行。
+<!-- S86_CURRENT_END -->
+
+## 当前：S85实际历史投影及独立复算完成（UTC 2026-09-10T20:35:08.829437+00:00）
+
+最新科学接受`work/S85_fixed_geometry_warp/ROOT_RESULT_ACCEPTANCE.json`，SHA835e9e6879b9dacc1a1583d116204bc36b74c17792fa6e4ea8fa11cdfc597857。四历史12/13/18/19×四目标20–23，全部16对、3145728源点记录和5个数值档案已保存；唯一投影运行2.293416秒，监督2.378199秒，峰值自进程RSS538640384B。不同作者从2原档案+5输出实际复算1.823490秒，120字段比较通过，其中28浮点项最大差0；另核31×4schema、完整候选排列及严格顺序。没有新模型、优化、目标RGB或传感器读取。此处只接受固定规则的数值/保存一致，不能称物理准确或生成改进。
+
+目标20–23各331776像素，预测支持312396/292217/267572/263594，孔洞19380/39559/64204/68182，覆盖94.1587/88.0766/80.6484/79.4494%。正双线性足迹仅定候选，硬Z赢家直接复制源RGB；多候选不等于真实遮挡，历史12赢家多不证明它更可靠，四目标不是四独立场景。13张PNG及总览已导出，root像素核验与四目标原尺寸视觉检查通过；灰格表示无投影支持，不是新生成或目标实拍。完整说明`S85_RESULTS.md`、4/16行CSV和`visuals_01/`。
+
+用户快照入口：`/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/S85_09月11日历史投影与对照`；完成以该目录`COPY_READBACK.json`和项目`DELIVERY_COMPLETION.json`为准。旧142页完整汇报保留原S84科学截点，未假称已包含S85。S82真实4历史预测、S83固定相机100步及S84单张传感器MAE约0.35617→0.35497米的旧结果与限制均保留。
+
+**下一项实质科研：S86固定warp生成消费者。** 原S70同设置每链约24.6分钟已核，不按S85两秒估计生成成本。新增Gterminal：从G0真实保存最后x_tilde/CFG clean d/sigmas，按原Euler末步算术融合再解码；与G0、末端RGB合成Gpaste、多步Gguide比较。原数学推导、S70/原Euler/CFG/VAE源码核验和DeepSeek不同作者反驳已保存；正式adapter/生成合同、λ/日程/latent mask及独立评分尚待冻结，未新生成。不同作者已交付`work/S86_fixed_warp_consumer/ADAPTER_SOURCE_PLAN.md`，root核原CFG/Euler并接受最小设计；两个局部包装仍待实现，不能把设计当已接入。
+
+创新原文岗位完成GenWarp/WAVE、DDNM/guidance-interval两有界批次并核单步对照先例；普通warp/clean融合/引导区间/末步消融不是新颖性证据。条件winner-gap界与边界/隐藏遮挡反例、终端恒等式均是数学说明。Gguide只胜Gpaste排除不了末步融合/VAE解释，胜Gterminal仍保留累计干预强度；劣于G0不报总体改善。NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+本轮DSH低价Flash0731一次真实返回，实际session核10903输入1099输出token；原答部分错误经源码/数学独立否决，不能当原文。UI归组HTTPError、CUA本地客户端阻断保留，未绕过。三子岗位按实质批次交付，完成不冒称继续检索。最新七项检查UTC20:31:46.439514，实际间隔30.063845分钟，超约3.831秒已如实标记并纠正误写标题。全部时间是实际动作时间，不是学生工时。以下为按各日期理解的历史记录，不覆盖本段。
+<!-- S85_CURRENT_END -->
+
+<!-- S84_CURRENT_BEGIN -->
+## 当前：S84真实评分及142页完整汇报已交付（UTC 2026-09-10T19:28:11.421577+00:00）
+
+科学结果截止UTC 2026-09-10T19:11:28.885950：S82四张历史照片真实模型预测、S83固定相机100步实际拟合、S84一次真实传感器参考评分均完成并经不同作者核验。S84固定196608网格，125708有效参考、70900缺测保留；未缩放深度MAE0.356166738→0.354967852米，平均仅降约1.199毫米。不同作者核全部196608×24及CSV，逐像素差0，均值差5.55e−17。接受单张已见参考的有限比较；最终误差仍约0.355米。17.126ms不同步、近似K、无去畸变和历史选图已见目标限制保留；不能据此认定稳健物理收益、生成改善或创新。
+
+**已完成报告交付：** [142页连续阅读版](</Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/最新连续阅读版/完整汇报_含S84最新科研.pdf>)；SHA aca5151607878639c66237e273c168495a2ab34922c1fa3d8408b117b8658e8f。新增导航1页＋125/4/5/5/2页五原稿；141个包含页原文/数字逐页一致、尺寸相同，root核新封面和6个衔接/末页；不假称重新视觉核全部142页。S82/S83五页52文件、S84两页38文件（含全196608行数据）已复制回读；原报告、224页主账、47份CSV及旧结果均保留。核验见新目录ROOT_DELIVERY_ACCEPTANCE.json及MERGE_CONTENT_REVIEW.md。报告编制不算新实验。
+
+**下一项实质科研：S85固定历史投影。** 从S83清理前终态，四历史12/13/18/19投到四目标20–23，保留16对及全部缺测/碰撞；双线性正足迹只定候选，硬z-buffer赢家直接取源RGB，不能叫加权颜色融合。三手算夹具和Softmax Splatting原文语义审查已完成。`work/S85_fixed_geometry_warp/ROOT_DESIGN_REVIEW.json`接受设计依据，projector源码、执行合同和独立前审仍待实施；没有真实投影/新视频。之后同warp比较G0原生成、Gpaste末端贴图、Gguide采样中引导，不以内部loss下降或与自身warp吻合代替独立收益。
+
+Gemini Pro Extended本轮真实返回；原答/原文/数学核验已留档，拒绝机制混用、打乱保频谱和同偏移量作因果判断。三个子岗位完成实作、报告/独立核验、创新近邻与反例；完成/待命不冒称始终运行。当前NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。下面历史段按其日期理解，不覆盖本段。
+<!-- S84_CURRENT_END -->
+
+<!-- S83_CURRENT_BEGIN -->
+## S83 固定相机100步真实计算已接受（UTC 2026-09-10T18:54:40.300194+00:00）
+
+本段优先于下方历史状态。S83于北京时间09-11 02:43:36–47真实运行，4历史缓存、原star/MST、固定共享光学P/近似K、100次Adam，一次清理；0新模型/原RGB/传感器/渲染/生成。局部FP32梯度修复后四张注册深度实际更新；边对齐参数亦训练，不能说是只调深度。初始化目标1.7617251873，最终0.0282186847，这是预测拟合目标，未证明真实几何改善。
+
+不同作者6档案/100步记录/全部2359296个三维点位置的独立D/P/K反投影通过，max1.18054e-6；终初log-depth变化独立核字节，清理只改置信度。中间梯度仅记录摘要，loss未独立重算；不偷换为真实精度。主接受`work/S83_fixed_camera_geometry/ROOT_RESULT_ACCEPTANCE.json`，解释`S83_RESULTS.md`。
+
+S82真实四历史raw预测与两次加载后技术失败仍完整保留，83文件快照已交付。S82/S83联合五页LaTeX增补正在编译准备，旧125页及S80/S81不变。S84已派发只读单锚点传感器参考深度前后诊断代码/合同准备，尚未新读取传感器或评分；不拟合尺度、不筛好点、保留17.126ms不同步/近似K。然后比较G0/Gpaste/Gguide，仍无新生成或已验证新方法。
+
+创新原文岗位完成AFNet/CRC/DPS、latent非局部性和置信度/尺度反例；当前NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。三岗位实作/独立核验/创新诊断，实际日志与流程检查同步。
+
+S82/S83报告交付（UTC 2026-09-10T19:05:18.650652+00:00）：5页PDF已内容/全页视觉验收及复制读回，文件SHA62f7d5c99869af6062fd4e6d55f4606ef05335e217a4c5a8e66d621f370af407；用户目录`/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10/S82_S83_09月11日历史几何增补`，附52份来源/实际数组档案，回读0错。当前S84真实评分已执行完成，另等不同作者复算，尚不在本PDF截点内。
+<!-- S83_CURRENT_END -->
+
+<!-- S82_CURRENT_BEGIN -->
+## S82 四历史真实预测已接受；S83准备中（UTC 2026-09-10T18:29:35.586715+00:00）
+
+当前真实完成入口：`work/S82_history_geometry_guidance/S82_RESULTS.md`与`ROOT_GEOMETRY_RESULT_ACCEPTANCE.json`。V3于北京时间09-11 02:25:31–43读取四张实际历史照片12/13/18/19，已有512 DPT模型eval/fresh state，一次recurrent前向保存4heads与预处理/预测相机六档案；前向加归档5.833599秒，成功尝试总11.618882秒。不同作者核全部身份/形状/字节/有限性及独立wxyz矩阵，最大差3.77e−08。只接受原始预测组件，没有公制准确性/几何对齐/新生成/创新通过。
+
+三次实际尝试、3次模型加载、12次RGB解码、总1次前向；前两次均加载后记录程序错误，0forward，原输出完整保留。第二次回执load0/FAILED_TERMINATED为记录瑕疵，真实1加载/普通退出1已单独补记。累计监督耗时23.560855秒，不能只报最后成功成本。
+
+成功缓存路径是`work/S82_history_geometry_guidance/execution_geometry_03/`，不是旧计划01或中间02。下一步`work/S83_fixed_camera_geometry/`按原star/MST、固定共享历史光学P/K和100步诊断准备，尚未执行真实optimizer。原fork深度梯度断连由人工张量确认；局部适配器仅人工FP32/同尺寸检查通过。近邻核AFNet/CRC/DPS等，共同一致不等于正确，贴合预测warp不等于真实收益。创新仍NO_METHOD_SELECTED/novelty_authorization=NONE/new_method_validated=false。
+
+报告保持旧125页主文及S80/S81已交付增补；S82当前新增真实数据与本段记录，没有假称已新增PDF或视频。三岗位继续实现/不同作者审查/创新反证；任务完成或等待如实记，不以满载代替实际研究。
+<!-- S82_CURRENT_END -->
+
+<!-- S81_CURRENT_BEGIN -->
+## S81 新增传感器深度评分已接受（记录UTC 2026-09-10T17:16:23.726164+00:00）
+
+本段优先于下面的历史当前/下一步。S81实际计算于北京时间09-11 01:11:10完成：复用旧S80对应，一张真实注册源深度，0新RGB/匹配/生成/模型调用；全部24行7757记录保留，1313源点有968个有效深度。实拍2405/2647、生成3828/5110可评分；实拍各行中位1.875–8.346px，生成40.674–314.255px，生成可评分记录≤10px为0。出画有限投影也计入；未评分1524条均源深度0，不当作已知错误。target23的A0/BF仅15/42可评分，限制保留。
+
+不同作者已从原深度和相机独立标量核全部源点/5252投影/7757记录/28配对及CSV，最大像素差3.41e-13，root全文核读独立器并接受。仅是原对应＋17.126ms不同步深度＋近似K条件下的不一致；不能唯一归因相机、确认物理对应或全图三维，也不是新方法验证。接受入口`work/S81_anchor_depth_reprojection/ROOT_RESULT_ACCEPTANCE.json`，完整表/限制`S81_RESULTS.md`，全部数据`execution_01/`。原S70–S80及125页主报告不改。
+
+创新最近邻与实际接入：`work/S81_anchor_depth_reprojection/GENERATION_MECHANISM_NEXT_STEP.md`复核WorldForge/Latent-Reframe/Gen3C和现有VMem检索渲染与latent条件区别。下一步实施普通历史预测几何引导基线，比较原生成、末端像素合成、采样中引导；先核恰合法四历史的CUT3R几何、相机/尺度，S68仅VAE/CLIP不含预测深度，不偷用S81传感器评分深度。该生成方案尚未执行。动态杯球草案仍未满足可执行设计，创新`NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false`。
+
+三子岗位当前分别：S81中文增补PDF；原文创新反证；下一代四历史几何输入/架构。S81增补PDF已交付（见本段下方闭合记录），旧125页已验收文件SHA29256638939c377954071b3ece6cecfbf9e4b668bdc428e9a04dab3ac916d530本轮重新核相同。实际流水与七项检查见主账，不能把自动30分钟计划当历史准点或学生工时。
+
+S81交付闭合（UTC 2026-09-10T17:28:50.278154+00:00）：5页`S81_真实深度评分增补.pdf`已完成内容/全部页面核验，连同可编辑LaTeX、24行表、7757条原数据及协议/复核共100份文件已复制到用户报告文件夹的`S81_09月11日真实深度评分增补/`，PDF SHA6c513e8aaa8cbde1a3a448e0aa22f1feacea34c3924cccbf7dbf410fbcf5f89b。`work/S81_anchor_depth_reprojection/REPORT_DELIVERY.json`为当前交付状态，旧科学接受文件中“PDF制作中”是当时状态。
+
+S82当前：`work/S82_history_geometry_guidance/README.md`是下一任务入口。已有恰四历史源码/输入审查、普通纯融合原型、17项人工张量检查和不同作者静态论文/实现核对；未生成新几何/warp或视频。限定缓存检索未找到本四历史，默认principal-point preset可能未赋值须实际读回，self/cross头不能混用；下一步按新合同进行一次仅四历史的512 DPT推理与已知相机/内参对齐，再比较G0/Gpaste/Gguide。三子岗位本轮任务均有落盘交付，未把等待/结束状态说成持续检索。
+<!-- S81_CURRENT_END -->
+
+<!-- S80_CURRENT_BEGIN -->
+## S80真实计算与全流程审查（2026-09-11T00:09:06.159310+08:00）
+
+本段优先于下方历史“当前/下一步”。全流程复核入口：`work/S79_workflow_accuracy_audit/ROOT_FULL_WORKFLOW_AUDIT.md`；原则v2.11仍适用，最近七项检查见`WORKFLOW_CHECK_S80.json`（北京时间09-11 00:05，距上次29.805分钟）。
+
+S80已从“组件加载0forward”推进为真实新观察器实验：09-10 23:51实际9.513933秒，13张原评分图/13次RootSIFT/12BF/12LG神经前向/24行，无缺失。新源N1313，生成BF1171与LG3939匹配均大于10px固定请求相机残差。root不同实现独立复算7757坐标对/3655断言PASS，最大差2.274e-13；首次FP32覆盖口径错误保留并修正检查器，未改实验。它仅表明接受数增多未伴随≤10px的接受计数增加；没有单独操纵数量，仍不能排除匹配错误、覆盖偏差或固定F近似，也不能确定物理对应真值或唯一根因。`work/S80_lightglue_observer/ROOT_RESULT_ACCEPTANCE.json`及`S80_RESULTS.md`为当前接受证据。
+
+S79六源点×三臂全18卡已实际检查，8同10异，非盲/非独立，不以16/18作准确率；旧S73/S77未修改。Perception样例metadata在23:37的一次请求curl35/HTTP000/0字节，未取得新ZIP/投影/合格样例，不能再记待获取或获取成功。失败在`work/S79_conservative_prefix/metadata_attempt01/`。
+
+创新专职检索与数学否决：`work/S79_innovation_state_witness/`保存原文范围、两个玩具环境、iSAM2/3D-Mem最近邻。普通持久状态/后验在给定小环境已达到旧见证的风险；root额外独立核T2风险与全部16/256编码最优。仅纯数学诊断，不是真实视频收益；新机制维持NO_METHOD_SELECTED / novelty_authorization=NONE / new_method_validated=false。
+
+Gemini Pro Extended已通过computer use实际返回，官方RootSIFT等错误建议已核源码拒绝；本机Harness请求低价Flash0731也已真实返回，但数字抄错与因果建议已纠正，3080专栏归组HTTP失败未掩盖。外部模型不是原文、实验或验收，凭据不进入交付。
+
+报告：原73页主文/224页主账/47CSV与331来源原样保留。第二版最终125页PDF已交付验收（52页新增深入讲解＋73页原报告，SHA29256638939c377954071b3ece6cecfbf9e4b668bdc428e9a04dab3ac916d530）；01–10章不同作者科学审查、root全新增页缩略/关键页全尺寸、全部73历史页文本对照完成，缺字/溢出/未定义引用0；目录`/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_深入讲解第二版_2026-09-10`。其主文科研截点23:37；同目录`S80_23点54分真实实验增补/`的4页PDF、LaTeX、全部24行CSV已独立复算及root全页可视核验。
+
+下一步：科研回到具体对应判读与公平动态强基线失败。当前杯球设计的前端/reader尚未可执行，杯身份与当前位置语义、联合后验支持、预算和评分封存仍须修正，见`work/S79_innovation_state_witness/NEXT_DECISION_INDEPENDENT_REVIEW.md`及`NEXT_DECISION_MINIMAL_REVISION_LIST.md`；尚未启动该真实动态实验。报告已接受，阅读入口为同目录`00_从这里开始.md`和`ROOT_DELIVERY_ACCEPTANCE.json`。没有发送导师消息，没有将评分权重/算力耗时换成项目完成比例、学生工时或PhD/CCF A认证。
+<!-- S80_CURRENT_END -->
+
+## S79/S80 当前进度增补（2026-09-10T23:30:20.089650+08:00）
+
+本段优先于下方所有历史“当前/下一步”。用户要求全流程复核，正在由root与不同作者沿proposal→数据→基线→诊断→审查→创新→报告核实；入口见`work/S79_workflow_accuracy_audit/`。原则已更新v2.11，旧版本备份保留。
+
+S79全18项保存匹配视觉检查实际完成：显示64px局部/2倍最近邻，root和不同作者各看全部卡片后分别封存。8项同判、10项分歧；两者都没有标明显错配，但局部结构相似不证明精确中心或三维点正确。分歧原样保留，不用16/18等作准确率。原S73/S77指标未变，S77 root验收已完成（09-10记录；原09-09执行不变）。证据`work/S78_match_visual_preflight/ROOT_VISUAL_OBSERVATIONS.json`及`INDEPENDENT_RATING_DISAGREEMENT_REVIEW.md`。
+
+S80仅完成官方固定LightGlue源与SIFT权重获取、隔离依赖及真实组件加载（UTC15:23:02–15:23:05，3.005869秒）；权重47,632,573B，全部学习参数可加载，仅无非学习confidence_thresholds缓存。**model forward=0、image read=0、SIFT detect=0**。还没有新的12对匹配实验，合同/源码/前审完成前不推理。计划让新BF与新LG共享同一份RootSIFT特征，保留全部12图对与支持分母；不覆盖旧观察器。
+
+动态创新支线提出有条件的共同合法前缀；未知映射语义不能靠减一帧解决。sample注释投影程序V2在前审发现ZIP重复路径/特殊类型问题，V3修订待补审；截至本增补未发起sample请求、未看答案或视频。身份/容器栈本身已有强基线，新机制及跨场景确认未完成，`NO_METHOD_SELECTED/novelty_authorization=NONE/new_method_validated=false`。
+
+导师汇报已交付73页主文与224页主账，47CSV共97829行与331来源文件；旧PDF是带日期快照，新增科研不冒充已经写入旧PDF。最新成果继续写主账和本段，课程会议/实际学生工时/导师认可未确认。
+
+## S78 当前增补（2026-09-10T22:58:59.859520+08:00）
+
+本段优先于下方历史当前状态。导师汇报第一版已完成：73页主文、224页原始主账、47个CSV共97829行、331份来源文件，目录 `/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/导师汇报_完整科研总结_2026-09-10`；适合零基础读者的指南和三分钟口述已写。不是新模型实验。
+
+S77 root已于本次实际时间接受保存匹配的固定错误标签算术诊断，见`work/S77_generated_wrong_pose_control/ROOT_RESULT_ACCEPTANCE.json`。原执行日期09-09不变，A0/B主全四目标事件false，二级UNKNOWN，两个标签下生成匹配均无≤10px。不可推出完整相机错误或无效，NO_METHOD_SELECTED/novelty NONE保持。
+
+创新原文核验见`work/S78_advisor_report_preparation/NEXT_RESEARCH_EVIDENCE_20260910.md`：官方身份/容器栈已是强规则基线；Perception Test合法cutoff仍有缺口。下一步先核source-only的18对保存匹配可视检查输入与合法前缀，未启动新的模型/视觉匹配，不重跑S70–S77。报告PDF内部的待root状态是整理快照，最新以本段及本轮增补为准。
+
+# 当前科研记忆与接手入口
+
+<!-- EXPERIMENT_NAME_LEGEND_20260912_BEGIN -->
+> **S编号与具体试验名称说明（2026-09-12更新）**  
+> 文档中的 `S86`–`S90` 是项目内部阶段编号，保留它们是为了让结果、日志和回执可以追溯；括号内是给新读者看的具体名称。编号不是论文术语、结果等级或“实验成功”的标志。S88–S90主要是数据资格/传输与协议审查，不能误读成模型性能实验。
+>
+> - **S86（单场景四目标几何条件注入基线实验）**：在一个已见静态场景、四个相关目标上，比较历史几何注入方式的真实生成链和RGB误差。
+> - **S87（末端引导强度控制与多步引导必要性反例实验）**：复用S86缓存，比较末端处理强度与持续多步引导；它只检验该已见场景的有限反例，不验证GRC或长期几何收益。
+> - **S88（RTMV相机JSON元数据与静态投影数据资格检查）**：核对归档身份、相机元数据和可访问的静态文件头；不是RGB-D配对性能实验。
+> - **S89（RTMV配对数据TLS接续失败审查）**：记录两种TLS/传输接续尝试及其失败边界；失败本身不等于数据缺失或科学负结果。
+> - **S90（RTMV归档配对数据恢复与索引协议审查）**：检查受限Range传输、归档成员身份、断点恢复和索引安全条件；已恢复的512B文件头不等于取得可用深度正文。
+>
+> 后续报告首次出现编号时应同时写成“**S86（单场景四目标几何条件注入基线实验）**”这类形式；后文可使用编号，但不要只写编号来替代试验名称。
+<!-- EXPERIMENT_NAME_LEGEND_20260912_END -->
+
+
+<!-- CURRENT_STATUS_BEGIN -->
+更新UTC：2026-09-09T09:49:40.773114+00:00（北京时间UTC+8）。本段覆盖下方历史状态。
+
+**最新完成：S74错误相机标签敏感性、S75五张真实历史照片的VAE解码检查，均已通过不同作者保存量复核。** S74复用638个真实匹配，固定20↔23、21↔22替代标签；四目标错误标签配对残差中位数均更大，146项独立算术通过，只说明本观察器能区分这组几何。S75真实加载一次ft-mse VAE并解码五份原缓存，实际17.499437秒；202项独立算术通过，root实际查看全五组原图/重建。匹配中位位移0.4735–0.5385px，但仅31.52–51.83%源特征有匹配，25个>10px离群点及最大480.846px保留。只削弱五历史中普遍大幅解码扭曲的解释，不证明生成latent兼容、相机正确或新方法。
+
+报告：docs/S74_WRONG_POSE_CONTROL_RESULT.md、docs/S75_VAE_HISTORY_ROUNDTRIP_RESULT.md。原始解码、统计、独立复核和ROOT_RESULT_ACCEPTANCE在work/S74_wrong_pose_control与work/S75_vae_history_roundtrip。工作区outputs/S74_S75研究结果_2026-09-09保存76文件快照和真实照片配对；该快照中的S76是早期草案，不覆盖下述新源码。
+
+**最新完成：S76相机相对响应单臂已结束并根审接受有限结论。** 真实执行2026-09-09T09:17:34.579246Z–09:42:04.467919Z，1469.888697秒return0，新增+5度单臂50步，沿用S70已接受A0而未重跑基线。历史顺序[19,18,13,12]、模型、相机中心、K、外观条件和实际随机流保持，重算相机后代。实际噪声/entry/50步/terminal RNG、模型元数据、条件/数组由不同作者308项核验通过。保存图像仅评分一次2.648151秒，不同作者19823项保存坐标/算术核验通过，无新模型/重匹配。
+
+四目标M/N分别304/1281、254/1172、89/651、10/727；common C/Nc为302/1272、254/1160、88/632、6/681。全匹配配对identity−H中位53.274/51.421/38.173/5.622px，两组all4事件均TRUE，但23仅10点、5正5负，H中位102.651px，不能把插值中位为正当多数正确。root逐一看了4对原分辨率图：20/21布局相对保留，22变形模糊，23场景/构图变化严重。只支持匹配子集有限方向响应，不证明相机准确、严格H等变、未匹配区域或创新。N/Nc来自评分器记录而非独立重提特征，657匹配/650共同视野，全部尾差保留。
+
+根审票work/S76_relative_camera_response/ROOT_RESULT_ACCEPTANCE.json SHA dfc73df22bf4d890587ad05c31223b8910fa2f1a467cef813827eecb4910f600；报告docs/S76_RELATIVE_CAMERA_RESPONSE_RESULT.md，图片visuals_01/target_20至23_pair.png与ALL_FOUR_TARGET_PAIRS.png，全为模型生成图。现无S76运行进程，不要重启已完成observer/session81333。下一最便宜对照建议：源审后用S73保存生成匹配做与S74相同固定错误标签20↔23/21↔22比较，保持分母/空值，不重生成或重匹配；仅置换S76共享局部yaw的H几乎无区分力。该建议尚未写成冻结合同或执行。动态记忆问题另需公平强基线与真实数据条件定义，不能直接把相机诊断当创新证据。
+
+**科研工具已接通：DeepSeek Harness 0.1.2-rc.1与OpenRouter。** 既有Node24.19，127.0.0.1:3080真实认证HTTP200。项目工作区09:25:00Z通过正式API注册并在Chrome显示；凭据mode600且Git排除，禁止打印/复制state。第一次自动科研红队用V3于09:24:09.903996–09:24:33.230540Z真实返回，11514输入/687输出tokens、0工具事件，旧记录仍在Ungrouped，因为其真实cwd是子目录，禁止改写历史。用户指定以后所有DSH科研任务进入geometry-world-modeling专栏，原则v2.10已经记录；scripts/run_dsh_review.py从根目录启动并按唯一新session header显式attach，归组结果与模型返回分开核验。
+
+第二次自动英文科研审查于09:41:58.132092–09:42:30.587362Z真实完成，32.455113秒，实际请求与返回都为openrouter/deepseek/deepseek-v4-flash-0731。记录11167输入/1153输出tokens、0工具事件；是session用量而非独立账单。session-3d41fa3c-73cb-4062-87ea-be48865e783e已正式归组，root实际UI查看并命名“创新审查 01｜事件记忆与固定预算”。root纠正模型意见中先验过度判断、要求相同selected evidence而抹掉选择干预、无提升即无信息等问题，未据模型建议改变S76。证据work/S76_relative_camera_response/dsh_event_memory_review_01/ROOT_ACCEPTANCE.json和ROOT_REVIEW_DECISION.md。原始私有state/凭据禁止打印或复制到交接。
+
+**创新检索已进一步排除弱创新，尚未选定方法。** WorldForge/Latent-Reframe已覆盖推理相机纠正；LightGlue/selective-risk提醒匹配筛选偏差。ReMind预印本2605.25333v2和官方commit bf316a30b10f444e15adf5ddf710fa9f97e34ee9已核：事件anchor训练和历史cache替换primitive已有，所读公开5B推理用prefix/fullhistory，没有在该路径找到自动事件选择器；这不是新颖性证明。替换缓存本身调用生成器，必须计算总成本。
+
+强基线进一步包括近期运动对+贪心覆盖+最近可靠事件anchor、任务相关后验信息选择（NeurIPS2013/2016）、RKN（ICML2019，单列训练/状态读出成本），以及BOCPD变点/分段状态过滤。协方差选择在错设静态模型下对变点前后等质量观测可打平，而预测误差不同；这是已有方法启发的符号反例，不是真实实验或新算法。IMM只核摘要/DOI，全文访问失败保留，不能说公式通读。最新各批NOTE/SOURCE_SCOPE位于work/S76_relative_camera_response/innovation_sources/dynamic_selection_adversarial_01与02，时间和缺失明确。下一研究问题应比较同eligible-history/feature/training access、同k和总compute下任务/变点感知选择能否提供额外预测信息，不给一方免费all-history摘要，不以打败错设弱基线称创新。
+
+本轮三子agent槽分别承担创新原文检索、实现/接口和独立审查，采用实际有限批次；结束或空闲不是持续后台工作。DSH意见必须经根审和原文核验，多agent同意不提高科学证据强度。
+
+**科学状态仍为NO_METHOD_SELECTED，novelty_authorization=NONE，new_method_validated=false。** proposal处于可信基线和失败分析；创新机制、跨场景长程确认、消融和论文贡献未完成，不按阅读批次估PhD/CCF A完成比例。S73所有生成接受匹配均>10px与共同支持92/48/6/0仍属观察器/内容/相机混杂，两个all4事件UNKNOWN不改变。M3 Max64GB，本机无远程GPU；无导师消息发送授权。
+
+**用户指定OpenAI Harness文章已保存**到工作区outputs/Harness_Engineering_2026-09-09，共11文件。直接HTML403失败保留，官方网页读取接口正文转成离线HTML，不包含图片/脚本，不冒充原始HTML200。已审阅适用于本项目的短入口、可核验反馈和事实来源集中原则；没有把工具安装当科研创新。
+
+关键既有证据与保护边界：
+
+- S70完整真实生成三臂各50步，4439.151532秒，A0/A1全部latent/raw/uint8精确重放；平均MSE A0=A1 .13116666776908745，B .12528866263799618，B−A−.005878005131091268，较高几何支持A受益事件false。全16图已看；S73只复用其中旧图。原SD2.1 VAE身份UNKNOWN，使用声明ft-mse变体；目标已曝光，A/B内容顺序规范化混杂。见docs/S70_FIXED_CONTEXT_RESULT.md。
+- S71全12对旧图诊断、不同作者305项算术和全8图查看完成，重复对照0位移；目标23只有3/7真参考对生成匹配，不足H估计。S72四真实对照638匹配、原Torch预处理/S68tensorSHA一致，125项独立算术完成。实际数据fr2_desk；S71引用fr1标定适用性错误已纠正，旧来源/快照保留，原近似ROS K未改。见docs/S71_FRAMING_DIAGNOSIS_RESULT.md、docs/S72_REAL_CONTROL_RESULT.md及work/S72_fixed_requested_geometry/S71_DATASET_ERRATA.md。
+- B0/C1均原固定事件false，原C2 V9第二批前空检索失败，原三行协议不完整；S64单位修复是声明工程变体，不替代旧C2，不构成新方法。S66九帧已真实评分/独立复算/全图查看，主误差 .0006382446123931144、事件false，与S70不同任务指标不可比较。
+- S67固定集合无selectedID/context变化；S68五历史实际CPU编码、S69 GT光学相机与原条件接口均完成且独立核验。S57旧观察器y/z翻转错误标签已撤回，不复活旧结论。S48/RAIMA完整同步数据与算力合同仍不满足；PC-DPM硬共享权重等旧方向已否决/与近邻重叠。
+- 动态支线FloWM仅原代码/配置CPU准备，未实际加载权重或模型执行；Coffee Martini两流已下载校验，cam06前5秒10历史截图已看，人在操纵容器，不满足当前被动遮挡运动假设；cam00/t>=5s未看。不要称已进行动态生成实验。详细状态在本阶段保存的CURRENT_STATUS_before_S73备份与先前交接。
+- 用户指定learning_research四文本及8核心外链、绘图库110文本等实际阅读范围在前轮记录；绘图库media/外链未全部查看，不能宣称所有字节通读。Supervisor handbook2.3、vibe-research-workflow、本地Claude科学批判与figure-designer用于本轮具体步骤。
+
+最近已到期执行的流程检查2026-09-09T09:31:58.931181Z，实际间隔30.56027235分钟，真实PID/argv/监视新鲜度核后识别S76_RUNNING_OBSERVED。下一到期10:01:58.931181Z。09:01旧条目过时说明已追加勘误，原行保留。主账只经scripts/research_log.py追加，实验失败/旧协议/读取失败均保留。
+
+本轮S76已完成，09:31检查描述的是当时RUNNING_OBSERVED；新根审/当前状态覆盖运行状态，但不倒改原检查或提前重置30分钟节奏。
+
+<!-- CURRENT_STATUS_END -->
+
+# 当前科研记忆与接手入口
+
+更新UTC：2026-09-08T10:09:02+00:00；创新主线已从V2/V3过强因果语言收窄为RAIMA结果前测量候选。`INNOVATION_NORTH_STAR_V3.md` SHA `f0e5893ad4892f11f36641476f8858ca9347db4075b35b32faf5beaf4ce102aa`只定义stored∩ordinarily-selected∩addressable来源的AOIG、SEM、RCSU，`NO_METHOD_SELECTED/novelty NONE`。fresh对抗审查SHA `6482266e...4599`裁决PIVOT：Stage D只保留有限pilot；Stage C因主endpoint非唯一、8-scene低功效/无抽样框、三reference共享偏差、treatment/consumer版本、跨架构范围与计算预算而BLOCKED。新增一手碰撞SHA `91c300c4...7550`确认WorldTrace/LoopBench、ReWorld、MBench、E3C、What-If World、ICLR25 influence和ICLR26 ARC-JSD已占据宽泛addressability/回环/retrieval≠influence/3D edit/paired intervention/context attribution；只剩`ordinary-selected source × enumerated consumer × 3D support × withheld real reference`联合测量交集，仍不是首创证明。V4 source-only统计冻结包编写中。计算审计SHA `c762be65...eebe`用S40/C1真实计时外推Stage D最小1 seed约10.86小时、Stage C乐观串行36.21–56.18天；当前Stage C计算阻塞，不能事后删控制。
+
+同轮执行状态：C1相机数值守卫V6 fresh primary仍以2 CRITICAL+2 MAJOR BLOCKED，V7 source-only修订中，未评分/未看C1像素。C2 V6 source-only回执SHA `acafa9ab...219a`已冻结并由作者/root在Python3.13/3.12隔离自测PASS，已修V5 parent PID、detached descendant和terminal publication已知问题；仍是0 prepare/attach/auth/launch/model/image/pixel，等两名非作者fresh审。S48 V6 fresh独立审查SHA `9c6900e1...f09a`给出3 CRITICAL+4 MAJOR+2 MINOR BLOCKED：replay自由scalar、localization可注入tail、reference无法证明从未conditioning，以及eligibility/valid-domain/typed sequence缺口；V7 source-only修订中，0 arm。最近七项流程实查为`2026-09-08T09:53:11.912956+00:00`，实际间隔31.044528分钟，`new_method_validated=false`。S40/C1真实生成事实和B0单行无严重事件保持不变。
+
+更新UTC：2026-09-08T09:25:05+00:00；创新北极星V2已冻结，`work/S43_paradigm_shift_audit/INNOVATION_NORTH_STAR_V2.md` SHA `574311ced8f5bcbf2ad21854a0f7895195bc49d4fe968012d3f33bca7b662f36`。PC-DPM硬共享权重因consumer合理专业化数学反例与统一attention强基线被否决；generic stale-memory rejection/refresh又与GaME、Spatia、WorldMM、WorldCraft、SPMEM碰撞，不能单独作创新。当前唯一主线是架构受限GeoCausal accountability gap：真实检验Access–Use、Use–Location、Use–Benefit三类断裂；Interaction-Aware Provenance Arbitration只是在P0–P3全部通过后才选择的方法空间，`novelty_authorization=NONE`。独立V2对抗审查正在进行。
+
+同轮执行状态：S48 V6四件套已经source-only冻结，主draft SHA `6611d5f803740207fcfcec44eae8f756076f0763cb3eff8349fe1065905c03a0`，V2 spec/reference/test SHA为`29014cf8...d19d2f`/`af6079dc...a5189`/`d05110ab...c89c`；作者与root分别在Python3.13/3.12各44 tests PASS，包含528个property cases与V5假Localization永久反例，但仍是0模型/0 arm/0 payload，fresh独立双审及G0/G1前不得运行。C2 V5 fresh primary SHA `8eb99073...47a7`以2 CRITICAL+2 MAJOR BLOCKED：supervisor/watchdog/worker parent PID矛盾、setsid后代逃逸却假报cleanup complete，以及terminal commit/path identity问题；V6作者修订中，0正式prepare/attach/auth/launch/generation。C1数值守卫V6 fresh primary SHA `0b30345a...eb16`也以2 CRITICAL+2 MAJOR BLOCKED：pre-lease report/receipt inode替换、审查字节与真正执行pathname脱钩、schema验证不全和攻击测试起点过晚；V7 source-only作者修订中，未盲分、未看像素。最近七项流程实查为`2026-09-08T09:22:09.241295+00:00`，实际间隔30.222700分钟，七项PASS只代表流程检查，`new_method_validated=false`。
+
+更新UTC：2026-09-08T08:45:13+00:00；S45B C1数值相机守卫V6五源码已冻结，`FROZEN_SOURCE_SET.json` SHA `4156b62c26e57c0717914859901053fbf4967779337b4cd6d3401bd6be53d26d`，作者最终合成回执SHA `58e4b4a7431a5969be7b34f374f10c51939ac8e726f61b7721d99203d64938d0`。root已逐一重算七个文件SHA，并在Python3.13.0/3.12.14各fresh运行worker、supervisor与独立suite，六次returncode0；每个解释器分别报告合成数学PASS、50项故障/隔离检查PASS、15项独立检查PASS。证据仍严格限于source/static/synthetic：0 binding/lock/execution，0真实C1文件/tensor/pixel/model访问；下一门是两名非作者fresh V6 source review，V5票不继承。创新逻辑已另冻成`work/S43_paradigm_shift_audit/INNOVATION_NORTH_STAR_V1.md` SHA `7be61175ffa5902d1358b733fd04ab3a760094539ad721b127b12cf28aedfc8e`：推荐measurement先行的GeoCausal合同，PC-DPM仅作P0–P5全部存活后的条件方法；`novelty_authorization=NONE`。
+
+更新UTC：2026-09-08T08:28:45+00:00；S48 V5 fresh独立统计/因果审查已经`BLOCKED`，报告 `work/S48_geocausal_kill_experiment/INDEPENDENT_STATISTICAL_REVIEW_V5.md` whole SHA `3a213ebaeec5463fe744d3aa8fc47c78edce9f5d4e63cbe6de1d16b1b4da9d93`，裁决2 CRITICAL/6 MAJOR/3 MINOR。两个决定性反例是：协议把已经除以255的RGB效应再次除以255，造成255倍单位歧义；以及跨source逐像素扣negative magnitude能把完全均匀的target direct effect雕刻成support内富集，实际8-bit合成反例仍通过原七项guard。V5原件已以SHA `b8b98ec9...767c`封存在`archive/S48_GEOCAUSAL_KILL_EXPERIMENT_PREREGISTRATION_DRAFT_v5_shab8b98ec9.md`。V6 source-only正在重写：统一uint8→[0,1]合同，Localization只用raw edit−matched-zero target effect，negative改独立veto，实现同路径dose=0、typed replay pair、strict uint8/periodic/chroma/local-shift guard，并补Benefit/reference与O-reinsert有限实现。0模型/0 S48 arm/0 C1/C2 payload；`execution_authorization=NONE`、`novelty_authorization=NONE`。最近一次七项流程实查是`2026-09-08T08:21:19.501352+00:00`，实际间隔33.464801分钟；下一目标约08:51:20Z。
+
+更新UTC：2026-09-08T08:15:09+00:00；S47 C2 V5 source-only八文件候选已经冻结，回执 `work/S47_c2_confirmation_generation/CANDIDATE_STATIC_SELFTEST_V5.json` SHA `70487c0ee97229f8fc5d37b342181cec97e198635199d1e817ec228891126745`，测试源 SHA `cd07e502c020ac5fd74c4523213a70d6edab4a23b4f1f752e16224332dfdb683`。V5吸收V4双BLOCKED审查：prepare/authorization只接受唯一success-only终态，watchdog先于worker存在且作为直接父进程回收完整进程组，capability绑定supervisor/watchdog/worker及execution/output inode，七类科学输入从已哈希FD消费，VAE目录拒绝未知子文件，prepare/attach/auth/execution/output及祖先inode贯穿终态，runtime证据仅create-only追加。Python3.13.0与项目Python3.12.14均以`-I -B -S`通过，SIGKILL前后、SIGTERM及late descendant四类假进程探针确认无存活PID。仍是0正式gate/prepare/attach/auth/launch、0模型/科学包导入、0 C2图片正文/像素/生成；质量与创新未评估。下一步必须由两名不同非作者对精确八SHA fresh复审；双PASS前不得prepare，任何源码修改使V5回执失效。V4原件、primary `0036acc5...167c`与adversarial `03e19676...0cb1`继续保留且无V5权限。
+
+更新UTC：2026-09-08T08:01:56.185837+00:00；S40与C1的实际本机两批生成、保存量readback和窄范围独立复核保持完成。B0主MSE `0.005278160708699555 < 0.01`，只是一行无严重差异事件；C1仍因计划yaw与ID8→ID0 c2w/K数值守卫未完成而未盲评分、未看像素，C2尚未生成。S45B V5虽有fresh primary PASS，但fresh adversarial给出3个CRITICAL并BLOCKED；V6只在source-only修macOS资源门、终态authority和逃逸后代，尚未冻结/绑定/执行。S47 C2 V3/V4双BLOCKED，V5 source-only正在修生命周期、路径身份、capability和成功终态；0正式prepare/attach/auth/launch、0模型/C2图像正文/像素。S48 V1–V4独立统计审查全部BLOCKED；V4的空间化sham反例与正负Benefit平均漏洞已推动V5。当前V5 SHA `b8b98ec9...767c`冻结：每`family×seed×sign`用`edit−matched-zero`直接pair，Localization用逐像素replay/negative control-excess，Benefit逐sign/target/replacement过门。source-only规范三SHA `a88efa8f...718de`/`2cacc5c3...359c7`/`f611e22d...7bb1`在Python3.13/NumPy2.4.6作者与root各23项synthetic测试PASS，Python3.12缺NumPy未运行；V5现正fresh独立对抗审查，仍不授权模型arm。源码静态审计只提出“slotwise latent保留、semantic embedding全局均值”的consumer-asymmetry假设，未获模型实证。`novelty_authorization=NONE`；自然失败、因果效应、收益、方法增益、创新和PhD／CCF A成果均未成立。
+
+## 最新实质状态：C1真实生成/消费已闭环，V5数值守卫被对抗审查否决；C2与S48仍在执行前
+
+- S43独立反方审查 `INDEPENDENT_ADVERSARIAL_SIX_STAGE_AUDIT_2026-09-08.md` SHA `e111d742...154f`。I3DM、TetherCache、Echo-Memory、CUE-R和visual evidence utility分别占据关键组件。剩余候选只是在限定架构中连接普通选择、post-selection全路径影响、干预前几何定位和独立signed benefit；单组件、组合叙事或检索未命中均不构成新颖性。
+- S48 V1/V2/V3/V4原件与独立BLOCKED审查均保留。V4审查SHA `c7f55fc5...a0b4`用纯数学反例证明标量control不能消掉空间化sham，并指出正负平均`B_local`会让一侧改善掩盖另一侧损害。V5精确SHA `b8b98ec9...767c`已冻结送fresh审：直接pair、逐像素control-excess、逐sign/target/replacement门和分开的reference/common-valid域；只有C1/C2产生合格自然失败且V5/G7全部通过才可启动。
+- S48静态机制审计SHA `cb68ad5e...1344`及Python3.12/3.13回执确认：`get_context_info`到`get_cond`之间存在可用干预边界，但当前返回值没有support；latent replace按slot保留，semantic path在`pipeline.py:1124`把source embeddings全局平均后广播。该不对称只是待真实干预的机制假设，不是质量失败或新方法。
+- S45B V5五源码冻结SHA集见`FROZEN_SOURCE_SET.json` SHA `4be945c0...401f`，fresh primary PASS SHA `ad062bf9...55e`被fresh adversarial BLOCKED SHA `92950952...b640`否决：macOS `RLIMIT_AS`可在一次性lock后使worker未启动、seal存在替换窗口、`setsid`+关stdio后代可逃离PGID。V6只在source-only修复并扩展攻击测试；尚未冻结、binding、execution、盲评分或像素查看。
+- S47 C2 V4 primary/adversarial review SHA `0036acc5...167c`/`03e19676...0cb1`双BLOCKED。共同或补充问题包括：失败prepare可被attach、success/failure授权回执并存仍被接受、capability minter/consumer范围不足、monitor SIGKILL后worker可reparent存活、科学输入/权重在哈希后按路径重开、runtime rename窗口及attempt目录身份未贯穿终态。V5须吸收两审全部问题后重新双审。
+- 最近一次七项工作流实查为`2026-09-08T08:21:19.501352+00:00`，实际间隔33.464801分钟；迟到已原样记录，`new_method_validated=false`。当次检查器读取S45B V5 adversarial BLOCKED/V6 source-only、C2 V4双BLOCKED/V5 frozen待fresh双审、S48 V5 fresh review当时尚未落盘及最新顶会排重。S48 V5随后于08:27:58Z记录为BLOCKED；下一目标约08:51:20Z，不提前或回填。
+
+- S39唯一受控加载在43.844049秒内返回0，峰值进程树RSS 17,005,658,112B；VMem、CLIP、CUT3R的missing/unexpected key为空，ft-mse VAE的missing/unexpected/mismatched/error为空。独立回执`work/S39_component_variant/loading_attempt_01/independent_loading_evidence_review.json`状态`PASS_S39_LOADING_EVIDENCE_REVIEW`、SHA `5707a2ca...e5a`。这只证明声明组件变体可加载，不证明生成、codec数值、质量或原VAE等价。
+- S40实际manifest SHA `9951a789...debe` 经双审/metadata/full-resource gate后只启动一次CPU8/FP32生成。父外控2737.983865秒returncode0，采样峰值进程树RSS 25,862,127,616B；trace闭合327事件和两批历史1→5→9，第二批实际选择`[0,2,4,1]`。两份独立终态小证据审查均PASS；它们未读取tensor/image正文，只证明受控执行与元数据链，不证明位级缓存消费或质量。
+- 首次受控readback `supervision_01/executed_01` 的list/tensor解析失败永久保留。v3.3的fresh `supervision_02/executed_02`随后通过独立结果复核，只在保存量消费与九帧像素身份范围成立；它不是画质或方法证据。
+- B0在看图前冻结`M_outer4(ID0,ID8)`与严格`MSE > 0.01`事件。唯一技术有效盲评分得到MSE `0.005278160708699555`、PSNR `22.77517390576968 dB`，事件为false；独立复算逐位匹配，full-frame MSE `0.004389557269540995`。九帧真实PNG和contact sheet已导出并实际查看：路线结构可辨且没有黑屏/复制式/灾难性场景崩溃，但细节偏软，相机服从未获度量证明。单行不能外推长期无失败或结束三场景队列。
+- S43最近邻V2含24条一手来源，扩展审计又检查VLB/MosaicMem/CaR/DreamX的后向、可访问前向和作者网络。`EXPANDED_CITATION_NETWORK_AUDIT.md` SHA `7c15c053...3907`、结构化JSON SHA `dd2549ba...5faf`；裁决`KEEP_CONDITIONAL_AFTER_EXPANDED_NETWORK_AUDIT`、`novelty_authorization=NONE`。Matrix-Game 3.5已占据3D patch provenance、几何支持、统一注意力和固定seed模块消融；MosaicMem V2只有作者主页`In Progress`信号，严格为`NOT_ASSESSABLE`。五条件联合缺口只是在明确已查范围未被推翻，不是新颖性证明。
+- C1固定输入`jesus.jpg` SHA `d611976b...e1`、seed43和与S40相同的两批CPU8/FP32控制。唯一执行父回执SHA `44753718...b18`、worker SHA `5deea695...8f0`，returncode0；终态时间约18:48:33Z，外控2684.242237秒，峰值进程树RSS 24,187,961,344B，5192条monitor、327条trace、两批retained 1..8。root不独立的v2元数据审计SHA `14a31780...de1`为PASS但authorization NONE。不同作者外部执行终态审查SHA `3f185098...a09`已PASS。归档/trace审查原件SHA `64140bd6...764b`因缺监督器接口字段被阻断并保留；兼容v2 SHA `ba4425b0...c23a`经根复核PASS。没有打开归档payload、像素或图片。
+- S45保存量readback已完成。root补严UTC内容顺序和实际作者隔离后，worker双审SHA `b3ddecad...6be`/`edaeb905...852`、supervisor审SHA `ff1ed145...ad0`、一次性terminal binding SHA `2645a159...85c`闭合。唯一执行外层SHA `801798bd...611`、worker SHA `54b45721...1a1`、report SHA `423e5fb8...f47`，returncode0、约3.57秒、峰值RSS205,438,976B、210项比较。不同作者结果审SHA `2b5e4bc3...ad4c`复核7199身份、102/327链和4766文件，确认ID2/4/1实际进入第二批。它只建立保存量和归档pixel身份；9个pixel body未打开、图片未查看。`requested_pose_K_guard_pass=false`是诚实缺门：身份传播不等于计划yaw及回到ID0的数值闭合。当前合法下一步是另行冻结并审查只读c2w/K守卫，通过后才绑定S46、双审评分源码、创建盲态证明并计算一次；看图必须晚于盲分封存。C2无论C1结果如何仍强制。
+
+## 先读与长期要求
+
+项目根目录是`/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling`；本任务工作目录`/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip`，outputs是给用户的日期快照。先读AGENTS.md、RESEARCH_PRINCIPLES.md v2.0、本文件和RESEARCH_LOG.md最新条目。阶段完整结果在docs/Sxx_RESULTS.md；当前完整交接docs/RESEARCH_HANDOFF_CURRENT.md。本次精简前的逐阶段详记完整保存在[历史记忆](docs/history/20260906T184709Z_before_S31_results/ROOT_RESEARCH_MEMORY.md)，没有删除历史证据。
+
+用户是MSc新手，简单中文、本机自主推进、时间记录、每30分钟实查，Supervisor尤其02_Idea_Generation与本地Claude技能、多agent和原文检索。用Claude skills，不调用Claude模型/CLI。最终目标PhD深度/CCF A投稿质量，未完成，不能保证录用/导师反应。按强基线→失败→原因→方法；普通修复与已有组合不能改名作创新。没有发导师/他人消息授权。
+
+`scripts/research_log.py.append_event`追加research_events.jsonl并渲染RESEARCH_LOG.md；补记用真实回执时间并注明记录时间。旧原件/失败/协议不改，不重复成功运行。UTC 2026-09-07T17:18:30.606513流程行错误沿用已撤回的C1 PASS，已在主账保留并纠正。修订检查器最近在2026-09-08T07:47:51.613286Z按实际间隔37.303350分钟完成七项检查并记录`new_method_validated=false`；下一目标约08:17:52Z，计划频率不冒充历史准点执行。
+
+## 目前最关键的科学证据
+
+| 阶段 | 实际结果及边界 | 完整记录 |
+|---|---|---|
+| S21/S22/S23 | 已见fr2_desk300帧CUT/TTT/FILT ATE8.254/2.848/1.858cm；278有深度配对/22缺失，完整300深度均值NA。全是已有方法。 | docs/S21_RESULTS.md–S23_RESULTS.md |
+| S24 | fr1_xyz全798RGB→796配对/26.572059秒，CPU8/512DPT三法实际推理；ATE12.24063/9.68646/2.90258cm，8预定块FILT ATE较好，无灾难遗忘事件。7164行/6618pairs另式复核；图裁尖峰原FAIL保留，v2完整轴实际查看通过。 | docs/S24_RESULTS.md |
+| S25 | 原VMem几何调用重放全历史并重置S/M；GA消费anchor self+后续other，不直接用raw camera_pose。state adapter60作者/92独立人工测试只是静态可用性，没做模型干预。 | work/S25_consumer_relevance/consumer_relevance.md |
+| S26B | 真实新三法各400GA，原共同旧4导入历史。新4 AbsRel67.82589/93.54310/67.57302%；共同旧4已83.33823%。28行/40均值独立复核PASS。先查坏起点，不能直接归因记忆。旧focal使保存world点位变化，但0实际Surfel/cache/query事件。 | docs/S26B_RESULTS.md |
+| S27/S27M | 保存量分析发现raw self不是全体GA实际输入，不准以4.4859%作公平优化起点。新1MST/3PnP/1backward/0Adam显示注册depth梯度断链；初始化与旧400终点逐位同。原断链发生在每次getter新ParameterStack；仅去detach仍不足。 | docs/S27_RESULTS.md |
+| S28 | 匹配全部33初态的原A/修梯度B各真实400步；B梯度出现但AbsRel83.33823→87.47618%，loss更低。完整8行/800记录另式PASS。修getter只是恢复已知语义。 | docs/S28_RESULTS.md |
+| S29 | 两零步初始化控制/2MST/6PnP/0Adam/0GT：s0=.1731799841按比例缩小全部局部深度，公共R/t相消；23检查及另一公式全786432点PASS。单位尺度不等于训练期固定尺度；S29当时未评分，S30之后评分其封存初态。 | docs/S29_RESULTS.md |
+| S30 | C2t/C2a都修getter，各自33raw/深度/目标与S29逐字匹配，真实800Adam/反传、0新网络。C2t83.33823→87.47128%；C2a5.03905→42.37947%，原loss均显著下降。16行/66raw/800记录不同作者完整PASS，两图实际查看。 | docs/S30_RESULTS.md |
+| S31 | 每臂一个自身初态全像素k，D*=kD400后评分。C2t84.05310%，C2a11.56681%，都仍输自身零步。8新行/2均值+原16行导入；0网络/GA/MST/backward，另式完整复核PASS。 | docs/S31_RESULTS.md |
+| S32 | 固定4窗16RGB实际4model，3可用窗1200Adam；48行36评分12NA。普通k在两fr1窗接近零步，v2独立48表/1200保存日志PASS，原形状断言失败保留。 | docs/S32_RESULTS.md |
+| S33 | 同S32初态普通公共pair尺度约束再1200Adam，64表旧48导入/新16；三可用窗AbsRel/RMSE/δ1均胜零步及k，绝对共同depth偏移均减小。独立64表/1200各类记录/2359296像素PASS，16照片快照完成。普通基线，不是新方法。 | docs/S33_RESULTS.md |
+| S34 | 强旧4冻结，800实际Adam/反传；新4 AbsRel零步/自由/约束4.605912/4.347383/4.322076%。原map/render变化、候选全部八张同；两类独立数值与交付核PASS。普通控制，非新方法/完整视频。 | docs/S34_RESULTS.md |
+| S35 | 五模块原循环记录接线准备；新人工检查3.110794秒/443.33MiB，成功与异常路径/原AST/NMS/RNG等PASS，另作者500归档载荷与133trace引用核PASS。0真模型，资源草稿仍不可执行。 | docs/S35_RESULTS.md |
+| S39/S40/S42 | 声明ft-mse组件变体五件实际加载PASS；唯一两批576生成真实return0且终态元数据双审PASS。首次readback失败保留，v3.3 attempt02窄范围PASS；B0盲评分与独立复算一致，MSE .00527816，严格严重事件false。九帧真实图已导出/查看；C1/C2未完成。 | work/S39_component_variant/loading_attempt_01/；work/S40_declared_variant_generation/execution_01/；work/S40_result_readback/；work/S42_baseline_failure_preregistration/ |
+| S43/S44/S45/S48 | S43六级合同只保留架构限定否证资格；Dual-Granularity Memory、Video Alchemist、Saber等又占据双记忆/per-source identity/source-aware mask，候选缩为跨consumer共享provenance+真实signed Benefit。S48 V1–V4统计BLOCKED，V5/normative包已冻结待fresh review。C1真实CPU两批生成returncode0并闭合1→5→9，终态/readback复核PASS、ID2/4/1进入第二批、九个pixel身份封存；yaw/回访c2w/K守卫V5 adversarial BLOCKED，V6 source-only未冻结，所以未评分/未看C1图。C2未生成。 | work/S43_paradigm_shift_audit/；work/S44_c1_confirmation_generation/；work/S45_c1_result_readback/；work/S45B_c1_numeric_camera_guard_supervised_v6/；work/S48_geocausal_kill_experiment/ |
+
+S26原共同4已跑400步但独立clean参考12像素失配导致FAILED原件保留；新FP32dense参考全字节一致只许可IMPORT_VALIDATED，不追认PASS。S26B首次启动缺显式importlib.util在数组前失败保留；只补标准库bootstrap的第二次启动成功。S22原生CPU RoPE精度失败、S24原裁轴图、绘图环境失败均保留。不要把修复后的新产物覆盖历史失败。
+
+
+## S34已完成的实际链条与结论
+
+输入为已见fr2_desk首8档案，约0.235880秒，给定GT光学相机。共同旧4来自S29 C2a零步/S21原4头，新8头来自S21 cut3r档案；不同源不称前缀字节相同。旧depth0–3固定，所有8个focal仍可训练；两臂57真实初态raw/decoded/objective一致。普通getter梯度修复和尺度约束不算创新。
+
+主生产UTC21:38:49.004084–21:40:48.662662，外控119.658477秒。真实2MST/14PnP/800Adam/800backward/4clean/806objective、0新model。共同旧packet一次与两400臂均PASS，zero取自由臂保存初態另clean，无第三MST。正式contract SHA2c51a060a294a335c3844b04dc78028bd687b724266792ea89f1a6cb597cb465。主session54299、consumer44064、独立80493均已exit0，不重轮询或重跑。
+
+消费者UTC21:42:05.220522–21:42:18.700442，外控13.479520秒；共同493个旧Surfel只建一次，三份完整深拷贝追加。新点123/158/157，最终616/651/650；原512×288渲染可见48777/50726/50334像素。原focal缓存4→12，均值402.08610535/406.63647970/405.87696075再乘.65；同外参不等于同内参，渲染变化不是质量证据。
+
+原票权数值变化，但三组有序候选均0–7、quota每项1，因为n=min14,k且k8。默认NMS缺原len5历史/真实latent状态，最终context未跑。相同合法缓存、相机和NMS状态下相同候选通向同条件仅为源码条件推论，不是已生成相同视频或所有后续请求无效的证明。
+
+120文件完整终态封存21:44:22.805906；主评分实际21:44:44.835389–45.809354，首GT字节21:44:45.451549才读取。固定新4×3完整12行/3均值，每组547012有效GT、239420无效GT、0无效预测。AbsRel .046059116645085774/.04347382601427406/.04322076250691019；RMSE .23858161931309185/.23202392161346547/.23083091088459334m；delta1 .9672805089812623/.9703837623471877/.9706103051722855。
+
+自由对零步收益.2585290631个百分点，约束再对自由仅.0253063507个百分点；index7两400AbsRel略差零步。自由pair有效log均值最大漂移.3306571869却平均深度改善，漂移本身不构成失败/遗忘。收束all-trainable伤害外推与尺度创新叙事，不继续该短窗调参。
+
+不同作者consumer保存量与fsum票权21:44:44.832850–45.375239实际PASS；深度/raw另式核21:47:54.677414–58.014601实际PASS，12行/3均值/57共同初態/228初末raw/各800优化梯度尺度保存记录/1600尺度边界，AbsRel/RMSE差最多1.39e-17/5.55e-17。保存梯度未重新反传；地图核未独立重实现renderer或Octree，不能称物理可见性验证。完整回执和SHA见[S34完整报告](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S34_RESULTS.md>)。
+
+最终报告bbfcd5ae6e28da63a7e2bce072a9e4b7c34059bfde83b92e52bc3460ff774c2b，22门最终表述审PASS，work/S34_independent_review/final_claim_review.json。两PNG作者和root已实际view，PDF/SVG未另渲染；work/S34_root_preparation/visual_review.json。快照/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/S34_固定旧地图三条件与真实照片_2026-09-07，220总文件/219载荷40763051B，含manifest40871308B；8原照片/12CSV/全部800各类日志/3渲染。manifest f007ad26376a9a9d5551a12e5cc4fb2a47ccccc9d1e1c971cde1fe922804b104；root219SHA、13MD仅链接改写、98链接、8原图核PASS，work/S34_root_preparation/snapshot_review.json。38大数组仅本地链接；最终表述/根QA另在ROOT，不回改封存包。
+
+## S41当前：原VMem恢复与消费者诊断排重
+
+资源观察UTC 2026-09-07T05:58:11.600000+00:00：官方`huggingface_hub 1.30.0 + hf_xet 1.6.0` attempt4在同一会话54832、PID8585中运行，固定repo/revision与单并发，临时文件实际2,049,463,215B；目标5,056,346,672B、完整SHA`675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4`。这只是资源传输，terminal receipt未通过前不得加载，且不启动重复下载。
+
+独立S39接续审计裁决`READY_SERIAL_PLAYBOOK_BLOCKED_ON_ATTEMPT4_TERMINAL_SUCCESS`。成功后可直接用recovery目标；依次prepare、两名不同作者审实际core、attach、metadata gate、一次受控加载、另一作者审四份加载证据。`core_file_sha256`与规范`core_sha256`不可混用，manifest必须取attach回执实际路径。当前0冻结、0加载、0视频。
+
+创新排重把普通mean替换、attention/router、source tag、geometry gate和点云更新全部判为已有近邻或普通baseline。只保留“冻结检索之后，单全局CLIP token是否真正影响回访，并能否把某来源影响定位到其几何支持区域”的诊断。主协议采用Gate0真实自然失败→Gate1 A0/A1→Gate2 A2–A5普通臂→必要时F00/F10/F01/F11同源图反事实；latent/Plücker置换仅为OOD绑定压力测试，不能证明通路主导。当前无方法增益，不能称创新或PhD/CCF A成果。
+
+证据：`work/S41_vmem_xet_attempt4/S39_NEXT_STEPS_REVIEW.md`、`work/S41_clip_mean_innovation_audit/AUDIT.md`、`work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md`、`workflow_checks.jsonl`。
+
+## S40历史：两批原流程入口准备完成
+
+资源最新更新UTC：2026-09-07T04:43:28.864722+00:00。**原CLIP已完整下载，3,944,517,836字节及完整SHA于04:40:51通过。旧会话36631已退出0。原VMem低并发attempt3已单独启动，会话71130/PID84800，04:42:22仍活跃；临时文件当时0字节且Xet有1条TLS EOF警告，未判成功或失败。** 接续同一71130，不重启；外控总时限预计05:11:16UTC，精确终态以新receipt为准。它成功后才能冻结全部文件并实际加载。
+
+更新UTC：2026-09-07T04:34:34.382312+00:00。**真实两批视频入口已完成源码准备和不同作者审查，尚未执行。** 保留原576分辨率、50采样步、400次几何优化和连续历史1→5→9，实际运行后还要核第二批确实消费第一批生成缓存。
+
+正式HF认证已成功，ft-mse配置/权重已完整校验。CLIP仍为下载会话36631；04:33:01临时文件大小约2.88GB，未完成。原VMem两次传输失败均已结束，新的低并发attempt3先等待CLIP终态，不启动重复并行下载。真实加载、视频生成与质量比较仍未发生。
+
+版本明确使用官方ft-mse VAE，原SD2.1来源仍UNKNOWN，不能称精确原版复现。继续按Supervisor强基线→自然失败→原因→方法；S38的CLIP平均问题仍待验证，新方法及PhD/CCF A质量目标未完成。
+
+[最新准备报告](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S40_GENERATION_PREPARATION.md>)；[认证与下载记录](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S39_AUTH_AND_COMPONENT_LOADING.md>)；[完整时间账](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md>)；[主记忆](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md>)。以下旧状态按各自时间理解，不覆盖最新更新。
+
+## S39历史与仍有效的资源记录：认证已恢复，资源与加载准备
+
+最新接续UTC：2026-09-07T04:18:10.356553+00:00。CLIP会话36631在04:16:56工具检查仍运行，临时文件已实际写入1,140,213,633字节，未完成校验。冻结工具又经另一作者全文审查PASS；仍未执行prepare或加载。系统curl单次HF入口探测也TLS失败，未发CDN Range。下一轮先接续同一CLIP句柄，待其终态再独立恢复原VMem；不启动重复并行下载。详见[实际接续清单](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/progress_handoff.json>)。
+
+更新UTC：2026-09-07T04:11:35.212928+00:00。**S39官方设备认证已成功；用户亲自完成网页授权。ft-mse图像解码器的配置与权重均已完整下载并通过SHA校验。原VMem和CLIP尚未确认完整；当前没有新增模型或视频生成实验。**
+
+原VMem第一次Xet真实传输后因重复TLS握手错误终止；官方普通HTTP第二次尝试也已明确失败，当前排查具体传输环节，不能把它们写为仍在运行。CLIP另一个下载会话36631仍存活，须接手先查其实际结果，不重复启动。旧S38的CLI401仅为历史，现在认证已解决。
+
+独立源码审查已通过单独的“VMem + stabilityai/sd-vae-ft-mse”组件版本，并修正不完整权重加载可能被内部捕获的问题。它还不是已加载模型；原SD2.1 VAE身份仍UNKNOWN，因此不能称精确原版复现。下一步完成余下权重校验，绑定真实文件与审查回执，再尝试有时间/内存上限的真实加载。之后才是两批视频闭环、自然失败分析和方法实验。
+
+研究仍遵循Supervisor 02_Idea_Generation的强基线→失败→原因→方法顺序；S38两agent的8篇论文学习与Gemini两轮核验已完成。保留“正确选图后CLIP平均是否损失回访细节”的待检验问题，普通加权不算创新。PhD/CCF A质量目标尚未达到。
+
+[本轮实际记录](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S39_AUTH_AND_COMPONENT_LOADING.md>)；[模型访问现状](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/MODEL_ACCESS_CURRENT.md>)；[主记忆](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md>)；[全部时间记录](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md>)。旧封存结果保持，下面历史状态不覆盖此最新更新。
+
+实际最近流程检查2026-09-07T03:59:36.922078+00:00，间隔27.835069分钟；下次目标04:26:36、截止04:29:36UTC。旧检查时刻不覆盖此条。
+
+## S38历史：论文方法学习、Gemini与原资源
+
+更新UTC：2026-09-07T03:37:44.061633+00:00（北京时间2026-09-07 11:37:44）。**S38两名agent完成8篇正式论文方法学习，Gemini Pro Extended实际完成两轮审查；没有新模型/生成实验。** 原答出现引用和架构错误，已经留原文与核验，未执行不成立的方案。优先保留“选图之后CLIP语义平均是否削弱回访内容”的诊断，普通锚点/加权不算新方法，须等真实基线和自然失败。
+
+原VMem网页已获准，用户已明确授权，不再请求登录或同意。浏览器下载尚未观察到落盘；官方HF CLI固定revision一次401。原SD2.1 VAE身份仍UNKNOWN，具名ft-mse组件版本仅为恢复选项，未改S35原件门。真实两批1→5→9闭环、新机制、跨场景评价及最终论文演示仍未完成。
+
+[本轮完整报告](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S38_PAPER_LEARNING_AND_GEMINI.md>)；[可读快照](</Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/S38_顶会论文学习与Gemini核验_2026-09-07/先读我.md>)；[模型访问现状](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/MODEL_ACCESS_CURRENT.md>)；[Gemini原答审查](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/gemini/root_review.md>)；[主记忆](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md>)。已有S34/S35/S36/S37封存结果保持；下面历史内容不覆盖此最新状态。
+
+用户已授权使用Gemini辅助和两agent学习；原则v1.6。A/B各4篇正式PDF及关键消融已读，独立引用复核另有作者。Gemini两轮有错误，root按原文/真实源码拒绝直接执行方案；不把模型选择当答案质量保证。当前proposal交付成熟度仍约四分之一（质性、非工时），阅读不替代真实创新与视频。
+
+## S37历史：登录核验与执行取舍
+
+S37阶段的登录/同意等待状态已经被S38更新；它曾正确记录当时限制，不是当前再次询问的理由。原报告docs/S37_RESUMPTION.md、7文件日期快照、有限复查16项回执保持。详细旧主记忆已保存到work/S38_paper_learning/current_before_update，原追加式主账保留所有历史时间。
+
+## S36原组件来源恢复调查已完成
+
+S36之后的锁屏检查记录已留在主账；**最新状态以本文件S39段为准，电脑现已解锁。**
+
+更新UTC：2026-09-07T00:11:06.253294+00:00。**S36原模型来源核验完成，没有新模型实验。** 9个直接小HTTP请求均成功；原VMem作者公开渠道未找到新的正式权重入口。社区SD2.1候选和官方ft-mse发布相同VAE参数LFS指纹，但仍缺它们与原Stability SD2.1 VAE的来源连接；两配置仅版本元数据和sample_size不同，非空间分块算子关系是源码条件推断，未实测权重/输出。S35原件门和冻结材料保持。
+
+S36当时电脑工具实测Mac锁屏，无法查看浏览器已有账号权限；该项已由后续S37解锁后的实际页面检查更新。S36当时的下一项为检查原HF模型是否已有访问；不自动申请或提交个人资料。原VMem/VAE身份齐备后，再统一补齐CLIP并冻结真实两批生成。没有新证据时，本次检索到此结束，不重复网站搜索、S35人工检查或短窗调参。
+
+[S36报告](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S36_RESOURCE_RECOVERY.md>)；[28文件来源核验快照](</Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/S36_原模型来源核验_2026-09-07/先读我.md>)；[当前科研记忆](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md>)；[实际时间账](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md>)。S34真实结果与S35人工接线交付继续有效，原完整视频、创新与PhD／CCF A质量目标仍未完成。
+
+根4个新直接请求UTC00:00:23–00:01:14，共11387B；另一作者VMem5请求UTC23:55:58–23:56:55，共275331B，9请求合计286718B。另7个search queries和网页工具阅读，后台流量未知。原VMem公开16issues/1PR/20comments、Releases空、HF讨论0，没有新路线。VAE社区rev4e63672c03103b6c636b8fb4119ba982469b2955与官方ft-mse rev31f26fdeee1355a5c34592e401dd41e45d25a493发布同a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815、334643276B。两config SHA424117cb534ce03497c41305ed868980123917b2b6abba4bbaa615e968772903和92d3dfb746fca211a2c9e019e285f8597412211728dce3c5bcf4eda0f2d62e7e。
+
+独立metadata/Git blob/源码核PASS（vae_relation_review_receipt.json）；sample_size只设空间tiling阈值，原use_tilingfalse，不能将条件性算子推断写成实测数值等同。启用tiling时576/latent72对256/32会触发、对768/96不会。社区↔ft-mse这条边不是原SD2.1 provenance，不可填VERIFIED_ORIGINAL_VAE_IDENTITY。0模型、GT、真实照片、旧预测数组、模型权重正文、重跑测试。
+
+两处元数据筛选错误已修且留初始回执：rsync子串误命中系统sync、S20缓存误写hf_cache后实际补查huggingface-cache。CUA Mac锁屏事实见local_delta_supplement.json，现有账号权限未知。限定数据/原checkout模型名和实际cache目录未出现新原组件；不是全电脑扫描。报告SHAfd6f1939f963d378299e796aa5e013919a7c20cbfddfe06d87d72793cab144d6，28文件快照379810B载荷。下一轮若仍锁屏且无新原资源/来源，不再同网页检索或重复成功测试；按定时提示只保留必要状态检查并结束该次接续。
+
+## S35已完成的接线准备与下一真实生成条件
+
+最终报告见 docs/S35_RESULTS.md。五模块在 work/S35_generation_integration；原S20TraceWriter与原pipeline源码不改。原资源门绑定缺口、launcher第二阶段计时缺口已修，旧审查REVISION_REQUIRED和旧代码保留。真实运行草稿real_run_draft_not_ready.json SHAe877695b49f52d59910e141a76453ac3b13e16313535266206646dec26b5a465；未冻结、VAE身份未知，不能执行。
+
+新人工合同e206b03c0843c9dacba4f7ba0f194b6e49346488d5b0e12a8423ae5f987b9200在UTC23:09:46.032190冻结；外控23:09:57.553586–23:10:00.664674，3.110793667秒、采样RSS464863232B、exit0，session47058已结束不再轮询。七源/三用途只首次执行，原9方法AST和Navigator配tiny两步/4×4解码模型，不是完整原网络。plain/observed像素、缓存、NMS、调用、RNG一致，计算模式/钩子恢复；成功历史1→5→9，第二批ID[0,2,4,1]，注入失败只保留首批5。源前审12门与实际运行回执均保存。
+
+另一作者UTC23:14:44.039792–44.467441在0.427525秒内独立核560文件身份、500归档载荷、133trace引用、39/26条trace与102/83条archive事件，retainedID/阈值/模式报告/时序对应，executed_results_review.json SHA7e2c50593684789d8e58a4e340e03fcafcb051ce416b1cecd10c24c5250f7340。没有重跑测试/模型；完整RNG/对象身份/像素相等属于原测试内存断言，未独立重新执行。DRAFT实际拒绝23:06:58UTC exit2/0worker，仅验证草稿分支。全部0真照片/GT/权重/NPZ/模型/GA/原renderer。
+
+最终报告1b8d88c979e61ee113f393a5df5321cdac7da98adfe7af350f5e723df20d447a，12项最终表述审PASS（report_claim_review.json）。[S35代码与全部人工记录快照](</Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/outputs/S35_原循环接线准备与人工检查_2026-09-07/先读我.md>)，589文件/588载荷35269955B，总35656833B，manifest f86a3205fc697a1635aa24489f2727d552f1fa36a31d94bc45c5ac9b038972e9；复制/26链接核PASS，work/S35_delivery/snapshot_review.json。10份交接另作者54链接核PASS；最终补快照链接与流程时点属于后续root小改，绑定current_records_final_receipt.json，原审查回执不回改。
+
+后续不重跑成功人工检查、不补旧成功smoke、不继续短窗尺度调参。正向资源门、四模型加载、原50步/400GA、真实generated-cache消费和完整视频质量仍未执行。完整项目目标仍未完成。
+
+
+本次UTC2026-09-06T22:37:32.708453+00:00纠正上轮遗漏：S20记录工具只有模块PASS、实际原循环接线与完整raw输出归档未完成（work/S20_protocol_review/trace_completion_review.json）。这两项可在不加载缺失权重时实现，当前启动S35准备，3agent分别接线/归档/源审、root负责资源门/runner。尚未集成执行或生成，不以人工检查冒充真实闭环；此前“只有外部资源可等”的判断被此具体待办纠正。
+
+[下一决策及源码依据](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S34_next_decision/decision.md>)已接受：回到原S20两批生成1→5→9，只有实际第一批generated ID缓存被第二批条件消费，才叫闭环。原576×576/T8/50步/context4/target4/seed42，两批同worker不重播种；两次原Navigator5°转向，原NMS在len5初始化；初图作者changi，不能借用S34八帧或假latent补状态。原数学保留，S33修正不偷偷带入原baseline。
+
+沿docs/S20_MINIMAL_VIDEO_PROTOCOL_DRAFT.md；四真实原组件齐备且加载/源码/观察器身份审定后才能另行冻结。建议CPU8/FP32、每批1800秒/45GiB是未验证预算，不是保证。主VMem与原指定VAE当前没有项目验收的完整本地资源，[最新有界资源检查](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S34_resource_refresh/report.md>)区分公开元数据、网络失败与有限本地扫描；不能说全电脑不存在或MPS/CPU必然不支持。不要反复401/环境smoke/无意义代理，不孤立下载暂无法启用的大组件以代替科研。
+
+## 旧结果、技能与环境
+
+S30–S33详细记忆已完整归档：[本次修改前的完整记忆](</Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/history/20260906T220746Z_before_S34_closure/ROOT_RESEARCH_MEMORY.md>)；逐阶段报告、原成功/失败目录和主账保持。S32/S33已完成16真实RGB新网络与累计2400Adam；S33三可用窗普通约束同时胜零步/k，缺pose窗全部NA，不能与S34混算新的独立实验。旧快照不覆盖当前主账。
+
+Supervisor固定207bc6f7a1aa107e544099c2c7cc86816fba9628，通读59MD+70PDF页记录在既有reader目录；2.2强基线→失败→机制指导本轮反证。idea-evaluator否决已有尺度机制新颖性及短窗代理不能验证生成主张；Claude scientific-critical-thinking用于反例/焦距混杂/条件推断/证据边界；figure-designer用于完整轴与非实拍图标识。技能路径和具体应用见docs/IDEA_GENERATION_FOCUS_CURRENT.md，未调用Claude模型/CLI。
+
+M3Max64GiB，无远程GPU；.venv-cut3r/bin/python为Py3.12/Torch2.7/NumPy1.26.4，科学CPU8/FP32，独立复算CPU1/FP64；overlay work/S17C_environment/site-packages。原512DPT3173761006B、SHA45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103，不重复下载/无理由重hash。绘图用既有HomebrewPy3.13/Matplotlib3.10.9，不改科学环境。
+
+VMem39291e4f272f6b4f270691d930926ab5930f942e，CUT3R8bc15dc92a6d7fd92920b4ec81540d3dec7d3ecf；隔离源码work/S17C_interface_preparation/isolated_vmem_source/extern/CUT3R。原文件只读，修改通过冻结wrapper；祖先git覆盖HOME，不全量git add/commit。旧HTTP服务PID55105非实验，不动。14周proposal约前3周至第4周初交付成熟度，非工时；新方法/公平跨场景/生成闭环/最终论文演示仍缺，不标整个目标完成。
+
+
+## S90一次有界网络索引真实结果（UTC 2026-09-12T07:55:51Z）
+
+最终独立复审已通过的索引协议执行了一次冻结预算网络请求。起点12605440、Range长度512；实际结果为 HTTP 302、curl return 56、0新增正文、0新增头，重定向说明正文为1034B而本次512B上限触发 Maximum file size exceeded。checkpoint状态为 STOPPED_TRANSPORT，complete_view_ids为空，image/depth/json payloads requested均为0。现有候选Gate0仍为REJECT/DATA_NOT_AVAILABLE，未形成RGB-D配对或未来真值。此结果只说明传输边界，不是数据缺失证明、模型实验或科学负结果；不重复盲发同一请求。证据：work/S90_proxy_resumable_index/index_01/RECEIPT.json、CHECKPOINT.json、MATCHED_VIEWS.json。
+
+## S92（保存数据未来误差尾部风险分解）：局部改善被高幅度恶化抵消
+
+更新UTC：2026-09-12T08:14:56Z（北京时间16:14:56）。在不调用新模型、不采集新GT的前提下，对S15B保存的never/all_new预测和evaluation_gt执行固定尾部分析。四个目标的all_new MAE分别比never上升0.012776m、0.005024m、0.000979m、0.001503m；AbsRel上升0.014472、0.007696、0.005395、0.006582，但改善像素比例仍为0.5948、0.6317、0.6467、0.6459。恶化像素中最高5%的AbsRel恶化量占全部恶化量83.5%–85.5%；16×16空间块bootstrap只作为单段描述性区间。
+
+该结果支持“少数高幅度恶化抵消多数小幅改善”的尾部诊断，可作为未来S91的风险敏感评价候选（mean AbsRel之外报告worst-5%/CVaR），但不能证明恶化来自几何风险，也不能验证GRC-Memory。状态DESCRIPTIVE_ONLY，S91仍需未见配对RGB-D、相机和固定预算。证据：work/S92_tail_risk_decomposition/PROTOCOL.md、RESULTS.md、results.json。
+
+## S90 transport_v2（两次独立有界续接仍被传输阻断）
+
+更新UTC：2026-09-12T08:17:50Z（北京时间16:17:50）。在不修改旧index_01的前提下，transport_v2建立独立index_02/index_03。index_02仅做不跟随重定向HEAD：HTTP302、TLS verify 0、curl18、0正文；因重定向说明体声明1034B而512B cap拒绝，未解析Location、未发Range。index_03加入ignore-content-length后：curl35、HTTP0、TLS verify 1、0正文，LibreSSL SSL_ERROR_SYSCALL，仍无Location、未发Range。两个checkpoint均STOPPED_TRANSPORT，0新header/body，complete_view_ids为空，image/depth/json payloads均为0。S90协议工程测试S90_TRANSPORT_V2_OFFLINE_PASS；停止重复RTMV请求，转向TUM/3RScan资格门。
+
+这不是数据不存在的证明，也不是科学负结果；Gate0和S91继续阻断。证据：work/S90_proxy_resumable_index/transport_v2/FINAL_REPORT.md及index_02/index_03回执。
+
+## S93 ALT-TUM-01（TUM RGB-D单序列最小资格检查）：部分可达但Gate0未通过
+
+更新UTC：2026-09-12T08:22:32Z（北京时间16:22:32）。对官方TUM `freiburg1_xyz`执行小预算资格检查：完整ground-truth文本201100B、3000条位姿、约30.09秒；RGB/Depth AVI各只取65536B前缀，确认640×480 MPEG-4容器，但没有提取带原始时间戳的配对RGB/Depth PNG帧。官方格式页记录640×480、RGB 8-bit、Depth 16-bit、depth缩放5000和预配准；尚未把内参/单位绑定到实际帧，场景划分与许可仍UNKNOWN。状态GATE0_NOT_PASSED，不启动S91；下一步最多做一次帧级样本提取或转3RScan。证据：work/S93_ALT_TUM01/PROTOCOL.md、RESULTS.md、GATE0_RESULT.json。
+
+## S93-FrameProbe 与 S94 评价合同更新
+
+更新UTC：2026-09-12T09:14:53Z（北京时间17:14:53）。TUM帧级探针一次误用负Range语法，意外下载完整RGB AVI 8,059,298B；已标记unintended、保留失败审计、停止后续下载。Depth只取1MiB。两AVI均可解码为640×480 MPEG-4，但Depth输出8-bit RGB而非16-bit深度，时间仅为相对30fps PTS，没有可追溯TUM绝对时间戳，故不能绑定GT pose，S93 Gate0仍失败。S94独立评价合同离线通过：未来答案隔离、source identity、k=4及2/8敏感性、GPU/host/读取/选择/前向成本、mean/worst-5%/CVaR95、强基线和至少5轨迹×3查询；未运行S91。证据：work/S93_ALT_TUM01/frame_probe/RESULTS.md、receipt.json、VERIFY_FRAME_PROBE.json、work/S94_evaluation_contract_review/EVALUATION_CONTRACT.md。
+## S94 ALT-3RSCAN-01（3RScan官方元数据、最小归档片段与RGB-D资格检查）
+
+更新UTC：2026-09-12T09:19:09Z（北京时间17:19:09）。对官方3RScan仓库、文档、JSON元数据和样例ZIP头/尾执行了有界资格检查。官方资料称3RScan提供校准RGB-D、6DoF相机位姿、内参K、reference/rescan分组及跨scan变换；本机解析到478个场景组（385 train、47 validation、46 test）和1004个rescan条目。样例归档的中央目录显示两个scan，每个含51个color、51个depth、51个pose、`_info.txt`和mesh成员。
+
+本机只取得`3RScan.json`、ZIP 512B头和65,536B尾部；没有取得完整RGB正文、16-bit depth正文、pose正文或`_info.txt`正文，尚未核验帧级同步、K具体数值、单位、深度有效率和完整许可。因此状态为`CONDITIONAL_CANDIDATE / GATE0_NOT_PASSED`，正式S91不允许启动。3RScan保留为比当前TUM更有价值的替代候选，但不等同于已获得数据或已完成实验；数据Terms流程不由agent代填。
+
+证据：`work/S94_ALT_3RSCAN01/PROTOCOL.md`、`RESULTS.md`、`GATE0_RESULT.json`、`receipts/zip_central_directory_summary.json`、`receipts/scene_pair_summary.json`。官方来源、版本和使用条件已写入该实验结果。
+
+## S94评价合同（固定预算未来几何风险记忆选择）
+
+同日完成独立离线合同审查`S94_CONTRACT_OFFLINE_PASS`。合同冻结未来答案隔离、source identity全链路、主记忆槽位`k=4`及`k=2,8`敏感性、GPU/cache与host memory分列、读取字节/选择时间/前向次数、mean AbsRel、worst-5%、CVaR95、重投影误差、覆盖率、强基线以及至少5条独立测试轨迹×3个未来查询。合同要求选择进程不能读取任何未来文件，并规定Gate0、traceability、预算、公平性或尾部指标失败时停止GRC方法主张。
+
+该合同仍是`PROTOCOL_ONLY / NOT_RUN`，不授予新颖性，也没有运行正式S91。证据：`work/S94_evaluation_contract_review/EVALUATION_CONTRACT.md`、`EVALUATION_CONTRACT.json`、`VULNERABILITIES_AND_REPAIRS.md`、`validate_contract.py`。
+
+## 本轮证据边界
+
+TUM S93-FrameProbe的误用负Range语法导致完整RGB AVI意外下载，已标记`unintended`并作为失败审计保留；不能把它称为合规采样或科研负结果。TUM depth解码为8-bit RGB且只有相对30fps PTS，故仍不能绑定GT pose。当前没有任何新方法、未见跨场景生成结果或GRC验证；创新状态仍为candidate/UNKNOWN，`novelty_authorization=NONE`。
+
+## 创新前沿复核（2026-09-12）
+
+独立创新代理核对了MemoNav（CVPR 2024）、Learning 3D Persistent Embodied World Models、Video World Models with Long-term Spatial Memory、WorldPlay、AutoScape、Spatia（CVPR 2026）、Geometry-as-context（CVPR 2026）和Latent Spatial Memory等原始论文/官方页面。结论是：泛化的“geometry-aware memory”、forgetting/informative memory、persistent 3D map、RGB-D future prediction、warp/geometry conditioning和latent spatial cache均已有近邻，单纯组合不能作为独立创新。
+
+当前仍保留的候选问题是：在固定记忆与计算预算下，观测级校准几何风险是否能预测独立未来RGB-D/pose误差，并在完整消费者路径上超过recent/random、pose、coverage、confidence、persistent-memory和utility-only基线。审稿式潜力约7–8/10，但当前证据为候选/UNKNOWN；反事实单记忆效应潜力约7–8.5/10但数据和算力风险高；几何×外观2×2交互是可立即做的诊断，潜力约6–7/10，尚未证明跨场景规律。
+
+本轮没有运行新模型代码，也没有把这些评分写成方法成立。报告：`work/agents/innovation_frontier_next.md`。
+
+## 创新前沿 Round 2（2026-09-12）
+
+第二轮审稿式原文检索进一步核对了GIM-World、C3、OUGS、Memorize When Needed、MosaicMem、HyDRA、RELIC、Mirage、Spatia和Long-Context SSM等工作。已覆盖部分包括几何长期记忆、空间检索、pruning/gating、固定容量、输出不确定性校准和闭环/重投影评价；GIM-World是最接近的部分覆盖者，但尚未看到“历史观测级校准几何风险→独立未来RGB-D/pose误差→完整消费者路径→source-level干预”的完整联合证据。
+
+因此当前候选仍是一个可能独立的**评价问题/实验空白**，不是已成立的方法。最小可证伪实验和kill criteria已经写入`work/agents/innovation_frontier_round2.md`，包括k=4（敏感性2/8）、5条独立轨迹×3个future query、强基线、尾部指标、source identity和replay-noise控制。Gate0未通过前不运行S91。
+
+## S95证据纠正：3RScan示例访问和时间语义（2026-09-12）
+
+对官方仓库setup脚本的独立复核发现，`3RScan.v2.zip`被标为example data并由脚本直接wget；项目/文档又给出完整数据的Terms总规则，但未明确示例ZIP是否例外。因此此前“示例完整帧必须由用户先完成Terms”表述过强，已纠正为`sample access/permission scope = AMBIGUOUS_NOT_VERIFIED`，不提交表单，也不把许可猜测写成Gate0结果。Gate0仍因完整帧、同步、K、单位、深度有效率和pose正文未验证而失败。
+
+3RScan的reference/rescan更安全的研究表述是“reference-to-rescan重访/变化评价”：FAQ定义reference为initial（通常最完整或first）并将其余作为rescan，论文语义涉及later point in time，但当前元数据审查没有建立精确逐scan时间戳或连续next-frame顺序，不能直接等同连续视频未来帧。
+
+## S95 GIM-World核函数数学诊断（2026-09-12）
+
+对GIM-World arXiv:2606.02436v1中Eq.16的平方角距离Gaussian形式做了独立数学诊断：4个大圆等间隔相机方向、位置和时间相同、sigma_r=pi时，4×4 Gram矩阵最小特征值为`-0.15846314545655754`，不是半正定核；同一局部Eq.17子集后验方差示例为`0.08703510995697616`，说明单个局部数值不一定立刻为负。该诊断与Feragen等CVPR 2015关于曲面上geodesic Gaussian一般不保持正定的结果一致，但**不是GIM-World代码复现，也不证明作者实际实现或论文实验失效**。它只提出强基线实现必须说明PSD处理或使用合法核近似。
+
+证据：`work/S95_contract_semantics_audit/gim_kernel/RESULTS.json`、`README.md`、`run_gim_kernel_diagnostic.py`。
+
+## S96/S97本地组件与RGB-D关联复核（2026-09-12 19:49）
+
+S96按官方GIM高层默认与无时间敏感性设置，对4个固定位姿池共8个核矩阵执行有限谱审计；主结果均未出现低于`-1e-10`的特征值，独立NumPy/FP64复核74/74项通过，最大重建差异在记录容差内。结论只覆盖这8个保存位姿池的数值一致性，不证明GIM全局PSD、论文结果、RGB-D质量、未来预测或GRC-Memory成立。
+
+S97原始最近邻诊断发现文件可读，但存在重复depth使用和跨GT间隔风险。随后按项目`src/tum_rgbd.py`的严格一对一规则（`|Δt|<0.020s`，唯一贪心）以及GT相邻间隔`>0.100s`建立连续支持区间并复核：fr1为792个RGB-D匹配、788个落在同一GT区间；fr2为2893个RGB-D匹配、2212个落在同一GT区间。保留帧全部640×480、RGB为8-bit RGB、depth为16-bit `I;16`且本轮无图像读取错误。fr2的681个匹配因GT支持区间规则排除，不能直接拿全序列做带GT评测。
+
+两个序列均已参与早期开发，标记`DEVELOPMENT_SEEN`，不能作为held-out确认；本轮没有模型推理、没有启动S91、没有GRC方法验证。原S97最近邻结果保留，修正解释见`work/S97_dev_rgbd_pair_audit/S97_OFFICIAL_ASSOCIATION_CORRECTION.md`。
+
+## S98固定窗口可行性审计（2026-09-12 20:27）
+
+按S8冻结的8.840秒/24目标/50ms snap/GT间隔>100ms规则，对S97官方关联结果做窗口审计：fr1仅有2个合格窗口（不足三窗口）；fr2有6个合格窗口，可选0、2、5，但fr2仍是`DEVELOPMENT_SEEN`，不能作为held-out。拒绝均因连续时长不足，无snap超差或重复帧。本轮未运行模型、未读深度像素或GT位姿值；S91和GRC仍阻断。证据：`work/S98_dev_window_feasibility/RESULTS.md`、`RESULTS.json`。
+
+## 最新研究状态：固定改写预算几何更新对照（S99），2026-09-14T14:23:37+08:00
+
+已完成并独立验收25条件×4未来查询的100次几何消费者重投影；复用已见S15B真实模型输出，0次新增神经推理/VMem视频生成。每源固定39/196个16×16块（19.897959%），4源156块/39936源像素。这是source-block rewrite预算，不是GRC的k记忆槽位或相同改写幅度。
+
+低不一致度平均共同域AbsRel=0.0795605800，随机20种子均值=0.0799777288，confidence_gain=0.0783648707。低D对随机3/4目标更好，但对confidence四目标均更差；delta1_all_gt=0.6612628097，也低于随机0.6644055417和confidence0.6621629832。低D worst5=0.4269007328略优confidence0.4291546159，不能说所有指标更差。按冻结规则STOP_LOW_DISAGREEMENT_ADVANTAGE_IN_THIS_SETTING，不把结果后更换指标/名字当创新。
+
+共同域只占GT有效域55.08%–58.20%，已报告全GT正确率与coverage；固定数量≠固定幅度，来源身份与遮挡变化属于整个集合更新效应，不能直接识别单记忆因果。先冻结并封存预测、后读取已见GT评分，不宣称测试未见。
+
+不同作者独立重写target20低D的projection/z-buffer，depth与source-ID逐值一致；GT前27检查、GT后100行及规则/聚合1896断言均通过，最大差0。root接受：work/S99_fixed_budget_risk_update/ROOT_RESULT_ACCEPTANCE.json；完整数值与边界：同目录RESULTS.md。
+
+固定未来窗口可行性审计（S98）独立复算已完成：fr1仅2窗口，fr2 6窗口选0/2/5；fr2是旧S8重复确认，不是新增未见结果。8.840秒/24帧/50ms规则来自后续S8协议，不是原proposal逐字要求。S97两个TUM开发序列配对已审，尚缺可作独立未见确认的数据。正式S91未运行。
+
+下一项候选：固定其它155个块的上下文，在每源39块不变时成对替换低D与confidence候选，先解决幅度匹配、背景交互、评价域和未来答案隔离；见NEXT_MECHANISM_HYPOTHESIS.md。目前是草案，未冻结/未运行。逐块空背景收益不可相加，不能当固定预算集合收益或oracle上界。SplaTAM官方固定commit代码已核，只有历史深度可作selector输入，未来查询深度只能作评分或明确oracle条件。
+
+当前new_method_validated=false / novelty_authorization=NONE。不把局部负结果扩写成所有GRC无效，也不声称PhD或CCF A成果已成立。旧176页PDF为历史截点；本轮交付为更新Markdown、原始NPZ/JSON与复核证据，不声称PDF已改。
+
+## S100固定上下文成对替换（2026-09-14）
+
+在运行前审查`S100_FINAL_PRERUN_PASS`后，按冻结协议完成9对同源候选、3个来源、2个固定背景、4个目标查询的成对替换；预测封存后才读取已见GT。共144次主几何消费者重渲染，0次新增神经推理。匹配规则未放宽，未匹配来源2按设计缺失。
+
+结果：全GT截断损失的平均收益B=low loss-confidence loss，在cap=0.5/1/2分别为-0.00000228936、+0.000000121567、+0.00000735581，接近零且随cap改变符号；36个pair-target组合中8个出现两个背景间反号（每个cap均为8）。这只说明已见消费者、有限背景和该损失下存在局部上下文依赖线索；不能证明可泛化交互、因果作用或GRC-Memory有效，也不能恢复S99已停止的低D平均优势主张。
+
+证据：`work/S100_context_matched_swap/PROTOCOL.md`、`FREEZE.json`、`predict_01/SEAL.json`、`score_01/SCORES.json`、`work/agents/S100_final_prerun.md`、`work/agents/S100_claim_boundary.md`。下一步保持`new_method_validated=false`，进行独立封存复核并优先解决未见跨场景、真实记忆槽位预算和未来RGB-D/pose评测资格。
+
+## S101/S103/S104远端准备与服务器核验（2026-09-15）
+
+用户提供并授权使用的学校服务器入口为`ssh -i ~/.ssh/id_ed25519_superpod yliutz@superpod.ust.hk`。root实际只读登录返回`slogin-02`、账号`yliutz`、Python 3.10.12；显式加载`/etc/profile.d/modules.sh`后核得Slurm 23.02.6、账号`mscitspod2026`、`normal`分区及`gpu:8(S:0-1)`。两个5分钟smoke job（583967、583968）实际运行于`dgx-09`并返回NVIDIA H800 81559 MiB、驱动570.158.01；两者因可选torch打印的shell引号错误失败，但GPU探测成功，因此只接受“GPU已验证”，不接受“VMem forward已验证”。回执见`work/S101_GPU_RUN_MANIFEST.json`，私钥内容未写入任何项目文件。
+
+S103已完成本机离线机制诊断：只读S100封存预测，72条pair-target/context记录，0新GT、0模型调用；support/identity变化稀疏，H_support/H_depth均失败，判定`MECHANISM_UNRESOLVED`。创新候选由独立审查收窄为SOCF与FGB-Future，二者仍是待证伪问题/协议，当前`new_method_validated=false`、`novelty_authorization=NONE`。正式GRC仍需合法独立held-out Gate0；GPU可解决算力，不能替代数据资格与近邻排重。
+
+## S101后续：SuperPOD CUDA验证与ICL-NUIM候选获取（2026-09-15）
+
+显式SSH命令`ssh -i ~/.ssh/id_ed25519_superpod yliutz@superpod.ust.hk`已验证。按HKUST官方Slurm流程，job 584006在`dgx-21`实际完成CUDA/PyTorch smoke：Python 3.10.21、torch 2.5.1+cu121、CUDA=True、NVIDIA H800、compute capability 9.0、2x2矩阵正确、峰值33,555,456B。之前两个引号错误job和一次默认identity认证失败均保留；没有运行VMem或正式GRC。
+
+按冻结的ICL-NUIM候选，CPU job 583984完成官方`living_room_traj0_frei_png.tar.gz`下载（711,444,709B，SHA256 `4eca8c2e9f77c1bd7436c746d22ea6144b8c01fe9bc29a84e734186823f1f1ad`）。结构审计job 584045实际完成：1,509 RGB PNG、1,509 16-bit depth PNG、1,509 associations、1,508 pose rows；时间只有frame-index/30Hz规则，故Gate0状态仍`BLOCKED_TIMESTAMP_AND_EXPOSURE_AUDIT_PENDING`。官方页面和部分pose文本已在候选检索时读过，不能宣称零metadata暴露；该数据是synthetic，不能单独支撑动态实拍结论。
+
+当前可执行GPU工作已写入`docs/GPU_EXPERIMENT_PLAN_AND_PROGRESS_20260915.md`，覆盖S0至当前旧结果清单和S102-S109（资格、跨场景VMem、k=2/4/8强基线、GRC、遮挡重访、反事实、尾部、多seed）实验合同。顶会精读近邻矩阵见`work/agents/innovation_topconf_matrix_20260915.md`；SOCF/FGB-Future仍是候选，绝不预先写成创新。定时heartbeat已根据上述真实结果更新，下一轮先完成Gate0和远端依赖，不把GPU smoke或数据下载当论文结果。
+
+## S101环境与创新精读补充（2026-09-15）
+
+SuperPOD依赖只读job 584098在dgx-09以1 GPU、4秒、exit0完成：torch 2.5.1+cu121与numpy 2.2.6可导入；diffusers、transformers、accelerate、cv2、imageio、scipy缺失。该事实已写入`work/agents/gpu_dependency_probe_20260915.md`，下一步补齐隔离环境并保存版本、来源、SHA和lockfile，不能把import成功当作VMem forward。
+
+ICL pose独立审计确认官方轨迹文件1508行、8字段、首列连续1..1508且非官方定义的硬件时间戳；与包内1509条association的对齐仍需显式规则，机器决定`work/S102_gate0/ICL_NUIM_GATE0_DECISION.json`保持`BLOCKED_TIMESTAMP_POSE_ALIGNMENT`。不能把第三方loader推测当作缺帧解释，也不能在Gate0前运行正式GRC。
+
+顶会原文精读卡已完成ViewRope与Spatia的问题、假设、算法、预算、差异和kill criteria，见`work/agents/topconf_min_experiment_cards_20260915.md`。它们收紧了“geometry-aware memory”的近邻边界；SOCF/FGB-Future仍是候选评价/机制，`new_method_validated=false`、`novelty_authorization=NONE`。30分钟heartbeat已根据584006、584098、584045及pose审计结果重写下一步，要求先Gate0与依赖复核，再按S103-S109顺序推进。
+
+## 服务器环境复查（2026-09-15）
+
+最新执行入口：CPU Slurm job `584449` 已提交，最近检查为 `PENDING (Priority)`。脚本 `work/S101_env_bootstrap/create_and_resolve.sh` 将创建个人 `gwm-cut3r-py311-20260915`（Python3.11）后做 CUT3R requirements 的 native pip resolver dry-run，15分钟上限、0 GPU；尚未声称环境创建或依赖安装成功。下一轮先读取该job的状态和 `/home/yliutz/gwm_env_bootstrap_20260915/` 回执，不重复提交。此任务不访问数据/GT/模型。ICL mapping清单的泛化“GT未访问”字段已纠正为实际边界：pose文本为资格审计读取，未来深度像素未读，GT未用于选择。
+
+用户提示服务器可能已有依赖。只读核验确认 Anaconda3 `base`（Python 3.11.5）可导入 torch 2.7.0+cu126、transformers 4.48.3、accelerate 1.4.0、scipy 1.11.1、imageio 2.31.1、torchvision 0.22.0+cu126、Pillow 9.4.0 和 cv2 4.11.0；diffusers仍缺失。个人 `torch`（Python 3.10.21）缺 scipy、diffusers、transformers、accelerate、cv2、imageio；`geometry`虽在conda清单中但预期 `bin/python` 不存在。该结果修正了“服务器所有依赖都缺失”的粗略判断，但尚未证明VMem项目级import或forward可运行。下一步锁定一个环境、补齐diffusers、执行不读数据/GT的项目级import smoke，并记录版本与来源。
+
+后续资格与环境复核显示：ICL 包内 association ID 为0..1508、pose ID为1..1508，丢弃 association ID 0 后配对子门PASS；整体 Gate0 仍因时间语义、单位、内参、坐标、split和GT隔离未完而阻断。共享 Anaconda base 在 H800 计算节点 job 584274 完成 CUDA/PyTorch/import smoke，仅 diffusers 缺失，但项目精确 NumPy/SciPy/Pillow pin 仍需隔离锁定。创新审查新增 `work/agents/innovation_falsification_matrix_20260915.md`，给出 SOCF/FGB-Future 相对强基线的唯一可辨识预测、统计门槛和淘汰用数学反例；创新仍未验证。
+## 2026-09-16T00:39:01+08:00 — S102 Gate0 TUM metadata qualification completed; formal baseline still gated
+
+修正远端 Slurm 资源配置后，H800 job 588524 成功完成 TUM Freiburg3 long office household 的元数据资格审查。归档大小 1,483,556,251 bytes，SHA-256 为 `c7cd8e1afb87c80e5744a356214819b110fa09b4744fa4ba0cc2382f9ba59e9c`；RGB 2585 行、depth 2509 行、groundtruth 8710 行，时间戳严格递增且唯一；20 ms 容差下 RGB-D 配对 2488/2585=0.962476；深度样本为 640×480、uint16、I;16。该作业只读取索引与一个深度样本，没有模型推理或未来GT评分。
+
+科学状态仍为 `CONDITIONAL_DATA_QUALIFICATION_ONLY`：相机内参/畸变坐标系、深度单位、未来GT隔离窗、独立held-out场景和同候选池固定预算尚未全部冻结，因此 Gate0 未通过，正式 S103 VMem baseline 和 GRC/SOCF 方法实验不能开始。QOSMinGRES 原因已记录：SuperPOD 要求即使元数据作业也申请 `--gpus=1`；实际模块是 `slurm/slurm/23.02.6`。
+
+最新预Gate线索：重影诊断发现最低RGB MSE可与高频二阶差分能量 6.7826×参考并存；SOCF-A、CVaR/DLV 仅完成封存/合成实现检查，均未证明未来收益或创新。顶会精读进一步确认几何记忆、反事实选帧和显式3D已有近邻，SOCF-A 只有在 history-only 冲突预测跨场景改善独立未来 RGB-D/pose 尾部误差时才可保留；否则降级为 FGB-Future 评价问题。当前 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+证据：`work/S102_gate0_tum/remote_receipts_588524/RESULTS.json`、`work/S102_gate0_tum/run_tum_gate0.slurm`、`work/ghosting_diagnostic_pre_gate_20260916/REPORT.md`、`work/SOCF_pre_gate_20260916/run_01/DECISION.json`、`work/cvar_dlv_prep_20260916/RECEIPT.json`、`work/agents/innovation_literature_scan_20260916.md`。
+
+下一步：冻结并独立审查完整 Gate0 合同（内参/畸变、depth→metric z、配对、未来窗口与GT隔离、独立held-out）；通过后按预注册顺序运行 selector-free FGB-Future/S103 development baseline，再以同候选池同预算测试 SOCF-A、强基线、跨场景和尾部指标。
+## 2026-09-16T00:45:00+08:00 — Minimal AGENTS/skills configuration audit
+
+依据 OpenAI 官方 Astra 文章完成配置审查，并只做两项局部修正：将项目 `AGENTS.md` 的重复读档改为“会话开始、恢复/压缩或状态变化时完整读取；同一会话的窄任务按需读取，20分钟 heartbeat 仍执行完整检查”，并把过期的“暂无远程GPU”改为已验证的 HKUST SuperPOD H800/SSH/Slurm路径。`RESEARCH_PRINCIPLES.md` 的数据隔离、创新否决、记录和heartbeat要求保留，因为它们是用户明确的科研约束；`deep-research`、`idea-evaluator`、`tech-paper-template`、`vibe-research-workflow`的触发范围未发现需要改写的冲突。审计文档见 `docs/CONFIG_AUDIT_OPENAI_ASTra_20260916.md`。不改变任何实验结果或科学结论。
+## 2026-09-16T01:01:00+08:00 — Persistent remote GPU execution rule and Gate0 contract validator
+
+依据用户新要求，已规定所有训练或长时间GPU任务必须从远端 `tmux`/`screen` 持久会话启动和监控，并保留Slurm job ID、日志和退出状态；VPN断开只影响查看，不应停止作业。新增 `work/remote_tmux/launch_slurm_in_tmux.sh` 及说明，尚未提交正式训练。
+
+Gate0机器可读合同 `work/S102_gate0_tum/gate0_contract_v1.json` 已生成并验证：结构检查 PASS、`reads_future_data=false`，但正式状态为 BLOCKED，九个合同部分仍缺证据（相机、深度、配对、pose、未来GT隔离、独立held-out、公平预算、checkpoint/code、独立读回）。第一次错误使用 `--contract` 参数，随后按脚本的 positional 参数重跑并得到预期 exit 2；失败已保留。故正式 S103 VMem baseline 预计在合同全部 PASS 后立即启动，当前不能宣称已开始。
+
+创新检索agent继续发现 NeurIPS25 VideoTitans、PAGER、HSC、CVPR等近邻，SOCF-A仍须证明在匹配 surprise/uncertainty/pose/ray 控制后对独立未来RGB-D/pose尾部误差有增量预测价值；否则采用FGB-Future评价/负结果路线。
+## 2026-09-16T01:08:00+08:00 — GPU start timing and innovation rotation
+
+当前正式GPU实验仍未启动。Gate0合同验证器结构通过但正式状态 BLOCKED；剩余项为相机/深度/pose合同、RGB-D一对一完整计数、未来GT隔离、独立零暴露held-out、固定候选池/预算/配置和独立读回。若没有新的数据访问问题，预计独立审查完成后需数小时至1个工作日；合同新版本 `formal_status=PASS` 当天立即通过远端tmux/screen提交 S103（selector-free VMem development baseline）。S103基线家族和读回约1–2个工作日，正式FGB-Future/SOCF/GRC比较还需基线封存后约2–4个工作日。
+
+创新岗位按轮次持续保留：当前 `/root/innovation_round3_counterfactual` 正在检索和设计可证伪反事实/尾部风险方向；完成后马上接替下一项有界原文或反证任务。当前仍为 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+证据：`docs/GATE0_AND_GPU_START_STATUS_20260916.md`、`work/S102_gate0_tum/gate0_contract_v1.json`、`work/remote_tmux/launch_slurm_in_tmux.sh`。
+## 2026-09-16T01:16:00+08:00 — Gate0攻坚与正式GPU持久运行防护
+
+围绕Gate0建立了逐字段证据清单、机器可读合同和验证器。当前合同结构 PASS、正式状态仍 BLOCKED；阻塞项未被猜测填充。根据远程启动器审查，新增 `work/remote_tmux/launch_formal_slurm_in_tmux.sh`：正式作业只有在远端Gate0验证器退出0且签名manifest存在时才会提交，并在tmux中记录Slurm/sacct回执；shell语法检查通过，尚未提交训练。
+
+创新岗位已轮训到 `/root/innovation_round4_selective_prediction`，保持至少一个有界创新检索agent活动；其余岗位并行推进Gate0证据和执行审查。正式S103启动条件仍是新合同所有部分 PASS；启动后第一步为selector-free VMem baseline，不先运行GRC/SOCF。
+## 2026-09-16T01:22:00+08:00 — S102 deterministic RGB-D pairing contract advanced
+
+通过远端持久 tmux 会话 `s102-pairing` 提交 H800 Slurm job 588581，完成项目实际 matcher 的只读配对审计。2507 条候选边中接受2488条一对一配对；RGB丢弃97、depth丢弃21、已分配depth重复0；0个depth节点有多个候选、19个RGB节点有两个候选。结果已写入 `work/S102_gate0_tum/PAIRING_CONTRACT.json`，状态为 `PASS_PAIRING_ONLY`，不改变整体 Gate0 阻塞。
+
+创新轮次已从 selective prediction 接力到 `/root/innovation_round5_mechanism_shift`，保持至少一个创新agent持续工作；当前候选仍需未来RGB-D/pose和强基线验证。
+## 2026-09-16T01:31:00+08:00 — Gate0远端数据库存核对
+
+为攻克Gate0核对SuperPOD `/home/yliutz/datasets`，当前只有已暴露的TUM Freiburg3 long-office archive和ICL-NUIM lr0；没有独立零暴露RGB-D场景。因此held-out identity仍是主要外部阻塞，不能把已有两套数据改名为盲测。相机/深度官方证据与RGB-D pairing子门已分别落盘，但整体合同仍 BLOCKED。没有读取未来GT或启动模型训练。
+## 2026-09-16T01:48+08:00 — Gate0/GPU takeover update
+
+为尽快推进 Gate0，已把两个历史含义明确拆开：**S103-GeoDiag** 是已封存的 72 条预测几何诊断，**S103-VMemBase** 才是待执行的 VMem 开发基线。Gate0 仍不是正式 PASS；当前唯一可接受的前置状态是新的真实 v2 合同达到 `PRE_RUN_READY`，之后才允许 development baseline，`POST_RUN_ACCEPTED` 仍要等预测封存和独立重算。
+
+用户已打开的 Gemini 浏览器窗口已用于并行独立审查。Gemini 的建议与本地审计一致：拆开 pre-run/post-run，禁止用 S103 单独编号造成歧义，使用运行时/文件系统输入隔离代替 JSON 关键词扫描，dispatch 前重新计算 staged artifact SHA-256。Gemini 只作建议，未接收密钥或私有文件，不能授予 Gate0 PASS。
+
+SuperPod 已从持久 tmux `s103-load-smoke-20260916` 提交并完成 H800 no-data model-load smoke，job **588611**，Slurm `COMPLETED|00:00:48|0:0`。回执显示 VMemModel、AutoEncoder、CLIPConditioner、ARCroco3DStereo 加载成功，23.96 秒、峰值显存 7.884 GB，权重 SHA `675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4`；`data_access=NONE`、`forward_completed=false`、无评分，不能称为 VMem 实验。完整回执已复制到 `work/S103_h800_model_load_smoke/remote_receipts_588611/`。
+
+scene14 已有归档哈希（239153034 bytes，SHA-256 `d3011fe0c00c133b31899ed24c7bf49a00541a0c39d218c3b5647b3d781531b6`）和 frame000000 资格抽样。该样本的图像尺寸、depth zero count/max 与 pose 存在性已被读取，必须标为已暴露资格样本，不能当未见 future outcome；证据为 `work/S102_gate0_3dmatch/SCENE13_14_QUALIFICATION_EVIDENCE.json`。尚无 held-out 实验。当前下一步是完成 3DMatch source-specific adapter 与 enforced isolation 证据，再用真实文件创建并验证 `PRE_RUN_READY` development contract；`new_method_validated=false`、`novelty_authorization=NONE` 保持不变。
+
+## 2026-09-16T02:21+08:00 — Apptainer probe does not yet unlock GPU baseline
+
+No-data H800 model-load smoke 588611 remains the only successful GPU execution boundary. Compute-node `unshare` isolation job 588625 failed before model construction with CUDA error 304. Apptainer 1.1.9 capability flags were confirmed in 588626, but GPU probes 588659/588660/588661/588662/588664 failed at container creation or execution because the available empty/minimal sandbox could not expose a runnable bound Python environment. The probes did not read model, RGB-D, future outcome, or GT. Receipt: `work/S103_selector_free_baseline/apptainer_cuda_probe_receipts_20260916/RECEIPT.json`.
+
+Current decision is `BLOCKED_GPU_ISOLATION_IMAGE`; do not start formal S103-VMemBase or GRC/SOCF. Next is a digest-pinned executable GPU image/rootfs or reviewed Pyxis image followed by synthetic allow/deny/escape and CUDA allocation checks. `new_method_validated=false`, `novelty_authorization=NONE`.
+
+## 2026-09-16T02:37+08:00 — VMem transfer integrity PASS; Gate0 remains blocked
+
+远端 `/home/yliutz/gwm_weights_20260915` 的五个必需文件已完成新一轮字节数和 SHA-256 对照，全部与本地一致。VMem 权重 SHA 为 `675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4`；完整回执为 `work/S101_env_bootstrap/VMEM_TRANSFER_INTEGRITY_RECEIPT_20260916.json`。本轮只读哈希，没有读取模型数据、RGB-D、future outcome 或 GT。
+
+传输完整性现在为 PASS；已有 588611 no-data model-load smoke 使用同一 VMem SHA，不重复运行。Gate0 仍受 GPU 兼容隔离镜像和真实 v2 合同约束；下一步是实现审查、合同重绑定和合成 allow/deny/escape 探针。`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-16T02:53+08:00 — SOCF-A-v2 remains a conditional design
+
+创新 agent 基于已验证权重和当前隔离阻塞，把 SOCF-A 收紧为一个可证伪假设：固定 VMem 预算下，用 history-only 的来源冲突特征预测替换某一来源后未来 RGB-D/pose 损失的有符号变化，并对方向不稳定样本 abstain。近邻包括 pose/redundancy retrieval、geometry/coverage selection 和 future-aware KV importance；最强竞争解释是该分数只是 pose、visibility、coverage、confidence 或 source identity 的代理。
+
+最小实验必须等 Gate0、compute-node 隔离、selector-free baseline 和同池强基线全部完成；设计为一个合格 held-out query、k=4、一次匹配替换、3 次相同 RNG 重放、预测封存后再挂载 future scorer。任何效果不超过重放波动、被简单代理解释、方向不稳定或固定分母未来几何损失不改善，立即淘汰。当前仍为 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-16T03:05+08:00 — SOCF-A-v2 adversarial confounder fixed
+
+创新反证发现：来源替换造成的 signed delta 可能完全来自 renderer support/owner map 改变，包括 valid-pixel count、z-buffer visibility、source provenance 和 evidence density；这不是抽象风险，S99 已观察到比较条件 source identity agreement 很低且低不一致没有稳定优势。于是 SOCF-A 必须使用 SCMC 对照：同 candidate pool、k、forward count、seed/noise 和预算，并优先要求 intervention 前 target projection 的 exact support-mask equality，同时匹配 owner-count、pose distance、confidence。
+
+若没有 exact match，必须标为 `UNTESTABLE_SUPPORT_MATCH`，不能用近似匹配冒充因果隔离。若 SOCF 与 SCMC 同步变化、效果不超过 replay variation，或被 coverage/owner/confidence 解释，立即淘汰。当前仍为设计，不运行实验。
+
+## 2026-09-16T03:17+08:00 — SOCF-A-v2 RNG confounder added
+
+第二个独立反证是 branch-dependent RNG：即使整数 seed 相同，来源替换分支也可能多消耗一次随机数，使 signed delta 只是执行随机性而非 source conflict。SOCF-A 必须预注册 NLPRC：冻结并 hash 初始 noise、Python/NumPy/Torch CPU/CUDA RNG states、deterministic flags、schedule、execution order、forward/output count，并在 retain/intervention 两臂前恢复相同快照；增加 byte-identical no-op 估计 replay envelope。
+
+若 no-op 超过 envelope、locked replay 改变符号、SOCF 效果不超过预注册 95% replay noise，或 no-op 无法在同一容器执行，立即标记 `UNTESTABLE`/淘汰。当前仍不运行。
+
+## 2026-09-16T03:29+08:00 — SOCF-A-v2 source-ID placebo added
+
+第三个独立控制是 Source-ID Permutation Placebo（SIPP），用于区分 candidate-pool/source identity 代理。冻结每个 query 的 sealed candidate pool、source tensors/features、IDs/order、k、camera/history、checkpoint/config、完整 downstream recomputation、成本和 NLPRC snapshot，只置换 score→source-ID mapping，并在 sealed prediction 后再评分。
+
+只有 source-aligned arm 在 support/coverage/owner 和成本匹配下超过 permutation placebo envelope，provenance 解释才保留；若效果在置换后仍存在、无法与 placebo 分离或 descendants 无法审计，立即降级/淘汰；无法运行则标 `UNTESTABLE`。当前仍为设计。
+
+## 2026-09-16T03:40+08:00 — SOCF-A-v2 denominator audit added
+
+第四个反证是 post-selection complete-case bias：即使 SCMC、NLPRC、SIPP 通过，若把没有 exact match、placebo 失败、abstain、invalid output 或困难 query 删除，SOCF 仍会被人为抬高。必须在 intervention/future scoring 前 hash 完整 eligible target-query universe，对 SOCF、controls、placebos 使用同一个 intention-to-treat 分母，并把所有失败保留在 feasibility ledger，标 `UNTESTABLE` 或 failure；complete-case 只能作次要分析。
+
+若收益只在删掉这些样本后出现、各臂 query inclusion 不一致，或完整分母效果落在零/replay bounds 内，立即降级/淘汰。当前仍为设计。
+
+## 2026-09-16T03:51+08:00 — SOCF-A-v2 claim boundary narrowed
+
+在 SCMC、NLPRC、SIPP 和 ITT 分母控制之后，唯一可辩护的差异是 auditable source-level signed intervention estimand：history-only 预测保留/替换一个命名 memory source 后独立 future RGB-D/pose loss 的变化，完整重算 consumer，方向不稳定时 abstain。
+
+但现有审查已指出 CUE-R、ViewRope/SplaTAM 和 cache abstention 等近邻。即使四项控制通过，若没有 residualized、跨 scene 和 horizon 重复的 held-out future geometry 增益，只能称 measurement/selection protocol；否则降级为 FGB-Future 或 negative evaluation。当前不作新方法主张。
+
+## 2026-09-16T04:03+08:00 — SOCF decisive package frozen as future protocol
+
+创新 agent 给出最小可区分实验，但目前不执行：Gate0、digest-pinned CUDA/container、selector-free VMem baseline、same-pool controls、合法 future scorer、2 条 calibration trajectory 和 1 条零暴露 held-out trajectory/scene 都必须先 PASS。冻结 pool/IDs/order、k=4、成本、camera、hash、conflict features、NLPRC states、abstention 和 SIPP permutations；calibration 做三次 locked F0/F1 replay，拟合 control-only 与 control+conflict；held-out 比较 SOCF、retain、SCMC、NLPRC no-op、SIPP。
+
+使用预先 hash 的 ITT query universe 和固定 full-GT pixel denominator，所有 unmatched/abstain/invalid 保留。若效果接近 replay、符号不稳定、没有超过 controls、只靠删样本或只改善 RGB 而几何恶化，淘汰；即使通过，也先称 measurement protocol，不自动称新方法。
+
+## 2026-09-16T04:14+08:00 — SOCF consumer recomputation guard added
+
+创新反证发现 source swap 可能留下 stale mutable state，例如 cached latent/KV、attention/renderer buffer 或 source_pixel_identity，使 F1 并非完整 consumer recomputation。任何 signed effect 前，必须从相同 serialized pre-consumer state、fresh process 做 F0→F1 和 F1→F0，并 hash memory input、tokens/KV、attention、renderer support/owner/provenance 及最终 RGB/depth/pose 输出；要求顺序不影响结果且所有替换源下游节点重新生成或有明确 source-independent 审计。
+
+若顺序改变输出、复用了未审计 stale buffer 或最终像素无法追溯到 frozen source IDs，立即停止并标 `INVALID_CONSUMER_RECOMPUTATION`。
+
+## 2026-09-16T04:30+08:00 — SOCF stale-state closure reiterated
+
+未来 SOCF 包必须先序列化 pre-consumer state，在 fresh process 中按两个顺序运行 retain/replacement，并 hash memory、latent/KV、attention、renderer support/owner/provenance 和最终输出。任何 order dependence 或 stale mutable state 都在 future scoring 前终止 estimand。
+
+## 2026-09-16T04:41+08:00 — 不能削弱科学门；只合并行政 manifest
+
+审查结论是 Gate0/container legality、selector-free baseline、SCMC、NLPRC、SIPP、ITT 分母和 order-reversal provenance 分别对应不同失败模式，不能删除或弱化。唯一安全简化是使用一个 immutable preflight manifest 和 shared frozen input/arm matrix，保留全部 arm、fresh-process 检查、完整分母和 `UNTESTABLE` 状态。
+
+## 2026-09-16T04:53+08:00 — SOCF immutable preflight manifest schema fixed
+
+未来 SOCF 仅允许使用一个 immutable manifest，包含授权/Gate0/container/baseline receipts、环境和全部 hash、ordered candidate pool、hash 后 ITT target universe 与固定分母、RNG/noise snapshot、F0/SOCF-F1/SCMC/NLPRC-no-op/SIPP arms、source→pixel provenance 与 order-reversal、prediction seal 和 future scorer receipt。所有缺失合法性、matching、provenance、replay 或 denominator 证据必须是 `UNTESTABLE_*` 或 invalid，绝不能写 PASS。
+
+
+## 2026-09-16 — SOCF manifest ambiguity corrections
+
+未来 SOCF 只有在所有 arm 输出和哈希冻结后才可写 `prediction_sealed=true`；此前 `future_scoring_permitted=false`，`PASS` 只表示所有回执齐全后的完成决策。预封存只记录 `denominator_spec_hash`，评分器完成后才写 `realized_denominator_hash`，不能把未来 GT 或实际有效像素数提前写入。SIPP 必须是只改变 score→source ID 对应关系的置换，保留 source tensor/feature/support/pose，并记录置换 seed/hash 与 arm pool hash。
+
+
+## 2026-09-16 — Receipt status and pilot boundary
+
+传输、CUDA、import 的 PASS 只属于环境证据；在明确的模型 forward Gate0 回执前，正式状态必须是 `NOT_RUN|BLOCKED`。单个 qualified held-out query 只能标 `PILOT_DIAGNOSTIC_ONLY`，不能称 protocol evidence；只有两条 calibration 加一条 untouched held-out scene/horizon 的完整包才可进入 protocol evidence。封存前只允许 `denominator_spec_hash`，评分器封存后才产生 `realized_denominator_hash`，未来 RGB/depth/pose 和实际有效像素数在封存前都不可读。
+
+
+## 2026-09-16 — GPU image availability boundary
+
+远端有 Apptainer/Enroot/Pyxis 的镜像接口，但 registry 权限、网络、配额、缓存和批准的 digest 都未知；没有拉取或批准任何镜像。正式阻塞仍是 `BLOCKED_GPU_ISOLATION_IMAGE`，不能把工具接口存在当作镜像可用。
+
+
+## 2026-09-16 — 最新状态对账与正式启动门
+
+旧心跳中的“VMem transfer partial”已被更新回执覆盖：`VMEM_TRANSFER_INTEGRITY_RECEIPT_20260916.json` 显示五个文件本地/远端 SHA 全部一致，当前是 `COMPLETE_SHA_VERIFIED`，不要重复传输。588611 只是无数据 model-load smoke，不能重复，也不是 formal forward。
+
+正式 Gate0 仍是 `BLOCKED`，GPU 隔离是 `BLOCKED_GPU_ISOLATION_IMAGE`。即使未来 validator 返回 `PRE_RUN_READY`，正式启动还要有 `formal_launch_guard_receipt`，把 validator 结果、sealed manifest SHA、guarded wrapper、Slurm 脚本、run ID 和执行边界绑定起来。当前不能运行正式 S103、评分、GRC 或 SOCF。
+
+
+## 2026-09-16 — Formal dispatch guard software closure
+
+本地正式启动 guard 已补齐并通过 8/8 software-only 回归：tmux 成功后原子保存 `gwm-formal-launch-guard-receipt-v1`，绑定 validator 回执、manifest/contract/protocol、Slurm/generic launcher、predictor wrapper、execution boundary、run ID/scope 和精确命令。这个修复只关闭启动记录缺口，不等于 GPU 镜像、计算节点隔离、PRE_RUN_READY 或科学实验已经通过；没有提交远程 formal launch。
+
+
+## 2026-09-16 — FGB-SI distinction narrowed by primary-source review
+
+**Design-only candidate:** FGB-SI (source-intervention future-geometry measurement) estimates the signed effect of retaining versus replacing one named history source on an externally supplied, held-out future RGB-D/pose state in a fixed commanded coordinate frame, with complete consumer-descendant recomputation and source-to-pixel provenance.
+
+Closest occupied mechanisms include ReWorld pose-indexed bounded memory/redundancy retrieval, Future Forcing future-aware KV selection/merging, and WorldRoamBench geometry/retention metrics. Generic future-aware fixed-budget memory or KV importance is therefore not a novelty basis. The scoped distinction is the auditable named-source intervention plus externally supplied, held-out future RGB-D/pose reference and provenance.
+
+Falsify if the effect adds no held-out future value beyond pose/coverage/confidence/utility, disappears under source/common-bias controls or registration checks, cannot be traced to external geometry, or appears only in one scene/horizon. If so, retain FGB-SI only as a negative/evaluation protocol. No experiment or novelty validation is authorized.
+
+
+## 2026-09-16 — FGB-SI pose wording correction
+
+创新候选不能把当前 3DMatch 的 mapping-estimated pose 写成独立真值。统一改为“externally supplied, held-out future RGB-D/pose reference”；只有另有独立传感器/参考系证据时才使用 independent。
+
+
+## 2026-09-16 — Formal launch receipt 的边界
+
+`gwm-formal-launch-guard-receipt-v1` 的 `PASS` 只表示软件 dispatch guard 成功创建 tmux 并保存绑定回执，不表示 Slurm 已完成提交、predictor 已执行、计算节点隔离已通过或已有科学结果；还必须等待下游 worker/Slurm 回执。
+
+
+## 2026-09-16 — 启动 guard 回归加强
+
+本地 software-only 回归现在是 9/9：成功 fixture 会检查 formal receipt 的关键字段关系、实际 SHA、run/scope/session/path/命令、execution boundary，以及嵌入 validator 的 `PRE_RUN_READY` 和空 errors；修改 wrapper 文件也会被拒绝。仍然没有远程 formal launch 或科学实验。
+
+## 2026-09-16T13:53+08:00 — S103 精确边界通过，Gate0 仅剩独立审查
+
+`S103-VMemBase-scene13-w001-v1` 已冻结一个明确暴露的 development window（history 0/15/30/45，command/target 60/75/90/105）。预测侧 13 个输入、评分侧 12 个未来引用、188 个源文件、运行配置、四组模型权重、预测器/评分器/复核器和 digest-pinned SIF 都有精确哈希绑定。
+
+持久 tmux 经 Slurm 运行了两次不加载模型、不做 forward、不打开未来 outcome 的精确隔离探针。589823 技术通过但容器清空环境导致回执缺少作业号，完整保留为失败的 provenance 尝试；修正后 589826 在 dgx-09 以 `COMPLETED|0:0|00:00:25` 通过，并在单个回执中绑定 job ID、窗口/运行时/评分清单/预测器 SHA。13 个允许输入和 188 个源文件及全部权重逐字节验证，stage/source/weights 只读，project/dataset/未来路径不可见，H800 CUDA matmul 通过。该 PASS 只属于技术边界，不是科学结果。
+
+新 `GATE0_CONTRACT_CANDIDATE_v4.json` 的校验结果仍是 `BLOCKED`：216 个非审查 artifact 全部验证通过，唯一实质缺口是 3DMatch adapter 的独立接受和不同作者对冻结 protocol 的预运行批准。不得自签，不得在两项真实审查前启动 VMem forward、评分、GRC 或 SOCF。`new_method_validated=false`，`novelty_authorization=NONE`。
+
+## 2026-09-16T18:43+08:00 — 内参一致性缺陷修复并重新冻结 v5
+
+静态审查发现旧 predictor 将 history K 在拼接后重复减去一次 x=96，同时 query K 用 `K0*1.2` 缩放了整个 3×3 矩阵，使齐次元素从 1 变成 1.2。该错误会令 history/query 相机条件不一致，因此旧 v4、runtime v1 和隔离 job 589826 全部降级为已归档 superseded evidence，绝不能用于正式 forward。
+
+新 predictor 使用唯一 `model_grid_K`：仅缩放前两行一次、仅裁剪一次，并在运行时验证八帧 K、主点和齐次行一致。新 SHA `534fd553...`；10/10 静态回归通过。runtime v2 SHA `732c2225...`；精确隔离 job 590696 在 dgx-27 以 `COMPLETED|0:0|00:00:49` 通过，回执 SHA `dc69ee8c...`。新 v5 contract SHA `f0597ad5...`、protocol SHA `bfc3e843...`，验证 216 个非审查 artifact 后仍只缺 adapter 独立接受和不同作者 protocol 批准。没有模型 forward、未来 outcome 访问或评分。
+
+## 2026-09-16T21:44+08:00 — Supervisor 审查发现 all-8 相机中心化缺陷，v6 取代 v5
+
+按 Supervisor-Skill 的小步验证原则复核官方 VMem 调用后发现，v5 predictor 只对四个 history C2W 做中心化，再把四个原始 query C2W 拼入；官方 pipeline 是先拼接 context+target 八个相机，再统一中心化和缩放。该缺陷会破坏 history/query 的共同坐标框架，因此 v5/runtime v2/job 590696 均降级为 superseded evidence，不能用于 forward。
+
+新 predictor 先拼接全部八个 C2W，再调用官方 `get_translation_scaling_factor`，并运行时验证全部成对相对平移在共同中心化前后保持不变。predictor SHA `75af8cad...`，12/12 静态检查通过。runtime v3 SHA `7b635f37...`；精确隔离 job 591500 在 dgx-21/H800 以 `COMPLETED|0:0|00:00:30` 通过，回执 SHA `d3152f12...`，无模型加载/forward/未来 outcome 访问。
+
+同时加固 Gate0：适配器与 protocol 审查必须包含不同作者身份、非空 findings 和明确 limitations；先绑定 adapter review 再计算最终 protocol SHA，任何预先批准的 base SHA 都会被拒绝。v6 base contract SHA `f866ce3d...`、base protocol SHA `b2ca7239...`，验证 217 个非审查 artifact 后仍只缺两项真实独立审查。正式 bundle v3 的负控制正确拒绝创建。若审查者立即可用且无新问题，预计 60–120 分钟可到 `sbatch`；Slurm 排队时间另计。没有真实审查者时启动日期未知，不得自签。

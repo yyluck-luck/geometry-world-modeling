@@ -1,0 +1,74 @@
+{
+  "status": "FAIL_RETAINED",
+  "started_utc": "2026-09-09T03:31:10.320200+00:00",
+  "archive_body_budget_bytes": 157286400,
+  "archive_body_bytes": 0,
+  "requests": [
+    {
+      "started_utc": "2026-09-09T03:31:10.320969+00:00",
+      "range": "bytes=474686633-474686662",
+      "expected_body_bytes": 30,
+      "observed_body_bytes": 0,
+      "attempt": 1,
+      "error": {
+        "type": "URLError",
+        "message": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)>"
+      },
+      "completed_utc": "2026-09-09T03:31:10.439846+00:00",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "saved_file": null
+    },
+    {
+      "started_utc": "2026-09-09T03:31:10.440324+00:00",
+      "range": "bytes=474686633-474686662",
+      "expected_body_bytes": 30,
+      "observed_body_bytes": 0,
+      "attempt": 2,
+      "error": {
+        "type": "URLError",
+        "message": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)>"
+      },
+      "completed_utc": "2026-09-09T03:31:11.381819+00:00",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "saved_file": null
+    }
+  ],
+  "members": [
+    {
+      "camera": "cam00",
+      "catalog_member": {
+        "name": "coffee_martini/cam00.mp4",
+        "compressed_bytes": 66447398,
+        "uncompressed_bytes": 66440149,
+        "method": 8,
+        "method_name": "deflate",
+        "flags": 0,
+        "encrypted": false,
+        "crc32": "8eadec32",
+        "local_header_offset": 474686633,
+        "central_filename_bytes": 24,
+        "central_extra_bytes": 24,
+        "central_comment_bytes": 0,
+        "is_directory": false
+      },
+      "started_utc": "2026-09-09T03:31:10.320963+00:00"
+    }
+  ],
+  "connections_max": 1,
+  "RGB_frames_exported": 0,
+  "RGB_frames_viewed": 0,
+  "audio_decode_runs": 0,
+  "model_runs": 0,
+  "url": "https://github.com/facebookresearch/Neural_3D_Video/releases/download/v1.0/coffee_martini.zip",
+  "archive_bytes": 1186324684,
+  "catalog_sha256": "e5ec5c9bb6a62ac26172823d5ab551b6412f4af4c2afb1cd6543d7ab3fa22d65",
+  "pose_receipt_sha256": "3456d3ef91ac366b93641ccc6c9cb54df192eaf9f0e1f85e18df6cf795e0075e",
+  "exception": {
+    "type": "URLError",
+    "message": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)>",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 1344, in do_open\n    h.request(req.get_method(), req.selector, req.data, headers,\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1386, in request\n    self._send_request(method, url, body, headers, encode_chunked)\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1432, in _send_request\n    self.endheaders(body, encode_chunked=encode_chunked)\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1381, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1141, in _send_output\n    self.send(msg)\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1085, in send\n    self.connect()\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/http/client.py\", line 1527, in connect\n    self.sock = self._context.wrap_socket(self.sock,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/ssl.py\", line 457, in wrap_socket\n    return self.sslsocket_class._create(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/ssl.py\", line 1053, in _create\n    self.do_handshake()\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/ssl.py\", line 1331, in do_handshake\n    self._sslobj.do_handshake()\nssl.SSLEOFError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/dynamic_data_feasibility/two_stream_metadata_01/fetch_and_probe.py\", line 128, in main\n    outputs=[member_download(m) for m in selected]\n             ^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/dynamic_data_feasibility/two_stream_metadata_01/fetch_and_probe.py\", line 66, in member_download\n    offset=member['local_header_offset'];fixed=fetch(offset,30,camera+'.local_fixed').read_bytes()\n                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/dynamic_data_feasibility/two_stream_metadata_01/fetch_and_probe.py\", line 41, in fetch\n    with urllib.request.urlopen(request,timeout=30) as response:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 521, in open\n    response = meth(req, response)\n               ^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 630, in http_response\n    response = self.parent.error(\n               ^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 553, in error\n    result = self._call_chain(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 745, in http_error_302\n    return self.parent.open(new, timeout=req.timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 515, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 532, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 1392, in https_open\n    return self.do_open(http.client.HTTPSConnection, req,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/urllib/request.py\", line 1347, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)>\n"
+  },
+  "completed_utc": "2026-09-09T03:31:11.385236+00:00",
+  "elapsed_seconds": 1.065048000018578,
+  "source_sha256": "852355d0cf9d388237afceabceffedf154a441596e73ebf424da685ed16d8e65"
+}

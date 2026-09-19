@@ -1,0 +1,38 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:58:58.000387+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:58:58.000544+00:00",
+      "requested_range": "bytes=0-29",
+      "ended_utc": "2026-09-06T09:58:58.000721+00:00",
+      "returncode": 0,
+      "bytes": 30,
+      "stderr": "",
+      "write_out": "206 https://example.invalid/fake.zip",
+      "status": 206,
+      "final_url": "https://example.invalid/fake.zip",
+      "headers": {
+        "Content-Range": "bytes 0-30/240",
+        "Content-Length": null,
+        "Content-Encoding": null,
+        "ETag": "\"same\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      }
+    }
+  ],
+  "members": [],
+  "body_bytes": 30,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "transport": "macOS curl 8.7.1 SecureTransport, no automatic retry",
+  "curl_version": "curl 8.7.1 (artificial version stub)",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_curl_review/range/contract.json",
+  "contract_sha256": "8718978630bd340282e91e9396d775c01d2d294b3530e1ab34bd9c4036e6e4ec",
+  "url": "https://example.invalid/fake.zip",
+  "archive_total_bytes": 240,
+  "error": "ValueError('same archive and exact range')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_last_two_curl.py\", line 44, in main\n    header=fetch(entry['local_header_offset'],30);_,nlen,xlen=parse_header(header,entry)\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_last_two_curl.py\", line 38, in fetch\n    require(headers.get('content-range')==f\"bytes {start}-{end}/{c['archive_total_bytes']}\" and headers.get('etag')==c['etag'] and headers.get('last-modified')==c['last_modified'],'same archive and exact range')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: same archive and exact range\n",
+  "ended_utc": "2026-09-06T09:58:58.001172+00:00"
+}

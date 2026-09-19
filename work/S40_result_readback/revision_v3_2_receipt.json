@@ -1,0 +1,56 @@
+{
+  "schema": "s40-readback-revision-v3-2-receipt-v1",
+  "status": "SOURCE_AND_PROTOCOL_REVISED_AWAITING_INDEPENDENT_REREVIEW",
+  "created_utc": "2026-09-07T12:51:08.597767+00:00",
+  "author_role": "/root",
+  "current_identities": {
+    "readback_sha256": "b40f44bea0dbde25479bc7c7f4fd89c3224a5bf71f54c7518da33b1f510d4d9f",
+    "protocol_sha256": "b468e7500be1c61ab39f343c6692cb2dc349ea0495f01e71141139a3f1534428"
+  },
+  "preserved_history": {
+    "v2_readback_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "v2_protocol_sha256": "b4887316240bc511cfde2d4fec5d31989ffa1a854be4da56a973e28cca0d7b2c",
+    "v2_source_review_sha256": "ea599804589dc4c10b2ca65c972bbf1ae8a1c3c04c327f7605c5a45e2f08ec19",
+    "attempt01_supervisor_receipt_sha256": "f269dc2486478e65176c38445ab97251f31a5a4ac6c9f50cbd344a73daefd5da",
+    "attempt01_worker_receipt_sha256": "4b762c3061d395a6767f319a553e681dbea8fe4d90bd49e5ac8a563d36bf35c6",
+    "v3_initial_readback_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+    "v3_initial_protocol_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+    "v3_revision_receipt_sha256": "e382f67a6e59b830443b2a947a27e7285e87aef2b6701474888ac88171757424",
+    "v3_boundary_review_sha256": "04441f30e8930089c0ca7d6c0d94be1b0863115a629895ff23bfb8561045b777",
+    "v3_boundary_correction_receipt_sha256": "83e4b7287229294a777d6ba82d99864b5203a537e5808a47f30183a0f1758077",
+    "v3_adversarial_review_sha256": "e7dac1824c9387834045f7b86cd81a85326e54fc7b6dc2a3a01b847a63fc3dcc"
+  },
+  "resolved_findings": {
+    "R1_list_tuple_type_erasure": "Reader.metadata now decodes list to list and tuple to tuple. The first batch still requires type(raw_ids) is list, exact [0], and exact int element type.",
+    "R2_descriptor_path_only_reuse": "Reader.array now requires the supplied complete descriptor to equal the descriptor previously verified and registered for that canonical blob path.",
+    "R3_scalar_type_label_unchecked": "Reader.metadata now accepts only the archive writer's str/int/bool/NoneType scalar labels and requires the JSON value's exact Python type to match the label.",
+    "R4_attempt01_read_boundary_wording": "The protocol states that tensor and PNG bodies were stream-hashed before failure while no NumPy comparison, visual decoding/viewing or quality scoring completed."
+  },
+  "unchanged_checks": [
+    "Tensor codec, dtype, shape, nbytes, body SHA and canonical descriptor SHA validation remain required.",
+    "All FIELDS, hash-chain, selected-ID, history, archive order, cache/condition/sampler, bitwise comparison and source-seal checks remain.",
+    "CPU1, 300-second and sampled 2-GiB external limits remain.",
+    "No quality, model-math, exact-original-baseline, method-gain or novelty claim is added."
+  ],
+  "metadata_only_static_check": {
+    "python_ast_parse": "PASS",
+    "git_diff_check": "PASS",
+    "archive_event_json_only": true,
+    "scalar_nodes_exact_type_checked": 25775,
+    "list_nodes": 4793,
+    "tuple_nodes": 37,
+    "first_context_decoded": [0],
+    "first_context_python_type": "list",
+    "second_context_kind": "tensor",
+    "second_context_dtype": "int64",
+    "second_context_shape": [4],
+    "tensor_blob_or_image_body_reads": 0
+  },
+  "operations": {
+    "readback_runs": 0,
+    "models_ga_gates_scoring_or_generation_runs": 0,
+    "images_decoded_or_viewed": 0,
+    "scientific_arrays_mapped_or_compared": 0
+  },
+  "next_gate": "Two independent reviewers must bind this exact source/protocol/receipt and return no blocking findings before the supervisor is rebased."
+}

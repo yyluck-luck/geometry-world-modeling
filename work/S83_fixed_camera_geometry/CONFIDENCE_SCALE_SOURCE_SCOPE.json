@@ -1,0 +1,101 @@
+{
+  "recorded_utc": "2026-09-10T18:44:55.926913+00:00",
+  "first_clock_utc": "2026-09-10T18:41:00Z",
+  "last_read_clock_utc": "2026-09-10T18:43:48Z",
+  "type": "official confidence-loss source audit and unexecuted mathematical derivations",
+  "english_query": "DUSt3R Geometric 3D Vision Made Easy confidence loss normalization CVPR 2024 paper",
+  "official_code": [
+    {
+      "url": "https://raw.githubusercontent.com/naver/dust3r/main/dust3r/losses.py",
+      "version": "main at retrieval, remote commit not pinned",
+      "scope": "lines 48-55,130-217 L21/Regr3D/ConfLoss"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/CUT3R/CUT3R/main/src/dust3r/losses.py",
+      "version": "main at retrieval, remote commit not pinned",
+      "scope": "lines 59-66,274-419,966-1033; branch excerpts 905-964 for nonuniform supervision"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/CUT3R/CUT3R/main/config/dpt_512_vary_4_64.yaml",
+      "version": "main at retrieval; not a released-checkpoint training receipt",
+      "scope": "lines 0-12 model/conf_mode/train criterion/test criterion; dataset list incidentally returned, not audited"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/CUT3R/CUT3R/main/src/dust3r/heads/postprocess.py",
+      "version": "main at retrieval",
+      "scope": "lines 131-140 reg_dense_conf"
+    }
+  ],
+  "paper_count": 1,
+  "paper": {
+    "title": "DUSt3R: Geometric 3D Vision Made Easy",
+    "venue": "CVPR 2024",
+    "metadata_url": "https://openaccess.thecvf.com/content/CVPR2024/html/Wang_DUSt3R_Geometric_3D_Vision_Made_Easy_CVPR_2024_paper.html",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Wang_DUSt3R_Geometric_3D_Vision_Made_Easy_CVPR_2024_paper.pdf",
+    "actual_read_scope": "CVF search-index extraction of printed p20700 section 3.2, equations 2-4 and confidence parameterization; not whole PDF",
+    "direct_pdf_open": "403 Forbidden",
+    "raw_source_bytes_saved": false
+  },
+  "local_sources": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/losses.py",
+      "bytes": 43222,
+      "sha256": "57168959c3ecfdc881460b10c186048dfc6240e582f8251cd31de456bc2ab3cb",
+      "read_scope": "targeted search L21/Regr3DPose normalization/ConfLoss declarations and formula only; official main was separately read deeply"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/dpt_512_vary_4_64.yaml",
+      "bytes": 13485,
+      "sha256": "becfd7b9f78212fb03f914a586230b59655618dbe24af6b58400b72f499aa360",
+      "read_scope": "model and train/test criteria targeted lines 1,13-14"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/heads/postprocess.py",
+      "bytes": 4689,
+      "sha256": "1053c35f0962f91ad8b985a702dd5c2cff4fd94ff92d96340ff7a8dbabe81384",
+      "read_scope": "targeted confidence reg_dense_conf exp/sigmoid lines"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/base_opt.py",
+      "bytes": 20800,
+      "sha256": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+      "read_scope": "targeted conf default/log transform use declarations"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/commons.py",
+      "bytes": 2339,
+      "sha256": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+      "read_scope": "lines 42-66; get_conf_trf log"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py",
+      "bytes": 12212,
+      "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+      "read_scope": "lines 64-84; precomputed confidence weights"
+    }
+  ],
+  "local_path_failure": {
+    "path": "work/cut3r-local/src/dust3r/losses.py",
+    "result": "No such file; continued with known VMem fork only for local comparison"
+  },
+  "constraints": {
+    "new_heads_or_gt_or_s83_result_arrays_read": 0,
+    "models_or_mathematical_code_run": 0,
+    "author_files_modified": false,
+    "s83_frozen_objective_modified": false,
+    "canonical_ledger_modified": false,
+    "method_selected": false
+  },
+  "limitations": [
+    "training configurations on main are not a verified full training history of the current checkpoint",
+    "confidence-gradient optimum assumes fixed positive residual and free c without network/floor coupling",
+    "uncertainty laws require an actual probability model, not heuristic log confidence",
+    "shared coordinate rescaling differs from fitting predicted geometry to fixed metric cameras",
+    "projection covariance uses fixed known camera/K and first-order smooth projection, excluding visibility discontinuities"
+  ],
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/CONFIDENCE_SCALE_NEAREST_WORK.md",
+    "bytes": 5715,
+    "sha256": "c078a9df97024946be0585b855ef5bc2db212f7f930c37d80bc2288aeca0a427"
+  }
+}

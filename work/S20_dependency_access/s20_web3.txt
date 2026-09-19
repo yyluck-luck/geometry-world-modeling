@@ -1,0 +1,537 @@
+Stability-AI-stablediffusion/modelcard.md at main · joypaul162/Stability-AI-stablediffusion · GitHub (https://github.com/joypaul162/Stability-AI-stablediffusion/blob/main/modelcard.md)
+citeturn323search0 [wordlim: 200] Crawled: last month; Training Procedure Stable Diffusion v2 is a latent diffusion model which combines an autoencoder with a diffusion model that is trained in the latent space of the autoencoder. ... SD-unCLIP 2.1 is a finetuned version of Stable Diffusion 2.1, modified to accept (noisy) CLIP image embedding in addition to the text prompt, and can be used to create image variations (Examples) or can be chained with text-to-image CLIP priors. ... If you plan on building applications on top of the model that the general public may use, you are responsible for adding the guardrails to minimize or prevent misuse of the application, especially for use-cases highlighted in the earlier section, Misuse, Malicious Use, and Out-of-Scope Use.
+Texts and images from communities and cultures that use other languages are likely to be insufficiently accounted for. This affects the overall output of the model, as white and western cultures are often set as the default. Further, the ability of the model to generate content with non-English prompts is significantly worse than with English-language prompts. Stable Diffusion v2 mirrors and exacerbates biases to such a degree that viewer discretion must be advised irrespective of the input or its intent.
+
+## Training
+
+Training Data The model developers used the following dataset for training the model:
+
+  * LAION-5B and subsets (details below). The training data is further filtered using LAION's NSFW detector. For more details, please refer to LAION-5B's NeurIPS 2022 paper and reviewer discussions on the topic.
+
+Training Procedure Stable Diffusion v2 is a latent diffusion model which combines an autoencoder with a diffusion model that is trained in the latent space of the autoencoder. During training,
+
+  * Images are encoded through an encoder, which turns images into latent representations. The autoencoder uses a relative downsampling factor of 8 and maps images of shape H x W x 3 to latents of shape H/f x W/f x 4
+  * Text prompts are encoded through the OpenCLIP-ViT/H text-encoder.
+  * The output of the text encoder is fed into the UNet backbone of the latent diffusion model via cross-attention.
+  * The loss is a reconstruction objective between the noise that was added to the latent and the prediction made by the UNet. We also use the so-called v-objective, see https://arxiv.org/abs/2202.00512.
+
+We currently provide the following checkpoints, for various versions:
+
+### Version 2.1
+
+  * `512-base-ema.ckpt`: Fine-tuned on `512-base-ema.ckpt` 2.0 with 220k extra steps taken, with `punsafe=0.98` on the same dataset.
+  * `768-v-ema.ckpt`: Resumed from `768-v-ema.ckpt` 2.0 with an additional 55k steps on the same dataset (`punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+
+SD-unCLIP 2.1 is a finetuned version of Stable Diffusion 2.1, modified to accept (noisy) CLIP image embedding in addition to the text prompt, and can be used to create image variations (Examples) or can be chained with text-to-image CLIP priors. The amount of noise added to the image embedding can be specified via the `noise_level` (0 means no noise, 1000 full noise).
+
+If you plan on building applications on top of the model that the general public may use, you are responsible for adding the guardrails to minimize or prevent misuse of the application, especially for use-cases highlighted in the earlier section, Misuse, Malicious Use, and Out-of-Scope Use.
+
+A public demo of SD-unCLIP is already available at clipdrop.co/stable-diffusion-reimagine
+
+### Version 2.0
+
+  * `512-base-ema.ckpt`: 550k steps at resolution `256x256` on a subset of LAION-5B filtered for explicit pornographic material, using the LAION-NSFW classifier with `punsafe=0.1` and an aesthetic score >= `4.5`. 850k steps at resolution `512x512` on the same dataset with resolution `>= 512x512`.
+--------------------------------------------------------------------------------
+unet/diffusion_pytorch_model.safetensors · stabilityai/stable-diffusion-2-1-base at main (https://huggingface.co/stabilityai/stable-diffusion-2-1-base/blob/main/unet/diffusion_pytorch_model.safetensors)
+citeturn323search1 [wordlim: 200] Crawled: 11 months ago; stabilityai ... stable-diffusion-2-1-base / unet /diffusion_pytorch_model.safetensors ... SHA256:
+[Input: Search models, datasets, users...]
+
+# 
+
+stabilityai
+
+/
+
+stable-diffusion-2-1-base
+
+like [Button: 691]
+
+Follow
+
+Image Stability AI [Button: 31.3k]
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+Model card Files xet Community 23
+
+Train
+
+Deploy
+
+Use this model
+
+main
+
+stable-diffusion-2-1-base / unet /diffusion_pytorch_model.safetensors
+
+Image: patrickvonplaten's picture
+
+patrickvonplaten
+
+Adding `safetensors` variant of this model (#4)
+
+e7cda18
+
+download
+
+Copy download link
+
+history blame contribute delete
+
+Safe
+
+3.46 GB
+
+This file is stored with Xet . It is too big to display, but you can still download it.
+
+### Large File Pointer Details
+
+( Raw pointer file )
+
+SHA256:
+    6dfae3e5f7d459b50f4b0850ead945972c75bb0e1897628933e169eb43974214
+
+Pointer size:
+    135 Bytes
+
+·
+
+Size of remote file:
+    3.46 GB
+
+·
+
+Xet backed hash:
+    ef38808922bff2b361543bcca9555228e0f6d1cf220e930e1c7544d51c89bf0a
+
+Xet efficiently stores Large Files inside Git, intelligently splitting files into unique chunks and accelerating uploads and downloads. More info.--------------------------------------------------------------------------------
+diffusers/docs/source/en/api/models/autoencoder_tiny.md at main · huggingface/diffusers · GitHub (https://github.com/huggingface/diffusers/blob/main/docs/source/en/api/models/autoencoder_tiny.md)
+citeturn323search2 [wordlim: 200] Crawled: last month; It is a tiny distilled version of Stable Diffusion's VAE that can quickly decode the latents in a [`StableDiffusionPipeline`] or [`StableDiffusionXLPipeline`] almost instantly. ...         "stabilityai/stable-diffusion-2-1-base", dtype=torch.float16 ... [[autodoc]] models.autoencoders.autoencoder_tiny.AutoencoderTinyOutput
+
+# autoencoder_tiny.md
+
+Copy path
+
+[Input: Go to file]
+
+Blame More file actions
+
+# Tiny AutoEncoder
+
+Tiny AutoEncoder for Stable Diffusion (TAESD) was introduced in madebyollin/taesd by Ollin Boer Bohan. It is a tiny distilled version of Stable Diffusion's VAE that can quickly decode the latents in a [`StableDiffusionPipeline`] or [`StableDiffusionXLPipeline`] almost instantly.
+
+To use with Stable Diffusion v-2.1:
+    
+    import torch
+    from diffusers import DiffusionPipeline, AutoencoderTiny
+    
+    pipe = DiffusionPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-2-1-base", dtype=torch.float16
+    )
+    pipe.vae = AutoencoderTiny.from_pretrained("madebyollin/taesd", dtype=torch.float16)
+    pipe = pipe.to("cuda")
+    
+    prompt = "slice of delicious New York-style berry cheesecake"
+    image = pipe(prompt, num_inference_steps=25).images[0]
+    image
+
+To use with Stable Diffusion XL 1.0
+    
+    import torch
+    from diffusers import DiffusionPipeline, AutoencoderTiny
+    
+    pipe = DiffusionPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-base-1.0", dtype=torch.float16
+    )
+    pipe.vae = AutoencoderTiny.from_pretrained("madebyollin/taesdxl", dtype=torch.float16)
+    pipe = pipe.to("cuda")
+    
+    prompt = "slice of delicious New York-style berry cheesecake"
+    image = pipe(prompt, num_inference_steps=25).images[0]
+    image
+
+## AutoencoderTiny
+
+[[autodoc]] AutoencoderTiny
+
+## AutoencoderTinyOutput
+
+[[autodoc]] models.autoencoders.autoencoder_tiny.AutoencoderTinyOutput
+--------------------------------------------------------------------------------
+GitHub - Stability-AI/generative-models: Generative Models by Stability AI · GitHub (https://github.com/stability-ai/generative-models)
+citeturn323search3 [wordlim: 200] Published: 1.3 years ago; Crawled: 3 months ago; We use the standard image encoder from SD 2.1, but replace the decoder with a temporally-aware `deflickering decoder`. ...     git clone https://github.com/Stability-AI/generative-models.git ... However for autoencoder training as e.g. in `configs/example_training/autoencoder/kl-f4/imagenet-attnfree-logvar.yaml`, only `pytorch1.13` is supported.
+To run SVD or SV3D on a streamlit server: `streamlit run scripts/demo/video_sampling.py`
+
+November 28, 2023
+
+  * We are releasing SDXL-Turbo, a lightning fast text-to image model. Alongside the model, we release a technical report
+
+    * Usage:
+      * Follow the installation instructions or update the existing environment with `pip install streamlit-keyup`.
+      * Download the weights and place them in the `checkpoints/` directory.
+      * Run `streamlit run scripts/demo/turbo.py`.
+
+November 21, 2023
+
+  * We are releasing Stable Video Diffusion, an image-to-video model, for research purposes:
+
+    * SVD: This model was trained to generate 14 frames at resolution 576x1024 given a context frame of the same size. We use the standard image encoder from SD 2.1, but replace the decoder with a temporally-aware `deflickering decoder`.
+    * SVD-XT: Same architecture as `SVD` but finetuned for 25 frame generation.
+    * Discrete times models (denoisers) are simply a special case of continuous time models (denoisers); see `sgm/modules/diffusionmodules/denoiser.py`.
+    * The following features are now independent: weighting of the diffusion loss function (`sgm/modules/diffusionmodules/denoiser_weighting.py`), preconditioning of the network (`sgm/modules/diffusionmodules/denoiser_scaling.py`), and sampling of noise levels during training (`sgm/modules/diffusionmodules/sigma_sampling.py`).
+  * Autoencoding models have also been cleaned up.
+
+## Installation:
+
+#### 1. Clone the repo
+    
+    git clone https://github.com/Stability-AI/generative-models.git
+    cd generative-models
+
+#### 2. Setting up the virtualenv
+
+This is assuming you have navigated to the `generative-models` root after cloning it.
+
+NOTE: This is tested under `python3.10`. For other python versions, you might encounter version conflicts.
+
+PyTorch 2.0
+    
+    # install required packages from pypi
+    python3 -m venv .pt2
+    source .pt2/bin/activate
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    pip3 install -r requirements/pt2.txt
+
+#### 3. Install `sgm`
+    
+    pip3 install .
+
+#### 4. Install `sdata` for training
+    
+    pip3 install -e git+https://github.com/Stability-AI/datapipelines.git@main#egg=sdata
+
+
+NOTE 2: This repository supports both `pytorch1.13` and `pytorch2`for training generative models. However for autoencoder training as e.g. in `configs/example_training/autoencoder/kl-f4/imagenet-attnfree-logvar.yaml`, only `pytorch1.13` is supported.
+
+NOTE 3: Training latent generative models (as e.g. in `configs/example_training/imagenet-f8_cond.yaml`) requires retrieving the checkpoint from Hugging Face and replacing the `CKPT_PATH` placeholder in this line. The same is to be done for the provided text-to-image configs.
+
+### Building New Diffusion Models
+
+#### Conditioner
+
+The `GeneralConditioner` is configured through the `conditioner_config`. Its only attribute is `emb_models`, a list of different embedders (all inherited from `AbstractEmbModel`) that are used to condition the generative model. All embedders should define whether or not they are trainable (`is_trainable`, default `False`), a classifier-free guidance dropout rate is used (`ucg_rate`, default `0`), and an input key (`input_key`), for example, `txt` for text-conditioning or `cls` for class-conditioning. --------------------------------------------------------------------------------
+stable-diffusion-webui-controlnet-docker/on_start.sh at main · kalaspuff/stable-diffusion-webui-controlnet-docker · GitHub (https://github.com/kalaspuff/stable-diffusion-webui-controlnet-docker/blob/main/on_start.sh)
+citeturn323search4 [wordlim: 200] Crawled: last week; download-model --checkpoint "v2-1_768-ema-pruned.yaml" "https://raw.githubusercontent.com/Stability-AI/stablediffusion/fc1488421a2761937b9d54784194157882cbc3b1/configs/stable-diffusion/v2-inference-v.yaml" ... ## VAE (variational autoencoder) · VAE 840k EMA:
+## End of lightweight installation for $IS_SHARED_UI setup.
+
+## ----------------------------
+
+## env $IS_SHARED_UI is not set
+
+## ----------------------------
+
+## Stable Diffusion 2.1 · 768 base model:
+
+download-model --checkpoint "v2-1_768-ema-pruned.safetensors" "https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/36a01dc742066de2e8c91e7cf0b8f6b53ef53da1/v2-1_768-ema-pruned.safetensors"
+
+download-model --checkpoint "v2-1_768-ema-pruned.yaml" "https://raw.githubusercontent.com/Stability-AI/stablediffusion/fc1488421a2761937b9d54784194157882cbc3b1/configs/stable-diffusion/v2-inference-v.yaml"
+
+## Stable Diffusion 1.5 · 512 base model:
+
+download-model --checkpoint "v1-5-pruned-emaonly.safetensors" "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/39593d5650112b4cc580433f6b0435385882d819/v1-5-pruned-emaonly.safetensors"
+
+download-model --checkpoint "v1-5-pruned-emaonly.yaml" "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/39593d5650112b4cc580433f6b0435385882d819/v1-inference.yaml"
+--------------------------------------------------------------------------------
+Initial Commit · sd2-community/stable-diffusion-2-1-base at 4e63672 (https://huggingface.co/sd2-community/stable-diffusion-2-1-base/commit/4e63672c03103b6c636b8fb4119ba982469b2955)
+citeturn323search5 [wordlim: 200] Published: 9 months ago; Crawled: 3 months ago; 13  | + - Use it with the [`stablediffusion`](https://github.com/Stability-AI/stablediffusion) repository: download the `v2-1_512-ema-pruned.ckpt` [here](https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt). ... 20  | + - **License:** [CreativeML Open RAIL++-M License](https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL) ... 2  | + oid sha256:681c555376658c81dc273f2d737a2aeb23ddb6d1d8e5b3a7064636d359a22668
+27  | + "UNet2DConditionModel"
+28  | + ],
+29  | + "vae": [
+30  | + "diffusers",
+31  | + "AutoencoderKL"
+32  | + ]
+33  | + }
+1  | + {
+2  | + "_class_name": "PNDMScheduler",
+3  | + "_diffusers_version": "0.10.0.dev0",
+4  | + "beta_end": 0.012,
+5  | + "beta_schedule": "scaled_linear",
+6  | + "beta_start": 0.00085,
+7  | + "clip_sample": false,
+8  | + "num_train_timesteps": 1000,
+9  | + "prediction_type": "epsilon",
+10  | + "set_alpha_to_one": false,
+11  | + "skip_prk_steps": true,
+12  | + "steps_offset": 1,
+13  | + "trained_betas": null
+14  | + }
+1  | + {
+2  | + "_name_or_path": "stabilityai/stable-diffusion-2",
+3  | + "architectures": [
+4  | + "CLIPTextModel"
+5  | + ],
+6  | + "attention_dropout": 0.0,
+7  | + "bos_token_id": 0,
+8  | + "dropout": 0.0,
+9  | + "eos_token_id": 2,
+10  | + "hidden_act": "gelu",
+11  | + "hidden_size": 1024,
+12  | + "initializer_factor": 1.0,
+13  | + "initializer_range": 0.02,
+14  | + "intermediate_size": 4096,
+15  | + "layer_norm_eps": 1e-05,
+16  | + "max_position_embeddings": 77,
+17  | + "model_type": "clip_text_model",
+18  | + "num_attention_heads": 16,
+19  | + "num_hidden_layers": 23,
+20  | + "pad_token_id": 1,
+21  | + "projection_dim": 512,
+22  | + "torch_dtype": "float32",
+23  | + "transformers_version": "4.25.0.dev0",
+24  | + "vocab_size": 49408
+25  | + }
+1  | + version https://git-lfs.github.com/spec/v1
+2  | + oid sha256:681c555376658c81dc273f2d737a2aeb23ddb6d1d8e5b3a7064636d359a22668
+3  | + size 680821096
+
+--------------------------------------------------------------------------------
+Duplicate from stabilityai/stable-diffusion-2-1-base · common-canvas/CommonCanvas-S-C at 3f5521a (https://huggingface.co/common-canvas/CommonCanvas-S-C/commit/3f5521a067ad8dbef473bfe0a9ea64d34d8e77f1)
+citeturn323search6 [wordlim: 200] Published: 2.6 years ago; Crawled: 3 months ago;   25. vae/diffusion_pytorch_model.bin +3 -0 ... 13  | + - Use it with the [`stablediffusion`](https://github.com/Stability-AI/stablediffusion) repository: download the `v2-1_512-ema-pruned.ckpt` [here](https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt). ... 2  | + oid sha256:da861650fc7df96390abffcbb9bcf67b7c5566422fda5af9bc003605be65c5f3
+vae/diffusion_pytorch_model.fp16.bin ADDED [Input] Viewed
+
+ | @@ -0,0 +1,3 @@
+ |  
+ |  
+ |  
+
+ |  
+1  | + version https://git-lfs.github.com/spec/v1
+2  | + oid sha256:44915add42092106e70bffac475aae4283b5e8167a8a0c5f55ccc667ee4ebeb5
+3  | + size 167405651
+
+vae/diffusion_pytorch_model.fp16.safetensors ADDED [Input] Viewed--------------------------------------------------------------------------------
+vae/diffusion_pytorch_model.fp16.safetensors · liuyingjiang/stable-diffusion-2-1-base at dc7c8e131cbe15c6519beb504e30b93c820647cf (https://huggingface.co/liuyingjiang/stable-diffusion-2-1-base/blame/dc7c8e131cbe15c6519beb504e30b93c820647cf/vae/diffusion_pytorch_model.fp16.safetensors)
+citeturn323search7 [wordlim: 200] Crawled: 4 months ago; stable-diffusion-2-1-base ...     oid sha256:3 e4c08995484ee61270175e9e7a072b66a6e4eeb5f0c266667fe1f45b90daf9a
+
+Image
+
+liuyingjiang
+
+/
+
+stable-diffusion-2-1-base
+
+like [Button: 0]
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+Model card Files xet Community
+
+Deploy
+
+Use this model
+
+dc7c8e1
+
+stable-diffusion-2-1-base
+
+File size: 134 Bytes
+    
+    dc7c8e1
+     
+     
+
+ | 
+    
+    1
+    
+    2
+    
+    3
+    
+    4
+
+ | 
+    
+    version https://gi t-lfs.github.com/spec/v1
+    oid sha256:3 e4c08995484ee61270175e9e7a072b66a6e4eeb5f0c266667fe1f45b90daf9a
+    size 167335342--------------------------------------------------------------------------------
+GitHub - lshqqytiger/stablediffusion-directml: High-Resolution Image Synthesis with Latent Diffusion Models · GitHub (https://github.com/lshqqytiger/stablediffusion-directml)
+citeturn323search8 [wordlim: 200] Published: 3.5 years ago; Crawled: last month;     git clone https://github.com/facebookresearch/xformers.git ...     cd ../stablediffusion ... The weights are available via the StabilityAI organization at Hugging Face under the CreativeML Open RAIL++-M License. ... Stable Diffusion v2 refers to a specific configuration of the model architecture that uses a downsampling-factor 8 autoencoder with an 865M UNet and OpenCLIP ViT-H/14 text encoder for the diffusion model. ... To sample from the SD2.1-v model, run the following:
+
+## General Disclaimer
+
+Stable Diffusion models are general text-to-image diffusion models and therefore mirror biases and (mis-)conceptions that are present in their training data. Although efforts were made to reduce the inclusion of explicit pornographic material, we do not recommend using the provided weights for services or products without additional safety mechanisms and considerations. The weights are research artifacts and should be treated as such. Details on the training procedure and data, as well as the intended use of the model can be found in the corresponding model card. The weights are available via the StabilityAI organization at Hugging Face under the CreativeML Open RAIL++-M License.
+
+## Stable Diffusion v2
+
+Stable Diffusion v2 refers to a specific configuration of the model architecture that uses a downsampling-factor 8 autoencoder with an 865M UNet and OpenCLIP ViT-H/14 text encoder for the diffusion model. The SD 2-v model produces 768x768 px outputs.
+
+Evaluations with different classifier-free guidance scales (1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0) and 50 DDIM sampling steps show the relative improvements of the checkpoints:
+
+--------------------------------------------------------------------------------
+Upload 21 files · yujingsun/stable-diffusion-2-1-base at 6a3ba18 (https://huggingface.co/yujingsun/stable-diffusion-2-1-base/commit/6a3ba184fa153cd64ca0507b60ebc5c607a260a4)
+citeturn323search9 [wordlim: 200] Published: 9 months ago; Crawled: 2 weeks ago;   17. stable-diffusion-2-1-base/vae/config.json +29 -0 ... 2  | + "_name_or_path": "stabilityai/stable-diffusion-2", ... 2  | + oid sha256:da861650fc7df96390abffcbb9bcf67b7c5566422fda5af9bc003605be65c5f3
+stable-diffusion-2-1-base/text_encoder/config.json ADDED [Input] Viewed
+
+ | @@ -0,0 +1,25 @@
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+ |  
+
+ |  
+1  | + {
+2  | + "_name_or_path": "stabilityai/stable-diffusion-2",
+3  | + "architectures": [
+4  | + "CLIPTextModel"
+5  | + ],
+6  | + "attention_dropout": 0.0,
+7  | + "bos_token_id": 0,
+8  | + "dropout": 0.0,
+9  | + "eos_token_id": 2,
+10  | + "hidden_act": "gelu",
+11  | + "hidden_size": 1024,
+12  | + "initializer_factor": 1.0,
+13  | + "initializer_range": 0.02,
+14  | + "intermediate_size": 4096,
+15  | + "layer_norm_eps": 1e-05,
+16  | + "max_position_embeddings": 77,
+17  | + "model_type": "clip_text_model",
+18  | + "num_attention_heads": 16,
+19  | + "num_hidden_layers": 23,
+20  | + "pad_token_id": 1,
+21  | + "projection_dim": 512,
+22  | + "torch_dtype": "float32",
+23  | + "transformers_version": "4.25.0.dev0",
+24  | + "vocab_size": 49408
+25  | + }
+
+stable-diffusion-2-1-base/text_encoder/model.fp16.safetensors ADDED [Input] Viewed
+
+ | @@ -0,0 +1,3 @@
+ |  
+ |  
+ |  
+
+ |  
+1  | + version https://git-lfs.github.com/spec/v1
+2  | + oid sha256:681c555376658c81dc273f2d737a2aeb23ddb6d1d8e5b3a7064636d359a22668
+3  | + size 680821096
+
+ |  
+1  | + {
+2  | + "_class_name": "AutoencoderKL",
+3  | + "_diffusers_version": "0.10.0.dev0",
+4  | + "act_fn": "silu",
+5  | + "block_out_channels": [
+6  | + 128,
+7  | + 256,
+8  | + 512,
+9  | + 512
+10  | + ],
+11  | + "down_block_types": [
+12  | + "DownEncoderBlock2D",
+13  | + "DownEncoderBlock2D",
+14  | + "DownEncoderBlock2D",
+15  | + "DownEncoderBlock2D"
+16  | + ],
+17  | + "in_channels": 3,
+18  | + "latent_channels": 4,
+19  | + "layers_per_block": 2,
+20  | + "norm_num_groups": 32,
+21  | + "out_channels": 3,
+22  | + "sample_size": 768,
+23  | + "up_block_types": [
+24  | + "UpDecoderBlock2D",
+25  | + "UpDecoderBlock2D",
+26  | + "UpDecoderBlock2D",
+27  | + "UpDecoderBlock2D"
+28  | + ]
+29  | + }
+
+stable-diffusion-2-1-base/vae/diffusion_pytorch_model.bin ADDED [Input] Viewed
+
+ | @@ -0,0 +1,3 @@
+ |  
+ |  
+ |  
+
+ |  
+1  | + version https://git-lfs.github.com/spec/v1
+2  | + oid sha256:1b4889b6b1d4ce7ae320a02dedaeff1780ad77d415ea0d744b476155c6377ddc
+3  | + size 334707217
+
+stable-diffusion-2-1-base/vae/diffusion_pytorch_model.fp16.bin ADDED [Input] Viewed
+
+ | @@ -0,0 +1,3 @@
+ |  
+ |  
+ |  
+
+ |  
+1  | + version https://git-lfs.github.com/spec/v1
+2  | + oid sha256:44915add42092106e70bffac475aae4283b5e8167a8a0c5f55ccc667ee4ebeb5
+3  | + size 167405651
+
+--------------------------------------------------------------------------------
+ReFlowSET/vae_audit/README.md at main · KAIST-VICLab/ReFlowSET · GitHub (https://github.com/KAIST-VICLab/ReFlowSET/blob/main/vae_audit/README.md)
+citeturn323search10 [wordlim: 200] Crawled: yesterday; The six are not rate-matched, and the tables must not be read as if they were: FLUX.2 keeps 0.5 latent channels per pixel, SD3.x and FLUX.1 keep 0.25, SD2.1 and SDXL keep 0.0625. ... Stability's own `stable-diffusion-2-1` and `stable-diffusion-2-1-base` repositories are not publicly reachable (HTTP 401 as of 2026-09-01), so the row cannot be pulled from its original.
+Downsample factor and latent channel count are read back from each downloaded config by the audit itself, and are reproduced above from the published run's own output — nothing here is hardcoded into the measurement.
+
+The six are not rate-matched, and the tables must not be read as if they were: FLUX.2 keeps 0.5 latent channels per pixel, SD3.x and FLUX.1 keep 0.25, SD2.1 and SDXL keep 0.0625. A larger latent should reconstruct better. What the audit establishes is what each codec loses at the operating point it is actually used at, which is the number a generator built on it inherits.
+
+### Notes that matter
+
+Gated repositories. SD3.0, SD3.5 and FLUX.1 are served only to an account that has accepted the publisher's licence on the Hub. Accept it on the model page, then `hf auth login`. `fetch_vaes.py` reports and skips a repository whose licence has not been accepted rather than failing the run.
+
+SD2.1 is a community mirror, and here is why. Stability's own `stable-diffusion-2-1` and `stable-diffusion-2-1-base` repositories are not publicly reachable (HTTP 401 as of 2026-09-01), so the row cannot be pulled from its original. --------------------------------------------------------------------------------
+Duplicate from Manojb/stable-diffusion-2-1-base · Kaixina/stable-diffusion-2-1-base at 7297ab1 (https://huggingface.co/Kaixina/stable-diffusion-2-1-base/commit/7297ab10b7f0996c0f1907ccb15edba18a606730)
+citeturn323search11 [wordlim: 200] Crawled: last month; 2  | + oid sha256:681c555376658c81dc273f2d737a2aeb23ddb6d1d8e5b3a7064636d359a22668 ... 22  | + "name_or_path": "stabilityai/stable-diffusion-2", ... vae/diffusion_pytorch_model.bin ADDED [Input] Viewed
+--------------------------------------------------------------------------------
+Comments on Dual Use Foundation AI Models with Widely Available Model Weights (https://stability.ai/s/Stability-AI-NTIA-Response-on-Open-Weights-The-Economic-Benefits-of-Open-Foundation-Models.pdf)
+citeturn323search12 [wordlim: 200] Published: 1.2 years ago; network.22 In addition, platforms can deploy AI technology defensively. ... ‘Stable Diffusion V2-1 Model Card’ available at https://huggingface.co/stabilityai/stable-diffusion-2-1. ... images from new or unverified accounts by default, unless the image has trusted metadata that confirms its origin.
+--------------------------------------------------------------------------------
+Internal Error ()
+citeturn323view0 [wordlim: 200] Source: open({"ref_id":"https://huggingface.co/stabilityai/stable-diffusion-2-1-base/blob/main/vae/config.json","lineno":null}); Total lines: 1
+--------------------------------------------------------------------------------
+Internal Error ()
+citeturn323view1 [wordlim: 200] Source: open({"ref_id":"https://huggingface.co/stabilityai/stable-diffusion-2-1-base/blob/main/vae/diffusion_pytorch_model.safetensors","lineno":null}); Total lines: 1
+

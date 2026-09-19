@@ -1,0 +1,91 @@
+# S14A：评分前诊断特征提取器准备记录
+
+本文记录程序准备，不是新方法结果。作者为独立分工的 feature-extractor agent；测试由同一作者编写，不能标成不同作者审计。真实30输入特征提取、训练、门控、阈值选择、重新评分均尚未运行。父任务须先冻结协议、输入清单及最后源码身份，再决定执行。
+
+## 要回答的问题和本轮边界
+
+S14候选希望判断“什么时候几何来源选图可能不如姿态回退”。本阶段只整理两种既定动作在评分前留下的信息，建立可核对的15列输入。集合交叠、权重集中度、熵和姿态距离都是普通诊断量，不是新算法创新。它们是否能预测受损、是否超出同信息普通门控的能力，尚无结果。
+
+本轮读取了项目AGENTS、当前记忆、最新日志、S14输入结构清单与创新候选文稿。为核字段语义，只查看了允许集合中的两个示例JSON：S7 block0 stride8的prediction_only_selection.json，以及S12 S7 block0 query20的selection.json；这属于既有字段检查，不是特征表运行。另只读记录器和选择器源码，没有打开S12 records/summary、S13数值结果、评分NPZ、原照片、GT或预测数组。
+
+使用本地Claude scientific-critical-thinking的测量定义、混杂、输入可用性和证据边界原则；不调用Claude模型/CLI。Supervisor idea-evaluator在已完成的S14候选审查中规定本阶段只能做前置验证，本实现不重新宣告新颖性。未使用临床GRADE评分；这份输入合同不需要生成式示意图，表格足够说明。没有新增网络文献判断，因此不重复已有定点检索。
+
+## 输入合同
+
+入口为 `scripts/extract_s14_prediction_features.py`，只依赖Python标准库。命令要求 `--manifest` 和新的 `--output`；`--root`默认为入口所在项目根。
+
+运行时实验输入必须**恰好30份**：
+
+- `results/S7_event_replay/block{0,1,2}_stride8/prediction_only_selection.json` 共3份。
+- `results/S8_event_replay_v2/block{0,1,2}_stride8/prediction_only_selection.json` 共3份。
+- `results/S12_matched_budget/selections/{S7,S8}_block{0,1,2}_query{20,21,22,23}.json` 共24份。
+
+manifest必须含 `schema: "s14a-prediction-feature-manifest-v1"`、`extractor_sha256`以及30条 `inputs: [{"path": "项目内相对路径", "sha256": "64位小写SHA"}]`。每项只能有path/sha256；路径集合必须与代码内完整固定域相同。缺项、重复、额外输入、错SHA和符号链接重定向均拒绝。可由父任务从现有inventory的json_inputs筛出上述30项，**程序不自动打开inventory**，也不沿输入内任何路径去读取其它文件。
+
+协议/manifest/源码本身是控制文件，不算30份实验JSON。程序读取manifest和自身源码以验证冻结身份；所有30实验文件的字节SHA全部匹配后才开始JSON解码，特征只取下述字段。JSON解析会解码完整允许文件，其它键不参与特征或输出；这不是操作系统沙盒或流式隐去未知键。已见查询和研究团队已知旧答案的事实也不会因输入隔离而消失。
+
+运行完成前再次读取30输入、源码和manifest，保存前后SHA。第一轮SHA通过的字节缓存在内存，之后从同一缓存解码，避免先哈希再重新打开解码造成输入身份缝隙。计数来自实际执行分支，包括哈希读取尝试数、成功数、JSON解码数、特征行数、最终所用pair数，不是系统级文件访问追踪。
+
+## 精确字段语义
+
+来源侧只用每个query的 `maps.A0P0.official_trace` 与 `maps.A0P0.readouts.official`；不分析其它图变体、readout或stride。姿态侧用独立selection JSON的原 `trace` 和 `full20_*`距离/顺序。两端ID必须位于0–19，候选各14个不同ID，最终各4个不同ID。
+
+源码定位：`src/vmem_retrieval_kernel.py::process_retrieved_spatial_information`、`src/rgbd_retrieval.py::select`、`src/s7_event_replay.py::decision_trace`、`scripts/run_s12_matched_budget.py::make_selections`。
+
+`weights`是原renderer可见来源的权重：按来源累计 `cos/(1+depth)`，再对来源总和归一化；其中已有实现首次遇到来源时初始化后又累加一次，该历史行为不在S14A中修正。它们不是测量准确率、经过校准的置信概率或独立样本频率。`candidate_counts`是离散候选配额，当前主域为20个ID中14个1、6个0；**不能把配额当成概率来算熵**。程序只用它核候选身份。
+
+姿态“距离”是原选择器组合量 `0.1 × 归一化平移距离 + 旋转角（弧度）`。因此列名不写米、厘米或单独角度。query距离统一取S12保存的全20 FP32值，并核两条trace的候选距离精确一致；不重新计算相机、平均姿态或PyTorch排序。pair距离来自原FP64 NMS比较。这里的f32/f64指历史记录产生时的精度，特征运算由Python float与math.fsum完成，不称全程FP32。
+
+## 固定15列特征
+
+以下G表示来源14方案，P表示姿态14方案。C为候选集合，S为最终四图集合；w是保存的20个来源权重，p=w/Σw。集合ID和阶段不是模型输入。
+
+| 输出列 | 明确定义与来源 |
+|---|---|
+| `candidate_intersection_count` | 两个14候选集合交集大小，0–14整数 |
+| `candidate_jaccard` | 候选交集大小/候选并集大小 |
+| `selected_intersection_count` | 两个最终四图集合交集大小，0–4整数 |
+| `selected_jaccard` | 最终集合交集大小/最终集合并集大小 |
+| `source_weight_hhi` | Σp²；集中度，不称可靠性 |
+| `source_weight_max_share` | max p；只反映来源票集中程度 |
+| `source_weight_normalized_entropy` | −Σp log p / log20；零权重仍占20个槽，0log0按0处理 |
+| `source_weight_gap_14_15_raw` | 将保存的原weights降序，取第14减第15；精确核既存cutoff_gap_14_15。不是candidate_counts间隔，也不再次归一化此差 |
+| `pose_query_distance_gap_14_15_f32` | 全20保存FP32距离升序，第15减第14；本域要求无tie |
+| `source_selected_query_distance_mean_f32` | G最终四个ID对应全20保存FP32距离的算术均值 |
+| `pose_selected_query_distance_mean_f32` | P最终四个ID对应同一全20距离的算术均值 |
+| `source_selected_pair_distance_mean_f64` | G四图六个保存pair距离的均值 |
+| `source_selected_pair_distance_min_f64` | G六个保存pair距离的最小值 |
+| `pose_selected_pair_distance_mean_f64` | P四图六个保存pair距离的均值 |
+| `pose_selected_pair_distance_min_f64` | P六个保存pair距离的最小值 |
+
+熵与HHI归一化是为了消除已保存浮点权重和不恰好为1的舍入，不是更改原选择权重。纯函数允许一般有效单一来源权重，其归一化熵定义为0；真实主域仍强制完整20个ID。空权重、全0、负值、非有限数、重复ID都会失败，不填0蒙混过关。
+
+元数据固定为 `stage, block, query, split, arm, stride`，单独列于metadata_columns。stage/block/query/split只能用于分层识别和溯源，不能进入后续拟合。JSON显式给feature_columns，CSV虽并列元数据与特征，消费者必须只采用feature_columns列表。开发/测试字样沿用旧数据标签，不表示本阶段获得新测试集。
+
+## 最终四图的六个pair如何核验
+
+没有保存所有190个历史pair，程序也不会重算190个距离。对每方原trace，读取最终selected次序，并定位后三个最终ID各自被接受的NMS step：第二张须有与第一张的1个比较，第三张须有与前两张的2个比较，第四张须有与前三张的3个比较，总共六个。
+
+必须严格匹配既有接受次序、比较ID次序和全部六个无向pair。行级溯源保存原step索引、comparison索引、两个ID和原距离。拒绝步骤里的偶然比较不替代被接受步骤中缺失的数据；若存在非空fallback、缺失pair、重复ID、非有限值或接受次序不符，停止并保存失败，不设0，也不找其它评分数据填补。
+
+成功运行预期是24行，每行两方各6个，共288个**pair使用记录**。某个物理pair可能在多个query或两方重复使用，288不是288个独立pair、更不是新距离计算。
+
+## 输出、失败与记录
+
+成功的新目录包含：
+
+- `features.csv`、`features.json`：全部24行×15列特征，以及6项元数据。
+- `row_provenance.json`：每行两份来源路径/SHA、query指针、候选/最终ID、归一化前权重总和、12条pair来源。
+- `input_identity.json`：30输入前后SHA。
+- `frozen_manifest.json`、`extractor_snapshot.py`：本次实际控制文件副本。
+- `run_metadata.json`：实际UTC开始/结束、环境、源码/manifest前后SHA、计数、输出SHA与状态。
+
+输出目录存在就拒绝，不覆盖历史。manifest格式或源码SHA失败发生在建目录前，调用方要记录控制台错误；建目录之后的输入/字段/特征错误写failed元数据。若缺pair等发生于部分行计算之后，不写部分成功feature表；已经创建的失败目录保留，修订后用新目录重试。后续独立核查应读取冻结快照，而非默认把live源码当作历史执行版本。
+
+## 已做人工检查和未做事项
+
+`scripts/check_s14_feature_boundaries.py`使用人工数据：手算均匀/稀疏/单来源权重；15列已知结果；空/全零/负/NaN权重；重复ID；缺pair/Infinity/fallback；重复JSON键；错误文件/源码SHA；非法路径；重复清单项；已有输出。它不读取真实实验文件，也不生产真实特征表。
+
+首次19项于UTC2026-09-06T03:53:17.437120–03:53:17.470225通过，环境为本机Python3.13.0（Homebrew，macOS26.7 arm64），回执保存在 `work/S14A_extractor_boundary_checks/receipt.json`。随后仅增加运行元数据中的源码和manifest结束SHA明示字段，最后版本于UTC03:54:42.142553–03:54:42.155775再次19项通过，回执为 `work/S14A_extractor_boundary_checks_v2/receipt.json`；旧回执保留，不是失败重试。最后入口SHA为 `188061a33c107043f7396c401affb10b5112fcd71db941159c9cde9dbedf12f3`，人工检查器SHA为 `ce4977be088e30e51574c2342da3fba2bac708d4d252c279b478b63f0fb5b5eb`。`--help`也已实际执行成功，没有调用主提取入口。
+
+尚未做：真实30输入的提取器运行、不同作者预审、特征有效性检验、标签联结、场景外测试、阈值/模型拟合、路由动作、模型或renderer推理、速度收益/视频质量判断。程序准备只能支持下一步的输入可用性核对，不能说“新创新已验证”。当前query位姿仍来自已见query RGB，因此也不声称生成前只有轨迹时可直接部署。

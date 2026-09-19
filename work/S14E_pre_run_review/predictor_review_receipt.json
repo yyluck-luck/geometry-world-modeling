@@ -1,0 +1,62 @@
+{
+  "status": "PREDICTOR_REVIEW_PASS_PREPARE_SCORE_PENDING",
+  "recorded_utc": "2026-09-06T09:17:31.381647+00:00",
+  "reviewer": "s14e_camera_calibration_audit",
+  "independent_of_predictor_author": true,
+  "sources": [
+    {
+      "path": "scripts/run_s14e_state_reuse_queries.py",
+      "sha256": "891fbebd441f44beef4c22882eac4b67d5165f2ebd0467d5d7b0e04e4e91950e"
+    },
+    {
+      "path": "docs/S14E_PREDICTOR_PREPARATION.md",
+      "sha256": "11013750dda2e15a5df884e3219f8aba096e25bed8006d4a3259d5c84b8d0d1e"
+    },
+    {
+      "path": "scripts/run_s14d_ray_only_probe.py",
+      "sha256": "859b0eb55da5751b72d9b65956cdbff1b19c9cb959c5c542687500a5bcef049a"
+    },
+    {
+      "path": "work/S14E_calibration_audit/scale_definition_clarification.md",
+      "sha256": "2b60bca4ebe0c2fb23e1dab0c00fb45160083e23bb7d712a7c531a2ed466a981"
+    },
+    {
+      "path": "work/S14E_calibration_audit/scale_definition_clarification.json",
+      "sha256": "9280130dc71938d9a9139e5478894cf3827eed92c100fd9fbe00ecf155acbf79"
+    },
+    {
+      "path": "docs/S14E_KNOWN_CAMERA_DESIGN_DRAFT.md",
+      "sha256": "7a00391940c2fbbcb018c0316a1daaef50b6bde8e31511a0630348a5c76fb02d"
+    }
+  ],
+  "artificial_receipt": "work/S14E_pre_run_review/predictor_independent_v1/receipt.json",
+  "checks": 118,
+  "runtime_cases": 6,
+  "main_early_failure_cases": 2,
+  "real_npz_decodes": 0,
+  "real_rgb_decodes": 0,
+  "real_depth_decodes": 0,
+  "real_trajectory_decodes": 0,
+  "checkpoint_reads": 0,
+  "model_calls": 0,
+  "confirmed": [
+    "Q0 zero dummy uses prior query_call_1; idx/instance/flags/true_shape dtype match S14D",
+    "17 arrays from four allowed NPZ roles; complete key domains and previous byte identities",
+    "All 5 state fields restore original dtype, including int64 state_pos",
+    "Every returned call saved before output/state/encoder/parity gates; later failure stops calls and preserves prior outputs",
+    "Actual /usr/bin/git version 2.50.1 reads pinned commit and clean status",
+    "Regular Python exceptions persist attempt/success counters and FAILED metadata; external force-kill must use caller partial status and not claim exact complete counters"
+  ],
+  "pending": [
+    "Prepare must enforce proper rotations, final forward OLS scale, K and ray formulas; predictor intentionally only checks shapes/finite/bottom rows/focal signs",
+    "Final design/protocol must consistently say zero/query_call_1 parity; older design prose says NaN/call0",
+    "Final manifest final source hashes, state/cached history equivalence gates, and score seal/target depth isolation remain to audit"
+  ],
+  "blocking_issues_in_predictor_current_source": [],
+  "latest_protocol_reviewed": {
+    "path": "docs/S14E_FINAL_PROTOCOL.md",
+    "sha256": "c9f757b84b3160f74f8945443f90dd3302db60828c5611b6d56d08f95341aa51",
+    "parity_wording_resolved": true
+  },
+  "partial_review_report_sha256": "10cae356e8dc98bf7021d938b558fa9f5aa66bea0add736e13ad21c03f66f709"
+}

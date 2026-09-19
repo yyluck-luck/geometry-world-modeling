@@ -1,0 +1,91 @@
+{
+  "schema": "S85_INDEPENDENT_SOURCE_REVIEW_V1",
+  "reviewed_utc": "2026-09-10T20:18:04.761515+00:00",
+  "verdict": "GO_FOR_ONE_ROOT_FIXED_PROJECTION_BATCH",
+  "blockers": [],
+  "identities": {
+    "project_fixed_geometry.py": {
+      "sha256": "344ad059365bc775af0c8336eeffdaf0b44c073626aca3a4c3a10e138c2d3019",
+      "bytes": 19083
+    },
+    "CONTRACT.json": {
+      "sha256": "bcf4801ff1619ec74e5714e2ba90c556a6abb6c45f48b2f3185b2eb9925a333b",
+      "bytes": 17834
+    },
+    "check_projector_synthetic.py": {
+      "sha256": "269163f28752cb963949eba05d4773237f68a5d849e9fb868c41b36939c98fcd",
+      "bytes": 8467
+    },
+    "AUTHOR_SYNTHETIC_01.json": {
+      "sha256": "c694a8778ec69a68121f439f850c67c929bce9653d80145d092cb0c1ec3d96d6",
+      "bytes": 1877
+    },
+    "AUTHOR_PRECHECK.md": {
+      "sha256": "e9dbbfe1e31f6275216364fb5b03c2222ce8325cbd68faa1e3f56066339c8930",
+      "bytes": 3165
+    }
+  },
+  "checks": [
+    {
+      "topic": "source_and_contract",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Full 359-line runner, full contract, full 151-line artificial checker, author receipt and precheck read; current frozen byte identities verified; AST parsed only."
+    },
+    {
+      "topic": "input_identity_scope",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Two fixed original NPZ archives, exact whole-file and seven consumed field shape/dtype/body checks. S83 selected field metadata independently matched accepted textual receipt. S69 identity and S72 actual K matched textual metadata. No real archive was opened during this review."
+    },
+    {
+      "topic": "geometry",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Saved source camera-Z and original integer 512x384 source grid; actual FP32 K/P promoted to FP64. Optical target c2w selected by IDs20..23; exact K principal point287.4000244140625 retained. Source backprojection and target R-transpose transform implement frozen optical convention, without scale fit or axis conversion."
+    },
+    {
+      "topic": "statuses_and_footprints",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Mutually exclusive source nonfinite/nonpositive, target nonfinite/nonpositive, outside and valid states; target Z tested before division. Closed target center domain[0,575]^2, positive four-neighbour footprint weights only; no clipping, epsilon or snap."
+    },
+    {
+      "topic": "selection",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Lexicographic target pixel/Z/history19,18,13,12/source pixel order; slot is harmless final deterministic key. Weights qualify candidates only. Winner RGB is copied exactly. Second candidate is full-order item2 including same-Z ties."
+    },
+    {
+      "topic": "full_denominators_and_schema",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "All4 histories retained for each of4 targets:16 pairs and3,145,728 source-point rows, not independent scenes. Dense status/XYZ/UV/four-slot tables, all candidates including losers, winner/second, mask and RGB schemas align with implementation. Empty-candidate path retains complete holes."
+    },
+    {
+      "topic": "information_isolation",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "No target RGB/sensor depth/model/optimizer imports or reads. Source colors come from frozen S83 original RGB01; unused confidence/world-point fields are not decoded. Fixed source100-step state is not selected by S84 sensor score."
+    },
+    {
+      "topic": "bounded_failure",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "One fixed execution_01, exclusive mkdir/file creation, no automatic retry.300s alarm,10GiB sampled self peak RSS,2GiB output cap with reserve; sequential target saves. Partial files and traceback survive failure. Resource controls are not a kernel hard memory limit, as contract states."
+    },
+    {
+      "topic": "artificial_evidence",
+      "result": "PASS_SOURCE_REVIEW",
+      "detail": "Author single successful artificial run is bound to this exact runner and was inspected, not rerun. Literal q footprint exactness is correctly separated from FP64 same-pose coordinate closeness. Endpoints/outside, all-hole, nonfinite, Z<=0, rotation, equal-Z ordering and unweighted colors are represented."
+    }
+  ],
+  "actual_review_actions": {
+    "runner_executions": 0,
+    "synthetic_reruns": 0,
+    "real_scientific_archive_reads": 0,
+    "new_model_calls": 0,
+    "source_AST_only": true,
+    "metadata_text_reads": true
+  },
+  "nonblockers_and_limits": [
+    "Input body identities are runtime checks, not independently reread real-array evidence at this pre-review stage.",
+    "Author artificial tests do not prove actual completion, resource usage, visibility or geometric accuracy.",
+    "Contract identity is bound by the reviewed byte SHA and root launch; runner records the actual contract SHA and verifies its own source SHA.",
+    "Memory enforcement is sampled ru_maxrss plus wall alarm, not an OS address-space ceiling; actual receipt and process exit must be reviewed.",
+    "Predicted support, coverage, collision counts and depth order are descriptions of this fixed geometry, not physical visibility, accuracy, generative quality or innovation."
+  ],
+  "next": "Root may launch exactly the frozen one-batch command. Independent saved-output recomputation must be separately authorized after a frozen checker is reviewed; this GO is not an output acceptance."
+}

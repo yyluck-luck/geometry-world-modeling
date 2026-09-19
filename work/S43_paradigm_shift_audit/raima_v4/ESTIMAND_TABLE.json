@@ -1,0 +1,108 @@
+{
+  "schema": "raima-v4-estimand-table-v1",
+  "status": "SOURCE_ONLY_NO_ACTIVE_S48_CONTRACT",
+  "method_status": "NO_METHOD_SELECTED",
+  "novelty_status": "NONE",
+  "scientific_independent_unit": "scene",
+  "technical_repeat": "seed",
+  "fixed_seed_roster": [101, 211, 307, 401, 503],
+  "conditioning_population": "rank-1 ordinarily selected stable source at the predeclared return target, conditional on complete Store-Select-Address evidence",
+  "primary_treatment_version": {
+    "name": "source-coherent in-distribution post-selection total-effect intervention",
+    "freeze": [
+      "prompt and action path",
+      "camera and intrinsics",
+      "initial model and non-target memory state",
+      "noise and RNG state",
+      "ordinary selected source roster and order",
+      "target source identity",
+      "tensor shape, count, layout and temporal position"
+    ],
+    "recompute": [
+      "all target-source consumer inputs affected by the registered edit",
+      "attention and fusion descendants",
+      "latent descendants",
+      "decoder descendants",
+      "saved output"
+    ],
+    "excluded_from_primary": [
+      "source deletion",
+      "source count change",
+      "token deletion",
+      "layout or order change",
+      "unmatched zero-source",
+      "scramble outside the registered natural edit distribution",
+      "any intervention failing the distribution-shift guard"
+    ]
+  },
+  "endpoint_states": {
+    "common": ["POSITIVE", "NEGATIVE", "TECHNICAL_MISSING"],
+    "rcsu_additional": ["REFERENCE_INELIGIBLE"],
+    "access_not_passed": "all endpoints must be NOT_EVALUATED",
+    "missing_policy": "any missing or reference-ineligible endpoint makes the full scene non-evaluable; no complete-case deletion"
+  },
+  "estimands": [
+    {
+      "id": "AOIG",
+      "question": "Does the registered rank-1 source show less observable output response than the preregistered detectability floor under both in-distribution edit families?",
+      "comparison": "same-path registered edit versus same-path dose-zero, with identical exogenous state and target-source descendants recomputed",
+      "outcome": "full-frame and registered target-domain uint8 output effect after exact replay and matched-negative floors",
+      "aggregation": "future S48 V7 must require positive control 5/5, both registered edit families below the floor 5/5, and every replay/negative/placebo guard",
+      "positive_means": "operationally insensitive under the registered interventions",
+      "does_not_mean": [
+        "the model did not use the source",
+        "all consumers are insensitive",
+        "a hidden or redundant pathway is absent"
+      ],
+      "primary_ood_rule": "drop, scramble, source deletion and layout-changing interventions are stress tests only"
+    },
+    {
+      "id": "HARMFUL_SEM",
+      "question": "Is the raw matched-zero target-source direct effect poorly aligned with both frozen 3D supports and harmful outside support on held-out references?",
+      "comparison": "raw target edit-minus-dose-zero direct effect map; replay and negative evidence act only as independent vetoes",
+      "outcome": "support-area-adjusted effect mass plus outside-support reference loss",
+      "aggregation": "future S48 V7 must require target influence, both support definitions, both edit families, at least 4/5 seeds, independent negative/replay/placebo vetoes, and outside-reference harm",
+      "positive_means": "harmful support-effect mismatch under the registered support and reference contract",
+      "does_not_mean": [
+        "the projection is the unique semantically correct effect region",
+        "reflection, shadow, occlusion or illumination propagation is always wrong",
+        "all model pathways are mislocalized"
+      ],
+      "primary_ood_rule": "an effect map from a failed intervention-validity guard is not eligible"
+    },
+    {
+      "id": "NEGATIVE_STABLE_RCSU",
+      "question": "Is the original-source reinsertion worse than every registered in-distribution matched replacement on the exact never-conditioned reference roster?",
+      "comparison": "registered P versus O-reinsert through identical injection, encoding, quantization, process, RNG and trace paths",
+      "outcome": "reference-roster-conditioned signed normalized RGB loss on exact common-valid domains",
+      "aggregation": "future S48 V7 must require 5-seed floor, at least 4/5 same sign, same sign for every eligible reference and replacement, outside noninferiority, and full inclusion/exclusion flow",
+      "positive_means": "stable negative comparator-relative RCSU",
+      "does_not_mean": [
+        "the source is harmful versus source absence",
+        "the replacement is a real-world counterfactual truth",
+        "the sign transfers to another reference roster or metric"
+      ],
+      "primary_ood_rule": "unmatched source removal or unnatural replacement cannot define RCSU"
+    }
+  ],
+  "primary_composite": {
+    "unit": "one frozen source-target unit per registered trajectory",
+    "unit_positive": "logical OR of AOIG, HARMFUL_SEM and NEGATIVE_STABLE_RCSU; multiple positive endpoints count once",
+    "planned_denominator": "exactly two units per scene, one return_short and one return_long",
+    "scene_rate": "equal mean of the two unit-positive indicators",
+    "scene_positive_threshold": {
+      "numerator": 1,
+      "denominator": 5,
+      "finite_roster_interpretation": "at least one of the two trajectory units is positive"
+    },
+    "missing_and_failure": "fail closed at scene and cohort level",
+    "target_claim": "prevalence of a registered retrieval-operation discrepancy among independent scenes in the frozen sampling frame",
+    "prohibited_latent_construct": "the union is not an identified scalar memory-quality trait"
+  },
+  "consumer_policy": {
+    "primary": "one future S48 V7 total-effect combination that edits the target source coherently across every enumerated appearance consumer",
+    "secondary": "consumer-specific controlled interventions are descriptive diagnostics only",
+    "selection": "no consumer or edit family may be selected by Stage D or Stage C effect size",
+    "all_consumer_failure": "if the source-dependent appearance descendants cannot be enumerated, the primary estimand is not identified"
+  }
+}

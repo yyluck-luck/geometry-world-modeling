@@ -1,0 +1,226 @@
+{
+  "started_utc": "2026-09-10T18:11:40.279695+00:00",
+  "completed_utc": "2026-09-10T18:11:40.959446+00:00",
+  "wall_seconds": 0.6796144160034601,
+  "source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py",
+    "bytes": 12212,
+    "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11"
+  },
+  "checker_sha256": "fad5b93b2a543e786221b1ac1b5316dd0419571db4a3a7ce96087c7c5e2e9794",
+  "contract_sha256": "c541326a7d1bcd77569cc407a26f51f3272b74efcc2db68955313c92114b76dc",
+  "extracted_functions": [
+    {
+      "name": "ParameterStack",
+      "start_line": 303,
+      "end_line": 317
+    },
+    {
+      "name": "_ravel_hw",
+      "start_line": 320,
+      "end_line": 328
+    },
+    {
+      "name": "get_depthmaps",
+      "start_line": 245,
+      "end_line": 249
+    }
+  ],
+  "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv/bin/python",
+  "torch_version": "2.7.0",
+  "dtype": "float32",
+  "device": "cpu",
+  "artificial_input": "Two 1x2 log-depth maps [0,1] and [2,3]; loss=sum(exp(log_depth))",
+  "arms": [
+    {
+      "arm": "local_actual_AST_call_chain",
+      "loss_before_step": 31.192874908447266,
+      "registered_after_backward": [
+        {
+          "name": "im_depthmaps.0",
+          "python_id": 4474974320,
+          "shape": [
+            1,
+            2
+          ],
+          "is_leaf": true,
+          "requires_grad": true,
+          "value": [
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "grad": null
+        },
+        {
+          "name": "im_depthmaps.1",
+          "python_id": 4475208080,
+          "shape": [
+            1,
+            2
+          ],
+          "is_leaf": true,
+          "requires_grad": true,
+          "value": [
+            [
+              2.0,
+              3.0
+            ]
+          ],
+          "grad": null
+        }
+      ],
+      "registered_before_step": [
+        [
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            2.0,
+            3.0
+          ]
+        ]
+      ],
+      "registered_after_step": [
+        [
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            2.0,
+            3.0
+          ]
+        ]
+      ],
+      "registered_changed": [
+        false,
+        false
+      ],
+      "temporary_leaf": {
+        "name": "temporary_ParameterStack_output",
+        "python_id": 4599904640,
+        "shape": [
+          2,
+          1,
+          2
+        ],
+        "is_leaf": true,
+        "requires_grad": true,
+        "value": [
+          [
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          [
+            [
+              2.0,
+              3.0
+            ]
+          ]
+        ],
+        "grad": [
+          [
+            [
+              1.0,
+              2.7182817459106445
+            ]
+          ],
+          [
+            [
+              7.389056205749512,
+              20.08553695678711
+            ]
+          ]
+        ]
+      },
+      "temporary_in_optimizer": false,
+      "optimizer_parameter_ids": [
+        4474974320,
+        4475208080
+      ],
+      "optimizer_state_count_after_step": 0
+    },
+    {
+      "arm": "official_style_registered_stack_then_direct_exp",
+      "loss_before_step": 31.192874908447266,
+      "registered_after_backward": [
+        {
+          "name": "im_depthmaps",
+          "python_id": 4560290192,
+          "shape": [
+            2,
+            2
+          ],
+          "is_leaf": true,
+          "requires_grad": true,
+          "value": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              2.0,
+              3.0
+            ]
+          ],
+          "grad": [
+            [
+              1.0,
+              2.7182817459106445
+            ],
+            [
+              7.389056205749512,
+              20.08553695678711
+            ]
+          ]
+        }
+      ],
+      "registered_before_step": [
+        [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ]
+        ]
+      ],
+      "registered_after_step": [
+        [
+          [
+            -0.010000000707805157,
+            0.9900000095367432
+          ],
+          [
+            1.9900000095367432,
+            2.990000009536743
+          ]
+        ]
+      ],
+      "registered_changed": [
+        true
+      ],
+      "temporary_leaf": null,
+      "temporary_in_optimizer": null,
+      "optimizer_parameter_ids": [
+        4560290192
+      ],
+      "optimizer_state_count_after_step": 1
+    }
+  ],
+  "diagnosis": "CONFIRMED_FOR_ARTIFICIAL_CALL_CHAIN",
+  "boundary": "No full optimizer, reconstruction, RGB/depth data, checkpoint, sampler, or historical S26 run. Does not imply other optimizer parameters cannot change or historical losses were invalid.",
+  "official_reference": "https://raw.githubusercontent.com/naver/dust3r/main/dust3r/cloud_opt/optimizer.py",
+  "official_scope": "Prior code read: init registers stacked im_depthmaps once; get_depthmaps directly applies exp. Control reproduces this dataflow only."
+}

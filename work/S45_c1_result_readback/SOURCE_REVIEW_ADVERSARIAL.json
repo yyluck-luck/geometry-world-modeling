@@ -1,0 +1,96 @@
+{
+  "schema": "s45-c1-readback-source-review-v1",
+  "review_kind": "adversarial",
+  "status": "PASS_S45_C1_READBACK_SOURCE_REVIEW",
+  "verdict": "PASS_SOURCE_NOT_EXECUTED",
+  "reviewed_utc": "2026-09-08T02:33:00.646137+00:00",
+  "reviewer_role": "/root/c2_generation_builder",
+  "author_role": "/root/c1_readback_builder",
+  "reviewed_identities": {
+    "readback.py": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "PROTOCOL.md": "d845559198b58f5dddbd6276dda2fbc109c19254cd182eb29bb183686f877e14",
+    "s40_v3_3_parent": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933",
+    "preparation_receipt.json": "74309bfeef36c80990912fcb2367cf634bbd2b481d8301f94f18e3ad05bb0bf2"
+  },
+  "executed": false,
+  "c1_payload_bytes_read": 0,
+  "pixels_decoded": 0,
+  "scientific_arrays_mapped": 0,
+  "review_scope": "Adversarial source-only review of the final S45 C1 worker wrapper, its protocol, its exact reviewed S40 v3.3 parent, and its amended zero-payload preparation receipt. Review used raw source hashing, JSON/text inspection, and an independently implemented standard-library AST analysis only. The candidate was not imported, compiled, or executed. No C1 result, archive payload, tensor body, descriptor body, trace payload, image body, or pixel was opened, decoded, or mapped.",
+  "checks": [
+    {
+      "id": "W01_EXACT_FOUR_IDENTITY_SET",
+      "verdict": "PASS",
+      "evidence": "All four required file SHA-256 values were independently recomputed and exactly equal the reviewed_identities object. That object contains exactly the keys readback.py, PROTOCOL.md, s40_v3_3_parent, and preparation_receipt.json."
+    },
+    {
+      "id": "W02_PREPARATION_BINDING",
+      "verdict": "PASS",
+      "evidence": "The preparation receipt has schema s45-c1-readback-preparation-v1, author_role /root/c1_readback_builder, and binds the exact worker, protocol, and S40 v3.3 parent identities. Every declared preparation operation is zero, including C1 payload reads, pixel decoding, scientific array mapping, readback runs, supervisor runs, model/renderer/generation runs, and scoring runs."
+    },
+    {
+      "id": "W03_DECLARED_AST_DERIVATION",
+      "verdict": "PASS",
+      "evidence": "Independent AST inspection found exactly one S40 assignment, one PINS assignment, and exactly one occurrence of each of the 16 declared label constants in the pinned parent. An independently reconstructed C1 transformation changed only those two assignments and 16 labels; independently reversing that edit set restored full AST equality with the exact S40 v3.3 parent."
+    },
+    {
+      "id": "W04_FAIL_CLOSED_SOURCE_AND_LABEL_PINS",
+      "verdict": "PASS",
+      "evidence": "The wrapper hashes the exact parent before parsing it, requires every declared assignment and label count to be exactly one, detects overlapping or modified derivation subtrees, and requires full restored-AST equality before future execution. Its C1 route and four C1 generation-source pins equal the protocol. The C1-specific schema, terminal receipt statuses, loading status, pass/failure labels, error labels, and evidence scope are included in the one-to-one replacement table."
+    },
+    {
+      "id": "W05_READ_ONLY_SCIENTIFIC_INPUT_PATH",
+      "verdict": "PASS",
+      "evidence": "The pinned parent hashes the complete archive inventory and descriptor sidecars/bodies before comparisons, preserves raw tensor-node provenance, requires exact descriptor registration, validates archive and trace chains, and checks two cache commits plus the cross-batch latent, embedding, camera, intrinsic, and archived pixel-tensor identity chain. NumPy is imported only inside Reader.array after descriptor verification, version-pinned to 1.26.4, and memmap mode is exactly r. No Torch, PIL, renderer, model, network, or subprocess import is present."
+    },
+    {
+      "id": "W06_OUTPUT_AND_FAILURE_BEHAVIOR",
+      "verdict": "PASS",
+      "evidence": "The inherited worker accepts a single caller-supplied new output directory, creates it with exist_ok false, writes report and receipt files with exclusive-create mode, retains a FAILED_OR_PARTIAL_C1_READBACK receipt on any caught failure, and fixes the readback budget at 300 seconds. Static inspection found no input unlink, rename, filesystem replacement, or retry path; the only source occurrence of .replace is the pure string conversion from a .bin name to its .json sidecar name."
+    },
+    {
+      "id": "W07_C1_POSTCONDITIONS_AND_CLAIM_SEPARATION",
+      "verdict": "PASS",
+      "evidence": "After the inherited full identity checks pass, the wrapper additionally requires exactly two completed cache_commit captures and a nonempty set of generated IDs in the second context. It labels saved-quantity consumption and archived pixel identity separately while keeping PNG decoding, visual quality, camera compliance, method gain, and novelty NOT_EVALUATED."
+    }
+  ],
+  "static_analysis": {
+    "worker_ast_parsed": true,
+    "parent_ast_parsed": true,
+    "worker_ast_nodes": 1039,
+    "parent_ast_nodes": 7707,
+    "s40_assignment_count": 1,
+    "pins_assignment_count": 1,
+    "declared_label_count": 16,
+    "all_declared_parent_label_counts_exactly_one": true,
+    "independent_full_ast_reverse_equal": true,
+    "worker_imports": [
+      "__future__",
+      "ast",
+      "copy",
+      "hashlib",
+      "pathlib"
+    ],
+    "numpy_import_count_in_parent": 1,
+    "numpy_import_deferred_to": "Reader.array",
+    "numpy_required_version": "1.26.4",
+    "memmap_modes": [
+      "r"
+    ],
+    "model_renderer_or_image_decoder_imports": 0,
+    "network_or_subprocess_imports": 0,
+    "destructive_input_operations": 0
+  },
+  "claim_boundary": {
+    "established": [
+      "The reviewed source is an exact, reversible C1 route-and-label derivation of the pinned S40 v3.3 worker and contains fail-closed identity checks suitable for the separately supervised saved-output readback.",
+      "If later authorized and passed, its report can establish only identity-bound saved-array consumption and archived pixel-tensor identity under its explicit comparison rules."
+    ],
+    "not_established": [
+      "That terminal C1 evidence or its payloads pass the worker, because the worker was not executed and no C1 payload was opened.",
+      "Any decoded PNG identity, human-visible image content, image quality, camera compliance, blind score, model correctness, method gain, or novelty.",
+      "Execution authorization; only the separately reviewed supervisor with the final terminal binding and exact review hashes may launch this worker."
+    ]
+  },
+  "blocking_findings": []
+}

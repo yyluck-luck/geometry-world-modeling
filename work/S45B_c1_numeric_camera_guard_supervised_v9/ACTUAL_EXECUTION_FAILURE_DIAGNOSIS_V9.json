@@ -1,0 +1,38 @@
+{
+  "schema": "s45b-c1-v9-actual-execution-failure-diagnosis-v1",
+  "status": "BLOCKED_V9_SUPERVISOR_SINGLE_K_SHAPE_REJECTED",
+  "recorded_utc": "2026-09-08T12:54:40.081212+00:00",
+  "diagnoser_role": "/root",
+  "external_returncode": 2,
+  "worker_returncode": 0,
+  "failed_phase": "WORKER_EVIDENCE_AND_SOURCE_REVALIDATION",
+  "error": "Camera tensor shape is outside c2w/K scope",
+  "actual_camera_tensor_bodies_read": 11,
+  "actual_camera_tensor_body_bytes_read": 1584,
+  "worker_numeric_verdict": "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
+  "formal_numeric_guard_pass": false,
+  "terminal_authority": false,
+  "actual_single_K_metadata": [
+    {
+      "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+      "body_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+      "descriptor_sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+      "dtype": "float32",
+      "nbytes": 36,
+      "shape": [
+        3,
+        3
+      ]
+    }
+  ],
+  "evidence_sha256": {
+    "report.json": "c064b8cde12d389c4a75502abb335c74612a03a69181c4ea86046c8ddd516797",
+    "worker_receipt.json": "206b63516da186595c49b89daad5a095df80b113bae441e425dfd8b6b1457548",
+    "supervisor_receipt.json": "12751acf7e1f3d32fc1666ef3afc51128922e5297f82e6d816b42542121f7681",
+    "C1_V9_FORMAL_ORCHESTRATION.json": "93e9736cc343e4fceb8b3146fb6c3e03db826fb6d11b1757f8e9bcd766e6a722"
+  },
+  "pixel_bodies_opened": 0,
+  "images_viewed": 0,
+  "new_model_runs": 0,
+  "next_step": "Preserve consumed V9 attempt. V10 changes only the valid single-camera shape set to include existing 3x3 K alongside 4x4 pose, with actual report metadata regression and fresh reviews. No terminal authority from this diagnosis."
+}

@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Relocate frozen independent S8 audit paths, leaving numerical code unchanged.
+
+All input bytes come from the read-only extracted ZIP or authenticated nested
+source archives. Historical path strings in sealed JSON are not rewritten.
+This adapter does not repeat full-tree derivation, inference, or surfel rendering.
+"""
+import argparse
+import ast
+import difflib
+import hashlib
+import importlib.util
+import json
+from pathlib import Path, PurePosixPath
+import shutil
+import sys
+import tarfile
+import zipfile
+from verify_s8_package import sha,save,safe_name
+
+S8_SHA='6ae1ee6fa5373a378cacb53babb1475a12b669419d8ebe96529aab079ba72878'
+HELPERS={'verify_s6_scores.py':'bd6bd1d88c3297e89cd556fd6d6c4b3517f2828562aea272f23ce0069ce159a2',
+    'verify_s7_replay.py':'506ad1e33a053b2d9d0fabe69fd2a611f48ce4b7201e860fa98c2f60e5fd42e0'}
+def main():
+    ap=argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True)
+    args=ap.parse_args();root=args.root.resolve(strict=True);output=args.output.absolute()
+    if output.exists() or output.is_symlink():raise ValueError('Use a fresh output')
+    stage=output.with_name(output.name+'_adapter');stage.mkdir()
+    meta=json.loads((root/'results/S8_event_replay_v2/run_metadata.json').read_text())
+    if meta.get('status')!='completed' or meta.get('phase')!='complete':raise ValueError('Replay is not complete')
+    manifest=json.loads((root/'MANIFEST.json').read_text());oldroot=Path(manifest['source_project'])
+    sequence=json.loads((root/'results/S8_cut3r_cpu_v2/sequence_metadata.json').read_text())
+    upstream=Path(sequence['repo']);mapping={};provenance=[]
+    sourcezip=root/'results/S8_event_replay_v2/experiment_source.zip'
+    if sha(sourcezip)!=meta['experiment_source_sha256']:raise ValueError('Source ZIP SHA mismatch')
+    with zipfile.ZipFile(sourcezip) as z:
+        names=z.namelist()
+        if len(names)!=len(set(names)) or set(names)!=set(meta['source_original_paths']) or set(names)!=set(meta['source_sha256']):
+            raise ValueError('Nested source ZIP inventory mismatch')
+        if z.testzip() is not None:raise ValueError('Nested source ZIP CRC mismatch')
+        for info in z.infolist():
+            name=info.filename;safe_name(name)
+            if not info.is_dir() and ((info.external_attr>>16)&0o170000) not in (0,0o100000):raise ValueError('Nonregular source member')
+            payload=z.read(name);digest=hashlib.sha256(payload).hexdigest()
+            if digest!=meta['source_sha256'][name]:raise ValueError('Source member SHA mismatch: '+name)
+            original=Path(meta['source_original_paths'][name])
+            if not original.is_absolute() or not original.is_relative_to(oldroot):raise ValueError('Unexpected historical source location')
+            candidate=root/original.relative_to(oldroot)
+            if candidate.is_file():
+                if sha(candidate)!=digest:raise ValueError('Packaged source disagrees with sealed archive: '+name)
+                target=candidate;origin='package_payload'
+            else:
+                target=stage/'sealed_sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(payload)
+                target.chmod(0o444);origin='nested_experiment_source_zip'
+            key=str(original)
+            if key in mapping and mapping[key]!=str(target):raise ValueError('Historical source alias ambiguity')
+            mapping[key]=str(target);provenance.append(dict(historical=key,packaged=str(target),origin=origin,sha256=digest))
+    tarpath=root/'results/S8_cut3r_cpu_v2/source_snapshot/upstream_source.tar'
+    if sha(tarpath)!=sequence['source_snapshot']['upstream_source.tar']['sha256']:raise ValueError('Upstream TAR SHA mismatch')
+    with tarfile.open(tarpath) as archive:
+        members=archive.getmembers();names=[m.name for m in members]
+        if len(names)!=len(set(names)):raise ValueError('Duplicate upstream TAR names')
+        lookup={m.name:m for m in members}
+        for name,digest in sequence['upstream_python_sha256'].items():
+            safe_name(name);member=lookup[name]
+            if not member.isfile():raise ValueError('Upstream selected member is not regular')
+            payload=archive.extractfile(member).read()
+            if hashlib.sha256(payload).hexdigest()!=digest:raise ValueError('Upstream source SHA mismatch')
+            target=stage/'upstream_sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(payload);target.chmod(0o444)
+            key=str(upstream/name);mapping[key]=str(target)
+            provenance.append(dict(historical=key,packaged=str(target),origin='nested_pinned_upstream_tar',sha256=digest))
+    save(stage/'path_mappings.json',provenance)
+    # This helper maps only authenticated historical roots and contained files.
+    paths='''from pathlib import Path
+import json
+ROOT=Path(%r)
+OLD_ROOT=Path(%r)
+STAGE=Path(%r)
+MAPPING=%r
+def mapped_path(value):
+    p=Path(value)
+    if not p.is_absolute():p=ROOT/p
+    if str(p) in MAPPING:p=Path(MAPPING[str(p)])
+    elif p.is_relative_to(OLD_ROOT):p=ROOT/p.relative_to(OLD_ROOT)
+    p=p.resolve(strict=True)
+    if not (p.is_relative_to(ROOT) or p.is_relative_to(STAGE)):
+        raise PermissionError('Input is outside authenticated package/sidecar: '+str(p))
+    if not p.is_file():raise ValueError('Expected an authenticated input file: '+str(p))
+    return p
+def historical_path(value):
+    p=Path(value)
+    if p.is_relative_to(ROOT):return OLD_ROOT/p.relative_to(ROOT)
+    reverse={v:k for k,v in MAPPING.items()}
+    if str(p) in reverse:return Path(reverse[str(p)])
+    raise PermissionError('No historical identity for relocated file: '+str(p))
+'''%(str(root),str(oldroot),str(stage),mapping)
+    (stage/'portable_paths.py').write_text(paths)
+    original=root/'scripts/verify_s8_results.py'
+    if sha(original)!=S8_SHA:raise ValueError('Frozen S8 auditor is not the reviewed version')
+    source=original.read_text();adapted=source;replacements=[]
+    def replace(old,new,count=1):
+        nonlocal adapted
+        if adapted.count(old)!=count:raise ValueError('Adapter site count mismatch: '+old)
+        adapted=adapted.replace(old,new);replacements.append(dict(old=old,new=new,count=count))
+    replace('ROOT = Path(__file__).resolve().parents[1]',
+        'from portable_paths import mapped_path, historical_path, OLD_ROOT\nROOT = Path('+repr(str(root))+')')
+    replace("    path=Path(name)\n    return (path if path.is_absolute() else ROOT/path).resolve(strict=True)",
+        '    return mapped_path(name)')
+    replace('p=Path(p).resolve(strict=True); digest=sha(p)','p=mapped_path(p); digest=sha(p)')
+    replace("modules=raw['loaded_modules']; repo=Path(sequence['repo']).resolve(strict=True)",
+        "modules=raw['loaded_modules']; repo=Path(sequence['repo'])")
+    replace('path=Path(path).resolve(strict=True)','path=Path(path)')
+    replace("str(ROOT/'scripts/run_s6_cut3r.py')","str(OLD_ROOT/'scripts/run_s6_cut3r.py')")
+    replace("'--history-count','20','--output',str(directory)","'--history-count','20','--output',str(historical_path(directory))")
+    replace("original=Path(meta['source_original_paths'][name]).resolve(strict=True)",
+        "original=mapped_path(meta['source_original_paths'][name])")
+    replace("reader.integrity(original,digest,'original/'+name)","reader.integrity(original,digest,'packaged_source/'+name)")
+    replace("reverse={str(Path(p).resolve()):name for name,p in meta['source_original_paths'].items()}",
+        "reverse={str(mapped_path(p)):name for name,p in meta['source_original_paths'].items()}")
+    replace("identity[kind]=dict(path=str(path),relative_path=", "identity[kind]=dict(path=str(historical_path(path)),relative_path=")
+    # Describe this execution accurately without altering any math/check tolerance.
+    replace('Independent S8 audit, gated on completed replay before reading new data.',
+        'Package-contained S8 audit with explicit path relocation; no original-project reads.')
+    replace("'Raw latent-state tensors are absent.",
+        "'Full original dataset and pre-amendment GT are absent. The historical 23803-check derivation audit is authenticated but not repeated.',\n            'Source and loaded-module hashes below compare package/nested-archive bytes to historical records, not current original checkout files.',\n            'Raw latent-state tensors are absent.")
+    # Compare every numerical helper AST before running. The whole textual patch is retained.
+    old_nodes={n.name:n for n in ast.parse(source).body if isinstance(n,(ast.FunctionDef,ast.ClassDef))}
+    new_nodes={n.name:n for n in ast.parse(adapted).body if isinstance(n,(ast.FunctionDef,ast.ClassDef))}
+    unchanged={n:ast.dump(old_nodes[n],include_attributes=False)==ast.dump(new_nodes[n],include_attributes=False)
+        for n in ('strict_json','safe_under','valid_sha','pose_at_closed','normalized_from_raw','rebuilt_observations',
+                  'sampling_from_timestamps','fixed_metadata','verify_state','main')}
+    if not all(unchanged.values()):raise ValueError('Numerical/schema helper AST changed')
+    (stage/'verify_s8_results.py').write_text(adapted)
+    for name,digest in HELPERS.items():
+        if sha(root/'scripts'/name)!=digest:raise ValueError('Independent helper SHA mismatch')
+        shutil.copy2(root/'scripts'/name,stage/name)
+    (stage/'source_path_adapter.diff').write_text(''.join(difflib.unified_diff(source.splitlines(True),adapted.splitlines(True),
+        fromfile='frozen_package/scripts/verify_s8_results.py',tofile='path_adapter/verify_s8_results.py')))
+    save(stage/'adaptation.json',dict(status='prepared',frozen_s8_sha256=S8_SHA,adapted_s8_sha256=sha(stage/'verify_s8_results.py'),
+        helper_sha256=HELPERS,unchanged_AST=unchanged,replacements=replacements,path_mapping_count=len(provenance),
+        direct_payload_mappings=sum(p['origin']=='package_payload' for p in provenance),
+        source_zip_mappings=sum(p['origin']=='nested_experiment_source_zip' for p in provenance),
+        upstream_tar_mappings=sum(p['origin']=='nested_pinned_upstream_tar' for p in provenance),
+        numerical_changes=False,tolerance_changes=False,original_or_extracted_evidence_changes=False))
+    sys.path.insert(0,str(stage))
+    spec=importlib.util.spec_from_file_location('portable_s8_auditor',stage/'verify_s8_results.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    auditargs=argparse.Namespace(manifest=root/'data/cut3r/S8_fr2desk_inputs_v2/S8_inputs.json',
+        protocol=root/'docs/S8_EXTERNAL_SCENE_PROTOCOL_V2.md',freeze=root/'docs/S8_EXECUTION_FREEZE_V2.json',
+        runs=root/'results/S8_cut3r_cpu_v2',data=root/'data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk',
+        results=root/'results/S8_event_replay_v2',output=output)
+    return module.audit(auditargs,meta)
+if __name__=='__main__':raise SystemExit(main())

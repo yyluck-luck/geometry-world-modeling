@@ -1,0 +1,67 @@
+{
+  "schema": "s42-b0-blind-scorer-rebase-v3-3-1-receipt-v1",
+  "status": "REVISED_AFTER_TWO_BLOCKING_REVIEWS_AWAITING_DUAL_SOURCE_REREVIEW",
+  "created_utc": "2026-09-07T15:19:57.716341+00:00",
+  "last_revision_utc": "2026-09-07T15:37:06.087589+00:00",
+  "author_role": "/root",
+  "current_identities": {
+    "score_b0_blind.py": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "B0_SCORING_CONTRACT.json": "1143f700855ab32df3d703fc91b2ff8707ca3dc3e217407156be9247d677c11b",
+    "PROTOCOL.md": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "preregistration_receipt.json": "5336c838de1714a6ab1f65be56312d21148d9dc6114162a7ee59497f3bbb2cf7"
+  },
+  "preserved_superseded_candidate": {
+    "directory": "history_before_v3_3_1_review_fixes",
+    "score_b0_blind.py": "00974932a2efefb6833b87037fc95f3550f2c2c1cf9b59425f85e58c42c34a67",
+    "B0_SCORING_CONTRACT.json": "52ba3cc2c7390b21c4b35b45d9dc53a7ed1ddbaf2b4b5f5ae71a842ea992878a",
+    "B0_REBASE_V3_3_RECEIPT.json": "321c9a84da05cb9a2c6e6102b150c12c12a68e6921c4bdd2148a2f2517adb325"
+  },
+  "blocking_reviews_that_invalidated_the_superseded_candidate": {
+    "primary": {
+      "path": "B0_SCORER_SOURCE_REVIEW_blocked.json",
+      "sha256": "e0a9754098787c7037b42ac76409a14590c0d562e531626a7841245f1a0f249d"
+    },
+    "adversarial": {
+      "path": "B0_SCORER_SOURCE_REVIEW_ADVERSARIAL_blocked.json",
+      "sha256": "f6fca3b81bf51f5a0288c53d2bdee6261dadd6562a9946adf6c0c3d5dab9eb1f"
+    },
+    "correction": "The older rebase receipt claimed that the complete canonical descriptor registry was checked. Both independent reviews showed that this was false for the superseded source. That receipt and both reviews are retained; none authorizes execution."
+  },
+  "additional_blocking_review_and_fix": {
+    "review_path": "B0_SCORER_SOURCE_REVIEW_blocked_v2.json",
+    "review_sha256": "a3ac7e6f6289d057828c5ff249807ff7167d0c4ee50e63a709d6d6202d2d5b64",
+    "blocked_scorer_sha256": "543f9fb4cdfd7009e4a5c8be83d99bcb0b83658549c2ea8964ed453f201e2738",
+    "blocked_receipt_sha256": "56207ef932b74bc42c7a46562bbfe5e2ab5206f4a05a3ed50023199cf2e83495",
+    "preservation": "The exact blocked receipt is retained in history_candidate_543f, and RECONSTRUCT_SCORE_543F.patch losslessly reconstructs the exact blocked scorer from the current source.",
+    "fix": "Both exception branches now clear the in-memory report and force technically_valid=false. A report can be staged only when report is non-null, status is the exact PASS status, and technically_valid is exactly true; every other state requires no report."
+  },
+  "revision_scope": {
+    "complete_manifest_descriptor_registry": "Every raw event TensorDescriptor must equal archive_manifest.tensor_descriptors[blob] in full before its body is opened; body and sidecar identities are also bound to manifest.files.",
+    "same_fd_immutable_snapshot": "Each used tensor is opened once without following symlinks, read and hashed through that file descriptor into immutable bytes, scored only from those bytes, and rehashed through the same still-open descriptor before sealing.",
+    "atomic_attempt_lease": "A fixed nonblocking flock is acquired before attempt enumeration; scoring occurs in one retained hidden staging directory and the complete directory is atomically published only after terminal files are sealed.",
+    "fresh_attestation": "The real non-template attestation must bind attempt 01, its canonical output path, scorer, contract, manifest, both source reviews, and a UTC after both reviews and before scoring.",
+    "dual_review": "The scorer requires primary and adversarial PASS reviews whose reviewers and scorer author are pairwise distinct."
+  },
+  "frozen_scientific_semantics_unchanged": {
+    "primary_pair": [0, 8],
+    "mask": "M_outer4",
+    "event": "unrounded float64 MSE_M > 0.01",
+    "equality_is_not_event": true,
+    "diagnostic_pairs": [[1, 7], [2, 6], [3, 5]],
+    "requested_camera_tolerance": 1e-6,
+    "B0_is_single_development_row": true,
+    "cohort_remains_incomplete_until_C1_C2": true
+  },
+  "author_static_checks": {
+    "python_compile": "PASS",
+    "contract_json_parse": "PASS",
+    "contract_sha_embedded_in_scorer": true,
+    "B0_score_runs": 0,
+    "model_generation_renderer_readback_or_gate_runs": 0,
+    "generated_images_or_montages_viewed": 0,
+    "S40_result_arrays_decoded_for_metric_selection": 0,
+    "tensor_or_image_payload_bodies_read_during_revision": 0
+  },
+  "claim_boundary": "This is a revised source candidate, not a PASS review, score, visual-quality result, camera-obedience result, method gain, or novelty result.",
+  "next_gate": "Two independent static reviewers must bind the exact current scorer and contract and return empty blockers before the real attempt-specific blindness attestation can be created or B0 can execute."
+}

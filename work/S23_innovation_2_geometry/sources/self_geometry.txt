@@ -1,0 +1,7571 @@
+Self-Geometry: GT-Free and Plug-and-Play Test-Time Adaptation for Geometrically Consistent 3D Vision Foundation Models
+// Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+/* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+I
+Introduction
+II
+Related Work
+II-A
+Frozen Vision Foundation Models
+II-B
+Fine-tuning-based Adaptation
+II-C
+Test-Time Adaptation
+II-D
+Conceptual Positioning Across Four Axes
+III
+Methodology
+III-A
+Problem Setup and Key Intuition
+III-B
+Geometric Disentanglement Optimization (GDO)
+III-C
+Frame Angular-Neighbor (FAN)
+III-D
+Lightweight Test-Time Adaptation (Lightweight TTA)
+IV
+Experiments
+IV-A
+Experimental Setup
+IV-B
+Quantitative Results
+IV-C
+Qualitative Results
+V
+Ablation Study
+V-A
+Complexity Comparison
+VI
+Conclusion
+References
+S.I
+GitHub Repository
+S.II
+Preliminary: Epipolar Geometry
+S.III
+Total Loss Formulation
+S.IV
+Algorithm
+S.V
+Training Details
+S.VI
+Limitations
+License: arXiv.org perpetual non-exclusive license
+arXiv:2608.10708v1 [cs.CV] 11 Aug 2026
+\cmlabAuthors
+Seokhyun Youn
+1
+, Dahyeon Kye
+1
+, Sung-Ho Bae
+2,†
+, Jihyong Oh
+1,†
+\cmlabAffiliations
+1
+CMLab, Chung-Ang University
+2
+Kyung Hee University
+†
+Corresponding authors
+\cmlabAuthorEmail
+{hisn16, rpekgus, jihyongoh}@cau.ac.kr  shbae@khu.ac.kr
+\cmlabProjectPage
+https://cmlab-korea.github.io/Self-Geometry/
+Self-Geometry: GT-Free and Plug-and-Play Test-Time Adaptation for Geometrically Consistent 3D Vision Foundation Models
+Seokhyun Youn
+Dahyeon Kye
+Sung-Ho Bae
+and Jihyong Oh
+†
+†
+thanks:
+Seokhyun Youn is with the CMLab, Department of Virtual Convergence, GSAIM, Chung-Ang University, Seoul, South Korea (e-mail: hisn16@cau.ac.kr).
+†
+†
+thanks:
+Dahyeon Kye is with the CMLab, Department of Imaging Science and Arts, GSAIM, Chung-Ang University, Seoul, South Korea (e-mail: rpekgus@cau.ac.kr).
+†
+†
+thanks:
+Sung-Ho Bae is with the School of Computing, Kyung Hee University, Yongin-si, South Korea (e-mail: shbae@khu.ac.kr).
+†
+†
+thanks:
+Jihyong Oh is with the CMLab, Department of Imaging Science and Arts, GSAIM, Chung-Ang University, Seoul, South Korea (e-mail: jihyongoh@cau.ac.kr).
+†
+†
+thanks:
+(
+Corresponding authors: Sung-Ho Bae; Jihyong Oh.
+)
+†
+†
+thanks:
+Manuscript received [Month Day, Year]; revised [Month Day, Year].
+Abstract
+Recent Vision Foundation Models (VFMs) predict depth, camera pose, and pointmap in a single forward pass without per-scene optimization, achieving strong generalization. However, enforcing explicit multi-view geometric consistency, e.g., through bundle adjustment, is computationally costly and is thus not imposed during VFM pretraining, so such inconsistency can arise. To address this, implicit self-consistency derived from model outputs (e.g., pointmaps, features), though enforced at test-time in prior work, delivers inherently limited performance gain, especially on scenes where the pretrained VFM is highly inaccurate. In contrast to this implicit signal, we propose
+Self-Geometry
+, a plug-and-play test-time adaptation pipeline that directly imposes explicit multi-view geometric constraints using 2D pixel correspondences as pseudo ground-truth. Our proposed
+Self-Geometry
+consists of Geometric Disentanglement Optimization, which combines Multi-View Consistency and Epipolar Consistency losses with Gradient Disentanglement to prevent gradient conflict; Frame Angular-Neighbor, a view sampler based on SO(3) geodesic distances for lightly imposing these constraints; and Lightweight TTA, which adapts VFMs via LoRA. Our method achieves consistent improvements in both pose and geometry estimation across six VFMs (VGGT,
+π
+3
+\pi^{3}
+, DA3-Giant/Large/Base/Small) and four benchmarks (7Scenes, ETH3D, ScanNet++, HiRoom).
+Index Terms:
+3D reconstruction, test-time adaptation, vision foundation models, self-supervised learning, epipolar geometry.
+I
+Introduction
+Multi-view 3D reconstruction aims to recover camera poses and dense scene geometry from multi-view images
+[
+1
+]
+. Conventional methods
+[
+2
+,
+3
+]
+obtain accurate geometry through per-scene optimization but require substantial computation for every new scene. Recent
+Vision Foundation Models (VFMs)
+, such as VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, and Depth Anything 3 (DA3)
+[
+6
+]
+, instead predict depths, camera poses, and pointmaps in a single forward pass and achieve strong zero-shot performance across diverse visual geometry benchmarks, including 7Scenes
+[
+7
+]
+, ScanNet++
+[
+8
+]
+, ETH3D
+[
+9
+]
+, and HiRoom
+[
+6
+]
+.
+Despite this strong performance, enforcing explicit multi-view geometric consistency, e.g., through bundle adjustment
+[
+3
+]
+, is prohibitively costly and thus omitted during
+VFM
+pretraining
+[
+4
+]
+; multi-view geometric inconsistency can then arise in VFM predictions
+[
+10
+,
+11
+]
+. To address this inconsistency, the implicit self-consistency derived from model outputs (e.g., pointmaps, features), enforced at test-time in prior work
+[
+12
+]
+, improves the model only indirectly and lacks explicit geometric guarantee. As shown in Fig.
+2
+, Free-Geometry
+[
+12
+]
+, a representative implicit self-consistency method, barely improves camera pose or depth, and yields only marginal pointmap improvement, especially where the pretrained VFM is highly inaccurate.
+Fig. 2:
+Comparison of pretrained DA3-Base
+[
+6
+]
+with two test-time adaptation methods on a HiRoom
+[
+6
+]
+(
+828786
+) scene, decomposed along camera pose error, depth error, and the resulting pointmap. +Free-Geometry
+[
+12
+]
+, a representative implicit self-consistency method, fails to substantially improve both the camera pose and depth, and consequently offers only limited improvement in the resulting pointmap. In contrast,
++Self-Geometry
+(Ours), which directly imposes explicit multi-view geometric constraints, yields consistent improvements across all three. In the depth error maps and pointmaps,
+Red
+regions denote prediction errors exceeding the benchmark threshold and
+gray
+regions denote correctly reconstructed pixels.
+Since VFMs do not enforce this consistency during pretraining, we adopt
+Test-Time Adaptation (TTA)
+[
+13
+,
+14
+,
+15
+]
+to lightly impose explicit multi-view geometric constraints on the pretrained
+VFM
+at test-time. Our key insight is that
+2D pixel correspondences
+, extracted at test-time by an external feature matcher (
+e.g.
+, LightGlue
+[
+16
+]
+), can serve as
+pseudo GT
+for explicit multi-view geometric supervision
+[
+17
+,
+18
+]
+, eliminating the need for the GT annotations required by fine-tuning-based methods. These
+2D pixel correspondences
+define the 2D pixel-level relations that camera poses and depths must satisfy
+[
+1
+,
+19
+]
+. Building on this insight, we propose
+Self-Geometry
+, a
+Plug-and-play
+TTA
+pipeline that imposes explicit multi-view geometric constraints on pretrained
+VFMs
+.
+Under this pipeline, the proposed
+Multi-View Consistency Loss
+(
+MVC Loss
+; Eq. (
+2
+)) enforces such 2D pixel-level relations through a
+point-to-point
+constraint that
+jointly
+supervises the predicted camera poses and depths by penalizing reprojection errors using
+pseudo-correspondences
+extracted at test-time. However, since the reprojection error depends on both the camera poses and the depths
+[
+3
+]
+, the
+MVC Loss
+inherits the well-known
+pose-depth ambiguity
+of reprojection-based supervision. Specifically, distinct (pose, depth) pairs can yield the same
+MVC Loss
+value, and thus the
+point-to-point
+MVC Loss
+alone cannot uniquely identify accurate pose or depth. To resolve this ambiguity, we introduce the
+Epipolar Consistency Loss
+(
+EC Loss
+; Eq. (
+3
+)), a
+depth-independent
+point-to-line
+constraint that supervises the camera poses alone
+[
+1
+]
+. Since both losses supervise the same camera poses, we further propose our
+Gradient Disentanglement
+(
+GD
+; Sec.
+III-B
+) at every
+TTA
+iteration to prevent the
+gradient conflict
+(Fig.
+IV
+(b)) that can arise between them. The proposed
+GD
+projects the proposed
+MVC Loss
+gradient onto the orthogonal complement of the proposed
+EC Loss
+gradient
+[
+20
+]
+. As a result, the two losses operate complementarily: the
+point-to-line
+EC Loss
+refines camera poses independently of depth, and the
+point-to-point
+MVC Loss
+refines both at a fine-grained level unreachable by the proposed
+EC Loss
+.
+To lightly apply these explicit multi-view geometric constraints at test-time, we introduce two lightweight components. First, we introduce
+Frame Angular-Neighbor
+(
+FAN
+; Sec.
+III-C
+), an SO(3)-guided
+[
+21
+]
+view sampler that selects
+angularly diverse
+source views using
+scene-scale-invariant
+SO(3) geodesic distances
+[
+1
+]
+, mitigating the quadratic cost of global attention in pretrained
+VFMs
+. Second, we adopt
+Lightweight Test-Time Adaptation
+(
+Lightweight TTA
+; Sec.
+III-D
+) that inserts
+Low-Rank Adaptation (LoRA)
+[
+22
+]
+into the QKV weights of pretrained
+VFMs
+’ attention blocks (see Sec.
+S.V
+for per-VFM details). Together, these components enable our proposed
+Self-Geometry
+, a
+Plug-and-play
+TTA
+pipeline imposing explicit multi-view geometric constraints on pretrained
+VFMs
+, to complete per-scene adaptation within two minutes (up to 40 input views, DA3-Giant
+[
+6
+]
+on ETH3D
+[
+9
+]
+; Tab.
+VII
+) on a single NVIDIA RTX PRO 6000
+[
+23
+]
+. Our contributions are summarized as follows:
+•
+We propose
+Self-Geometry
+, a
+GT-free
+and
+Plug-and-play
+TTA
+pipeline that leverages
+2D pixel correspondences
+as
+pseudo GT
+to impose explicit multi-view geometric supervision on pretrained
+VFMs
+.
+•
+Within our proposed
+Self-Geometry
+, we design three complementary components:
+Geometric Disentanglement Optimization
+(
+GDO
+), which imposes explicit multi-view geometric supervision through
+GT-free
+correspondence-guided losses;
+FAN
+, an SO(3)-guided view sampler using
+scene-scale-invariant
+SO(3) geodesic distances; and a
+LoRA
+[
+22
+]
+-based
+Lightweight TTA
+strategy.
+•
+Across six pretrained
+VFMs
+(VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, DA3-G/L/B/S
+[
+6
+]
+) and four datasets (7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+), our proposed
+Self-Geometry
+yields consistent improvements in both Pose Estimation and Geometry Estimation, completing scene-wise adaptation within two minutes per-scene on a single NVIDIA RTX PRO 6000
+[
+23
+]
+.
+II
+Related Work
+II-A
+Frozen Vision Foundation Models
+Feed-forward 3D reconstruction has emerged as an alternative to per-scene SfM
+[
+2
+]
+. Early such models operated on image pairs
+[
+24
+,
+25
+]
+or streaming inputs
+[
+26
+]
+. Recent
+VFMs
+extend to arbitrary multi-view inputs: VGGT
+[
+4
+]
+uses alternating attention,
+π
+3
+\pi^{3}
+[
+5
+]
+uses permutation-equivariance, and DA3
+[
+6
+]
+uses a unified depth-ray representation. Under a
+train-then-freeze
+paradigm, these
+VFMs
+are trained to regress camera pose and depth individually against
+GT annotations
+without enforcing any explicit multi-view geometric consistency, so such inconsistency can arise in the resulting pointmap. Our proposed
+Self-Geometry
+mitigates this inconsistency via
+GT-free
+per-scene
+TTA
+[
+13
+,
+14
+,
+15
+]
+.
+II-B
+Fine-tuning-based Adaptation
+Fine-tuning-based approaches modify pretrained
+VFMs
+via additional training on external data or auxiliary priors
+[
+27
+,
+28
+,
+29
+,
+11
+]
+. Most relevant, Fin3R
+[
+30
+]
+fine-tunes only the encoder of DUSt3R/MASt3R/CUT3R/VGGT
+[
+24
+,
+25
+,
+26
+,
+4
+]
+via
+LoRA
+[
+22
+]
+distillation from a monocular teacher. All fine-tune on a fixed dataset and cannot guarantee specialization to arbitrary target scenes. Our proposed
+Self-Geometry
+performs per-scene
+TTA
+using only pseudo-correspondences from each target scene, requiring no additional training dataset.
+II-C
+Test-Time Adaptation
+TTA
+[
+31
+,
+32
+,
+33
+,
+34
+,
+35
+,
+36
+]
+specializes pretrained
+VFMs
+using only the test scene. These methods rely on either auxiliary priors or implicit self-consistency supervision. TCO
+[
+36
+]
+requires external priors such as camera poses, intrinsics, and depth. Free-Geometry
+[
+12
+]
+distills a full-view teacher into a masked-view student via
+LoRA
+[
+22
+]
+to enforce cross-view feature consistency. In contrast, our proposed
+Self-Geometry
+lightly imposes explicit multi-view geometric constraints using only 2D pixel correspondences, without any auxiliary priors or teacher distillation.
+TABLE I:
+Conceptual Comparisons of Multi-View 3D
+VFMs
+Across Four Positioning Axes:
+✓
+denotes fully supported,
+▲
+\blacktriangle
+denotes partially supported, and
+✗
+denotes unsupported.
+Category / Method
+GT-
+free
+Teacher-
+free
+Plug-&-
+play
+Explicit-
+Geometry
+(a) Frozen
+VFM
+VGGT
+[
+4
+]
+/
+π
+3
+\pi^{3}
+[
+5
+]
+/ DA3
+[
+6
+]
+✗
+▲
+\blacktriangle
+—
+✗
+(b) Fine-tuning-based
+Pow3R
+[
+28
+]
+/ Fin3R
+[
+30
+]
+/ Selfi
+[
+11
+]
+✗
+✗
+▲
+\blacktriangle
+▲
+\blacktriangle
+(c)
+TTA
+-based
+TCO
+[
+36
+]
+✗
+✓
+✓
+✓
+Free-Geometry
+[
+12
+]
+✓
+✗
+✓
+✗
+SelfEvo
+[
+32
+]
+✓
+✗
+✓
+✗
+TTT3R
+[
+33
+]
+✓
+✓
+✗
+✗
+Online3R
+[
+34
+]
+✓
+✓
+✗
+▲
+\blacktriangle
+Test3R
+[
+31
+]
+✓
+✓
+▲
+\blacktriangle
+▲
+\blacktriangle
+LoRA3D
+[
+35
+]
+✓
+✓
+▲
+\blacktriangle
+✓
+(d) Ours
+Self-Geometry
+✓
+✓
+✓
+✓
+II-D
+Conceptual Positioning Across Four Axes
+As summarized in Tab.
+I
+, existing approaches each exhibit at least one of the following four limitations. (i)
+GT-dependent
+: Frozen
+VFMs
+use
+GT annotations
+during pretraining, and fine-tuning-based methods use them during additional training; collecting such GT annotations is costly. (ii)
+Teacher-dependent
+: Fine-tuning-based methods, SelfEvo
+[
+32
+]
+, and Free-Geometry
+[
+12
+]
+rely on
+teacher-model distillation
+; student accuracy is upper-bounded by the teacher. (iii)
+Architecture-specific
+: TTT3R
+[
+33
+]
+, Online3R
+[
+34
+]
+, Test3R
+[
+31
+]
+, and LoRA3D
+[
+35
+]
+are tied to
+specific architectures
+such as CUT3R
+[
+26
+]
+, MASt3R
+[
+25
+]
+, and DUSt3R
+[
+24
+]
+, respectively; extending them to another VFM requires per-backbone redesign. (iv)
+Implicit-Geometry
+: Free-Geometry, SelfEvo, and TTT3R rely on
+implicit self-consistency supervision
+derived from model predictions such as pointmaps or features; this implicit signal delivers only limited performance gain. In contrast, our proposed
+Self-Geometry
+enforces explicit geometric consistency, addressing all four axes simultaneously:
+GT-free
+,
+Teacher-free
+,
+Plug-and-play
+, and
+Explicit-Geometry
+.
+Fig. 3:
+Overview of Our Proposed
+Self-Geometry
+Pipeline.
+Self-Geometry
+adapts a frozen pretrained
+VFM
+to a target scene through three complementary components. (i)
+GDO
+(Sec.
+III-B
+) formulates two
+GT-free
+correspondence-guided losses, the
+point-to-point
+MVC Loss
+(Eq. (
+2
+)) and the
+point-to-line
+EC Loss
+(Eq. (
+3
+)), and applies
+GD
+(Eq. (
+4
+)) to prevent the
+gradient conflict
+that can arise between them. (ii)
+FAN
+(Sec.
+III-C
+) samples angularly diverse views via
+scene-scale-invariant
+SO(3) geodesic distances (Eq. (
+5
+)). (iii)
+Lightweight TTA
+(Sec.
+III-D
+) updates only
+LoRA
+(Sec.
+III-D
+) parameters inserted into the attention blocks of the pretrained
+VFM
+. Together, these components operate as a
+GT-free
+and
+Plug-and-play
+TTA
+that imposes explicit multi-view geometric constraints on pretrained
+VFMs
+.
+III
+Methodology
+III-A
+Problem Setup and Key Intuition
+Problem Setup.
+As discussed in Sec.
+I
+, pretrained
+VFMs
+are trained without enforcing any explicit multi-view geometric consistency, so such inconsistency can arise in the resulting pointmap (Fig.
+2
+). To resolve this inconsistency, we present our proposed
+Self-Geometry
+, a
+GT-free
+and
+Plug-and-play
+TTA
+pipeline that imposes explicit multi-view geometric constraints on a pretrained
+VFM
+.
+Key Intuition:
+2D Pixel Correspondences Provide Explicit Multi-view Geometric Supervision
+.
+Our key insight is that
+2D pixel correspondences themselves define explicit multi-view geometric supervision
+on the predictions of a pretrained
+VFM
+.
+Pipeline Overview.
+As depicted in Fig.
+3
+, our proposed
+Self-Geometry
+consists of three complementary components. (i)
+Geometric Disentanglement Optimization
+(
+GDO
+; Sec.
+III-B
+) formulates the two constraints as the
+point-to-point
+MVC Loss
+and the
+point-to-line
+EC Loss
+, and applies the proposed
+GD
+to prevent the
+gradient conflict
+that can arise between them on the camera poses. (ii)
+Frame Angular-Neighbor
+(
+FAN
+; Sec.
+III-C
+) samples input views using
+scene-scale-invariant
+SO(3) geodesic distances, thereby providing geometrically rich supervision. (iii)
+Lightweight Test-Time Adaptation
+(
+Lightweight TTA
+; Sec.
+III-D
+) updates only lightweight
+LoRA
+-based adapter parameters, keeping the pretrained
+VFM
+frozen. Together, these components operate as our
+Self-Geometry
+, a
+GT-free
+and
+Plug-and-play
+TTA
+pipeline imposing explicit multi-view geometric constraints on pretrained
+VFMs
+.
+III-B
+Geometric Disentanglement Optimization (GDO)
+The proposed
+GDO
+imposes explicit multi-view geometric constraints on pretrained
+VFMs
+through the following five steps: (i)
+Scene Initialization
+(Eq. (
+1
+)) extracts pseudo-correspondences from the input views using an external feature matcher; (ii)
+Pseudo-Correspondence Filtering
+removes mismatched pseudo-correspondences; (iii)
+Multi-View Consistency Loss
+(Eq. (
+2
+)) imposes a
+point-to-point
+constraint that supervises both camera pose and depth; (iv)
+Epipolar Consistency Loss
+(Eq. (
+3
+)) imposes a
+depth-independent
+point-to-line
+constraint that supervises camera pose alone; and (v)
+Gradient Disentanglement
+(Eq. (
+4
+)) projects the proposed
+MVC Loss
+gradient onto the orthogonal complement of the proposed
+EC Loss
+gradient
+[
+20
+]
+to prevent the
+gradient conflict
+that can arise between the two losses on the camera poses, so that the two losses operate complementarily.
+Scene Initialization.
+In this step, at scene initialization, we apply an external feature matcher (
+i.e.
+, LightGlue
+[
+16
+]
+) once to every pair of input views to extract
+2D pixel correspondences
+, and
+reuse
+the resulting 2D pixel correspondence set throughout all subsequent
+TTA
+iterations.
+Given the set of input views
+ℐ
+=
+{
+𝐈
+i
+}
+i
+=
+1
+N
+\mathcal{I}=\{\mathbf{I}_{i}\}_{i=1}^{N}
+, the pretrained
+VFM
+predicts camera poses
+𝒫
+=
+{
+𝐏
+i
+}
+i
+=
+1
+N
+\mathcal{P}=\{\mathbf{P}_{i}\}_{i=1}^{N}
+, depth maps
+𝒟
+=
+{
+𝐃
+i
+}
+i
+=
+1
+N
+\mathcal{D}=\{\mathbf{D}_{i}\}_{i=1}^{N}
+, and pointmaps
+𝒳
+=
+{
+𝐗
+i
+}
+i
+=
+1
+N
+\mathcal{X}=\{\mathbf{X}_{i}\}_{i=1}^{N}
+in a single forward pass. Here,
+N
+∈
+ℕ
+N\in\mathbb{N}
+is the number of input views and
+𝐈
+i
+∈
+ℝ
+H
+×
+W
+×
+3
+\mathbf{I}_{i}\in\mathbb{R}^{H\times W\times 3}
+is the RGB image at the
+i
+i
+-th view. The camera pose of each view
+i
+i
+,
+𝐏
+i
+=
+(
+𝐊
+i
+,
+𝐑
+i
+,
+𝐭
+i
+)
+\mathbf{P}_{i}=(\mathbf{K}_{i},\mathbf{R}_{i},\mathbf{t}_{i})
+, consists of an intrinsic matrix
+𝐊
+i
+∈
+ℝ
+3
+×
+3
+\mathbf{K}_{i}\in\mathbb{R}^{3\times 3}
+, a rotation matrix
+𝐑
+i
+∈
+S
+​
+O
+​
+(
+3
+)
+\mathbf{R}_{i}\in SO(3)
+, and a translation vector
+𝐭
+i
+∈
+ℝ
+3
+\mathbf{t}_{i}\in\mathbb{R}^{3}
+, and
+𝐃
+i
+∈
+ℝ
+H
+×
+W
+\mathbf{D}_{i}\in\mathbb{R}^{H\times W}
+and
+𝐗
+i
+∈
+ℝ
+H
+×
+W
+×
+3
+\mathbf{X}_{i}\in\mathbb{R}^{H\times W\times 3}
+are the pixel-wise depth map and pointmap of view
+i
+i
+, respectively. Fixing one view as the target view
+i
+i
+and the others as source views (each indexed by
+j
+j
+), the pseudo-correspondence set from the external matcher is defined as:
+ℳ
+=
+{
+(
+𝐱
+i
+m
+,
+𝐱
+j
+m
+)
+}
+m
+=
+1
+M
+.
+\mathcal{M}=\bigl\{(\mathbf{x}_{i}^{m},\mathbf{x}_{j}^{m})\bigr\}_{m=1}^{M}.
+(1)
+Here,
+𝐱
+i
+m
+,
+𝐱
+j
+m
+∈
+ℝ
+2
+\mathbf{x}_{i}^{m},\mathbf{x}_{j}^{m}\in\mathbb{R}^{2}
+are the pixel coordinates of the
+m
+m
+-th pseudo-correspondence in the target and source views, and
+M
+=
+|
+ℳ
+|
+M=|\mathcal{M}|
+is the total number of pseudo-correspondences. Each pair provides two distinct multi-view geometric constraints that the predicted
+𝒫
+\mathcal{P}
+and
+𝒟
+\mathcal{D}
+must satisfy, formalized as the
+point-to-point
+MVC Loss
+(Eq. (
+2
+)) and the
+point-to-line
+EC Loss
+(Eq. (
+3
+)).
+Pseudo-Correspondence Filtering.
+The pseudo-correspondences extracted by the external matcher may contain mismatches that inject unreliable supervision. To remove them, before every
+TTA
+iteration, we sequentially apply the proposed
+EC Loss
+-based filter (Eq. (
+3
+)), followed by the proposed
+MVC Loss
+-based filter (Eq. (
+2
+)), to
+ℳ
+\mathcal{M}
+. The
+EC Loss
+-based filter coarsely removes mismatches with large camera pose errors, and the proposed
+MVC Loss
+-based filter eliminates the residual mismatches. We empirically validate the effectiveness of this filtering strategy in Sec.
+V
+.
+Multi-View Consistency Loss,
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+.
+The proposed
+MVC Loss
+formalizes the
+point-to-point
+reprojection constraint provided by the pseudo-correspondences. At each
+TTA
+iteration, this loss constrains the camera poses and depths predicted by the pretrained
+VFM
+to consistently reproject each 2D pixel in source view
+j
+j
+to its paired 2D pixel in target view
+i
+i
+, as:
+ℒ
+mvc
+i
+​
+(
+𝒫
+,
+𝒟
+,
+ℳ
+)
+=
+1
+|
+ℳ
+|
+​
+∑
+(
+𝐱
+i
+m
+,
+𝐱
+j
+m
+)
+∈
+ℳ
+‖
+𝐱
+^
+i
+m
+−
+𝐱
+i
+m
+‖
+2
+.
+\mathcal{L}_{\mathrm{mvc}}^{i}(\mathcal{P},\mathcal{D};\mathcal{M})=\frac{1}{|\mathcal{M}|}\sum_{(\mathbf{x}_{i}^{m},\mathbf{x}_{j}^{m})\in\mathcal{M}}\left\|\hat{\mathbf{x}}_{i}^{m}-\mathbf{x}_{i}^{m}\right\|_{2}.
+(2)
+Here,
+𝐱
+^
+i
+m
+\hat{\mathbf{x}}_{i}^{m}
+is the pixel obtained by reprojecting the pseudo-correspondence pixel
+𝐱
+j
+m
+\mathbf{x}_{j}^{m}
+in source view
+j
+j
+into target view
+i
+i
+using the camera poses
+𝒫
+\mathcal{P}
+and depth
+𝐃
+j
+\mathbf{D}_{j}
+, and
+𝐱
+i
+m
+\mathbf{x}_{i}^{m}
+is the pseudo-correspondence pixel in target view
+i
+i
+. Since
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+depends on both
+𝒫
+\mathcal{P}
+and
+𝐃
+j
+\mathbf{D}_{j}
+, it
+jointly
+supervises the camera poses and depths. However,
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+inherits the well-known
+pose-depth ambiguity
+of reprojection-based supervision, where distinct
+(
+𝒫
+,
+𝐃
+j
+)
+(\mathcal{P},\mathbf{D}_{j})
+pairs can yield the same
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+value, and thus the
+point-to-point
+MVC Loss
+alone cannot uniquely identify accurate camera pose or depth.
+Epipolar Consistency Loss,
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+.
+To resolve this
+pose-depth ambiguity
+, we further introduce the
+depth-independent
+EC Loss
+that formalizes the
+point-to-line
+epipolar constraint provided by the pseudo-correspondences. At each
+TTA
+iteration, this loss constrains the camera poses predicted by the pretrained
+VFM
+to consistently place each 2D pixel in source view
+j
+j
+on the epipolar line of its paired 2D pixel in target view
+i
+i
+, as:
+ℒ
+ec
+i
+​
+(
+𝒫
+,
+ℳ
+)
+=
+1
+|
+ℳ
+|
+​
+∑
+(
+𝐱
+i
+m
+,
+𝐱
+j
+m
+)
+∈
+ℳ
+d
+Sampson
+​
+(
+𝐱
+~
+i
+m
+,
+𝐱
+~
+j
+m
+,
+𝐅
+i
+←
+j
+)
+.
+\displaystyle\mathcal{L}_{\mathrm{ec}}^{i}(\mathcal{P};\mathcal{M})=\frac{1}{|\mathcal{M}|}\sum_{(\mathbf{x}_{i}^{m},\mathbf{x}_{j}^{m})\in\mathcal{M}}\sqrt{d_{\mathrm{Sampson}}\!\left(\tilde{\mathbf{x}}_{i}^{m},\tilde{\mathbf{x}}_{j}^{m};\mathbf{F}_{i\leftarrow j}\right)}.
+(3)
+Here,
+𝐅
+i
+←
+j
+\mathbf{F}_{i\leftarrow j}
+is the fundamental matrix from source view
+j
+j
+to target view
+i
+i
+derived from the camera poses
+𝒫
+\mathcal{P}
+predicted by the pretrained
+VFM
+,
+d
+Sampson
+​
+(
+⋅
+,
+⋅
+,
+𝐅
+)
+d_{\mathrm{Sampson}}(\cdot,\cdot;\mathbf{F})
+is the Sampson distance (see Sec.
+S.II
+), and
+𝐱
+~
+i
+m
+\tilde{\mathbf{x}}_{i}^{m}
+and
+𝐱
+~
+j
+m
+\tilde{\mathbf{x}}_{j}^{m}
+are the homogeneous coordinates of the pseudo-correspondence pixels
+𝐱
+i
+m
+\mathbf{x}_{i}^{m}
+and
+𝐱
+j
+m
+\mathbf{x}_{j}^{m}
+.
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+depends only on
+𝒫
+\mathcal{P}
+, supervising the camera poses in a
+depth-independent
+manner.
+Gradient Disentanglement.
+Since both losses supervise the same camera poses, we introduce
+Gradient Disentanglement
+(
+GD
+) at every
+TTA
+iteration to prevent the
+gradient conflict
+(Fig.
+IV
+(b)) that can arise between them, projecting
+∇
+ℒ
+mvc
+\nabla\mathcal{L}_{\mathrm{mvc}}
+onto the orthogonal complement of
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\mathrm{ec}}
+, as:
+∇
+ℒ
+mvc
+←
+∇
+ℒ
+mvc
+−
+⟨
+∇
+ℒ
+mvc
+,
+∇
+ℒ
+ec
+⟩
+‖
+∇
+ℒ
+ec
+‖
+2
+2
+∇
+ℒ
+ec
+.
+\nabla\mathcal{L}_{\mathrm{mvc}}\;\leftarrow\;\nabla\mathcal{L}_{\mathrm{mvc}}-\frac{\left\langle\nabla\mathcal{L}_{\mathrm{mvc}},\;\nabla\mathcal{L}_{\mathrm{ec}}\right\rangle}{\left\|\nabla\mathcal{L}_{\mathrm{ec}}\right\|_{2}^{2}}\,\nabla\mathcal{L}_{\mathrm{ec}}.
+(4)
+Here,
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\mathrm{ec}}
+and
+∇
+ℒ
+mvc
+\nabla\mathcal{L}_{\mathrm{mvc}}
+are the gradients of
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+and
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+with respect to the learnable parameters, and
+⟨
+⋅
+,
+⋅
+⟩
+\langle\cdot,\cdot\rangle
+denotes the inner product between the flattened gradient vectors. This projection preserves
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\mathrm{ec}}
+and removes only the
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\mathrm{ec}}
+-direction component from
+∇
+ℒ
+mvc
+\nabla\mathcal{L}_{\mathrm{mvc}}
+, so that the two losses operate complementarily at the gradient level: the
+point-to-line
+EC Loss
+refines the camera poses independently of the depths, and the
+point-to-point
+MVC Loss
+refines the camera poses and depths at a fine-grained level that the proposed
+EC Loss
+cannot reach.
+III-C
+Frame Angular-Neighbor (FAN)
+As discussed in Sec.
+I
+, to lightly apply these explicit multi-view geometric constraints, we need an efficient view sampling strategy. To minimize information loss about the target scene induced by the sampled view set, it must cover the scene evenly with moderate inter-frame overlap, which depends on the relative displacement between the sampled cameras. Although SE(3)
+[
+21
+]
+geodesic distance measures this displacement fully, its rotation and translation components have distinct units and its translation is
+scene-scale-variant
+, requiring heuristic per-scene normalization that unnecessarily complicates the view sampling pipeline. We therefore introduce
+FAN
+, which uses SO(3) geodesic distance alone; since relative rotation primarily determines viewing direction and thus scene coverage, this
+scene-scale-invariant
+measure can achieve uniform scene coverage without the translation component. At each
+TTA
+iteration, the proposed
+FAN
+samples angularly diverse views using SO(3) geodesic distances (
+i.e.
+, the relative rotation angles), and proceeds in two steps: (i)
+Geometry-Rich View Selection
+(
+GRV
+; Eq. (
+6
+)) selects the target view based on SO(3) geodesic diversity, and (ii)
+Angular-Neighbor Sampling
+(
+ANS
+) samples source views from each SO(3) bin defined relative to it.
+Geometry-Rich View Selection (GRV).
+The proposed
+GRV
+selects the target view in two steps and uses SO(3) bins constructed from the SO(3) geodesic distance between input views. The SO(3) geodesic distance between two input views
+i
+i
+and
+j
+j
+is defined as:
+θ
+i
+​
+j
+=
+cos
+−
+1
+⁡
+(
+tr
+⁡
+(
+𝐑
+i
+​
+𝐑
+j
+⊤
+)
+−
+1
+2
+)
+.
+\theta_{ij}=\cos^{-1}\!\left(\frac{\mathrm{tr}(\mathbf{R}_{i}\mathbf{R}_{j}^{\top})-1}{2}\right).
+(5)
+Here,
+𝐑
+i
+,
+𝐑
+j
+∈
+S
+​
+O
+​
+(
+3
+)
+\mathbf{R}_{i},\mathbf{R}_{j}\in SO(3)
+are the rotation matrices of the respective views,
+tr
+⁡
+(
+⋅
+)
+\mathrm{tr}(\cdot)
+is the trace operator, and
+θ
+i
+​
+j
+∈
+[
+0
+,
+π
+]
+\theta_{ij}\in[0,\pi]
+is the SO(3) geodesic distance between the two rotation matrices. We partition the value range
+[
+0
+,
+π
+]
+[0,\pi]
+of
+θ
+i
+​
+j
+\theta_{ij}
+into
+B
+B
+disjoint intervals to construct the SO(3) bins, and each view is assigned to the bin whose interval contains its
+θ
+i
+​
+j
+\theta_{ij}
+.
+In the first step, each input view
+v
+v
+is treated as a candidate target view, and the remaining views are assigned as source views to the SO(3) bins; a bin with at least one assigned source view is defined as an
+active SO(3) bin
+. Since the number of active SO(3) bins reflects the scene coverage of the source views with respect to the target view, we obtain the candidate target view index set
+𝒱
+⊆
+{
+1
+,
+…
+,
+N
+}
+\mathcal{V}\subseteq\{1,\dots,N\}
+maximizing this count.
+In the second step, from the candidates in
+𝒱
+\mathcal{V}
+, the view that maximizes the SO(3) bin entropy is selected as the target view:
+v
+∗
+=
+arg
+max
+v
+∈
+𝒱
+H
+(
+v
+)
+,
+H
+(
+v
+)
+=
+−
+∑
+b
+=
+1
+B
+p
+b
+(
+v
+)
+log
+p
+b
+(
+v
+)
+,
+p
+b
+​
+(
+v
+)
+=
+n
+b
+​
+(
+v
+)
+∑
+k
+=
+1
+B
+n
+k
+​
+(
+v
+)
+.
+\begin{gathered}v^{*}=\arg\max_{v\in\mathcal{V}}H(v),\quad H(v)=-\sum_{b=1}^{B}p_{b}(v)\log p_{b}(v),\\
+p_{b}(v)=\frac{n_{b}(v)}{\sum_{k=1}^{B}n_{k}(v)}.\end{gathered}
+(6)
+Here,
+n
+b
+​
+(
+v
+)
+n_{b}(v)
+is the number of source views assigned to bin
+b
+b
+for candidate target view
+v
+v
+. In Eq. (
+6
+), maximizing the entropy
+H
+⁡
+(
+v
+)
+H(v)
+corresponds to selecting a target view
+v
+∗
+v^{*}
+whose source views are uniformly distributed across all active SO(3) bins rather than concentrated in specific angular regions. Through this two-step procedure, the sampled view set at each
+TTA
+iteration achieves uniform scene coverage.
+Angular-Neighbor Sampling (ANS).
+The proposed
+ANS
+samples source views from each SO(3) bin defined with respect to the target view
+v
+∗
+v^{*}
+selected once by the proposed
+GRV
+at scene initialization, constructing a compact sampled view set at each
+TTA
+iteration. This bin-wise sampling prevents source views from being concentrated in specific angular regions and ensures uniform scene coverage.
+III-D
+Lightweight Test-Time Adaptation (Lightweight TTA)
+The proposed
+Lightweight TTA
+is a parameter-efficient optimization component. It specializes the pretrained
+VFM
+to the target scene without additional training data, preserving the geometric prior acquired during pretraining. It employs a
+LoRA
+[
+22
+]
+-based adapter and updates only its parameters while keeping the pretrained
+VFM
+frozen. It works with the proposed
+FAN
+(Sec.
+III-C
+) to complete per-scene adaptation on a single GPU within two minutes.
+LoRA-Based Adapter.
+Our proposed
+LoRA-based adapter
+targets the attention blocks of the pretrained
+VFM
+. Specifically, following Fin3R
+[
+30
+]
+, which
+LoRA
+fine-tunes pretrained
+VFMs
+, we insert
+LoRA
+[
+22
+]
+only into the QKV weights of these blocks, keeping all parameters of the pretrained
+VFM
+frozen and updating only the
+LoRA
+parameters.
+Together, the proposed
+GDO
+,
+FAN
+, and
+Lightweight TTA
+form our
+Self-Geometry
+, a
+GT-free
+and
+Plug-and-play
+TTA
+pipeline imposing explicit multi-view geometric constraints on pretrained
+VFMs
+, adapting each scene on a single NVIDIA RTX PRO 6000
+[
+23
+]
+within two minutes. The total loss formulation and algorithm are provided in Sec.
+S.III
+and Sec.
+S.IV
+, respectively.
+IV
+Experiments
+TABLE II:
+Pose Estimation results: AUC@3, AUC@30 (
+↑
+\uparrow
+) on 7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+, and Mean. Row notation: DA3-G/L/B/S denote DA3-Giant/Large/Base/Small
+[
+6
+]
+; each pretrained model (e.g., VGGT,
+π
+3
+\pi^{3}
+, DA3-G) appears in four consecutive rows — the baseline and three adapted variants with suffix “-TCO” (
+TCO
+[
+36
+]
+), “-Fr” (
+Free-Geometry
+[
+12
+]
+), and “-Ours” (our proposed
+Self-Geometry
+).
+Δ
+\Delta
+% vs. baseline in parentheses. Per column,
+blue
+/
+red
+marks the largest gain/degradation among the three adaptation methods.
+Method
+7Scenes
+ETH3D
+ScanNet++
+HiRoom
+Mean
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+VGGT
+0.25
+0.86
+0.20
+0.76
+0.56
+0.94
+0.51
+0.88
+0.38
+0.86
+VGGT
+-TCO
+0.26 (
++4.3%
+)
+0.86 (
++0.3%
+)
+0.17 (
+-12.2%
+)
+0.72 (
+-5.4%
+)
+0.43 (
+-21.9%
+)
+0.92 (
+-1.7%
+)
+0.42 (
+-18.4%
+)
+0.86 (
+-1.7%
+)
+0.32
+(
+-15.2%
+)
+0.84
+(
+-2.0%
+)
+VGGT
+-Fr
+0.25 (
+-0.2%
+)
+0.86 (
+-0.0%
+)
+0.20 (
++3.9%
+)
+0.77 (
++1.1%
+)
+0.56 (
++0.1%
+)
+0.94 (
++0.0%
+)
+0.54 (
++4.8%
+)
+0.89 (
++1.8%
+)
+0.39
+(
++2.1%
+)
+0.86
+(
++0.7%
+)
+VGGT
+-Ours
+0.28 (
++13.9%
+)
+0.87 (
++1.1%
+)
+0.27 (
++37.3%
+)
+0.83 (
++9.2%
+)
+0.54 (
+-2.9%
+)
+0.94 (
+-0.0%
+)
+0.47 (
+-8.2%
+)
+0.85 (
+-3.4%
+)
+0.39
+(
++3.3%
+)
+0.87
+(
++1.4%
+)
+π
+3
+\pi^{3}
+0.26
+0.86
+0.33
+0.86
+0.55
+0.94
+0.65
+0.94
+0.45
+0.90
+π
+3
+\pi^{3}
+-TCO
+0.02 (
+-90.5%
+)
+0.42 (
+-51.3%
+)
+0.09 (
+-72.0%
+)
+0.60 (
+-30.2%
+)
+0.02 (
+-96.0%
+)
+0.63 (
+-32.5%
+)
+0.01 (
+-97.8%
+)
+0.51 (
+-46.1%
+)
+0.04
+(
+-91.5%
+)
+0.54
+(
+-40.0%
+)
+π
+3
+\pi^{3}
+-Fr
+0.26 (
+-0.3%
+)
+0.86 (
++0.0%
+)
+0.32 (
+-3.4%
+)
+0.85 (
+-0.1%
+)
+0.45 (
+-18.4%
+)
+0.93 (
+-1.3%
+)
+0.63 (
+-2.1%
+)
+0.95 (
++0.6%
+)
+0.41
+(
+-7.1%
+)
+0.90
+(
+-0.2%
+)
+π
+3
+\pi^{3}
+-Ours
+0.26 (
+-1.5%
+)
+0.86 (
++0.3%
+)
+0.41 (
++25.1%
+)
+0.90 (
++5.0%
+)
+0.60 (
++8.8%
+)
+0.95 (
++1.6%
+)
+0.67 (
++3.4%
+)
+0.95 (
++0.8%
+)
+0.48
+(
++8.3%
+)
+0.92
+(
++1.9%
+)
+DA3-G
+0.27
+0.87
+0.49
+0.91
+0.85
+0.98
+0.80
+0.96
+0.60
+0.93
+DA3-G
+-TCO
+0.28 (
++1.6%
+)
+0.87 (
++0.1%
+)
+0.50 (
++2.5%
+)
+0.92 (
++1.0%
+)
+0.84 (
+-1.3%
+)
+0.98 (
+-0.2%
+)
+0.81 (
++1.6%
+)
+0.96 (
++0.1%
+)
+0.61
+(
++0.8%
+)
+0.93
+(
++0.2%
+)
+DA3-G
+-Fr
+0.28 (
++0.8%
+)
+0.87 (
++0.1%
+)
+0.52 (
++7.9%
+)
+0.92 (
++1.1%
+)
+0.85 (
++0.2%
+)
+0.98 (
++0.0%
+)
+0.82 (
++1.9%
+)
+0.98 (
++1.7%
+)
+0.62
+(
++2.4%
+)
+0.94
+(
++0.7%
+)
+DA3-G
+-Ours
+0.27 (
++0.0%
+)
+0.87 (
++0.0%
+)
+0.50 (
++3.4%
+)
+0.91 (
+-0.2%
+)
+0.84 (
+-1.0%
+)
+0.98 (
+-0.1%
+)
+0.83 (
++3.5%
+)
+0.96 (
++0.4%
+)
+0.61
+(
++1.5%
+)
+0.93
+(
++0.1%
+)
+DA3-L
+0.29
+0.86
+0.32
+0.87
+0.56
+0.94
+0.59
+0.94
+0.44
+0.90
+DA3-L
+-TCO
+0.30 (
++2.6%
+)
+0.86 (
++0.1%
+)
+0.31 (
+-3.7%
+)
+0.87 (
+-0.2%
+)
+0.54 (
+-2.9%
+)
+0.94 (
+-0.3%
+)
+0.62 (
++5.0%
+)
+0.95 (
++0.6%
+)
+0.44
+(
++0.5%
+)
+0.90
+(
++0.1%
+)
+DA3-L
+-Fr
+0.29 (
++0.4%
+)
+0.86 (
+-0.1%
+)
+0.36 (
++13.3%
+)
+0.88 (
++1.6%
+)
+0.56 (
++0.9%
+)
+0.94 (
++0.1%
+)
+0.58 (
+-1.0%
+)
+0.94 (
++0.1%
+)
+0.45
+(
++2.5%
+)
+0.91
+(
++0.4%
+)
+DA3-L
+-Ours
+0.29 (
+-0.3%
+)
+0.86 (
+-0.1%
+)
+0.32 (
+-1.5%
+)
+0.87 (
+-0.2%
+)
+0.56 (
++0.0%
+)
+0.94 (
++0.0%
+)
+0.62 (
++5.6%
+)
+0.94 (
++0.4%
+)
+0.45
+(
++1.6%
+)
+0.90
+(
++0.0%
+)
+DA3-B
+0.21
+0.82
+0.15
+0.75
+0.20
+0.81
+0.19
+0.83
+0.19
+0.80
+DA3-B
+-TCO
+0.22 (
++1.0%
+)
+0.83 (
++0.7%
+)
+0.16 (
++5.0%
+)
+0.76 (
++1.4%
+)
+0.20 (
++0.8%
+)
+0.81 (
+-0.4%
+)
+0.20 (
++3.9%
+)
+0.84 (
++0.6%
+)
+0.19
+(
++2.5%
+)
+0.81
+(
++0.6%
+)
+DA3-B
+-Fr
+0.21 (
+-2.0%
+)
+0.82 (
+-0.2%
+)
+0.18 (
++19.9%
+)
+0.77 (
++2.9%
+)
+0.21 (
++1.7%
+)
+0.81 (
++0.8%
+)
+0.17 (
+-12.3%
+)
+0.83 (
+-0.8%
+)
+0.19
+(
++0.8%
+)
+0.81
+(
++0.6%
+)
+DA3-B
+-Ours
+0.22 (
++1.2%
+)
+0.83 (
++0.4%
+)
+0.16 (
++9.8%
+)
+0.75 (
++0.9%
+)
+0.21 (
++2.2%
+)
+0.81 (
++0.2%
+)
+0.29 (
++54.8%
+)
+0.87 (
++4.4%
+)
+0.22
+(
++16.6%
+)
+0.81
+(
++1.5%
+)
+DA3-S
+0.15
+0.78
+0.09
+0.62
+0.09
+0.68
+0.09
+0.75
+0.10
+0.71
+DA3-S
+-TCO
+0.15 (
++5.6%
+)
+0.79 (
++0.4%
+)
+0.09 (
++2.4%
+)
+0.62 (
+-0.3%
+)
+0.08 (
+-9.0%
+)
+0.66 (
+-3.1%
+)
+0.10 (
++4.4%
+)
+0.76 (
++0.9%
+)
+0.11
+(
++1.5%
+)
+0.71
+(
+-0.5%
+)
+DA3-S
+-Fr
+0.15 (
++2.4%
+)
+0.78 (
++0.0%
+)
+0.10 (
++19.5%
+)
+0.66 (
++6.4%
+)
+0.09 (
++1.9%
+)
+0.70 (
++1.9%
+)
+0.09 (
+-5.6%
+)
+0.74 (
+-1.3%
+)
+0.11
+(
++4.0%
+)
+0.72
+(
++1.5%
+)
+DA3-S
+-Ours
+0.14 (
+-2.4%
+)
+0.79 (
++1.0%
+)
+0.09 (
++8.3%
+)
+0.64 (
++3.6%
+)
+0.09 (
++0.0%
+)
+0.69 (
++0.3%
+)
+0.16 (
++64.8%
+)
+0.79 (
++5.6%
+)
+0.12
+(
++15.6%
+)
+0.73
+(
++2.6%
+)
+TABLE III:
+Geometry Estimation results: F1-score (
+↑
+\uparrow
+) under unposed (w/o p.) and posed (w/ p.) modes on 7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+, and Mean. Row notation: DA3-G/L/B/S denote DA3-Giant/Large/Base/Small
+[
+6
+]
+; each pretrained model (e.g., VGGT,
+π
+3
+\pi^{3}
+, DA3-G) appears in four consecutive rows — the baseline and three adapted variants with suffix “-TCO” (
+TCO
+[
+36
+]
+), “-Fr” (
+Free-Geometry
+[
+12
+]
+), and “-Ours” (our proposed
+Self-Geometry
+).
+Δ
+\Delta
+% vs. baseline in parentheses. Per column,
+blue
+/
+red
+marks the largest gain/degradation among the three adaptation methods.
+Method
+7Scenes
+ETH3D
+ScanNet++
+HiRoom
+Mean
+w/o p.
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+VGGT
+0.43
+0.37
+0.52
+0.43
+0.60
+0.40
+0.60
+0.68
+0.54
+0.47
+VGGT
+-TCO
+0.44 (
++3.1%
+)
+0.39 (
++4.9%
+)
+0.49 (
+-4.6%
+)
+0.40 (
+-7.9%
+)
+0.48 (
+-19.8%
+)
+0.36 (
+-10.1%
+)
+0.44 (
+-26.5%
+)
+0.51 (
+-24.8%
+)
+0.46
+(
+-13.4%
+)
+0.41
+(
+-12.0%
+)
+VGGT
+-Fr
+0.43 (
++0.4%
+)
+0.37 (
++1.1%
+)
+0.50 (
+-4.3%
+)
+0.44 (
++1.1%
+)
+0.59 (
+-1.0%
+)
+0.41 (
++1.2%
+)
+0.63 (
++6.0%
+)
+0.67 (
+-0.6%
+)
+0.54
+(
++0.4%
+)
+0.47
+(
++0.5%
+)
+VGGT
+-Ours
+0.44 (
++3.3%
+)
+0.38 (
++4.6%
+)
+0.60 (
++16.5%
+)
+0.47 (
++9.3%
+)
+0.54 (
+-10.6%
+)
+0.41 (
++2.5%
+)
+0.55 (
+-7.5%
+)
+0.64 (
+-4.9%
+)
+0.53
+(
+-0.4%
+)
+0.48
+(
++1.8%
+)
+π
+3
+\pi^{3}
+0.42
+0.58
+0.70
+0.79
+0.63
+0.77
+0.74
+0.83
+0.62
+0.74
+π
+3
+\pi^{3}
+-TCO
+0.17 (
+-60.1%
+)
+0.15 (
+-75.0%
+)
+0.48 (
+-31.5%
+)
+0.44 (
+-44.3%
+)
+0.24 (
+-62.1%
+)
+0.34 (
+-55.8%
+)
+0.11 (
+-84.9%
+)
+0.15 (
+-81.6%
+)
+0.25
+(
+-60.0%
+)
+0.27
+(
+-63.7%
+)
+π
+3
+\pi^{3}
+-Fr
+0.43 (
++3.1%
+)
+0.58 (
++0.5%
+)
+0.71 (
++1.0%
+)
+0.80 (
++0.2%
+)
+0.51 (
+-19.6%
+)
+0.77 (
++0.1%
+)
+0.62 (
+-17.1%
+)
+0.81 (
+-2.6%
+)
+0.56
+(
+-9.3%
+)
+0.74
+(
+-0.6%
+)
+π
+3
+\pi^{3}
+-Ours
+0.46 (
++10.5%
+)
+0.57 (
+-1.0%
+)
+0.74 (
++5.9%
+)
+0.81 (
++2.6%
+)
+0.65 (
++2.2%
+)
+0.79 (
++3.4%
+)
+0.77 (
++3.8%
+)
+0.84 (
++1.3%
+)
+0.65
+(
++5.1%
+)
+0.76
+(
++1.7%
+)
+DA3-G
+0.49
+0.56
+0.79
+0.87
+0.78
+0.80
+0.86
+0.95
+0.73
+0.80
+DA3-G
+-TCO
+0.51 (
++3.1%
+)
+0.59 (
++5.5%
+)
+0.79 (
++0.3%
+)
+0.87 (
++0.1%
+)
+0.76 (
+-2.8%
+)
+0.80 (
+-0.1%
+)
+0.84 (
+-2.0%
+)
+0.94 (
+-1.3%
+)
+0.73
+(
+-0.7%
+)
+0.80
+(
++0.6%
+)
+DA3-G
+-Fr
+0.51 (
++2.2%
+)
+0.56 (
+-0.9%
+)
+0.79 (
++0.6%
+)
+0.87 (
+-0.7%
+)
+0.78 (
+-0.1%
+)
+0.80 (
+-0.0%
+)
+0.86 (
++0.7%
+)
+0.94 (
+-1.4%
+)
+0.74
+(
++0.7%
+)
+0.79
+(
+-0.8%
+)
+DA3-G
+-Ours
+0.51 (
++2.8%
+)
+0.57 (
++1.5%
+)
+0.78 (
+-0.2%
+)
+0.87 (
++0.1%
+)
+0.79 (
++0.4%
+)
+0.81 (
++0.5%
+)
+0.87 (
++1.2%
+)
+0.95 (
+-0.5%
+)
+0.74
+(
++0.9%
+)
+0.80
+(
++0.3%
+)
+DA3-L
+0.51
+0.48
+0.69
+0.75
+0.69
+0.76
+0.69
+0.88
+0.65
+0.72
+DA3-L
+-TCO
+0.51 (
+-0.7%
+)
+0.48 (
++1.3%
+)
+0.68 (
+-1.4%
+)
+0.75 (
+-0.0%
+)
+0.65 (
+-5.5%
+)
+0.76 (
+-0.9%
+)
+0.74 (
++7.5%
+)
+0.83 (
+-5.2%
+)
+0.65
+(
++0.0%
+)
+0.71
+(
+-1.6%
+)
+DA3-L
+-Fr
+0.53 (
++3.5%
+)
+0.48 (
+-0.5%
+)
+0.68 (
+-2.7%
+)
+0.76 (
++0.8%
+)
+0.69 (
++0.6%
+)
+0.76 (
++0.0%
+)
+0.57 (
+-17.3%
+)
+0.77 (
+-12.5%
+)
+0.62
+(
+-4.5%
+)
+0.69
+(
+-3.7%
+)
+DA3-L
+-Ours
+0.51 (
++0.4%
+)
+0.47 (
+-1.3%
+)
+0.69 (
+-1.1%
+)
+0.75 (
++0.1%
+)
+0.69 (
++0.5%
+)
+0.76 (
++0.1%
+)
+0.72 (
++4.3%
+)
+0.88 (
+-0.1%
+)
+0.65
+(
++1.1%
+)
+0.72
+(
+-0.2%
+)
+DA3-B
+0.50
+0.50
+0.49
+0.66
+0.48
+0.67
+0.23
+0.72
+0.42
+0.64
+DA3-B
+-TCO
+0.48 (
+-3.8%
+)
+0.51 (
++2.6%
+)
+0.49 (
+-0.2%
+)
+0.68 (
++2.7%
+)
+0.44 (
+-7.5%
+)
+0.67 (
+-0.1%
+)
+0.26 (
++11.3%
+)
+0.65 (
+-9.7%
+)
+0.42
+(
+-1.8%
+)
+0.63
+(
+-1.5%
+)
+DA3-B
+-Fr
+0.49 (
+-2.0%
+)
+0.50 (
+-0.5%
+)
+0.50 (
++1.3%
+)
+0.66 (
+-0.2%
+)
+0.48 (
++1.2%
+)
+0.68 (
++0.5%
+)
+0.19 (
+-18.4%
+)
+0.68 (
+-5.4%
+)
+0.41
+(
+-2.4%
+)
+0.63
+(
+-1.5%
+)
+DA3-B
+-Ours
+0.50 (
++0.2%
+)
+0.50 (
+-0.8%
+)
+0.50 (
++1.9%
+)
+0.67 (
++0.8%
+)
+0.48 (
++0.2%
+)
+0.67 (
++0.3%
+)
+0.43 (
++85.2%
+)
+0.72 (
++0.4%
+)
+0.48
+(
++12.2%
+)
+0.64
+(
++0.3%
+)
+DA3-S
+0.39
+0.47
+0.37
+0.64
+0.33
+0.53
+0.18
+0.51
+0.32
+0.54
+DA3-S
+-TCO
+0.39 (
+-1.1%
+)
+0.47 (
++0.7%
+)
+0.38 (
++2.0%
+)
+0.66 (
++3.1%
+)
+0.30 (
+-7.9%
+)
+0.53 (
+-0.9%
+)
+0.21 (
++13.8%
+)
+0.42 (
+-17.6%
+)
+0.32
+(
++0.2%
+)
+0.52
+(
+-3.4%
+)
+DA3-S
+-Fr
+0.41 (
++4.5%
+)
+0.47 (
+-0.1%
+)
+0.49 (
++31.5%
+)
+0.64 (
++1.3%
+)
+0.33 (
++0.8%
+)
+0.53 (
+-0.2%
+)
+0.16 (
+-12.1%
+)
+0.51 (
+-0.8%
+)
+0.35
+(
++9.1%
+)
+0.54
+(
++0.1%
+)
+DA3-S
+-Ours
+0.38 (
+-2.1%
+)
+0.47 (
++1.4%
+)
+0.41 (
++11.0%
+)
+0.65 (
++2.1%
+)
+0.34 (
++4.4%
+)
+0.53 (
++0.4%
+)
+0.31 (
++70.4%
+)
+0.55 (
++7.0%
+)
+0.36
+(
++13.9%
+)
+0.55
+(
++2.7%
+)
+Fig. 4:
+Qualitative comparison of pretrained
+VFMs
+against our proposed
+Self-Geometry
+across representative scenes (rows:
+VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+,
+DA3-Giant
+[
+6
+]
+; scene identifier below each row).
+(a) Depth Estimation
+: from left to right, Reference RGB, GT depth, and depth error maps for Original, +TCO
+[
+36
+]
+,
++Free-Geometry
+[
+12
+]
+, and
++Self-Geometry
+(Ours).
+(b) Geometry Estimation
+: from left to right, GT fused pointcloud and geometry error maps for the same four methods.
+Red
+regions denote errors exceeding the benchmark threshold;
+gray
+regions denote correctly reconstructed pixels.
+Best viewed in zoom.
+We evaluate our proposed
+Self-Geometry
+on Pose Estimation and Geometry Estimation across multiple pretrained
+Vision Foundation Models (VFMs)
+(VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, and DA3
+[
+6
+]
+) and four benchmark datasets (7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, and HiRoom
+[
+6
+]
+), compare it against
+Free-Geometry
+[
+12
+]
+and
+TCO
+[
+36
+]
+, and analyze the effectiveness of the proposed
+Epipolar Consistency Loss (EC Loss)
+(Sec.
+III-B
+),
+Multi-View Consistency Loss (MVC Loss)
+(Sec.
+III-B
+),
+Geometric Disentanglement Optimization (GDO)
+(Sec.
+III-B
+), and
+Frame Angular-Neighbor (FAN)
+(Sec.
+III-C
+) through qualitative comparisons, ablation studies, and complexity analysis. Additional implementation details are provided in Sec.
+S.V
+.
+IV-A
+Experimental Setup
+Datasets.
+Following the DA3 benchmark protocol, including its per-scene sampling of up to 100 frames, we evaluate our proposed
+Self-Geometry
+on 7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, and HiRoom
+[
+6
+]
+. Since our proposed
+Self-Geometry
+targets pose and geometry estimation in indoor and outdoor scenes, we exclude the object-centric DTU
+[
+37
+]
+.
+Pose Estimation.
+Following DA3
+[
+6
+]
+, we report AUC@1, AUC@3, and AUC@30 (thresholds in degrees) of pairwise pose error, averaged across benchmark scenes.
+Geometry Estimation.
+Following DA3
+[
+6
+]
+, we report F1-score under posed (GT poses; depth only) and unposed (predicted poses; pose and depth) modes.
+Baselines.
+To evaluate generalizability across
+VFM
+architectures and scales, we experiment on three feed-forward
+VFMs
+(VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, and DA3
+[
+6
+]
+with Giant, Large, Base, and Small variants). For each model-dataset pair, we compare the frozen pretrained
+VFM
+to the same model adapted by our proposed
+Self-Geometry
+. We additionally include the two most recent comparison baselines,
+Free-Geometry
+[
+12
+]
+and
+TCO
+[
+36
+]
+. For
+TCO
+, since GT camera poses are unavailable, we use the pretrained
+VFM
+’s predicted camera poses as its auxiliary prior.
+For fair comparison
+, both baselines share the same DA3 evaluation protocol as our proposed
+Self-Geometry
+, and adopt the training configurations of their official implementations. For
+VFMs
+unsupported by these implementations, we re-implement and re-train each baseline.
+Training Details.
+We instantiate the proposed
+Lightweight TTA
+(Sec.
+III-D
+) with
+LoRA
+[
+22
+]
+; the pretrained parameters remain frozen, and each
+VFM
+is adapted per-scene with identical optimization settings. The total loss combines the two primary losses (Eqs. (
+2
+) and (
+3
+)) with three self-supervised auxiliary regularizers that suppress excessive drift from the pretrained
+VFM
+, formalized in Sec.
+S.III
+. We optimize each scene with AdamW
+[
+38
+]
+for 50
+TTA
+iterations, selecting the checkpoint minimizing the scale-invariant
+ℒ
+ec
+⋅
+ℒ
+mvc
+\sqrt{\mathcal{L}_{\mathrm{ec}}\cdot\mathcal{L}_{\mathrm{mvc}}}
+(Eqs. (
+3
+) and (
+2
+)). Training details are provided in Sec.
+S.V
+.
+IV-B
+Quantitative Results
+Tab.
+II
+and Tab.
+III
+present pose and geometry estimation results, respectively. Across six pretrained
+VFMs
+, our proposed
+Self-Geometry
+outperforms
+Free-Geometry
+[
+12
+]
+and
+TCO
+[
+36
+]
+on most Mean columns and achieves the largest Mean improvements over the frozen baselines in both tasks.
+On
+π
+3
+\pi^{3}
+[
+5
+]
+,
+TCO
+[
+36
+]
+collapses across all four datasets, degrading Mean pose AUC@3 by
+-91.5%
+and Mean geometry w/o p. by
+-60.0%
+(Tab.
+II
+and Tab.
+III
+). In our GT-free setting where
+TCO
+’s pose prior is derived from the pretrained
+VFM
+’s own prediction (Sec.
+IV-A
+),
+TCO
+’s optimization diverges on
+π
+3
+\pi^{3}
+. Our proposed
+Self-Geometry
+, by contrast, delivers consistent Mean gains on
+π
+3
+\pi^{3}
+(AUC@3
++8.3%
+, geometry w/o p.
++5.1%
+), highlighting its robustness across pretrained
+VFMs
+.
+For Pose Estimation, relative gains grow as the AUC threshold tightens. On ETH3D
+[
+9
+]
+, which comprises wide-baseline outdoor scenes, our proposed
+Self-Geometry
+improves the AUC@30 / AUC@3 of VGGT
+[
+4
+]
+by
++9.2% / +37.3%
+and of
+π
+3
+\pi^{3}
+[
+5
+]
+by
++5.0% / +25.1%
+, as the wide baselines strengthen correspondence-based geometric constraints. On HiRoom
+[
+6
+]
+, a challenging synthetic benchmark with varied indoor illumination and abundant fine structures, the gains are most pronounced for the smaller pretrained
+VFMs
+: DA3-Base and DA3-Small improve geometry w/o p. by
++85.2%
+and
++70.4%
+, respectively, suggesting that our proposed
+Self-Geometry
+is particularly effective in the under-fitted regime.
+On ScanNet++
+[
+8
+]
+and HiRoom
+[
+6
+]
+, VGGT+Ours exhibits relative degradations in a subset of columns (e.g., AUC@3
+-2.9% / -8.2%
+, geometry w/o p.
+-10.6% / -7.5%
+). These relative degradations correspond to small absolute drops within 6 pp, and the Mean pose improvements of VGGT+Ours remain positive (AUC@3 Mean
++3.3%
+, AUC@30 Mean
++1.4%
+).
+IV-C
+Qualitative Results
+We qualitatively compare diverse pretrained
+VFMs
+such as VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, and DA3-Giant
+[
+6
+]
+against
+Free-Geometry
+[
+12
+]
+and our proposed
+Self-Geometry
+on representative scenes from HiRoom
+[
+6
+]
+and ScanNet++
+[
+8
+]
+, along two axes: depth (Fig.
+4
+(a)) and 3D geometry (Fig.
+4
+(b)).
+Depth Estimation Results.
+Fig.
+4
+(a) visualizes per-pixel depth error against GT. Original,
+TCO
+[
+36
+]
+, and
+Free-Geometry
+[
+12
+]
+all leave widespread
+red
+regions, and
+TCO
+expands them further on
+π
+3
+\pi^{3}
+[
+5
+]
+. In contrast, our proposed
+Self-Geometry
+substantially reduces them across all three backbones, consistent with the F1-score gains in Tab.
+III
+.
+Geometry Estimation Results.
+Fig.
+4
+(b) shows fused pointclouds. Compared to Original,
+TCO
+[
+36
+]
+, and
+Free-Geometry
+[
+12
+]
+, which exhibit scattered
+red
+outliers (most severe for
+TCO
+on
+π
+3
+\pi^{3}
+[
+5
+]
+), our proposed
+Self-Geometry
+yields noticeably cleaner surface reconstructions with fewer error regions. Additional qualitative results across more scenes are provided in Figs.
+S.1
+,
+S.2
+, and
+S.3
+.
+V
+Ablation Study
+This section isolates the contribution from each of the three core components in our proposed
+Self-Geometry
+(
+GDO
+(Sec.
+III-B
+),
+Pseudo-Correspondence Filtering
+(Sec.
+III-B
+), and
+FAN
+(Sec.
+III-C
+)), and profiles its computational complexity (Sec.
+V-A
+). Component ablations are conducted on VGGT
+[
+4
+]
+with ETH3D
+[
+9
+]
+.
+TABLE IV:
+Ablations for
+GDO
+(Sec.
+III-B
+) on VGGT
+[
+4
+]
+with ETH3D
+[
+9
+]
+. Block (i) toggles
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+(Eq. (
+3
+)) and
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+(Eq. (
+2
+)); Block (ii) varies
+GD
+(Eq. (
+4
+)) strategies. Pose (AUC@1/3/30
+↑
+\uparrow
+) and Geometry (F1
+↑
+\uparrow
+; w/ p., w/o p.).
+Bold
+: best per column.
+Variant
+AUC@1
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+-
+Baseline
+0.03
+0.20
+0.76
+0.43
+0.52
+(i) Loss Components
+A
+w/o
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+0.04
+0.20
+0.74
+0.45
+0.49
+B
+w/o
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+0.05
+0.23
+0.82
+0.50
+0.59
+(ii) Gradient Disentanglement
+C
+w/o Gradient Disent.
+0.05
+0.27
+0.82
+0.45
+0.59
+D
+∇
+ℒ
+mvc
+\nabla\mathcal{L}_{\mathrm{mvc}}
+Disent.
+0.06
+0.25
+0.78
+0.44
+0.52
+E
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\mathrm{ec}}
+Disent.
+(Ours)
+0.07
+0.27
+0.83
+0.47
+0.60
+F
+Bidirectional Disent.
+0.06
+0.26
+0.82
+0.46
+0.59
+Fig. 5:
+Visualization of our proposed
+GD
+(Eq. (
+4
+)) on VGGT
+[
+4
+]
+with ETH3D
+[
+9
+]
+. (a) Concept of
+GD
+on a representative gradient pair. (b) Polar histogram of
+∠
+⁡
+(
+∇
+ℒ
+ec
+,
+∇
+ℒ
+mvc
+)
+\angle(\nabla\mathcal{L}_{\mathrm{ec}},\nabla\mathcal{L}_{\mathrm{mvc}})
+aggregated over all ETH3D scenes and
+TTA
+iterations, with obtuse bins in
+red
+and acute bins in
+gray
+. (c, d) Convergence of
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+and
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+across
+TTA
+iterations, w/
+GD
+:
+blue
+, w/o:
+red
+.
+TABLE V:
+Ablations for
+Pseudo-Correspondence Filtering
+(Sec.
+III-B
+) on VGGT
+[
+4
+]
+with ETH3D
+[
+9
+]
+. Variants A to D toggle the two filtering stages using
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+(Eq. (
+3
+)) and
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+(Eq. (
+2
+)). Precision/Recall/F1 (vs. GT), and downstream Pose (AUC@1/3/30
+↑
+\uparrow
+) / Geometry (F1
+↑
+\uparrow
+; w/ p., w/o p.) after
+TTA
+.
+Bold
+: best per column.
+Variant
+Correspondence Quality
+Pose Estimation
+Geometry Estimation
+Precision
+↑
+\uparrow
+Recall
+↑
+\uparrow
+F1
+↑
+\uparrow
+AUC@1
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+-
+Baseline
+–
+–
+–
+0.03
+0.20
+0.76
+0.43
+0.52
+A
+Raw (see Fig.
+6
+(a))
+0.39
+1.00
+0.73
+0.01
+0.04
+0.37
+0.17
+0.17
+B
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+filter (see Fig.
+6
+(a))
+0.56
+0.93
+0.74
+0.03
+0.14
+0.54
+0.31
+0.32
+C
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+filter
+0.62
+0.93
+0.76
+0.06
+0.24
+0.79
+0.46
+0.54
+D
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
++
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+filter (see Fig.
+6
+(a))
+(Ours)
+0.63
+0.88
+0.75
+0.07
+0.27
+0.83
+0.47
+0.60
+Fig. 6:
+Visualization of our proposed
+Pseudo-Correspondence Filtering
+(Sec.
+III-B
+) on VGGT
+[
+4
+]
+with the ETH3D
+[
+9
+]
+relief
+scene, comparing Raw (
+gray
+),
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+filter (
+red
+), and
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
++
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+filter (Ours,
+blue
+). (a) Filtering on a representative pair. (b) Reprojection error distribution across all pairs. (c) Downstream Precision, pose AUC@30, and geometry F1 (w/o p.).
+Ablations for GDO.
+We ablate the proposed
+GDO
+(Sec.
+III-B
+) in Tab.
+IV
+and analyze it in Fig.
+IV
+. w/o
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+(Tab.
+IV
+-(i)-A) yields no meaningful improvement over the baseline, and w/o
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+(Tab.
+IV
+-(i)-B) improves over the baseline but underperforms the variants that combine the two losses (Tab.
+IV
+-(ii)-C, D, E, F), indicating that combining the two losses is essential. However, this combination alone is insufficient: as shown in Fig.
+IV
+(b), the two losses produce
+gradient conflict
+in 42.4% of TTA iterations across all ETH3D scenes, and w/o Gradient Disent. (Tab.
+IV
+-(ii)-C), which combines both losses without
+GD
+, exhibits a drop in w/ p. (
+0.50
+→
+0.45
+0.50\to 0.45
+) relative to Tab.
+IV
+-(i)-B. This motivates the need for explicit
+GD
+. The proposed
+GD
+direction
+∇
+ℒ
+ec
+\nabla\mathcal{L}_{\text{ec}}
+Disent. (Tab.
+IV
+-(ii)-E, Ours) attains the best performance across most metrics over the remaining GD variants (
+∇
+ℒ
+mvc
+\nabla\mathcal{L}_{\text{mvc}}
+Disent. (Tab.
+IV
+-(ii)-D) and Bidirectional Disent. (Tab.
+IV
+-(ii)-F)), validating our
+GD
+design that lets the two losses supervise camera pose and depth in a disentangled and complementary manner. Additionally, as shown in Fig.
+IV
+(c, d), the proposed
+GD
+stabilizes the convergence of both losses.
+Ablations for Pseudo-Correspondence Filtering.
+We ablate the proposed
+Pseudo-Correspondence Filtering
+(Sec.
+III-B
+) in Tab.
+V
+and analyze it in Fig.
+6
+.
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
++
+ℒ
+mvc
+\mathcal{L}_{\text{mvc}}
+filter (Tab.
+V
+-D, Ours), the sequential combination that the proposed
+Pseudo-Correspondence Filtering
+adopts, outperforms
+ℒ
+ec
+\mathcal{L}_{\text{ec}}
+filter (Tab.
+V
+-B) on both Precision and downstream metrics, indicating that Precision of pseudo-correspondences is critical for downstream performance. As shown in Fig.
+6
+(b), Tab.
+V
+-B and Tab.
+V
+-D trim the large-error tail of the raw reprojection error distribution, securing Precision. Additionally, as shown in Fig.
+6
+(a), the two filters remove different types of mismatch, confirming that their combination operates complementarily.
+TABLE VI:
+Ablations for
+FAN
+(Sec.
+III-C
+) on VGGT
+[
+4
+]
+with ETH3D
+[
+9
+]
+. Block (i) sweeps
+SO(3) bin width
+; Block (ii) varies
+target view selection
+; Block (iii) varies
+source view ordering
+within each SO(3) bin. Pose (AUC@1/3/30
+↑
+\uparrow
+) and Geometry (F1
+↑
+\uparrow
+; w/ p., w/o p.).
+Bold
+: best per column.
+Variant
+AUC@1
+↑
+\uparrow
+AUC@3
+↑
+\uparrow
+AUC@30
+↑
+\uparrow
+w/ p.
+↑
+\uparrow
+w/o p.
+↑
+\uparrow
+-
+Baseline
+0.03
+0.20
+0.76
+0.43
+0.52
+(i) SO(3) Bin Width
+A
+15
+∘
+(9 bins)
+(Ours)
+0.07
+0.27
+0.83
+0.47
+0.60
+B
+30
+∘
+(6 bins)
+0.04
+0.24
+0.83
+0.48
+0.62
+C
+45
+∘
+(4 bins)
+0.06
+0.24
+0.81
+0.46
+0.62
+(ii) Target View Selection
+A
+t
+=
+0
+t=0
+(Fixed Target View; see Fig.
+VI
+-(a))
+0.04
+0.22
+0.76
+0.41
+0.54
+B
+GRV
+(Eq. (
+6
+); see Fig.
+VI
+-(b))
+(Ours)
+0.07
+0.27
+0.83
+0.47
+0.60
+C
+Dynamic
+GRV
+0.07
+0.26
+0.83
+0.46
+0.58
+(iii) Source View Ordering
+A
+Sequential Order
+(Ours)
+0.07
+0.27
+0.83
+0.47
+0.60
+B
+Asc. Match Count
+0.06
+0.26
+0.82
+0.47
+0.59
+C
+Desc. Match Count
+0.07
+0.26
+0.82
+0.45
+0.61
+Fig. 7:
+Comparison of target view selection strategies on VGGT
+[
+4
+]
+with the ETH3D
+[
+9
+]
+courtyard
+scene. The top row shows the top-down view of the camera trajectory, with each view colored by its SO(3) bin index relative to the target view and the target view marked with a
+yellow
+star; the bottom row shows the source view count per SO(3) bin. The two columns correspond to (a) an arbitrarily chosen target (
+v
+=
+0
+v=0
+) and (b) our proposed
+GRV
+(Sec.
+III-C
+) target (
+v
+∗
+=
+14
+v^{\ast}=14
+).
+TABLE VII:
+Computational complexity of our proposed
+Self-Geometry
+across six pretrained
+VFMs
+.
+Add. Params. (M)
+:
+LoRA
+(Sec.
+III-D
+) overhead (millions; % of
+VFM
+in parens).
+ETH3D per-scene adapt. time
+: mean adaptation time on ETH3D, split into
+Init.
+(LightGlue
+[
+16
+]
+matching + filtering),
+FAN
+(Sec.
+III-C
+),
+GDO
+(50-iter
+TTA
+; Sec.
+III-B
+), and
+Total
+. Rightmost: mean
+Total
+on 7Scenes
+[
+7
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+. Measured on a single NVIDIA RTX PRO 6000 GPU
+[
+23
+]
+.
+Model
+Add. Params. (M)
+↓
+\downarrow
+(vs. pretrained)
+ETH3D per-scene adapt. time (min.)
+↓
+\downarrow
+Total (min.) on other datasets
+↓
+\downarrow
+Init.
+FAN
+GDO
+Total
+7Scenes
+ScanNet++
+HiRoom
+VGGT
+18.87 (
++1.5%
+)
+0.30
+0.01
+2.98
+3.29
+5.36
+5.83
+2.22
+π
+3
+\pi^{3}
+6.29 (
++0.7%
+)
+0.31
+0.02
+1.61
+1.93
+3.91
+3.97
+1.25
+DA3-Giant
+15.73 (
++1.2%
+)
+0.26
+0.01
+1.37
+1.65
+3.99
+3.94
+1.84
+DA3-Large
+6.29 (
++1.5%
+)
+0.26
+0.01
+0.98
+1.25
+3.39
+3.31
+1.42
+DA3-Base
+2.36 (
++1.7%
+)
+0.26
+0.02
+0.39
+0.66
+2.68
+2.47
+0.61
+DA3-Small
+1.18 (
++3.4%
+)
+0.26
+0.02
+0.21
+0.49
+2.46
+2.19
+0.33
+Ablations for FAN.
+We ablate the proposed
+FAN
+(Sec.
+III-C
+) in Tab.
+VI
+and analyze it in Fig.
+VI
+. 15
+∘
+(Tab.
+VI
+-(i)-A, Ours), 30
+∘
+(Tab.
+VI
+-(i)-B), and 45
+∘
+(Tab.
+VI
+-(i)-C) all attain comparable performance across the three SO(3) bin widths, showing that the proposed
+FAN
+is robust to the bin width hyperparameter.
+GRV
+(Tab.
+VI
+-(ii)-B, Ours), the target view that the proposed
+FAN
+selects once using the baseline model prediction, improves substantially over Fixed
+t
+=
+0
+t=0
+(Tab.
+VI
+-(ii)-A) on every column, confirming that target view selection is the dominant factor. In Fig.
+VI
+, the SO(3) bin distributions of (a) Fixed
+t
+=
+0
+t=0
+(Tab.
+VI
+-(ii)-A) and (b)
+GRV
+(Tab.
+VI
+-(ii)-B, Ours) visually show how each target view selection strategy covers the target scene. Dynamic
+GRV
+(Tab.
+VI
+-(ii)-C), which updates the target view every TTA iteration from the adapting model, underperforms
+GRV
+(Tab.
+VI
+-(ii)-B, Ours) since the adapting model is still evolving. Sequential (Tab.
+VI
+-(iii)-A, Ours), Asc. Match Count (Tab.
+VI
+-(iii)-B), and Desc. Match Count (Tab.
+VI
+-(iii)-C) all attain comparable performance across all three orderings, confirming that the proposed
+FAN
+is a robust view sampler.
+V-A
+Complexity Comparison
+We further profile the computational complexity of our proposed
+Self-Geometry
+across six pretrained
+VFMs
+in Tab.
+VII
+. The
+LoRA
+adapter adds only 0.7%–3.4% additional parameters over the pretrained
+VFM
+, confirming that the proposed
+Lightweight TTA
+strategy is parameter-efficient. Decomposing the per-scene adaptation wall-clock,
+Init.
+takes about 0.3 minutes independent of model size, the proposed
+FAN
+takes only 0.01–0.02 minutes and is negligible, and the proposed
+GDO
+(VGGT
+[
+4
+]
+2.98 min down to DA3-Small
+[
+6
+]
+0.21 min) is dominated by the forward-backward computation cost of the
+VFM
+itself. As a result, our proposed
+Self-Geometry
+completes per-scene adaptation within two minutes (up to 40 input views, DA3-Giant on ETH3D
+[
+9
+]
+) on a single NVIDIA RTX PRO 6000
+[
+23
+]
+, and remains within a practical scene-wise adaptation budget on the other three datasets (7Scenes
+[
+7
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+).
+VI
+Conclusion
+We proposed
+Self-Geometry
+, a
+GT-free
+and
+Plug-and-play
+TTA
+pipeline that mitigates the
+multi-view geometric inconsistency
+of pretrained
+VFMs
+(Fig.
+2
+). The key insight is that
+2D pixel correspondences
+extracted at test-time by an external feature matcher (LightGlue
+[
+16
+]
+) can serve as
+pseudo GT
+for imposing
+explicit multi-view geometric supervision
+on pretrained
+VFMs
+. Building on this insight, our proposed
+Self-Geometry
+comprises three complementary components:
+GDO
+(Sec.
+III-B
+), which disentangles the gradients of the
+point-to-point
+MVC Loss
+(Sec.
+III-B
+) and the
+point-to-line
+EC Loss
+(Sec.
+III-B
+);
+FAN
+(Sec.
+III-C
+), an SO(3)-guided view sampler using
+scene-scale-invariant
+SO(3) geodesic distances; and
+Lightweight TTA
+(Sec.
+III-D
+), a
+LoRA
+[
+22
+]
+-based parameter-efficient per-scene adaptation strategy. Experiments across six pretrained
+VFMs
+(VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, DA3-G/L/B/S
+[
+6
+]
+) and four benchmark datasets (7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+) confirm consistent improvements in both Pose Estimation and Geometry Estimation (Tab.
+II
+, Tab.
+III
+, Fig.
+4
+). By completing per-scene adaptation within two minutes (up to 40 input views, DA3-Giant on ETH3D
+[
+9
+]
+) on a single NVIDIA RTX PRO 6000
+[
+23
+]
+GPU (Tab.
+VII
+), our proposed
+Self-Geometry
+offers a practical recipe for augmenting frozen pretrained
+VFMs
+with
+explicit multi-view geometric consistency
+at test-time.
+References
+[1]
+R. Hartley and A. Zisserman
+(2003)
+Multiple view geometry in computer vision
+.
+2 edition
+,
+Cambridge University Press
+.
+Cited by:
+§I
+,
+§I
+,
+§I
+,
+§I
+,
+§S.II
+.
+[2]
+J. L. Schönberger and J. Frahm
+(2016)
+Structure-from-motion revisited
+.
+In
+CVPR
+,
+Cited by:
+§I
+,
+§II-A
+.
+[3]
+B. Triggs, P. F. McLauchlan, R. I. Hartley, and A. W. Fitzgibbon
+(2000)
+Bundle adjustment — a modern synthesis
+.
+In
+Vision Algorithms: Theory and Practice
+,
+Cited by:
+§I
+,
+§I
+,
+§I
+.
+[4]
+J. Wang, M. Chen, N. Karaev, A. Vedaldi, C. Rupprecht, and D. Novotny
+(2025)
+VGGT: visual geometry grounded transformer
+.
+In
+CVPR
+,
+Cited by:
+3rd item
+,
+§I
+,
+§I
+,
+§II-A
+,
+§II-B
+,
+TABLE I
+,
+Fig. 4
+,
+§IV-A
+,
+§IV-B
+,
+§IV-C
+,
+§IV
+,
+Fig. 6
+,
+§V-A
+,
+TABLE IV
+,
+TABLE IV
+,
+TABLE V
+,
+TABLE VI
+,
+TABLE VI
+,
+§V
+,
+§S.V
+,
+§VI
+.
+[5]
+Y. Yang
+et al.
+(2025)
+π
+3
+\pi^{3}
+: Scalable permutation-equivariant visual geometry learning
+.
+arXiv
+.
+Cited by:
+3rd item
+,
+§I
+,
+§II-A
+,
+TABLE I
+,
+Fig. 4
+,
+§IV-A
+,
+§IV-B
+,
+§IV-B
+,
+§IV-C
+,
+§IV-C
+,
+§IV-C
+,
+§IV
+,
+§S.V
+,
+§S.V
+,
+§VI
+.
+[6]
+H. Lin
+et al.
+(2025)
+Depth anything 3: recovering the visual space from any views
+.
+arXiv
+.
+Cited by:
+Fig. 2
+,
+3rd item
+,
+§I
+,
+§I
+,
+§II-A
+,
+TABLE I
+,
+Fig. 4
+,
+§IV-A
+,
+§IV-A
+,
+§IV-A
+,
+§IV-A
+,
+§IV-B
+,
+§IV-B
+,
+§IV-C
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. S.3
+,
+§V-A
+,
+TABLE VII
+,
+§S.V
+,
+§VI
+.
+[7]
+J. Shotton, B. Glocker, C. Zach, S. Izadi, A. Criminisi, and A. Fitzgibbon
+(2013)
+Scene coordinate regression forests for camera relocalization in RGB-D images
+.
+In
+CVPR
+,
+Cited by:
+3rd item
+,
+§I
+,
+§IV-A
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. S.1
+,
+§V-A
+,
+TABLE VII
+,
+§S.V
+,
+§VI
+.
+[8]
+C. Yeshwanth, Y. Liu, M. Nießner, and A. Dai
+(2023)
+ScanNet++: a high-fidelity dataset of 3D indoor scenes
+.
+In
+ICCV
+,
+Cited by:
+3rd item
+,
+§I
+,
+§IV-A
+,
+§IV-B
+,
+§IV-C
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. S.2
+,
+§V-A
+,
+TABLE VII
+,
+§S.V
+,
+§VI
+.
+[9]
+T. Schöps, J. L. Schönberger, S. Galliani, T. Sattler, K. Schindler, M. Pollefeys, and A. Geiger
+(2017)
+A multi-view stereo benchmark with high-resolution images and multi-camera videos
+.
+In
+CVPR
+,
+Cited by:
+3rd item
+,
+§I
+,
+§I
+,
+§IV-A
+,
+§IV-B
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. 6
+,
+§V-A
+,
+TABLE IV
+,
+TABLE IV
+,
+TABLE V
+,
+TABLE VI
+,
+TABLE VI
+,
+§V
+,
+§S.V
+,
+§VI
+.
+[10]
+J. Bratulić, S. Mittal, T. Brox, and C. Rupprecht
+(2025)
+On geometric understanding and learned data priors in vggt
+.
+arXiv preprint arXiv:2512.11508
+.
+Cited by:
+§I
+.
+[11]
+H. Deng, Y. Song, J. Jiang, K. Heal, T. Sun, J. Flynn, S. Marschner, and L. Chai
+(2025)
+Selfi: self improving reconstruction engine via 3D geometric feature alignment
+.
+arXiv
+.
+Note:
+arXiv:2512.08930
+Cited by:
+§I
+,
+§II-B
+,
+TABLE I
+.
+[12]
+Y. Dai and X. Yang
+(2026)
+Free geometry: test-time adaptation for multi-view 3D reconstruction
+.
+arXiv
+.
+Note:
+arXiv:2604.14048
+Cited by:
+Fig. 2
+,
+§I
+,
+§II-C
+,
+§II-D
+,
+TABLE I
+,
+Fig. 4
+,
+Fig. 4
+,
+§IV-A
+,
+§IV-B
+,
+§IV-C
+,
+§IV-C
+,
+§IV-C
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. S.1
+,
+Fig. S.1
+,
+Fig. S.2
+,
+Fig. S.2
+,
+Fig. S.3
+,
+Fig. S.3
+.
+[13]
+Y. Sun, X. Wang, Z. Liu, J. Miller, A. A. Efros, and M. Hardt
+(2020)
+Test-time training with self-supervision for generalization under distribution shifts
+.
+In
+ICML
+,
+Cited by:
+§I
+,
+§II-A
+.
+[14]
+D. Wang, E. Shelhamer, S. Liu, B. Olshausen, and T. Darrell
+(2021)
+Tent: fully test-time adaptation by entropy minimization
+.
+In
+ICLR
+,
+Cited by:
+§I
+,
+§II-A
+.
+[15]
+Q. Wang, O. Fink, L. Van Gool, and D. Dai
+(2022)
+Continual test-time domain adaptation
+.
+In
+CVPR
+,
+Cited by:
+§I
+,
+§II-A
+.
+[16]
+P. Lindenberger, P. Sarlin, and M. Pollefeys
+(2023)
+LightGlue: local feature matching at light speed
+.
+In
+ICCV
+,
+Cited by:
+§I
+,
+§III-B
+,
+§S.IV
+,
+TABLE VII
+,
+§VI
+,
+§S.VI
+,
+4
+.
+[17]
+C. Godard, O. Mac Aodha, M. Firman, and G. J. Brostow
+(2019)
+Digging into self-supervised monocular depth estimation
+.
+In
+ICCV
+,
+Cited by:
+§I
+,
+§S.III
+,
+§S.III
+.
+[18]
+T. Zhou, M. Brown, N. Snavely, and D. G. Lowe
+(2017)
+Unsupervised learning of depth and ego-motion from video
+.
+In
+CVPR
+,
+Cited by:
+§I
+.
+[19]
+H. C. Longuet-Higgins
+(1981)
+A computer algorithm for reconstructing a scene from two projections
+.
+Nature
+.
+Cited by:
+§I
+.
+[20]
+T. Yu, S. Kumar, A. Gupta, S. Levine, K. Hausman, and C. Finn
+(2020)
+Gradient surgery for multi-task learning
+.
+In
+NeurIPS
+,
+Cited by:
+§I
+,
+§III-B
+.
+[21]
+J. Solà, J. Deray, and D. Atchuthan
+(2018)
+A micro Lie theory for state estimation in robotics
+.
+arXiv
+.
+Cited by:
+§I
+,
+§III-C
+.
+[22]
+E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, and W. Chen
+(2022)
+LoRA: low-rank adaptation of large language models
+.
+In
+ICLR
+,
+Cited by:
+2nd item
+,
+§I
+,
+§II-B
+,
+§II-C
+,
+§III-D
+,
+§III-D
+,
+§IV-A
+,
+§S.V
+,
+§VI
+.
+[23]
+NVIDIA Corporation
+(2025)
+NVIDIA RTX PRO 6000 Blackwell Workstation Edition
+.
+Note:
+https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-6000/
+Product datasheet
+Cited by:
+3rd item
+,
+§I
+,
+§III-D
+,
+§V-A
+,
+TABLE VII
+,
+§VI
+.
+[24]
+S. Wang, V. Leroy, Y. Cabon, B. Chidlovskii, and J. Revaud
+(2024)
+DUSt3R: geometric 3D vision made easy
+.
+In
+CVPR
+,
+Cited by:
+§II-A
+,
+§II-B
+,
+§II-D
+.
+[25]
+V. Leroy, Y. Cabon, and J. Revaud
+(2024)
+Grounding image matching in 3D with MASt3R
+.
+In
+ECCV
+,
+Cited by:
+§II-A
+,
+§II-B
+,
+§II-D
+.
+[26]
+Q. Wang, Y. Zhang, A. Holynski, A. A. Efros, and A. Kanazawa
+(2025)
+Continuous 3D perception model with persistent state
+.
+arXiv
+.
+Note:
+arXiv:2501.12387
+Cited by:
+§II-A
+,
+§II-B
+,
+§II-D
+.
+[27]
+J. Lu, T. Huang, P. Li, Z. Dou, C. Lin, Z. Cui, Z. Dong, S. Yeung, W. Wang, and Y. Liu
+(2024)
+Align3R: aligned monocular depth estimation for dynamic videos
+.
+arXiv
+.
+Note:
+arXiv:2412.03079
+Cited by:
+§II-B
+.
+[28]
+W. Jang, P. Weinzaepfel, V. Leroy, L. Agapito, and J. Revaud
+(2025)
+Pow3R: empowering unconstrained 3D reconstruction with camera and scene priors
+.
+arXiv
+.
+Note:
+arXiv:2503.17316
+Cited by:
+§II-B
+,
+TABLE I
+.
+[29]
+W. Li, S. Liu, P. Qiao, and Y. Dou
+(2025)
+Mono3R: exploiting monocular cues for geometric 3D reconstruction
+.
+arXiv
+.
+Note:
+arXiv:2504.13419
+Cited by:
+§II-B
+.
+[30]
+W. Ren, H. Wang, X. Tan, and K. Han
+(2025)
+Fin3R: fine-tuning feed-forward 3D reconstruction models via monocular knowledge distillation
+.
+In
+NeurIPS
+,
+Cited by:
+§II-B
+,
+TABLE I
+,
+§III-D
+.
+[31]
+Y. Yuan
+et al.
+(2025)
+Test3R: learning to reconstruct 3D at test time
+.
+arXiv
+.
+Cited by:
+§II-C
+,
+§II-D
+,
+TABLE I
+.
+[32]
+SelfEvo Authors
+(2026)
+SelfEvo: self-improving 4D perception via self-distillation
+.
+arXiv
+.
+Note:
+arXiv:2604.08532
+Cited by:
+§II-C
+,
+§II-D
+,
+TABLE I
+.
+[33]
+TTT3R Authors
+(2025)
+TTT3R: 3D reconstruction as test-time training
+.
+arXiv
+.
+Note:
+arXiv:2509.26645
+Cited by:
+§II-C
+,
+§II-D
+,
+TABLE I
+.
+[34]
+X. Zhou
+et al.
+(2026)
+Online3R: online test-time learning for sequential 3D reconstruction
+.
+arXiv
+.
+Note:
+arXiv:2604.09480
+Cited by:
+§II-C
+,
+§II-D
+,
+TABLE I
+.
+[35]
+Z. Lu
+et al.
+(2024)
+LoRA3D: low-rank self-calibration of 3D geometric foundation models
+.
+arXiv
+.
+Note:
+arXiv:2412.07746
+Cited by:
+§II-C
+,
+§II-D
+,
+TABLE I
+.
+[36]
+L. Zhou, H. Wu, A. Dave, and D. Samaras
+(2026)
+Learning 3D reconstruction with priors in test time
+.
+In
+CVPR
+,
+Cited by:
+§II-C
+,
+TABLE I
+,
+Fig. 4
+,
+§IV-A
+,
+§IV-B
+,
+§IV-B
+,
+§IV-C
+,
+§IV-C
+,
+TABLE II
+,
+TABLE III
+,
+§IV
+,
+Fig. S.1
+,
+Fig. S.2
+,
+Fig. S.3
+.
+[37]
+R. Jensen, A. Dahl, G. Vogiatzis, E. Tola, and H. Aanæs
+(2014)
+Large scale multi-view stereopsis evaluation
+.
+In
+CVPR
+,
+Cited by:
+§IV-A
+.
+[38]
+I. Loshchilov and F. Hutter
+(2019)
+Decoupled weight decay regularization
+.
+In
+ICLR
+,
+Cited by:
+§IV-A
+,
+TABLE S.1
+.
+[39]
+Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli
+(2004)
+Image quality assessment: from error visibility to structural similarity
+.
+IEEE Transactions on Image Processing
+13
+(
+4
+),
+pp. 600–612
+.
+Cited by:
+§S.III
+.
+[40]
+R. Szeliski
+(2022)
+Computer vision: algorithms and applications
+.
+2 edition
+,
+Springer
+.
+Cited by:
+§S.III
+.
+[41]
+S. Liu, E. Johns, and A. J. Davison
+(2019)
+End-to-end multi-task learning with attention
+.
+In
+CVPR
+,
+Cited by:
+§S.III
+.
+Supplementary Materials
+S.I
+GitHub Repository
+The code will be released soon at
+https://github.com/CMLab-Korea/Self-Geometry
+.
+S.II
+Preliminary: Epipolar Geometry
+In this section, we summarize the key concepts of epipolar geometry used in Sec.
+III
+. Epipolar geometry defines the geometric relation that correspondences between two views must satisfy, and forms the basis of our
+Epipolar Consistency Loss
+(
+EC Loss
+) (Eq. (
+3
+)). To this end, we consider two views
+(
+I
+i
+,
+I
+j
+)
+(I_{i},I_{j})
+, a target view
+I
+i
+I_{i}
+and a source view
+I
+j
+I_{j}
+, where
+I
+i
+,
+I
+j
+∈
+ℝ
+H
+×
+W
+×
+3
+I_{i},I_{j}\in\mathbb{R}^{H\times W\times 3}
+and
+H
+H
+and
+W
+W
+are the vertical and horizontal image resolutions, respectively. The camera intrinsic matrix of each view is denoted by
+𝐊
+i
+,
+𝐊
+j
+∈
+ℝ
+3
+×
+3
+\mathbf{K}_{i},\mathbf{K}_{j}\in\mathbb{R}^{3\times 3}
+, respectively, and the relative pose from the source view
+j
+j
+to the target view
+i
+i
+is denoted by
+[
+𝐑
+i
+←
+j
+∣
+𝐭
+i
+←
+j
+]
+∈
+ℝ
+3
+×
+4
+[\mathbf{R}_{i\leftarrow j}\mid\mathbf{t}_{i\leftarrow j}]\in\mathbb{R}^{3\times 4}
+, where
+𝐑
+i
+←
+j
+∈
+S
+​
+O
+​
+(
+3
+)
+\mathbf{R}_{i\leftarrow j}\in SO(3)
+is a rotation matrix and
+𝐭
+i
+←
+j
+∈
+ℝ
+3
+\mathbf{t}_{i\leftarrow j}\in\mathbb{R}^{3}
+is a translation vector. The correspondence pair between the two views is represented by the homogeneous 2D coordinates
+𝐱
+~
+i
+,
+𝐱
+~
+j
+∈
+ℝ
+3
+\tilde{\mathbf{x}}_{i},\tilde{\mathbf{x}}_{j}\in\mathbb{R}^{3}
+in the pixel coordinate system.
+Under the above notation, if the target view and the source view observe the same 3D point, their
+𝐱
+~
+i
+,
+𝐱
+~
+j
+\tilde{\mathbf{x}}_{i},\tilde{\mathbf{x}}_{j}
+must satisfy a linear constraint derived from
+[
+𝐑
+i
+←
+j
+∣
+𝐭
+i
+←
+j
+]
+[\mathbf{R}_{i\leftarrow j}\mid\mathbf{t}_{i\leftarrow j}]
+. We refer to this constraint as the
+epipolar relation
+, which is most concisely expressed in the calibrated normalized coordinate system where the effect of
+𝐊
+i
+,
+𝐊
+j
+\mathbf{K}_{i},\mathbf{K}_{j}
+is removed. This expression is encoded by the
+essential matrix
+defined from
+[
+𝐑
+i
+←
+j
+∣
+𝐭
+i
+←
+j
+]
+[\mathbf{R}_{i\leftarrow j}\mid\mathbf{t}_{i\leftarrow j}]
+:
+𝐄
+i
+←
+j
+=
+[
+𝐭
+i
+←
+j
+]
+×
+​
+𝐑
+i
+←
+j
+,
+\mathbf{E}_{i\leftarrow j}=[\mathbf{t}_{i\leftarrow j}]_{\times}\mathbf{R}_{i\leftarrow j},
+(S.1)
+where
+[
+𝐭
+i
+←
+j
+]
+×
+∈
+ℝ
+3
+×
+3
+[\mathbf{t}_{i\leftarrow j}]_{\times}\in\mathbb{R}^{3\times 3}
+is the skew-symmetric matrix of
+𝐭
+i
+←
+j
+\mathbf{t}_{i\leftarrow j}
+. In contrast, since
+𝐱
+~
+i
+,
+𝐱
+~
+j
+\tilde{\mathbf{x}}_{i},\tilde{\mathbf{x}}_{j}
+are defined in the pixel coordinate system, the epipolar relation holding in the calibrated normalized coordinate system must be directly expressed in the pixel coordinate system. To this end, we define the
+fundamental matrix
+as follows:
+𝐅
+i
+←
+j
+=
+𝐊
+i
+−
+⁣
+⊤
+​
+𝐄
+i
+←
+j
+​
+𝐊
+j
+−
+1
+.
+\mathbf{F}_{i\leftarrow j}=\mathbf{K}_{i}^{-\top}\mathbf{E}_{i\leftarrow j}\,\mathbf{K}_{j}^{-1}.
+(S.2)
+Here,
+𝐅
+i
+←
+j
+\mathbf{F}_{i\leftarrow j}
+maps a correspondence in one view to an
+epipolar line
+in the other view. Specifically, given
+𝐱
+~
+j
+\tilde{\mathbf{x}}_{j}
+in the source view, the epipolar line
+ℓ
+i
+∈
+ℝ
+3
+\boldsymbol{\ell}_{i}\in\mathbb{R}^{3}
+on which the corresponding correspondence in the target view must lie is defined as:
+ℓ
+i
+=
+𝐅
+i
+←
+j
+​
+𝐱
+~
+j
+.
+\boldsymbol{\ell}_{i}=\mathbf{F}_{i\leftarrow j}\,\tilde{\mathbf{x}}_{j}.
+(S.3)
+If the target view and the source view observe the same 3D point,
+𝐱
+~
+i
+\tilde{\mathbf{x}}_{i}
+in the target view must lie on
+ℓ
+i
+\boldsymbol{\ell}_{i}
+(Eq. (
+S.3
+)). This relation is algebraically expressed as the
+epipolar constraint
+:
+𝐱
+~
+i
+⊤
+​
+𝐅
+i
+←
+j
+​
+𝐱
+~
+j
+=
+0
+.
+\tilde{\mathbf{x}}_{i}^{\top}\mathbf{F}_{i\leftarrow j}\,\tilde{\mathbf{x}}_{j}=0.
+(S.4)
+Therefore, the epipolar constraint (Eq. (
+S.4
+)) provides the basic condition for determining whether a correspondence pair and the relative camera pose are geometrically consistent.
+In practice, since
+𝐅
+i
+←
+j
+\mathbf{F}_{i\leftarrow j}
+and correspondences contain noise, it is difficult to exactly satisfy the epipolar constraint (Eq. (
+S.4
+)). This requires a residual that quantifies the degree of violation of the epipolar constraint, for which we use the
+Sampson distance
+[
+1
+]
+, defined as follows:
+d
+Sampson
+​
+(
+𝐱
+~
+i
+,
+𝐱
+~
+j
+,
+𝐅
+i
+←
+j
+)
+=
+(
+𝐱
+~
+i
+⊤
+​
+𝐅
+i
+←
+j
+​
+𝐱
+~
+j
+)
+2
+∑
+k
+=
+1
+2
+[
+(
+𝐅
+i
+←
+j
+​
+𝐱
+~
+j
+)
+k
+2
++
+(
+𝐅
+i
+←
+j
+⊤
+​
+𝐱
+~
+i
+)
+k
+2
+]
+.
+\resizebox{19218570}{}{$d_{\mathrm{Sampson}}\!\left(\tilde{\mathbf{x}}_{i},\tilde{\mathbf{x}}_{j};\,\mathbf{F}_{i\leftarrow j}\right)=\dfrac{(\tilde{\mathbf{x}}_{i}^{\top}\mathbf{F}_{i\leftarrow j}\,\tilde{\mathbf{x}}_{j})^{2}}{\sum_{k=1}^{2}\left[(\mathbf{F}_{i\leftarrow j}\,\tilde{\mathbf{x}}_{j})_{k}^{2}+(\mathbf{F}_{i\leftarrow j}^{\top}\tilde{\mathbf{x}}_{i})_{k}^{2}\right]}$}.
+(S.5)
+Here,
+(
+⋅
+)
+k
+(\cdot)_{k}
+denotes the
+k
+k
+-th component of a vector. Since the Sampson distance robustly quantifies how much a correspondence pair violates the epipolar constraint, it is directly used as the residual in the
+EC Loss
+(Eq. (
+3
+)) in Sec.
+III-B
+.
+S.III
+Total Loss Formulation
+In this section, we formalize the total loss that our proposed
+Self-Geometry
+optimizes at each
+Test-Time Adaptation (TTA)
+iteration
+t
+t
+. The total loss combines the two primary losses introduced in Sec.
+III
+(
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+, Eq. (
+2
+);
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+, Eq. (
+3
+)) with three self-supervised auxiliary regularizers (
+ℒ
+pc
+\mathcal{L}_{\mathrm{pc}}
+,
+ℒ
+eds
+\mathcal{L}_{\mathrm{eds}}
+,
+ℒ
+bdc
+\mathcal{L}_{\mathrm{bdc}}
+) that suppress excessive drift of the pretrained
+VFM
+depth predictions from the target scene. The gradients of the two primary losses are disentangled at every
+TTA
+iteration via our proposed
+GD
+(Eq. (
+4
+)), and every reprojection or distance based residual passes through
+Huber Robustification
+(Eq. (
+S.10
+)) to guard against outlier-induced instability.
+Photometric Consistency Loss,
+ℒ
+pc
+\mathcal{L}_{\mathrm{pc}}
+.
+Following Monodepth2
+[
+17
+]
+, this loss measures the photometric error between the target view
+𝐈
+i
+\mathbf{I}_{i}
+and the image
+𝐈
+^
+i
+←
+j
+\hat{\mathbf{I}}_{i\leftarrow j}
+obtained by warping source view
+j
+j
+into target view
+i
+i
+using the camera poses
+𝒫
+\mathcal{P}
+and depth
+𝐃
+i
+\mathbf{D}_{i}
+predicted by the pretrained
+VFM
+. This loss mixes SSIM and L1 as:
+ℒ
+pc
+=
+α
+⋅
+1
+−
+SSIM
+⁡
+(
+𝐈
+i
+,
+𝐈
+^
+i
+←
+j
+)
+2
++
+(
+1
+−
+α
+)
+​
+‖
+𝐈
+i
+−
+𝐈
+^
+i
+←
+j
+‖
+1
+.
+\mathcal{L}_{\mathrm{pc}}=\alpha\cdot\frac{1-\mathrm{SSIM}(\mathbf{I}_{i},\hat{\mathbf{I}}_{i\leftarrow j})}{2}+(1-\alpha)\bigl\|\mathbf{I}_{i}-\hat{\mathbf{I}}_{i\leftarrow j}\bigr\|_{1}.
+(S.6)
+Here, SSIM denotes the structural similarity index
+[
+39
+]
+between two images, and
+α
+∈
+[
+0
+,
+1
+]
+\alpha\in[0,1]
+is the mixing weight (
+α
+=
+0.85
+\alpha=0.85
+).
+Edge-aware Depth Smoothness Loss,
+ℒ
+eds
+\mathcal{L}_{\mathrm{eds}}
+.
+Following Monodepth2
+[
+17
+]
+, this loss encourages the depth map to remain discontinuous along image edges and smooth elsewhere. It is computed as the L1 norm of the depth gradient exponentially weighted by the image gradient:
+ℒ
+eds
+=
+|
+∂
+x
+𝐃
+i
+|
+​
+e
+−
+|
+∂
+x
+𝐈
+i
+|
++
+|
+∂
+y
+𝐃
+i
+|
+​
+e
+−
+|
+∂
+y
+𝐈
+i
+|
+.
+\mathcal{L}_{\mathrm{eds}}=\bigl|\partial_{x}\mathbf{D}_{i}\bigr|\,e^{-|\partial_{x}\mathbf{I}_{i}|}+\bigl|\partial_{y}\mathbf{D}_{i}\bigr|\,e^{-|\partial_{y}\mathbf{I}_{i}|}.
+(S.7)
+Here,
+∂
+x
+\partial_{x}
+and
+∂
+y
+\partial_{y}
+denote the horizontal and vertical spatial gradient operators, respectively.
+Baseline Depth Consistency Loss,
+ℒ
+bdc
+\mathcal{L}_{\mathrm{bdc}}
+.
+This loss uses the baseline depth prediction
+𝐃
+i
+base
+\mathbf{D}_{i}^{\mathrm{base}}
+of the pretrained
+VFM
+as an anchor to suppress excessive drift of the adapted depth
+𝐃
+i
+\mathbf{D}_{i}
+. It is given by the L1 error restricted to the confident-pixel set
+𝒱
+c
+\mathcal{V}_{c}
+that comprises the top
+q
+q
+-quantile of the baseline confidence:
+ℒ
+bdc
+=
+1
+|
+𝒱
+c
+|
+​
+∑
+p
+∈
+𝒱
+c
+|
+𝐃
+i
+​
+(
+p
+)
+−
+𝐃
+i
+base
+​
+(
+p
+)
+|
+.
+\mathcal{L}_{\mathrm{bdc}}=\frac{1}{|\mathcal{V}_{c}|}\sum_{p\in\mathcal{V}_{c}}\bigl|\mathbf{D}_{i}(p)-\mathbf{D}_{i}^{\mathrm{base}}(p)\bigr|.
+(S.8)
+Here,
+q
+=
+0.5
+q=0.5
+is the quantile that controls the size of the confident region.
+Huber Robustification.
+The per-point residuals of
+ℒ
+mvc
+,
+ℒ
+ec
+,
+ℒ
+pc
+\mathcal{L}_{\mathrm{mvc}},\mathcal{L}_{\mathrm{ec}},\mathcal{L}_{\mathrm{pc}}
+, and
+ℒ
+bdc
+\mathcal{L}_{\mathrm{bdc}}
+pass through classical Huber loss to guard against outlier-induced instability (
+ℒ
+eds
+\mathcal{L}_{\mathrm{eds}}
+is used unmodified since it is already spatially regularized). The threshold
+δ
+\delta
+is set from a median absolute deviation (MAD) based scale
+σ
+\sigma
+[
+40
+]
+. The robust scale
+σ
+\sigma
+and the Huber threshold
+δ
+\delta
+are respectively given by:
+σ
+=
+1.4826
+⋅
+median
+⁡
+(
+|
+r
+|
+)
+,
+δ
+=
+1.345
+⋅
+σ
+,
+\sigma=1.4826\cdot\mathrm{median}(|r|),\quad\delta=1.345\cdot\sigma,
+(S.9)
+and the Huber loss
+H
+δ
+​
+(
+r
+)
+H_{\delta}(r)
+takes the standard piecewise form:
+H
+δ
+​
+(
+r
+)
+=
+{
+1
+2
+​
+r
+2
+if
+​
+|
+r
+|
+≤
+δ
+,
+δ
+⁡
+(
+|
+r
+|
+−
+1
+2
+​
+δ
+)
+otherwise
+.
+H_{\delta}(r)=\begin{cases}\tfrac{1}{2}r^{2}&\text{if }|r|\leq\delta,\\
+\delta\bigl(|r|-\tfrac{1}{2}\delta\bigr)&\text{otherwise}.\end{cases}
+(S.10)
+Here,
+r
+r
+denotes the per-point residual of each loss. The
+δ
+\delta
+of the primary losses is set once at scene initialization from the baseline forward residual (after removing the top 10% outliers) and remains fixed across iterations, whereas the
+δ
+\delta
+of the auxiliary
+ℒ
+bdc
+\mathcal{L}_{\mathrm{bdc}}
+is re-estimated at each iteration from the residual between the adapted forward and the baseline.
+Dynamic Weight Averaging.
+To prevent optimizer bias toward any single loss caused by scale imbalance across losses, we apply
+Dynamic Weight Averaging (DWA)
+[
+41
+]
+to dynamically rebalance the weight
+w
+k
+​
+(
+t
+)
+w_{k}(t)
+of each loss at every iteration. The recent two-iteration decay ratio
+r
+k
+​
+(
+t
+)
+r_{k}(t)
+of each loss
+k
+k
+and its softmax-normalized weight
+w
+k
+​
+(
+t
+)
+w_{k}(t)
+are computed as:
+r
+k
+​
+(
+t
+)
+=
+ℒ
+k
+​
+(
+t
+−
+1
+)
+ℒ
+k
+​
+(
+t
+−
+2
+)
+,
+w
+k
+​
+(
+t
+)
+=
+K
+⋅
+exp
+⁡
+(
+r
+k
+​
+(
+t
+)
+/
+T
+)
+∑
+j
+=
+1
+K
+exp
+⁡
+(
+r
+j
+​
+(
+t
+)
+/
+T
+)
+.
+r_{k}(t)=\frac{\mathcal{L}_{k}(t-1)}{\mathcal{L}_{k}(t-2)},\quad w_{k}(t)=K\cdot\frac{\exp\bigl(r_{k}(t)/T\bigr)}{\sum_{j=1}^{K}\exp\bigl(r_{j}(t)/T\bigr)}.
+(S.11)
+Here,
+K
+=
+5
+K=5
+is the number of losses that constitute the total loss, and
+T
+=
+1.0
+T=1.0
+is the softmax temperature. To prevent extreme rebalancing,
+r
+k
+​
+(
+t
+)
+r_{k}(t)
+is clamped to
+[
+0.5
+,
+2.0
+]
+[0.5,2.0]
+.
+Total Loss.
+Combining the primary and auxiliary losses, the total loss is expressed as the sum of the Huber-robustified form
+ℒ
+~
+k
+\tilde{\mathcal{L}}_{k}
+of each loss weighted by both a static weight
+λ
+k
+\lambda_{k}
+and the dynamic DWA weight
+w
+k
+​
+(
+t
+)
+w_{k}(t)
+:
+ℒ
+total
+​
+(
+t
+)
+=
+∑
+k
+∈
+{
+mvc
+,
+ec
+,
+pc
+,
+eds
+,
+bdc
+}
+w
+k
+​
+(
+t
+)
+​
+λ
+k
+​
+ℒ
+~
+k
+.
+\mathcal{L}_{\mathrm{total}}(t)=\sum_{k\in\{\mathrm{mvc},\,\mathrm{ec},\,\mathrm{pc},\,\mathrm{eds},\,\mathrm{bdc}\}}w_{k}(t)\,\lambda_{k}\,\tilde{\mathcal{L}}_{k}.
+(S.12)
+Here,
+ℒ
+~
+eds
+=
+ℒ
+eds
+\tilde{\mathcal{L}}_{\mathrm{eds}}=\mathcal{L}_{\mathrm{eds}}
+(unmodified), and every other
+ℒ
+~
+k
+\tilde{\mathcal{L}}_{k}
+applies the Huber loss
+H
+δ
+H_{\delta}
+(Eq. (
+S.10
+)) to its per-point residuals. Our default configuration sets
+λ
+k
+=
+1.0
+\lambda_{k}=1.0
+for every loss. At each gradient step,
+∇
+ℒ
+~
+mvc
+\nabla\tilde{\mathcal{L}}_{\mathrm{mvc}}
+is projected onto the orthogonal complement of
+∇
+ℒ
+~
+ec
+\nabla\tilde{\mathcal{L}}_{\mathrm{ec}}
+via our proposed
+GD
+(Eq. (
+4
+)) before summation into the total gradient.
+Algorithm 1
+Per-scene TTA of our proposed
+Self-Geometry
+.
+1:
+Input views
+ℐ
+=
+{
+𝐈
+i
+}
+i
+=
+1
+N
+\mathcal{I}=\{\mathbf{I}_{i}\}_{i=1}^{N}
+; frozen pretrained
+Vision Foundation Model (VFM)
+f
+θ
+f_{\theta}
+; initialized
+Low-Rank Adaptation (LoRA)
+parameters
+ϕ
+\phi
+; total iterations
+T
+T
+; SO(3) bin width
+Δ
+​
+θ
+\Delta\theta
+; AdamW learning rate
+η
+\eta
+; gradient-norm clip
+C
+C
+.
+2:
+Adapted
+LoRA
+parameters
+ϕ
+∗
+\phi^{\ast}
+.
+3:
+Compute the baseline pose
+𝒫
+base
+\mathcal{P}^{\mathrm{base}}
+and depth
+𝒟
+base
+\mathcal{D}^{\mathrm{base}}
+:
+(
+𝒫
+base
+,
+𝒟
+base
+)
+←
+f
+θ
+​
+(
+ℐ
+)
+(\mathcal{P}^{\mathrm{base}},\mathcal{D}^{\mathrm{base}})\leftarrow f_{\theta}(\mathcal{I})
+.
+4:
+ℳ
+←
+\mathcal{M}\leftarrow
+LightGlue
+[
+16
+]
+matches on every view pair (Eq. (
+1
+)); apply
+Pseudo-Correspondence Filtering
+with the
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+-based filter followed by the
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+-based filter.
+5:
+Estimate per-scene Huber thresholds
+δ
+mvc
+,
+δ
+ec
+\delta_{\mathrm{mvc}},\delta_{\mathrm{ec}}
+from baseline residuals on
+ℳ
+\mathcal{M}
+(Eq. (
+S.9
+)).
+6:
+Assign source views to SO(3) bins of width
+Δ
+​
+θ
+\Delta\theta
+and select the target view
+v
+∗
+←
+arg
+⁡
+max
+v
+∈
+𝒱
+⁡
+H
+⁡
+(
+v
+)
+v^{\ast}\leftarrow\arg\max_{v\in\mathcal{V}}H(v)
+via
+Geometry-Rich View Selection
+(GRV; Eqs. (
+5
+), (
+6
+)).
+7:
+Initialize the running best checkpoint metric
+ℒ
+best
+←
+∞
+\mathcal{L}_{\mathrm{best}}\leftarrow\infty
+and the running best
+LoRA
+parameters
+ϕ
+best
+←
+ϕ
+\phi_{\mathrm{best}}\leftarrow\phi
+.
+8:
+for
+t
+=
+1
+,
+…
+,
+T
+t=1,\dots,T
+do
+9:
+Sample the source view subset
+ℐ
+t
+\mathcal{I}_{t}
+from bins around
+v
+∗
+v^{\ast}
+via
+Angular-Neighbor Sampling (ANS)
+.
+10:
+Forward
+ℐ
+t
+\mathcal{I}_{t}
+through the
+LoRA
+-adapted
+VFM
+f
+θ
+,
+ϕ
+f_{\theta,\phi}
+to obtain the adapted pose
+𝒫
+t
+\mathcal{P}_{t}
+and depth
+𝒟
+t
+\mathcal{D}_{t}
+:
+(
+𝒫
+t
+,
+𝒟
+t
+)
+←
+f
+θ
+,
+ϕ
+​
+(
+ℐ
+t
+)
+(\mathcal{P}_{t},\mathcal{D}_{t})\leftarrow f_{\theta,\phi}(\mathcal{I}_{t})
+.
+11:
+Compute the primary losses
+ℒ
+mvc
+,
+ℒ
+ec
+\mathcal{L}_{\mathrm{mvc}},\mathcal{L}_{\mathrm{ec}}
+(Eqs. (
+2
+), (
+3
+)) and the auxiliary regularizers
+ℒ
+pc
+,
+ℒ
+eds
+,
+ℒ
+bdc
+\mathcal{L}_{\mathrm{pc}},\mathcal{L}_{\mathrm{eds}},\mathcal{L}_{\mathrm{bdc}}
+(Eqs. (
+S.6
+)–(
+S.8
+)).
+12:
+Apply
+Huber Robustification
+(Eq. (
+S.10
+)) to obtain
+ℒ
+~
+k
+←
+H
+δ
+​
+(
+ℒ
+k
+)
+\tilde{\mathcal{L}}_{k}\leftarrow H_{\delta}(\mathcal{L}_{k})
+for
+k
+∈
+{
+mvc
+,
+ec
+,
+pc
+,
+bdc
+}
+k\in\{\mathrm{mvc},\mathrm{ec},\mathrm{pc},\mathrm{bdc}\}
+; set
+ℒ
+~
+eds
+←
+ℒ
+eds
+\tilde{\mathcal{L}}_{\mathrm{eds}}\leftarrow\mathcal{L}_{\mathrm{eds}}
+.
+13:
+Rebalance via
+Dynamic Weight Averaging
+: update
+w
+k
+​
+(
+t
+)
+w_{k}(t)
+(Eq. (
+S.11
+)) and form
+ℒ
+total
+​
+(
+t
+)
+\mathcal{L}_{\mathrm{total}}(t)
+(Eq. (
+S.12
+)).
+14:
+Compute per-task gradients
+∇
+ℒ
+~
+mvc
+,
+∇
+ℒ
+~
+ec
+\nabla\tilde{\mathcal{L}}_{\mathrm{mvc}},\nabla\tilde{\mathcal{L}}_{\mathrm{ec}}
+with respect to
+ϕ
+\phi
+.
+15:
+Apply
+Gradient Disentanglement (GD)
+: project
+∇
+ℒ
+~
+mvc
+\nabla\tilde{\mathcal{L}}_{\mathrm{mvc}}
+onto the orthogonal complement of
+∇
+ℒ
+~
+ec
+\nabla\tilde{\mathcal{L}}_{\mathrm{ec}}
+(Eq. (
+4
+)).
+16:
+Aggregate all gradients, clip the global norm to
+C
+C
+, and update
+ϕ
+\phi
+via AdamW
+(
+η
+)
+(\eta)
+.
+17:
+Compute scale-invariant checkpoint metric
+s
+⁡
+(
+t
+)
+←
+ℒ
+~
+ec
+​
+(
+t
+)
+⋅
+ℒ
+~
+mvc
+​
+(
+t
+)
+s(t)\leftarrow\sqrt{\tilde{\mathcal{L}}_{\mathrm{ec}}(t)\cdot\tilde{\mathcal{L}}_{\mathrm{mvc}}(t)}
+;
+if
+s
+⁡
+(
+t
+)
+<
+ℒ
+best
+s(t)<\mathcal{L}_{\mathrm{best}}
+then
+ℒ
+best
+←
+s
+⁡
+(
+t
+)
+\mathcal{L}_{\mathrm{best}}\leftarrow s(t)
+,
+ϕ
+best
+←
+ϕ
+\phi_{\mathrm{best}}\leftarrow\phi
+.
+18:
+end
+for
+19:
+return
+ϕ
+∗
+←
+ϕ
+best
+\phi^{\ast}\leftarrow\phi_{\mathrm{best}}
+.
+S.IV
+Algorithm
+Algorithm
+1
+summarizes the complete per-scene procedure of our proposed
+Self-Geometry
+. The procedure comprises three stages: (i)
+Scene Initialization
+, which extracts the pseudo-correspondence set
+ℳ
+\mathcal{M}
+via LightGlue
+[
+16
+]
+, applies
+Pseudo-Correspondence Filtering
+, and estimates the per-scene Huber thresholds (Eq. (
+S.9
+)); (ii) target view selection via our proposed
+GRV
+; and (iii)
+T
+T
+iterations of the
+TTA
+loop, each performing our proposed
+ANS
+, computing the primary losses (
+ℒ
+mvc
+\mathcal{L}_{\mathrm{mvc}}
+,
+ℒ
+ec
+\mathcal{L}_{\mathrm{ec}}
+) together with the three auxiliary regularizers (
+ℒ
+pc
+\mathcal{L}_{\mathrm{pc}}
+,
+ℒ
+eds
+\mathcal{L}_{\mathrm{eds}}
+,
+ℒ
+bdc
+\mathcal{L}_{\mathrm{bdc}}
+; Eqs. (
+S.6
+)–(
+S.8
+)), applying
+Huber Robustification
+(Eq. (
+S.10
+)) and
+Dynamic Weight Averaging
+(Eq. (
+S.11
+)), and taking an AdamW step after our proposed
+GD
+on the primary loss gradients.
+TABLE S.1:
+TTA hyperparameters of our proposed
+Self-Geometry
+. Every value in this table is used identically across all combinations of the six pretrained
+VFMs
+and four benchmark datasets, without any per-
+VFM
+or per-dataset tuning.
+Hyperparameter
+Iterations
+T
+T
+50
+50
+Optimizer
+Type
+AdamW
+[
+38
+]
+Learning rate
+η
+\eta
+5
+×
+10
+−
+5
+5\times 10^{-5}
+Weight decay
+0.05
+0.05
+Schedule
+cosine with
+5
+%
+5\%
+warmup
+Final learning rate
+1
+×
+10
+−
+8
+1\times 10^{-8}
+Gradient clip
+C
+C
+5.0
+5.0
+LoRA
+(Sec.
+III-D
+)
+Rank
+r
+r
+64
+64
+Alpha
+α
+L
+\alpha_{L}
+64
+64
+Dropout
+0.1
+0.1
+S.V
+Training Details
+Table
+S.1
+lists the hyperparameters used by our proposed
+Self-Geometry
+.
+Every value in Table
+S.1
+is used identically across all combinations of the six pretrained
+VFMs
+(VGGT
+[
+4
+]
+,
+π
+3
+\pi^{3}
+[
+5
+]
+, DA3-Giant/Large/Base/Small
+[
+6
+]
+) and the four benchmark datasets (7Scenes
+[
+7
+]
+, ETH3D
+[
+9
+]
+, ScanNet++
+[
+8
+]
+, HiRoom
+[
+6
+]
+) in our experiments.
+Following Sec.
+III-D
+, we insert
+LoRA
+[
+22
+]
+into the QKV weights of every attention block of each pretrained
+VFM
+, keeping all remaining parameters of the pretrained
+VFM
+frozen and updating only the
+LoRA
+parameters. This
+LoRA
+adapter configuration is applied identically across all six pretrained
+VFMs
+, except that for
+π
+3
+\pi^{3}
+[
+5
+]
+LoRA
+is inserted only into the encoder due to its model size.
+Fig. S.1:
+Additional qualitative results on 7Scenes
+[
+7
+]
+: rows are six pretrained
+VFMs
+, each showing the scene with the largest F1 improvement for that
+VFM
+.
+(a) Depth Estimation
+: from left to right, Reference RGB, GT depth, and depth error maps.
+(b) Geometry Estimation
+: from left to right, GT fused pointcloud and geometry error maps. Both (a) and (b) show Original, +TCO
+[
+36
+]
+,
++Free-Geometry
+[
+12
+]
+, and
++Self-Geometry
+(Ours), where
+red
+/
+gray
+denote errors above/within the benchmark threshold.
+Best viewed in zoom.
+Fig. S.2:
+Additional qualitative results on ScanNet++
+[
+8
+]
+: rows are six pretrained
+VFMs
+, each showing the scene with the largest F1 improvement for that
+VFM
+.
+(a) Depth Estimation
+: from left to right, Reference RGB, GT depth, and depth error maps.
+(b) Geometry Estimation
+: from left to right, GT fused pointcloud and geometry error maps. Both (a) and (b) show Original, +TCO
+[
+36
+]
+,
++Free-Geometry
+[
+12
+]
+, and
++Self-Geometry
+(Ours), where
+red
+/
+gray
+denote errors above/within the benchmark threshold.
+Best viewed in zoom.
+Fig. S.3:
+Additional qualitative results on HiRoom
+[
+6
+]
+: rows are six pretrained
+VFMs
+, each showing the scene with the largest F1 improvement for that
+VFM
+.
+(a) Depth Estimation
+: from left to right, Reference RGB, GT depth, and depth error maps.
+(b) Geometry Estimation
+: from left to right, GT fused pointcloud and geometry error maps. Both (a) and (b) show Original, +TCO
+[
+36
+]
+,
++Free-Geometry
+[
+12
+]
+, and
++Self-Geometry
+(Ours), where
+red
+/
+gray
+denote errors above/within the benchmark threshold.
+Best viewed in zoom.
+S.VI
+Limitations
+Dependence on External Feature Matcher.
+Our proposed
+Self-Geometry
+obtains its multi-view geometric supervision from the 2D pixel correspondences produced by an external feature matcher (LightGlue
+[
+16
+]
+). Consequently, on scenes where the matcher struggles (
+e.g.
+, repetitive textures, textureless surfaces, or wide-baseline viewpoint changes with limited overlap), the supervision signal weakens and adaptation quality degrades.
+Adaptation Latency.
+Although our proposed
+Self-Geometry
+completes per-scene adaptation within a few minutes on a single GPU (Tab.
+VII
+), this latency remains far from real-time requirements.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:
+Click the "Report Issue"
+(
+)
+button, located in the page header.
+Tip:
+You can select the relevant text first, to include it in your report.
+Our team has already identified
+the following issues
+. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a
+list of packages that need conversion
+, and welcome
+developer contributions
+.
+We gratefully acknowledge support from
+        our
+major funders
+,
+member institutions
+,
+,
+        and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status
+(opens in new tab)
+Major funding support from

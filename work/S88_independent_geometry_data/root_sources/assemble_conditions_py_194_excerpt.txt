@@ -1,0 +1,41 @@
+194:         budget()
+195:         Consumer = type('OriginalConditioningOnly', (), {name: env[name] for name in METHODS})
+196:         for arm, ids in m['arms'].items():
+197:             budget()
+198:             arm_record = dict(status='RUNNING', ordered_history_ids=ids, target_ids=m['target_ids'])
+199:             report['arms'][arm] = arm_record
+200:             try:
+201:                 all_ids = ids + m['target_ids']
+202:                 optical = torch.tensor(np.stack([cameras[i] for i in all_ids]), dtype=torch.float32)
+203:                 D = torch.diag(torch.tensor([1., -1., -1., 1.], dtype=torch.float32))
+204:                 consumer_raw = optical @ D
+205:                 require(torch.equal(consumer_raw @ D, optical), 'Optical-to-consumer local basis roundtrip failed')
+206:                 latent = torch.tensor(np.stack([cache[i]['latent'] for i in ids]), dtype=torch.float32)
+207:                 embedding = torch.tensor(np.stack([cache[i]['embedding'] for i in ids]), dtype=torch.float32)
+208:                 Ks = torch.tensor(np.stack([cache[i]['K_pixels_576'] for i in ids]
+209:                                             + [target_K.copy() for _ in m['target_ids']]), dtype=torch.float32)
+210:                 masks = torch.tensor([True] * 4 + [False] * 4)
+211:                 obj = Consumer()
+212:                 obj.device, obj.dtype, obj.camera_scale = 'cpu', torch.float32, 2.0
+213:                 obj.config = SimpleNamespace(model=SimpleNamespace(num_frames=8))
+214:                 with torch.inference_mode():
+215:                     scale, centered = obj.get_translation_scaling_factor(consumer_raw.clone())
+216:                     centered_before_cond = centered.clone()
+217:                     result = obj.get_cond(latent.clone(), centered, Ks.clone(), scale,
+218:                                           embedding.clone(), masks.clone())
+219:                 scale_tensor = torch.as_tensor(scale, dtype=torch.float32).reshape(())
+220:                 arrays = dict(ordered_ids=np.asarray(all_ids, np.int64), optical_c2ws_fp32=optical.numpy(),
+221:                     consumer_raw_c2ws=consumer_raw.numpy(), centered_consumer_c2ws=centered_before_cond.numpy(),
+222:                     post_cond_optical_c2ws=result['all_c2ws'].numpy(), scale=scale_tensor.numpy(),
+223:                     K_pixels_576=Ks.numpy(), input_masks=masks.numpy(),
+224:                     context_latents=latent.numpy(), context_embeddings=embedding.numpy())
+225:                 for group in ['c', 'uc']:
+226:                     arrays.update({group + '__' + k: v.numpy() for k, v in result[group].items()})
+227:                 arm_record['output'] = store_arrays(arm, arrays)
+228:                 require(torch.isfinite(scale_tensor) and scale_tensor > 0, 'Invalid natural original scale')
+229:                 require(set(result) == {'c', 'uc', 'all_c2ws', 'all_Ks', 'input_masks', 'num_cameras'}
+230:                         and result['num_cameras'] == 8, 'Unexpected original result schema')
+231:                 expected = {'crossattn': (8, 1, 1024), 'replace': (8, 5, 72, 72),
+232:                             'concat': (8, 7, 72, 72), 'dense_vector': (8, 6, 72, 72)}
+233:                 for group in ['c', 'uc']:
+234:                     require(set(result[group]) == set(expected), 'Unexpected conditioning fields')

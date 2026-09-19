@@ -1,0 +1,98 @@
+{
+  "schema": "s46-c1-blind-scoring-contract-template-v1",
+  "status": "NON_EXECUTABLE_TEMPLATE_UNBOUND_C1_TERMINAL_IDENTITIES",
+  "created_utc": "2026-09-07T18:12:48Z",
+  "author_role": "/root/c1_blind_score_builder",
+  "row": "C1",
+  "scope": "Identity-unbound preparation only. This file is not a frozen contract, source review, blindness attestation, score, or result.",
+  "frozen_preregistration": {
+    "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+    "protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+  },
+  "fixed_row_identity": {
+    "row": "C1",
+    "input_name": "jesus.jpg",
+    "input_sha256": "d611976bb9d3e8d6e1740b86ead24028bfd7857944eba118458e09e7e645f3e1",
+    "seed": 43,
+    "height": 576,
+    "width": 576,
+    "required_ids": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "operations": ["turn_left(5)", "turn_right(5)"]
+  },
+  "frozen_math": {
+    "authoritative_pair": [0, 8],
+    "normalization": "uint8_RGB_to_float64_then_divide_by_255_per_region",
+    "accumulation": "sum_squared_difference_float64_then_divide_by_exact_rgb_scalar_count",
+    "mask_name": "M_outer4",
+    "regions_in_order": [
+      ["R1", [0, 192, 0, 192]],
+      ["R2", [0, 192, 384, 576]],
+      ["R3", [192, 384, 0, 192]],
+      ["R4", [192, 384, 384, 576]]
+    ],
+    "pixel_count": 147456,
+    "rgb_scalar_count": 442368,
+    "mse_threshold": 0.01,
+    "event_operator": ">",
+    "equality_is_event": false,
+    "psnr": "-10*log10(MSE); null plus +inf display marker when MSE is zero",
+    "fixed_generated_only_pairs_no_GT": [[1, 7], [2, 6], [3, 5]],
+    "full_frame_diagnostic": true,
+    "diagnostics_may_replace_primary": false
+  },
+  "frozen_math_sha256": "9bee0abe9392e04e061adb7cf8b39297d7730e7045ed856486f1e03ee8d82812",
+  "binding_slots": {
+    "binding_completed_utc": null,
+    "authorized_attempt": 1,
+    "authorized_output_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S46_c1_blind_scoring_preparation/C1_score_attempt_01",
+    "required_upstream_record_labels": [
+      "generation_manifest",
+      "generation_terminal_receipt",
+      "generation_worker_receipt",
+      "readback_supervisor_receipt",
+      "readback_worker_receipt",
+      "readback_report",
+      "readback_result_review",
+      "row_validity_review"
+    ],
+    "upstream_records": null,
+    "authoritative_pixel_identities": null,
+    "pixel_identity_source_record_label": null,
+    "pixel_identities_json_pointer": null,
+    "archive_tensor_directory": null,
+    "row_validity_record_label": "row_validity_review",
+    "row_validity_assertions_json_pointer": null,
+    "required_true_row_validity_assertions": [
+      "generation_first_technically_valid_attempt",
+      "readback_independently_reviewed",
+      "cache_readback_guard_pass",
+      "requested_pose_K_guard_pass",
+      "all_nine_authoritative_pixels_identified",
+      "no_visual_QA_before_machine_score"
+    ]
+  },
+  "source_review_gate": {
+    "primary_schema": "s46-c1-blind-scorer-source-review-v1",
+    "primary_status": "PASS_S46_C1_BLIND_SCORER_SOURCE_REVIEW",
+    "adversarial_schema": "s46-c1-blind-scorer-adversarial-source-review-v1",
+    "adversarial_status": "PASS_S46_C1_BLIND_SCORER_ADVERSARIAL_SOURCE_REVIEW",
+    "author_and_two_reviewers_pairwise_distinct": true,
+    "reviews_must_bind_exact_scorer_and_bound_contract": true,
+    "reviews_must_state_executed_payload_read_and_images_viewed_false": true
+  },
+  "blindness_gate": {
+    "attestation_schema": "s46-c1-blindness-attestation-v1",
+    "attestation_status": "PASS_S46_C1_BLINDNESS_PRE_SCORE",
+    "attestation_created_after_both_source_reviews_and_before_score": true,
+    "machine_receipt_must_precede_human_view": true,
+    "metric_roi_pair_threshold_changed_after_output": false
+  },
+  "attempt_policy": {
+    "first_technically_valid_attempt_is_only_scientific_result": true,
+    "valid_attempt_may_be_rerun": false,
+    "technical_failure_requires_new_sequential_attempt_contract_and_attestation": true,
+    "all_attempts_retained": true,
+    "copy_guard": "INVALID if all ID1-ID8 body hashes equal ID0 or if ID1-ID8 are mutually identical"
+  },
+  "claim_boundary": "A technically valid C1 score is one baseline-only confirmation row. C2 remains mandatory. It is not visual quality, rendered camera obedience, memory or mean causality, method gain, or novelty evidence."
+}

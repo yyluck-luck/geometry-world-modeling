@@ -1,0 +1,126 @@
+{
+  "recorded_utc": "2026-09-10T18:31:10.079442+00:00",
+  "first_clock_utc": "2026-09-10T18:27:07Z",
+  "last_explicit_read_clock_utc": "2026-09-10T18:28:39Z",
+  "review_type": "different-author static review of root adapter and artificial checker; claim boundary of root-stated S83 plan; not full S83 runner preexecution review",
+  "source_files": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/gradient_preserving_optimizer.py",
+      "bytes": 1588,
+      "sha256": "912c277c12e06e6f896cfc6e433b74e1d831ea731cf9201599f2b36f24a18b56",
+      "read_scope": "full source; different-author static review",
+      "defined_functions": [
+        {
+          "name": "with_gradient_preserving_depths",
+          "start": 8,
+          "end": 31
+        },
+        {
+          "name": "get_depthmaps",
+          "start": 11,
+          "end": 29
+        }
+      ]
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/check_gradient_adapter_synthetic.py",
+      "bytes": 7191,
+      "sha256": "a054d64b4bcc3164b9f9550e80a91f3923d22dd7f4f85b6c8721e7d1c245d345",
+      "read_scope": "full source; different-author static review, not rerun",
+      "defined_functions": [
+        {
+          "name": "utc",
+          "start": 23,
+          "end": 24
+        },
+        {
+          "name": "sha",
+          "start": 27,
+          "end": 28
+        },
+        {
+          "name": "main",
+          "start": 31,
+          "end": 124
+        },
+        {
+          "name": "__init__",
+          "start": 62,
+          "end": 67
+        }
+      ]
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/OPTIMIZER_GRADIENT_DIAGNOSTIC.py",
+      "bytes": 7274,
+      "sha256": "fad5b93b2a543e786221b1ac1b5316dd0419571db4a3a7ce96087c7c5e2e9794",
+      "read_scope": "full source; prior own diagnostic background, not independent replication"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py",
+      "bytes": 12212,
+      "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+      "read_scope": "lines 1-125, 123-330"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/init_im_poses.py",
+      "bytes": 11896,
+      "sha256": "b3f59fbf32fd9690e63551ac14dc957edef9145bb3d5544fcb53a6eb3758bb21",
+      "read_scope": "lines 73-220"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/base_opt.py",
+      "bytes": 20800,
+      "sha256": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+      "read_scope": "lines 469-575"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/GRADIENT_ADAPTER_NOTE.md",
+      "bytes": 2682,
+      "sha256": "9ac2f084a9930c87a4cf55d22c505dd1ebe11b826cc06294421d9101a03749c6",
+      "read_scope": "full author note, claims not independently rerun"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/GRADIENT_ADAPTER_SYNTHETIC.json",
+      "bytes": 8891,
+      "sha256": "dea084c2c4da703a20ec2a28210b0dd671ee1fab7984ea72e17413b97e7587e5",
+      "read_scope": "bytes/hash only; artificial receipt; not parsed/recomputed"
+    }
+  ],
+  "existing_primary_sources_reused": [
+    {
+      "url": "https://raw.githubusercontent.com/naver/dust3r/main/dust3r/cloud_opt/optimizer.py",
+      "version": "previously read main, remote commit not pinned",
+      "scope_receipt": "work/S82_history_geometry_guidance/GEOMETRY_ALIGNMENT_SOURCE_SCOPE.json"
+    },
+    {
+      "url": "https://arxiv.org/html/2403.07535v1",
+      "version": "AFNet author v1, CVPR 2024 metadata verified earlier",
+      "scope_receipt": "work/S82_history_geometry_guidance/CORRELATED_GEOMETRY_SOURCE_SCOPE.json"
+    },
+    {
+      "url": "https://arxiv.org/html/2209.14687v4",
+      "version": "DPS author v4 2024-05-20, ICLR 2023 metadata verified earlier",
+      "scope_receipt": "work/S82_history_geometry_guidance/WARP_MEASUREMENT_SOURCE_SCOPE.json"
+    }
+  ],
+  "new_papers_searched": 0,
+  "new_scientific_arrays_read": 0,
+  "models_or_optimizers_or_artificial_tests_run": 0,
+  "author_files_modified": false,
+  "canonical_ledger_modified": false,
+  "static_conclusion": "No blocking gradient-connectivity issue identified within equal-size 2D FP32 ParameterList getter scope; not numerical/full-optimizer approval",
+  "limitations": [
+    "adapter retains dtype while original casts float32",
+    "exp finite values not assured by getter",
+    "gradient connectivity and loss decrease do not imply metric geometric accuracy",
+    "100 Adam steps do not certify convergence or defeat of strong baselines",
+    "MST init and given poses may constrain scale but do not validate depth truth",
+    "original global loop returns last pre-step loss; actual post-step loss needs evaluation"
+  ],
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/CLAIM_AND_FAILURE_BOUNDARY.md",
+    "bytes": 7450,
+    "sha256": "0468c3aea9635a2dcd5f340918b981e9de7035a3eba097f9b7a79b50342b36c6"
+  }
+}

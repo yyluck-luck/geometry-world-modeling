@@ -1,0 +1,28 @@
+{
+  "schema": "s76-display-source-review-v1",
+  "status": "PASS_S76_DISPLAY_SOURCE_REVIEW",
+  "reviewer_role": "/root/c2_v9_source_primary",
+  "author_role": "/root",
+  "started_utc": "2026-09-09T09:40:49Z",
+  "completed_utc": "2026-09-09T09:41:15.345176+00:00",
+  "source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S76_relative_camera_response/prepare_visuals.py",
+    "sha256": "2fe978f0df91c2a9351551be41a145ed2506f4491b0d8de45c6818bc5b52a8bf",
+    "bytes": 6896
+  },
+  "blockers": [],
+  "actual_scope": "Complete 135-line display source and fixed score contract tail only; no scientific bytes, images, renderer/scorer/verifier/model execution.",
+  "checks": [
+    "Exact current scoring_01 receipt path and caller SHA, COMPLETE status, all target IDs [20,21,22,23], unrun IDs empty, new_method_validated false",
+    "Exactly both A0 and yaw_plus5 PNGs for every target, fixed canonical paths, file SHA, PNG/RGB/576x576, decoded pixel SHA",
+    "Each source pasted at native 576 resolution below 64-pixel header; verification-only crop compares exact source bytes; no output crop/resize/warp/filter or match-based selection",
+    "Every panel labels MODEL-GENERATED and not a real photograph; A0 label reused baseline, yaw +5 degrees",
+    "Four 1152x640 pairs and one 1152x2560 sheet; frozen file/pixel SHA provenance; create-only output and FAILED_PRESERVED after rendering errors"
+  ],
+  "limitations": [
+    "Source review only: actual pixels, fonts, placement and output SHA remain future runtime evidence.",
+    "Prevalidation/source/font/image-read errors occur before visuals_01 and internal try/finally; root external receipt must retain such failures. Internal started_utc covers output preparation after source decoding, not entire process.",
+    "Output pixel SHA hashes the in-memory composed canvas and output file SHA hashes saved PNG; independent decoding of final PNG is not performed by this script. Ordinary lossless PNG write is used.",
+    "No conclusion about camera response, model quality, feature correspondence truth or method validation."
+  ]
+}

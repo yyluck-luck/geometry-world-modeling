@@ -1,0 +1,264 @@
+{
+  "schema": "s23-route4-primary-literature-v1",
+  "route_id": 4,
+  "author_agent": "/root/s15b_bonn_resolution",
+  "recorded_at_utc": "2026-09-06 14:06:24 UTC",
+  "mode": "read_only_primary_literature_and_existing_source",
+  "new_model_runs": 0,
+  "new_dataset_downloads": 0,
+  "real_rgb_decodes": 0,
+  "new_gt_reads": 0,
+  "claude_model_calls": 0,
+  "timing_note": "First two web calls did not record wall-clock wrappers; later calls contain actual UTC before/after. Unknown times remain null. Web fetch success is not an HTTP status-code claim; raw response bytes below are captured tool output, not the original publisher file.",
+  "skills": [
+    {
+      "path": "/Users/rocket/.claude/skills/sci-scientific-brainstorming/SKILL.md",
+      "scope": "assumption reversal, bounded alternative, critical evaluation, falsifier; no Claude model"
+    },
+    {
+      "path": "work/S23_supervisor_readthrough/audit.md",
+      "scope": "consumed root full-read action mapping; do not claim this subagent personally read all 70 handbook pages"
+    },
+    {
+      "path": "work/S23_supervisor_readthrough/five_route_acceptance.json",
+      "scope": "all ten fields and G0-G4 decision boundaries"
+    }
+  ],
+  "sources": [
+    {
+      "id": "P1",
+      "title": "RayMap3R",
+      "version": "arXiv 2603.20588v1",
+      "paper_url": "https://arxiv.org/html/2603.20588v1",
+      "code_url": "https://github.com/Brack-Wang/raymap3r",
+      "code_commit": "3be79cd660ddf548cb2b6fcda85ddf197baba707",
+      "read_scope": "Sections 3.2-3.3; cached official model source dynamic/static discrepancy, alpha-gating, ray branch references",
+      "read_records": [
+        "s23_occ_mechanism2.json"
+      ],
+      "local_code": "work/S21_novelty_search/ray_src__dust3r__model_py.source",
+      "availability": "Paper read; official code previously cached/pinned; this route only textual inspection.",
+      "relation": "state dynamics suppression is prior art; not a new gate"
+    },
+    {
+      "id": "P2",
+      "title": "MoPe: Motion Permanence for Robust Monocular Gaussian Mapping in Dynamic Environments",
+      "version": "arXiv 2606.29237v1 (2026-06-28)",
+      "paper_url": "https://arxiv.org/html/2606.29237v1",
+      "code_url": "https://github.com/chloeqxq/MoPe",
+      "code_read_url": "https://raw.githubusercontent.com/chloeqxq/MoPe/main/src/utils/dyn_uncertainty/temporal_fusion.py",
+      "code_commit": null,
+      "read_scope": "Sections III-B to III-D and V; README overview/dependency/reproduction sections; complete temporal_fusion.py web text",
+      "read_records": [
+        "s23_occ_primary1.txt",
+        "s23_occ_mechanism2.json",
+        "s23_occ_code_read.json",
+        "s23_occ_code_actual.json"
+      ],
+      "availability": "Paper and public source accessible. Current branch text not immutable pinned. README installation still says TEG-SLAM; no installation attempted.",
+      "relation": "Bayesian/log-odds temporal dynamic identity and opacity cleanup already implemented; code probability-floor rescaling must not be replaced by bare paper sigmoid when reproducing."
+    },
+    {
+      "id": "P3",
+      "title": "PersistGS: Differentiable Physics for Object Permanence in 4D Gaussian Splatting",
+      "version": "arXiv 2606.03479v1 (2026-06-02); CVPR 2026 GenRecon3D workshop",
+      "paper_url": "https://arxiv.org/html/2606.03479v1",
+      "publisher_url": "https://openaccess.thecvf.com/content/CVPR2026W/GenRecon3d/papers/Ramlal_PersistGS_Differentiable_Physics_for_Object_Permanence_in_4D_Gaussian_Splatting_CVPRW_2026_paper.pdf",
+      "code_url": null,
+      "read_scope": "Sections 3.1-3.3, 4.1, 5 (known segmentation, physics assumptions, visibility curriculum and synthetic scene scope)",
+      "read_records": [
+        "s23_occ_mechanism2.json",
+        "s23_occ_mechanism3.json",
+        "s23_occ_code_read.json"
+      ],
+      "availability": "Paper read. No project-specific implementation URL identified in bounded paper read; this does not prove code unavailable.",
+      "relation": "Physical occlusion continuation already studied; not a general identifiability solution for hidden object removal."
+    },
+    {
+      "id": "P4",
+      "title": "Gaussian Mapping for Evolving Scenes (GaME)",
+      "version": "arXiv 2506.06909v2; CVPR 2026; preprint first appeared 2025",
+      "paper_url": "https://arxiv.org/html/2506.06909v2",
+      "code_url": "https://github.com/VladimirYugay/GaME",
+      "code_commit": null,
+      "read_scope": "Section 4.2 Add/Remove equations and object propagation; 4.3 masked keyframe loss; 5 dataset/evaluation; official README installation/data and source directory inventory",
+      "read_records": [
+        "s23_occ_followup.json",
+        "s23_occ_mechanism3.json",
+        "s23_occ_code_access.json",
+        "s23_occ_code_read.json",
+        "s23_occ_code_actual.json"
+      ],
+      "availability": "Primary arXiv method and public README/source tree accessible; complete kernel implementation not inspected. No run or CPU compatibility claim.",
+      "relation": "Closest direct counterexample: already distinguishes foreground occlusion from free-space contradiction and masks stale historical keyframe regions."
+    },
+    {
+      "id": "P5",
+      "title": "Mem-World: Memory-Augmented Action-Conditioned World Models for Persistent Robot Manipulation",
+      "version": "arXiv 2606.18960v1 (2026-06-17)",
+      "paper_url": "https://arxiv.org/html/2606.18960v1",
+      "code_url": null,
+      "read_scope": "Sections 3.1-3.2: W-VMem surfel indexing, wrist-only update, object emphasis, temporal decay and future-action query retrieval",
+      "read_records": [
+        "s23_occ_mechanism2.json"
+      ],
+      "availability": "Primary mechanism text read. No project-specific code URL identified from bounded paper read, not evidence of absence.",
+      "relation": "Dynamic manipulation memory/retrieval is covered; latent cache invalidation not established as absent from an uninspected implementation."
+    }
+  ],
+  "failures": [
+    {
+      "record": "s23_occ_primary1.txt",
+      "target": "CVF GaME HTML attempt",
+      "result": "tool Internal Error; retained; used primary arXiv v2 subsequently"
+    },
+    {
+      "target": "first two web calls",
+      "result": "no exact request timestamp wrapper saved; no fabricated start/end"
+    },
+    {
+      "target": "GaME implementation granularity",
+      "result": "source directory inventory and README only; rely on primary method for mathematical comparison"
+    },
+    {
+      "target": "author delivery checker v1",
+      "result": "Raw web responses from first calls were plain text but exported with .json suffix. json.loads validation failed before sources/receipt modification. Corrected suffix to .txt without changing bytes; structured envelopes remain JSON. This is artifact format correction, not a model/experiment failure."
+    }
+  ],
+  "excluded_claims": [
+    "novelty established",
+    "strong baseline natural dynamic failure observed locally",
+    "world-model video generated",
+    "synthetic event equals natural event",
+    "all paper methods faithfully executable on this Mac"
+  ],
+  "future_data_links": [
+    {
+      "url": "https://huggingface.co/datasets/voviktyl/GaME_Aria",
+      "kind": "author README links processed real changed-room clips; not downloaded; suitability for same-scene hidden/reappear pair remains to audit"
+    },
+    {
+      "url": "https://huggingface.co/datasets/voviktyl/GaME_Flat",
+      "kind": "author README links synthetic changed-scene clips; not real event; not downloaded"
+    }
+  ],
+  "raw_records": [
+    {
+      "file": "raw/s23_occ_search1.txt",
+      "before_utc": null,
+      "after_utc": null,
+      "format": "unstructured web tool response text",
+      "sha256": "dcc18cb81efd22852788b9df46dc9eeba62eb519ae7890efb5a90de03d16fc05",
+      "bytes": 36763
+    },
+    {
+      "file": "raw/s23_occ_primary1.txt",
+      "before_utc": null,
+      "after_utc": null,
+      "format": "unstructured web tool response text",
+      "sha256": "8454507de322181dc27203143897dfcf8349c9e3726c445ae67d6cdc6dc2a003",
+      "bytes": 30912
+    },
+    {
+      "file": "raw/s23_occ_followup.json",
+      "before_utc": "2026-09-06 14:02:22 UTC",
+      "after_utc": "2026-09-06 14:02:25 UTC",
+      "format": "json tool envelope",
+      "sha256": "261aa8330c1d47d677b8abf8e03ed3f95722cb0753b6ab0ecdb541c6aec8a5a7",
+      "bytes": 32511
+    },
+    {
+      "file": "raw/s23_occ_mechanism2.json",
+      "before_utc": "2026-09-06 14:02:54 UTC",
+      "after_utc": "2026-09-06 14:02:57 UTC",
+      "format": "json tool envelope",
+      "sha256": "8eeea9362815e3b9f261dab536f6f64a8c029331eb947bcdf1d18be2c95819da",
+      "bytes": 32816
+    },
+    {
+      "file": "raw/s23_occ_mechanism3.json",
+      "before_utc": "2026-09-06 14:04:49 UTC",
+      "after_utc": "2026-09-06 14:04:53 UTC",
+      "format": "json tool envelope",
+      "sha256": "f3bd535a43a76e21793a7279aef87ebbefa744ab9e76e3ce79c711046cd038b7",
+      "bytes": 30210
+    },
+    {
+      "file": "raw/s23_occ_code_access.json",
+      "before_utc": "2026-09-06 14:05:01 UTC",
+      "after_utc": "2026-09-06 14:05:07 UTC",
+      "format": "json tool envelope",
+      "sha256": "c77f63acd8478144db78941dd5509fd224c61e5ee5d4709f3346b4f38399d387",
+      "bytes": 30927
+    },
+    {
+      "file": "raw/s23_occ_code_read.json",
+      "before_utc": "2026-09-06 14:05:26 UTC",
+      "after_utc": "2026-09-06 14:05:29 UTC",
+      "format": "json tool envelope",
+      "sha256": "8511845a720ec30e4f73739692984079c2c8f0a3a841c52a759d866a9814c999",
+      "bytes": 30450
+    },
+    {
+      "file": "raw/s23_occ_code_actual.json",
+      "before_utc": "2026-09-06 14:05:46 UTC",
+      "after_utc": "2026-09-06 14:05:49 UTC",
+      "format": "json tool envelope",
+      "sha256": "187e48a4f0da93743033353be5a9ac04a1924573484f0fdb47cdc272d87715ce",
+      "bytes": 14726
+    }
+  ],
+  "local_text_identities_at_delivery": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/AGENTS.md",
+      "sha256": "3e957d23cdaf28435843ac75919733463956538dbcceaad287276dcd1fd16b52",
+      "bytes": 1882
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_PRINCIPLES.md",
+      "sha256": "17baf25d869786a45e53e72c48435505efdcfdc471c09b21dcf65ab9f5231842",
+      "bytes": 9401
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md",
+      "sha256": "33446bc651feffe88f7e8decc3974f7f28c6b61b18d03feebb5940d3ebb6cbfb",
+      "bytes": 25141
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_supervisor_readthrough/audit.md",
+      "sha256": "ff28cc74b3bbde6374f3236574dee9c1331f1741017442e0e9a2b0bea73cc889",
+      "bytes": 28947
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_supervisor_readthrough/five_route_acceptance.json",
+      "sha256": "615f869ce4a2072a9490eca161296520ef89dddb97306b3b227f3aa20a660f69",
+      "bytes": 7215
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S22_RESULTS.md",
+      "sha256": "6a2ee75dd83fbe4835fa3d841b9e795b7b515f120419b5824232dc6b6f5890f4",
+      "bytes": 3733
+    },
+    {
+      "path": "/Users/rocket/.claude/skills/sci-scientific-brainstorming/SKILL.md",
+      "sha256": "ec80122098c8fcacfd45ff58c903f8b2841e38743ce9001a17ca3d9e98faf634",
+      "bytes": 8179
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/Yiyang_LIU_Proposal.txt",
+      "sha256": "f189361a2e61e3690f2d9a43f7f216b94aadf63626c6f905027f1c541da8a1d0",
+      "bytes": 5255
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/pipeline.py",
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+      "bytes": 62176
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S21_novelty_search/ray_src__dust3r__model_py.source",
+      "sha256": "857be3fe59025de3bce7c9d1ccbe364395edd75d0d69264b3fd73a04dd0d3f78",
+      "bytes": 87612
+    }
+  ],
+  "identity_note": "Delivery-time text hashes. Canonical memory/log may have advanced since initial reading; this is not a freeze of all prior research state."
+}

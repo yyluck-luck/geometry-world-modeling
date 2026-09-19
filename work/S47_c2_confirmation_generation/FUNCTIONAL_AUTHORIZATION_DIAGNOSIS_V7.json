@@ -1,0 +1,131 @@
+{
+  "schema": "s47-c2-functional-authorization-diagnosis-v1",
+  "status": "BLOCKED_V7_REAL_PRODUCER_CONSUMER_INCOMPATIBILITY",
+  "reviewer_role": "/root/c2_final_launch_readiness",
+  "completed_utc": "2026-09-08T12:24:57.651574+00:00",
+  "trigger": {
+    "external_returncode": 1,
+    "elapsed_seconds": 0.08586754102725536,
+    "error": "C2 authorization attempt lease is incomplete, conflicting, or unsealed",
+    "external_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/resumption_20260908/C2_V7_EXTERNAL_LAUNCH/receipt.json",
+    "external_receipt_sha256": "0028c1a112d11129902454ce6569a076e45eacd090e37a1c72905cc5474e6a9d"
+  },
+  "blocking_findings": [
+    {
+      "id": "F1",
+      "kind": "REAL_PRODUCER_CONSUMER_SCHEMA_MISMATCH",
+      "producer": "create_launch_authorization.py:457",
+      "reader": "generation_gate.py:1455",
+      "consumer": "generation_gate.py:1431",
+      "details": "Producer writes authorization_identity with exactly device/inode/size/mode; read_json_snapshot returns these plus mtime_ns/ctime_ns. require_launch_authorization passes the six-field dict unchanged into receipt equality. All four shared values match, but dictionary equality is false. Independently evaluated all 25 existing conjuncts: only authorization_identity equality fails. LaunchControlLease:1684 also projects its file identity to four fields and compares to the same returned identity, so changing only the first equality would leave a second failure.",
+      "minimal_fix_candidate": "At the existing durable-identity contract boundary in require_launch_authorization, project the snapshot identity once to device/inode/size/mode. Preserve six-field live descriptor consistency in read_regular_snapshot and RegularBinding. This is a proposed source repair only; no frozen source was changed."
+    },
+    {
+      "id": "F2",
+      "kind": "ACTUAL_FINAL_REVIEW_NOT_READONLY",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/FINAL_ATTACHMENT_REVIEW.json",
+      "actual_mode": "0644",
+      "required_condition": "All 12 retained launch-control file modes have no write bits, generation_gate.py:1732.",
+      "details": "After F1 was corrected in memory, actual open_launch_control_lease immediately reproduced One held C2 launch-control file became writable. The final_attachment review alone among the retained controls had write bits; the authorization producer validated its bytes and inode but did not check this later retained-control read-only condition. No chmod was performed.",
+      "minimal_fix_candidate": "The final review publisher must seal the relevant review read-only before it is consumed by the already-existing retained-control contract. Whether/how to rebase the sealed failed path is a separate root decision; this diagnosis authorizes no retry or mutation."
+    },
+    {
+      "id": "F3",
+      "kind": "UNDEFINED_EXISTING_GATE_NAME",
+      "consumer": "generation_gate.py:1756",
+      "details": "frozen_manifest references GATE, but generation_gate.py defines no GATE global. After in-memory F1 repair and a separately documented simulated read-only mode for the known F2 review, the real frozen_manifest method reproduced NameError: name GATE is not defined. Supplying only the intended HERE/generation_gate.py binding in memory makes the unchanged source-identity check pass.",
+      "minimal_fix_candidate": "Define GATE as HERE / generation_gate.py, or replace the two references in this one predicate with that fixed path. Keep the hash predicate. No source edit was performed."
+    }
+  ],
+  "independent_read_only_evidence": {
+    "require_launch_authorization": "PASS_DIAGNOSTIC_READ_ONLY",
+    "open_launch_control_lease_actual_mode": {
+      "type": "RuntimeError",
+      "message": "One held C2 launch-control file became writable"
+    },
+    "open_launch_control_lease_under_mode_projection": "PASS_REMAINING_DIAGNOSTIC_READ_ONLY_CHAIN",
+    "held_directories": 3,
+    "held_files": 12,
+    "control_validate": "PASS_DIAGNOSTIC_READ_ONLY",
+    "metadata_only_check": "PASS_DIAGNOSTIC_READ_ONLY",
+    "frozen_manifest_before_Gate_binding": {
+      "type": "NameError",
+      "message": "name 'GATE' is not defined"
+    },
+    "frozen_manifest_after_inmemory_Gate_binding": "PASS_DIAGNOSTIC_READ_ONLY"
+  },
+  "conditional_diagnostic_boundary": "Only the returned in-memory validate() mode for terminal_review_final_attachment was projected from actual 0644 to required 0444 after original live byte/path/inode validation. The actual file was not chmodded. Remaining-chain results are conditional on separately resolving this real blocker.",
+  "authorization_identity_field_comparison": {
+    "actual_producer": {
+      "device": 16777234,
+      "inode": 262348870,
+      "size": 2599,
+      "mode": 292
+    },
+    "actual_reader": {
+      "device": 16777234,
+      "inode": 262348870,
+      "size": 2599,
+      "mode": 292,
+      "mtime_ns": 1788869955655191499,
+      "ctime_ns": 1788869955655781791
+    },
+    "shared_fields_all_equal": true,
+    "extra_reader_keys": [
+      "ctime_ns",
+      "mtime_ns"
+    ],
+    "conjuncts_evaluated": 25,
+    "failed_conjuncts": 1
+  },
+  "coverage_gap": "The existing synthetic_authorization_terminal_probe builds and directly passes the same four-field identity to require_successful_authorization_attempt. It does not exercise the actual read_json_snapshot -> require_launch_authorization producer-consumer edge. Prior source/core/final metadata reviews, including this reviewer readiness vote, did not establish a full runnable authorization-to-retained-control-to-derived-read_frozen chain. Those old votes remain historical and do not override this real failure.",
+  "remaining_chain_scope": "Under explicitly in-memory proposed repairs and the simulated review permission correction, require_launch_authorization, the three-directory/twelve-file retained control, validate(), check_manifest(metadata_only=True), and frozen_manifest passed. No formal create, model construction, full-resource gate or scientific execution occurred. This does not certify later runtime functionality.",
+  "preserved_artifact_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_01.json": "3420b14eb7f1643de03b1a778a62645dce7ecbe688f4be99254598acc9ac6004",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/attempt_started.json": "3de01dfee42ce4fa402c32b9d467feb2992e79dbdb89fa0c11c6e7868c704559",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/success_receipt.json": "545ba853c6d404df17d1e964769cedc8036d8d2d63e1e0ca6a2bc4abd168f15f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/manifest.json": "3b46f3016ac3755ac96bd8c955dee0a577f6a5b83ebf039343a799a6f55e2217",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/receipt.json": "50f5c99ac2ded49a5d203cb802e72051fe955266b3d98ae4983073c50d7c5f66",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/metadata_gate.json": "cb76b3ee72be087811507b6ef7784f8d2f95a5e66da26cda70096014fa948f1f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/manifest_core.json": "99f62b480a9dbead14a79eadafad43a520a110501e224e56702bcdc8ede10b07",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/receipt.json": "a71ad6ad30a43f3ff655f2d6da6f14bf4f9a0e2d1b648375350f12178b5187f6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/generation_gate.py": "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/create_launch_authorization.py": "209d6b141e154574d8ddd59e252839c27c911e4ec6fba4b18da5a9aca16ec89e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_generation.py": "4a96ba1e49a8ce2dae4885f70cf3b55debcacde594425dbaae1d59268dafc974",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/FINAL_ATTACHMENT_REVIEW.json": "0403ab19eecefb26118fa44f84ed90f17b8213fa5f8151aa9bc8f54c83320cdd",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/LAUNCH_READINESS_REVIEW.json": "3732816e385e55b84c16d14d475db8bad9fd6a5258d1d917114680429e5bf9ee"
+  },
+  "reserved_execution_paths_absent": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/execution_01": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/.execution_01.watchdog_failure.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/.execution_01.supervisor_failure.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S47_C2_confirmation_generation": true
+  },
+  "execution_boundary": {
+    "formal_launcher_calls": 0,
+    "authorization_tool_calls": 0,
+    "prepare_attach_calls": 0,
+    "new_attempts_created": 0,
+    "frozen_source_or_bundle_edits": 0,
+    "models_loaded": 0,
+    "scientific_imports": 0,
+    "component_bodies_read": 0,
+    "input_bodies_read": 0,
+    "pixels_decoded": 0,
+    "generation_calls": 0,
+    "real_pipeline_executed": false,
+    "tests_rerun": 0,
+    "real_file_permission_changes": 0
+  },
+  "evidence": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/functional_authorization_diagnosis_v7/evidence.json": "ff5563dbd29d4d191e51d328246dceeef9c35f5c0a28a99932ec825efb85028c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/functional_authorization_diagnosis_v7/diagnose.py": "5074382b3ab40636e716aea2b31acec9c7ba0241d99f43b610c7da308348b836",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/functional_authorization_diagnosis_v7/diagnose_before_readonly_observation.py": "c9010b50cd6d4f6d3af1585f964c0a42dfd685365144e7cbf82d81cafc2bfd57",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/static_selftest.py": "e2ffea8bd9825a5387962c2a966e5942eec031e2a2a47a467e01fd8b0f76c2f5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/resumption_20260908/C2_V7_EXTERNAL_LAUNCH/stderr.txt": "bb6cdf989c016a25dae7a69f2f4d030a47a0fd2f7d4b7fe4bd0cb307d66df1a9"
+  },
+  "next_step": "Preserve V7 source/control/public-attempt evidence. Make one bounded repair design covering F1/F2/F3 and validate the actual read-only producer-consumer chain against preserved metadata before any separately reviewed source rebase; no permission or retry decision is made by this diagnostic report.",
+  "scientific_status": "NOT_EVALUATED",
+  "novelty_authorization": "NONE",
+  "new_method_validated": false
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "s12-matched-budget-design-review-v1",
+  "status": "DESIGN_ONLY_PENDING_PROTOCOL_AND_IMPLEMENTATION",
+  "written_utc": "2026-09-05T22:44:14.779705+00:00",
+  "new_selection_executed": false,
+  "report_sha256": "c2e7f2d44ff6cfead7f1bee4d9a36e36fd86d1f7060c0ffe0f2d926d6ae4eb7f",
+  "preserved_v1_report": "docs/S12_MATCHED_BUDGET_DESIGN_REVIEW_V1.md",
+  "issues_before_final_review": [
+    {
+      "id": "M1",
+      "topic": "estimand",
+      "requirement": "Same candidate/reference counts and NMS; pose geometry is not no-geometry; not matched computational cost."
+    },
+    {
+      "id": "M2",
+      "topic": "pose sorting",
+      "requirement": "Official single-query average/coordinate transform, FP64 geodesic .1 then FP32 default argsort; canonical ascending-ID input before both sorting stages."
+    },
+    {
+      "id": "M3",
+      "topic": "NMS",
+      "requirement": "Frozen original threshold, strict <, /1.2, 1e-5, repeated scans and original fallback; no forced-last false branch."
+    },
+    {
+      "id": "M4",
+      "topic": "trace completeness",
+      "requirement": "Old steps are sparse visited pair distances. Newly needed pairs require original pose geodesic computation or explicit fail-closed coverage, not assumed all20 replay."
+    },
+    {
+      "id": "M5",
+      "topic": "evaluation sealing",
+      "requirement": "Seal all new IDs/traces before opening saved support/valid; full valid denominator, original50mm proxy; old seen data remains exploratory."
+    },
+    {
+      "id": "M6",
+      "topic": "aggregation",
+      "requirement": "Predeclare primary configuration and weights, report all seven sensitivities; dev4/test8/test12 distinct and24 queries not192 independent."
+    }
+  ],
+  "suggested_primary": {
+    "map": "A0P0",
+    "stride": 8,
+    "splits": [
+      "S7 development 4",
+      "S7 test 8",
+      "S8 test 12"
+    ],
+    "status": "reviewer recommendation, root to fix in protocol"
+  },
+  "scope": "Static source + saved JSON field inspection only; no NPZ/new sorting prefix/geodesic/NMS/selection/support/model/render execution",
+  "saved_schema_checks": {
+    "status": "PASS",
+    "started_utc": "2026-09-05T22:42:36.398954+00:00",
+    "completed_utc": "2026-09-05T22:42:36.419807+00:00",
+    "checks_count": 1338,
+    "map_conditions": {
+      "S7": 96,
+      "S8": 96
+    },
+    "distinct_seen_queries": 24,
+    "files": 12,
+    "scope": "Only saved JSON schema/domain/count/tie/threshold identity checks. Did not take a nearest14 prefix, compute any new selection/distance/NMS/support, or open NPZ."
+  },
+  "source_sha256": {
+    "src/vmem_retrieval_kernel.py": "35825a3989f368906cba08808616f0c6922ff08d0a92c7205fddb4822652e2b3",
+    "src/rgbd_retrieval.py": "6f5188f7f72b66e93af27ab5a368cd09fcea2166715f1bf4cd0545a686ec3cd6",
+    "src/s6_memory_bridge.py": "aceaa7828e794289aa580c63605bd3988216ca6832cba45be40d28756b8993cd",
+    "src/s7_event_replay.py": "3f4028366d1cf1fdcca8744a0cb14690075b9b146bd71af88360afa74bc5e20d",
+    "scripts/run_s7_replay.py": "e1722cf10300b1c0d4fd62ab3fb6908cfee245113f3404baeddfabe08ab3b218",
+    "scripts/run_s8_replay.py": "b101b598ed779ff882dad3e88cf48c78a1877a1c6d2dd1abaad0b3f84f77c505",
+    "scripts/run_s6_memory.py": "fcf8705d910edc75b684972096dde07513be1fb849a37f5c751df983fd9e5f29",
+    "docs/S9_B_CANDIDATE_QUOTA_CORRECTION.md": "e004890ee3f6be2a57a275afe2555489ed42de84a6af3c2446ddce763c5ac9f5",
+    "docs/S7_EVENT_REPLAY_PROTOCOL.md": "4484c8f08c27c94f3f4b6654f131faa72bb07c47efdf25e50426526d5d37e068",
+    "docs/S8_EXTERNAL_SCENE_PROTOCOL_V2.md": "d4ae1781696f4918b65129b82f52698ab07b1642fdf744f74501187a96984431",
+    "results/S7_event_replay/records.json": "84a4a7d8670922c856cd4034b9b17453930eddb60f6656371558fa04877fb747",
+    "results/S8_event_replay_v2/records.json": "1eb38e65395e9165844a69b125843a1212bae324cf98574637e0f89c3114fd86"
+  },
+  "old_selection_json_sha256": {
+    "results/S7_event_replay/block0_stride8/prediction_only_selection.json": "85cf5d6905b68f7a21f324e9cc00abb0fda082c95a4ae012831741004af232dd",
+    "results/S7_event_replay/block0_stride12/prediction_only_selection.json": "d6860e945ddc628060f163f12fd0ab95719079a4cfb98fa8d8011e7648d2c243",
+    "results/S7_event_replay/block1_stride8/prediction_only_selection.json": "181e0a9bef457eb92dc548d5a0763e47e34fb0888deb8d8f6bd9ed895232dc6e",
+    "results/S7_event_replay/block1_stride12/prediction_only_selection.json": "c0e0bd5b9829d8778db667de5f655c88f43dfac76f9f3a5dd082e3c21defa15e",
+    "results/S7_event_replay/block2_stride8/prediction_only_selection.json": "1d35326211ca08da58d9245166f6a6a71e2cb72cef71894c3e0f03929af2add2",
+    "results/S7_event_replay/block2_stride12/prediction_only_selection.json": "f1121d34ff9d52809366964d5b6838ef721070ce9de9a53daf28ddf4343ff6fe",
+    "results/S8_event_replay_v2/block0_stride8/prediction_only_selection.json": "e6fb8fd5e5053e5738dc6d2e4aa25bdd93ef5c0069afcfc399e903b387aa79fa",
+    "results/S8_event_replay_v2/block0_stride12/prediction_only_selection.json": "7099d57778d6b536dc17dba619fbb3fbad94e4bde0bb541f86ee898c22791e2e",
+    "results/S8_event_replay_v2/block1_stride8/prediction_only_selection.json": "d8475deb5b1440af7ab3c27c62c3918f305733dd0b40ee9b5615ce4a7a2d50b8",
+    "results/S8_event_replay_v2/block1_stride12/prediction_only_selection.json": "6e7fbe3d55bbc2029fb4cdd9ed90ba53d1b520ed6a47e98ed18123a807f08bff",
+    "results/S8_event_replay_v2/block2_stride8/prediction_only_selection.json": "1c277eb75208c74401287f38cfc0ff5607354bb8860cefb1a4e747ed20811dca",
+    "results/S8_event_replay_v2/block2_stride12/prediction_only_selection.json": "9ce7c08c2b6383c3a827f4e40c58afd9607c9f8e88c62bd994a2d4137792a168"
+  },
+  "artifact_sha256": {
+    "work/S12_matched_budget_design_review_v1/saved_schema_checks.json": "f3bd948ddb53887c663ce2d45a001787fdaf59b3c0fe20121d6ff101118da028"
+  },
+  "future_version_rule": "Preserve V1 MD/JSON; final approval must bind reviewed protocol/runner and clarify which recommendations were adopted."
+}

@@ -1,0 +1,150 @@
+{
+  "schema": "s40-readback-source-review-v3-3",
+  "status": "PASS_S40_READBACK_V3_3_SOURCE_REVIEW",
+  "verdict": "PASS_SOURCE_DELTA_REVIEW_NOT_EXECUTED",
+  "completed_utc": "2026-09-07T13:13:36Z",
+  "reviewer": "/root/gemini_third_review_verifier",
+  "reviewer_role": "/root/gemini_third_review_verifier",
+  "author_role": "/root",
+  "review_mode": "second_independent_read_only_adversarial_static_review",
+  "reviewed_identities": {
+    "readback_source": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/readback.py",
+      "expected_sha256": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933",
+      "actual_sha256": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933"
+    },
+    "protocol": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/PROTOCOL_DRAFT.md",
+      "expected_sha256": "257e1b7583b000e907cde8baf3e4e3fcefb9f2c81037ed98887d0f6367483163",
+      "actual_sha256": "257e1b7583b000e907cde8baf3e4e3fcefb9f2c81037ed98887d0f6367483163"
+    },
+    "revision_receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/revision_v3_3_receipt.json",
+      "expected_sha256": "bebc80b8fccf6e8699d4768f6ffab097bcc75f6bca4a7f101ef53e827b0e2e9d",
+      "actual_sha256": "bebc80b8fccf6e8699d4768f6ffab097bcc75f6bca4a7f101ef53e827b0e2e9d"
+    },
+    "prior_primary_v3_2_review_sha256": "0de2fa685d1487690e0ff782c571bf51866810d6aa927512f7d056713ee7f4fd",
+    "prior_adversarial_v3_2_review_sha256": "6d03a856e69fdb71b85eab789f8a7c5d495dc967cba2d4b550c005d029aaa6ce",
+    "archive_writer_sha256": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486"
+  },
+  "previous_blockers_regression": {
+    "ordinary_archived_dict_tensor_masquerade": {
+      "status": "CLOSED",
+      "evidence": [
+        "readback.py:30-31 defines a dedicated TensorDescriptor dict subclass solely as the raw-tensor provenance marker.",
+        "readback.py:107-123 decodes a raw kind=dict wrapper to an exact built-in dict while only a raw kind=tensor node returns TensorDescriptor(n). An ordinary archived Python dict is encoded by archive_outputs.py:190-197 as a kind=dict wrapper, so descriptor-shaped fields do not acquire the subclass.",
+        "readback.py:124-126 globally requires type(d) is TensorDescriptor before any mapping and then requires dict(d) to equal the complete descriptor registered for the canonical blob path. An exact field copy in an ordinary dict therefore fails before mapping.",
+        "A metadata-only scan of the fixed capture_complete event trees found no ordinary archived dict whose decoded top-level kind imitates tensor; the source-level exact-type gate remains decisive even if such a node were present."
+      ]
+    },
+    "list_tuple_and_bool_boundary": {
+      "status": "CLOSED",
+      "evidence": [
+        "readback.py:112-113 preserves list and tuple as different Python container types.",
+        "readback.py:287-290 requires exact built-in list, exact value [0], and exact int elements. The last condition rejects bool even though False == 0 in Python; tuple is rejected by the exact container type.",
+        "The fixed metadata-only archive path remains reachable: context_output occurrence 0 decodes to list [0], while occurrence 1 is a marked int64 tensor descriptor of shape [4]."
+      ]
+    },
+    "scalar_contract_precision": {
+      "status": "CLOSED_FOR_FIXED_S40_SCOPE",
+      "evidence": [
+        "readback.py:114-118 accepts only exact built-in str, int, bool, and NoneType label/value pairs.",
+        "The fixed capture metadata contains 12,357 str, 11,060 int, 6 bool, and 2,352 NoneType scalar nodes, with each JSON value type matching its label.",
+        "PROTOCOL_DRAFT.md:12 and revision_v3_3_receipt.json explicitly scope this exact built-in gate to the four labels present in the frozen S40 archive; they no longer claim compatibility with every subclass nominally admitted by archive_outputs.py:182-183."
+      ]
+    }
+  },
+  "adversarial_checks": {
+    "ordinary_dict_with_identical_descriptor_fields_rejected": true,
+    "ordinary_dict_rejection_reason": "Its decoded exact type is dict, so Reader.array's exact TensorDescriptor check fails even if every field equals a registered descriptor.",
+    "raw_tensor_descriptor_accepted_only_after_full_registration": true,
+    "raw_tensor_reason": "Reader.tree verifies each raw tensor node before Reader.metadata marks it; duplicate blob paths must have identical complete descriptors, and Reader.array repeats complete mapping equality before memmap.",
+    "pil_pixels_keep_tensor_provenance": true,
+    "pil_pixels_evidence": "readback.py:121-122 recursively decodes the raw pil_image pixels node. Metadata-only inspection of initial_output, both context_output captures, and both cache_commit captures found pil_image frames whose pixels are all marked TensorDescriptor nodes.",
+    "duplicate_content_addressed_descriptors_supported": true,
+    "duplicate_evidence": "readback.py:93-99 accepts a previously registered canonical path only when the complete raw descriptor is equal. Reader.array compares dict(marked_descriptor) against that registered mapping, so legitimate identical reuse passes while contradictory reuse fails. archive_outputs.py:142-160 derives the content path from the descriptor-plus-body identity.",
+    "tuple_args_remain_usable": true,
+    "tuple_args_evidence": "Both translation_input and condition_input captures encode args as tuple. Current consumers at readback.py:329-340 use len, indexing, and slicing only; they do not mutate args or require a list.",
+    "valid_bool_can_pass_batch1_int_gate": false,
+    "second_batch_can_fall_back_to_list": false,
+    "unknown_or_unmarked_metadata_can_reach_array_mapping": false,
+    "array_gate_coverage": "Every numeric mapping entry, including both arguments of same_desc and the tensor branch of same_scalar, passes through Reader.array at readback.py:124-133. All current mapping call-site values are descendants of archive capture groups decoded at readback.py:243-252; trace and summary dictionaries are not passed to Reader.array. Any unexpected plain dict or unknown metadata kind fails closed at the exact-type gate.",
+    "map_context_error_message_matches_predicate": true,
+    "map_context_error_evidence": "readback.py:353 checks maps[0][0] < contexts[1][0] and reports that the first committed map does not precede the second context when false; predicate and message now have the same direction."
+  },
+  "fixed_archive_metadata_observed_without_payload_body_reads": {
+    "capture_complete_kind_counts": {
+      "dict": 2487,
+      "list": 4793,
+      "pil_image": 75,
+      "python_float64": 127,
+      "scalar": 25775,
+      "tensor": 7580,
+      "torch_metadata": 4,
+      "tuple": 37
+    },
+    "context_output_occurrence_0_ids": {
+      "decoded_type": "list",
+      "value": [
+        0
+      ]
+    },
+    "context_output_occurrence_1_ids": {
+      "decoded_type": "TensorDescriptor",
+      "kind": "tensor",
+      "dtype": "int64",
+      "shape": [
+        4
+      ],
+      "blob": "tensors/2a1119dcc2a2f3d1103985b60723071ec44ab4594d565dfb832141f07b2ea1d5.bin"
+    },
+    "tensor_blob_or_image_payload_bodies_read_by_this_review": 0
+  },
+  "current_source_constraints_present": {
+    "full_archive_inventory_and_tensor_sidecar_hashing": true,
+    "two_closed_trace_batches_and_state_machine": true,
+    "selected_and_retained_id_binding": true,
+    "archive_causal_order": true,
+    "history_1_to_5_to_9": true,
+    "map_K_5_to_14_and_depth_5_to_9": true,
+    "sampler_output_to_samples_z_to_cache_latent": true,
+    "target_samples_to_encoder_input_to_embedding_commit": true,
+    "context_and_target_camera_K_translation_condition_sampler_chain": true,
+    "conditional_and_unconditional_sampler_input_binding": true,
+    "replace_latent_and_mask_channel_checks": true,
+    "cross_batch_latent_embedding_camera_K_and_pixel_checks": true,
+    "summary_and_actual_call_count_checks": true,
+    "final_input_stat_seal": true
+  },
+  "protocol_boundary_review": {
+    "attempt01_identity_hashing_boundary_accurate": true,
+    "evidence": "PROTOCOL_DRAFT.md:3 says attempt01 had already stream-hashed 5,916 files and 244,804,717 bytes, including 1,951 tensor .bin files and 9 PNG files, while distinguishing those body reads from successful NumPy mapping/comparison, image decoding/viewing, and quality scoring.",
+    "source_review_scope_accurate": true,
+    "evidence_limits_preserved": "The protocol and source limit a possible pass to saved-output identity and cache-consumption evidence; they do not claim model rerun, renderer or GA correctness, visual quality, long-horizon consistency, baseline superiority, or innovation."
+  },
+  "blocking_findings": [],
+  "nonblocking_findings": [
+    {
+      "id": "N1_FIXED_ARCHIVE_SCALAR_SCOPE",
+      "finding": "The reader intentionally rejects scalar subclasses that the generic writer's isinstance branch could nominally archive. This is fail-closed and is now accurately scoped to the exact built-in labels in this frozen S40 archive."
+    },
+    {
+      "id": "N2_STATIC_REVIEW_ONLY",
+      "finding": "This PASS covers the frozen v3.3 source, protocol, and revision receipt. It does not show that a supervised readback run will finish within CPU1, 300 seconds, and 2 GiB."
+    }
+  ],
+  "execution_boundary": {
+    "readback_executed": false,
+    "readback_source_imported": false,
+    "supervisor_executed": false,
+    "model_executed": false,
+    "generation_executed": false,
+    "resource_gate_executed": false,
+    "scientific_arrays_mapped_or_compared": false,
+    "images_decoded_or_viewed": false,
+    "tensor_blob_or_image_payload_bodies_read": false,
+    "archive_event_json_metadata_only_read": true,
+    "quality_or_novelty_claim_made": false
+  },
+  "next_gate": "A separate primary review must independently pass the same frozen v3.3 identities. Only then may the outer readback supervisor be rebased and separately source-reviewed before any fresh supervised readback attempt."
+}

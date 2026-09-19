@@ -1,0 +1,217 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v4",
+  "review_kind": "primary",
+  "status": "BLOCKED_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V7",
+  "verdict": "BLOCKED_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T11:27:27Z",
+  "time_basis": "UTC was captured immediately before this review artifact was written; no historical work duration is inferred.",
+  "author_role": "/root/s48_v5_adversarial_review",
+  "reviewer_role": "/root/c2_v5_lifecycle_review",
+  "reviewer_task_id": "/root/c2_v5_lifecycle_review",
+  "reviewer_turn_id": "s45b-c1-v7-primary-2026-09-08T11:27:27Z",
+  "reviewer_independence": {
+    "different_from_author": true,
+    "fresh_v7_source_review_performed": true,
+    "v6_primary_conclusion_inherited": false,
+    "review_limited_to_ordinary_functional_and_numeric_consistency": true
+  },
+  "reviewed_identities": {
+    "camera_guard.py": "6f60c290888dd3ee66aabf570d87136c8026f25d09372d3d1e42f4ba9c0bc34c",
+    "supervise_camera_guard.py": "b60d844ee7a637a14b507de3fc43196c0a683d1e6bd9243b353b0b706f178ae9",
+    "PROTOCOL.md": "0a2b2b04b3878e0bf048f0380091f099f0d82c81d2c308ee5d132ff6bf51e778",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "ac65f7a715dab027f4b555a9bcba13bf299c8e2500bddecb1e4683909392c7b6",
+    "synthetic_selftest.py": "008fb8d8988bff406c7c59e8143771bf50d04c9dfc4e71599afd55b792b6af14",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "reviewed_control_documents": {
+    "FROZEN_SOURCE_SET.json": "b0ad14d3e3e66be9dddbe27c29546de3e6f92c1741c79f934d6d64ffa250992c",
+    "FINAL_SYNTHETIC_SELFTEST_RECEIPT.json": "311dcfbdb118f1e2977177a63220750fb42c738e2dc56300aeb213d190fc0aba",
+    "v6_primary_blocked_review": "0b30345a8546cd2e89036b118b12b75825cf7662b133d2bac380b4f9904aeb16"
+  },
+  "frozen_source_gate": {
+    "expected_frozen_source_set_sha256": "b0ad14d3e3e66be9dddbe27c29546de3e6f92c1741c79f934d6d64ffa250992c",
+    "observed_frozen_source_set_sha256": "b0ad14d3e3e66be9dddbe27c29546de3e6f92c1741c79f934d6d64ffa250992c",
+    "all_five_recomputed_source_sha256_values_match": true,
+    "candidate_files_modified": false
+  },
+  "review_scope": {
+    "question": "Does the exact frozen five-file V7 source set implement the same requested-camera comparison, units, and inclusive threshold as the sealed S42 authority, without a source-level false PASS?",
+    "method": "Fresh source/protocol comparison, exact identity rehash, both existing built-in suites and the existing independent synthetic suite under two isolated interpreters, plus a focused pure-in-memory boundary derivation for the differing base anchor. No new lifecycle or isolation attack was added.",
+    "source_static_synthetic_only": true,
+    "real_c1_manifest_receipt_event_tensor_or_image_content_opened": false,
+    "model_or_scientific_package_imported_or_run": false,
+    "formal_binding_lock_or_execution_created": false
+  },
+  "dual_interpreter_reproduction": {
+    "working_directory": "/tmp",
+    "python_flags": [
+      "-I",
+      "-B",
+      "-S"
+    ],
+    "python_3_13_0": {
+      "launcher": "/opt/homebrew/bin/python3.13",
+      "resolved_executable": "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "resolved_executable_sha256": "bc525dba04d881fcf010cb7aa58ff527b0b664957081fc9ccfa022d4de45e81e",
+      "version": "Python 3.13.0",
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 8229,
+        "stdout_sha256": "ec5c950eb02c6895186ed071334c84b44d57eb4169c2914ca7d7a48094c7db19",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V7_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
+        "stdout_bytes": 5847,
+        "stdout_sha256": "8a28f6bc6297d429e494f5b8d9ff1a15a4a8b6f94c91df853172f3e950f143df",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "python_3_12_14": {
+      "launcher": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+      "resolved_executable": "/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+      "resolved_executable_sha256": "ac60cfe0268614638d0ffa35f3b0284fc7b3a11482723793455e17eeb278509e",
+      "version": "Python 3.12.14",
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 8113,
+        "stdout_sha256": "7e62f0afc4baf0399d14c1112cc52795f3f029e8aaa2cd43c42b60570030168c",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V7_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
+        "stdout_bytes": 5829,
+        "stdout_sha256": "cf53ddb7d6426bcef5084a92f918692df7f973093f12916ac1645775e60ebeba",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "interpretation": "All six existing source/synthetic commands return zero. They do not cover the first-cache versus final-cache base-anchor divergence, so they cannot override the blocking source-level false-PASS witness."
+  },
+  "numeric_contract_review": {
+    "yaw_sequence_degrees": "PASS_EXACT_0_1.25_2.5_3.75_5_3.75_2.5_1.25_0",
+    "degree_to_radian_conversion": "PASS",
+    "rotation_matrix_sign": "PASS_POSITIVE_SIN_0_2_NEGATIVE_SIN_2_0",
+    "composition_order": "PASS_LEFT_MULTIPLY_RY_BY_C0_ROTATION",
+    "translation_rule": "PASS_KEEP_C0_TRANSLATION",
+    "homogeneous_row_rule": "PASS_FORMULA_BUT_FAILS_AUTHORITY_ANCHOR_SELECTION",
+    "comparison_metric": "PASS_MAX_ABSOLUTE_ELEMENT_ERROR",
+    "finite_binary64_operands": "PASS_SOURCE",
+    "threshold": "PASS_INCLUSIVE_LESS_THAN_OR_EQUAL_TO_1E_MINUS_6",
+    "batch_to_cache_mapping": "PASS_IDS_1_TO_4_THEN_5_TO_8",
+    "cache_sizes": "PASS_EXACT_5_THEN_9",
+    "fixed_intrinsics_rule": "FAIL_CRITICAL_WRONG_BASE_CACHE_OCCURRENCE",
+    "planned_pose_rule": "FAIL_CRITICAL_WRONG_BASE_CACHE_OCCURRENCE",
+    "id8_to_id0_closure_rule": "FAIL_CRITICAL_WRONG_BASE_CACHE_OCCURRENCE",
+    "supervisor_complete_numeric_schema_validation": "PASS_SOURCE",
+    "scientific_non_goal_sentinels": "PASS_SOURCE"
+  },
+  "focused_numeric_consistency_witness": {
+    "reproduction_type": "PURE_IN_MEMORY_SYNTHETIC_BOUNDARY_CONSTRUCTION_NO_REAL_C1_ACCESS",
+    "tolerance": 1e-6,
+    "construction": "Let A be cache occurrence 0 ID0. Let final-cache ID0 F differ from A by +0.75e-6 in one translation element and one K element. Let the corresponding elements of IDs1-8 and their batch targets differ from A by -0.75e-6, with exact yaw rotations and exact batch-to-cache equality; preserve cache0 IDs1-4 in cache1.",
+    "c1_v7_observation": "Continuity |F-A|, planned/fixed-K |G-A|, and raw ID8-to-A closure are each 0.75e-6, so camera_guard.py accepts every inclusive <=1e-6 predicate and returns PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY.",
+    "sealed_s42_observation": "S42 anchors pose, K, and closure to F. The same G differs from F by 1.5e-6 (the observed binary64 K delta is approximately 1.500000053e-6), so the authoritative S42 check fails.",
+    "mathematical_reason": "The implemented premises |F-A|<=tau and |G-A|<=tau imply only |G-F|<=2*tau, while sealed S42 requires |G-F|<=tau.",
+    "real_c1_files_opened": 0,
+    "formal_paths_created": 0
+  },
+  "checks": {
+    "frozen_manifest_receipt_and_five_source_hashes": "PASS",
+    "reviewed_s42_s45_identity_hashes": "PASS",
+    "existing_dual_interpreter_synthetic_matrix": "PASS_SOURCE_SYNTHETIC_ONLY",
+    "camera_units_rotation_sign_and_left_multiplication": "PASS",
+    "matrix_metric_finiteness_and_inclusive_threshold": "PASS",
+    "cache_and_batch_schema_mapping": "PASS",
+    "authoritative_final_cache_id0_anchor": "FAIL_CRITICAL",
+    "complete_report_and_receipt_schema_validation": "PASS_SOURCE",
+    "unbound_template_remains_nonexecutable": "PASS",
+    "formal_paths_absent_after_review_except_this_nonformal_source_review": "PASS"
+  },
+  "blocking_findings": [
+    {
+      "id": "B1_C1_USES_FIRST_CACHE_ID0_WHILE_SEALED_S42_USES_FINAL_CACHE_ID0",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "PROTOCOL.md:77-106",
+        "camera_guard.py:1135-1149",
+        "camera_guard.py:1165-1178",
+        "camera_guard.py:1418-1427",
+        "camera_guard.py:1451-1463",
+        "work/S42_baseline_failure_preregistration/score_b0_blind.py:811-820",
+        "work/S42_baseline_failure_preregistration/score_b0_blind.py:837-856"
+      ],
+      "finding": "V7 computes base_pose/base_k and actual ID0 from cache_commits[0], whereas the exact reviewed S42 authority computes them from cache_commits[1], the final cache. V7 separately permits up to 1e-6 cache overlap drift and up to 1e-6 planned/closure drift from its first-cache base. Those two inclusive bands can point in opposite directions, allowing nearly 2e-6 error relative to S42's final-cache ID0 while V7 reports PASS.",
+      "reproduction": "A pure in-memory boundary construction with +0.75e-6 final-ID0 drift and -0.75e-6 planned/closure drift passes V7 at 0.75e-6 on every relevant predicate but fails S42 at 1.5e-6. No real C1 payload, tensor, array, image, or formal path was used.",
+      "impact": "The pre-guard can issue a numeric requested-camera PASS for an archive that the sealed S42 scorer must classify as an invalid requested-camera condition. This defeats the guard's sole scientific purpose and can promote an invalid C1 comparison toward terminal authority.",
+      "why_existing_tests_miss_it": "The positive fixture gives both cache commits the same ID0 pose/K. Its inclusive boundary case perturbs only a batch matrix element and never puts the two ID0 anchors on one side of the tolerance band and the planned sequence on the other.",
+      "required_fix": "Use cache_commits[1].c2ws[0] and cache_commits[1].Ks[0] as base_pose/base_k and actual ID0, exactly matching S42, while retaining the cache-overlap diagnostic. Add a regression case with opposing sub-tolerance first/final and planned/final deltas, freeze new source hashes, and require two fresh non-author reviews."
+    }
+  ],
+  "nonblocking_observations": [
+    {
+      "id": "N1_NARROW_SCIENTIFIC_SCOPE_IS_CORRECTLY_DECLARED",
+      "severity": "NOTE",
+      "observation": "Even after the anchor bug is fixed, this guard establishes only archived requested c2w/K input consistency. It does not establish rendered-pixel camera obedience, visual quality, method gain, causality, novelty, or publication level."
+    },
+    {
+      "id": "N2_DYNAMIC_SUPERVISOR_SELFTEST_OUTPUT",
+      "severity": "NOTE",
+      "observation": "Both supervisor selftests pass with return code zero, but their complete stdout hashes can differ from the author's receipt because the JSON includes live file-stat and runtime observations. This is recorded rather than treated as a deterministic-output claim."
+    }
+  ],
+  "formal_state_after_review": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V7.json": false,
+    "BINDING_REVIEW_V7.json": false,
+    "GOVERNANCE_ATTESTATION_V7.json": false,
+    "SOURCE_REVIEW_ADVERSARIAL_V7.json": false,
+    "SOURCE_REVIEW_PRIMARY_V7.json_is_nonformal_review_only": true
+  },
+  "access_ledger": {
+    "formal_runner_calls": 0,
+    "formal_binding_created": false,
+    "formal_attempt_created": false,
+    "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,
+    "c1_tensor_bodies_read": 0,
+    "real_scientific_arrays_mapped": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_renderer_generation_calls": 0,
+    "temporary_synthetic_directories_only": true
+  },
+  "executed": false,
+  "authorization_effect": "NONE_BLOCKED_DO_NOT_CREATE_BINDING_GOVERNANCE_ATTESTATION_LOCK_EXECUTION_OR_TERMINAL_RESULT; FIX_BASE_ANCHOR_FREEZE_NEW_HASHES_AND_REPEAT_TWO_FRESH_REVIEWS",
+  "evidence_boundary": "Source, static analysis, exact existing dual-interpreter synthetic suites, and one pure in-memory camera-math consistency witness only. No real C1 manifest, receipt, event, tensor, array, image, pixel, model, generation, rendered-camera-obedience, quality, method-gain, causal, novelty, or publication-level evidence."
+}

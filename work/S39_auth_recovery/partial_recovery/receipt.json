@@ -1,0 +1,102 @@
+{
+  "schema": "S39_PARTIAL_RECOVERY_SOURCE_PREPARATION_V2",
+  "completed_utc": "2026-09-07T04:57:05.812929+00:00",
+  "status": "PREPARED_NOT_EXECUTED",
+  "source": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/recover_partial.py",
+  "source_sha256": "65b72714d0b186a090ab92a86d158018043951a1f0dbbdfc62e58040a110d02e",
+  "report_sha256": "3d634c8885a37db7ecfcee75c87f6589e202a0fc240060fc77f466ea56fb0d95",
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/file_download.py",
+      "sha256": "f99d5b54b07b55d22e539023031d4572e08b388b7d32f3fa9bfe1e5ab4652ed4",
+      "bytes": 90227
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_http.py",
+      "sha256": "4587b40d0a792c88348e9d32e75d825f839e6677c22de03af9666e8736900315",
+      "bytes": 47007
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/__init__.py",
+      "sha256": "a7f7f5c8a8161826804b508fa4da2bb899e50e7a0ae480f7acc911d5ce7838c2",
+      "bytes": 60995
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_headers.py",
+      "sha256": "43d6eef66bcea66fbdadfbfe61196bfd8c32fda31992645c37731b5447090090",
+      "bytes": 8234
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_preservation.json",
+      "sha256": "92373813349c12e4c7d498672ee240bce33b2820266ce9982f37715bb5cc8872",
+      "bytes": 1340
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_auth.py",
+      "sha256": "624baadf28baee3c479857722d2738df1bc6b8200847bfa1f9d6a35fc231a464",
+      "bytes": 19958
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_oauth_device.py",
+      "sha256": "a3b202988d35c83b75a0014d31426f3754e149f6820e90bc007612420727146c",
+      "bytes": 7983
+    }
+  ],
+  "source_findings": {
+    "uuid_wb_finally_unlink": {
+      "file": "huggingface_hub/file_download.py",
+      "lines": "1930-2005",
+      "verdict": "direct next-CLI pathname resumption not supported by inspected orchestration"
+    },
+    "xet_existing_partial_reuse": "No guarantee established by inspected start_download_file path; chunk cache is distinct",
+    "http_get_resume_size": {
+      "lines": "325-473",
+      "not_used_reason": "200 response can truncate/fallback; streaming retry count resets with progress"
+    },
+    "official_metadata": {
+      "lines": "1578-1651",
+      "timeout_seconds": 20,
+      "retry_on_errors": false
+    },
+    "hub_redirect_guard": {
+      "file": "huggingface_hub/utils/_http.py",
+      "lines": "698-746",
+      "native_behavior": "stop before leaving Hub; new script further limits bearer to huggingface.co"
+    },
+    "oauth_refresh": {
+      "caller": "utils/_headers.py125-154 -> utils/_auth.py244-338",
+      "request": "utils/_oauth_device.py155-179 -> get_session().post(ENDPOINT + /oauth/token)",
+      "v1_issue": "HEAD-only guard rejected necessary official refresh",
+      "v2_change": "exact https huggingface.co/oauth/token POST permitted once, no query/body persistence, no redirects; HEAD count separate",
+      "request_or_response_body_read_by_review": false,
+      "credentials_read_by_review": false,
+      "credential_refresh_executed": false
+    }
+  },
+  "prepared_execution_limits": {
+    "metadata_head_attempts_including_redirects_max": 3,
+    "cdn_get_attempts_max": 1,
+    "automatic_retries": 0,
+    "max_cdn_bytes_saved": "expected size minus copied apparent prefix; mismatch rejected",
+    "total_seconds_requires_explicit_cli_value": true,
+    "allowed_seconds_min": 1,
+    "allowed_seconds_max": 7200,
+    "official_oauth_refresh_post_attempts_max": 1,
+    "total_http_attempts_including_head_redirects_max": 5,
+    "oauth_post_redirects_followed": 0
+  },
+  "evidence_boundary": {
+    "st_size_is_verified_prefix": false,
+    "full_sha_only_success_gate": true,
+    "new_network_requests_this_preparation": 0,
+    "active_partial_content_read": false,
+    "current_process_signalled_or_modified": false,
+    "scientific_models_run": 0,
+    "module_import_executed": false,
+    "runtime_tests": 0,
+    "static_ast_parse": "PASS at 2026-09-07T04:57:05.812929+00:00",
+    "canonical_ledger_changed": false
+  },
+  "next_step": "Independent static review first; only after genuine attempt3 terminal consider one separately recorded recovery execution. Do not run while current attempt3 remains active.",
+  "previous_version_dir": "history/v1"
+}

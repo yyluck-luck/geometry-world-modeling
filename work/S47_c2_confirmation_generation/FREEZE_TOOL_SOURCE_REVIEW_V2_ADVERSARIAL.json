@@ -1,0 +1,121 @@
+{
+  "schema": "s47-c2-freeze-tool-source-review-v2",
+  "status": "BLOCKED",
+  "required_pass_status_withheld": "PASS_S47_C2_FREEZE_TOOL_SOURCE_REVIEW_ADVERSARIAL",
+  "author_role": "/root/c2_generation_builder",
+  "reviewer_role": "/root/c1_blind_score_builder/s45b_static_adversarial",
+  "reviewed_utc": "2026-09-08T04:00:55.418776+00:00",
+  "reviewed_files": {
+    "PROTOCOL.md": "e8518eb3199e1940601ced07bb31fdd1920aee994ce7ec69c72ce51773f58284",
+    "FREEZE_PROTOCOL.md": "f9bbe710263538e6ff727f43a0ce7c373a267f1aed1292c97a75e7d52f0f9aa6",
+    "generation_gate.py": "078f5e88257795c3e6727f89f861d83baa39d65706d98ea3ed2073a9049ce910",
+    "runtime_adapter.py": "13a2f3f23e203b0ebe47a6915732390dc0bfb7ec4311d69fb3aa3e108b445c5e",
+    "launch_generation.py": "e6cacd4d4acb431b065ac800c7abf9f8f4910a06b43b7b99fbe2ed9b73d463f7",
+    "freeze_c2_manifest.py": "7c896934d0f6a29373e0e8df3539cb9291b9c9081f14567b39784def0e0d0237",
+    "create_launch_authorization.py": "67ff8eb5c2433fe1c54243a445f94d2566ad6398e5efdd3d9d4dbe229118bb32",
+    "inference_seed44.yaml": "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+  },
+  "executed": false,
+  "production_entrypoint_calls": 0,
+  "formal_gate_calls": 0,
+  "formal_prepare_calls": 0,
+  "formal_attach_calls": 0,
+  "launch_authorization_tool_calls": 0,
+  "formal_paths_created": 0,
+  "model_or_scientific_imports": 0,
+  "pixels_decoded": 0,
+  "input_image_body_bytes_read": 0,
+  "generation_calls": 0,
+  "archive_or_result_reads": 0,
+  "blocking_findings": [
+    {
+      "id": "S47-C2-ADV-001",
+      "severity": "BLOCKER",
+      "title": "The row wrapper can be made to launch in a non-canonical execution directory",
+      "evidence": [
+        "launch_generation.py:136-144 counts only argv elements exactly equal to --execution-directory and validates only the following element.",
+        "The sealed S35 parser at launch_original.py:453-455 also accepts --execution-directory=<value> and resolves repeated options by taking the last value.",
+        "On both Python 3.13.0 and Python 3.12.14, the wrapper accepted --execution-directory <canonical execution_01> --execution-directory=/tmp/s47-c2-adversarial-bypass, while downstream argparse selected /tmp/s47-c2-adversarial-bypass.",
+        "launch_generation.py also accepts a caller-supplied --worker token; the sealed parent dispatches directly to worker(args) at launch_original.py:460."
+      ],
+      "impact": "An authorized caller can route the launch receipt to an arbitrary fresh directory while leaving the reviewed execution_01 path unused. In particular, failures before output-root creation can be retried through further alternate directories, so the fixed-path and one-attempt claims in PROTOCOL.md:34 are not enforced. The accepted worker flag also exposes the parent's internal worker route to the external CLI instead of reserving it to the monitored parent process.",
+      "required_fix": "Parse and normalize the complete outer CLI once; reject duplicate or equals-form execution-directory options, argparse abbreviations, and every external worker-mode request. Pass a sanitized canonical argument object to the derived parent. If an internal worker mode remains necessary, authenticate it with a parent-created create-only capability that cannot be supplied through the public wrapper. Re-run the two-interpreter adversarial argv tests."
+    },
+    {
+      "id": "S47-C2-ADV-002",
+      "severity": "BLOCKER",
+      "title": "Bound identities are hashed and then reopened for parsing or execution",
+      "evidence": [
+        "generation_gate.py:249-252, 256-257, 350-351, 478-479, 495-498, and 545-549 hash a pathname and then reopen it for JSON parsing.",
+        "freeze_c2_manifest.py:105-111 and create_launch_authorization.py:95-102 hash generation_gate.py and then execute a later pathname lookup through SourceFileLoader.",
+        "freeze_c2_manifest.py:74-77 and create_launch_authorization.py:45-54 perform the same hash-then-read sequence for bound JSON records.",
+        "runtime_adapter.py:24-25 hashes the S35 factory and then reopens it for AST parsing."
+      ],
+      "impact": "A pathname replacement between the hash and the second open lets the bytes parsed or executed differ from the bytes whose SHA was approved. The dynamic-import cases may also select cached bytecode. Rechecking a pathname later does not prove that the intervening parse or execution used the approved bytes, so source, review, manifest, and authorization bindings are not fail-closed against the requested TOCTOU adversary.",
+      "required_fix": "For each bound source or JSON record, open once with O_NOFOLLOW, verify a regular file and expected device/inode/mode from fstat, read one immutable byte snapshot, hash that snapshot, and parse or compile those exact bytes. Avoid SourceFileLoader for bound code; compile the verified bytes directly. Hold directory/file leases or revalidate the same descriptor identity across publication-sensitive phases."
+    },
+    {
+      "id": "S47-C2-ADV-003",
+      "severity": "BLOCKER",
+      "title": "A failed authorization staging attempt does not consume a fixed attempt lease",
+      "evidence": [
+        "PROTOCOL.md:33 says create_launch_authorization.py may run once.",
+        "create_launch_authorization.py:177-184 chooses a new PID/time-nanosecond staging pathname on every invocation.",
+        "create_launch_authorization.py:185-189 has no terminal failure handler or fixed create-only attempt marker; require_formal_freshness at lines 106-109 checks only the final authorization, execution_01, and output root."
+      ],
+      "impact": "If an invocation fails after writing its staging file but before publishing launch_authorization_01.json, the next invocation selects a different staging name and is accepted while the fixed authorization remains absent. Thus authorization staging can be retried despite the stated one-run contract, and abandoned staging artifacts are neither authoritative terminal failures nor gates on later attempts.",
+      "required_fix": "Claim a fixed create-only authorization-attempt lease before staging and retain a terminal success or failure record under that lease. Make every later invocation fail when the lease exists. If prepublication retries are intended, revise the protocol explicitly and bind a retry counter and all retained failures into the terminal authorization review."
+    },
+    {
+      "id": "S47-C2-ADV-004",
+      "severity": "BLOCKER",
+      "title": "The unpublished-metadata exception is not restricted to the attach preflight object",
+      "evidence": [
+        "generation_gate.py:667-678 checks only that _allow_unpublished_attachment implies metadata_only, then skips both require_published_attachment and require_launch_authorization.",
+        "No check binds the exception to freeze_c2_manifest.py's temporary candidate, rejects PUBLISHED_MANIFEST, or proves that the authorization and canonical attachment are absent.",
+        "The returned status at generation_gate.py:718-733 remains PASS_METADATA_ONLY, although execution_authorized is false."
+      ],
+      "impact": "Any caller can request the private flag for the canonical published manifest and receive a metadata PASS before authorization. This does not by itself produce a full resource gate, but it contradicts PROTOCOL.md:34 and FREEZE_PROTOCOL.md:16, which state that the exception is solely for the temporary non-authoritative attach preflight and that canonical published metadata gates require authorization.",
+      "required_fix": "Remove the caller-controlled boolean from the general gate API. Validate a byte snapshot through a narrowly scoped attach-preflight function or an unforgeable in-process capability, and explicitly reject PUBLISHED_MANIFEST and every path outside the active hidden staging directory when authorization is absent."
+    },
+    {
+      "id": "S47-C2-ADV-005",
+      "severity": "BLOCKER",
+      "title": "Runtime evidence path selection and temporary publication are replaceable",
+      "evidence": [
+        "runtime_adapter.py:81 validates the supplied gate, but lines 83-85 reopen gate[manifest_path] without a bound snapshot and use that second document to choose output_root/runtime_loading.json.",
+        "runtime_adapter.py:151-156 writes the predictable runtime_loading.s47-c2.tmp with ordinary write_text before replace; it neither uses create-exclusive O_NOFOLLOW creation nor holds the output directory identity."
+      ],
+      "impact": "A concurrent manifest replacement can redirect the runtime-loading record after gate validation. A pre-existing temporary symlink can make write_text follow and truncate another writable target. These paths violate the requested path-replacement and create-only evidence guarantees.",
+      "required_fix": "Carry the already verified manifest/output identity in the gate object and do not reopen the manifest for routing. Hold an output-directory descriptor, create a randomized or fixed leased temporary file relative to that descriptor with O_CREAT|O_EXCL|O_NOFOLLOW, fsync it, verify descriptor identity, and publish relative to the same directory descriptor without following symlinks."
+    }
+  ],
+  "verified_nonblocking_properties": [
+    "All eight candidate SHA-256 identities matched the requested review set immediately before this review was written.",
+    "The launch AST derivation reversed to the full sealed S35 AST and reported the expected route/label counts under Python 3.13.0 and the project Python 3.12.14.",
+    "The runtime AST derivation located exactly one gate import, four labels, and four fixed seed sites and reversed to the full sealed S35 AST under both reviewed interpreters.",
+    "The seed-44 YAML is exactly the sealed S40 config bytes after the unique seed: 42 to seed: 44 replacement plus one terminal LF; both interpreters observed one source occurrence, one candidate occurrence, and the pinned candidate SHA.",
+    "The final-review builder checks exact five-value bindings, required statuses, distinct non-root reviewer roles, zero-execution fields, review times strictly after attachment, and authorization time strictly after both reviews.",
+    "The ordinary canonical metadata/full gate path calls require_launch_authorization; the blocker is the separately exposed unpublished-exception route.",
+    "The freeze publisher uses lexists freshness checks and macOS RENAME_EXCL for its canonical directory publications."
+  ],
+  "disposable_checks": {
+    "interpreters": [
+      "system Python 3.13.0",
+      "project .venv-cut3r Python 3.12.14"
+    ],
+    "stdlib_only": true,
+    "launcher_compile_only": true,
+    "runtime_factory_derived_without_calling_create_runtime": true,
+    "argv_bypass_reproduced": true,
+    "seed_derivation_checked_in_memory": true,
+    "filesystem_mutations_from_checks": 0
+  },
+  "boundaries": [
+    "Static source and small parent/config identity review only.",
+    "No production main function, formal generation gate, prepare mode, attach mode, authorization tool, worker, model, renderer, archive, scorer, or generator was invoked.",
+    "No C2 input image body was read or decoded; no tensor, pixel, archive, result, or visual artifact was opened.",
+    "No scientific package was imported. PYTHONDONTWRITEBYTECODE=1 was used for disposable interpreter checks.",
+    "This BLOCKED review grants no permission to freeze, authorize, or launch the candidate."
+  ]
+}

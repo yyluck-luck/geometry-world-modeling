@@ -1,0 +1,61 @@
+189:     curr_c2ws,
+190:     curr_Ks,
+191:     curr_input_camera_indices,
+192:     all_c2ws,
+193:     camera_scale,
+194: ):
+195:     assert sorted(curr_input_camera_indices) == sorted(
+196:         range(len(curr_input_camera_indices))
+197:     )
+198:     H, W, T, F = curr_imgs.shape[-2], curr_imgs.shape[-1], len(curr_imgs), 8
+199: 
+200:     value_dict = {}
+201:     value_dict["cond_frames_without_noise"] = curr_imgs_clip[curr_input_frame_indices]
+202:     value_dict["cond_frames"] = curr_imgs + 0.0 * torch.randn_like(curr_imgs)
+203:     value_dict["cond_frames_mask"] = torch.zeros(T, dtype=torch.bool)
+204:     value_dict["cond_frames_mask"][curr_input_frame_indices] = True
+205:     value_dict["cond_aug"] = 0.0
+206: 
+207:     if curr_c2ws.shape[-1] == 3:
+208:         c2w = to_hom_pose(curr_c2ws.float())
+209:     else:
+210:         c2w = curr_c2ws
+211:     w2c = torch.linalg.inv(c2w)
+212: 
+213:     # camera centering
+214:     ref_c2ws = all_c2ws
+215:     camera_dist_2med = torch.norm(
+216:         ref_c2ws[:, :3, 3] - ref_c2ws[:, :3, 3].median(0, keepdim=True).values,
+217:         dim=-1,
+218:     )
+219:     valid_mask = camera_dist_2med <= torch.clamp(
+220:         torch.quantile(camera_dist_2med, 0.97) * 10,
+221:         max=1e6,
+222:     )
+223:     c2w[:, :3, 3] -= ref_c2ws[valid_mask, :3, 3].mean(0, keepdim=True)
+224:     w2c = torch.linalg.inv(c2w)
+225: 
+226:     # camera normalization
+227:     camera_dists = c2w[:, :3, 3].clone()
+228:     translation_scaling_factor = (
+229:         camera_scale
+230:         if torch.isclose(
+231:             torch.norm(camera_dists[0]),
+232:             torch.zeros(1),
+233:             atol=1e-5,
+234:         ).any()
+235:         else (camera_scale / torch.norm(camera_dists[0]))
+236:     )
+237:     w2c[:, :3, 3] *= translation_scaling_factor
+238:     c2w[:, :3, 3] *= translation_scaling_factor
+239:     value_dict["plucker_coordinate"] = get_plucker_coordinates(
+240:         extrinsics_src=w2c[0],
+241:         extrinsics=w2c,
+242:         intrinsics=curr_Ks.float().clone(),
+243:         target_size=(H // F, W // F),
+244:     )
+245: 
+246:     value_dict["c2w"] = c2w
+247:     value_dict["K"] = curr_Ks
+248:     value_dict["camera_mask"] = torch.zeros(T, dtype=torch.bool)
+249:     value_dict["camera_mask"][curr_input_camera_indices] = True

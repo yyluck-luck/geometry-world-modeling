@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-09-09T02:52:30.995817+00:00",
+  "scope": "Advisory range-branch metadata boundary, no numerical source or protocol change",
+  "generator_sha256": "ba3a5fb9954e10b51bc56b717fe3de213728560f5dd3c6bc7e319594f1391b92",
+  "field": "arm receipt quantizer[].maps_minus1_plus1",
+  "finding": "Generator computes this advisory flag with Torch frame.min() < -.1; authoritative original tensor_to_pil and independent scorer compare a NumPy FP32 scalar with Python -.1. At exact FP32(-.1), the former is false while the latter is true under the frozen versions.",
+  "actual_emitted_pixels": "Generator already invokes the exact original tensor_to_pil function; no emission change is required.",
+  "interpretation": "Do not treat this generator advisory flag as authoritative at the threshold. Independent scorer derives authoritative branch from saved raw FP32 with the original NumPy rule and byte-checks saved uint8. Retain raw outputs and both metadata interpretations if encountered.",
+  "reviewer_observation_sha256": "82348aab83ed7ac736cf4fbbc28767cff495cf2b07f41ce12624e18f98d4e1c2",
+  "real_image_or_model_evidence": false,
+  "new_method_validated": false
+}

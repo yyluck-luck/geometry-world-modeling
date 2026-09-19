@@ -1,0 +1,41 @@
+{
+  "contract_id": "S94-v1",
+  "status": "PROTOCOL_ONLY_NOT_RUN",
+  "recorded_at": "2026-09-12T17:11:57+08:00",
+  "gate0": {
+    "required_modalities": ["history_rgb", "history_depth_or_geometry", "future_rgb", "future_depth_or_geometry", "timestamps", "intrinsics", "poses", "depth_units", "sha256"],
+    "history_candidates_min": 6,
+    "future_queries_min_per_trajectory": 3,
+    "test_trajectories_confirmatory_min": 5,
+    "split_unit": "scene_or_trajectory",
+    "frame_random_split_forbidden": true,
+    "future_inputs_to_selector_forbidden": ["future_rgb", "future_depth", "future_pose", "future_mask", "future_model_output", "future_error", "future_valid_mask"]
+  },
+  "source_identity": {
+    "fields": ["dataset", "scene_id", "trajectory_id", "frame_id", "timestamp_ns", "modality", "file_sha256"],
+    "traceability_min": 0.95,
+    "identity_match_required": true,
+    "fusion_must_preserve_components": true
+  },
+  "budget": {
+    "k_primary": 4,
+    "k_sensitivity": [2, 8],
+    "same_candidate_pool": true,
+    "same_consumer": true,
+    "same_denoising_steps": true,
+    "same_rng_and_noise": true,
+    "track_separately": ["gpu_cache_bytes", "host_memory_bytes", "read_bytes", "selection_time_ms", "selection_forward_count", "consumer_time_ms", "peak_rss_bytes"]
+  },
+  "methods": ["random-k", "recent-k", "nearest-pose-k", "coverage-k", "pose/reprojection-only", "depth-consistency-only", "confidence-only", "utility-only", "risk-only", "risk+utility", "WorldTrace-Field/Landmark_if_runnable", "MemRoPE_if_runnable", "WORLDMEM-style_if_runnable", "Fisher/EIG-proxy_if_runnable"],
+  "metrics": {
+    "primary": ["future_3d_position_error_or_camera_z_absrel", "future_depth_mae_m"],
+    "tail": ["worst5_absrel", "cvar95_absrel"],
+    "auxiliary": ["reprojection_px", "coverage", "failure_rate", "rgb_mse"],
+    "statistical_unit": "scene_trajectory_query",
+    "pixel_as_independent_sample": false,
+    "ci": "trajectory_level_bootstrap_95pct",
+    "calibration": ["risk_coverage", "risk_quantile_future_error_trend", "test_spearman_auxiliary"]
+  },
+  "stop_rules": ["gate0_fail", "future_leakage", "source_traceability_below_0.95", "budget_violation", "no_stable_gain_on_mean_and_tail", "single_scene_or_seed_only_gain", "rgb_only_gain", "seen_or_saved_data_only", "cost_increase_without_geometric_gain"],
+  "claim_boundary": "No method or novelty claim unless all gates, fixed budgets, independent test trajectories, and independent review pass."
+}

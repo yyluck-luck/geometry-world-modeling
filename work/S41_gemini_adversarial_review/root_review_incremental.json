@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "review_type": "incremental_methodology_review",
+  "reviewed_at": "2026-09-07T13:51:54+08:00",
+  "target": {
+    "path": "work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md",
+    "sha256": "8b8ad1f3aa40cc431929fec8808e34a4cb25a1778a05a7cbef96b88aaafe4d83"
+  },
+  "coordinated_with": {
+    "path": "work/S41_clip_mean_innovation_audit/AUDIT.md",
+    "sha256": "922f708a3b319e98fd5b84116a9a298df349d86700c26aded83e8ce279617475"
+  },
+  "verdict": "REVISION_REQUIRED",
+  "verdict_reason": "The root review has the correct scientific direction, evidence boundary, source-path correction, and first causal gate. Revision is required because its absolute statement that training saw only one K/V token is not established by released training code, the Gate 2 arms should be explicitly coordinated with the canonical six-arm audit, and Section 6 does not define a commensurate source-level intervention for separating global-CLIP response from replace/Plucker consumption. The proposed replace-latent cyclic permutation must not be treated as an ordinary arm or evidence that one path dominates.",
+  "scope_and_non_actions": {
+    "model_loaded": false,
+    "model_forward_run": false,
+    "video_generated": false,
+    "root_report_modified": false,
+    "main_ledger_modified": false
+  },
+  "accepted_parts": [
+    {
+      "location": "lines 13-22",
+      "finding": "The four-path correction is accurate: global CLIP enters crossattn, history VAE latent enters replace, concat contains input mask plus Plucker, and dense_vector contains Plucker."
+    },
+    {
+      "location": "lines 49-61",
+      "finding": "Gate 0 followed by A0 exact replay and A1 zero-CLIP is the correct cheapest order. A1 is explicitly described as information deletion and a causal negative control, not a performance algorithm."
+    },
+    {
+      "location": "lines 63-69",
+      "finding": "Nearest, farthest, medoid, and Surfel-vote mean are appropriate zero-parameter ordinary baselines after CLIP influence is established, with output norm and downstream generation compute controlled."
+    },
+    {
+      "location": "lines 73-87",
+      "finding": "The proposed source-to-region response map and the requirement to report both supported and unsupported absolute effects are useful and correctly bounded as an intervention-response audit rather than neural or real-world causal attribution."
+    }
+  ],
+  "required_revisions": [
+    {
+      "id": "R1",
+      "severity": "MAJOR",
+      "location": "line 71",
+      "issue": "The phrase 'the model was trained only with a single token' is stronger than the available evidence. The released repository exposes an inference path that always averages to K/V length 1, while the inspected paper confirms K=4/M=4 LoRA fine-tuning but does not expose training code proving every checkpoint update used context length 1.",
+      "exact_change": "Replace the absolute phrase with: 'the released checkpoint/interface is only validated with the mean-then-single-token path; no released training evidence was found showing adaptation to K/V length greater than 1, so [N,1024] is an unvalidated and likely out-of-distribution structural intervention.'",
+      "reason": "This still excludes source sequence from the main matrix without overstating the evidence."
+    },
+    {
+      "id": "R2",
+      "severity": "MINOR",
+      "location": "lines 63-69",
+      "issue": "The four alternatives are correct but are not labeled consistently with AUDIT.md. They test distinct explanations, so an A2/A3 failure must not be used to skip A4/A5 after A1 has established CLIP influence.",
+      "exact_change": "Label the arms A2 nearest, A3 farthest, A4 medoid, and A5 Surfel-vote mean. They may be scheduled as Gate 2a (A2/A3 directional check) followed by Gate 2b (A4/A5 robust-set and geometry-weighted checks), but state that all four are required for the full aggregation-cause audit after Gate 1 passes: A4 can succeed when A2 fails, and A5 can succeed when A2/A4 fail.",
+      "reason": "The only decisive compute-saving branch is A1 approximately equal to A0, which kills all aggregation alternatives. Staging Gate 2 improves interpretation, not logical coverage."
+    },
+    {
+      "id": "R3",
+      "severity": "MAJOR",
+      "location": "lines 75-87",
+      "issue": "'Only alter source i condition evidence' is underspecified. A CLIP-only edit, a replace-latent edit, and a camera/Plucker edit are different interventions with different information and scale; their raw output effect magnitudes cannot be compared as path dominance.",
+      "exact_change": "Define one pre-registered source-image counterfactual I_i -> I_i_cf, chosen without target output or GT, and a small 2x2 branch attribution block reusing A0: F00 original; F10 update only source i CLIP embedding before the mean; F01 update only source i latent in replace; F11 update both. Keep pose/K, both Plucker paths, all other sources, masks, noise, sampler, and weights fixed. First use an observed source whose stored latent is actually the VAE encoding of that image. For a generated source stored as samples_z, re-encoding the decoded frame changes latent provenance and is not a matched intervention; exclude it from the first clean test or explicitly classify a pre-declared delta-transfer construction as a stress test. Report the actual condition deltas and source-region response maps for each contrast; use the F10 x F01 interaction to test complementarity. Do not rank CLIP and replace by unnormalized scalar effect size.",
+      "reason": "The same source edit gives the two appearance paths the closest available common semantic treatment while preserving path isolation. The provenance guard prevents a generated samples_z latent from being silently replaced by a re-encoded latent. Tensor information and perturbation energy still differ, so conclusions remain path-specific."
+    },
+    {
+      "id": "R4",
+      "severity": "MAJOR",
+      "location": "add after the source-to-region protocol",
+      "issue": "The previously suggested A4 replace-latent cyclic permutation preserves the marginal multiset of history latents but destroys the joint association among frame appearance, source camera/Plucker, and temporal slot. A large degradation is therefore compatible with sensitivity to contradictory out-of-distribution conditions, not proof that replace dominates. A null effect is also inconclusive under redundant views or permutation-tolerant consumption.",
+      "exact_change": "Keep A4 as CLIP medoid, matching AUDIT.md. Rename the optional latent permutation to S_Rperm and label it only as a correspondence-sensitivity stress test. State explicitly: 'S_Rperm is not an ordinary baseline, not same-information in the joint sense, and cannot rank replace against crossattn.' If used, permute only the four latent channels among history slots while retaining the replace mask and record the exact fixed permutation.",
+      "reason": "This avoids a label collision and prevents a frame-camera misbinding result from being misreported as consumer-path attribution."
+    },
+    {
+      "id": "R5",
+      "severity": "MINOR",
+      "location": "line 87 and any later use of 'same input'",
+      "issue": "A0-A5 read the same frozen upstream pool but deliver different information to the denoiser. Calling them simply same-input baselines can be read as an information-matched comparison.",
+      "exact_change": "Use: 'same frozen upstream candidate pool, same one-token output interface, and same downstream generation budget; delivered information differs by design and is reported per arm.'",
+      "reason": "This distinguishes availability fairness from delivered-information equality."
+    },
+    {
+      "id": "R6",
+      "severity": "MINOR",
+      "location": "add to the Plucker attribution description",
+      "issue": "Plucker appears twice, in concat and dense_vector. Changing only one copy creates an internally inconsistent geometry condition and cannot be described as testing Plucker information as a whole.",
+      "exact_change": "For a geometry correspondence stress test, change the history Plucker maps in concat and dense_vector together in both conditional c and unconditional uc while keeping each concat input-mask channel fixed. If the goal is instead to isolate the two Plucker consumers, define a separate 2x2 OOD factorial and do not mix its result with the appearance-path decision tree.",
+      "reason": "This preserves a clear distinction between geometry information and the two network injection sites."
+    }
+  ],
+  "arm_label_coordination": {
+    "decision": "Use AUDIT.md labels A0-A5 as the canonical crossattn aggregation arms. Do not replace A4 medoid with a replace-latent permutation.",
+    "canonical_arms": [
+      {
+        "id": "A0",
+        "name": "original_mean",
+        "role": "exact baseline"
+      },
+      {
+        "id": "A1",
+        "name": "zero_clip",
+        "role": "CLIP-path causal negative control"
+      },
+      {
+        "id": "A2",
+        "name": "nearest_view_single_token",
+        "role": "directionally relevant ordinary baseline"
+      },
+      {
+        "id": "A3",
+        "name": "farthest_view_single_token",
+        "role": "directional negative control"
+      },
+      {
+        "id": "A4",
+        "name": "clip_medoid",
+        "role": "ordinary set baseline"
+      },
+      {
+        "id": "A5",
+        "name": "surfel_vote_weighted_mean",
+        "role": "ordinary geometry-weighted baseline"
+      }
+    ],
+    "optional_stress_ids": [
+      {
+        "id": "S_Rperm",
+        "name": "replace_latent_only_cyclic_permutation",
+        "role": "frame-camera and frame-time binding stress test only"
+      },
+      {
+        "id": "S_Pperm",
+        "name": "history_plucker_cyclic_permutation_in_both_concat_and_dense_vector",
+        "role": "geometry-binding stress test only"
+      },
+      {
+        "id": "S_RPperm",
+        "name": "joint_replace_and_history_plucker_cyclic_permutation",
+        "role": "optional triangulation that preserves latent-Plucker pairing but changes temporal/source slots"
+      }
+    ]
+  },
+  "replace_permutation_judgment": {
+    "only_a_stress_test": true,
+    "preserves": [
+      "the marginal multiset of K history latent arrays",
+      "tensor shapes",
+      "denoiser and VAE forward counts",
+      "global CLIP mean",
+      "the unpermuted mask and Plucker tensors when S_Rperm alone is used"
+    ],
+    "breaks": [
+      "history-frame appearance to camera-ray association",
+      "history-frame appearance to temporal/input-slot association",
+      "the joint distribution on which the released checkpoint was conditioned"
+    ],
+    "allowed_inference_if_large_effect": "The model/output is sensitive to valid history-latent slot binding or to the introduced condition contradiction.",
+    "forbidden_inference_if_large_effect": "replace is the dominant consumer, global CLIP is irrelevant, or fixing replace binding improves the natural failure.",
+    "allowed_inference_if_null_effect": "No detectable sensitivity to this particular fixed permutation under the tested scene, seed, and metric.",
+    "forbidden_inference_if_null_effect": "replace is unused; redundant views or permutation-tolerant set consumption remain alternatives."
+  },
+  "minimal_decision_tree": [
+    {
+      "node": "G0_real_failure_and_trace",
+      "run": "Original frozen two-batch baseline only",
+      "requirements": [
+        "verify batch-1 samples_z is the exact history latent consumed by batch 2",
+        "freeze natural revisit failure, target support regions, scenes, seeds, frame IDs, pose/K, and metrics before interventions"
+      ],
+      "stop_if": "No repeatable natural baseline failure, or trace/readback is not exact.",
+      "next": "G1_clip_influence"
+    },
+    {
+      "node": "G1_clip_influence",
+      "run": "A0 exact mean replay and A1 zero-CLIP only",
+      "controls": "All non-crossattn tensors, noise, RNG, weights, CFG, sampler, and output interface are identical. A1 deliberately deletes CLIP information.",
+      "stop_if": "A0 fails exact replay, or A1-A0 is within the pre-registered exact-replay/output tolerance.",
+      "interpretation": "Only if A1 differs from A0 is there evidence that the global CLIP path influences this output; this does not yet implicate averaging.",
+      "next": "G2a_directional_single_token"
+    },
+    {
+      "node": "G2a_directional_single_token",
+      "run": "A2 nearest and A3 farthest, both using a pre-declared rule and the frozen K-vector pool",
+      "controls": "One-token output, weights, downstream generation compute, and target mean norm are fixed; delivered semantic information differs and must be declared.",
+      "stop_if": "Do not stop the full aggregation audit solely because A2 fails: A4 tests a different off-manifold/robust-consensus explanation and A5 tests a different geometry-weighted-set explanation.",
+      "interpretation": "A2 versus A3 tests target-related directionality; neither arm proves source-to-region addressability.",
+      "next": "G2b_ordinary_strong_baselines is required for complete cause coverage after Gate 1 passes."
+    },
+    {
+      "node": "G2b_ordinary_strong_baselines",
+      "run": "A4 CLIP medoid and A5 Surfel-vote weighted mean",
+      "controls": "Same frozen upstream pool and one-token generation interface; preprocessing aggregation is cached and timed separately.",
+      "stop_or_pivot_if": "If any A2-A5 arm explains the apparent gain, it becomes an ordinary strong baseline and the method novelty claim is rejected; if none yields robust improvement, reject averaging as the demonstrated primary cause.",
+      "next_only_if": "A CLIP influence, a directionally correct source signal, and unexplained robust headroom all remain: G3_matched_source_counterfactual."
+    },
+    {
+      "node": "G3_matched_source_counterfactual",
+      "run": "Reuse F00=A0, then F10 CLIP-only, F01 replace-only, and F11 CLIP+replace from the same pre-registered source image counterfactual. Start with an observed source whose stored replace latent is the VAE encoding of that image; do not silently substitute a re-encoded decoded frame for a generated samples_z source.",
+      "controls": "Correct pose/K and both Plucker paths remain fixed; all unrelated history sources and generation randomness remain exact. Save source provenance, condition deltas, total response, supported-region response, unsupported-region response, and interaction.",
+      "stop_if": "The CLIP-only effect is only global style, source-region localization is not above the pre-registered control, or effects do not predict the natural failure on held-out scenes.",
+      "interpretation": "Compare within-path counterfactual responses and localization. Do not infer path dominance from raw CLIP-versus-latent effect magnitude because the encoders, dimensions, and perturbation scales differ.",
+      "next_optional": "G4_geometry_binding_stress"
+    },
+    {
+      "node": "G4_geometry_binding_stress",
+      "run": "Only after G3 leaves a source-localized effect, compare the informative G3 condition with correct geometry versus S_Pperm; optionally triangulate S_Rperm and S_RPperm using the same fixed permutation.",
+      "controls": "When geometry is permuted, update history Plucker in concat and dense_vector together for both c and uc, and retain their respective concat input-mask channels. Label every permutation run OOD stress.",
+      "interpretation": "The three permutation stresses can reveal sensitivity to appearance-geometry mismatch versus joint pair movement, but they cannot establish a fair performance ranking among global CLIP, replace, and Plucker paths."
+    }
+  ],
+  "fairness_contract": {
+    "level_1_exact_generation_control": "Keep model/checkpoint, VAE, selected IDs and original arrays, noise tensor, RNG state, sampler, steps, CFG, masks, and evaluation code exact except for the named treatment.",
+    "level_2_aggregation_interface_control": "A0-A5 all emit one [num_cameras,1,1024] conditional token and use the same downstream generation compute. Their upstream candidate pool is the same; their delivered information is not.",
+    "level_3_matched_semantic_treatment": "For appearance-path attribution, derive CLIP and VAE-latent alternatives from the same pre-registered observed-source counterfactual, inject one path at a time, and report both condition-space deltas. A generated history source whose stored latent is samples_z cannot be silently replaced by a VAE re-encoding. This is more comparable than zeroing one modality and permuting another, but it is still not equal-information across modalities.",
+    "level_4_geometry_interaction": "Plucker carries camera rays rather than appearance. Test it as an interaction/correspondence stress with both duplicate injection paths and both c/uc branches changed consistently, not as a same-information competitor to CLIP or replace.",
+    "prohibited_summary": "Do not state that the path with the largest raw ablation loss is dominant. Use path-specific necessity, directional response, localization, and interaction language."
+  },
+  "final_recommendation": "Revise the root report with R1-R6, preserve its overall Reject-and-Pivot method verdict and Accept-with-Revisions diagnostic verdict, and adopt the staged A0-A5 labels above. Keep any replace-latent permutation outside the main arm matrix under the S_Rperm stress-test name."
+}

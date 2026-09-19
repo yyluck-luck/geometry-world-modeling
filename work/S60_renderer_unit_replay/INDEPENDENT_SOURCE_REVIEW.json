@@ -1,0 +1,114 @@
+{
+  "schema": "s60-renderer-unit-replay-independent-source-review-v1",
+  "status": "PASS_BOUNDED_SOURCE_CHECK",
+  "author_role": "/root",
+  "reviewer_role": "/root/c2_v9_source_primary",
+  "completed_utc": "2026-09-08T17:35:54.044525+00:00",
+  "reviewed_files": {
+    "replay.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S60_renderer_unit_replay/replay.py",
+      "sha256": "4f58467755346fe126cf5a351b25d66359c143e6e7bae9188245a44b08175dfb",
+      "mode": "0o444",
+      "bytes": 7427
+    },
+    "PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S60_renderer_unit_replay/PROTOCOL.md",
+      "sha256": "7bfae182fcabcaadfbd67909a6dfdc33738bef899f2863d6af48eb5821f6e84f",
+      "mode": "0o444",
+      "bytes": 1795
+    }
+  },
+  "blockers": [],
+  "scope": "Exact two-file source check for one externally limited 120-second, two-condition numeric replay. No replay execution, model action, numeric tensor body read or RGB read performed by this reviewer.",
+  "checks": [
+    "Exact author-supplied replay/protocol SHA and 0444 modes match; original pipeline SHA and archived event-file SHA independently match.",
+    "Syntax compilation only succeeded for replay and exact extracted AST. Three unique undecorated original methods are selected; nested polygon helper retained. No pipeline module import or model construction is present. Renderer uses only numerical globals and surfel position/normal/radius; retrieval uses source mapping and context_num_frames=4.",
+    "Pinned seq58/60/62 metadata contains numeric tensors/scalars/containers only. Tensor decode permits float32/float64/int32/int64 under archive/tensors/*.bin with byte-length and bytes-SHA checks. Exact selected metadata has no image or RGB tree; outputs are numeric depth/index/cos NPZ and receipt.",
+    "For s>0, scaling world position X, camera translation t and radius by s with fixed R gives R^-1(sX-st)=s R^-1(X-t); perspective x/z and y/z are unchanged. Normal orientation and source mapping remain unchanged. Focal lengths/principal point and image dimensions are retained. The source enforces the stated center-projection tolerance.",
+    "Median positive camera-z selects one length scale before either normalized rasterization result, without searching factors. The original-unit condition uses original surfels and numerically unchanged float64 camera; checks each saved numerical output with array_equal and retrieval equality before the second condition.",
+    "Original near/far constants 0.1/1000, rasterization constants and retrieval weight cos/(1+depth) remain unchanged. Therefore scale dependence is expected to test absolute numerical assumptions; this comparison alone does not isolate near-plane clipping from all other dimensional constants or establish physical calibration.",
+    "Exactly two conditions are enumerated. execution_01 is create-only and currently absent; successful output paths are unique per condition, plus receipt, then chmod0444. A failure leaves its consumed directory. No loop retries or alternate scale search appear.",
+    "The 120-second limit is an external runner obligation stated by protocol; replay.py has no internal timeout. This review does not attest that an outer timed run occurred.",
+    "All result claims explicitly remain post-exposure numerical diagnostics: second_generation_batch_run=false, c2_complete=false, new_method_validated=false; no complete C2, baseline success, quality improvement or novelty claim is authorized."
+  ],
+  "actual_read_scope_clarification": "decode(seq58 full tree) will additionally read five archived surfel_depths numerical maps and five surfel_Ks scalars even though they are unused by replay. They remain inside the authorized seq58 numeric tree and contain no RGB. Protocol shorthand should not be interpreted as an exact minimal tensor read list; READS will record actual numeric blob reads.",
+  "original_functions": [
+    {
+      "name": "render_surfels_to_image",
+      "line": 228,
+      "end_line": 409,
+      "ast_sha256": "79be7ab68fdec2e80cba17c5a1ed63097b856e202da6f9909496b6024c5b7c7f"
+    },
+    {
+      "name": "get_frame_distribution",
+      "line": 411,
+      "end_line": 460,
+      "ast_sha256": "3930236d8ecdd504553f00217af13784d10277ca31a45a52c651fb688b8e0456"
+    },
+    {
+      "name": "process_retrieved_spatial_information",
+      "line": 462,
+      "end_line": 502,
+      "ast_sha256": "d24c611f512b0d718937da518655af4890b4659d5b23dd2ac4afb6238127f6e7"
+    }
+  ],
+  "verified_event_metadata": [
+    {
+      "seq": 58,
+      "event_sha256": "110633cc63b6dd18be5d038003f4a0c6531116acb3e9ee515e810d9ff3204bc2",
+      "name": "render_input",
+      "node_kind_counts": {
+        "dict": 520,
+        "scalar": 5624,
+        "list": 1034,
+        "tensor": 1558,
+        "tuple": 2
+      },
+      "tensor_descriptor_occurrences": 1558,
+      "blob_bodies_read_by_reviewer": 0
+    },
+    {
+      "seq": 60,
+      "event_sha256": "ec0e2dfce02d36c4470dc43f9a9bb54d6c9d17d973e09b37cb4fcb0cfc2d1746",
+      "name": "render_output",
+      "node_kind_counts": {
+        "dict": 3,
+        "scalar": 11,
+        "tensor": 3
+      },
+      "tensor_descriptor_occurrences": 3,
+      "blob_bodies_read_by_reviewer": 0
+    },
+    {
+      "seq": 62,
+      "event_sha256": "ccfe5d97cd3598a527a99b11dedcd3fcdcdfd0fc6cd985c15b0597c678926098",
+      "name": "retrieval_output",
+      "node_kind_counts": {
+        "dict": 2,
+        "scalar": 8,
+        "tuple": 1,
+        "list": 2
+      },
+      "tensor_descriptor_occurrences": 0,
+      "blob_bodies_read_by_reviewer": 0
+    }
+  ],
+  "execution_directory_absent_at_review": true,
+  "review_actions": {
+    "python_AST_parse_and_compile_only": true,
+    "original_function_execution": false,
+    "replay_execution": false,
+    "model_calls": 0,
+    "numeric_blob_bodies_read": 0,
+    "rgb_image_reads": 0,
+    "tests_added_or_run": 0,
+    "old_evidence_edits": 0
+  },
+  "limits": {
+    "result_validation": "NOT_PERFORMED_NO_EXECUTION",
+    "full_c2_success": "NOT_ESTABLISHED",
+    "quality_status": "NOT_EVALUATED",
+    "novelty_authorization": "NONE",
+    "new_method_validated": false
+  }
+}

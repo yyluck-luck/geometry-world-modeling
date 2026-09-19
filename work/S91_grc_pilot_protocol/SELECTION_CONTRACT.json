@@ -1,0 +1,13 @@
+{
+  "schema": "s91-grc-pilot-selection-contract-v1",
+  "experiment_name": "S91（未来几何风险增量预测试验，GRC-Pilot）",
+  "status": "BLOCKED_ON_GATE0",
+  "selection_input_allowed": ["past_rgb", "past_depth_or_geometry", "past_timestamps", "past_cameras", "query_camera", "frozen_model_state"],
+  "selection_input_forbidden": ["future_rgb", "future_depth", "future_pose", "future_mask", "future_model_output", "future_error", "post_generation_score"],
+  "selectors": ["random-k", "recent-k", "nearest-pose-k", "coverage-k", "utility-only", "confidence-only", "risk-only", "risk+utility", "worldmem-style"],
+  "fairness": {"same_candidate_pool": true, "same_k": true, "same_consumer": true, "same_randomness": true, "same_total_cost_accounting": true},
+  "minimum_gate0": {"independent_scenes": 3, "history_candidates": 6, "future_queries": 3},
+  "primary_metric": "future_3d_position_error_or_declared_camera_z_depth_error",
+  "secondary_metrics": ["rgb_mse", "coverage", "failure_rate", "wall_time", "peak_memory"],
+  "stop_if": ["test_direction_unstable", "no_gain_over_strong_baselines", "single_scene_only", "future_leakage", "rgb_only_gain", "unfair_budget"]
+}

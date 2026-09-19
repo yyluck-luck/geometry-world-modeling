@@ -1,0 +1,500 @@
+{
+  "schema": "s38-focused-paper-learning-a-v1",
+  "recorded_utc": "2026-09-07T03:28:55.089819+00:00",
+  "scope": "Four formally published selected papers; primary method and ablation reading, not exhaustive survey, replication or claimed state-of-the-art ranking",
+  "papers": [
+    {
+      "id": "streamingt2v",
+      "title": "StreamingT2V: Consistent, Dynamic, and Extendable Long Video Generation from Text",
+      "authors": [
+        "Roberto Henschel",
+        "Levon Khachatryan",
+        "Hayk Poghosyan",
+        "Daniil Hayrapetyan",
+        "Vahram Tadevosyan",
+        "Zhangyang Wang",
+        "Shant Navasardyan",
+        "Humphrey Shi"
+      ],
+      "year": 2025,
+      "venue": "CVPR 2025 main conference",
+      "pages": "2568-2577",
+      "venue_evidence": "CVF official accepted-version statement and InProceedings booktitle/year",
+      "read_scope": {
+        "main": "Sections 4.1-4.3 and 5.1-5.2; raw-text lines 275-580, mainly PDF pp.4-7",
+        "supplement": "A.3.1/A.3.1.1, A.3.2/A.3.2.1, A.3.3 and A.4 training paragraphs; raw-text lines129-350",
+        "not_read": "Complete appendix prompt list, all qualitative figures, all references, source implementation; not a full-paper line-by-line attestation"
+      },
+      "decisive_ablation": "A.3 isolates CAM against Add-Cond/Conc-Cond; A.3.2 compares CAM with/without APM. A.3.3 isolates blending from shared noise.",
+      "fairness_limit": "Same initial clip and same dataset in respective comparisons do not establish identical model capacity, training or end-to-end compute. APM fixed initial generated chunk is not inherently real ground truth.",
+      "transfer_failure": "Identity metrics are not 3D revisit truth; unseen regions, real dynamic changes, and untrained module insertion can defeat transfer.",
+      "formal_paper": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v.pdf",
+        "bytes": 4217550,
+        "sha256": "43a297f6b4be9d3b1c587e33841ec722bebfe03a1ee99890ef14d67c811d9e89",
+        "url": "https://openaccess.thecvf.com/content/CVPR2025/papers/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.pdf",
+        "access_started_utc": "2026-09-07T03:14:39.280289+00:00",
+        "access_completed_utc": "2026-09-07T03:14:47.678578+00:00",
+        "http_status": 200
+      },
+      "official_venue": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v_venue.html",
+        "bytes": 6965,
+        "sha256": "29aead44e4d0a9c238658b42754dffd242a061a4e47ceb6600b53c6b6c4d6e60",
+        "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.html",
+        "access_started_utc": "2026-09-07T03:14:39.852481+00:00",
+        "access_completed_utc": "2026-09-07T03:14:40.839005+00:00",
+        "http_status": 200
+      },
+      "text_extraction": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v.txt",
+        "bytes": 41975,
+        "sha256": "29608c4fd07596155bf273b5916f69cd5bedcce70cc8bac523c3f6d086f8e10f"
+      },
+      "supplement": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v_supp.pdf",
+        "bytes": 11561319,
+        "sha256": "27b5edaea1de6f380fc38b34a8fa957597b7125d47acaa4cff36c25c52e92051",
+        "url": "https://openaccess.thecvf.com/content/CVPR2025/supplemental/Henschel_StreamingT2V_Consistent_Dynamic_CVPR_2025_supplemental.pdf",
+        "access_started_utc": "2026-09-07T03:20:21.528279+00:00",
+        "access_completed_utc": "2026-09-07T03:20:32.071998+00:00",
+        "http_status": "200"
+      },
+      "supplement_text": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v_supp.txt",
+        "bytes": 25530,
+        "sha256": "992ee0a0d521e0f4678ef2c4b07a1b8d29cf1dd7454ad32244b8b1bbe516569f"
+      }
+    },
+    {
+      "id": "vmem",
+      "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "authors": [
+        "Runjia Li",
+        "Philip Torr",
+        "Andrea Vedaldi",
+        "Tomas Jakab"
+      ],
+      "year": 2025,
+      "venue": "ICCV 2025 main conference",
+      "pages": "25690-25699",
+      "venue_evidence": "CVF official proceedings author/title/booktitle/year, PDF ICCV watermark",
+      "read_scope": {
+        "main": "Sections2 relevant mechanism contrast; 3.1-3.2;4.1-4.4 and Tables1/4; raw-text lines195-600 and605-745",
+        "not_read": "Full supplement; not a new complete code audit"
+      },
+      "decisive_ablation": "Table4 compares temporal/camera-distance/FOV/surfel retrieval inside each fixed K group. Table1 explicitly has identical short-horizon K17 outputs when context fits.",
+      "fairness_limit": "K4 vs K17 includes fine-tuned backbone/total frame count differences; 12x is not solely index acceleration. Fixed-K retrieval ablation is the more relevant mechanism comparison.",
+      "transfer_failure": "Geometry change may leave actual ordered conditions unchanged; generator can still fail after correct retrieval.",
+      "formal_paper": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/vmem.pdf",
+        "bytes": 8331301,
+        "sha256": "d44f893b986181fc76ac1b97f07694f72debde86b87c55eae3c2a8de95f39d61",
+        "url": "https://openaccess.thecvf.com/content/ICCV2025/papers/Li_VMem_Consistent_Interactive_Video_Scene_Generation_with_Surfel-Indexed_View_Memory_ICCV_2025_paper.pdf",
+        "access_started_utc": "2026-09-07T03:17:17.965726+00:00",
+        "access_completed_utc": "2026-09-07T03:17:26.007294+00:00",
+        "http_status": 200
+      },
+      "official_venue": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/vmem_venue.html",
+        "bytes": 6166,
+        "sha256": "4504127f1ebabff33f74b4135a8809281b601c81d74f2be5461309a939bde1dd",
+        "url": "https://openaccess.thecvf.com/content/ICCV2025/html/Li_VMem_Consistent_Interactive_Video_Scene_Generation_with_Surfel-Indexed_View_Memory_ICCV_2025_paper.html",
+        "access_started_utc": "2026-09-07T03:14:40.839025+00:00",
+        "access_completed_utc": "2026-09-07T03:14:43.032514+00:00",
+        "http_status": 200
+      },
+      "text_extraction": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/vmem.txt",
+        "bytes": 46041,
+        "sha256": "764b5811ac732f35fc54392499e8b10abb6a1398bbf01356e9f1cecf58af70f3"
+      }
+    },
+    {
+      "id": "worldmem",
+      "title": "WorldMem: Long-term Consistent World Simulation with Memory",
+      "authors": [
+        "Zeqi Xiao",
+        "Yushi Lan",
+        "Yifan Zhou",
+        "Wenqi Ouyang",
+        "Shuai Yang",
+        "Yanhong Zeng",
+        "Xingang Pan"
+      ],
+      "year": 2025,
+      "venue": "NeurIPS 2025 main conference",
+      "volume": 38,
+      "venue_evidence": "Official NeurIPS proceedings main-conference page and exact linked proceedings PDF",
+      "read_scope": {
+        "main": "Sections3.1-3.4,4.1-4.2,5; Algorithm1, equations3-6, Tables1-6; raw-text lines206-568, PDF pp.4-10",
+        "not_read": "Full appended checklist, all auxiliary videos or authors code"
+      },
+      "decisive_ablation": "Table2 separates dense/relative pose encoding; Table3 separates confidence and similarity retrieval; Table6 tests time condition on placed-object events.",
+      "fairness_limit": "Memory model obtains extra historical frames; Minecraft quantitative protocols use given simulator poses. Within-window self-consistency target and beyond-window real future targets are different constructs.",
+      "transfer_failure": "Noisy poses/occlusion can undermine retrieval; static TUM windows cannot verify dynamic state evolution.",
+      "formal_paper": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/worldmem.pdf",
+        "bytes": 18778324,
+        "sha256": "4e11c198381dc1bd0615212b06024906d35eb762809cc643f5154d80419e2361",
+        "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/470629a47e2d65ce0606c40055df5d26-Paper-Conference.pdf",
+        "access_started_utc": "2026-09-07T03:14:39.280671+00:00",
+        "access_completed_utc": "2026-09-07T03:15:13.318705+00:00",
+        "http_status": 200
+      },
+      "official_venue": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/worldmem_venue.html",
+        "bytes": 9724,
+        "sha256": "f261f9d6cd57e3efa68fc5864b19abbb91e99a9a450abc55979343619fa87229",
+        "url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/470629a47e2d65ce0606c40055df5d26-Abstract-Conference.html",
+        "access_started_utc": "2026-09-07T03:14:43.032540+00:00",
+        "access_completed_utc": "2026-09-07T03:14:45.398814+00:00",
+        "http_status": 200
+      },
+      "text_extraction": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/worldmem.txt",
+        "bytes": 71784,
+        "sha256": "512745f4cd542e1579187da4f2a557479db40d8dd8fd5a245257a7c7e2b2ef13"
+      }
+    },
+    {
+      "id": "longlive",
+      "title": "LongLive: Real-time Interactive Long Video Generation",
+      "authors": [
+        "Shuai Yang",
+        "Wei Huang",
+        "Ruihang Chu",
+        "Yicheng Xiao",
+        "Yuyang Zhao",
+        "Xianbang Wang",
+        "Muyang Li",
+        "Enze Xie",
+        "Yingcong Chen",
+        "Yao Lu",
+        "Song Han",
+        "Yukang Chen"
+      ],
+      "year": 2026,
+      "venue": "ICLR 2026 conference",
+      "venue_evidence": "Official ICLR2026 proceedings page and linked accepted paper header",
+      "read_scope": {
+        "main": "Sections3.1-3.3 and4.1-4.5; Tables1-4/Fig7; raw-text lines197-530; PDF pp.3-9",
+        "appendix": "Algorithm2 tail and F.1 implementation/training, raw-text850-920; no exhaustive appendix read",
+        "visual": "Actually viewed local PDF page8 PNG to resolve Table4 caption versus cells",
+        "not_read": "Full author code, all appendix figures or demo videos"
+      },
+      "decisive_ablation": "Table4 clear/retain/recache at a5s switch in a10s video; Figure7 fixed effective-window comparison9local+3sink vs12local.",
+      "fairness_limit": "Extra recache/training costs remain; 32GPU-days and H100 FPS are author hardware results, not our CPU measurements.",
+      "caption_table_conflict": {
+        "source": "Table4, PDFp8",
+        "caption_claim": "recache best consistency and CLIP",
+        "actual_clip_cells": {
+          "no_kv_cache": 28.95,
+          "retained_kv_cache": 25.92,
+          "kv_recache": 27.87
+        },
+        "interpretation": "Recache improves trade-off versus retained cache; do not claim best CLIP among all three. PDF raster actually checked."
+      },
+      "transfer_failure": "Original VMem has different cross-call state; its cached producer latent is not the same object as LongLive causal KV. Training-free transplantation is unsupported.",
+      "formal_paper": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/longlive.pdf",
+        "bytes": 34489883,
+        "sha256": "7c3101ae80a7d7235007f016dfe65d0f6c5cc06f2dc41e37027a011b7f144133",
+        "url": "https://proceedings.iclr.cc/paper_files/paper/2026/file/91a1610c6ed9e02d33f826b46f472b92-Paper-Conference.pdf",
+        "access_started_utc": "2026-09-07T03:14:39.280723+00:00",
+        "access_completed_utc": "2026-09-07T03:15:23.285011+00:00",
+        "http_status": 200
+      },
+      "official_venue": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/longlive_venue.html",
+        "bytes": 10530,
+        "sha256": "c7ac1580730ab8fcff1521990a466ab16bd5e6d99a0f879f780c46e7c48813fa",
+        "url": "https://proceedings.iclr.cc/paper_files/paper/2026/hash/91a1610c6ed9e02d33f826b46f472b92-Abstract-Conference.html",
+        "access_started_utc": "2026-09-07T03:16:01.299060+00:00",
+        "access_completed_utc": "2026-09-07T03:16:02.379699+00:00",
+        "http_status": 200
+      },
+      "text_extraction": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/longlive.txt",
+        "bytes": 70515,
+        "sha256": "65927550814af00e1f84a1409599e4d853ab6dfcde641ef974926241a9a97923"
+      }
+    }
+  ],
+  "source_access_receipts": [
+    "fetch_receipt.json",
+    "fetch_retry_receipt.json",
+    "fetch_final_receipt.json",
+    "fetch_supp_retry_receipt.json",
+    "fetch_supp_system_receipt.json"
+  ],
+  "web_discovery": {
+    "queries": [
+      "WorldMem official proceedings",
+      "StreamingT2V CVPR2025",
+      "LongLive ICLR2026",
+      "VMem ICCV2025",
+      "StreamingT2V A.3.2 APM",
+      "video generation CLIP reference averaging consistency memory",
+      "view synthesis semantic reference selection memory generation"
+    ],
+    "actual_clocked_windows_utc": [
+      "2026-09-07 03:12:41–03:12:45",
+      "2026-09-07 03:13:32–03:13:35",
+      "2026-09-07 03:13:55–03:13:57",
+      "2026-09-07 03:19:05–03:19:06",
+      "2026-09-07 03:19:27–03:19:30",
+      "2026-09-07 03:22:03–03:22:09"
+    ],
+    "timing_limit": "First discovery and one cached-supplement open did not capture separate exact tool timestamps; no exact time invented. Every selected primary source has precise successful direct-access start/end above.",
+    "unused": "Search snippets/secondary sites were not used for method numbers. Under-review results were not counted as accepted papers.",
+    "failures": "Web tool encountered CVF403, largePDF limits and arXivHTML failure; directpublic paper fetching succeeded as receipts show. No credential, TLS verification disabling or paywall bypass."
+  },
+  "supervisor": {
+    "commit": "207bc6f7a1aa107e544099c2c7cc86816fba9628",
+    "2.2": "Existing strong baseline -> actual failure -> mechanism-specific control; stop scale proxy sweep",
+    "2.3": "First-principles consumer purpose and opposite-control tradeoffs generated the one question; no paradigm-shift claim"
+  },
+  "claude_skill": "Local scientific-critical-thinking only; no Claude model/CLI; Mermaid used for own conceptual workflow, no artificial scientific results",
+  "local_read_snapshot": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/AGENTS.md",
+      "bytes": 1882,
+      "sha256": "3e957d23cdaf28435843ac75919733463956538dbcceaad287276dcd1fd16b52",
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_PRINCIPLES.md",
+      "bytes": 10493,
+      "sha256": "5e5437b666b06a5ce37b1b38e5409b3841b213fd5054fc89630a3c51f96646e1",
+      "read_scope": "full current v1.5"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md",
+      "bytes": 22195,
+      "sha256": "7e920ad91b23314b500b4f45d48c048e93e2142d68090855232e7649c12c691e",
+      "read_scope": "full current summary/relevant S34-S38 boundary; current mutable file"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md",
+      "bytes": 295817,
+      "sha256": "b3796437af0f7f8d5745512d022f91622f44811600cffe801f476b2315c1e3c5",
+      "read_scope": "newest approximately11000 characters through actual access grant at03:08:50UTC"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S37_RESUMPTION.md",
+      "bytes": 3930,
+      "sha256": "43b81d337eeecf32df283e8df1c6dc293761f3ebbdaa8c7b44d1331ad256f458",
+      "read_scope": "full; superseded account-status facts checked against latest log"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_3_generation/idea.md",
+      "bytes": 21277,
+      "sha256": "020ad6e5c03ac6ee1e0399958215608685e2594e40a64c1387b6f64e7c475b39",
+      "read_scope": "full core hypothesis/nearest works/experiment and boundaries; approximately first14500 characters in latest turn plus earlier established reading"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_3_generation/sources.json",
+      "bytes": 23286,
+      "sha256": "b480965f01dba4477b6ac66a0fcba9ee00d2e9d671a0f5c6549b83e4e3728c8c",
+      "read_scope": "prior neighbor identities, used as navigation not current venue certification"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+      "bytes": 62233,
+      "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+      "read_scope": "lines1120-1240; actual get_cond mean and separated crossattn/replace/rays. No execution"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/SKILL.md",
+      "bytes": 13597,
+      "sha256": "630ce9528f472637830b216bf6de231e6dfdcdae4d3b16976324da5ce2d145fb",
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/references/fatal-flaws.md",
+      "bytes": 8659,
+      "sha256": "236dc67ddea96aba2d52b61adb5d0d9f69c05d683d49938914f066d0996e2679",
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/references/lifecycle-capability-matching.md",
+      "bytes": 7731,
+      "sha256": "1467485ac36508286ae9b41cf2b84ef5d13c063ac68daf2bb45bca4137ee01c2",
+      "read_scope": "lines1-100"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/references/five-dimensions.md",
+      "bytes": 12621,
+      "sha256": "d855620c2587fe7b3ddb01cfe837abb594d960e0b31c2e4c22a9ad10fd393798",
+      "read_scope": "lines1-100; existing scoring discipline from full entrypoint"
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/references/paradigm-shift-probe.md",
+      "bytes": 6290,
+      "sha256": "ca2523afea8215bba46398a338135aa78e675bfdf9ff6c89da00052934db8e8a",
+      "read_scope": "lines1-105"
+    },
+    {
+      "path": "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md",
+      "bytes": 23705,
+      "sha256": "0db52bacb62ec0f73b51569bab142f484df06546ebb17a42a056376c09335791",
+      "read_scope": "full; applied construct validity, confounding, proportionality"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_3_generation/sources/handbook_2_2.md",
+      "bytes": 7846,
+      "sha256": "f3ca0a15f072dc15145b940f03c00f1ece61e5955ca359afd95ab0ff9b2718dd",
+      "read_scope": "full pinned prior saved handbook copy"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_3_generation/sources/handbook_2_3.md",
+      "bytes": 5920,
+      "sha256": "c4a0022cad1bfeb09301d3b78e16f2197693bd170d613e6a2be5e45c73266b59",
+      "read_scope": "full pinned prior saved handbook copy"
+    },
+    {
+      "path": "/Users/rocket/.codex/memories/MEMORY.md",
+      "bytes": 40413,
+      "sha256": "bdd3259d46fd80943d7bb24e7d5b133f8350c20ad29999b41edb9a66e26db030",
+      "read_scope": "initial registry search and lines326-360; historical navigation only, current science/resource facts checked in project"
+    }
+  ],
+  "snapshot_caveat": "Local hashes are the receipt-time snapshot of read files; mutable root ledgers may have changed since initial reading or after this seal. Original frozen scientific results unchanged.",
+  "candidate": {
+    "type": "New Setting / falsifiable diagnostic, not validated new method",
+    "question": "Can geometry-retrieved references harm return-view appearance through their pooled semantic direction, conditional on identical ordered latents, cameras and selected information?",
+    "status": "UNTESTED; NOT PREREGISTERED; NOT AUTHORIZED AS A SCIENTIFIC RUN BY THIS DOCUMENT",
+    "source_fact": "Original get_cond averages selected CLIP encoder_embeddings on dim0 at1125 and repeats at1150. Producer latent replace and ray/camera conditioning are separate unchanged paths.",
+    "interventions": [
+      "Original selected-vector mean",
+      "A selected previously observed anchor vector, scaled to the norm of the original mean",
+      "The selected nearest-camera vector, scaled to the norm of the original mean"
+    ],
+    "input_gates": [
+      "All selected contexts and cached quantities come from original real generation; no fake latent",
+      "Anchor must already be in lawful selected set; otherwise retain preselected unit as ineligible/NA without expanding information",
+      "Nonzero finite norms and unchanged unconditional inputs; failure means intervention unidentifiable, not a positive result",
+      "Same parameters, resolution, steps, noise, pose/intrinsics, latent bytes and ordered contexts; change semantic direction only"
+    ],
+    "minimal_design": "Only after actual original baseline passes: at least two preselected new physical scenes with paired preset seeds; one natural return request per unit and three matched sampling calls. Exact scene/seed count, joint acceptance margin and runtime cap must be frozen before outputs; no current sample-size/power claim.",
+    "endpoints": "Same-view observed-content reconstruction plus requested-view adherence; never treat constant copied frames as success. Report all units and missing reasons; not solely CLIP or geometry error.",
+    "baseline_interpretation": "Anchor and nearest-vector routes are ordinary strong controls. If either solves the effect, stop at baseline hardening; no new name or novelty claim.",
+    "stop_conditions": [
+      "Original full resources or execution gate absent => not testable",
+      "No natural eligible exposure => do not force a failure or alter candidate-count rules",
+      "No stable paired gain across scenes/seeds or camera adherence worsens => reject benefit version or report uncertainty under frozen margins",
+      "Effects require altered norm, additional frames, GT-based choice, changed focal/latents or post-hoc selection => causal claim invalid",
+      "Ordinary anchor/nearest control explains benefit => reject novel-method positioning"
+    ],
+    "closest_axes": [
+      {
+        "work": "StreamingT2V",
+        "object": "learned anchor appearance guidance versus original VMem existing pooled vector",
+        "mechanism": "trained APM versus a diagnostic direction replacement",
+        "granularity": "video-chunk anchor tokens versus one pooled selected-set vector",
+        "setting": "T2V long identity versus camera-controlled observed revisit"
+      },
+      {
+        "work": "VMem",
+        "object": "surfel-selected multiview conditions versus their separate semantic pooling path",
+        "mechanism": "visibility retrieval versus holding retrieval fixed",
+        "granularity": "reference-view set versus one downstream semantic vector",
+        "setting": "same original consumer, diagnostic only"
+      },
+      {
+        "work": "WorldMem",
+        "object": "pose/time-aware token memory versus current consumer semantic vector",
+        "mechanism": "learned state-relative attention versus no new training",
+        "granularity": "memory tokens/states versus matched pooled direction",
+        "setting": "dynamic simulation versus static observed-content revisit"
+      },
+      {
+        "work": "LongLive",
+        "object": "prompt-conditioned causal KV versus explicit producer latent/CLIP inputs",
+        "mechanism": "recache+training versus route-isolation test",
+        "granularity": "layer KV versus crossattn input",
+        "setting": "prompt switch versus fixed-camera request; not a direct transplantation"
+      }
+    ],
+    "idea_evaluator": {
+      "verdict": "Accept with Revisions for diagnostic only; reject fixed-anchor/weighted-average-as-novel-method framing",
+      "fatal_flaws": [
+        {
+          "id": "F6",
+          "severity": "MAJOR",
+          "finding": "No genuine full-generator failure yet, so geometry/metadata proxy cannot verify semantic harm",
+          "defense": "Actual baseline then matched real condition intervention"
+        },
+        {
+          "id": "F1",
+          "severity": "MINOR for diagnostic; fatal for proposed anchor-only novelty",
+          "finding": "Anchor appearance preservation and state/cache correction already covered",
+          "defense": "Do not claim a new method; current bounded search does not establish novelty"
+        }
+      ],
+      "lifecycle": "Frontier exploration; short-to-medium as handbook category, no promised completion date",
+      "capability": "MSc beginner, M3Max64GiB, no remoteGPU, effective weekly hours unknown; four-model full execution still unverified. Full paper training resources do not fit current local premise.",
+      "five_dimensions_mechanism_only": {
+        "Higher": {
+          "score": 5,
+          "reason": "No measured gain; ordinary anchor may explain it"
+        },
+        "Faster": {
+          "score": 4,
+          "reason": "Three paired sampling routes add diagnostic cost; no speedup mechanism"
+        },
+        "Stronger": {
+          "score": 6,
+          "reason": "Separating conflicting geometry/semantic conditioning is testable with invariant other inputs, not confirmed"
+        },
+        "Cheaper": {
+          "score": 5,
+          "reason": "No new training labels, but generation cost remains unmeasured"
+        },
+        "Broader": {
+          "score": 5,
+          "reason": "Source-specific path; no cross-model validation"
+        }
+      },
+      "paradigm_probe": {
+        "first_principles": "Partial: downstream semantic use need not track geometry coverage",
+        "elephant": "No: long-horizon drift is already studied",
+        "technology_cycle": "Partial: full raw consumer observation is newly ready locally, not a field-wide breakthrough",
+        "hamming": "No established major effect"
+      },
+      "risks": {
+        "compute": "High until original real run measured",
+        "data": "Medium; two new scenes insufficient for final confirmation",
+        "engineering": "Medium; immutable cache/RNG/condition identity must hold",
+        "timeline": "Unknown, not assigned invented student hours"
+      },
+      "integrity": "No empirical effect sizes, novelty, PhD level, significance, or resource success inferred from this idea score."
+    },
+    "s23_nonduplication": "Does not propose branch-ancestry mixing, metadata label interventions, new memory quotas, or scale sweeps. It interrogates a downstream source-proven semantic pathway while holding its reference set fixed."
+  },
+  "artifact_identities": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/report.md",
+      "bytes": 7726,
+      "sha256": "bf5207ae41f3f4ad2c34118ffa160a18367e2973713fe4304f658a7154099a56"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/longlive_page8.png",
+      "bytes": 631755,
+      "sha256": "ab0dfc6d6ec06c0b8fa505b74c65c619f1bd7b2f6d1768d98c3bdd38e6493690"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v_page6.png",
+      "bytes": 449426,
+      "sha256": "a876a33930d30cbdd221a3cc41f18b56aaa3495df4095ae16b04efcc964ea806"
+    }
+  ],
+  "limitations": [
+    "Paper values are author-reported, not reproduced",
+    "Different data/information/compute regimes prevent cross-paper ranking",
+    "Only two extracted paper pages viewed; no full qualitative-video verification",
+    "pdftotext repaired a LongLive PDF xref warning; Table4 visually checked against PDF raster",
+    "All4 venue/title/year pairs independently verified from official archived pages; no preprint counted as accepted"
+  ]
+}

@@ -1,0 +1,986 @@
+                                        BundleFusion: Real-time Globally Consistent 3D Reconstruction using
+                                        On-the-fly Surface Re-integration
+                                        ANGELA DAI, Stanford University
+                                        MATTHIAS NIESSNER, Stanford University
+                                        MICHAEL ZOLLHÖFER, Max-Planck-Institute for Informatics
+                                        SHAHRAM IZADI, Microsoft Research
+                                        CHRISTIAN THEOBALT, Max-Planck-Institute for Informatics
+
+
+
+
+arXiv:1604.01093v3 [cs.GR] 7 Feb 2017
+                                           Real-time, high-quality, 3D scanning of large-scale scenes is key to mixed    world into the virtual, or providing immediate user feedback during
+                                        reality and robotic applications. However, scalability brings challenges of      scanning.
+                                        drift in pose estimation, introducing significant errors in the accumulated         However, despite the plethora of reconstruction systems, we have
+                                        model. Approaches often require hours of offline processing to globally          yet to see a single holistic solution for the problem of real-time 3D
+                                        correct model errors. Recent online methods demonstrate compelling re-
+                                                                                                                         reconstruction at scale that makes scanning easily accessible to
+                                        sults, but suffer from: (1) needing minutes to perform online correction,
+                                                                                                                         untrained users. This is due to the many requirements that such a
+                                        preventing true real-time use; (2) brittle frame-to-frame (or frame-to-model)
+                                        pose estimation resulting in many tracking failures; or (3) supporting only      solution needs to fulfill:
+                                        unstructured point-based representations, which limit scan quality and ap-          High-quality surface modeling. We need a single textured and
+                                        plicability. We systematically address these issues with a novel, real-time,     noise-free 3D model of the scene, consumable by standard graphics
+                                        end-to-end reconstruction framework. At its core is a robust pose estimation     applications. This requires a high-quality representation that can
+                                        strategy, optimizing per frame for a global set of camera poses by consid-       model continuous surfaces rather than discrete points.
+                                        ering the complete history of RGB-D input with an efficient hierarchical            Scalability. For mixed reality and robot navigation scenarios,
+                                        approach. We remove the heavy reliance on temporal tracking, and con-            we need to acquire models of entire rooms or several large spaces.
+                                        tinually localize to the globally optimized frames instead. We contribute        Our underlying representation therefore must handle both small-
+                                        a parallelizable optimization framework, which employs correspondences           and large-scale scanning while preserving both global structure and
+                                        based on sparse features and dense geometric and photometric matching.
+                                                                                                                         maintaining high local accuracy.
+                                        Our approach estimates globally optimized (i.e., bundle adjusted) poses
+                                        in real-time, supports robust tracking with recovery from gross tracking
+                                                                                                                            Global model consistency. With scale comes the need to cor-
+                                        failures (i.e., relocalization), and re-estimates the 3D model in real-time to   rect pose drift and estimation errors, and the subsequent distortions
+                                        ensure global consistency; all within a single framework. Our approach           in the acquired 3D model. This correction is particularly challeng-
+                                        outperforms state-of-the-art online systems with quality on par to offline       ing at real-time rates, but is key for allowing online revisiting of
+                                        methods, but with unprecedented speed and scan completeness. Our frame-          previously scanned areas or loop closure during actual use.
+                                        work leads to a comprehensive online scanning solution for large indoor             Robust camera tracking. Apart from incremental errors, cam-
+                                        environments, enabling ease of use and high-quality results1 .                   era tracking can also fail in featureless regions. In order to recover,
+                                        CCS Concepts: •Computing methodologies →Computer graphics; Shape                 we require the ability to relocalize. Many existing approaches rely
+                                        modeling; Mesh geometry models;                                                  heavily on proximity to the previous frame, limiting fast camera
+                                        General Terms: RGB-D, scan, real-time, global consistency, scalable              motion and recovery from tracking failure. Instead, we need to
+                                                                                                                         (re)localize in a robust manner without relying on temporal coher-
+                                        ACM Reference format:                                                            ence.
+                                        Angela Dai, Matthias Nießner, Michael Zollhöfer, Shahram Izadi, and Chris-
+                                                                                                                            On-the-fly model updates. In addition to robust tracking, input
+                                        tian Theobalt. 2016. BundleFusion: Real-time Globally Consistent 3D Re-
+                                        construction using On-the-fly Surface Re-integration. 1, 1, Article 1 (Janu-
+                                                                                                                         data needs to be integrated to a 3D representation and interactively
+                                        ary 2016), 19 pages.                                                             visualized. The challenge is to update the model after data has been
+                                        DOI: 10.1145/nnnnnnn.nnnnnnn                                                     integrated, in accordance with the newest pose estimates.
+                                                                                                                            Real-time rates. The ability to react to instantaneous feedback
+                                                                                                                         is crucial to 3D scanning and key to obtaining high-quality results.
+                                        1    INTRODUCTION
+                                                                                                                         The real-time capability of a 3D scanning method is fundamental to
+                                        We are seeing a renaissance in 3D scanning, fueled both by applica-              AR/VR and robotics applications.
+                                        tions such as fabrication, augmented and virtual reality, gaming and                Researchers have studied specific parts of this problem, but to
+                                        robotics, and by the ubiquity of RGB-D cameras, now even available               date there is no single approach to tackle all of these requirements
+                                        in consumer-grade mobile devices. This has opened up the need for                in real time. This is the very aim of this paper, to systematically
+                                        real-time scanning at scale. Here, the user or robot must scan an                address all these requirements in a single, end-to-end real-time
+                                        entire room (or several spaces) in real-time, with instantaneous and             reconstruction framework. At the core of our method is a robust
+                                        continual integration of the accumulated 3D model into the desired               pose estimation strategy, which globally optimizes for the camera
+                                        application, whether that is robot navigation, mapping the physical              trajectory per frame, considering the complete history of RGB-D
+                                        1 Our source code and all reconstruction results are publicly available:         input in an efficient local-to-global hierarchical optimization frame-
+                                        http://graphics.stanford.edu/projects/bundlefusion/                              work. Since we globally correlate each RGB-D frame, loop closure
+1:2   • Dai, A. et al
+
+
+
+
+Fig. 1. Our novel real-time 3D reconstruction approach solves for global pose alignment and obtains dense volumetric reconstructions at a level of quality and
+completeness that was previously only attainable with offline approaches.
+
+
+is handled implicitly and continuously, removing the need for any                    (3) A new RGB-D re-integration strategy to enable on-the-fly and
+explicit loop closure detection. This enables our method to be ex-                continuous 3D model updates when refined global pose estimates
+tremely robust to tracking failures, with tracking far less brittle than          are available.
+existing frame-to-frame or frame-to-model RGB-D approaches. If                       (4) Large-scale reconstruction of geometry and texture, demon-
+tracking failures occur, our framework instantaneously relocalizes                strating model refinement in revisited areas, recovery from tracking
+in a globally consistent manner, even when scanning is interrupted                failures, and robustness to drift and continuous loop closures.
+and restarted from a completely different viewpoint. Areas can also
+be revisited multiple times without problem, and reconstruction                   2    RELATED WORK
+quality continuously improves. This allows for a robust scanning                  There has been extensive work on 3D reconstruction over the past
+experience, where even novice users can perform large-scale scans                 decades. Key to high-quality 3D reconstruction is the choice of
+without failure.                                                                  underlying representation for fusing multiple sensor measurements.
+   Key to our work is a new fully parallelizable sparse-then-dense                Approaches range from unstructured point-based representations
+global pose optimization framework: sparse RGB features are used                  [18, 22, 41, 50, 54], 2.5D depth map [30, 32] or height-field [14]
+for coarse global pose estimation, ensuring proposals fall within                 methods, to volumetric approaches, based on occupancy grids [7, 56]
+the basin of convergence of the following dense step, which con-                  or implicit surfaces [5, 19]. While each has trade-offs, volumetric
+siders both photometric and geometric consistency for fine-scale                  methods based on implicit truncated signed distance fields (TSDFs)
+alignment. Thus, we maintain global structure with implicit loop                  have become the de facto method for highest quality reconstructions;
+closures while achieving high local reconstruction accuracy. To                   e.g., [11, 13, 26]. They model continuous surfaces, systematically
+achieve the corresponding model correction, we extend a scalable                  regularize noise, remove the need for explicit topology bookkeeping,
+variant of real-time volumetric fusion [37], but importantly support              and efficiently perform incremental updates. The most prominent
+model updates based on refined poses from our global optimization.                recent example is KinectFusion [20, 34] where real-time volumetric
+Thus, we can correct errors in the 3D model in real time and revisit              fusion of smaller scenes was demonstrated.
+existing scanned areas. We demonstrate how our approach out-                         One inherent issue with these implicit volumetric methods is
+performs current state-of-the-art online systems at unprecedented                 their lack of scalability due to reliance on a uniform grid. This
+speed and scan completeness, and even surpasses the accuracy and                  has become a focus of much recent research [3, 22, 37, 39, 40, 45,
+robustness of offline methods in many scenarios. This leads to a                  51, 58, 59], where real-time efficient data structures for volumetric
+comprehensive real-time scanning solution for large indoor environ-               fusion have been proposed. These exploit the sparsity in the TSDF
+ments, that requires little expertise to operate, making 3D scanning              representation to create more efficient spatial subdivision strategies.
+easily accessible to the masses.                                                  While this allows for volumetric fusion at scale, pose estimates suffer
+   In summary, the main contributions of our work are as follows:                 from drift, causing distortions in the 3D model. Even small pose
+   (1) A novel, real-time global pose alignment framework which                   errors, seemingly negligible on a small local scale, can accumulate
+considers the complete history of input frames, removing the brit-                to dramatic error in the final 3D model [37]. Zhang et al. [59] use
+tle and imprecise nature of temporal tracking approaches, while                   planar structural priors and repeated object detection to reduce the
+achieving scalability by a rapid hierarchical decomposition of the                effect of drift; however, they do not detect loop closures or use color
+problem by using a local-to-global optimization strategy.                         data, which makes tracking difficult in open or planar areas, or very
+   (2) A sparse-to-dense alignment strategy enabling both consistent              cluttered scenes.
+global structure with implicit loop closures and highly-accurate                     Most of the research on achieving globally consistent 3D models at
+fine-scale pose alignment to facilitate local surface detail.                     scale from RGB-D input requires offline processing and access to all
+                                                                                  input frames. [4, 27, 60–62] provide for globally consistent models
+                          BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration •                 1:3
+
+
+
+
+Fig. 2. Our global pose optimization takes as input the RGB-D stream of a commodity sensor, detects pairwise correspondences between the input frames,
+and performs a combination of local and global alignment steps using sparse and dense correspondences to compute per-frame pose estimates.
+
+
+by optimizing across the entire pose trajectory, but require minutes          3   METHOD OVERVIEW
+or even hours of processing time, meaning real-time revisiting or             The core of our approach is an efficient global pose optimization
+refinement of reconstructed areas is infeasible.                              algorithm which operates in unison with a large-scale, real-time 3D
+   Real-time, drift-free pose estimation is a key focus in the simulta-       reconstruction framework; see Fig. 2. At every frame, we continu-
+neous localization and mapping (SLAM) literature. Many real-time              ously run pose optimization and update the reconstruction accord-
+monocular RGB methods have been proposed, including sparse                    ing to the newly-computed pose estimates. We do not strictly rely
+methods [24], semi-dense [10, 12] or direct methods [9, 31]. Typi-            on temporal coherence, allowing for free-form camera paths, instan-
+cally these approaches rely on either pose-graph optimization [25]            taneous relocalization, and frequent revisiting of the same scene
+or bundle adjustment [48], minimizing reprojection error across               region. This makes our approach robust towards sensor occlusion,
+frames and/or distributing the error across the graph. While im-              fast frame-to-frame motions and featureless regions.
+pressive tracking results have been shown using only monocular                    We take as input the RGB-D stream captured by a commodity
+RGB sensors, these approaches do not generate detailed dense 3D               depth sensor. To obtain global alignment, we perform a sparse-
+models, which is the aim of our work.                                         then-dense global pose optimization: we use a set of sparse feature
+   MonoFusion [38] augments sparse SLAM bundle adjustment with                correspondences to obtain a coarse global alignment, as sparse fea-
+dense volumetric fusion, showing compelling monocular results                 tures inherently provide for loop closure detection and relocalization.
+but on small-scale scenes. Real-time SLAM approaches typically                This alignment is then refined by optimizing for dense photometric
+first estimate poses frame-to-frame and perform correction in a               and geometric consistency. Sparse correspondences are established
+background thread (running slower than real-time rates; e.g., 1Hz).           through pairwise Scale-Invariant Feature Transform (SIFT) [28] fea-
+In contrast, DTAM [35] uses the concept of frame-to-model tracking            ture correspondences between all input frames (see Sec. 4.1). That
+(from KinectFusion [20, 34]) to estimate the pose directly from the           is, detected SIFT keypoints are matched against all previous frames,
+reconstructed dense 3D model. This omits the need for a correction            and carefully filtered to remove mismatches, thus avoiding false
+step, but clearly does not scale to larger scenes.                            loop closures (see Sec. 4.1.1).
+   Pose estimation from range data typically is based on variants of              To make real-time global pose alignment tractable, we perform a
+the iterative closest point (ICP) algorithm [2, 42]. In practice, this        hierarchical local-to-global pose optimization (see Sec. 4.2) using
+makes tracking extremely brittle and has led researchers to explore           the filtered frame correspondences. On the first hierarchy level,
+either the use of RGB data to improve frame-to-frame tracking [52]            every consecutive n frames compose a chunk, which is locally pose
+or the use of global pose estimation correction, including pose graph         optimized under the consideration of its contained frames. On
+optimization [44], loop closure detection [53], incremental bundle            the second hierarchy level, all chunks are correlated with respect
+adjustement [11, 54], or recovery from tracking failures by image             to each other and globally optimized. This is akin to hierarchical
+or keypoint-based relocalization [15, 49].                                    submapping [29]; however, instead of analyzing global connectivity
+   These systems are state-of-the-art in terms of online correction           once all frames are available, our new method forms chunks based
+of both pose and underlying 3D model. However, they either re-                on the current temporal window. Note that this is our only temporal
+quire many seconds or even minutes to perform online optimization             assumption; between chunks there is no temporal reliance.
+[11, 53]; assume very specific camera trajectories to detect explicit             This hierarchical two-stage optimization strategy reduces the
+loop closures limiting free-form camera motions and scanning [53];            number of unknowns per optimization step and ensures our method
+rely on computing optimized camera poses prior to fusion limiting             scales to large scenes. Pose alignment on both levels is formulated
+the ability to refine the model afterwards [44], or use point-based           as energy minimization problem in which both the filtered sparse
+representations that limit quality and lack general applicability
+where continuous surfaces are needed [54].
+1:4   •   Dai, A. et al
+
+
+correspondences, as well as dense photometric and geometric con-          are built into the optimization (not described in this section; see
+straints are considered (see Sec. 4.3). To solve this highly-nonlinear    Sec. 4.4.1 for details).
+optimization problem on both hierarchy levels, we employ a fast           Key Point Correspondence Filter For a pair of frames fi and
+data-parallel GPU-solver tailored to the problem (see Sec. 4.4).          f j with detected corresponding 3D points P from fi , and Q from
+   A dense scene reconstruction is obtained using a sparse volumet-       f j , the key point correspondence filter finds a set of correspon-
+ric representation and fusion [37], which scales to large scenes in       dences which exhibit a stable distribution and a consistent rigid
+real-time. The continuous change in the optimized global poses ne-        transform. Correspondences are greedily aggregated (in order of
+cessitates continuous updates to the global 3D scene representation       match distance); for each newly added correspondence, we compute
+(see Sec. 5). A key novelty is to allow for symmetric on-the-fly rein-    the rigid transform Ti j (p) = (Tj −1 ◦ Ti )(p), which minimizes the
+tegration of RGB-D frames. In order to update the pose of a frame         RMSD between the current set of correspondences Pcur and Qcur ,
+with an improved estimate, we remove the RGB-D image at the old           using the Kabsch algorithm [16, 21]. We further check whether
+pose with a new real-time de-integration step, and reintegrate it at      this is an ambiguously determined transform (e.g, the correspon-
+the new pose. Thus, the volumetric model continuously improves as         dences lie on a line or exhibit rotational symmetry) by performing a
+more RGB-D frames and refined pose estimates become available;            condition analysis of the covariance of points of Pcur and Qcur as
+e.g., if a loop is closed (cf. Fig. 13).                                  well as the cross-covariance between Pcur and Qcur ; if any of these
+                                                                          condition numbers are high (> 100) then the system is considered
+4     GLOBAL POSE ALIGNMENT                                               unstable. Thus, if the re-projection error under Ti j is high (max resid-
+We first describe the details of our real-time global pose optimization   ual > 0.02m) or the condition analysis determines instability, then
+strategy, which is the foundation for online, globally-consistent 3D      correspondences are removed (in order of re-projection error) until
+reconstruction. Input to our approach is the live RGB-D stream            this is not the case anymore or there are too few correspondences to
+S = { fi = (Ci , Di )}i captured by a commodity sensor. We assume         determine a rigid transform. If the resulting set of correspondences
+spatially and temporally aligned color Ci and depth data Di at            for fi and f j do not produce a valid transform, all correspondences
+each frame, captured at 30Hz and 640 × 480 pixel resolution. The          between fi and f j are discarded.
+goal is to find a set of 3D correspondences between the frames in         Surface Area Filter In addition, we check that the surface spanned
+the input sequence, and then find an optimal set of rigid camera          by the features is large enough, as correspondences spanning small
+transforms {Ti } such that all frames align as best as possible. The      physical size are prone to ambiguity. For frames fi and f j , we esti-
+transformation Ti (p) = Ri p + ti (rotation Ri , translation ti ) maps    mate the surface areas spanned by the 3D keypoints P of fi and by
+from the local camera coordinates of the i-th frame to the world          the 3D keypoints Q of f j . For each set of 3D points, we project them
+space coordinate system; we assume the first frame defines the            into the plane given by their two principal axes, with surface area
+world coordinate system.                                                  given by the 2D oriented bounding box of the resulting projected
+                                                                          points. If the areas spanned by P and Q are insufficient (< 0.032m2 ),
+4.1    Feature Correspondence Search                                      the set of matches is deemed ambiguous and discarded.
+                                                                          Dense Verification Finally, we perform a dense two-sided geo-
+In our framework, we first search for sparse correspondences be-
+                                                                          metric and photometric verification step. For frames fi and f j , we
+tween frames using efficient feature detection, feature matching,
+                                                                          use the computed relative transform Ti j from the key point corre-
+and correspondence filtering steps. These sparse correspondences
+                                                                          spondence filter to align the coordinate systems of fi and f j . We
+are later used in tandem with dense photometric correspondences,
+                                                                          measure the average depth discrepancy, normal deviation and pho-
+but since accurate sparse correspondences are crucial to attaining
+                                                                          toconsistency of the re-projection in both directions in order to
+the basin of convergence of the dense optimization, we elaborate
+                                                                          find valid pixel correspondences, and compute the re-projection
+on their search and filtering below. For each new frame, SIFT fea-
+                                                                          error of these correspondences. For efficiency reasons, this step
+tures are detected and matched to the features of all previously seen
+                                                                          is performed on filtered and downsampled input frames of size
+frames. We use SIFT as it accounts for the major variation encoun-
+                                                                          w 0 ×h 0 = 80 × 60. Note that when a new RGB-D image fi arrives, its
+tered during hand-held RGB-D scanning, namely: image translation,
+                                                                          filtered and downsampled color intensity Cilow and depth Dilow are
+scaling, and rotation. Potential matches between each pair of frames
+are then filtered to remove false positives and produce a list of valid   cached for efficiency. The camera space positions Pilow and normals
+pairwise correspondences as input to global pose optimization. Our        Nilow of each Dilow are also computed and cached per frame. With
+correspondence search is performed entirely on the GPU, avoiding          π denoting the camera intrinsics for the downsampled images, the
+the overhead of copying data (e.g., feature locations, descriptors,       total re-projection error from fi to f j is:
+matches) to the host. We compute SIFT keypoints and descriptors
+at 4 − 5 ms per frame, and match a pair of frames in ≈ 0.05ms (in
+                                                                                                            Õ
+                                                                                         Er (fi , f j ) =         Ti j (pi,x,y ) − qj,x,y       .
+parallel). We can thus find full correspondences in real-time against                                       x,y
+                                                                                                                                            2
+up to over 20K frames, matched in a hierarchical fashion, for every
+new input RGB-D image.
+                                                                          Here, pi,x,y = Pilow (x, y) and qj,x,y = P jlow (π −1 (Ti j pi,x,y )). How-
+   4.1.1 Correspondence Filtering. To minimize outliers, we filter        ever, this is sensitive to occlusion error, so we discard correspon-
+the sets of detected pairwise correspondences based on geometric          dences with high depth discrepancy, normal deviation, or lack of
+and photometric consistency. Note that further robustness checks          photoconsistency. That is, the potential correspondence at pixel
+                          BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration                           •   1:5
+
+
+location (x, y) is considered valid if the following conditions hold:     world space (< 0.03m) are merged to one best 3D representative
+                                                                          in the least squares sense. This keyframe feature set is projected
+                     Ti j (pi,x,y ) − qj,x,y       < τd                   into the space of the keyframe using the transformations from the
+                                               2
+                                                                          frames of origin, resulting in a consistent set of feature locations and
+                      (Ti j (ni,x,y )) · nj,x,y > τn
+                                                                          depths. Note that once this global keyframe and keyframe feature
+                Cilow (x, y) − Cjlow (x, y) < τc                          set is created, the chunk data (i.e., intra-chunk features, descriptors,
+                                           1
+                                                                          correspondences) can be discarded as it is not needed in the second
+Matches between fi and f j are invalidated in the case of excessive       layer pose alignment.
+re-projection error (> 0.075m) or insufficient valid correspondences      Global Inter-Chunk Pose Optimization Sparse correspondence
+(< 0.02w 0h 0 ), and we use τd = 0.15m, τn = 0.9, τc = 0.1. This          search and filtering between global keyframes is analogous to that
+check is efficiently implemented with a single kernel call, such that     within a chunk, but on the level of all keyframes and their feature
+each thread block handles one pair of images, with re-projection          sets. If a global keyframe does not find any matches to previously
+computed through local reductions.                                        seen keyframes, it is marked as invalid but kept as a candidate, allow-
+   If all checks are passed, the correspondences are added to the         ing for re-validation when it finds a match to a keyframe observed
+valid set, which is used later on for pose optimization. We only          in the future. The global pose optimization computes the best global
+consider a frame-to-frame match if the valid set comprises at least       alignments {Ti } for the set of all global keyframes, thus aligning all
+Nmin correspondences. Note that Nmin = 3 is sufficient to define a        chunks globally. Again, the same energy minimization approach
+valid frame-to-frame transform; however, we found Nmin = 5 to be          from Sec. 4.3 is applied using both sparse and dense constraints.
+a good compromise between precision and recall.                           Intra-chunk alignment runs after each new global keyframe has
+                                                                          found correspondences. The pose for a global keyframe is initialized
+4.2   Hierarchical Optimization                                           with the delta transform computed by the corresponding intra-
+In order to run at real-time rates on up to tens of thousands of RGB-     chunk optimization, composed with the previous global keyframe
+D input frames, we apply a hierarchical optimization strategy. The        pose. After the intra-chunk transforms have been computed, we
+input sequence is split into short chunks of consecutive frames. On       obtain globally consistent transforms among all input frames by
+the lowest hierarchy level, we optimize for local alignments within       applying the corresponding delta transformations (from the local
+a chunk. On the second hierarchy level, chunks are globally aligned       optimization) to all frames in a chunk.
+against each other, using representative keyframes with associated
+features per chunk.                                                       4.3 Pose Alignment as Energy Optimization
+Local Intra-Chunk Pose Optimization Intra-chunk alignment                 Given a set of 3D correspondences between a set of frames S (frames
+is based on chunks of Nchunk = 11 consecutive frames in the input         in a chunk or keyframes, depending on hierarchy level), the goal of
+RGB-D stream; adjacent chunks overlap by 1 frame. The goal of local       pose alignment is to find an optimal set of rigid camera transforms
+pose optimization is to compute the best intra-chunk alignments           {Ti } per frame i (for simpler notation, we henceforth write i for fi )
+{Ti }, relative to the first frame of the chunk, which locally defines    such that all frames align as best as possible. We parameterize the
+the reference frame. To this end, valid feature correspondences are       4 × 4 rigid transform Ti using matrix exponentials based on skew-
+searched between all pairs of frames of the chunk, and then the en-       symmetric matrix generators [33], which yields fast convergence.
+ergy minimization approach described in Sec. 4.3 is applied, jointly      This leaves 3 unknown parameters for rotation, and 3 for translation.
+considering both these feature correspondences and dense photo-           For ease of notation, we stack the degrees of freedom for all |S|
+metric and geometric matching. Since each chunk only contains a           frames in a parameter vector:
+small number of consecutive frames, the pose variation within the
+chunk is small, and we can initialize each of the Ti to the identity                 X = (R0 , t0 , . . . , R |S | , t |S| )T = (x 0 , . . . , x N )T .
+matrix. To ensure that the local pose optimization result after con-
+                                                                          Here, N is the total number of variables x i . Given this notation,
+vergence is sufficiently accurate, we apply the Dense Verification
+                                                                          we phrase the alignment problem as a variational non-linear least
+test (see Sec. 4.1.1) to each pair of images within the chunk using
+                                                                          squares minimization problem in the unknown parameters X. To
+the optimized local trajectory. If the re-projection error is too large
+                                                                          this end, we define the following alignment objective, which is based
+for any pair of images (> 0.05m), the chunk is discarded and not
+                                                                          on sparse features and dense photometric and geometric constraints:
+used in the global optimization.
+Per-Chunk Keyframes Once a chunk has been completely pro-                          E align (X) = w sparse E sparse (X) + w dense E dense (X).
+cessed, we define the RGB-D data from the first frame in the chunk
+to be the chunk’s keyframe. We also compute a representative ag-          Here, w sparse and w dense are weights for the sparse and dense match-
+gregate keyframe feature set. Based on the optimized pose trajectory      ing terms, respectively. w dense is linearly increased; this allows the
+of the chunk, we compute a coherent set of 3D positions of the            sparse term to first find a good global structure, which is then refined
+intra-chunk feature points in world space. These 3D positions may         with the dense term (as the poses fall into the basin of convergence of
+contain multiple instances of the same real-world point, found in         the dense term, it becomes more reliable), thus achieving coarse-to-
+separate pairwise frame matches. Thus, to obtain the keyframe             fine alignment. Note that depending on the optimization hierarchy
+feature set, we aggregate the feature point instances that have pre-      level, the reference frame is the first frame in the chunk (for intra-
+viously found (intra-chunk) matches. Those that coincide in 3D            chunk alignment), or the first frame in the entire input sequence
+1:6    •   Dai, A. et al
+
+
+(for global inter-chunk alignment). Hence, the reference transform                    4.4 Fast and Robust Optimization Strategy
+T0 is not a free variable and left out from the optimization.                         The described global pose alignment objective is a non-linear least
+Sparse Matching In the sparse matching term, we minimize the                          squares problem in the unknown extrinsic camera parameters. Since
+sum of distances between the world space positions over all feature                   our goal is online and global camera pose optimization for long scan-
+correspondences between all pairs of frames in S:                                     ning sequences with over twenty thousand frames, an efficient, yet
+                            Õ| |S
+                            |S Õ|                                                     effective, optimization strategy is required. To face this challenge,
+                                                                           2
+                                          Õ
+           E sparse (X) =                            Ti pi,k − Tj pj,l 2 .            we implement a data-parallel GPU-based non-linear iterative solver
+                            i=1 j=1 (k,l )∈C(i, j)                                    similar to the work of Zollhöfer et al. [64]. However, the unique spar-
+                                                                                      sity pattern associated with the global alignment objective requires
+Here, pi,k is the k-th detected feature point in the i-th frame. Ci, j
+                                                                                      a different parallelization strategy and prohibits the use of previ-
+is the set of all pairwise correspondences between the i-th and
+                                                                                      ous GPU-based solvers [55, 63, 64]. Our approach is based on the
+the j-th frame. Geometrically speaking, we seek the best rigid
+                                                                                      Gauss-Newton method, which only requires first order derivatives
+transformations Ti such that the Euclidean distance over all the
+                                                                                      and exhibits quadratic convergence close to the optimum, which
+detected feature matches is minimized.
+                                                                                      is beneficial due to our incremental optimization scheme. We find
+Dense Matching We additionally use dense photometric and geo-
+                                                                                      the best pose parameters X ∗ by minimizing the proposed highly
+metric constraints for fine-scale alignment. To this end, we exploit
+                                                                                      non-linear least squares objective using this method:
+the dense pixel information of each input frame’s color Ci and depth
+Di . Evaluating the dense alignment is computationally more ex-                                              X ∗ = argmin Eal iдn (X) .
+pensive than the previous sparse term. We therefore evaluate it on                                                      X
+a restricted set E of frame pairs, E contains a frame pair (i, j) if their            For ease of notation, we reformulate the objective in the following
+camera angles are similar (within 60◦ , to avoid glancing angles of                   canonical least-squares form:
+the same view) and they have non-zero overlap with each other; this                                                           R
+can be thought of as encoding the edges (i, j) of a sparse matching                                                                 r i (X)2 .
+                                                                                                                              Õ
+                                                                                                             Eal iдn (X) =
+graph. The optimization for both dense photometric and geometric                                                              i=1
+alignment is based on the following energy:
+                                                                                      This is done by re-naming the R = 3Ncor r + |E| · (|Ii | + |Di |) terms
+             E dense (T ) = w photo E photo (T ) + w geo E geo (T ).                  of the energy appropriately. Here, Ncor r is either the total number
+Here, w photo is the weight of the photometric term and w geo of the                  of inter-chunk sparse correspondences for inter-chunk alignment,
+geometric term, respectively. For the dense photo-consistency term,                   or per-chunk sparse correspondences for intra-chunk alignment.
+we evaluate the error on the gradient Ii of the luminance of Ci to                    The notation can be further simplified by defining a vector field
+gain robustness against lighting changes:                                             F : RN → RR that stacks all scalar residuals:
+                         | Ii |                                                                            F(X) = [ . . . , r i (X), . . . ]T .
+                       Õ Õ                                                       2
+                                                                  −1
+      E photo (X) =                  Ii (π (di,k )) − Ij (π (Tj        Ti di,k )) .   With this notation, Er e f ine can be expressed in terms of the squared
+                                                                                 2
+                      (i, j)∈E k=0                                                    Euclidean length of F(X):
+Here, π denotes the perspective projection, and di,k is the 3D po-
+                                                                                                              Er ef ine (X) = ||F(X)||22 .
+sition associated with the k-th pixel of the i-th depth frame. Our
+geometric alignment term evaluates a point-to-plane metric to al-                     Gauss-Newton is applied via a local linear approximation of F at
+low for fine-scale alignment in the tangent plane of the captured                     the last solution X k −1 using first-order Taylor expansion:
+geometry:
+                                                                                            F(X k ) = F(X k−1 ) + JF (X k −1 ) · ∆X, ∆X = X k − X k −1 .
+                                E geo (X) =
+                                                                                      Here, JF denotes the Jacobian of F. By substituting F with this
+  Õ |D
+    Õi | h                                                       i2                 local approximation, the optimal parameter update ∆X ∗ is found
+               nTi,k (di,k − Ti −1 Tj π −1 Dj π (Tj −1 Ti di,k ) ) .
+                                                    
+                                                                                      by solving a linear least squares problem:
+(i, j)∈E k=0
+                                                                                                 ∆X ∗ = argmin ||F(X k−1 ) + JF (X k −1 ) · ∆X||22 .
+Here, ni,k is the normal of the k-th pixel in the i-th input frame.                                       ∆X |
+Correspondences that project outside of the input frame are ignored,
+                                                                                                                              {z               }
+                                                                                                                                El in (∆X)
+and we apply ICP-like pruning based on distance and normal con-
+straints after each optimization step. For the dense photometric                      To obtain the minimizer ∆X ∗ , we set the corresponding partial
+and geometric constraints, we downsample Ii and Di , to 80 × 60                       derivatives dd E∆X
+                                                                                                       l in
+                                                                                                            (∆Xi∗ ) = 0, ∀i to zero, which yields the following
+                                                                                                          i
+pixels (using the same cached frames as for the dense verification                    system of linear equations:
+filter). Note that for the global pose optimization, the result of
+                                                                                              JF (X k −1 )T JF (X k−1 ) · ∆X ∗ = −JF (X k −1 )T F(X k−1 ) .
+optimizing densely at every keyframe is effectively reset by the
+sparse correspondence optimization, since the 3D positions of the                     To solve the system, we use a GPU-based data-parallel Precondi-
+correspondences are fixed. Thus we only perform the dense global                      tioned Conjugate Gradient (PCG) solver with Jacobi preconditioner.
+keyframe optimization after the user has indicated the end of scan-                   Based on the iterative solution strategy, the sparsity of the system
+ning.                                                                                 matrix JF (X k −1 )T JF (X k−1 ) can be exploited. For the sparse term,
+                          BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration                 •    1:7
+
+
+we never explicitly compute this matrix, but compute the non-zero            4.4.1 Correspondence and Frame Filtering. As an additional safe-
+entries, if required, on-the-fly during the PCG iterations.               guard to make the optimization robust against potential corre-
+   Gauss-Newton iterates this process of locally linearizing the en-      spondence outliers, which were mistakenly considered to be valid,
+ergy and solving the associated linear least squares problem starting     we perform correspondence and frame filtering after each opti-
+from an initial estimate X0 until convergence. We warm-start the          mization finishes. That is, we determine the maximum residual
+optimization based on the result obtained in the last frame.              r max = maxi r i (X) using a parallel reduction on the GPU, with the
+   In contrast to Zollhöfer [64], instead of using a reduction based     final max computation performed on the CPU. If r max > 0.05m,
+on two kernels to compute the optimal step size and update for the        we remove all correspondences between the two frames i and j
+descent direction, we use a single kernel running a combination of        associated with the correspondence which induces r max . Note that
+warp scans based on the shuffle intrinsic and global memory atomics       all correspondences between i and j are removed, in order to min-
+to accumulate the final result. This turned out to be much faster for     imize the number of times the optimization has to run in order
+our problem size.                                                         to prune all bad correspondences. Additionally, if a frame has no
+   The central operation of the PCG algorithm is the multiplication       correspondence to any other frame, it is implicitly removed from
+of the system matrix with the current descent direction.                  the optimization and marked as invalid.
+   Let us first consider the sparse feature term. To avoid fill-in, we       Note that the vast majority of false loop closures are filtered
+multiply the system matrix incrementally based on two separate            out through the verification steps (Sec. 4.1.1), and the optimization
+kernel calls: the first kernel multiplies JF and the computed inter-      pruning effectively removes the rest. Table 2 provides a detailed
+mediate result is then multiplied by JTF in the second kernel call.       overview of the effects of these filtering steps.
+For example, at the end of the apt0 sequence (see Fig. 3, bottom), JF
+has about 105K rows (residuals) and 5K columns (unknowns). In
+                                                                          5   DYNAMIC 3D RECONSTRUCTION
+all operations, we exploit the sparse structure of the matrix, only
+performing operations which will lead to a non-zero result. Since         Key to live, globally consistent reconstruction is updating the 3D
+JF and JTF have very different row-wise sparsity patterns, using two      model based on newly-optimized camera poses. We thus monitor
+different kernel calls helps to fine tune the parallelization approach    the continuous change in the poses of each frame to update the vol-
+to the specific requirements.                                             umetric scene representation through integration and de-integration
+   More specifically, for the sparse term, each row of JF encodes ex-     of frames. Based on this strategy, errors in the volumetric represen-
+actly one pairwise correspondence, depending on at most 2 extrinsic       tation due to accumulated drift or dead reckoning in feature-less
+camera poses or 2 × 6 = 12 non-zero matrix entries. Due to the low        regions can be fixed as soon as better pose estimates are available.
+number of required operations, the matrix-vector product can be
+readily computed by assigning one dedicated thread to each 3D block       5.1 Scene Representation
+row; i.e., handling the x-, y-, and z-residuals of one correspondence.
+                                                                          Scene geometry is reconstructed by incrementally fusing all input
+This is beneficial, since the different dimensions share common op-
+                                                                          RGB-D data into an implicit truncated signed distance (TSDF) repre-
+erations in the evaluation of F and JF . In contrast, JT has exactly
+                                                                          sentation, following Curless and Levoy [5]. The TSDF is defined over
+one row per unknown. The number of non-zero entries in each row
+                                                                          a volumetric grid of voxels; to store and process this data, we em-
+is equivalent to the number of correspondences involving the frame
+                                                                          ploy the state-of-the-art sparse volumetric voxel hashing approach
+associated with the unknown. For longer scanning sequences, this
+                                                                          proposed by Nießner et al. [37]. This approach scales well to the
+can easily lead to several thousand entries per row. To reduce the
+                                                                          scenario of large-scale surface reconstruction, since empty space
+amount of memory reads and compute of each thread, we opted for
+                                                                          neither needs to be represented nor addressed; the TSDF is stored
+a reduction-based approach to compute the matrix-vector products.
+                                                                          in a sparse volumetric grid based on spatial hashing. Following the
+We use one block of size Nblock = 256 to compute each row-wise
+                                                                          original approach, we also use voxel blocks of 8 × 8 × 8 voxels. In
+dot product. Each warp of a block performs a warp-reduction based
+                                                                          contrast to the work of Nießner et al. [37], we allow for RGB-D
+on the shuffle intrinsic and the final per-warp results are combined
+                                                                          frames to both be integrated into the TSDF as well as de-integrated
+based on shared memory atomics. For computing the multiplication
+                                                                          (i.e., adding and removing frames from the reconstruction). In order
+with JTF , we pre-compute auxiliary lists that allow lookup to all
+                                                                          to allow for pose updates, we also ensure that these two operations
+correspondences that influence a certain variable. This table is filled
+                                                                          are symmetric; i.e., one inverts the other.
+based on a kernel that has one thread per correspondence and adds
+entries to the lists corresponding to the involved variables. The
+per-list memory is managed using atomic counters. We recompute            5.2 Integration and De-integration
+this table if the set of active correspondences changes.                  Integration of a depth frame Di occurs as follows. For each voxel,
+   For the dense photometric and geometric alignment terms, the           D(v) denotes the signed distance of the voxel, W(v) the voxel weight,
+number of associated residuals is considerably higher. Since the          di (v) the projective distance (along the z axis) between a voxel and
+system matrix is fixed during the PCG steps, we pre-compute it at         Di , and w i (v) the integration weight for a sample of Di . For data
+the beginning of each non-linear iteration. The required memory is        integration, each voxel is then updated by
+preallocated and we update only the non-zero entries via scattered
+writes. Note that we only require a few writes, since we perform
+the local reductions in shared memory.                                           D 0 (v) =
+                                                                                             D(v)W(v)+w i (v)d i (v)
+                                                                                                                     ,   W 0 (v) = W(v) + w i (v).
+                                                                                                 W(v)+w i (v)
+1:8    • Dai, A. et al
+
+
+   We can reverse this operation to de-integrate a frame. Each voxel
+is then updated by
+                         D(v)W(v)−w i (v)d i (v)
+          D  (v) =          W(v)−w i (v)
+                                                 ,   W  (v) = W(v) − w i (v).
+    We can thus update a frame in the reconstruction by de-integrating
+it from its original pose and integrating it with a new pose. This is
+crucial for obtaining high-quality reconstructions in the presence
+of loop closures and revisiting, since the already integrated sur-
+face measurements must be adapted to the continuously changing
+stream of pose estimates.
+
+5.3     Managing Reconstruction Updates
+Each input frame is stored with its associated depth and color data,              Fig. 4. Performance Evaluation: our proposed pipeline runs at well beyond
+along with two poses: its integrated pose, and its optimized pose.                30Hz for all used test sequences. The computations are split up over two
+                                                                                  GPUs (left bar Titan X, right bar Titan Black).
+The integrated pose is the one used currently in the reconstruction,
+and is set whenever a frame gets integrated. The optimized pose
+stores the (continually-changing) result of the pose optimization.
+    When an input frame arrives, we aim to integrate it into the
+reconstruction as quickly as possible, to give the user or robot in-
+stantaneous feedback of the 3D model. Since the global optimization
+is not run for each frame but for each chunk, an optimized pose may
+not immediately be available and we must obtain an initial transform
+by other means. We compute this initial transform by composing
+the frame-to-frame transform from the key point correspondence
+filter with the newest available optimized transform.
+    In order to update the reconstruction with the most pertinent                 Fig. 5. Convergence analysis of the global keyframe optimization (log scale):
+optimization updates, we sort the frames in descending order by                   peaks correspond to new global keyframes. Only a few iterations are re-
+                                                                                  quired for convergence.
+the difference between the integrated transform and the optimized
+transform. The integrated transform and optimized transform are
+parameterized by 6 DOFs: α, β, γ (here, we use Euler angles in
+radians) describing the rotation, and x, y, z (in meters) describing
+the translation. Then the distance between the integrated trans-
+form tint = (α i , βi , γi , x i , yi , zi ) and the optimized transform topt =
+(αo , βo , γo , xo , yo , zo ) is defined to be s ∗ tint − s ∗ topt 2 where
+s = (2, 2, 2, 1, 1, 1) is multiplied element-wise to bring the rotations
+and translations closer in scale. For each new input frame, we de-
+integrate and integrate the N f ix = 10 frames from the top of the list.
+This allows us to dynamically update the reconstruction to produce
+a globally-consistent 3D reconstruction.
+
+6     RESULTS
+For live scanning, we use a Structure Sensor 2 mounted to an iPad
+Air. The RGB-D stream is captured at 30Hz with a color and depth
+                                                                                  Fig. 6. Recovery from tracking failure: our method is able to detect (gray
+resolution of 640 × 480. Note that we are agnostic to the type                    overlay) and recover from tracking failure; i.e., if the sensor is occluded or
+of used depth sensor. We stream the captured RGB-D data via a                     observes a featureless region.
+wireless network connection to a desktop machine that runs our
+global pose optimization and reconstructs a 3D model in real-time.
+Visual feedback of the reconstruction is streamed live to the iPad to             large-scale indoor scenes (4 offices, 2 apartments, 1 copyroom, with
+aid in the scanning process. To reduce the required bandwidth, we                 up to 95m camera trajectories), their alignment without noticeable
+use data compression based on zlib for depth and jpeg compression                 camera drift, and the high local quality of geometry and texture are
+for color. We implemented our global pose alignment framework                     on par with even offline approaches. This also demonstrates that our
+using the CUDA 7.0 architecture. Reconstruction results of scenes                 global pose alignment strategy scales well to large spatial extents
+captured using our live system are shown in Fig. 1 and 3 as well                  and long sequences (over 20,000 frames).
+as in the supplementary video. The completeness of the various
+                                                                                    Qualitative Comparison. First, we compare to the online 3D re-
+2 http://structure.io/                                                            construction approach of Nießner et al. [37], see Fig. 12. In contrast
+                            BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration •                        1:9
+
+
+
+
+Fig. 3. Large-scale reconstruction results: our proposed real-time global pose optimization outperforms current state-of-the-art online reconstruction systems.
+The globally aligned 3D reconstructions are at a quality that was previously only attainable offline. Note the completeness of the scans, the global alignment
+without noticeable camera drift and the high local quality of the reconstructions in both geometry and texture. Scans comprise thousands of input frames,
+include revisiting and many loop closures.
+
+
+
+
+Fig. 7. Our proposed real-time global pose optimization (top) outperforms the method of Whelan et al. [54] (bottom) in terms of scan completeness and
+alignment accuracy. Note, we generate a high-quality surface mesh, while the competing approach only outputs a pointcloud.
+
+
+to their work, which builds on frame-to-model tracking and suf-                   handles loop closures using non-rigid warping. In contrast, our
+fers from the accumulation of camera drift, we are able to produce                dynamic de-integration and integration of frames mitigates issues
+drift-free reconstructions at high fidelity. Our novel global pose                with warping artifacts in rigid structures, and moreover produces a
+optimization framework implicitly handles loop closure, recovers                  high quality continuous surface. Since our approach does not rely
+from tracking failures, and reduces geometric drift. Note that most               on explict loop closure detection, it scales better to scenarios with
+real-time fusion methods (e.g., [3, 20, 34, 37]) share the same frame-            many loop closures (c.p. Fig. 7 and 9). We additionally compare
+to-model ICP tracking algorithm, and therefore suffer from notable                to the offline Redwood approach [4], using their rigid variant, see
+drift. Fig. 7 and 9 show a comparison of our approach with the                    Fig. 8 and 9. Note, we do not compare to their newer non-rigid
+online ElasticFusion approach of Whelan et al. [54], which captures               approach, since it fails on most of our dataset sequences. While
+surfel maps using dense frame-to-model tracking and explicitly
+1:10   • Dai, A. et al
+
+
+
+
+Fig. 8. Our proposed real-time global pose optimization (top) delivers a reconstruction quality on par or even better than the off-line Redwood [4] system
+(bottom). Note, our reconstructions have more small scale detail.
+
+
+
+
+Fig. 9. Our proposed real-time global pose optimization (top) delivers a reconstruction quality on par or even better than the off-line Redwood [4] (middle) and
+the ElasticFusion [54] (bottom) system. Note that Redwood does not use color information, and was not able to resolve all loop closures in this challenging
+scan.
+
+
+                                                                                   take color information into account, thus struggling with sequences
+                                                                                   that contain fewer geometric features.
+
+                                                                                      Performance and Convergence. We measure the performance of
+                                                                                   our pipeline on an Intel Core i7 3.4GHz CPU (32GB RAM). For com-
+                                                                                   pute, we use a combination of a NVIDIA GeForce GTX Titan X and
+                                                                                   a GTX Titan Black. The Titan X is used for volumetric reconstruc-
+                                                                                   tion, and the Titan Black for correspondence search and global pose
+                                                                                   optimization. Our pipeline runs with a framerate well beyond 30Hz
+                                                                                   (see Fig. 4) for all shown test sequences. Note that the global dense
+                                                                                   optimization runs in < 500ms at the end of the sequences. After
+Fig. 10. Comparison of Sparse vs. Dense Alignment: the proposed dense
+                                                                                   adding a new global keyframe, our approach requires only a few
+intra- and inter- chunk alignment (top) leads to higher quality reconstruc-
+tions than only the sparse alignment step (bottom).
+                                                                                   iterations to reach convergence. Fig. 5 shows convergence plots for
+                                                                                   three of the used test sequences (cf. Fig. 3); the behavior generalizes
+                                                                                   to all other sequences. We achieve this real-time performance with
+their approach takes several hours (2.3h - 13.2h for each of our se-               the combination of our tailored data-parallel Gauss-Newton solver
+quences), we achieve comparable quality and better reconstruction                  (efficiently handling millions of residuals and solving for over a
+of small-scale detail at real-time rates. Note that Redwood does not               hundred thousand unknowns), a sparse-to-dense strategy enabling
+                           BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration • 1:11
+
+
+
+
+Fig. 11. Performance comparison of our tailored GPU-based solver to
+Ceres [1]. Both solvers are evaluated over the sparse energy term for 101
+keyframes, involving 600 variables and 16339 residuals, with poses initialized
+to the identity.
+
+
+convergence in only a few iterations, and a local-to-global strategy
+which efficiently decomposes the problem. Note that recent work
+provides detailed intuition why hand-crafted optimizers outperform
+existing, general solver libraries [6].
+   Additionally, we evaluate the performance of our tailored GPU-
+based solver against the widely-used, CPU-based Ceres solver [1].                Fig. 12. Comparison to the VoxelHashing approach of Nießner et al. [37]: in
+Fig. 11 shows the performance of both solvers for the sparse energy              contrast to the frame-to-model tracking of VoxelHashing, our novel global
+over 101 keyframes, comprising 600 variables and 16339 residuals,                pose optimization implicitly handles loop closure (top), robustly detects and
+with poses initialized to the identity. Note that this behavior is               recovers from tracking failures (middle), and greatly reduces local geometric
+representative of other sparse energy solves. For Ceres, we use the              drift (bottom).
+default Levenberg-Marquardt with a sparse normal Cholesky linear
+solver (the fastest of the linear solver options for this problem).
+                                                                                 the sparse term (Opt-s) and the dense term (Opt-d). The footprint
+While our solver takes a couple more iterations to converge without
+                                                                                 for storing the SIFT keypoints and correspondences (included in
+the Levenberg-Marquardt damping strategy, it still runs ≈ 20 times
+                                                                                 Opt(s)) is negligibly small; i.e, 31mb for Apt 0. The longest recon-
+faster than Ceres while converging to the same energy minimum.
+                                                                                 structed sequence (home at scan1 2013 jan 1) is part of the SUN3D
+                                                                                 dataset [57], consisting of 14785 frames (≈ 8.2 minutes scan time
+    Table 1. Memory consumption (GB) for the captured sequences.                 @30Hz). This sequence has a CPU memory footprint of 34.7GB
+                                                                                 and requires 7.3GB of GPU memory (4mm voxels) for tracking and
+                                       GPU                          CPU          reconstruction.
+                                          1cm          4mm
+                                                                                  Recovery from Tracking Failure. If a new keyframe cannot be
+                   Opt-d     Opt-s     Rec           Rec
+     Apt 0          1.4      0.031     0.5 1.9       3.9 5.3        20.0         aligned successfully, we assume tracking is lost and do not integrate
+     Apt 1          1.4      0.031     0.4 1.8       3.2 4.6        20.1         surface measurements. An example scanning sequence is shown
+     Apt 2          0.6      0.012     0.7 1.4       6.0 6.7        9.3          in Fig. 6. To indicate tracking failure, the reconstruction is shown
+   Copyroom         0.7      0.016     0.3 1.1       1.8 2.6        10.5         with a gray overlay. Based on this cue, the user is able to recover
+                                                                                 the method by moving back to a previously scanned area. Note that
+    Office 0        1.0      0.021     0.4 1.4       2.5 3.5        14.4
+                                                                                 there is no temporal nor spatial coherence required, as our method
+    Office 1        0.9      0.024     0.4 1.4       2.9 3.9        13.4
+                                                                                 globally matches new frames against all existing data. Thus, scan-
+    Office 2        0.6      0.011     0.4 1.0       3.0 3.6        8.2
+                                                                                 ning may be interrupted, and continued at a completely different
+    Office 3        0.6      0.011     0.4 1.0       2.7 3.3        8.9
+                                                                                 location.
+                                                                                    Loop Closure Detection and Handling. Our global pose optimiza-
+   Memory Consumption. We evaluate the memory consumption of
+                                                                                 tion approach detects and handles loop closures transparently (see
+our globally consistent reconstruction approach on our eight cap-
+                                                                                 Fig. 13), since the volumetric scene representation is continuously
+tured sequences, see Tab. 1. The most significant required memory
+                                                                                 updated to match the stream of computed pose estimates. This
+resides in RAM (CPU), i.e., 20GB for Apt 0. It stores all RGB-D frames
+                                                                                 allows incrementally fixing loop closures over time by means of
+and depends linearly on the length of the sequence, see Tab. 5. The
+                                                                                 integration and de-integration of surface measurements.
+required device memory (GPU) is much smaller, e.g., 5.3GB (4mm
+voxels) and 1.9GB (1cm voxels) for the same sequence. This is well                   Precision and Recall of Loop Closures. Tab. 2 gives the precision
+within the limits of modern graphics cards (12 GB for GTX Titan X).              (i.e., the percentage of correct chunk pair correspondence detections
+We also give the amount of memory required to store and manage                   from the set of established correspondences) and recall (i.e., the
+the TSDF (Rec) and to run the camera pose optimization, both for                 percentage of detected chunk pair correspondences from the set
+1:12   • Dai, A. et al
+
+
+
+
+Fig. 13. Global pose optimization robustly detects and resolves loop closure. Note, while data is first integrated at slightly wrong locations, the volumetric
+representation improves over time as soon as better pose estimates are available.
+
+
+Table 2. Loop closure precision and recall on the synthetic augmented             shown in Fig. 14. As a default, we use a voxel resolution of 4mm for
+ICL-NUIM Dataset [4].                                                             all reconstructions. While 1cm voxels reduce memory consumption,
+                              Sift Raw    Sift + KF    Sift + Verify   Opt        the quality of the reconstruction is slightly impaired.
+              Precision (%)     27.0         98.0           98.2       100
+  Living 1                                                                           Quantitative Comparison. We quantitatively evaluate our approach
+               Recall (%)       47.5         40.3           39.5       39.3
+              Precision (%)      25.3        92.1          92.4        100
+                                                                                  on independent benchmark data and compare against state-of-the-
+  Living 2                                                                        art online (DVO-SLAM [23], RGB-D SLAM [8], MRSMap [46], Kintin-
+               Recall (%)        49.3        47.4          45.9        45.7
+              Precision (%)      14.1        97.7          99.6        100
+                                                                                  uous [51], VoxelHashing [36, 37], ElasticFusion [54]) and offline
+  Office 1                                                                        systems (Submap Bundle Adjustment [29], Redwood [4]). Note that
+               Recall (%)        49.1        48.7          48.0        47.7
+                                                                                  for Redwood, we show results for the rigid variant, which produced
+              Precision (%)      10.9        90.2          96.2        100
+  Office 2                                                                        better camera tracking results. We first evaluate our approach on
+               Recall (%)        46.0        42.4          42.1        42.0
+                                                                                  the ICL-NUIM dataset of Handa et al. [17], which provides ground
+                                                                                  truth camera poses for several scans of a synthetic environment.
+                                                                                  Table 3 shows our trajectory estimation performance, measured
+                                                                                  with absolute trajectory error (ATE), on the four living room scenes
+                                                                                  (including synthetic noise), for which we out-perform existing state-
+                                                                                  of-the-art online and offline systems. Additionally, in Table 4 we
+                                                                                  evaluate our approach on the RGB-D benchmark of Sturm et al [47].
+                                                                                  This benchmark provides ground truth camera pose estimates for
+Fig. 14. Comparison of different voxel resolutions: 4mm voxel resolution          hand-held Kinect sequences using a calibrated motion capture sys-
+(left) leads to higher-fidelity reconstructions than the coarser 1cm resolution   tem. For these sequences, which only cover small scenes and simple
+(right). Note the generally sharper texture and the more refined geometry
+                                                                                  camera trajectories, our results are on par with or better than the
+in case of 4mm voxels.
+                                                                                  existing state of the art. Note that our own sequences have a larger
+                                                                                  spatial extent and are much more challenging, with faster motion
+of ground truth correspondences), on the loop closure set of the                  and many more loop closures.
+augmented ICL-NUIM dataset. A chunk pair correspondence is                           For these datasets (Tables 3 and 4), the Redwood system, which
+determined to be in the ground truth set if their geometry overlaps               relies solely on geometric registration, suffers from the relative lack
+by ≥ 30% according to the ground truth trajectory, and a proposed                 of varying views in the camera trajectories. In particular, fr3/nst is
+chunk pair correspondence is determined to be correct if it lies in the           a textured wall, which cannot be registered with a geometric-only
+ground truth set with reprojection error less than 0.2m, following                method. On both these datasets, we also quantitatively validate the
+[4]. We show our registration performance after running the SIFT                  relevance of our design decisions. While online alignment based
+matcher (Sift Raw), our correspondence filters described in Sec. 4.1.1            on sparse features only (Ours (s)) achieves reasonable results, using
+– the Key Point Correspondence Filter (SIFT + KF) and the Surface                 dense matching only in per chunk alignment further increases ac-
+Area and Dense Verification (SIFT + Verify) –, and the final result               curacy (Ours (sd)). Our full sparse and dense matching approach on
+after the optimization residual pruning described in Sec. 4.4.1 (Opt).            both local and global level leads to the highest accuracy.
+As can be seen, all steps of the globally consistent camera tracking
+                                                                                     Parameters. While we report default parameters for the Structure
+increase precision while maintaining sufficient recall.
+                                                                                  Sensor, other RGB-D sensors maintain different noise characteristics,
+   Dense Tracking and Voxel Resolution. In Fig. 10, we evaluate the               and we vary several parameters accordingly. For significant depth
+influence of the dense tracking component of our energy function.                 noise, we allow dense verification and residual pruning to be more
+While globally drift-free reconstructions can be obtained by sparse               lax, so as to not acquire too many false negatives. That is, for Kinect
+tracking only, the dense alignment term leads to more refined local               data we have a dense reprojection threshold of 0.3m and prune
+results. The impact of voxel resolution on reconstruction quality is              residuals > 0.16m, and for the (noisy) synthetic ICL-NUIM data we
+                               BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration                                   •   1:13
+
+     Table 3. ATE RMSE on the synthetic ICL-NUIM dataset by [17].                          allows for longer sessions. In order to allow for longer sequences,
+                                                                                           we would need more than two hierarchy levels to perform the op-
+                                  kt0          kt1         kt2          kt3
+                                                                                           timization in real time. We could also imagine spatial clustering
+         DVO SLAM               10.4cm        2.9cm      19.1cm       15.2cm
+                                                                                           – e.g., into separate rooms – and split up the optimization tasks
+        RGB-D SLAM              2.6cm         0.8cm       1.8cm       43.3cm
+                                                                                           accordingly.
+          MRSMap                20.4cm       22.8cm      18.9cm       109cm
+         Kintinuous             7.2cm         0.5cm       1.0cm       35.5cm               7     ADDITIONAL EVALUATION
+        VoxelHashing            1.4cm        0.4cm        1.8cm       12.0cm
+        Elastic Fusion          0.9cm         0.9cm       1.4cm       10.6cm                                           Table 5. Dataset overview.
+       Redwood (rigid)          25.6cm        3.0cm       3.3cm       6.1cm                                                 #Frames       Trajectory Length
+           Ours (s)             0.9cm         1.2cm       1.3cm       1.3cm                                  Apt 0            8560              89.4m
+          Ours (sd)             0.8cm         0.5cm       1.1cm       1.2cm                                  Apt 1            8580              91.8m
+             Ours               0.6cm        0.4cm       0.6cm        1.1cm                                  Apt 2            3989              87.5m
+Note that unlike the other methods, Redwood does not use color information and runs                        Copyroom           4480              24.4m
+offline. For our approach, we also provide results for sparse-only (s) as well as sparse
+                              and local dense only (sd).                                                    Office 0          6159              52.8m
+                                                                                                            Office 1          5730              51.7m
+          Table 4. ATE RMSE on the TUM RGB-D dataset by [47].                                               Office 2          3500              36.3m
+                                                                                                            Office 3          3820              66.8m
+                             fr1/desk      fr2/xyz      fr3/office       fr3/nst               In order to capture scans at high completeness, the camera is moved in long and
+      DVO SLAM                2.1cm         1.8cm         3.5cm           1.8cm                                              complex trajectories.
+     RGB-D SLAM               2.3cm        0.8cm          3.2cm           1.7cm
+       MRSMap                 4.3cm         2.0cm         4.2cm         201.8cm
+                                                                                           7.1 Additional Qualitative Results
+      Kintinuous              3.7cm         2.9cm         3.0cm           3.1cm
+     VoxelHashing             2.3cm         2.2cm         2.3cm           8.7cm            Reconstructed models for the eight scenes in our dataset are publicly
+     Elastic Fusion           2.0cm         1.1cm         1.7cm           1.6cm            available 3 . While our method and ElasticFusion run at real-time
+      LSD-SLAM                   -          1.5cm            -               -             rates, Redwood runs offline, taking 8.6 hours for Apt0, 13.2 hours
+                                                                                           for Apt1, 4 hours for Copyroom, 7.7 hours for Office1, 2.6 hours for
+      Submap BA               2.2cm            -          3.5cm              -
+                                                                                           Office2, and 3.5 hours for Office3. The relocalization (due to sensor
+    Redwood (rigid)           2.7cm         9.1cm         3.0cm         192.9cm
+                                                                                           occlusion) in the sequence Apt 2 cannot be handled by state-of-the-
+        Ours (s)              1.9cm         1.4cm         2.9cm           1.6cm            art methods such as ElasticFusion and Redwood. Redwood is also a
+       Ours (sd)              1.7cm         1.4cm         2.8cm           1.4cm            geometry-only approach that does not use the RGB channels. Note
+          Ours                1.6cm         1.1cm         2.2cm          1.2cm             that the lack of ElasticFusion results on some sequences is due to
+ Note that unlike the other methods listed, Redwood does not use color information         the occasional frame jump in our wifi streaming setup, which dense
+and runs offline. For our approach, we also provide results for sparse-only (s) as well
+                         as sparse and local dense only (sd).                              frame-to-model methods cannot handle.
+                                                                                              We additionally evaluate our method on the SUN3D dataset [57],
+                                                                                           which contains a variety of indoor scenes captured with an Asus
+have a dense reprojection threshold of 0.1m and prune residuals                            Xtion sensor. Fig. 15 shows reconstruction results for several large,
+> 0.08m.                                                                                   complex scenes, using the offline SUN3Dsfm bundle adjustment
+   Limitations. As our tracking is based on sparse key point match-                        system as well as our approach. Note that our approach produces
+ing, small local misalignments can occur; e.g., SIFT matches can be                        better global structure while maintaining local detail at real-time
+off by a few pixels and the depth data associated with a keypoint                          rates. The SUN3D dataset also contains eight scenes which contain
+may be inaccurate due to sensor noise. While we solve for optimal                          manual object-correspondence annotations in order to guide their
+keypoint positions from the inter-chunk optimization, small mis-                           reconstructions; we show reconstruction results using our method
+matches between global keypoints can still be propagated within                            (without annotation information) on these scenes in Fig. 16.
+the global optimization, leading to local misalignments. Ideally, we                          In addition, we have reconstructed all 464 scenes from the NYU2
+would treat the locations of the global keypoints as unknowns to                           dataset [43], which contains a variety of indoor scenes recorded by
+optimize for. Unfortunately, this would involve significant compu-                         a Kinect. Several reconstruction results are shown in Fig. 17.
+tational effort, which (currently) seems to exceed even the compu-
+                                                                                           7.2 Additional Quantitative Results
+tational budget of offline approaches. Another limitation is that we
+currently run our method on two GPUs. Fortunately, we can easily                           The ICL-NUIM dataset of Handa et al. [17] also provides the ground
+stream the data to and from an iPad with live visual feedback, on                          truth 3D model used to generate the virtually scanned sequences.
+both the desktop and mobile device, thus making scanning fun and                           In addition to the camera tracking evaluation provided in Section
+convenient. With our current hardware configurations, we are lim-                          6 of the paper, we evaluate surface reconstruction accuracy (mean
+ited to scans of up to 25,000 input RGB-D frames. This corresponds                         distance of the model to the ground truth surface) for the living
+to about 14 minutes of continuous scanning, assuming 30Hz input                            room model in Table 6.
+– although many RGB-D sensors have a lower frame rate which                                3 http://www.graphics.stanford.edu/projects/bundlefusion/
+1:14   • Dai, A. et al
+
+
+
+
+                     Fig. 15. Reconstruction results on scenes from the SUN3D dataset [57], using SUN3Dsfm and our approach.
+                         BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration • 1:15
+
+
+
+
+Fig. 16. Reconstruction results on eight scenes from the SUN3D dataset [57], chosen from the List of Annotated Scenes (our method is fully automated and
+does not use any annotations).
+1:16   • Dai, A. et al
+
+
+
+
+                         Fig. 17. Reconstructions from the NYU2 dataset [43].
+                             BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration                                •   1:17
+
+
+   Additionally, we further evaluate our camera tracking on the aug-                                Table 8. Frame Registration and Missed frames.
+mented ICL-NUIM dataset of [4], which comprises synthetic scans
+                                                                                                                          #Frames       #Unregistered Frames
+of two virtual scenes, a living room and an office, from the original
+                                                                                                  Apt 0                     8560                  0
+ICL-NUIM data. In contrast to the original ICL-NUIM, these scans
+                                                                                                  Apt 1                     8580                 82
+have longer trajectories with more loop closures. Table 7 shows our
+                                                                                                  Apt 2                     3989                115
+trajectory estimation performance on this dataset (with synthetic
+sensor noise, using the reported camera intrinsic parameters), which                           Copyroom                     4480                  0
+is on par with or better than existing state of the art. Although the                            Office 0                   6159                105
+camera trajectories are complex, the additional loop closures help                               Office 1                   5730                  1
+maintain stability (as frames find matches which are not neighbors,                              Office 2                   3500                  0
+mitigating tracking drift), aiding our performance in all scenes ex-                             Office 3                   3820                 42
+cept Office 1. In this case, our method has difficulty closing the loop,                      SUN3D (avg)                   5100                  6
+as part of it covers a wall with little to no color features.                             Livingroom 1 (A-ICL)              2870                  1
+   In Table 8, we show the number of frames registered for each our                       Livingroom 2 (A-ICL)              2350                  0
+captured sequences, as well as for the augmented ICL-NUIM and                                Office 1 (A-ICL)               2690                 94
+various SUN3D sequences. Our method registers the vast majority                              Office 2 (A-ICL)               2538                  0
+of frames in these sequences, only dropping frames when they fail to                 Frames registered by our method on various sequences. The unregistered frames are
+pass our correspondence filters, which err on the conservative side.                 those which did not find sufficient sparse matches; i.e., untextured walls or frames in
+Many of the unregistered frames listed contain sensor occlusions                      which the depth sensor was occluded. For instance, in Apt 2, we occlude the sensor
+                                                                                        with our hand to demonstrate our relocalization ability, which leads to a higher
+(for the Apt 2 relocalizations) or untextured walls, indicating that our             unregistered frame count. Note that the SUN3D frame registration is reported for the
+correspondence and frame filtering finds a good balance between                       average of the scenes shown in Figs. 15-16, and that A-ICL refers to the Augmented
+discarding potentially bad matches and retaining good matches to                                                      ICL-NUIM dataset.
+
+maintain stable tracking.
+                                                                                                   Table 9. SIFT performance for a 640 × 480 image.
+Table 6. Surface reconstruction accuracy on the synthetic ICL-NUIM
+                                                                                               #Features       Time Detect (ms)           Time Match (ms)
+dataset by [17].
+                                                                                                  150                3.8                       0.04
+                                kt0        kt1         kt2         kt3                            250                4.2                       0.07
+        DVO SLAM              3.2cm       6.1cm      11.9cm       5.3cm                          1000                5.8                       0.42
+       RGB-D SLAM             4.4cm       3.2cm      3.1cm       16.7cm               Detection time (including descriptor computation) is reported per frame, and match
+         MRSMap               6.1cm      14.0cm      9.8cm       24.8cm              time per image pair (parallelized). On all sequences run, we detect about 150 features
+                                                                                                            per frame, and about 250 per keyframe.
+        Kintinuous            1.1cm       0.8cm      0.9cm       24.8cm
+       Elastic Fusion         0.7cm       0.7cm      0.8cm        2.8cm
+      Redwood (rigid)         2.0cm       2.0cm      1.3cm        2.2cm              8    CONCLUSION
+            Ours              0.5cm      0.6cm       0.7cm       0.8cm               We have presented a novel online real-time 3D reconstruction ap-
+ Mean distance of each reconstructed model to the ground truth surface. Note that    proach that provides robust tracking and implicitly solves the loop
+ unlike the other methods listed, Redwood does not use color information and runs
+                                      offline.
+                                                                                     closure problem by globally optimizing the trajectory for every
+                                                                                     captured frame. To this end, we combine online SIFT feature ex-
+                                                                                     traction, matching, and pruning with a novel parallel non-linear
+Table 7. ATE RMSE on the synthetic augmented ICL-NUIM Dataset by [4].
+                                                                                     pose optimization framework, over both sparse features as well as
+                   Living room 1        Living room 2        Office 1     Office 2   dense correspondences, enabling the solution of the global align-
+ Kintinuous             27cm                28cm              19cm         26cm      ment problem at real-time rates. The continuously changing stream
+ DVO SLAM              102cm                14cm              11cm         11cm      of optimized pose estimates is monitored and the reconstruction
+ SUN3D SfM              21cm                23cm              24cm         12cm      is updated through dynamic integration and de-integration. The
+  Redwood               10cm                13cm              6cm          7cm       capabilities of the proposed approach have been demonstrated on
+                                                                                     several large-scale 3D reconstructions with reconstruction quality
+    Ours               0.6cm                0.5cm            15.3cm       1.4cm
+                                                                                     and completeness that was previously only possible with offline
+Note that unlike the other methods listed, Redwood does not use color information    approaches and tedious capture sessions. We believe online global
+                                and runs offline.
+                                                                                     pose alignment will pave the way for many new and interesting ap-
+                                                                                     plications. Global accurate tracking is the foundation for immersive
+7.3    SIFT Performance                                                              AR/VR applications and makes online hand-held 3D reconstruction
+We provide an additional performance analysis of our GPU-based                       applicable to scenarios that require high-fidelity tracking.
+SIFT detection and matching strategy, see Table 9. Note that for a
+1296 × 968 image (another Structure sensor color resolution), SIFT                   ACKNOWLEDGMENTS
+detection time increases slightly to ≈ 6.4ms. We detect ∼ 150                        We would like to thank Thomas Whelan for his help with Elastic-
+features per frame, and ∼ 250 per keyframe, for all sequences.                       Fusion, and Sungjoon Choi for his advice on the Redwood system.
+1:18    • Dai, A. et al
+
+
+This work was funded by the Max Planck Center for Visual Comput-                            [28] David G. Lowe. 2004. Distinctive Image Features from Scale-Invariant Keypoints.
+ing and Communications, the ERC Starting Grant 335545 CapReal,                                   IJCV 60 (2004), 91–110.
+                                                                                            [29] R. Maier, J. Sturm, and D. Cremers. 2014. Submap-based Bundle Adjustment for
+and a Stanford Graduate Fellowship. We are grateful for hardware                                 3D Reconstruction from RGB-D Data. In Proc. GCPR. Münster, Germany.
+donations from NVIDIA Corporation and Occipital.                                            [30] Maxime Meilland, Andrew Comport, and others. 2013. On unifying key-frame and
+                                                                                                 voxel-based dense visual SLAM at large scales. In Proc. IROS. IEEE, 3677–3683.
+                                                                                            [31] Maxime Meilland, A Comport, Patrick Rives, and INRIA Sophia Antipolis
+REFERENCES                                                                                       Méditerranée. 2011. Real-time dense visual tracking under large lighting varia-
+ [1] Sameer Agarwal, Keir Mierle, and Others. 2013. Ceres Solver. http://ceres-solver.           tions. In Proc. BMVC, Vol. 29.
+     org. (2013).                                                                           [32] P. Merrell, A. Akbarzadeh, L. Wang, P. Mordohai, J.M. Frahm, R. Yang, D. Nistér,
+ [2] P.J. Besl and N.D. McKay. 1992. A method for registration of 3-D shapes. IEEE               and M. Pollefeys. 2007. Real-time visibility-based fusion of depth maps. In Proc.
+     Trans. PAMI 14, 2 (1992), 239–256.                                                          ICCV. 1–8.
+ [3] Jiawen Chen, Dennis Bautembach, and Shahram Izadi. 2013. Scalable real-time            [33] Richard M. Murray, S. Shankar Sastry, and Li Zexiang. 1994. A Mathematical
+     volumetric surface reconstruction. ACM TOG 32, 4 (2013), 113.                               Introduction to Robotic Manipulation. CRC Press.
+ [4] Sungjoon Choi, Qian-Yi Zhou, and Vladlen Koltun. 2015. Robust Reconstruction           [34] Richard A Newcombe, Shahram Izadi, Otmar Hilliges, David Molyneaux, David
+     of Indoor Scenes. Proc. CVPR (June 2015).                                                   Kim, Andrew J Davison, Pushmeet Kohli, Jamie Shotton, Steve Hodges, and
+ [5] Brian Curless and Marc Levoy. 1996. A volumetric method for building complex                Andrew Fitzgibbon. 2011. KinectFusion: Real-time dense surface mapping and
+     models from range images. In In Proc. SIGGRAPH. ACM, 303–312.                               tracking. In Proc. ISMAR. 127–136.
+ [6] Zachary DeVito, Michael Mara, Michael Zollhöfer, Gilbert Bernstein, Jonathan          [35] Richard A. Newcombe, Steven J. Lovegrove, and Andrew J. Davison. 2011. DTAM:
+     Ragan-Kelley, Christian Theobalt, Pat Hanrahan, Matthew Fisher, and Matthias                Dense Tracking and Mapping in Real-time. In Proc. ICCV. 2320–2327.
+     Nießner. 2016. Opt: A Domain Specific Language for Non-linear Least Squares            [36] Matthias Nießner, Angela Dai, and Matthew Fisher. 2014. Combining Inertial
+     Optimization in Graphics and Imaging. arXiv preprint arXiv:1604.06525 (2016).               Navigation and ICP for Real-time 3D Surface Reconstruction. (2014).
+ [7] Alberto Elfes and Larry Matthies. 1987. Sensor integration for robot navigation:       [37] M. Nießner, M. Zollhöfer, S. Izadi, and M. Stamminger. 2013. Real-time 3D
+     combining sonar and stereo range data in a grid-based representataion. In Decision          Reconstruction at Scale using Voxel Hashing. ACM TOG (2013).
+     and Control, 1987. 26th IEEE Conference on, Vol. 26. IEEE, 1802–1807.                  [38] Vivek Pradeep, Christoph Rhemann, Shahram Izadi, Christopher Zach, Michael
+ [8] Felix Endres, Jürgen Hess, Nikolas Engelhard, Jürgen Sturm, Daniel Cremers, and           Bleyer, and Steven Bathiche. 2013. MonoFusion: Real-time 3D reconstruction of
+     Wolfram Burgard. 2012. An evaluation of the RGB-D SLAM system. In Proc. ICRA.               small scenes with a single web camera. In Proc. ISMAR. 83–88.
+     IEEE, 1691–1696.                                                                       [39] F Reichl, J Weiss, and R Westermann. 2015. Memory-Efficient Interactive Online
+ [9] J. Engel, T. Schöps, and D. Cremers. 2014. LSD-SLAM: Large-Scale Direct Monoc-             Reconstruction From Depth Image Streams. In Computer Graphics Forum. Wiley
+     ular SLAM. In European Conference on Computer Vision.                                       Online Library.
+[10] Jakob Engel, Jurgen Sturm, and Daniel Cremers. 2013. Semi-dense visual odometry        [40] H. Roth and M. Vona. 2012. Moving Volume KinectFusion. In Proc. BMVC.
+     for a monocular camera. In Proc. ICCV. IEEE, 1449–1456.                                [41] S. Rusinkiewicz, O. Hall-Holt, and M. Levoy. 2002. Real-time 3D model acquisition.
+[11] Nicola Fioraio, Jonathan Taylor, Andrew Fitzgibbon, Luigi Di Stefano, and                   ACM TOG 21, 3 (2002), 438–446.
+     Shahram Izadi. 2015. Large-Scale and Drift-Free Surface Reconstruction Using           [42] S. Rusinkiewicz and M. Levoy. 2001. Efficient variants of the ICP algorithm. In
+     Online Subvolume Registration. Proc. CVPR (June 2015).                                      Proc. 3DIM. 145–152.
+[12] Christian Forster, Matia Pizzoli, and Davide Scaramuzza. 2014. SVO: Fast semi-         [43] Nathan Silberman, Derek Hoiem, Pushmeet Kohli, and Rob Fergus. 2012. Indoor
+     direct monocular visual odometry. In Proc. ICRA. IEEE, 15–22.                               Segmentation and Support Inference from RGBD Images. In ECCV.
+[13] Simon Fuhrmann and Michael Goesele. 2014. Floating Scale Surface Reconstruc-           [44] F. Steinbruecker, C. Kerl, J. Sturm, and D. Cremers. 2013. Large-Scale Multi-
+     tion. In Proc. SIGGRAPH.                                                                    Resolution Surface Reconstruction from RGB-D Sequences. In Proc. ICCV. Sydney,
+[14] David Gallup, Marc Pollefeys, and Jan-Michael Frahm. 2010. 3D reconstruction                Australia.
+     using an n-layer heightmap. In Pattern Recognition. Springer, 1–10.                    [45] F. Steinbruecker, J. Sturm, and D. Cremers. 2014. Volumetric 3D Mapping in Real-
+[15] Ben Glocker, Jamie Shotton, Antonio Criminisi, and Shahram Izadi. 2015. Real-               Time on a CPU. In 2014 IEEE International Conference on Robotics and Automation
+     Time RGB-D Camera Relocalization via Randomized Ferns for Keyframe Encoding.                (ICRA). Hongkong, China.
+     TVCG 21, 5 (2015), 571–583.                                                            [46] Jörg Stückler and Sven Behnke. 2014. Multi-resolution surfel maps for efficient
+[16] John C Gower. 1975. Generalized procrustes analysis. Psychometrika 40, 1 (1975),            dense 3D modeling and tracking. Journal of Visual Communication and Image
+     33–51.                                                                                      Representation 25, 1 (2014), 137–147.
+[17] A. Handa, T. Whelan, J.B. McDonald, and A.J. Davison. 2014. A Benchmark for            [47] J. Sturm, N. Engelhard, F. Endres, W. Burgard, and D. Cremers. 2012. A Benchmark
+     RGB-D Visual Odometry, 3D Reconstruction and SLAM. In Proc. ICRA. Hong                      for the Evaluation of RGB-D SLAM Systems. In Proc. IROS.
+     Kong, China.                                                                           [48] Bill Triggs, Philip F McLauchlan, Richard I Hartley, and Andrew W Fitzgibbon.
+[18] P. Henry, M. Krainin, E. Herbst, X. Ren, and D. Fox. 2010. RGB-D mapping: Using             2000. Bundle adjustmen, a modern synthesis. In Vision algorithms: theory and
+     depth cameras for dense 3D modeling of indoor environments. In Proc. Int. Symp.             practice. Springer, 298–372.
+     Experimental Robotics, Vol. 20. 22–25.                                                 [49] Julien Valentin, Matthias Nießner, Jamie Shotton, Andrew Fitzgibbon, Shahram
+[19] A. Hilton, A. Stoddart, J. Illingworth, and T. Windeatt. 1996. Reliable surface             Izadi, and Philip Torr. 2015. Exploiting Uncertainty in Regression Forests for
+     reconstruction from multiple range images. JProc. ECCV (1996), 117–126.                     Accurate Camera Relocalization. In Proc. CVPR. 4400–4408.
+[20] S. Izadi, D. Kim, O. Hilliges, D. Molyneaux, R. Newcombe, P. Kohli, J. Shotton, S.     [50] T. Weise, T. Wismer, B. Leibe, and L. Van Gool. 2009. In-hand scanning with
+     Hodges, D. Freeman, A. Davison, and A. Fitzgibbon. 2011. KinectFusion: Real-                online loop closure. In Proc. ICCV Workshops. 1630–1637.
+     time 3D reconstruction and interaction using a moving depth camera. In Proc.           [51] T Whelan, H Johannsson, M Kaess, J Leonard, and J McDonald. 2012. Robust
+     UIST. 559–568.                                                                              Tracking for Real-Time Dense RGB-D Mapping with Kintinuous. Technical Report.
+[21] Wolfgang Kabsch. 1976. A solution for the best rotation to relate two sets of               Query date: 2012-10-25.
+     vectors. Acta Crystallographica Section A: Crystal Physics, Diffraction, Theoretical   [52] Thomas Whelan, Hordur Johannsson, Michael Kaess, John J Leonard, and John
+     and General Crystallography 32, 5 (1976), 922–923.                                          McDonald. 2013. Robust real-time visual odometry for dense RGB-D mapping. In
+[22] Maik Keller, Damien Lefloch, Martin Lambers, Shahram Izadi, Tim Weyrich,                    Proc. ICRA.
+     and Andreas Kolb. 2013. Real-time 3D Reconstruction in Dynamic Scenes using            [53] Thomas Whelan, Michael Kaess, John J Leonard, and John McDonald. 2013.
+     Point-based Fusion. In Proc. 3DV. IEEE, 1–8.                                                Deformation-based loop closure for large scale dense RGB-D SLAM. In Proc. IROS.
+[23] C. Kerl, J. Sturm, and D. Cremers. 2013. Dense Visual SLAM for RGB-D Cameras.               IEEE, 548–555.
+     In Proc. IROS.                                                                         [54] T. Whelan, S. Leutenegger, R. F. Salas-Moreno, B. Glocker, and A. J. Davison. 2015.
+[24] Georg Klein and David Murray. 2007. Parallel Tracking and Mapping for Small                 ElasticFusion: Dense SLAM Without A Pose Graph. In Proc. RSS. Rome, Italy.
+     AR Workspaces. In Proc. ISMAR. Nara, Japan.                                            [55] Chenglei Wu, Michael Zollhöfer, Matthias Nießner, Marc Stamminger, Shahram
+[25] Rainer Kümmerle, Giorgio Grisetti, Hauke Strasdat, Kurt Konolige, and Wolfram              Izadi, and Christian Theobalt. 2014. Real-time Shading-based Refinement for
+     Burgard. 2011. g 2 o: A general framework for graph optimization. In Proc. ICRA.            Consumer Depth Cameras. ACM TOG 33, 6 (2014).
+     IEEE, 3607–3613.                                                                       [56] Kai M Wurm, Armin Hornung, Maren Bennewitz, Cyrill Stachniss, and Wol-
+[26] Marc Levoy, Kari Pulli, Brian Curless, Szymon Rusinkiewicz, David Koller, Lucas             fram Burgard. 2010. OctoMap: A probabilistic, flexible, and compact 3D map
+     Pereira, Matt Ginzton, Sean Anderson, James Davis, Jeremy Ginsberg, and others.             representation for robotic systems. In Proc. ICRA, Vol. 2.
+     2000. The digital Michelangelo project: 3D scanning of large statues. In In Proc.      [57] Jianxiong Xiao, Andrew Owens, and Antonio Torralba. 2013. SUN3D: A database
+     SIGGRAPH. ACM Press/Addison-Wesley Publishing Co., 131–144.                                 of big spaces reconstructed using sfm and object labels. In Proc. ICCV. IEEE,
+[27] Hao Li, Etienne Vouga, Anton Gudym, Linjie Luo, Jonathan T Barron, and Gleb                 1625–1632.
+     Gusev. 2013. 3D self-portraits. ACM TOG 32, 6 (2013), 187.
+                              BundleFusion: Real-time Globally Consistent 3D Reconstruction using On-the-fly Surface Re-integration   •   1:19
+
+
+[58] M. Zeng, F. Zhao, J. Zheng, and X. Liu. 2012. Octree-based Fusion for Realtime
+     3D Reconstruction. Graphical Models (2012).
+[59] Yizhong Zhang, Weiwei Xu, Yiying Tong, and Kun Zhou. 2015. Online structure
+     analysis for real-time indoor scene reconstruction. ACM Transactions on Graphics
+     (TOG) 34, 5 (2015), 159.
+[60] Qian-Yi Zhou and Vladlen Koltun. 2013. Dense scene reconstruction with points
+     of interest. ACM Transactions on Graphics (TOG) 32, 4 (2013), 112.
+[61] Qian-Yi Zhou and Vladlen Koltun. 2014. Color map optimization for 3D recon-
+     struction with consumer depth cameras. ACM Transactions on Graphics (TOG)
+     33, 4 (2014), 155.
+[62] Qian-Yi Zhou, Steven Miller, and Vladlen Koltun. 2013. Elastic fragments for
+     dense scene reconstruction. In Computer Vision (ICCV), 2013 IEEE International
+     Conference on. IEEE, 473–480.
+[63] Michael Zollhöfer, Angela Dai, Matthias Innmann, Chenglei Wu, Marc Stam-
+     minger, Christian Theobalt, and Matthias Nießner. 2015. Shading-based refine-
+     ment on volumetric signed distance functions. ACM TOG 34, 4 (2015).
+[64] Michael Zollhöfer, Matthias Nießner, Shahram Izadi, Christoph Rehmann, Christo-
+     pher Zach, Matthew Fisher, Chenglei Wu, Andrew Fitzgibbon, Charles Loop,
+     Christian Theobalt, and Marc Stamminger. 2014. Real-time Non-rigid Reconstruc-
+     tion using an RGB-D Camera. ACM TOG 33, 4 (2014).
+
+accepted January 2017
+

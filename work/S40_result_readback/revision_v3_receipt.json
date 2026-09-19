@@ -1,0 +1,59 @@
+{
+  "schema": "s40-readback-revision-v3-receipt-v1",
+  "status": "SOURCE_REVISED_AWAITING_INDEPENDENT_REVIEW",
+  "created_utc": "2026-09-07T12:35:22.527880+00:00",
+  "author_role": "/root",
+  "failure_preserved": {
+    "supervision_directory": "work/S40_result_readback/supervision_01",
+    "supervisor_receipt_sha256": "f269dc2486478e65176c38445ab97251f31a5a4ac6c9f50cbd344a73daefd5da",
+    "worker_directory": "work/S40_result_readback/executed_01",
+    "worker_receipt_sha256": "4b762c3061d395a6767f319a553e681dbea8fe4d90bd49e5ac8a563d36bf35c6",
+    "worker_error_type": "TypeError",
+    "worker_error": "list indices must be integers or slices, not str",
+    "report_present": false
+  },
+  "identities": {
+    "previous_readback_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "revised_readback_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+    "previous_protocol_sha256": "b4887316240bc511cfde2d4fec5d31989ffa1a854be4da56a973e28cca0d7b2c",
+    "revised_protocol_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+    "previous_source_review_sha256": "ea599804589dc4c10b2ca65c972bbf1ae8a1c3c04c327f7605c5a45e2f08ec19",
+    "pipeline_sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "archive_manifest_sha256": "4e2acb3448589710aedcf6945d2d278bfa1b6d194b94adaad0d9b371697e153b",
+    "archive_events_sha256": "bca5c9148a81ba6a070cb4d10c67db384bf1d96f06a0233f746b117a3228a7b1",
+    "trace_events_sha256": "5d748f8c7fb095c0ecc6eac899b846d86a89a07264b927ee20fc6cbd6b65bb3e"
+  },
+  "actual_schema_evidence": {
+    "first_context_output": {
+      "archive_event_seq": 22,
+      "representation": "Python list containing one exact non-bool int",
+      "decoded_value": [0]
+    },
+    "second_context_output": {
+      "archive_event_seq": 68,
+      "representation": "tensor descriptor",
+      "dtype": "int64",
+      "shape": [4],
+      "tensor_sha256": "2a1119dcc2a2f3d1103985b60723071ec44ab4594d565dfb832141f07b2ea1d5"
+    },
+    "frozen_source_lines": {
+      "first_batch_python_list": [631, 632],
+      "later_batch_tensor": [752, 764]
+    }
+  },
+  "revision_scope": [
+    "Only the context_time_indices parsing at the two-batch readback loop changed.",
+    "Batch 1 now requires the exact original Python [0] list with exact int element type.",
+    "Batch 2 still requires a tensor descriptor and keeps the original one-dimensional integer-array checks.",
+    "Reader.array, tensor descriptor verification, FIELDS, hash chains, bitwise comparisons, resource budgets and claim boundaries were not relaxed.",
+    "The protocol records the observed failure and requires fresh supervision_02/executed_02 only after renewed reviews."
+  ],
+  "static_checks": {
+    "python_ast_parse": "PASS",
+    "git_diff_check": "PASS",
+    "readback_executed": false,
+    "archive_tensor_or_image_bodies_read": 0,
+    "model_gate_generation_or_scoring_runs": 0
+  },
+  "next_gate": "A different author must review the exact revised source/protocol/receipt. A PASS then permits updating the outer supervisor pins; that final supervisor requires another independent review before attempt02."
+}

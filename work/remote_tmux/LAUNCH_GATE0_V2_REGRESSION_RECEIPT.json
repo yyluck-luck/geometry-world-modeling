@@ -1,0 +1,100 @@
+{
+  "schema": "gate0-v2-launch-regression-v1",
+  "recorded_at_utc": "2026-09-16T10:41:26.240376+00:00",
+  "guard_sha256": "4a427fda6725e6253ab3e74847fd6cfedd9fb4a27c8f37abf81c55c5470c2e20",
+  "test_sha256": "a63e48b2ddc46ad27695e273aa0211a9113ebf6ecd54b74e61d5f3f346cfb3bf",
+  "scope": "Software-only stub validator/tmux checks; no remote deployment or job submission.",
+  "status": "PASS",
+  "cases": [
+    {
+      "name": "valid v2 receipt dispatches once; duplicate state is rejected",
+      "passed": true,
+      "first_exit": 0,
+      "second_exit": 3,
+      "tmux_dispatches": 1,
+      "formal_receipt": true,
+      "stdout": "tmux_session:test-v2\nreceipt_directory:/tmp/gate0-v2-launch-test-0f1vu50t/formal.log.state\nformal_launch_guard_receipt:/tmp/gate0-v2-launch-test-0f1vu50t/formal.log.formal_launch_guard_receipt.json\n",
+      "stderr": ""
+    },
+    {
+      "name": "blocked v2 receipt rejects before tmux",
+      "passed": true,
+      "first_exit": 2,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "legacy validator schema rejects despite zero exit",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "validator did not return PRE_RUN_READY\n"
+    },
+    {
+      "name": "changed validator rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "validator_sha256 mismatch; dispatch refused\n"
+    },
+    {
+      "name": "changed sbatch rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "sbatch_script_sha256 mismatch; dispatch refused\n"
+    },
+    {
+      "name": "changed contract rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "contract_sha256 mismatch; dispatch refused\n"
+    },
+    {
+      "name": "manifest scope mismatch rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "dispatch scope does not bind contract\n"
+    },
+    {
+      "name": "wrapper binding mismatch rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "dispatch wrapper SHA binding missing/mismatch\n"
+    },
+    {
+      "name": "wrapper file tamper rejects before execution",
+      "passed": true,
+      "first_exit": 1,
+      "second_exit": null,
+      "tmux_dispatches": 0,
+      "formal_receipt": false,
+      "stdout": "",
+      "stderr": "predictor wrapper SHA mismatch\n"
+    }
+  ]
+}

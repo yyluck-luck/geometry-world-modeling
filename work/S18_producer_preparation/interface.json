@@ -1,0 +1,107 @@
+{
+  "schema": "s18-producer-interface-v1",
+  "utc": "2026-09-06T12:09:49.773625+00:00",
+  "status": "AUTHOR_READY_FOR_INDEPENDENT_FREEZE_REVIEW_NOT_REAL_RUN",
+  "cli": "--manifest ABS --output FRESH",
+  "manifest_schema": "s18-memory-bridge-manifest-v1",
+  "manifest_required_fields": [
+    "python",
+    "runner",
+    "source_root",
+    "source_commit",
+    "pipeline_source",
+    "util_source",
+    "config_source",
+    "kernels",
+    "memory_kernel",
+    "retrieval_kernel",
+    "s17c_manifest",
+    "s17c_seal",
+    "s17c_verification",
+    "s17c_metadata",
+    "s17c_final",
+    "control_files",
+    "contract",
+    "identities"
+  ],
+  "contract": {
+    "device": "cpu",
+    "cpu_threads": 8,
+    "seed": 0,
+    "numpy_version": "1.26.4",
+    "dtype": "float32",
+    "camera_dtype": "float32",
+    "history_count": 2,
+    "query_count": 2,
+    "shrink_factor": 0.05,
+    "reduced_size": [
+      19,
+      25
+    ],
+    "radius_scale": 0.5,
+    "conf_thresh": 1,
+    "depth_quantile": 0.999,
+    "merge_normal_threshold": 0.6,
+    "max_points_per_node": 10,
+    "merge_position_threshold": null,
+    "render_width": 512,
+    "render_height": 288,
+    "render_focal_factor": 0.65,
+    "render_principal_point": [
+      256,
+      144
+    ],
+    "disk_resolution": 16,
+    "context_num_frames": 4,
+    "wall_seconds": 600,
+    "monitored_rss_bytes": 34359738368,
+    "external_monitor_required": true,
+    "model_calls": 0,
+    "RGB_decodes": 0,
+    "GT_reads": 0,
+    "full_context_calls": 0,
+    "video_generated": false
+  },
+  "run_metadata_schema": "s18-memory-bridge-run-v1",
+  "array_identity_schema": {
+    "shape": "list[int]",
+    "dtype": "NumPy dtype str",
+    "sha256": "SHA-256 of contiguous array bytes"
+  },
+  "output_files_schema": "relative_path: {sha256,bytes}",
+  "terminal_states": {
+    "SUCCESS": "both queries have candidates; exit0",
+    "NO_SURFELS": "original reduced data produced an empty map; no render, exit0",
+    "NO_VISIBLE_SOURCE": "one or both original queries have empty candidates; exit0",
+    "FAILED": "failed gate/original algorithm error; partial outputs preserved, exit1"
+  },
+  "map_state_encoding": "UTF8 compact sorted-key JSON of ordered list[{position_hex,normal_hex,radius_hex of np.float32,sources:list,color:null}]",
+  "array_files": [
+    "reduced_inputs.npz",
+    "bilinear_provenance.npz",
+    "frame0_geometry.npz",
+    "frame1_geometry.npz",
+    "map_after_frame0.npz",
+    "map_after_frame1.npz",
+    "render_query0.npz",
+    "render_query1.npz"
+  ],
+  "json_files": [
+    "map_after_frame0_sources.json",
+    "map_after_frame1_sources.json",
+    "merge_trace_partial.json",
+    "merge_trace.json",
+    "octree_nodes.json",
+    "candidate_provenance.json",
+    "votes_query0.json",
+    "votes_query1.json"
+  ],
+  "failure_or_empty_notes": "Merge outputs only if original merge called; render/votes only if map nonempty. map_failure if failure occurs with observer active. No fabricated success/empty padding.",
+  "scope": {
+    "S17C_array_decodes_before_freeze": 0,
+    "real_RGB_reads": 0,
+    "GT_reads": 0,
+    "checkpoint_reads": 0,
+    "model_instances": 0
+  }
+}

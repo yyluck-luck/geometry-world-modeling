@@ -1,0 +1,74 @@
+{
+  "schema": "s44-c1-freeze-tool-source-review-correction-v1",
+  "status": "BLOCKED_S44_C1_FREEZE_TOOL_SOURCE_REVIEW",
+  "reviewed_utc": "2026-09-07T17:00:07.166318+00:00",
+  "reviewer_role": "/root/c1_freeze_source_audit",
+  "supersedes_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW.json",
+    "sha256": "1e868b63d293105c49ceb302eccb9c6a18079fc3d3b36dc997c01bd4022d276c",
+    "reason": "The create-only PASS is retained but withdrawn after a second adversarial publication-order audit found failure-state authorization leaks. It must not be used to run prepare."
+  },
+  "reviewed_files": {
+    "generation_gate.py": "83fa268bd6a24ca1dd8da11ca36402ced068908635e74ad089d022f3f00b0d0a",
+    "runtime_adapter.py": "afedaadca7bff62616368541d980a28f24131e1256eafef7af81275aa09dfb4e",
+    "launch_generation.py": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b",
+    "PROTOCOL.md": "91ccc2151b3c8e1928291c0e7c47c880c2132f5d4709598f60a306248d94b586",
+    "FREEZE_PROTOCOL.md": "7328493a6947ece8af1ae03141760ac399829cdb025a9b9f98dc807e2d48f7e2",
+    "freeze_c1_manifest.py": "12a424ea42d56efa5067907da2dd63044a5bb9ce9f21a6c8f8949ed9dea7f94a",
+    "inference_seed43.yaml": "2fb88eb0a15c449b876386df5c9c0d2aad8da43c6be5aeccbd9b8d72be1908aa"
+  },
+  "blocking_findings": [
+    {
+      "id": "R1_FAILED_ATTACH_CAN_LEAVE_LAUNCHABLE_FORMAL_MANIFEST",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:221-239",
+        "freeze_c1_manifest.py:290-304",
+        "generation_gate.py:201-277",
+        "generation_gate.py:378-464"
+      ],
+      "problem": "attach publishes the formal read-only review_attachment_01/manifest.json before metadata validation and the final reserved-root freshness check. If either later check fails, the catch block records a failed attachment but leaves the formal manifest. The execution gate validates the manifest and its two core reviews but never requires a successful attachment receipt. A transient collision at the final freshness check can therefore be removed later and the manifest from the terminal failed attachment can pass the launcher, bypassing the protocol's required successful attach stage.",
+      "minimal_fix": "Treat the formal manifest path as the authorization token and publish it last. Build and hash the final object in memory, validate identical bytes through a non-authoritative create-only candidate path, recheck all reserved roots, then create review_attachment_01/manifest.json only after those checks pass. The generation gate should additionally require the exact canonical final manifest path so a failed candidate file cannot be supplied to the launcher. Preserve candidate and failure receipt on any earlier failure.",
+      "pass_condition": "No code path that returns an attachment failure can leave any file accepted by generation_gate.check_manifest as the executable C1 manifest."
+    },
+    {
+      "id": "R2_FORMAL_ONE_SHOT_DIRECTORY_IS_CONSUMED_BEFORE_PREFLIGHT",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:243-290"
+      ],
+      "problem": "main creates the only accepted freeze_attempt_01 or review_attachment_01 directory before loading the pinned gate and, for attach, before checking that all required core/review arguments are present. A command typo or preflight source mismatch therefore permanently consumes the sole path. The tool has no attempt_02 route, so retaining that failure leaves no protocol-compliant way to complete the row without revising code or deleting evidence.",
+      "minimal_fix": "Perform non-mutating mode, exact output-path, complete-argument, source/protocol-hash, parent/input/config and reserved-root preflight before creating a formal attempt directory. After preflight, create the directory exclusively and repeat the state-dependent checks before publication. Alternatively, define monotonically numbered retry directories and bind every failed attempt, but do not silently reuse or delete attempt_01.",
+      "pass_condition": "Invalid invocation or static preflight failure cannot consume the unique formal path, while every failure after the attempt begins remains retained create-only."
+    },
+    {
+      "id": "R3_BROKEN_SYMLINK_CAN_FALSELY_SATISFY_FRESHNESS",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:103-105",
+        "freeze_c1_manifest.py:227",
+        "freeze_c1_manifest.py:255-258"
+      ],
+      "problem": "Freshness uses Path.exists(), which is false for a broken symlink. A lexically occupied broken symlink at the scientific or execution root can therefore be reported as fresh during prepare/attach, while the launcher's exclusive mkdir later fails before a normal run can begin. For execution_01 this can also fail before a terminal receipt is initialized.",
+      "minimal_fix": "Use a no-follow occupancy test such as os.path.lexists or lstat for every reserved path, reject symlinks explicitly, and retain mkdir(exist_ok=False) as the final race-safe creation guard. Record that the freeze check is a point-in-time readiness check; the launcher remains the final guard against a later check-to-create race.",
+      "pass_condition": "Any existing directory, file, symlink or broken symlink occupies the reserved path and blocks readiness; later races fail at exclusive creation without being misreported as a completed run."
+    }
+  ],
+  "checks_that_remain_passed": {
+    "all_seven_candidate_hashes_match": true,
+    "seed43_manifest_yaml_and_three_rng_calls_plus_config_guard": true,
+    "runtime_adapter_inverse_full_ast_equal": true,
+    "launcher_inverse_full_ast_equal": true,
+    "only_input_and_seed_are_scientific_differences": true,
+    "s39_loading_evidence_is_separated_from_c1_input": true,
+    "no_model_or_pixel_execution_in_review": true
+  },
+  "executed": false,
+  "prepare_calls": 0,
+  "attach_calls": 0,
+  "launcher_main_calls": 0,
+  "model_or_scientific_imports": 0,
+  "pixels_decoded": 0,
+  "generation_calls": 0,
+  "review_scope": "Static correction only. The retained earlier PASS is invalidated for this exact hash set. No prepare, attach, launcher, model, image decode or generation action is authorized."
+}

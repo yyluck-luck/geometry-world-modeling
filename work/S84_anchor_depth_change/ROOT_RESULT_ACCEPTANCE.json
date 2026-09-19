@@ -1,0 +1,60 @@
+{
+  "schema": "S84-root-result-acceptance-v1",
+  "recorded_utc": "2026-09-10T19:11:28.885950+00:00",
+  "status": "ACCEPTED_SINGLE_EXPOSED_SENSOR_REFERENCE_MAE_COMPARISON",
+  "receipt_sha256": "66d3441383c3de32f57f1d4fb737b2eedac6e7790dea9128932b31bbd395ca53",
+  "summary_sha256": "86aa23bc5874e5b95e8ab54e84c7225adc6899f3f1ce6a735cf83fa150e79b95",
+  "independent_review_sha256": "92b7fc83435039c9aab7470ac25127187edd02ebec8d44bd3c2fee4f92373c9e",
+  "checker_sha256": "7361aa5213ca8b3f9c26cd9059c5e990c0838d46088889f13fcd251a49f3f228",
+  "root_review": "Full frozen author source/contract and full independent174line checker read before execution; complete actual receipts/summary and independent report read after execution.",
+  "result": {
+    "N": 196608,
+    "V": 125708,
+    "zero_reference_count": 70900,
+    "out_of_domain_count": 0,
+    "initial_mae_m": 0.35616673817357597,
+    "final_mae_m": 0.3549678521511166,
+    "delta_mae_m": -0.0011988860224593778,
+    "pixel_counts_descriptive_only": {
+      "denominator": 125708,
+      "paired_valid": 125708,
+      "decreased": 87663,
+      "unchanged": 1010,
+      "increased": 37035,
+      "unavailable": 0
+    }
+  },
+  "independent_check": {
+    "pixel_rows": 196608,
+    "columns": 24,
+    "pixel_max_abs_difference": 0.0,
+    "summary_max_mae_difference": 5.551115123125783e-17,
+    "csv_roundtrip": "All196608rows exactly match saved FP64/integer/boolean values, including undefined NaN."
+  },
+  "scientific_execution": {
+    "started_utc": "2026-09-10T19:03:01.524392+00:00",
+    "completed_utc": "2026-09-10T19:03:02.943122+00:00",
+    "seconds": 1.4187392500025453,
+    "sensor_png_decodes": 1,
+    "optimizer_calls": 0,
+    "model_calls": 0
+  },
+  "accepted_claim": "For this one preassociated and previously exposed sensor reference, fixed sharedV and no scale fitting, final pre-clean S83 depth has about1.199mm lower mean absolute camera-Z difference than initialization.",
+  "not_accepted": [
+    "A millimetre-accurate final geometry: final MAE is about0.355m.",
+    "Uniform per-point improvement:37035valid-reference pixels have higher error.",
+    "Statistical significance, robust physical-truth sign, independent pixel/scene inference, or cross-scene generalization.",
+    "Lower target-view warp displacement, video generation improvement, or novel method."
+  ],
+  "reference_limits": [
+    "17.126ms RGB/depth mismatch",
+    "Nominal1.25 pixel mapping, approximateK, no undistortion/time compensation",
+    "70900sensorzero pixels remain missing",
+    "Depth MAE does not control reprojection: see paper-only counterexample",
+    "No bound on sensor-reference error has been established."
+  ],
+  "new_method_validated": false,
+  "novelty_authorization": "NONE",
+  "next": "Prepare frozen four-history geometry-to-target warp consumer and G0/Gpaste/Gguide fair comparison. Retain all target supports, holes and failures; do not fit S83 to this sensor score.",
+  "pdf_status": "S84two-page source ready, compilation pending root acceptance; S82/S83fivepage separately delivered."
+}

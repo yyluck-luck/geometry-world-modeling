@@ -1,0 +1,115 @@
+{
+  "schema": "S40_READBACK_INDEPENDENT_SOURCE_REVIEW_V1",
+  "reviewed_utc": "2026-09-07T05:02:33.248010+00:00",
+  "reviewer": "/root/s14_feature_extractor",
+  "verdict": "REVISION_REQUIRED_SOURCE_ONLY",
+  "source_sha256": "3e3d1b6a9e41aa4be6268088501ed555520282e8d652466d92d8cd5a8424f3ef",
+  "full_source_lines_read": 315,
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/readback.py",
+      "sha256": "3e3d1b6a9e41aa4be6268088501ed555520282e8d652466d92d8cd5a8424f3ef",
+      "bytes": 23548,
+      "read_scope": "full text"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/PROTOCOL_DRAFT.md",
+      "sha256": "3eaaa53740f40d9b18785ba8c64d5419568ec0c69278a2e119e171dec80b45ac",
+      "bytes": 5151,
+      "read_scope": "full text"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/preparation_receipt.json",
+      "sha256": "71387b0184ec2ac028cc1d9b9a8e90f79d7ece786a28df1148fbfc06c354e7ae",
+      "bytes": 3192,
+      "read_scope": "full text"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/integrate_original.py",
+      "sha256": "adf819e1cda3de4f830d2c3e5776664591607a0109d50f59cdc1addeb684b0ec",
+      "bytes": 27783,
+      "read_scope": "targeted source sections listed in findings"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_outputs.py",
+      "sha256": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+      "bytes": 16611,
+      "read_scope": "targeted source sections listed in findings"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py",
+      "sha256": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57",
+      "bytes": 28718,
+      "read_scope": "targeted source sections listed in findings"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+      "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+      "bytes": 62233,
+      "read_scope": "targeted source sections listed in findings"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py",
+      "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+      "bytes": 45708,
+      "read_scope": "targeted source sections listed in findings"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "MAJOR_SOURCE_CONTRACT_GAP",
+      "source_lines": [
+        196,
+        211,
+        270,
+        279
+      ],
+      "title": "Trace hash integrity is checked but full batch transition/identity validation is absent",
+      "evidence": "Reader.chain checks seq/previous/hash/schema. run checks first/last event, failures, two begin/end/cache_commit records, and Euler counts. It does not implement per-batch unique-ID, nonoverlap, sample/sampler/cache/map state transitions or reject internal duplicate session/end events. Archive metadata.batch_id is available but discarded for correspondence selection.",
+      "impact": "Cannot claim the protocol's two-chain semantic ordering and closure from these checks alone. A coherently sealed malformed transition sequence is not rejected by the missing gates; this is static reasoning, not an executed mutation test.",
+      "requested_change": "Implement a small separate read-only trace state machine for two complete unique batches, denoiser callback order/count and single-session closure; connect each relevant archive capture metadata.batch_id to the same trace batch instead of only occurrence position. Existing src/s20_generation_trace.py385-490 supplies the known transition semantics; do not run/import its legacy verify_trace whole-payload reader."
+    },
+    {
+      "id": "R2",
+      "severity": "MAJOR_VALUE_PROVENANCE_GAP",
+      "source_lines": [
+        207,
+        240,
+        249,
+        258
+      ],
+      "title": "Saved operation outputs are not fully connected to the claimed actual CLIP/sample/target chain",
+      "evidence": "actual_clip_to_cache compares cache_commit.target_encoder_embeddings with committed rows; it never compares encode_image_output with that variable or saved target sample rows with encode_image_input. sampler_output.output is not compared with sample_output.samples_z. Target cameras/K are compared with cache but only context camera/K prefixes are checked at translation/get_cond entry.",
+      "impact": "Current successful comparisons establish commit-variable→cache→selected-context→condition/sampler-input. They do not independently establish all already-saved upstream operation-result bridges stated in the intended full chain.",
+      "requested_change": "Use each capture's actual metadata.batch_id and causal interval to pair target encode_image_input/output (without assuming a universal fixed encoding count); compare all target samples to encoder input, encoder result to committed all-target embeddings, sampler output to samples_z, batch target camera/K suffixes to actual translation/get_cond inputs, and translation scaling output to get_cond scalar. Do not recompute CLIP, VAE, sampler, camera math or pixel conversion."
+    }
+  ],
+  "passes_with_static_scope": [
+    "Manifest/external receipt SHA anchors and declared ft-mse identity kept separate from exact original baseline",
+    "Archive actual physical inventory, per-file size/hash, tensor body+descriptor hash and sidecars are dynamically verified",
+    "Archive capture pairing/order and full raw tensor presence checked; saved trace blobs hashed; missing trace payloads labelled metadata only",
+    "Actual selected cache values checked against context stacks, first committed5 against next context cache, actual get_cond output against sampler inputs, selected latent channels against cond.replace",
+    "FP64→FP32 limited to small camera/K inputs and explicitly labelled before exact bitwise comparison; other comparisons require same dtype/bits",
+    "NumPy1.26.4 loaded late; comparisons use read-only memmap and chunked bitwise equality, without Torch/codec/renderer/model imports",
+    "No real data/results are created by import; new output directory required; failures and narrow success scope distinguished"
+  ],
+  "resource_boundary": {
+    "CPU1": "Suggested environment only; script does not enforce or verify actual thread limit",
+    "RSS2GiB": "Not enforced by this script; mandatory external supervisor before execution",
+    "300_seconds": "Fixed argument and cooperative tick checks; no preemptive timer around JSON loading/other blocking operations. External supervisor must enforce whole-tree deadline.",
+    "low_memory": "Large tensor payloads use memmap; JSON/event chains are materialized in RAM, so peak RSS cannot be certified statically",
+    "execution_resource_pass": false
+  },
+  "operations": {
+    "new_network": 0,
+    "models_or_weights_or_gt_read": 0,
+    "real_prediction_arrays_read": 0,
+    "script_import_or_execution": 0,
+    "synthetic_cases_or_old_tests": 0,
+    "author_code_modified": false,
+    "canonical_ledger_modified": false
+  },
+  "review_file_note": "Initial concerns are preserved as v1; any later source revision needs a new binding and delta review. No actual result PASS is signed.",
+  "review_markdown_sha256": "6da1cb48149a6ade7cfb23f6a6335c03f716b30d2f12ec8c84ea29fbd97a9bb6"
+}

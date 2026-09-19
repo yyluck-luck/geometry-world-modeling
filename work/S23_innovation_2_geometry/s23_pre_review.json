@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "reviewed_utc": "2026-09-06T13:56:20.714202+00:00",
+  "reviewer": "/root/s14_feature_extractor",
+  "relationship": "different agent from script author; static source review, not external reproduction",
+  "status": "CHANGES_REQUESTED_BEFORE_NEW_GT",
+  "scope": {
+    "script_execution": false,
+    "model_execution": false,
+    "new_gt_read": false,
+    "prediction_arrays_read": false,
+    "read_existing_S21_S22_result_documents": true
+  },
+  "reviewed_inputs": [
+    {
+      "path": "scripts/s23_geometry_diagnostic.py",
+      "sha256": "d43390fae945346e441dddc6dc7058f6a96a0bc13880e29c92ad4ada7fbd240b"
+    },
+    {
+      "path": "docs/S23_GEOMETRY_DIAGNOSTIC_PROTOCOL.md",
+      "sha256": "c2ebf0b5f188d3df0132a5ba49552f9b11937bff67521e189465d5457d3585a8"
+    }
+  ],
+  "confirmed": [
+    {
+      "item": "self_world_pose_direction",
+      "finding": "512 DPT uses separate self and world heads, pose is c2w from pose_encoding_to_camera; row-vector p @ R.T + t is correct. 224 LinearPts3dPose constructs world by transforming self and must not be pooled with DPT closure.",
+      "evidence": [
+        "work/S21_baseline_preparation/ttt3r_original/src/dust3r/heads/dpt_head.py:DPTPts3dPose",
+        "work/S21_baseline_preparation/ttt3r_original/src/dust3r/heads/linear_head.py:228-235",
+        "work/S21_baseline_preparation/ttt3r_original/src/dust3r/utils/camera.py:396-420",
+        "scripts/s21_baseline.py:92",
+        "scripts/s22_filt_shared_precision.py:102"
+      ]
+    },
+    {
+      "item": "depth_definition_and_units",
+      "finding": "Compare self Z, not vector norm, to registered TUM PNG / 5000. Zero is missing; Freiburg 2 factor 1.031 has already been applied by dataset authors and must not be applied again.",
+      "source": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats",
+      "source_sections": [
+        "Color images and depth maps",
+        "Intrinsic Camera Calibration of the Kinect",
+        "Calibration of the depth images"
+      ]
+    },
+    {
+      "item": "association",
+      "finding": "Full-sequence timestamp candidate enumeration and globally greedy one-to-one matching occur before selecting 300 RGBs; strict < .02 and tie order agree with stated local protocol. A brute-force enumeration check is planned but has not been executed by this reviewer."
+    },
+    {
+      "item": "grid",
+      "finding": "512 preprocessing on 640x480 yields 512x384 without extra crop. Integer pixel-center nearest map preserves zero rather than interpolating missing depth. Agreement with PIL nearest is a proposed author preflight, not independently executed here."
+    },
+    {
+      "item": "ordinary_depth_metrics",
+      "finding": "Raw and pose_scaled metrics count nonpositive/nonfinite predictions as delta failures; full continuous metrics become NA and retain finite-prediction sums/counts. Strict delta threshold and equal-frame versus pixel-pooled distinction match protocol."
+    },
+    {
+      "item": "information_boundary",
+      "finding": "Per-frame median GT/pred scale is a retrospective diagnostic, not a guaranteed lower bound or deployable predictor. Closure is same-frame self-consistency, not multi-view truth or forgetting causality."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "MAJOR",
+      "blocking_before_gt": true,
+      "location": "scripts/s23_geometry_diagnostic.py:54-70,163",
+      "issue": "Empty closure set and empty 32-stride check grid are not handled. np.quantile(empty) or statistics.median([]) raises, instead of preserving count/excluded and NA. Aggregate closure means also cannot retain missing rows.",
+      "minimal_counterexample": "All self points are [0,0,0], or all world points are nonfinite. A valid full frame can still have no valid points on the sampled check grid.",
+      "requested_change": "Return count=0 and nullable summaries; scalar check verifies empty counts without taking a median; aggregate records complete and available denominators. Add artificial empty/all-invalid checks."
+    },
+    {
+      "id": "R2",
+      "severity": "MAJOR",
+      "blocking_before_gt": true,
+      "location": "scripts/s23_geometry_diagnostic.py:115-124,151-156",
+      "issue": "When GT is valid but no positive finite prediction exists, frame_oracle is omitted. Pooled oracle metrics then drop that frame and its GT pixels entirely; a usable frame can make pooled delta=1 despite another complete failure. Full-frame equality is NA, but pooled value is not clearly labeled incomplete and violates the stated retained-denominator intent.",
+      "minimal_counterexample": "Two one-pixel GT frames both depth 1: prediction 1 for first, 0 for second. First oracle delta=1, second oracle absent; pooled oracle delta becomes 1 over one pixel rather than a complete-set result.",
+      "requested_change": "Represent unavailable oracle explicitly and preserve intended frame/GT coverage. Either retain failure counts under a predeclared unavailable-oracle convention, or mark complete pooled oracle result NA and separately label available-frame metrics. Do not silently drop it."
+    },
+    {
+      "id": "R3",
+      "severity": "MINOR",
+      "blocking_before_gt": false,
+      "location": "scripts/s23_geometry_diagnostic.py:61-70",
+      "issue": "Scalar closure check covers count, median and relative median but not reported p90.",
+      "requested_change": "Add independently implemented sorted linear quantile p90 check or narrow the declared scalar-check coverage."
+    },
+    {
+      "id": "R4",
+      "severity": "MINOR",
+      "blocking_before_gt": false,
+      "location": "scripts/s23_geometry_diagnostic.py:89-110",
+      "issue": "prepare only tests preflight passed, not preflight script SHA, and omits hashes of S21 run_manifest and prior scoring metrics used for frame identities and scales.",
+      "requested_change": "Bind preflight script SHA and input metadata identities before sealing. The manifest embeds values, so this is provenance hardening, not an observed numerical error."
+    },
+    {
+      "id": "R5",
+      "severity": "MINOR",
+      "blocking_before_gt": false,
+      "location": "scripts/s23_geometry_diagnostic.py:130-139",
+      "issue": "Initial RUNNING receipt says gt_png_read=false; after a partial GT read crash this stale state can remain even though bytes were accessed.",
+      "requested_change": "Record GT-read-start event before first access and cumulative/read-complete status without implying unaccessed bytes after interruption."
+    }
+  ],
+  "not_claimed": [
+    "No actual depth quality ranking reviewed",
+    "No scalar implementation executed by reviewer",
+    "No complete reproduction",
+    "No approval of future method or video claim"
+  ]
+}

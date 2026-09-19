@@ -1,0 +1,3135 @@
+VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory
+// Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+/* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1
+Introduction
+2
+Related work
+Inpainting-based view extrapolation.
+Multi-view-based view extrapolation.
+3
+Method
+3.1
+Surfel-indexed view memory
+Reading from the memory.
+Writing to the memory.
+3.2
+Novel view generator
+4
+Experiments
+4.1
+Experimental setup
+Implementation details.
+Datasets.
+Evaluation metrics.
+4.2
+Short- and long-term view generation
+4.3
+Long-term view generation with revisitations
+4.4
+Ablation study
+Computational efficiency.
+5
+Conclusion
+References
+A
+Implementation details
+B
+Average pose calculation
+C
+Autoregressive point map prediction
+D
+Limitations and discussion
+Evaluation protocol.
+Limited training data and computing resources.
+Inference speed.
+Future improvements.
+License: arXiv.org perpetual non-exclusive license
+arXiv:2506.18903v3 [cs.CV] 14 Aug 2025
+VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory
+Runjia Li
+Philip Torr
+Andrea Vedaldi
+Tomas Jakab
+Affiliation:
+University of Oxford
+Affiliation:
+v-mem.github.io
+Abstract
+We propose a novel memory module for building video generators capable of interactively exploring environments.
+Previous approaches have achieved similar results either by out-painting 2D views of a scene while incrementally reconstructing its 3D geometry—which quickly accumulates errors—or by using video generators with a short context window, which struggle to maintain scene coherence over the long term.
+To address these limitations, we introduce
+Surfel-Indexed View Memory
+(
+VMem
+), a memory module that remembers past views by indexing them geometrically based on the 3D surface elements (surfels) they have observed.
+VMem enables efficient retrieval of the most relevant past views when generating new ones.
+By focusing only on these relevant views, our method produces consistent explorations of imagined environments at a fraction of the computational cost required to use all past views as context.
+We evaluate our approach on challenging long-term scene synthesis benchmarks and demonstrate superior performance compared to existing methods in maintaining scene coherence and camera control.
+Figure 1
+:
+VMem enables autoregressive scene generation from a single image along user-defined trajectories.
+The
+green
+region shows results with the proposed memory module, maintaining coherence when generating previously seen parts of the scene.
+The
+red
+region, without memory, exhibits degradation highlighted with red ellipses, demonstrating VMem is effective for consistent scene generation.
+1
+Introduction
+We consider the problem of generating long videos that explore an imagined space following a camera path specified interactively by the user.
+In this paradigm, the user tells the model which camera path to follow for the next few frames, observes the generated content, and then decides where to explore next based on what they have seen.
+For example, exploring a house may involve visiting the kitchen, the living room, and the bathroom, eventually returning to the kitchen.
+Throughout the video, the scene must remain consistent, ensuring that the kitchen looks the same upon return.
+Generating such videos is essential for immersive applications such as games, where players can navigate generated worlds.
+However, even recent large-scale interactive video generators such as Google’s Genie 2
+[
+20
+]
+struggle to achieve this goal.
+This problem has so far been addressed by two types of methods.
+First,
+outpainting-based
+methods
+[
+36
+,
+7
+,
+11
+,
+18
+,
+21
+,
+43
+,
+26
+,
+15
+,
+16
+,
+24
+]
+iterate between generating new 2D views of the scene and estimating its 3D geometry.
+They use the estimated geometry to partially render a new viewpoint and then employ an outpainting model to complete the missing parts, thus adding one more image to the collection.
+However, errors in outpainting, 3D reconstruction, and stitching accumulate over time, leading to severe degradation of the generated content after a short while.
+Second,
+multi-view/video-based
+methods
+[
+25
+,
+42
+,
+22
+,
+35
+,
+20
+]
+condition novel view generation on previous views using a geometry-free approach that does not explicitly estimate the scene geometry.
+While this avoids the accumulation of errors in the reconstructed 3D scene geometry, it comes at a high computational cost, limiting the number of conditioning views to a small context window of recent frames.
+This constraint hurts the long-term consistency of the generated images.
+Figure 2
+:
+Method.
+Given target camera viewpoints
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+, we query our Surfel-Indexed View Memory to retrieve the most relevant
+K
+K
+past views
+𝒱
+∗
+⊂
+𝒱
+(
+s
+)
+\mathcal{V}^{*}\subset\mathcal{V}^{(s)}
+where
+𝒱
+∗
+=
+{
+v
+t
+}
+t
+=
+1
+K
+\mathcal{V}^{*}=\{v_{t}\}_{t=1}^{K}
+as references.
+Retrieved reference images
+𝐱
+t
+\mathbf{x}_{t}
+along with Plücker embeddings of both reference camera poses
+𝐜
+t
+\mathbf{c}_{t}
+and target camera poses
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+are fed into generator
+ψ
+\psi
+to synthesize novel views
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+.
+After generation, the surfel-indexed memory is updated
+𝒮
+(
+s
+)
+→
+𝒮
+(
+s
++
+1
+)
+\mathcal{S}^{(s)}\rightarrow\mathcal{S}^{(s+1)}
+by appending new view indices
+{
+T
++
+m
+}
+m
+=
+1
+M
+\{T+m\}_{m=1}^{M}
+to existing surfels or creating new surfels based on geometry of the generated views.
+This is repeated autoregressively, enabling long-term consistent generation.
+In this work, we revisit the second class of methods and propose conditioning not on the most recently generated views, but on the
+most relevant ones
+for generating the next image, thereby maintaining a high degree of consistency within a limited computational budget.
+Given a novel viewpoint of the scene, the most relevant past views are those that have already observed the parts of the scene currently being generated.
+This implies that, for each part of the scene, we must remember which views have previously observed it and retrieve them from memory.
+To achieve this, we introduce
+Surfel-Indexed View Memory
+, abbreviated as
+VMem
+, a memory module that anchors previous views to the 3D surface elements they observe.
+Given a new viewpoint, we retrieve the past views that best capture the currently observed surfaces and use them to condition novel view generation.
+To create the memory, we estimate the geometry of each new view using an off-the-shelf point map predictor.
+This is similar to outpainting methods but, crucially, we do not use the estimated geometry as the final representation of the scene;
+instead, we use it to construct VMem, which is a memory of past views.
+We represent the scene geometry using surfels, which are more robust compared to meshes and can represent occlusions compared to point clouds.
+Each surfel stores in its attributes a set of indices corresponding to past viewpoints that observed it.
+To retrieve relevant past viewpoints, we render the surfels with their attributes from the novel viewpoint and splat them onto an image grid.
+Each pixel in the resulting image then corresponds to a set of viewpoint indices.
+We select the top
+K
+K
+most frequently represented viewpoint indices and use them to retrieve past views from the database, where each view is represented by an RGB image and its corresponding camera parameters.
+A key advantage of our approach over outpainting-based methods is that it does not require highly accurate scene geometry.
+As long as we successfully retrieve the most relevant past views, our method remains robust.
+By leveraging
+Surfel-Indexed View Memory
+, we significantly reduce the memory and computational burden of conditioning on a large number of previous views, as required by multi-view/video-based methods, while improving long-term consistency across generated novel views.
+Our approach represents a step toward scalable, realistic, and long-term autoregressive scene generation, making the following contributions:
+1.
+We introduce Surfel-Indexed View Memory, a
+plug-and-play
+module to index past views geometrically and use them to condition novel view generation.
+2.
+We show that our method can generate long-term coherent videos of scenes and outperforms existing approaches.
+3.
+We demonstrate that Surfel-Indexed View Memory achieves comparable performance with
+4
+×
+4\times
+fewer context views, delivering a
+12
+×
+12\times
+speedup.
+4.
+We validate our approach on challenging benchmarks, outperforming the current open-source state-of-the-art methods.
+2
+Related work
+Novel view synthesis (NVS) is a challenging and ill-posed problem that can be categorized into two main categories: view interpolation methods
+[
+19
+,
+3
+,
+4
+,
+5
+,
+6
+,
+37
+,
+30
+,
+8
+]
+, which generate views close to given inputs, and view extrapolation or autoregressive view generation, where novel views extend significantly beyond the original scene, introducing substantial new content.
+The latter is particularly difficult from single images.
+Between these lie single-view scene reconstruction methods, which succeed mainly for single-object scenes
+[
+17
+,
+27
+,
+12
+,
+29
+,
+1
+,
+38
+]
+or highly bounded scenes
+[
+28
+]
+.
+However, their extrapolation capabilities remain limited.
+Most relevant to our work are single-image view extrapolation models, which fall into two categories: those incorporating explicit geometric modeling with inpainting, and those based directly on image or video generation.
+Inpainting-based view extrapolation.
+Inpainting-based methods
+[
+36
+,
+7
+,
+11
+,
+18
+,
+21
+,
+43
+,
+26
+,
+15
+,
+16
+,
+24
+,
+40
+,
+41
+]
+use pre-trained 3D reconstruction models to generate 3D representations—such as meshes, point clouds, or Gaussian splats—from images.
+These representations are reprojected into novel views, where 2D inpainting fills missing regions.
+SceneScape
+[
+7
+]
+reconstructs meshes from images using pre-trained depth estimators.
+Diffusion-based inpainting then completes the projected novel view, which is reprojected back to refine and extend the mesh.
+This process is iterated to generate novel views.
+MultiDiff
+[
+18
+]
+uses depth estimators to warp reference images into multiple novel views, training diffusion models to inpaint missing regions simultaneously.
+CamCtrl3D
+[
+21
+]
+follows a similar approach but adds ray maps to condition diffusion models for view synthesis.
+ViewCrafter
+[
+43
+]
+uses pre-trained pointmap estimators to create point clouds and trains video diffusion models for inpainting.
+GenWarp
+[
+26
+]
+warps 2D coordinate representations of reference views into novel views and uses them to condition generation.
+While these methods improve geometric consistency, they are susceptible to errors in depth or pointmap estimation, which propagate distortions across generated views.
+Once 3D representations are constructed, inaccuracies from depth or pointmap estimation become difficult to correct.
+Moreover, scaling to large scenes is computationally intensive, as storing and processing high-fidelity 3D representations requires substantial memory.
+Figure 3
+:
+Surfel-based memory index.
+Each surfel stores indices of views that observed it.
+We color-code each surfel by contributing view indices.
+This spatial index enables retrieval of relevant past views: when generating a novel view, we identify visible surfels from the target viewpoint and retrieve views that previously observed those same regions, naturally accounting for occlusion.
+Multi-view-based view extrapolation.
+Another category
+[
+25
+,
+22
+,
+31
+,
+42
+,
+35
+,
+8
+,
+46
+]
+avoids explicitly modeling 3D scene geometry.
+Instead, these approaches generate novel views by conditioning on previously rendered or generated views.
+GeoGPT
+[
+25
+]
+uses autoregressive likelihood models to synthesize novel views from single images.
+Building on this, LookOut
+[
+22
+]
+improves consistency by generating view sequences along predefined trajectories, conditioning on up to two preceding views.
+Other methods
+[
+31
+,
+42
+]
+enhance novel view synthesis by employing cross-view attention or enforcing epipolar constraints within diffusion models.
+MotionCtrl
+[
+35
+]
+leverages geometric priors from pre-trained video diffusion models to synthesize camera-controllable videos.
+These methods are
+trajectory-based
+, requiring input views to follow continuous spatial paths.
+In contrast,
+image-set models
+like CAT3D
+[
+8
+]
+and more recently SEVA
+[
+46
+]
+synthesize novel views from sparse and unordered input images, without trajectory constraints.
+However, these methods are computationally expensive, with
+O
+⁡
+(
+n
+2
+)
+O(n^{2})
+complexity for attention, limiting conditioning views to small context windows containing only recently generated frames.
+This limitation impacts long-term consistency of generated images.
+Several concurrent works explore memory-based approaches for scene generation.
+Genie
+[
+2
+,
+20
+]
+maintains memory through recurrent state features.
+Gen3C
+[
+23
+]
+conditions on stored point clouds like ViewCrafter
+[
+43
+]
+, inheriting inpainting-based limitations.
+StarGen
+[
+44
+]
+and WorldMem
+[
+39
+]
+use distance- and field-of-view-based spatial memory retrieval, which can recover spatially correlated views but lack geometric reasoning for occlusions.
+In contrast, our surfel-based memory explicitly models occlusions and provides more principled view selection.
+3
+Method
+Let
+𝐱
+1
+∈
+ℝ
+H
+×
+W
+×
+3
+\mathbf{x}_{1}\in\mathbb{R}^{H\times W\times 3}
+be an RGB image of a scene that we wish to explore, and let
+{
+𝐜
+t
+}
+t
+=
+1
+T
+\{\mathbf{c}_{t}\}_{t=1}^{T}
+be a sequence of camera parameters specifying a path through the scene.
+Our goal is to generate a corresponding video,
+i.e
+.
+, a sequence of images
+{
+𝐱
+t
+}
+t
+=
+1
+T
+\{\mathbf{x}_{t}\}_{t=1}^{T}
+, where
+𝐱
+1
+\mathbf{x}_{1}
+is the given input image, and each subsequent frame
+𝐱
+t
+\mathbf{x}_{t}
+is consistent with the previous ones and reflects the specified cameras
+{
+𝐜
+t
+}
+t
+=
+1
+T
+\{\mathbf{c}_{t}\}_{t=1}^{T}
+.
+Moreover, we aim to do so autoregressively, generating
+M
+M
+novel views at a time for the given cameras (with
+M
+M
+kept small to ensure interactivity) while ensuring consistency with previously generated views.
+This enables interactive scene exploration, where the user can specify the next camera positions at each step.
+Specifically, we work with a sequence of
+views
+, where each view
+v
+t
+=
+(
+𝐱
+t
+,
+𝐜
+t
+)
+v_{t}=(\mathbf{x}_{t},\mathbf{c}_{t})
+consists of an image
+𝐱
+t
+\mathbf{x}_{t}
+and its corresponding camera
+𝐜
+t
+\mathbf{c}_{t}
+at timestep
+t
+t
+.
+At generation step
+s
+s
+(
+s
+≥
+0
+s\geq 0
+), we have generated
+T
+=
+s
+​
+M
+T=sM
+frames so far.
+The goal is to generate
+M
+M
+new RGB images
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+for the next target camera parameters
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+, given the previously generated views
+𝒱
+(
+s
+)
+=
+{
+v
+1
+,
+v
+2
+,
+…
+,
+v
+T
+}
+\mathcal{V}^{(s)}=\{v_{1},v_{2},\dots,v_{T}\}
+.
+After generation, we update
+T
+←
+T
++
+M
+T\leftarrow T+M
+.
+A challenge with this approach is that the context
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+grows unbounded over time.
+Video generators addressing this problem
+[
+25
+,
+42
+,
+22
+,
+35
+]
+typically consider a fixed-length subset of
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+, conditioning their generation only on the most recent
+L
+L
+views
+{
+v
+T
+−
+L
++
+1
+,
+…
+,
+v
+T
+}
+\{v_{T-L+1},\dots,v_{T}\}
+.
+This limitation results in severe inconsistencies when the generated sequence extends beyond the (small) context window.
+We solve this problem by dynamically retrieving the most relevant subset of past views, denoted as
+𝒱
+∗
+⊆
+𝒱
+(
+s
+)
+\mathcal{V}^{*}\subseteq\mathcal{V}^{(s)}
+.
+To achieve this, we introduce an efficient data structure, the Surfel-Indexed View Memory, that stores and retrieves past views based on their approximate 3D geometry.
+We first describe the Surfel-Indexed View Memory (
+Sec.
+3.1
+) and then introduce the novel view generator (
+Sec.
+3.2
+).
+An overview of the method is provided in
+Fig.
+2
+.
+3.1
+Surfel-indexed view memory
+Consider the problem of generating the next views
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+of the scene as seen from the cameras
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+.
+The generator must consider the previously generated views and ensure
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+are consistent with those, while generating new content as needed.
+However, not all past views are equally relevant to the novel views
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+.
+We prioritize past views that have likely observed the largest portion of the scene currently being generated.
+For example, if the current locale is surrounded by walls, parts of the scene behind those walls are likely less relevant for generating a new view of that locale.
+Conversely, views that share a similar visible region with the target view can provide more useful information for generating its content.
+This principle drives our design for a view memory module.
+We maintain a coarse model of the scene geometry using surfels (visualized in
+Fig.
+3
+), simple surface primitives that account for occlusion.
+Each surfel stores the indices of the past views that observed it.
+To generate a new view, the surfels visible from the new viewpoint are retrieved, using the associated indices to vote for which views to consider for generation.
+This process is illustrated in
+Fig.
+4
+.
+Specifically, we define a
+surfel
+as the tuple
+𝐬
+k
+=
+(
+𝐩
+k
+,
+𝐧
+k
+,
+r
+k
+,
+ℐ
+k
+)
+,
+\mathbf{s}_{k}=\left(\mathbf{p}_{k},\,\mathbf{n}_{k},\,r_{k},\,\mathcal{I}_{k}\right),
+where
+𝐩
+k
+∈
+ℝ
+3
+\mathbf{p}_{k}\in\mathbb{R}^{3}
+denotes the surfel’s 3D position,
+𝐧
+k
+∈
+ℝ
+3
+\mathbf{n}_{k}\in\mathbb{R}^{3}
+is its surface normal,
+r
+k
+∈
+ℝ
+r_{k}\in\mathbb{R}
+is the surfel radius, and
+ℐ
+k
+⊆
+{
+1
+,
+2
+,
+…
+,
+T
+}
+\mathcal{I}_{k}\subseteq\{1,2,\ldots,T\}
+is a subset of past view indices that observed the surfel.
+The surfel-based memory indexing of past views
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+, encapsulating the scene, is represented as a set of surfels
+𝒮
+(
+s
+)
+=
+{
+𝐬
+k
+}
+k
+=
+1
+N
+(
+s
+)
+\mathcal{S}^{(s)}=\{\mathbf{s}_{k}\}_{k=1}^{N^{(s)}}
+, where
+N
+(
+s
+)
+N^{(s)}
+is the number of surfels at generation step
+s
+s
+.
+We also maintain an octree to quickly retrieve surfels based on their geometry.
+Next, we describe how to read from and write to this memory.
+Figure 4
+:
+Surfel-Indexed View Memory.
+Reading
+procedure renders surfels
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+with their attributes, containing past view indices as frame indices.
+We then select the
+K
+K
+most frequent frame indices in the rendered image to retrieve relevant past views from
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+.
+Writing
+procedure estimates geometry of newly generated views
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}
+as surfels and merges them with existing surfels.
+Frame indices
+{
+T
++
+m
+}
+m
+=
+1
+M
+\{T+m\}_{m=1}^{M}
+are appended to surfels in these views, and novel views are stored, updating
+𝒱
+(
+s
+)
+→
+𝒱
+(
+s
++
+1
+)
+\mathcal{V}^{(s)}\rightarrow\mathcal{V}^{(s+1)}
+and
+𝒮
+(
+s
+)
+→
+𝒮
+(
+s
++
+1
+)
+\mathcal{S}^{(s)}\rightarrow\mathcal{S}^{(s+1)}
+.
+Reading from the memory.
+To retrieve the most relevant past views from the memory
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+for the novel cameras
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+, we first compute their average pose
+𝐜
+¯
+s
+∈
+SE
+⁡
+(
+3
+)
+\bar{\mathbf{c}}_{s}\in\mathrm{SE}(3)
+as a reference (refer to
+Appendix
+B
+).
+Then we render the surfels
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+from the averaged camera pose
+𝐜
+¯
+s
+\bar{\mathbf{c}}_{s}
+.
+Each surfel is rendered as a splat with its attributes, accounting for relative depth and occlusions, and contributing to the image based on its coverage.
+The rendered attributes correspond to the indices of the past views.
+The core intuition is that views observing the largest portion of the scene from the perspective of the novel camera are most relevant for novel view synthesis.
+To identify these views, we rank past view indices based on their frequency across all rendered pixels.
+We then select the top-
+K
+K
+most frequently represented indices
+ℐ
+∗
+\mathcal{I}^{*}
+and use them to retrieve the corresponding past views,
+𝒱
+∗
+=
+{
+v
+t
+}
+t
+∈
+ℐ
+∗
+\mathcal{V}^{*}=\{v_{t}\}_{t\in\mathcal{I}^{*}}
+, from the memory
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+.
+This subset of views serves as the context for the new view generator, as described in
+Sec.
+3.2
+.
+To avoid oversampling repeatedly visited regions, we apply a non-maximum suppression algorithm that reduces redundancy in memory and promotes broader scene coverage among the top-
+K
+K
+views.
+During retrieval, we retain only the most frequently referenced view among those with similar poses.
+During writing to the memory, we merge surfels by comparing their associated camera poses—if two poses are highly similar, we discard the older one.
+Writing to the memory.
+After generating the new views
+{
+v
+T
++
+m
+=
+(
+𝐱
+T
++
+m
+,
+𝐜
+T
++
+m
+)
+}
+m
+=
+1
+M
+\{v_{T+m}=(\mathbf{x}_{T+m},\mathbf{c}_{T+m})\}_{m=1}^{M}
+, we add them to the memory
+𝒱
+(
+s
+)
+\mathcal{V}^{(s)}
+and update the surfel-based memory index
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+.
+We use an off-the-shelf point map estimator
+ϕ
+\phi
+, such as CUT3R
+[
+32
+]
+, to estimate their point maps
+{
+𝐏
+T
++
+m
+∗
+}
+m
+=
+1
+M
+\{\mathbf{P}^{*}_{T+m}\}_{m=1}^{M}
+.
+Specifically, we jointly estimate the point maps for the newly generated views along with the retrieved past views
+𝒱
+∗
+\mathcal{V}^{*}
+.
+This joint estimation ensures that the new point maps are aligned with the coordinate frame of the existing scene geometry in the surfel-based memory index
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+.
+Next, we convert the estimated point maps to a set of new surfels.
+For each newly generated frame
+t
+∈
+{
+T
++
+1
+,
+T
++
+2
+,
+…
+,
+T
++
+M
+}
+t\in\{T+1,T+2,\ldots,T+M\}
+, we process its point map
+𝐏
+t
+∗
+\mathbf{P}^{*}_{t}
+.
+Since our approach only requires coarse geometry, we first downsample the point map
+𝐏
+t
+∗
+\mathbf{P}^{*}_{t}
+by a factor
+σ
+\sigma
+, yielding a smaller point map
+𝐏
+t
+∈
+ℝ
+H
+′
+×
+W
+′
+×
+3
+\mathbf{P}_{t}\in\mathbb{R}^{H^{\prime}\times W^{\prime}\times 3}
+, where
+H
+′
+=
+H
+/
+σ
+H^{\prime}=H/\sigma
+and
+W
+′
+=
+W
+/
+σ
+W^{\prime}=W/\sigma
+.
+For each pixel location
+(
+u
+,
+v
+)
+(u,v)
+in the downsampled point map, we have a 3D point
+𝐩
+u
+,
+v
+,
+t
+\mathbf{p}_{u,v,t}
+, and we create a new surfel
+𝐬
+k
+′
+\mathbf{s}_{k^{\prime}}
+centered on it.
+We compute each surfel’s normal using the cross-product of displacement vectors to neighboring pixels.
+For a pixel at 2D location
+(
+u
+,
+v
+)
+(u,v)
+in the image grid, we use neighboring pixels to estimate the local surface normal:
+𝐧
+k
+′
+=
+(
+𝐩
+u
++
+1
+,
+v
+,
+t
+−
+𝐩
+u
+−
+1
+,
+v
+,
+t
+)
+×
+(
+𝐩
+u
+,
+v
++
+1
+,
+t
+−
+𝐩
+u
+,
+v
+−
+1
+,
+t
+)
+‖
+(
+𝐩
+u
++
+1
+,
+v
+,
+t
+−
+𝐩
+u
+−
+1
+,
+v
+,
+t
+)
+×
+(
+𝐩
+u
+,
+v
++
+1
+,
+t
+−
+𝐩
+u
+,
+v
+−
+1
+,
+t
+)
+‖
+,
+\mathbf{n}_{k^{\prime}}=\frac{(\mathbf{p}_{u+1,v,t}-\mathbf{p}_{u-1,v,t})\times(\mathbf{p}_{u,v+1,t}-\mathbf{p}_{u,v-1,t})}{\left\|(\mathbf{p}_{u+1,v,t}-\mathbf{p}_{u-1,v,t})\times(\mathbf{p}_{u,v+1,t}-\mathbf{p}_{u,v-1,t})\right\|},
+where
+𝐩
+u
+,
+v
+,
+t
+\mathbf{p}_{u,v,t}
+represents the 3D point at image coordinates
+(
+u
+,
+v
+)
+(u,v)
+in frame
+t
+t
+.
+To ensure that the surfels reasonably cover the scene, we use a heuristic to compute the surfel’s radius, which is proportional to the depth of the surfel and inversely proportional to the focal length and the cosine of the angle between the surfel normal and the viewing direction:
+r
+k
+′
+=
+1
+2
+​
+𝐃
+u
+,
+v
+,
+t
+/
+f
+t
+α
++
+(
+1
+−
+α
+)
+​
+‖
+𝐧
+k
+′
+⋅
+(
+𝐩
+u
+,
+v
+,
+t
+−
+𝐎
+t
+)
+‖
+,
+r_{k^{\prime}}=\frac{\frac{1}{2}\mathbf{D}_{u,v,t}/f_{t}}{\alpha+(1-\alpha)\left\|\mathbf{n}_{k^{\prime}}\cdot(\mathbf{p}_{u,v,t}-\mathbf{O}_{t})\right\|},
+where
+𝐃
+u
+,
+v
+,
+t
+\mathbf{D}_{u,v,t}
+represents the depth at pixel
+(
+u
+,
+v
+)
+(u,v)
+in frame
+t
+t
+,
+𝐎
+t
+\mathbf{O}_{t}
+is the camera center of frame
+t
+t
+,
+𝐩
+u
+,
+v
+,
+t
+−
+𝐎
+t
+\mathbf{p}_{u,v,t}-\mathbf{O}_{t}
+is the viewing direction, and
+f
+t
+f_{t}
+is the focal length at time
+t
+t
+.
+The factor
+α
+\alpha
+is used to avoid extreme values when
+‖
+𝐧
+k
+′
+⋅
+(
+𝐩
+u
+,
+v
+,
+t
+−
+𝐎
+t
+)
+‖
+≈
+0
+\left\|\mathbf{n}_{k^{\prime}}\cdot(\mathbf{p}_{u,v,t}-\mathbf{O}_{t})\right\|\approx 0
+.
+Finally, we check if the index
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+already contains a surfel
+𝐬
+k
+\mathbf{s}_{k}
+similar to the new surfel
+𝐬
+k
+′
+\mathbf{s}_{k^{\prime}}
+.
+Two surfels match if their centers are within a distance
+d
+d
+and the cosine similarity between their normals is above a threshold
+θ
+\theta
+.
+If such a surfel
+𝐬
+k
+\mathbf{s}_{k}
+is found, we add the frame index
+t
+t
+to the surfel’s set of past view indices:
+ℐ
+k
+←
+ℐ
+k
+∪
+{
+t
+}
+\mathcal{I}_{k}\leftarrow\mathcal{I}_{k}\cup\{t\}
+, and discard
+𝐬
+k
+′
+\mathbf{s}_{k^{\prime}}
+.
+If not, we set
+ℐ
+k
+′
+=
+{
+t
+}
+\mathcal{I}_{k^{\prime}}=\{t\}
+and add
+𝐬
+k
+′
+\mathbf{s}_{k^{\prime}}
+to the index
+𝒮
+(
+s
++
+1
+)
+\mathcal{S}^{(s+1)}
+.
+This process transforms the surfel memory from
+𝒮
+(
+s
+)
+\mathcal{S}^{(s)}
+to
+𝒮
+(
+s
++
+1
+)
+\mathcal{S}^{(s+1)}
+with
+N
+(
+s
++
+1
+)
+N^{(s+1)}
+surfels for the next generation step.
+3.2
+Novel view generator
+Figure 5
+:
+Long sequences with revisitations.
+We compare our VMem against a baseline without
+memory that relies solely on the last
+K
+K
+frames for context.
+Each sequence: input images (left), then generated images at selected frames.
+Our method (
+top rows
+) maintains consistency when revisiting observed regions, while the baseline (
+bottom rows
+) shows severe inconsistencies across extended sequences.
+We use a camera-conditioned image-set generator
+ψ
+\psi
+to generate novel views.
+The generator
+ψ
+\psi
+takes
+K
+K
+retrieved reference views
+𝒱
+∗
+=
+{
+v
+t
+=
+(
+𝐱
+t
+,
+𝐜
+t
+)
+}
+t
+∈
+ℐ
+∗
+\mathcal{V}^{*}=\{v_{t}=(\mathbf{x}_{t},\mathbf{c}_{t})\}_{t\in\mathcal{I}^{*}}
+and the target camera poses
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+\{\mathbf{c}_{T+m}\}_{m=1}^{M}
+for the
+M
+M
+new frames to be generated and samples the novel views:
+{
+𝐱
+T
++
+m
+}
+m
+=
+1
+M
+∼
+ψ
+⁡
+(
+{
+(
+𝐱
+t
+,
+𝐜
+t
+)
+}
+t
+∈
+ℐ
+∗
+,
+{
+𝐜
+T
++
+m
+}
+m
+=
+1
+M
+)
+,
+\{\mathbf{x}_{T+m}\}_{m=1}^{M}\sim\psi\left(\{(\mathbf{x}_{t},\mathbf{c}_{t})\}_{t\in\mathcal{I}^{*}},\{\mathbf{c}_{T+m}\}_{m=1}^{M}\right),
+where
+ℐ
+∗
+⊆
+{
+1
+,
+2
+,
+…
+,
+T
+}
+\mathcal{I}^{*}\subseteq\{1,2,\ldots,T\}
+are the frame indices of the retrieved reference views.
+Specifically, we base our generator on the recent SEVA
+[
+46
+]
+model.
+Given the plug-and-play nature of our memory module, VMem can work with other image-set generators as well.
+We also fine-tune a more efficient version of SEVA that operates with a reduced number of reference frames.
+We provide more details in
+Sec.
+4.1
+.
+Short-term
+(
+50
+t
+​
+h
+​
+frame
+50^{th}\text{frame}
+)
+Long-term
+(
+≥
+200
+t
+​
+h
+​
+frame
+\geq 200^{th}\text{frame}
+)
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+FID
+↓
+\downarrow
+R
+dist
+R_{\text{dist}}
+↓
+\downarrow
+T
+dist
+T_{\text{dist}}
+↓
+\downarrow
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+FID
+↓
+\downarrow
+R
+dist
+R_{\text{dist}}
+↓
+\downarrow
+T
+dist
+T_{\text{dist}}
+↓
+\downarrow
+GeoGPT
+[
+25
+]
+0.444
+13.35
+—
+26.72
+—
+—
+0.674
+9.54
+—
+41.87
+—
+—
+Lookout
+[
+22
+]
+0.378
+14.43
+—
+28.86
+1.241
+0.876
+0.658
+10.51
+—
+58.12
+1.142
+0.924
+PhotoNVS
+[
+42
+]
+0.333
+15.51
+—
+21.76
+—
+—
+0.588
+11.54
+—
+41.95
+—
+—
+GenWarp
+[
+26
+]
+0.436
+12.03
+0.144
+29.69
+0.564
+0.059
+0.613
+9.56
+0.085
+36.40
+0.850
+0.251
+MotionCtrl
+[
+35
+]
+0.424
+12.00
+0.148
+19.25
+0.341
+0.356
+0.605
+9.13
+0.083
+35.45
+0.748
+0.609
+ViewCrafter
+[
+43
+]
+0.377
+16.97
+0.262
+25.39
+1.562
+0.208
+0.592
+9.74
+0.148
+34.12
+2.177
+0.827
+SEVA
+[
+46
+]
+(
+K
+=
+17
+K=17
+)
+0.293
+18.33
+0.382
+17.29
+0.223
+0.118
+0.455
+13.98
+0.216
+23.82
+1.125
+0.742
+VMem (
+K
+=
+4
+K=4
+)
+0.287
+18.49
+0.406
+17.12
+0.219
+0.039
+0.493
+13.12
+0.183
+27.15
+0.811
+0.499
+VMem (
+K
+=
+17
+K=17
+)
+0.293
+18.33
+0.382
+17.29
+0.223
+0.118
+0.452
+14.09
+0.227
+23.56
+0.982
+0.432
+Table 1:
+Single-view NVS on RealEstate10K.
+Frames are subsampled with 10-frame intervals.
+K
+K
+denotes the number of context views.
+In the short-term setting, all past frames fit in the context windows for both SEVA
+[
+46
+]
+and VMem; hence, SEVA
+[
+46
+]
+and VMem (
+K
+=
+17
+K=17
+) yield identical results since VMem uses SEVA as the backbone.
+VMem (
+K
+=
+4
+K=4
+) is fine-tuned on RealEstate10K for this setting, yielding better performance than SEVA
+[
+46
+]
+and VMem (
+K
+=
+17
+K=17
+) in short-term scenarios.
+VMem surpasses baselines on most metrics in this benchmark. However, its
+true advantage—spatial consistency—is not fully reflected
+because RealEstate10K trajectories rarely revisit previously observed areas.
+We address this limitation in
+Sec.
+4.3
+.
+Method
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+FID
+↓
+\downarrow
+R
+dist
+R_{\text{dist}}
+↓
+\downarrow
+T
+dist
+T_{\text{dist}}
+↓
+\downarrow
+Look-out
+[
+22
+]
+0.809
+8.41
+0.069
+38.34
+1.262
+0.341
+GenWarp
+[
+26
+]
+0.507
+11.13
+0.134
+32.94
+0.848
+0.241
+MotionCtrl
+[
+35
+]
+0.589
+9.07
+0.096
+26.86
+0.871
+0.293
+ViewCrafter
+[
+43
+]
+0.401
+11.82
+0.217
+24.72
+0.902
+0.492
+SEVA
+[
+46
+]
+(
+K
+=
+17
+K=17
+)
+0.401
+11.82
+0.217
+24.72
+0.902
+0.492
+VMem (
+K
+=
+4
+K=4
+)
+0.397
+15.72
+0.297
+24.97
+0.821
+0.392
+VMem (
+K
+=
+17
+K=17
+)
+0.304
+18.15
+0.377
+24.18
+0.892
+0.165
+Table 2
+:
+Results on cycle trajectories from RealEstate10K.
+Method
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+R
+dist
+R_{\text{dist}}
+↓
+\downarrow
+T
+dist
+T_{\text{dist}}
+↓
+\downarrow
+Look-out
+[
+22
+]
+0.792
+8.52
+0.008
+0.727
+1.499
+GenWarp
+[
+26
+]
+0.521
+10.27
+0.129
+0.785
+1.982
+MotionCtrl
+[
+35
+]
+0.692
+8.21
+0.082
+0.842
+0.129
+ViewCrafter
+[
+43
+]
+0.494
+13.62
+0.129
+1.643
+0.492
+VMem (
+K
+=
+4
+K=4
+)
+0.472
+14.11
+0.121
+1.204
+0.387
+Table 3
+:
+Results on cycle trajectories from Tanks and Temples.
+4
+Experiments
+We evaluate our method on established benchmarks for camera-conditioned autoregressive view generation from a single image, comparing our models to previous open-source approaches (
+Sec.
+4.2
+).
+These benchmarks, however, have a critical limitation: camera trajectories rarely revisit previously observed regions, unlike real-world behavior where humans or robots often return to or look at previously explored areas.
+To address this limitation, we propose a cycle-trajectory evaluation protocol that extends these benchmarks by making the camera return to the starting position along the same path in reverse order (
+Sec.
+4.3
+).
+Additionally, we collect a small dataset with trajectories that revisit observed regions for qualitative evaluation in
+Fig.
+5
+.
+Finally, we conduct an ablation study in
+Sec.
+4.4
+.
+4.1
+Experimental setup
+Implementation details.
+We use pre-trained SEVA
+[
+46
+]
+as the generator
+ψ
+\psi
+.
+SEVA uses a fixed total number of reference and target frames (
+K
++
+M
+=
+21
+K+M=21
+).
+For our experiments, we use
+M
+=
+4
+M=4
+target views, which leaves
+K
+=
+17
+K=17
+context views.
+However, this configuration demands substantial computational resources that may be prohibitive for many applications.
+To address this limitation, we fine-tune a more efficient version with LoRA
+[
+13
+]
+on the RealEstate10K training split
+[
+47
+]
+that works with a reduced number of reference frames (
+K
+=
+4
+K=4
+) and target views (
+M
+=
+4
+M=4
+), and use this efficient version for our main experiments.
+We demonstrate (
+Secs.
+4.3
+and
+4.4
+) that this fine-tuned version, when combined with VMem, achieves comparable performance to the original SEVA while delivering approximately
+12
+×
+12\times
+speedup at inference time.
+We provide more technical details in
+Appendix
+A
+.
+Datasets.
+We consider two real-world datasets for novel view generation evaluation: RealEstate10K
+[
+47
+]
+, comprising indoor scene video clips, and Tanks-and-Temples
+[
+14
+]
+, including indoor and outdoor scenes with larger camera motions.
+For qualitative evaluation, we use in-the-wild images collected from the internet or captured with phone cameras as input views (see
+Fig.
+5
+).
+Evaluation metrics.
+We evaluate generated novel view quality based on three factors:
+(1) overall quality of generated novel views, comparing generated novel view distributions to test set distributions using Fréchet Image Distance (FID)
+[
+10
+]
+;
+(2) the ability of the model to preserve image details across views, measuring peak signal-to-noise ratio (PSNR) for pixel differences, along with LPIPS
+[
+45
+]
+and SSIM
+[
+34
+]
+, as in
+[
+22
+]
+; and
+(3) alignment between generated camera poses and ground truth, following
+[
+9
+]
+, where we express estimated camera poses relative to the first frame and normalize translation by the furthest frame.
+We use DUSt3R
+[
+33
+]
+to extract poses from generated views.
+We calculate rotation distance
+R
+dist
+R_{\text{dist}}
+by comparing ground truth and extracted rotation matrices of each generated sequence:
+R
+dist
+=
+arccos
+⁡
+(
+0.5
+​
+(
+tr
+​
+(
+𝐑
+gen
+​
+𝐑
+gt
+T
+)
+−
+1
+)
+)
+,
+R_{\text{dist}}=\arccos\left(0.5\left(\text{tr}(\mathbf{R}_{\text{gen}}\mathbf{R}^{T}_{\text{gt}})-1\right)\right),
+where
+𝐑
+\mathbf{R}
+denotes a rotation matrix.
+We compute translation distance
+t
+dist
+t_{\text{dist}}
+as:
+t
+dist
+=
+‖
+𝐭
+gt
+−
+𝐭
+gen
+‖
+2
+.
+t_{\text{dist}}=\left\|\mathbf{t}_{\text{gt}}-\mathbf{t}_{\text{gen}}\right\|_{2}.
+Figure 6
+:
+Qualitative comparison of the cycle trajectory frames
+(
+≥
+400
+\geq 400
+frames). VMem autoregressively generates new views while maintaining memory of all previously generated frames, ensuring consistency when revisiting previously seen locations.
+4.2
+Short- and long-term view generation
+We first evaluate VMem on the benchmark from
+[
+22
+,
+42
+]
+, which defines two scenarios:
+short-term
+and
+long-term
+novel view generation.
+Beginning from the first frame of each ground-truth test sequence, the model autoregressively generates images along the ground truth camera trajectories with 10-frame intervals.
+The
+short-term
+scenario evaluates the fifth generated image (50 frames from the initial view), while the
+long-term
+scenario evaluates the final image (
+≥
+\geq
+200 frames from the initial view).
+Following the protocol, we only consider samples with more than 200 frames for the
+long-term
+scenario and more than 50 frames for the
+short-term
+scenario.
+We report results in
+Tab.
+1
+.
+VMem substantially outperforms all baselines on the key metrics, demonstrating superior scene extrapolation.
+However, the benchmark trajectories rarely revisit observed regions, limiting evaluation of long-term scene consistency.
+Context
+views
+K
+K
+View Retrieval
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+R
+dist
+R_{\text{dist}}
+↓
+\downarrow
+T
+dist
+T_{\text{dist}}
+↓
+\downarrow
+17
+Temporal
+0.477
+13.92
+0.188
+0.976
+0.254
+Camera Distance (SEVA
+[
+46
+]
+)
+0.397
+15.72
+0.297
+0.821
+0.392
+Field of View
+0.374
+15.75
+0.292
+0.911
+0.382
+VMem
+0.304
+18.15
+0.377
+0.892
+0.165
+4
+Temporal
+0.794
+7.52
+0.018
+1.942
+0.458
+Camera Distance
+0.422
+13.27
+0.187
+1.787
+0.319
+Field of View
+0.424
+13.11
+0.192
+1.782
+0.285
+VMem
+0.381
+14.82
+0.275
+0.793
+0.124
+Table 4
+:
+Ablation study on cycle trajectories from RealEstate10K.
+We compare different view retrieval strategies for two context view counts
+K
+K
+4.3
+Long-term view generation with revisitations
+To evaluate long-term scene consistency when revisiting observed regions—a scenario that rarely occurs in existing benchmarks—we propose a cycle-trajectory evaluation protocol as a proxy for real revisitation scenarios in human and robotic exploration.
+In this protocol, the model generates frames following trajectories from initial to final poses, then returns along the same path to the starting position.
+We evaluate metrics every 10 frames on the return trajectories, using all test sequences.
+Following this protocol, we report quantitative results in
+Tab.
+2
+and qualitative comparisons in
+Fig.
+6
+.
+VMem outperforms all baselines across all metrics, demonstrating superior visual consistency when generating previously observed regions.
+To validate generalization, we evaluate on Tanks-and-Temples containing indoor and outdoor scenes with more dynamic camera trajectories.
+We use all six advanced scenes and apply the same
+cycle-trajectory
+protocol using the first 50 frames, evaluating every frame without temporal subsampling.
+Results are in
+Tab.
+3
+.
+VMem consistently outperforms all baselines across in-domain (
+Tab.
+2
+) and out-of-domain (
+Tab.
+3
+) evaluations on the majority of metrics.
+We also qualitatively evaluate VMem across diverse in-the-wild scenes in
+Fig.
+5
+, demonstrating generation of diverse, consistent, high-quality long videos.
+4.4
+Ablation study
+We ablate our surfel-based memory indexing for context view retrieval in VMem.
+We evaluate our approach in the cycle-trajectory setting against three alternative retrieval strategies:
+(1) temporal-based retrieval, selecting the most recent
+K
+K
+views from memory,
+(2) camera distance-based retrieval, selecting top
+K
+K
+views with cameras closest to the target view camera—also used by SEVA
+[
+46
+]
+, our backbone generator, and
+(3) field-of-view-based retrieval, selecting top
+K
+K
+views with highest field-of-view overlap with the target view.
+We also evaluate performance trade-offs between our lightweight, fine-tuned generator using
+K
+=
+4
+K=4
+context views versus original SEVA with
+K
+=
+17
+K=17
+context views.
+We report results in
+Tab.
+4
+.
+Our findings show VMem consistently improves generator performance across both numbers of context views.
+Improvement is most pronounced with fewer context views (
+K
+=
+4
+K=4
+), highlighting the effectiveness of our surfel-based memory index.
+Computational efficiency.
+A key practical advantage of our approach is its computational efficiency.
+VMem with only
+K
+=
+4
+K=4
+views achieves
+12
+×
+12\times
+speed improvement over the original SEVA while recovering most of the performance achieved with
+K
+=
+17
+K=17
+views.
+On an RTX 4090 GPU, our method generates frames in 4.2 seconds compared to 50 seconds for SEVA, representing a step towards real-time interactive scene exploration.
+5
+Conclusion
+We introduced
+Surfel-Indexed View Memory (VMem)
+, a novel plug-and-play memory module for long-term autoregressive scene generation using a surfel-indexed view memory.
+By anchoring past views to a surfel-based representation of the scene and retrieving the most relevant ones, our approach improves long-term scene consistency while reducing computational costs.
+Experiments on long-term scene synthesis benchmarks demonstrate that VMem outperforms existing methods in scene coherence while enabling the use of fewer context views, leading to significantly faster generation.
+Our work advances scalable video generation, with applications in virtual reality, gaming, and other domains.
+Acknowledgments.
+The authors of this work are supported by Clarendon scholarship, ERC 101001212-UNION, and AIMS EP/S024050/1. The authors would like to thank Xingyi Yang, Zeren Jiang, Junlin Han, Zhongrui Gui for their insightful feedback.
+References
+[1]
+Mark Boss, Zixuan Huang, Aaryaman Vasishta, and Varun Jampani.
+SF3D: Stable fast 3D mesh reconstruction with uv-unwrapping and
+illumination disentanglement.
+arXiv preprint arXiv:2408.00653
+, 2024.
+[2]
+Jake Bruce, Michael D Dennis, Ashley Edwards, Jack Parker-Holder, Yuge Shi,
+Edward Hughes, Matthew Lai, Aditi Mavalankar, Richie Steigerwald, Chris Apps,
+et al.
+Genie: Generative interactive environments.
+In
+Forty-first International Conference on Machine Learning
+,
+2024.
+[3]
+Anpei Chen, Zexiang Xu, Fuqiang Zhao, Xiaoshuai Zhang, Fanbo Xiang, Jingyi Yu,
+and Hao Su.
+Mvsnerf: Fast generalizable radiance field reconstruction from
+multi-view stereo.
+In
+Proceedings of the IEEE/CVF international conference on
+computer vision
+, pages 14124–14133, 2021.
+[4]
+Hansheng Chen, Jiatao Gu, Anpei Chen, Wei Tian, Zhuowen Tu, Lingjie Liu, and
+Hao Su.
+Single-Stage Diffusion NeRF: A Unified Approach to 3D
+Generation and Reconstruction, 2023.
+arXiv:2304.06714 [cs].
+[5]
+Yuedong Chen, Haofei Xu, Chuanxia Zheng, Bohan Zhuang, Marc Pollefeys, Andreas
+Geiger, Tat-Jen Cham, and Jianfei Cai.
+Mvsplat: Efficient 3d gaussian splatting from sparse multi-view
+images.
+arXiv preprint arXiv:2403.14627
+, 2024a.
+[6]
+Yuedong Chen, Chuanxia Zheng, Haofei Xu, Bohan Zhuang, Andrea Vedaldi, Tat-Jen
+Cham, and Jianfei Cai.
+Mvsplat360: Feed-forward 360 scene synthesis from sparse views.
+In
+Advances in Neural Information Processing Systems
+(NeurIPS)
+, 2024b.
+[7]
+Rafail Fridman, Amit Abecasis, Yoni Kasten, and Tali Dekel.
+Scenescape: Text-driven consistent scene generation.
+arXiv preprint arXiv:2302.01133
+, 2023.
+[8]
+Ruiqi Gao*, Aleksander Holynski*, Philipp Henzler, Arthur Brussee, Ricardo
+Martin-Brualla, Pratul P. Srinivasan, Jonathan T. Barron, and Ben Poole*.
+Cat3d: Create anything in 3d with multi-view diffusion models.
+Advances in Neural Information Processing Systems
+, 2024.
+[9]
+Hao He, Yinghao Xu, Yuwei Guo, Gordon Wetzstein, Bo Dai, Hongsheng Li, and
+Ceyuan Yang.
+Cameractrl: Enabling camera control for text-to-video generation.
+arXiv preprint arXiv:2404.02101
+, 2024.
+[10]
+Martin Heusel, Hubert Ramsauer, Thomas Unterthiner, Bernhard Nessler, and Sepp
+Hochreiter.
+Gans trained by a two time-scale update rule converge to a local nash
+equilibrium.
+Advances in neural information processing systems
+, 30, 2017.
+[11]
+Lukas Höllein, Ang Cao, Andrew Owens, Justin Johnson, and Matthias
+Nießner.
+Text2room: Extracting textured 3d meshes from 2d text-to-image
+models.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision (ICCV)
+, pages 7909–7920, 2023.
+[12]
+Yicong Hong, Kai Zhang, Jiuxiang Gu, Sai Bi, Yang Zhou, Difan Liu, Feng Liu,
+Kalyan Sunkavalli, Trung Bui, and Hao Tan.
+LRM: Large reconstruction model for single image to 3D.
+In
+Proc. ICLR
+, 2024.
+[13]
+Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li,
+Shean Wang, Lu Wang, and Weizhu Chen.
+LoRA: Low-rank adaptation of large language models.
+In
+Proc. ICLR
+, 2022.
+[14]
+Arno Knapitsch, Jaesik Park, Qian-Yi Zhou, and Vladlen Koltun.
+Tanks and temples: Benchmarking large-scale scene reconstruction.
+ACM Transactions on Graphics (ToG)
+, 36(4):1–13, 2017.
+[15]
+Jing Yu Koh, Harsh Agrawal, Dhruv Batra, Richard Tucker, Austin Waters, Honglak
+Lee, Yinfei Yang, Jason Baldridge, and Peter Anderson.
+Simple and effective synthesis of indoor 3d scenes.
+In
+Proceedings of the AAAI Conference on Artificial
+Intelligence
+, pages 1169–1178, 2023.
+[16]
+Andrew Liu, Richard Tucker, Varun Jampani, Ameesh Makadia, Noah Snavely, and
+Angjoo Kanazawa.
+Infinite nature: Perpetual view generation of natural scenes from a
+single image.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision
+, pages 14458–14467, 2021.
+[17]
+Luke Melas-Kyriazi, Christian Rupprecht, Iro Laina, and Andrea Vedaldi.
+RealFusion: 360 reconstruction of any object from a single image.
+In
+Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR)
+, 2023.
+[18]
+Norman Müller, Katja Schwarz, Barbara Rössle, Lorenzo Porzi,
+Samuel Rota Bulò, Matthias Nießner, and Peter Kontschieder.
+Multidiff: Consistent novel view synthesis from a single image.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, pages 10258–10268, 2024.
+[19]
+Michael Niemeyer, Jonathan T Barron, Ben Mildenhall, Mehdi SM Sajjadi, Andreas
+Geiger, and Noha Radwan.
+Regnerf: Regularizing neural radiance fields for view synthesis from
+sparse inputs.
+In
+Proceedings of the IEEE/CVF conference on computer vision
+and pattern recognition
+, pages 5480–5490, 2022.
+[20]
+Jack Parker-Holder, Philip Ball, Jake Bruce, Vibhavari Dasagi, Kristian
+Holsheimer, Christos Kaplanis, Alexandre Moufarek, Guy Scully, Jeremy Shar,
+Jimmy Shi, Stephen Spencer, Jessica Yung, Michael Dennis, Sultan Kenjeyev,
+Shangbang Long, Vlad Mnih, Harris Chan, Maxime Gazeau, Bonnie Li, Fabio
+Pardo, Luyu Wang, Lei Zhang, Frederic Besse, Tim Harley, Anna Mitenkova, Jane
+Wang, Jeff Clune, Demis Hassabis, Raia Hadsell, Adrian Bolton, Satinder
+Singh, and Tim Rocktäschel.
+Genie 2: A large-scale foundation world model, 2024.
+[21]
+Stefan Popov, Amit Raj, Michael Krainin, Yuanzhen Li, William T. Freeman, and
+Michael Rubinstein.
+Camctrl3d: Single-image scene exploration with precise 3d camera
+control, 2025.
+[22]
+Xuanchi Ren and Xiaolong Wang.
+Look outside the room: Synthesizing a consistent long-term 3d scene
+video from a single image.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, pages 3563–3573, 2022.
+[23]
+Xuanchi Ren, Tianchang Shen, Jiahui Huang, Huan Ling, Yifan Lu, Merlin
+Nimier-David, Thomas Müller, Alexander Keller, Sanja Fidler, and Jun Gao.
+Gen3c: 3d-informed world-consistent video generation with precise
+camera control.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, 2025.
+[24]
+Chris Rockwell, David F Fouhey, and Justin Johnson.
+Pixelsynth: Generating a 3d-consistent experience from a single
+image.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision
+, pages 14104–14113, 2021.
+[25]
+Robin Rombach, Patrick Esser, and Björn Ommer.
+Geometry-free view synthesis: Transformers and no 3d priors.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision (ICCV)
+, pages 14356–14366, 2021.
+[26]
+Junyoung Seo, Kazumi Fukuda, Takashi Shibuya, Takuya Narihira, Naoki Murata,
+Shoukang Hu, Chieh-Hsin Lai, Seungryong Kim, and Yuki Mitsufuji.
+Genwarp: Single image to novel views with semantic-preserving
+generative warping.
+arXiv preprint arXiv:2405.17251
+, 2024.
+[27]
+Ruoxi Shi, Hansheng Chen, Zhuoyang Zhang, Minghua Liu, Chao Xu, Xinyue Wei,
+Linghao Chen, Chong Zeng, and Hao Su.
+Zero123++: a single image to consistent multi-view diffusion base
+model.
+arXiv.cs
+, abs/2310.15110, 2023.
+[28]
+Stanislaw Szymanowicz, Eldar Insafutdinov, Chuanxia Zheng, Dylan Campbell, Joao
+Henriques, Christian Rupprecht, and Andrea Vedaldi.
+Flash3d: Feed-forward generalisable 3d scene reconstruction from a
+single image.
+arxiv
+, 2024a.
+[29]
+Stanislaw Szymanowicz, Christian Rupprecht, and Andrea Vedaldi.
+Splatter Image: Ultra-fast single-view 3D reconstruction.
+In
+Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR)
+, 2024b.
+[30]
+Prune Truong, Marie-Julie Rakotosaona, Fabian Manhardt, and Federico Tombari.
+Sparf: Neural radiance fields from sparse and noisy poses.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, pages 4190–4200, 2023.
+[31]
+Hung-Yu Tseng, Qinbo Li, Changil Kim, Suhib Alsisan, Jia-Bin Huang, and
+Johannes Kopf.
+Consistent view synthesis with pose-guided diffusion models.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, pages 16773–16783, 2023.
+[32]
+Qianqian Wang*, Yifei Zhang*, Aleksander Holynski, Alexei A. Efros, and Angjoo
+Kanazawa.
+Continuous 3d perception model with persistent state.
+In
+CVPR
+, 2025.
+[33]
+Shuzhe Wang, Vincent Leroy, Yohann Cabon, Boris Chidlovskii, and Jerome Revaud.
+Dust3r: Geometric 3d vision made easy.
+In
+CVPR
+, 2024.
+[34]
+Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Simoncelli.
+Image quality assessment: from error visibility to structural
+similarity.
+IEEE transactions on image processing
+, 13(4):600–612, 2004.
+[35]
+Zhouxia Wang, Ziyang Yuan, Xintao Wang, Yaowei Li, Tianshui Chen, Menghan Xia,
+Ping Luo, and Ying Shan.
+Motionctrl: A unified and flexible motion controller for video
+generation.
+ACM SIGGRAPH 2024 Conference Papers
+, 2023.
+[36]
+Olivia Wiles, Georgia Gkioxari, Richard Szeliski, and Justin Johnson.
+SynSin: End-to-end view synthesis from a single image.
+In
+CVPR
+, 2020.
+[37]
+Rundi Wu, Ben Mildenhall, Philipp Henzler, Keunhong Park, Ruiqi Gao, Daniel
+Watson, Pratul P Srinivasan, Dor Verbin, Jonathan T Barron, Ben Poole, et al.
+Reconfusion: 3d reconstruction with diffusion priors.
+In
+Proceedings of the IEEE/CVF conference on computer vision
+and pattern recognition
+, pages 21551–21561, 2024.
+[38]
+Jianfeng Xiang, Zelong Lv, Sicheng Xu, Yu Deng, Ruicheng Wang, Bowen Zhang,
+Dong Chen, Xin Tong, and Jiaolong Yang.
+Structured 3d latents for scalable and versatile 3d generation.
+arXiv preprint arXiv:2412.01506
+, 2024.
+[39]
+Zeqi Xiao, Yushi Lan, Yifan Zhou, Wenqi Ouyang, Shuai Yang, Yanhong Zeng, and
+Xingang Pan.
+Worldmem: Long-term consistent world simulation with memory, 2025.
+[40]
+Hong-Xing Yu, Haoyi Duan, Junhwa Hur, Kyle Sargent, Michael Rubinstein,
+William T. Freeman, Forrester Cole, Deqing Sun, Noah Snavely, Jiajun Wu, and
+Charles Herrmann.
+Wonderjourney: Going from anywhere to everywhere.
+arXiv.cs
+, abs/2312.03884, 2023a.
+[41]
+Hong-Xing Yu, Haoyi Duan, Charles Herrmann, William T. Freeman, and Jiajun Wu.
+WonderWorld: interactive 3D scene generation from a single image.
+arXiv
+, 2406.09394, 2025.
+[42]
+Jason J Yu, Fereshteh Forghani, Konstantinos G Derpanis, and Marcus A Brubaker.
+Long-term photometric consistent novel view synthesis with diffusion
+models.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision
+, pages 7094–7104, 2023b.
+[43]
+Wangbo Yu, Jinbo Xing, Li Yuan, Wenbo Hu, Xiaoyu Li, Zhipeng Huang, Xiangjun
+Gao, Tien-Tsin Wong, Ying Shan, and Yonghong Tian.
+Viewcrafter: Taming video diffusion models for high-fidelity novel
+view synthesis.
+arXiv preprint arXiv:2409.02048
+, 2024.
+[44]
+Shangjin Zhai, Zhichao Ye, Jialin Liu, Weijian Xie, Jiaqi Hu, Zhen Peng, Hua
+Xue, Danpeng Chen, Xiaomeng Wang, Lei Yang, Nan Wang, Haomin Liu, and Guofeng
+Zhang.
+Stargen: A spatiotemporal autoregression framework with video
+diffusion model for scalable and controllable scene generation, 2025.
+[45]
+Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang.
+The unreasonable effectiveness of deep features as a perceptual
+metric.
+In
+Proceedings of the IEEE conference on computer vision and
+pattern recognition
+, pages 586–595, 2018.
+[46]
+Jensen (Jinghao) Zhou, Hang Gao, Vikram Voleti, Aaryaman Vasishta, Chun-Han
+Yao, Mark Boss, Philip Torr, Christian Rupprecht, and Varun Jampani.
+Stable virtual camera: Generative view synthesis with diffusion
+models.
+arXiv preprint arXiv:2503.14489
+, 2025.
+[47]
+Tinghui Zhou, Richard Tucker, John Flynn, Graham Fyffe, and Noah Snavely.
+Stereo magnification: Learning view synthesis using multiplane
+images.
+arXiv preprint arXiv:1805.09817
+, 2018.
+Appendix
+Appendix A
+Implementation details
+To address the computational cost of SEVA
+[
+46
+]
+, which uses a large fixed total number of reference and target frames (
+K
++
+M
+=
+21
+K+M=21
+), we fine-tune a more efficient version that employs a reduced number of reference frames (
+K
+=
+4
+K=4
+) and target views (
+M
+=
+4
+M=4
+).
+We apply LoRA
+[
+13
+]
+with rank
+256
+256
+and randomly sample context views online during training.
+Training proceeds for 600,000 iterations on 8 A40 GPUs with a batch size of 24 per GPU, using the AdamW optimizer with a learning rate of
+3
+×
+10
+−
+6
+3\times 10^{-6}
+, weight decay of
+10
+−
+4
+10^{-4}
+, and a cosine annealing schedule.
+For inference, we set the classifier-free guidance scale to
+3
+3
+, the point map scaling factor
+σ
+\sigma
+to
+0.03
+0.03
+, and
+α
+\alpha
+to
+0.2
+0.2
+for surfel radius calculation.
+Appendix B
+Average pose calculation
+To compute the average camera pose for rendering surfels, we average translations
+𝐭
+T
++
+m
+\mathbf{t}_{T+m}
+with a simple mean, and rotations
+𝐑
+T
++
+m
+\mathbf{R}_{T+m}
+by converting them to quaternions
+𝐪
+m
+\mathbf{q}_{m}
+, aligning signs to a common hemisphere, and normalizing the mean quaternion:
+𝐪
+¯
+=
+∑
+m
+=
+1
+M
+𝐪
+~
+m
+‖
+∑
+m
+=
+1
+M
+𝐪
+~
+m
+‖
+,
+𝐪
+~
+m
+=
+sign
+​
+(
+𝐪
+m
+⋅
+𝐪
+1
+)
+⋅
+𝐪
+m
+.
+\bar{\mathbf{q}}=\frac{\sum_{m=1}^{M}\tilde{\mathbf{q}}_{m}}{\|\sum_{m=1}^{M}\tilde{\mathbf{q}}_{m}\|},\quad\tilde{\mathbf{q}}_{m}=\text{sign}(\mathbf{q}_{m}\cdot\mathbf{q}_{1})\cdot\mathbf{q}_{m}.
+The final average pose is
+𝐜
+¯
+=
+[
+R
+⁡
+(
+𝐪
+¯
+)
+𝐭
+¯
+𝟎
+⊤
+1
+]
+\bar{\mathbf{c}}=\begin{bmatrix}\mathrm{R}(\bar{\mathbf{q}})&\bar{\mathbf{t}}\\
+\mathbf{0}^{\top}&1\end{bmatrix}
+, where
+R
+⁡
+(
+𝐪
+¯
+)
+\mathrm{R}(\bar{\mathbf{q}})
+denotes the rotation matrix from
+𝐪
+¯
+\bar{\mathbf{q}}
+and
+𝐭
+¯
+=
+1
+M
+​
+∑
+m
+=
+1
+M
+𝐭
+T
++
+m
+\bar{\mathbf{t}}=\frac{1}{M}\sum_{m=1}^{M}\mathbf{t}_{T+m}
+.
+Appendix C
+Autoregressive point map prediction
+Since we generate point maps for each view in an autoregressive manner, it is crucial to maintain their consistency across a shared coordinate space. Point-map estimators such as CUT3R include an optimization stage that jointly refines the depth, camera parameters, and point maps. To ensure a fixed camera trajectory, we freeze the camera parameters, which are user-defined inputs. Additionally, at each generation step when we have
+T
+T
+frames generated so far, we freeze all previously predicted depth maps for frames
+1
+,
+2
+,
+…
+,
+T
+1,2,\ldots,T
+during optimization. This ensures that the resulting point maps and surfel representations remain consistent and causal. We then save the optimized depth maps of the newly generated frames
+T
++
+1
+,
+…
+,
+T
++
+M
+T+1,\ldots,T+M
+for future prediction.
+Appendix D
+Limitations and discussion
+Evaluation protocol.
+Since there is no established benchmark for evaluating long-term consistency in scene video generation, we adopt cyclic trajectories as a proxy for assessment. However, these trajectories remain relatively simple and contain only limited occlusions, which means the full potential of VMem in handling occlusions is not fully demonstrated. Moreover, existing evaluation metrics primarily capture low-level texture similarity in hallucinated content, rather than assessing true multi-view consistency—an inherent limitation of single-view autoregressive generation. As such, there is a clear need for more standardized evaluation protocols, which we leave for future exploration.
+Limited training data and computing resources.
+Due to limited computational resources, our more efficient version of the generator based on SEVA
+[
+46
+]
+was fine-tuned only on the RealEstate10K dataset
+[
+47
+]
+. This dataset primarily consists of indoor scenes and a limited number of outdoor real-estate scenarios. Consequently, the model may struggle to generalize to broader contexts, with performance potentially degrading when dealing with natural landscapes or images containing moving objects compared to indoor environments. We believe this limitation stems primarily from insufficient dataset diversity rather than fundamental model constraints.
+Inference speed.
+Due to the multi-step sampling process of diffusion models, VMem requires 4.16 seconds to generate a single frame on an RTX 4090 GPU. This falls short of the real-time performance needed for applications such as virtual reality. We believe that future advancements in single-step image-set models and improvements in computational infrastructure hold promise for significantly accelerating inference speed.
+Future improvements.
+Since our memory module relies heavily on the capabilities of the off-the-shelf image-set generator and the point map predictor, the performance of VMem is expected to improve as these underlying models continue to advance.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:
+Click the "Report Issue"
+(
+)
+button, located in the page header.
+Tip:
+You can select the relevant text first, to include it in your report.
+Our team has already identified
+the following issues
+. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a
+list of packages that need conversion
+, and welcome
+developer contributions
+.
+We gratefully acknowledge support from
+        our
+major funders
+,
+member institutions
+,
+,
+        and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status
+(opens in new tab)
+Major funding support from

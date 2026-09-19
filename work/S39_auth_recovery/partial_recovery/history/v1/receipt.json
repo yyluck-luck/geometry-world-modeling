@@ -1,0 +1,79 @@
+{
+  "schema": "S39_PARTIAL_RECOVERY_SOURCE_PREPARATION_V1",
+  "completed_utc": "2026-09-07T04:55:10.338996+00:00",
+  "status": "PREPARED_NOT_EXECUTED",
+  "source": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/recover_partial.py",
+  "source_sha256": "c796752d5ce8fec6b08491cc52d91e5c04d75e7c7dfcd3bbc51fe6f1dd6800e3",
+  "report_sha256": "dd7cc4b741dd6906b95b53c396964b546908f8ea1c40681cba0376a6404b2c08",
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/file_download.py",
+      "sha256": "f99d5b54b07b55d22e539023031d4572e08b388b7d32f3fa9bfe1e5ab4652ed4",
+      "bytes": 90227
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_http.py",
+      "sha256": "4587b40d0a792c88348e9d32e75d825f839e6677c22de03af9666e8736900315",
+      "bytes": 47007
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/__init__.py",
+      "sha256": "a7f7f5c8a8161826804b508fa4da2bb899e50e7a0ae480f7acc911d5ce7838c2",
+      "bytes": 60995
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_headers.py",
+      "sha256": "43d6eef66bcea66fbdadfbfe61196bfd8c32fda31992645c37731b5447090090",
+      "bytes": 8234
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_preservation.json",
+      "sha256": "92373813349c12e4c7d498672ee240bce33b2820266ce9982f37715bb5cc8872",
+      "bytes": 1340
+    }
+  ],
+  "source_findings": {
+    "uuid_wb_finally_unlink": {
+      "file": "huggingface_hub/file_download.py",
+      "lines": "1930-2005",
+      "verdict": "direct next-CLI pathname resumption not supported by inspected orchestration"
+    },
+    "xet_existing_partial_reuse": "No guarantee established by inspected start_download_file path; chunk cache is distinct",
+    "http_get_resume_size": {
+      "lines": "325-473",
+      "not_used_reason": "200 response can truncate/fallback; streaming retry count resets with progress"
+    },
+    "official_metadata": {
+      "lines": "1578-1651",
+      "timeout_seconds": 20,
+      "retry_on_errors": false
+    },
+    "hub_redirect_guard": {
+      "file": "huggingface_hub/utils/_http.py",
+      "lines": "698-746",
+      "native_behavior": "stop before leaving Hub; new script further limits bearer to huggingface.co"
+    }
+  },
+  "prepared_execution_limits": {
+    "metadata_head_attempts_including_redirects_max": 3,
+    "cdn_get_attempts_max": 1,
+    "automatic_retries": 0,
+    "max_cdn_bytes_saved": "expected size minus copied apparent prefix; mismatch rejected",
+    "total_seconds_requires_explicit_cli_value": true,
+    "allowed_seconds_min": 1,
+    "allowed_seconds_max": 7200
+  },
+  "evidence_boundary": {
+    "st_size_is_verified_prefix": false,
+    "full_sha_only_success_gate": true,
+    "new_network_requests_this_preparation": 0,
+    "active_partial_content_read": false,
+    "current_process_signalled_or_modified": false,
+    "scientific_models_run": 0,
+    "module_import_executed": false,
+    "runtime_tests": 0,
+    "static_ast_parse": "PASS at 2026-09-07T04:54:26.681605+00:00",
+    "canonical_ledger_changed": false
+  },
+  "next_step": "Independent static review first; only after genuine attempt3 terminal consider one separately recorded recovery execution. Do not run while current attempt3 remains active."
+}

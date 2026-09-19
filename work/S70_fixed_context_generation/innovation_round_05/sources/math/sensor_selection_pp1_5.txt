@@ -1,0 +1,368 @@
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 57, NO. 2, FEBRUARY 2009                                                                                        451
+
+
+
+
+                Sensor Selection via Convex Optimization
+                                                   Siddharth Joshi and Stephen Boyd, Fellow, IEEE
+
+
+
+   Abstract—We consider the problem of choosing a set of                                      and a bound on the performance that can be achieved over all
+sensor measurements, from a set of     possible or potential sensor                           possible choices. Thus, we get a suboptimal design, and a bound
+measurements, that minimizes the error in estimating some pa-                                 on how suboptimal it is. Numerous numerical experiments sug-
+rameters. Solving this problem by evaluating the performance for
+each of the       possible choices of sensor measurements is not                              gest that the gap between these two is often small. Our basic
+practical unless     and are small. In this paper, we describe a                              method can be followed by any local optimization method. We
+heuristic, based on convex optimization, for approximately solving                            have found, for example, that a greedy algorithm that considers
+this problem. Our heuristic gives a subset selection as well as                               all possible swaps between the set of selected and unselected
+a bound on the best performance that can be achieved by any
+selection of sensor measurements. There is no guarantee that
+                                                                                              sensors, accepting any swaps that improve the objective, can
+the gap between the performance of the chosen subset and the                                  give a modest improvement in the quality of the sensor selec-
+performance bound is always small; but numerical experiments                                  tion. When this local search terminates it gives a 2-opt sensor
+suggest that the gap is small in many cases. Our heuristic method                             selection, i.e., one for which no swap of a selected and an uns-
+requires on the order of       operations; for       1000 possible                            elected sensor has better objective value.
+sensors, we can carry out sensor selection in a few seconds on a
+2-GHz personal computer.                                                                         1) Prior and Related Work: The sensor selection problem
+                                                                                              arises in various applications, including robotics [2], sensor
+   Index Terms—Convex optimization, experiment design, sensor                                 placement for structures [3], [4], target tracking [5], [6],
+selection.
+                                                                                              chemical plant control [7], and wireless networks [8]. Sensor
+                                                                                              selection in the context of dynamical systems is studied in, e.g.,
+                             I. INTRODUCTION                                                  [9]–[11]. Sensor selection, with a rather different setup from
+                                                                                              ours, has been studied in sensor network management [12],
+                                                                                              hypothesis testing in a sensor network [13], and discrete-event
+
+W        E study the problem of selecting sensors, from among
+             potential sensors. Each sensor gives a linear func-
+tion of a parameter vector , plus an additive noise; we as-
+                                                                                              systems [14]. The sensor selection problem formulation we use
+                                                                                              in this paper can be found in, e.g., [15]. The sensor selection
+                                                                                              problem (and various extensions described in Section V) can be
+sume these measurement noises are independent identically dis-
+                                                                                              formulated in an information theoretic framework [16]–[19],
+tributed zero-mean Gaussian random variables. The sensor se-
+                                                                                              and in a Bayesian framework [20], [21]. (We will comment on
+lection, i.e., the choice of the subset of sensors to use, affects
+                                                                                              this in more detail later.)
+the estimation error covariance matrix. Our goal is to choose
+                                                                                                 The complexity of a sensor selection problem (though not
+the sensor selection to minimize the determinant of the estima-
+                                                                                              the one we consider) is considered in [22], where the authors
+tion error covariance matrix, which is equivalent to minimizing
+                                                                                              show that it is NP-hard. (As far as we know, NP-hardness of the
+the volume of the associated confidence ellipsoid. One simple
+                                                                                              sensor selection problem we consider has not been established.)
+method for solving the sensor selection problem is to evaluate
+                                                                                              The sensor selection problem can be exactly solved using global
+the performance for all        choices for the sensor selection, but
+                                                                                              optimization techniques, such as branch and bound [23], [24].
+evidently this is not practical unless or is very small. For
+                                                                                              These methods can, and often do, run for very long times, even
+example, with          100 potential sensors, from which we are to
+                                                                                              with modest values of and .
+choose           , there are on the order of      possible choices,
+                                                                                                 Several heuristics have been proposed to approximately solve
+so direct enumeration is clearly not possible.
+                                                                                              the sensor selection problem. These include genetic algorithms
+   In this paper we describe a new method for approximately
+                                                                                              [15], and application specific local search methods. Local opti-
+solving the sensor selection problem. Our method is based on
+                                                                                              mization techniques, similar to the one we describe, are summa-
+convex optimization, and is therefore tractable, with computa-
+                                                                                              rized in [25] and [26]. While these heuristics can produce good
+tional complexity growing as         . For             , the method
+                                                                                              suboptimal sensor selections, they do not yield any guarantees
+can be carried out in a few seconds, on a 2-GHz personal com-
+                                                                                              or bounds on the performance that is achievable. In any case,
+puter; for         100, the method can be carried out in millisec-
+                                                                                              any local optimization method, including the ones described in
+onds. The method provides both a suboptimal choice of sensors,
+                                                                                              these papers, and generic methods such as randomized rounding
+                                                                                              [27], can be incorporated into our method.
+   Manuscript received November 25, 2007; revised August 10, 2008. First pub-                    The sensor selection problem is closely related to the D-op-
+lished October 31, 2008; current version published January 30, 2009. The as-
+sociate editor coordinating the review of this manuscript and approving it for                timal experiment design problem [28], [29]. Here, too, we are
+publication was Dr. Daniel P. Palomar.                                                        to choose a subset of possible measurements from a palette of
+   The authors are with the Department of Electrical Engineering, Stanford Uni-               choices. In D-optimal experiment design, however, we consider
+versity, Stanford, CA 94305 USA (e-mail: sidj@stanford.edu; boyd@stanford.
+edu).                                                                                         the case when and           both grow, with a constant ratio; the
+   Digital Object Identifier 10.1109/TSP.2008.2007095                                         question is not which sensors to use, but how frequently to use
+                                                                        1053-587X/$25.00 © 2008 IEEE
+
+
+             Authorized licensed use limited to: Stanford University. Downloaded on May 6, 2009 at 14:23 from IEEE Xplore. Restrictions apply.
+452                                                                                       IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 57, NO. 2, FEBRUARY 2009
+
+
+
+each one. The standard convex relaxation for the D-optimal ex-                              A scalar measure of the quality of estimation is the volume of
+periment design problem (see, e.g., [30, Sec. 7.5]) leads to a                              the -confidence ellipsoid
+convex problem that is similar to ours, but different; we will
+discuss the differences in more detail below.
+                                                                                                                                                           (4)
+   Finally, we note that the idea of using convex relaxation as the
+basis for a heuristic for solving a combinatorial problem is quite
+old, and has been observed to give very good results in many
+applications. Recent problems that are solved using this general                            where is the Gamma function. Another scalar measure of un-
+technique are compressed sensing [31], sparse regressor selec-                              certainty, that has the same units as the entries in the param-
+tion [32], sparse signal detection [33], sparse decoding [34], and                          eter , is the mean radius, defined as the geometric mean of the
+many others. Other applications that use convex relaxations in-                             lengths of the semi-axes of the -confidence ellipsoid
+clude portfolio optimization with transaction costs [35], con-
+troller design [36], and circuit design [37].                                                                                                              (5)
+   2) Outline: The rest of this paper is organized as follows. In
+Section II, we formally describe the sensor selection problem. In                             We will be interested in volume ratios, so it is convenient to
+Section III, we describe the basic convex relaxation, an approx-                            work with the log of the volume
+imate relaxation that can be solved even more efficiently, and
+a local optimization method to improve the basic sensor selec-
+tion. We illustrate the method, with and without local optimiza-                                                                                           (6)
+tion, with a numerical example, in Section IV. In Section V, we
+describe a number of variations and extensions on the sensor
+                                                                                            where is a constant that depends only on , , and . The log
+selection problem, than can be incorporated in the convex op-
+                                                                                            volume of the confidence ellipsoid, given in (6), gives a quanti-
+timization framework, including different objective functions,
+                                                                                            tative measure of how informative the collection of measure-
+map estimation, constraints on sensors, and a robust version of
+                                                                                            ments is.
+the sensor selection problem.
+                                                                                            B. Sensor Selection Problem
+                        II. SENSOR SELECTION
+                                                                                               Now we can describe the sensor selection problem. We
+A. Parameter Estimation                                                                     consider a set of   potential measurements, characterized by
+                                                                                                              ; we are to choose a subset of          of
+ Suppose we are to estimate a vector                               from        linear
+                                                                                            them that minimizes the log volume (or mean radius) of the
+measurements, corrupted by additive noise,
+                                                                                            resulting confidence ellipsoid. This can be expressed as the
+                                                                                            optimization problem
+                                                                                    (1)
+
+where             is a vector of parameters to estimate, and                                                        maximize
+            are independent identically distributed
+random variables. We assume that              , which charac-                                                       subject to                             (7)
+terize the measurements, span     . The maximum-likelihood
+estimate of is                                                                              where                    is the optimization variable, and de-
+                                                                                            notes the cardinality of . (We interpret
+                                                                                    (2)     as      if             is singular.) We let denote the optimal
+                                                                                            value of the sensor selection problem.
+                                                                                               We can rewrite the problem (7) as
+The estimation error                has zero mean and covariance
+                                                                                                             maximize
+
+                                                                                                             subject to
+                                                                                                                                                           (8)
+  The -confidence ellipsoid for                    , which is the minimum
+volume ellipsoid that contains                  with probability , is given
+by                                                                                          with variable          . (The vector is the vector with all entries
+                                                                                            one.) Here encodes whether the          measurement (or sensor)
+                                                                                    (3)     is to be used. This problem is a Boolean-convex problem, since
+                                                                                            the objective is a concave function of for              (see, e.g.,
+where               .(    is the cumulative distribution func-                              [30, Sec. 3.1.5]), the sum constraint is linear, and the last
+tion of a -squared random variable with degrees of freedom.)                                constraints restrict to be Boolean (i.e., 0–1).
+
+           Authorized licensed use limited to: Stanford University. Downloaded on May 6, 2009 at 14:23 from IEEE Xplore. Restrictions apply.
+JOSHI AND BOYD: SENSOR SELECTION VIA CONVEX OPTIMIZATION                                                                                                    453
+
+
+
+                     III. CONVEX RELAXATION                                                    We can relate the gap , which is a difference of log-determi-
+                                                                                            nants, to geometric properties of confidence ellipsoids. A gap
+A. The Relaxed Sensor Selection Problem                                                     of corresponds to a ratio of             in confidence ellipsoid
+   By replacing the nonconvex constraints              with the                             volume. In terms of the mean radius , a gap of corresponds
+convex constraints            , we obtain the convex relaxation                             to a ratio            .
+of the sensor selection problem (7):                                                           Not much can be said about the gap, in general; for example,
+                                                                                            there are no generic useful bounds on how large it can be. The
+            maximize                                                                        gap is, however, very useful when evaluated for a given problem
+                                                                                            instance.
+            subject to
+                                                                                            B. Relation to D-Optimal Experiment Design
+                                                                                   (9)
+                                                                                               Our sensor selection problem, and relaxed sensor selection
+where            is the variable. This problem, unlike the original                         problem, are closely related to D-optimal experiment design. In
+sensor selection problem (7), is convex, since the objective (to                            D-optimal experiment design, we have a set of potential mea-
+be maximized) is concave, and the equality and inequality con-                              surements or sensors. In this case, however, we can use any one
+straints on are linear. It can be solved efficiently, for example,                          sensor multiple times; the problem is to choose which sensors to
+using interior-point methods [30]. These methods typically re-                              use, and for each one, how many times to use it, while keeping
+quire a few tens of iterations; each iteration can be carried out                           the total number of uses less than or equal to . In contrast, in
+(as we will see below) with a complexity of             operations,                         our sensor selection problem, we can use each potential sensor
+so the overall complexity is            operations. We will let                             at most once. One method for approximately solving the D-op-
+denote a solution of the relaxed problem (9).                                               timal experiment design problem is to form a convex relaxation,
+   The relaxed sensor selection problem (9) is not equivalent to                            that is the very similar to ours; however, the upper bound con-
+the original sensor selection problem (7); in particular,       can                         straints          are not present, and the relaxed variables are
+be fractional. We can say, however, that the optimal objective                              normalized to have sum one (and not ); see, e.g., [30, Sec.
+value of the relaxed sensor selection problem (9), which we de-                             7.5]. The variables in the relaxed D-optimal experiment design
+note , is an upper bound on , the optimal objective value                                   problem also have a different interpretation: is the frequency
+of the sensor selection problem (8). To see this, we note that                              with which sensor is to be used, when a large number of mea-
+the feasible set for the relaxed problem contains the feasible set                          surements is made.
+for the original problem; therefore, its optimal value cannot be
+smaller than that of the original problem.                                                  C. The Dual Problem
+   We can also use the solution of the relaxed problem (9) to                                  In this section we describe a dual for the relaxed sensor se-
+generate a suboptimal subset selection . There are many ways                                lection problem, which has an interesting interpretation in terms
+to do this; but we describe here the simplest possible method.                              of covering ellipsoids. The dual of the relaxed sensor selection
+Let                denote the elements of       rearranged in de-                           problem is
+scending order. (Ties can be broken arbitrarily.) Our selection
+is then                                                                                                 minimize
+                                                                                                        subject to
+                                                                                                                                                          (10)
+i.e., the indexes corresponding to the largest elements of .
+We let be the corresponding 0–1 vector. The point is feasible                               with variables           ,        , and        . (The set of
+for the sensor selection problem (8); the associated objective                              symmetric matrices is denoted by         .) See the Appendix for
+value                                                                                       the derivation.
+                                                                                               This dual problem can be interpreted as the problem of
+                                                                                            finding the minimum volume covering ellipsoid with outlier
+                                                                                            detection; see [38], [39]. (This should not be surprising because
+                                                                                            the dual of the D-optimal experiment design problem is the
+is then a lower bound on , the optimal value of the sensor                                  minimum volume covering ellipsoid problem [30, 7.5.3].)
+selection problem (8).                                                                         If    are set to 0, the optimal solution     and     determine
+   The difference between the upper and lower bounds on ,                                   the minimum volume ellipsoid, given by                            ,
+                                                                                            that contains the points                . When the variable is
+                                                                                            positive, is allowed to be outside this ellipsoid, i.e., it is an
+                                                                                            outlier. We now show that, at optimality, at most of the
+                                                                                            are nonzero. This can be inferred in many ways. Let           , ,
+                                                                                            and      be an optimal solution of the problem (10). The dual
+is called the gap. The gap is always nonnegative; if it is zero,                            variables     are associated with the inequalities          and by
+then is actually optimal for the sensor selection problem (8);                              complementary slackness we have
+more generally, we can say that the subset selection is no more
+than -suboptimal.
+
+           Authorized licensed use limited to: Stanford University. Downloaded on May 6, 2009 at 14:23 from IEEE Xplore. Restrictions apply.
+454                                                                                       IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 57, NO. 2, FEBRUARY 2009
+
+
+
+Since all the     are positive and sum to , at most of the                                  We then use a backtracking line search to compute a step size
+are 1 and thus at most of the        are nonzero. Therefore, the                                        , and update by replacing it with                . We
+solution of the problem (10) determines a covering ellipsoid for                            stop when the Newton decrement                       is small. The
+the points                , with at most outliers.                                          total number of steps required is typically ten or fewer.
+                                                                                               For completeness we give expressions for the derivatives of
+D. Approximate Relaxed Sensor Selection                                                       . Its gradient is given by
+   It is not necessary to solve the relaxed sensor selection
+problem (9) to high accuracy, since we use it only to get the
+upper bound , and to find the indexes associated with the
+                                                                                            where
+largest values of its solution. In this section we describe a
+simple method for solving it approximately but very efficiently,
+while retaining a provable upper bound on . This can be
+done by solving a smooth convex problem, which is closely
+related to the subproblems solved in an interior-point method
+for solving the relaxed problem.                                                            The Hessian                 is given by
+   The approximate relaxed sensor selection problem is
+
+          maximize
+
+
+                                                                                            where denotes the Hadamard (elementwise) product and             is
+                                                                                            the measurement matrix
+          subject to                                                              (11)
+
+with variable             . Here is a positive parameter that                                                                                  ..         (14)
+controls the quality of approximation. In the approximate re-                                                                                   .
+laxed sensor selection problem, we have implicit constraints
+that             . The function is concave and smooth, so
+                                                                                               We can give a complexity analysis for computing the Newton
+the problem (11) can be efficiently solved by Newton’s method,
+                                                                                            step      using (13). We first form                , which costs
+which we describe in detail below. Let denote the solution of
+                                                                                                     operations, and compute its Cholesky factor, which
+the approximate relaxed sensor selection problem (11).
+                                                                                            costs       . We then form             and        , which costs
+   A standard result in interior-point methods [30, Sec. 11.2] is
+                                                                                                    . We compute its Cholesky factorization, which costs
+that is at most         suboptimal for the relaxed sensor selec-
+                                                                                                    (which dominates all other costs so far). Once we
+tion problem (9):
+                                                                                            have computed the Cholesky factorization of            , we can
+                                                                                            compute        at cost       . Thus, the overall cost is       .
+                                                                                            Moreover, the hidden constant is quite modest, since the cost is
+                                                                                            dominated by the Cholesky factorization of an            matrix,
+                                                                                            which can be carried out in           operations.
+In particular, we can use
+                                                                                            E. Local Optimization
+
+                                                                                  (12)         The construction of a feasible selection from the solution
+                                                                                            of the (approximate) relaxed problem (11) can be (possibly)
+                                                                                            improved by a local optimization method. One simple method to
+as an upper bound on .                                                                      carry this out is to start from , and check sensor selections that
+   We can use this bound to choose so that, in terms of ,                                   can be derived from by swapping one of the chosen sensors
+the increase in gap contributed by the term        , which is a                             (i.e.,          ) with one of the         sensors not chosen. For
+factor of              , is small, say, 1%. This corresponds to                             similar methods, see, e.g., Fedorov’s exchange algorithm [29],
+               .                                                                            [40] or Wynn’s algorithm [41].
+                                                                                               We can determine whether a sensor swap increases the objec-
+Newton’s Method:
+                                                                                            tive value more efficiently than by computing the new objective
+   We now briefly describe Newton’s method for solving (11);                                value from scratch. Suppose we are to evaluate the change in ob-
+for full details, see, e.g., [30, Sec. 10.2]. As an initial (feasible)                      jective value when sensor is removed from our selection, and
+point, we take                     . At each step, we compute the                           sensor (which was not originally chosen) replaces it. We let
+Newton search step            , which can be expressed as                                   denote the error covariance with the original subset selection
+
+
+                                                                                  (13)
+
+           Authorized licensed use limited to: Stanford University. Downloaded on May 6, 2009 at 14:23 from IEEE Xplore. Restrictions apply.
+JOSHI AND BOYD: SENSOR SELECTION VIA CONVEX OPTIMIZATION                                                                                                         455
+
+
+
+and we let    denote the error covariance when sensor                                is     local optimization method will be                  , the same as solving
+swapped with sensor                                                                         the relaxed sensor problem.
+
+                                                                                            More Sophisticated Local Optimization:
+                                                                                               The local optimization method described above does not
+                                                                                            use the solution of the (approximate) relaxed sensor selection
+Using the low-rank update formula for the determinant of a ma-                              problem ; Instead it proceeds directly from the rounded
+trix, we have                                                                               estimate . More sophisticated rounding methods can use the
+                                                                                            approximate relaxed point       . For example, in a randomized
+                                                                                            rounding scheme,        is interpreted as the probability of se-
+                                                                                            lecting sensor . In the local optimization method, we can use
+                                                                                                to order the sensors which are checked for possible swap-
+                                                                                            ping. (In the local optimization described above, the sensors
+We can determine whether swapping                    and increases the ob-                  are checked according to their index.) More Specifically, we
+jective, i.e., whether                                  , by evaluating the                 choose unselected sensors in descending order of the values,
+determinant of the 2 2 matrix                                                               and we pick the selected sensors in ascending order of the
+                                                                                            values. The intuition behind this scheme is that a sensor with
+                                                                                            higher     is more likely to be in the globally optimal sensor
+                                                                                            selection. To determine the ordering we need to sort the sensors
+The computation effort required to calculate this matrix is                                 according to the values only one time, and then maintain the
+      . (In contrast, computing       from scratch requires                                 ordering when a swap is taken. The initial sorting requires a
+      , so the savings here is  .) A small gain in efficiency                               computation effort of                , which for practical values
+can be obtained by recognizing                                                              of     and is dominated by the computational effort needed
+                                                                                            to check the              swaps. We can also restrict the swaps
+                                                                                            to be among those sensors for which            is in the interval
+                                                                                                      (or some interval, possibly symmetric, around         ).
+                                                                                            This drastically reduces the number of swaps to be checked
+                                                                                            (and number of sensors to be sorted), and therefore speeds up
+remembering the previously calculated products of the form                                  the local optimization.
+        , and checking                       before calculating
+        .                                                                                                                       IV. EXAMPLE
+   Now we continue our description of the local optimization                                   In this section, we illustrate the sensor selection method with
+method. Given the current sensor selection, we attempt a search                             a numerical example. We consider an example instance with
+over all possible            swaps. If we find that no swap in-                                           potential sensors and               parameters to es-
+creases the objective value, the algorithm terminates. The so-                              timate. The measurement vectors                     are chosen ran-
+lution so obtained is called 2-opt, because exchanging any one                              domly, and independently, from an                       distribution.
+selected sensor with any unselected one will not improve the so-                            We solve the relaxed problem (11), with                   , and find
+lution.                                                                                     suboptimal subset selections, with and without local optimiza-
+   If, however, we encounter a swap that increases the objective                            tion, for                      .
+value, we (greedily) update to correspond to the new sensor                                    To solve each approximate relaxed problem requires 11
+selection, replacing by . The matrix can be evaluated effi-                                 Newton steps, which would take a few milliseconds in a C
+ciently using the matrix inversion lemma (also known as Wood-                               implementation, run on a typical 2-GHz personal computer.
+bury formula):
+                                                                                            For each problem instance, the (basic) local search checks
+                                                                                            4000–12 000 sensor swaps, and around 3–20 swaps are taken
+                                                                                            before a 2-opt solution is found. We also the run the restricted
+                                                                                            version on the local search, which only considers sensors with
+The computation effort required to calculate           given       is                           value in the interval             . This local search produces
+       . With the new sensor selection we restart the search                                an equally good final sensor selection, while checking a factor
+for an improving swap.                                                                      10–15 times fewer swaps than the basic method. (In any case,
+   The local optimization algorithm must terminate because                                  the basic local search only takes milliseconds to complete, on a
+there is only a finite number of sensor selections that are better                          typical personal computer, for a problem instance of this size.)
+than the original one. The total number of local optimization                                  To show the quality of the sensor subsets chosen, we evaluate
+steps can be very large (in theory); so we can simply limit the                             the upper bound [given by (12)], the lower bound using
+number of steps taken, say to            . (We should mention that                          the simple selection rule, and the (possibly) better lower bounds
+we have never observed an example that requires a very large                                      and         obtained after local optimization and restricted
+number of local optimization steps.) If          is chosen to grow                          local optimization, respectively, for each value of . The top
+no faster than          , then the total computational effort of the                        half of Fig. 1 shows , ,          , and        , and the bottom half
+
+           Authorized licensed use limited to: Stanford University. Downloaded on May 6, 2009 at 14:23 from IEEE Xplore. Restrictions apply.
+

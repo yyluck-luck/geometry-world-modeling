@@ -1,0 +1,66 @@
+{
+  "schema": "raima-reference-time-metadata-feasibility-v1",
+  "started_utc": "2026-09-08T11:04:02.363026+00:00",
+  "completed_utc": "2026-09-08T11:04:03.156682+00:00",
+  "evidence_type": "REAL_DATA_METADATA_ANALYSIS_ONLY",
+  "rows": [
+    {
+      "sequence": "fr1_xyz",
+      "metadata_path": "data/tum/rgbd_dataset_freiburg1_xyz/rgb.txt",
+      "metadata_sha256": "532884d60bef0c9a05e14bf311998883baf59a2fa47009d1021f2c7937bd69a3",
+      "indexed_rgb_count": 798,
+      "local_rgb_path_count": 798,
+      "min_adjacent_gap_ns": 27457000,
+      "max_adjacent_gap_ns": 41076000,
+      "min_span_of_three_captures_ns": 58912000,
+      "max_captures_in_any_closed_20ms_window": 1,
+      "max_other_captures_within_10ms_of_an_existing_capture": 0,
+      "targets_with_at_least_three_other_captures_within_10ms": 0,
+      "temporal_prerequisite_for_three_references": "FAIL_ON_PUBLISHED_TIMESTAMPS"
+    },
+    {
+      "sequence": "fr2_desk_original",
+      "metadata_path": "data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/rgb.txt",
+      "metadata_sha256": "45ad9139fe05fa69c495fe43861fdc869d0e052afc37c88333d6aebd36bbec3f",
+      "indexed_rgb_count": 2965,
+      "local_rgb_path_count": 2965,
+      "min_adjacent_gap_ns": 23974000,
+      "max_adjacent_gap_ns": 44919000,
+      "min_span_of_three_captures_ns": 54975000,
+      "max_captures_in_any_closed_20ms_window": 1,
+      "max_other_captures_within_10ms_of_an_existing_capture": 0,
+      "targets_with_at_least_three_other_captures_within_10ms": 0,
+      "temporal_prerequisite_for_three_references": "FAIL_ON_PUBLISHED_TIMESTAMPS"
+    },
+    {
+      "sequence": "fr2_desk_guarded_same_capture",
+      "metadata_path": "data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb.txt",
+      "metadata_sha256": "45ad9139fe05fa69c495fe43861fdc869d0e052afc37c88333d6aebd36bbec3f",
+      "indexed_rgb_count": 2965,
+      "local_rgb_path_count": 2965,
+      "min_adjacent_gap_ns": 23974000,
+      "max_adjacent_gap_ns": 44919000,
+      "min_span_of_three_captures_ns": 54975000,
+      "max_captures_in_any_closed_20ms_window": 1,
+      "max_other_captures_within_10ms_of_an_existing_capture": 0,
+      "targets_with_at_least_three_other_captures_within_10ms": 0,
+      "temporal_prerequisite_for_three_references": "FAIL_ON_PUBLISHED_TIMESTAMPS"
+    }
+  ],
+  "source_sha256": "38922cbdca2803761638f9ec2fbf725988939f1d944a69ad99ef8a752e1895cf",
+  "protocol_sha256": "6611d5f803740207fcfcec44eae8f756076f0763cb3eff8349fe1065905c03a0",
+  "reference_candidate_binding_sha256": "6ddbd1be13fa0980d15e7e80bb228f12f260efd40fe1ded30bc6035d3fb901f8",
+  "hypothesis": "At least three distinct real reference captures within +/-10ms of each target",
+  "result": "LOCAL_TUM_SINGLE_RGB_STREAMS_CANNOT_SUPPLY_THREE_SYNCHRONOUS_REFERENCES_ON_PUBLISHED_TIMESTAMPS",
+  "bounds": [
+    "fr2 original and guarded files describe the same capture, not independent references",
+    "uses published sensor timestamps; no clock-drift calibration has been acquired or inferred",
+    "single-image B0/C1/C2 have no qualified independent reference by S48 protocol",
+    "time feasibility is necessary only; camera, pose, validity, state lock and leakage remain untested",
+    "no conclusion about unseen datasets, multiple synchronized sensors or a separately registered static-scene contract"
+  ],
+  "images_opened": 0,
+  "pixels_decoded": 0,
+  "models_called": 0,
+  "scientific_effect_claim": false
+}

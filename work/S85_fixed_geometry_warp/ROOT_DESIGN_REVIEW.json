@@ -1,0 +1,34 @@
+{
+  "recorded_utc": "2026-09-10T19:28:11.421577+00:00",
+  "status": "DESIGN_BASIS_ACCEPTED_IMPLEMENTATION_AND_EXECUTION_NOT_STARTED",
+  "reviewed_files": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/NEXT_RUN_DESIGN.md",
+      "sha256": "471f0e2748ca666559e52f287cfda06be911c4826438591bbbbc28c316cf3aae"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/PROJECTOR_HAND_CHECKS.md",
+      "sha256": "426500b1b9c238719fc07933aea19c4bf7182363fc9b47629e4cfc4d791a31dd"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/SPLAT_SEMANTICS_NEIGHBOR.md",
+      "sha256": "5520dbe8cbc289a70e7ca2871e6b9f568765cb036d6c71f77b58106723044630"
+    }
+  ],
+  "decisions": [
+    "Use fixed FINAL_BEFORE_CLEAN history prediction state with four histories and four target optical cameras; no target RGB or sensor depth in projector.",
+    "Positive bilinear footprint determines candidacy only; hard minimum positive target-Z selects exact source RGB. Not weighted color fusion or a new method.",
+    "Freeze second_candidate_z as second item in complete stable sort; it may equal winner Z. Do not call it second distinct depth layer.",
+    "Read actual saved FP32 K/P values and promote to FP64; nominal 1.5u-96,1.5v relation is artificial same-camera check only.",
+    "Retain all source statuses, support candidates, losers, holes and four target outputs. Mask indicates predicted support, not correctness or ground-truth visibility."
+  ],
+  "remaining": [
+    "Write isolated projector and explicit schema/source/resource/output contract.",
+    "Implement the three documented artificial fixtures plus boundary case, then different-author source review.",
+    "Only then run one fixed projection batch with complete receipts and independent saved-output check.",
+    "Freeze generation-consumer interface and G0/Gpaste/Gguide comparator separately; no choice of guide strength or denoising schedule has been tested here."
+  ],
+  "real_projection_executed": false,
+  "new_generation_executed": false,
+  "new_method_validated": false
+}

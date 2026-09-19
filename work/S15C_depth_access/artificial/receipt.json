@@ -1,0 +1,105 @@
+{
+  "schema": "s15c-depth-fetcher-artificial-checks-v1",
+  "started_utc": "2026-09-06T10:25:43.715825+00:00",
+  "ended_utc": "2026-09-06T10:25:43.720960+00:00",
+  "status": "PASS",
+  "check_count": 21,
+  "checks": [
+    {
+      "name": "persistent object reused for both ranges",
+      "status": "PASS"
+    },
+    {
+      "name": "exact payload decompressed and CRC verified",
+      "status": "PASS"
+    },
+    {
+      "name": "actual body byte accounting",
+      "status": "PASS"
+    },
+    {
+      "name": "response evidence retained",
+      "status": "PASS"
+    },
+    {
+      "name": "two transport failures then success",
+      "status": "PASS"
+    },
+    {
+      "name": "exact three attempts and reconnect objects",
+      "status": "PASS"
+    },
+    {
+      "name": "TLS failure zero response bytes recorded",
+      "status": "PASS"
+    },
+    {
+      "name": "third transport failure stops",
+      "status": "PASS",
+      "expected_error": "SSLError('artificial TLS failure')"
+    },
+    {
+      "name": "no fourth retry attempted",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP 200 rejected without body read or retry",
+      "status": "PASS",
+      "expected_error": "ValueError('HTTP status must be 206; no redirect or full-body read')"
+    },
+    {
+      "name": "HTTP 200 body unopened",
+      "status": "PASS"
+    },
+    {
+      "name": "changed ETag rejected without retry",
+      "status": "PASS",
+      "expected_error": "ValueError('archive identity mismatch')"
+    },
+    {
+      "name": "changed identity body unopened",
+      "status": "PASS"
+    },
+    {
+      "name": "short body protocol failure is not retried",
+      "status": "PASS",
+      "expected_error": "ValueError('response body length mismatch')"
+    },
+    {
+      "name": "short body preserved and exactly counted",
+      "status": "PASS"
+    },
+    {
+      "name": "attempt budget before network",
+      "status": "PASS",
+      "expected_error": "ValueError('request attempt budget exhausted')"
+    },
+    {
+      "name": "attempt budget opened zero connections",
+      "status": "PASS"
+    },
+    {
+      "name": "sentinel byte budget before network",
+      "status": "PASS",
+      "expected_error": "ValueError('response byte budget including sentinel')"
+    },
+    {
+      "name": "total time budget before network",
+      "status": "PASS",
+      "expected_error": "ValueError('total wall budget exhausted')"
+    },
+    {
+      "name": "local/central CRC mismatch fails",
+      "status": "PASS"
+    },
+    {
+      "name": "unexpected member path fails",
+      "status": "PASS"
+    }
+  ],
+  "real_network_requests": 0,
+  "real_image_decodes": 0,
+  "real_zip_member_payloads_read": 0,
+  "fetcher_sha256": "888cdab6ba5881be02951f8738f0449026bff750aeb086940946492eaccd8c4a",
+  "parser_sha256": "ec68dfa5831a2cc0e7a191f25c6ef3ddae23e8bde49ff7a74e8d5c949de578b9"
+}

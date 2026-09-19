@@ -1,0 +1,94 @@
+{
+  "schema": "s15b-witness-cost-run-v1",
+  "started_at_utc": "2026-09-06T10:22:52.561651+00:00",
+  "status": "FAIL",
+  "counters": {
+    "proposal_arrays_decoded": 0,
+    "rgb_images_decoded": 0,
+    "model_calls": 0,
+    "depth_answer_images_decoded": 0,
+    "final_target_rgb_decoded": 0
+  },
+  "contract": {
+    "source_ids": [
+      0,
+      3,
+      6,
+      9
+    ],
+    "witness_ids": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "input_size": [
+      640,
+      480
+    ],
+    "resize": [
+      299,
+      224
+    ],
+    "crop": [
+      37,
+      0,
+      261,
+      224
+    ],
+    "image_transform": "PIL RGB; LANCZOS resize; crop; PIL L",
+    "census": "5x5 row-major excluding center; neighbor < center; 24 bits",
+    "projection": "physical pinhole; float64; floor(pixel+0.5)",
+    "source_center_min": 2,
+    "source_center_max": 221,
+    "witness_center_min": 2,
+    "witness_center_max": 221,
+    "support": "both hypotheses finite positive source z and witness z; both rounded centers in bounds",
+    "patch_size": 16,
+    "minimum_group_paired_observations": 64,
+    "groups": [
+      [
+        12,
+        13,
+        14,
+        15
+      ],
+      [
+        16,
+        17,
+        18,
+        19
+      ]
+    ],
+    "visibility_filter": false,
+    "photometric_tie": "keep_old",
+    "matched_tie": "source_id, patch_row, patch_col",
+    "accepted_patch_action": "entire 16x16 block; downstream geometry validity remains separate",
+    "maximum_cpu_seconds": 600,
+    "maximum_rss_bytes": 8589934592,
+    "experiment_kind": "exploratory_existing_component_not_novel_method"
+  },
+  "manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_witness_preparation/artificial_inputs/bad_hash_manifest.json",
+    "bytes": 5111,
+    "sha256": "082dd4eb149683d332fbd125529b93acc55cb4452c0cdbf09b576a124c9d0efa"
+  },
+  "runner": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15b_witness_costs.py",
+    "bytes": 17301,
+    "sha256": "9ece71b5a6c9e889df7610aee30e209aea734d0a09190b14f37dcf5766335406"
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "numpy": "1.26.4",
+    "pillow": "10.3.0"
+  },
+  "evidence_kind": "real_input_photo_costs_only_if_manifest_is_real; not_depth_accuracy_or_novelty",
+  "completed_at_utc": "2026-09-06T10:22:52.563550+00:00",
+  "error": "ValueError('Input SHA mismatch: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_witness_preparation/artificial_inputs/artificial_frame_00.png')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15b_witness_costs.py\", line 278, in run\n    allowed_items = validate_manifest(manifest)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15b_witness_costs.py\", line 93, in validate_manifest\n    validate_identity(item)\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15b_witness_costs.py\", line 76, in validate_identity\n    require(sha(path) == item[\"sha256\"], \"Input SHA mismatch: \" + str(path))\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15b_witness_costs.py\", line 52, in require\n    raise ValueError(message)\nValueError: Input SHA mismatch: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_witness_preparation/artificial_inputs/artificial_frame_00.png\n"
+}

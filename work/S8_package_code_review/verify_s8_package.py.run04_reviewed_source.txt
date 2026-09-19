@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Safely unpack and audit the announced S8 evidence ZIP, fully offline on macOS.
+
+Requires the existing NumPy/SciPy/PyTorch/Pillow environment. Does not install,
+download, infer, run the surfel renderer, or execute experiment CLI entry points.
+Every execution requires a fresh --output. Extracted evidence is immutable.
+"""
+import argparse
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import shutil
+import stat
+import subprocess
+import traceback
+import zipfile
+
+EXPECTED_SHA='afae809a350cb8565674f1326443db11ee5c9a4a7b12f0bdb7ea0ebf9d2c05d3'
+EXPECTED_BYTES=325899547
+MANIFEST_SHA='2fa3989609ad92cc39cc2be80c6007cc2bbf4a43b9e180c1aac737d8844a7c27'
+def now():return datetime.now(timezone.utc).isoformat()
+def sha(p):
+    h=hashlib.sha256()
+    with Path(p).open('rb') as f:
+        for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
+    return h.hexdigest()
+def save(p,v):Path(p).write_text(json.dumps(v,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
+def safe_name(n):
+    p=PurePosixPath(n)
+    if not n or p.is_absolute() or '..' in p.parts or str(p)!=n or '\\' in n or ':' in n or '\0' in n:
+        raise ValueError('Unsafe archive member: '+repr(n))
+    return p
+def main():
+    ap=argparse.ArgumentParser(description=__doc__)
+    for name in ('zip','output','python'):ap.add_argument('--'+name,type=Path,required=True)
+    args=ap.parse_args();archive=args.zip.resolve(strict=True);out=args.output.absolute()
+    if archive.suffix.lower()!='.zip':raise ValueError('Only the announced final ZIP is accepted')
+    if out.exists() or out.is_symlink():raise ValueError('Use a fresh output directory; prior attempts are preserved')
+    out.mkdir(parents=True)
+    report=dict(started_utc=now(),status='running',archive=str(archive),checks=[],commands=[],errors=[])
+    def check(label,ok,detail=None,kind='integrity'):
+        report['checks'].append(dict(label=label,ok=bool(ok),kind=kind,detail=detail))
+        if not ok:raise AssertionError(label)
+    try:
+        tools=out/'tools';shutil.copytree(Path(__file__).parent,tools,ignore=shutil.ignore_patterns('__pycache__'))
+        report['tools_sha256']={p.name:sha(p) for p in sorted(tools.glob('*.py'))}
+        report['archive_bytes']=archive.stat().st_size;report['archive_sha256']=sha(archive)
+        check('Announced archive bytes',report['archive_bytes']==EXPECTED_BYTES)
+        check('Announced archive SHA256',report['archive_sha256']==EXPECTED_SHA)
+        root=out/'extracted';root.mkdir()
+        with zipfile.ZipFile(archive) as z:
+            infos=z.infolist();names=[i.filename for i in infos]
+            check('692 unique archive members',len(names)==len(set(names))==692)
+            check('Expected bounded uncompressed size',sum(i.file_size for i in infos)<500*1024**2)
+            for i in infos:
+                safe_name(i.filename);mode=i.external_attr>>16
+                check('Safe regular member/'+i.filename,not i.is_dir() and not stat.S_ISLNK(mode) and
+                    (stat.S_IFMT(mode) in (0,stat.S_IFREG)))
+            check('All member CRCs',z.testzip() is None)
+            check('Manifest SHA256',hashlib.sha256(z.read('MANIFEST.json')).hexdigest()==MANIFEST_SHA)
+            manifest=json.loads(z.read('MANIFEST.json'));entries={x['path']:x for x in manifest['payloads']}
+            check('691 unique manifest payloads',len(entries)==len(manifest['payloads'])==manifest['payload_count']==691)
+            check('Exact manifest inventory',set(names)==set(entries)|{'MANIFEST.json'})
+            check('Manifest payload byte total',sum(x['bytes'] for x in entries.values())==manifest['payload_bytes']==372094638)
+            for name in names:
+                target=root/name;target.parent.mkdir(parents=True,exist_ok=True)
+                with z.open(name) as src,target.open('xb') as dst:shutil.copyfileobj(src,dst)
+        before={str(p.relative_to(root)):sha(p) for p in sorted(root.rglob('*')) if p.is_file()}
+        for name,e in entries.items():check('Payload SHA and bytes/'+name,sha(root/name)==e['sha256'] and (root/name).stat().st_size==e['bytes'])
+        report['archive_members']=len(names);report['manifest_payloads']=len(entries);report['payload_bytes']=manifest['payload_bytes']
+        report['extracted_utc']=now();report['extracted_root']=str(root)
+        for p in root.rglob('*'):p.chmod(0o555 if p.is_dir() else 0o444)
+        root.chmod(0o555)
+        canonical=Path(manifest['source_project']);workspace=Path(manifest['source_project'])
+        # This is the historical second source checkout, obtained from sealed metadata.
+        seq=json.loads((root/'results/S8_cut3r_cpu_v2/sequence_metadata.json').read_text())
+        modelrepo=Path(seq['repo']);workspace=modelrepo.parent.parent
+        profile=out/'offline.sb'
+        profile.write_text('(version 1)\n(allow default)\n(deny network*)\n'
+            '(deny file-read* (subpath '+json.dumps(str(canonical.parent.parent.parent))+'))\n'
+            '(allow file-read* (subpath '+json.dumps(str(canonical/'.venv'))+'))\n'
+            '(deny file-read* (subpath '+json.dumps(str(workspace))+'))\n'
+            '(allow file-read* (subpath '+json.dumps(str(out))+'))\n'
+            '(deny file-write*)\n(allow file-write* (subpath '+json.dumps(str(out))+'))\n'
+            '(allow file-write* (literal "/dev/null"))\n'
+            '(deny file-write* (subpath '+json.dumps(str(root))+'))\n'+
+            ''.join('(allow file-read-metadata (literal '+json.dumps(str(p))+'))\n'
+                for p in sorted(set(out.parents)|set((canonical/'.venv').parents))))
+        guard=out/'guard';guard.mkdir();shutil.copy2(tools/'guard.py',guard/'sitecustomize.py')
+        tmp=out/'tmp';tmp.mkdir()
+        env=dict(os.environ,PYTHONPATH=str(guard),PYTHONDONTWRITEBYTECODE='1',TMPDIR=str(tmp),
+            AUDIT_ORIGINAL=str(canonical),AUDIT_OLD_WORKSPACE=str(workspace),AUDIT_ROOT=str(root),AUDIT_OUTPUT=str(out),
+            MPLCONFIGDIR=str(out/'mplconfig'),XDG_CACHE_HOME=str(out/'cache'))
+        env.pop('PYTHONHOME',None)
+        def command(label,argv):
+            record=dict(label=label,started_utc=now(),argv=argv,cwd=str(out))
+            r=subprocess.run(['/usr/bin/sandbox-exec','-f',str(profile),*argv],cwd=out,env=env,text=True,
+                stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=180)
+            (out/(label+'.log')).write_text(r.stdout)
+            record.update(completed_utc=now(),returncode=r.returncode);report['commands'].append(record)
+            check('Isolated command/'+label,r.returncode==0,dict(log=label+'.log',returncode=r.returncode))
+        python=str(args.python.absolute())
+        command('boundary_probes',[python,str(tools/'probe.py'),'--output',str(out/'boundary_probes.json')])
+        probes=json.loads((out/'boundary_probes.json').read_text())
+        check('Python and OS boundary probes all passed',probes['status']=='passed')
+        report['isolation']=dict(method='macOS sandbox + Python audit hook + read-only payload permissions',
+            network='deny network* at OS level',original_project='OS/Python denied, .venv dependencies allowed',
+            original_model_checkout='OS/Python denied through historical workspace rule',
+            writes='OS limited to fresh audit output; extracted evidence denied',
+            sandbox_sha256=sha(profile),probe_checks=len(probes['checks']),python=python)
+        command('portable_math',[python,str(tools/'portable_math.py'),'--root',str(root),'--output',str(out/'math')])
+        result=json.loads((out/'math/verification.json').read_text())
+        check('Package-contained mathematical audit',result['status']=='passed')
+        report['mathematical_audit']={k:result[k] for k in ('status','started_utc','completed_utc','checks_count','checks_by_kind','limitations',
+            'query_conditions','readout_conditions','unique_queries','maps_recomputed','association_paths_recomputed','render_vote_recomputations',
+            'decision_recomputations','measurement_depth_PNGs_reread','RGB_PNGs_reread','GT_rgb_poses_recomputed','GT_depth_timestamps_checked',
+            'accepted_observation_cases_rebuilt','normalized_blocks_recomputed','sampling')}
+        comparison={}
+        for name in ('records.json','aggregate.json','aggregate_by_block.json','scales.json','sampling.json'):
+            old=root/'results/S8_results_audit_v2'/name;new=out/'math'/name
+            comparison[name]=dict(exact_JSON_equal=json.loads(old.read_text())==json.loads(new.read_text()),
+                original_sha256=sha(old),recomputed_sha256=sha(new))
+            check('Exact prior independent JSON/'+name,comparison[name]['exact_JSON_equal'],kind='recomputed')
+        report['comparisons']=comparison
+        after={str(p.relative_to(root)):sha(p) for p in sorted(root.rglob('*')) if p.is_file()}
+        check('Original extracted inventory unchanged',set(before)==set(after))
+        for name,digest in before.items():check('Extracted payload unchanged/'+name,after.get(name)==digest)
+        check('ZIP unchanged at finish',sha(archive)==EXPECTED_SHA and archive.stat().st_size==EXPECTED_BYTES)
+        report['status']='passed'
+    except Exception:
+        report['status']='failed';report['errors'].append(traceback.format_exc())
+    report['completed_utc']=now();report['checks_count']=len(report['checks'])
+    save(out/'verification.json',report)
+    print(json.dumps({k:v for k,v in report.items() if k not in ('checks','mathematical_audit')},ensure_ascii=False,indent=2))
+    return 0 if report['status']=='passed' else 1
+if __name__=='__main__':raise SystemExit(main())

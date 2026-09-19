@@ -1,0 +1,31 @@
+{
+  "created_utc": "2026-09-09T03:31:10.258179+00:00",
+  "fixed_cameras": [
+    "cam00",
+    "cam06"
+  ],
+  "reason": "Previously fixed nearest nonheldout camera-center rule, selected from calibration only.",
+  "archive_body_cap_bytes": 157286400,
+  "external_timeout_seconds": 600,
+  "max_connections": 1,
+  "max_attempts_per_exact_range": 2,
+  "partial_attempts_charged_to_same_cap": true,
+  "streaming_chunk_bytes": 1048576,
+  "ffprobe_threads": 1,
+  "no_RGB_export_or_view": true,
+  "no_audio_decode": true,
+  "no_S70_payload_access": true,
+  "steps": [
+    "Verify pinned catalog and pose receipt",
+    "Parse each actual local ZIP header; exact name/method/flags/CRC/compressed and uncompressed lengths",
+    "Exact bounded HTTP206 ranges; reject200 before body; retain failed partials",
+    "Streaming raw-deflate member decompression; exact length/CRC/SHA",
+    "ffprobe identify stream metadata then video-only frame PTS enumeration",
+    "Compare exact rational PTS, strict monotonicity, frame counts and time sets; retain all differences"
+  ],
+  "boundary": "Actual video-body download and ffprobe internal video traversal are authorized; no images displayed/exported, no model result. PTS equality alone does not verify physical exposure synchrony or visibility.",
+  "sources": {
+    "fetch_and_probe.py": "852355d0cf9d388237afceabceffedf154a441596e73ebf424da685ed16d8e65",
+    "run_bounded.py": "0220c3611d780229151e519792b6b2080b9dc44ef0ff5239a2157e59832ed70a"
+  }
+}

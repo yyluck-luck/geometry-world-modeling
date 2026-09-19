@@ -1,0 +1,88 @@
+{
+  "status": "PREPARED_PENDING_DIFFERENT_AUTHOR_REVIEW_AND_PARENT_FREEZE",
+  "recorded_utc": "2026-09-06T15:20:00.458391+00:00",
+  "role": "Scorer author differs from GA adapter/runner authors; artificial checks are scorer author self-checks, not independent real experiment audit",
+  "artifacts": {
+    "scripts/score_s26_consumer.py": {
+      "sha256": "5e10c2a990ac7e9db8337740854b49a02fa18fdd0793e222984091acc1c2ff63",
+      "bytes": 20944
+    },
+    "docs/S26_CONSUMER_SCORING_PROTOCOL.md": {
+      "sha256": "433e3242c9188cac241b2b74ff3854ba4175df400350f97f1ebb83334538cc04",
+      "bytes": 8463
+    },
+    "work/S26_scoring_preparation/check_artificial.py": {
+      "sha256": "9d4c8603ec90d04e26d54b5e01e0a5533adf09bc2fbeced0f3ff06a2b7d88ccc",
+      "bytes": 12244
+    },
+    "work/S26_scoring_preparation/artificial_checks_v1.json": {
+      "sha256": "abd9aa6dfc9791f8bc022a60040a08d7081dd62a025fa48791c286a7660c443f",
+      "bytes": 5621
+    },
+    "work/S26_scoring_preparation/candidate_scoring_inputs.json": {
+      "sha256": "e0f58602f03565063ba0aea424233e354509eaa779aafe4ac86a1d53f5b4f38c",
+      "bytes": 5282
+    }
+  },
+  "actual_actions": [
+    {
+      "action": "Source, continuity and consumer contract read; no S24 scores, true prediction arrays or sensor PNG byte reads",
+      "scope": "read-only code/text/metadata"
+    },
+    {
+      "action": "Wrote standalone scorer and protocol",
+      "scope": "scripts/score_s26_consumer.py and docs/S26_CONSUMER_SCORING_PROTOCOL.md"
+    },
+    {
+      "action": "Executed artificial numeric/byte fixture checks",
+      "started_utc": "2026-09-06T15:18:56.391848+00:00",
+      "completed_utc": "2026-09-06T15:18:56.455316+00:00",
+      "checks": 58,
+      "status": "PASS"
+    },
+    {
+      "action": "Ran prepare-inputs metadata-only command",
+      "prepared_utc": "2026-09-06T15:19:05.221955+00:00",
+      "source_identity": {
+        "work/S26_consumer_baseline_preparation/candidate_inputs.json": "339cc566dc35bd9f24d838bd58a9def5731d46bdd9791a14ab81ce468fab53dd",
+        "results/S23_geometry_diagnostic/gt_receipt.json": "dae56e52c26fc49c17630894839dca44717dcd73bf7a35e56dd9c310d4b3de12"
+      }
+    }
+  ],
+  "true_prediction_array_reads": 0,
+  "sensor_gt_png_byte_reads": 0,
+  "ga_runs": 0,
+  "model_runs": 0,
+  "scoring_runs": 0,
+  "skill_local_application": {
+    "path": "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md",
+    "sha256": "0db52bacb62ec0f73b51569bab142f484df06546ebb17a42a056376c09335791",
+    "applied": [
+      "methodology and construct validity: depth endpoint versus memory/video claims",
+      "bias: fixed frames, all GT-valid pixels, retain invalid predictions and nulls",
+      "statistics: equal-frame mean, all prescribed frames required, pixels not independent",
+      "control: common GT camera disclosed, common old depth tolerance separate from frozen parameters"
+    ],
+    "not_claimed": [
+      "full skill literature review",
+      "independent experiment audit",
+      "clinical evidence grades"
+    ]
+  },
+  "handoff": {
+    "parent_manifest_field": "scoring = entire candidate_scoring_inputs.json object",
+    "command": ".venv-cut3r/bin/python scripts/score_s26_consumer.py score --manifest <parent-manifest> --manifest-sha256 <parent-sha>",
+    "fixed_output": "results/S26_consumer_baseline/scoring",
+    "existing_output_refused": true,
+    "old_depth_atol": 1e-06,
+    "old_depth_rtol": 1e-06,
+    "read_GT_only_after": "four PASS receipts + four input seals + all four NPZ hashes + prediction schema + old depth tolerance"
+  },
+  "limits": [
+    "Already seen S23 sensor depth; technical isolation does not recreate researcher blindness",
+    "Eight adjacent frames around 0.236 seconds, new4 main comparison; no long-history/causal/method superiority inference",
+    "No GA execution, sensor scoring or real arrays validated in this preparation",
+    "Internal parameter bitwise freezing is checked separately by producer observer",
+    "Full project and generation loop remain incomplete"
+  ]
+}

@@ -1,0 +1,168 @@
+Mem-World: Memory-Augmented Action-Conditioned World Models for Persistent Robot Manipulation (https://arxiv.org/html/2606.18960v1)
+citeturn328view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2606.18960v1","lineno":null}); Total lines: 236
+L0: ##### Report GitHub Issue
+L1: 
+L2: [Button: ×]
+L3: 
+L4: Title: [Input: Enter title]
+L5: 
+L6: Content selection saved. Describe the issue below:
+L7: 
+L8: Description:
+L9: 
+L10: [Button: Submit without GitHub] [Button: Submit in GitHub]
+L11: 
+L12: cite0†Back to arXiv L13: 
+L14: cite1†Why HTML?†info.arxiv.org cite2†Report Issue cite3†Back to Abstract cite4†Download PDF L15:   1. cite5†Abstract L16:   2. cite6†1 Introduction L17:   3. cite7†2 Related Work L18:   4. cite8†3 Method L19:     1. cite9†3.1 Preliminary L20:     2. cite10†3.2 W-VMem for Persistent Manipulation World Modeling L21:   5. cite11†4 Experiments L22:     1. cite12†4.1 World Model Consistency Evaluation L23:     2. cite13†4.2 World Model for Policy Evaluation L24:     3. cite14†4.3 World Model for Policy Training L25:   6. cite15†5 Conclusion L26:   7. cite16†References L27: 
+L28: cite17†License: arXiv.org perpetual non-exclusive license†info.arxiv.org L29: 
+L30: arXiv:2606.18960v1 [cs.CV] 17 Jun 2026
+L31: # Mem-World: Memory-Augmented Action-Conditioned World Models for Persistent Robot Manipulation
+L32: Zirui Zheng Affiliation: Zirui Zheng, Mingyi Li, Dong Wang, Huchuan Lu, and Xu Jia are with Dalian University of Technology Affiliation: Zirui Zheng, Jiaqian Yu, Xiongfeng Peng, Jun Shi, Chao Zhang and Weiming Li are with Samsung R&D Institute China-Beijing (SRCB), China    Jiaqian Yu Affiliation: Zirui Zheng, Jiaqian Yu, Xiongfeng Peng, Jun Shi, Chao Zhang and Weiming Li are with Samsung R&D Institute China-Beijing (SRCB), China    Xiongfeng Peng Affiliation: Zirui Zheng, Jiaqian Yu, Xiongfeng Peng, Jun Shi, Chao Zhang and Weiming Li are with Samsung R&D Institute China-Beijing (SRCB), China    Jun Shi Affiliation: Zirui Zheng, Jiaqian Yu, Xiongfeng Peng, Jun Shi, Chao Zhang and Weiming Li are with Samsung R&D Institute China-Beijing (SRCB), China    Mingyi Li Affiliation: Zirui Zheng, Mingyi Li, Dong Wang, Huchuan Lu, and Xu Jia are with Dalian University of Technology    Chao Zhang, Weiming Li, Dong Wang, Huchuan Lu, Xu Jia Affiliation: Zirui Zheng, Mingyi Li, Dong Wang, Huchuan Lu, and Xu Jia are with Dalian University of Technology Affiliation: Zirui Zheng, Jiaqian Yu, Xiongfeng Peng, Jun Shi, Chao Zhang and Weiming Li are with Samsung R&D Institute China-Beijing (SRCB), China
+L33: ###### Abstract
+L34: Action-conditioned world models have emerged as a promising paradigm for robot learning, offering a scalable alternative to costly real-world experimentation by generating action-consistent video rollouts. However, persistent world modeling remains challenging in manipulation: frequent end-effector occlusions and rapid wrist-camera motion make the current observation insufficient for predicting future views, causing models to forget or hallucinate scene details seen in earlier frames.
+L35: Existing memory retrieval strategies often fail to identify informative history in dynamic manipulation scenarios. To address this limitation, we propose Mem-World, a memory-augmented multi-view action-conditioned world model. At its core, we present W-VMem, a 4D wrist-view-centered surfel-indexed memory that anchors historical observations to temporally evolving surface elements.
+L36: By explicitly modeling when and where scene elements are observed, W-VMem enables geometry-aware retrieval of relevant history frames conditioned on future actions. During generation, relevant history frames are selected via surfel-based rendering and scoring, providing informative and non-redundant context for prediction.
+L37: Extensive experiments show that Mem-World generates persistent rollouts in complex manipulation scenarios, enables more reliable policy evaluation than Ctrl-World, improving the Pearson correlation with real-world performance by 14.5%, and supports effective policy improvement through synthetic data generation, increasing success rates from 58% to 72% on long-horizon tasks.
+L38: > Keywords: World Models, Robot Manipulation, Memory Mechanism
+L39: ## 1 Introduction
+L40: Action-conditioned world models represent a rapidly advancing direction in robot learning [cite18†11 , cite19†15 , cite20†10 , cite21†19 , cite22†39 , cite23†30 , cite24†1 , cite25†2 ], offering a scalable alternative to costly real-world experimentation.
+L41: Built on pretrained video diffusion backbones [cite26†3 , cite27†38 , cite28†28 ] and fine-tuned with action conditioning on large-scale robotics datasets [cite29†16 , cite30†9 , cite31†22 ], these models generate action-consistent video trajectories that can serve as virtual environments for policy development and evaluation.
+L42: In robot manipulation, such world models are often built in a multi-view setting, combining external third-person cameras with a wrist-mounted camera to capture both global scene context and fine-grained hand-object interactions. This multi-view formulation is important for manipulation, but it also exposes a key challenge: the wrist view is both highly informative and highly unstable.
+L43: Since the wrist camera moves with the end effector, it undergoes rapid egocentric motion and is frequently occluded by the end-effector or manipulated objects. As a result, the current observation often contains only partial evidence about the scene state, causing autoregressive world models to forget or hallucinate objects that were visible in earlier frames, particularly severe in long-horizon rollouts.
+L44: Existing approaches only partially address this issue. Interactive World Simulator [cite23†30 ] mitigates limited temporal context by adjusting the conditioning window size, predicting future observations from the current observation together with adjacent $N$ historical frames; however, simply enlarging the context window does not essentially solve the problem.
+L45: Ctrl-World [cite18†11 ] addresses history-frame retrieval by sampling $N$ conditioning frames from the entire history at a fixed stride and using joint-pose similarity to emphasize historical frames with similar joint configurations during future-observation prediction. However, joint-pose similarity is only an indirect proxy for contextual relevance.
+L46: It fails to capture visibility constraints introduced by end-effector occlusions and cannot prioritize viewpoints that provide richer scene coverage, such as elevated wrist-camera observations. Similar memory retrieval mechanisms have been explored in navigation-oriented world models, often using camera field-of-view (FOV) overlap [cite32†34 , cite33†32 ] or static 3D anchors [cite34†18 ] to retrieve the relevant historical frames.
+L47: However, manipulation violates the underlying assumptions: the scene is partially dynamic and the robot arm itself causes structured occlusions.
+L48: To address the limitations, we propose Mem-World, a memory-augmented multi-view action-conditioned world model for persistent robot manipulation. At its core, Mem-World introduces the W-VMem, a 4D wrist-view-centered surfel-indexed view memory module inspired by VMem [cite34†18 ], which anchors previous wrist-view observations to the 4D surface elements they correspond to. Specifically, we first construct a global W-VMem from the initial multi-view frames using an off-the-shelf point map estimator [cite35†20 ].
+L49: During autoregressive generation of future observations, W-VMem is updated using only the wrist-view observations to capture the association between 4D surfels and the dynamic wrist view. Each surfel in W-VMem maintains its creation timestep, merged timestep, orientation, depth, and a binary flag indicating whether it belongs to a manipulated object.
+L50: Before generating observations at subsequent timesteps, the memory reading module retrieves relevant historical frames by rendering the surfels at each timestep from future wrist-camera viewpoints and projecting them onto an image grid. Based on the rendered surfel maps and the stored surfel attributes, the module computes a surfel score for each historical timestep and selects observations corresponding to the top-$K$ timesteps as conditioning inputs.
+L51: By grounding future predictions in these geometrically relevant contexts, Mem-World preserves persistent scene information over long-horizon rollouts.
+L52: Extensive experiments show that Mem-World generates more temporally consistent robot manipulation rollouts than prior methods. To specifically evaluate memory persistence, we curate replay trajectories with frequent end-effector occlusions and complex wrist-camera motions. Mem-World outperforms prior world models across frame-level and object-level consistency metrics.
+L53: It also provides more reliable policy evaluation, improving the Pearson correlation with real-world performance by 14.5%, and improves long-horizon policy performance with generated data, increasing the average success rate from 58% to 72%. Our contributions are summarized as follows:
+L54:   * •
+L55: 
+L56: We propose Mem-World, a memory-augmented multi-view action-conditioned world model for persistent robot manipulation rollouts, improving the reliability of world models for long-horizon policy evaluation and training.
+L57: 
+L58:   * •
+L59: 
+L60: We introduce W-VMem, a 4D wrist-view-centered surfel-indexed memory that anchors historical observations to temporally evolving surface elements and enables geometry-aware retrieval under severe occlusions, rapid wrist-camera motion, and dynamic hand-object interactions.
+L61:   * •
+L62: 
+L63: We evaluate Mem-World under memory-stressing replay trajectories and long-horizon manipulation tasks, showing more temporally consistent rollouts, stronger correlation with real-world policy performance, and improved policy learning from synthetic data.
+L64: ## 2 Related Work
+L65: Video Prediction Model for Robotic Manipulation. Recent video prediction advances have demonstrated substantial promise for robotics, enabling models to serve as zero-shot planners [cite36†7 , cite37†17 ], direct controllers [cite38†8 , cite39†23 , cite40†33 , cite41†13 ], and data engines [cite42†14 , cite43†26 , cite44†29 ].
+L66: Complementary to these applications, action-conditioned world models [cite22†39 , cite18†11 , cite19†15 , cite45†6 , cite23†30 ] incorporate low-level actions as conditioning signals, making them particularly suitable for policy evaluation. IRASim [cite22†39 ] formulates robot manipulation as a trajectory-to-video generation problem and introduces frame-level action conditioning.
+L67: Ctrl-World [cite18†11 ] proposes a multi-view action-conditioned world model that simultaneously generates two third-person views and one wrist view, capturing manipulation details from complementary perspectives. Interactive World Simulator [cite23†30 ] proposes a head-view action-conditioned world model built upon a consistency model, enabling long-horizon real-time closed-loop rollouts and policy evaluation. Despite this progress, persistent long-horizon multi-view rollout remains underexplored.
+L68: To address this gap, we introduce Mem-World , a multi-view, action-conditioned world model with a 4D, wrist-view-centered, surfel-indexed memory module that retrieves relevant historical frames during rollouts. Extensive experiments show Mem-World supports reliable policy evaluation and policy improvement in long-horizon tasks by maintaining persistent multi-view world modeling.
+L69: Memory Modeling in Long-Horizon Video Generation. Maintaining long-horizon consistency is a central challenge in world models; existing efforts address this issue through either explicit 3D reconstruction [cite46†35 , cite47†4 , cite48†24 ] or implicit context conditioning [cite33†32 , cite32†34 , cite34†18 , cite49†25 ].
+L70: Explicit methods leverage 3D foundation models to reconstruct scene representations and render condition frames from novel viewpoints, providing strong geometric guidance but relying heavily on reconstruction quality and introducing substantial computational overhead. Implicit methods maintain a memory bank and retrieve spatially relevant history to condition the current generation.
+L71: Geometry-aware retrieval strategies use camera poses or field-of-view overlap [cite33†32 , cite32†34 ] to identify informative context. VMem [cite34†18 ] further proposes a lightweight surfel-indexed memory that associates static 3D surfels with historical observations and retrieves relevant frames by rendering the memory from future camera poses.
+L72: Our work differs by making memory retrieval temporally aware and manipulation-centric, using dynamic surface-level associations rather than static camera-pose overlap alone.
+L73: cite50†Image: Refer to caption Figure 1: Pipeline of Mem-World. During rollout, a wrist-view 4D surfel memory maintains a geometry-aware representation of past observations, from which relevant history frames are retrieved. Given these retrieved frames and a sequence of future actions, the multi-view action-conditioned world model predicts subsequent observations. The predicted observations are then integrated back into the memory, enabling iterative rollout with an updated memory module.
+L74: ## 3 Method
+L75: Our goal is to build a multi-view action-conditioned world model that can generate persistent future observations. As shown in cite51†Fig. 1 , our pipeline consists of two modules: (1) wrist-view-centered 4D surfel memory and (2) a multi-view action-conditioned world model. During rollout, the world model generates future observations conditioned on the retrieved history frames and future actions.
+L76: The memory module then takes the predicted observations as input and updates W-VMem to support memory retrieval at subsequent timesteps. In this section, we first introduce the preliminaries of the surfel-indexed view memory in Sec. 3.1, and then describe the memory initialization, reading, and updating procedures of W-VMem in Sec. 3.2.
+L77: ### 3.1 Preliminary
+L78: Surfel-indexed View Memory. For autoregressive video prediction conditioned on camera pose, VMem [cite34†18 ] constructs a Surfel-indexed view memory based on past observations (view), where each surfel $s_{k}=(p_{k},n_{k},r_{k},\mathcal{I}_{k})$ stores its 3D position $p_{k}$, surface normal $n_{k}$, radius $r_{k}$, and the indices $\mathcal{I}_{k}$ of observations that have observed it. Given a future camera pose, VMem renders all visible surfels and aggregates their associated observation indices.
+L79: It then retrieves historical observations that cover larger portions of the rendered surfels, using them as context for predicting the future observation. The predicted observations are then converted into surfels and merged into memory. This iterative geometry-aware retrieval and update process improves long-term consistency in static egocentric scenes, but it assumes that camera poses are directly available and does not explicitly distinguish temporally changing scene elements.
+L80: ### 3.2 W-VMem for Persistent Manipulation World Modeling
+L81: A standard action-conditioned world model $W$ predicts future observations $\hat{o}_{t+1:t+H}$ conditioned on the current observation $\hat{o}_{t}$ and the action chunk $a_{t+1:t+H}$, Mem-World augments the conditions with additional historical observations.
+L82: By extending Surfel-indexed View Memory to multi-view action-conditioned manipulation world models, W-VMem retrieves a set of relevant history frames $\mathcal{H}_{t}=\{o_{g_{1}},\ldots,o_{g_{K}}\}$ at rollout timestep $t$, where $\{g_{i}\}_{i=1}^{K}$ are selected historical timesteps. The world model then predicts future multi-view observations as:
+L83:  | $$\hat{o}_{t+1:t+H}\sim W(\cdot\mid\hat{o}_{t},\mathcal{H}_{t},a_{t+1:t+H}).$$  |  | (1)
+L84: 
+L85: However, such extending presents three main challenges: (1) Given camera settings for robot manipulation task, how to obtain future camera poses from joint-space actions for rendering surfels? (2) How to define surfels for dynamic robot manipulation scenes? (3) How to initialize, update, and read surfels in multi-view robot manipulation scenes?
+L86: Grounding future wrist views from robot actions. In our multi-view setup, the third-person cameras remain fixed throughout an episode, so future pose estimation only applies to the wrist camera. We exploit the rigid mounting between the wrist camera and the end effector, which provides a fixed geometric transformation between them.
+L87: Given the future actions predicted by the policy model, we first use forward kinematics to obtain the corresponding end-effector poses, and then apply this fixed transformation to derive future wrist-camera poses in the robot base frame. For surfel rendering, these camera poses must be expressed in the frame of the point cloud.
+L88: In practice, we estimate the point cloud using a calibrated third-person camera as the reference frame, and therefore use the known camera extrinsics to transform the wrist-camera poses.
+L89: Time-aware Surfel Definition for Manipulation. VMem assumes a static scene and renders all surfels jointly, which is insufficient for robot manipulation where the robot arm and manipulated objects move over time. W-VMem augments each surfel with temporal and task-relevance attributes: $s_{k}=(p_{k},n_{k},r_{k},t_{k},m_{k})$, where $t_{k}$ denotes the timestep set at which the surfel is created and updated, enabling the representation to capture temporal dynamics.
+L90: $m_{k}\in\{0,1\}$ is a binary flag indicating whether the surfel belongs to a manipulated object, allowing us to emphasize task-relevant regions. To obtain $m_{k}$, we use a vision-language model [cite52†27 ] to analyze the scene from the text instruction and initial observation, identifying task-relevant object categories. We then apply a segmentation model [cite53†36 ] to segment them in the image and assign the flag to associated surfels.
+L91: Memory Initialization and Updating. For initialization, we construct an initial set of surfels from the first frame of the three camera views, which provides a complete observation of the scene. For observations generated at subsequent timesteps, we update the surfel representation using only the wrist-view frame. This design is motivated by two considerations.
+L92: First, the wrist view provides the most manipulation-centric observation; it directly captures the region under active interaction, where object geometry, texture, contact states, and fine-grained changes are more clearly observed. Second, W-VMem is designed to associate surfels with relevant historical wrist-view observations.
+L93: If third-person observations were used to update the surfels, their global field of view would cause most visible surfels to be repeatedly refreshed and assigned almost all timestamps. As a result, the timestamps of surfels would no longer indicate when they were observed by the moving wrist camera, making it difficult to associate surfels with the corresponding historical wrist-view observations.
+L94: By restricting updates to wrist-view observations, W-VMem preserves this temporal association and better records which regions have been actively observed over time.
+L95: Algorithm 1 Mem-World Rollout with W-VMem
+L96: 
+L97: 1: Initial multi-view observations $o_{t=0}$, action-conditioned world model $W$, top-$K$, action horizon $H$, interaction step $T$
+L98: 
+L99: 2: Generated multi-view rollout $\mathcal{O}$
+L100: 
+L101: 3: Initialize W-VMem $\mathcal{S}\leftarrow\textsc{InitSurfels}(o_{0})$, $\mathcal{O}\leftarrow\mathcal{O}\cup\{o_{t=0}\}$
+L102: 
+L103: 4: for $t=0$ to $T-1$ do
+L104: 
+L105: 5:   Obtain action chunk $\mathbf{a}_{t+1:t+H}$ from policy or replayed trajectory
+L106: 6:   Estimate camera pose $\bar{\mathbf{c}}_{w}\leftarrow\textsc{AvgWristPose}(a_{t+1:t+H})$
+L107: 
+L108: 7:   Compute $score_{\tau}\leftarrow\textsc{Score}(\textsc{Render}(\mathcal{S}_{\tau},\bar{\mathbf{c}}_{w}))$ for each $\tau$
+L109: 
+L110: 8:   Retrieve history frames $\mathcal{H}_{t}\leftarrow\textsc{TopK-NMS}(\{score_{\tau}\},K)$
+L111: 
+L112: 9:   Generate $\hat{o}_{t+1:t+H}\leftarrow W(\hat{o}_{t},\mathcal{H}_{t},\mathbf{a}_{t+1:t+H})$
+L113: 
+L114: 10:   $\mathcal{O}\leftarrow\mathcal{O}\cup\{\hat{o}_{t+1},\ldots,\hat{o}_{t+H}\}$
+L115: 11:   Update W-VMem $\mathcal{S}\leftarrow\textsc{UpdateSurfels}(\mathcal{S},\hat{o}_{t+1:t+H}^{w})$
+L116: 
+L117: 12: end for
+L118: Geometry-aware Memory Retrieval. After updating the W-VMem, the world model would receive a new action chunk from the policy model for future observation generation. To provide historical context for this process, W-VMem is read to retrieve the historical observations relevant to future states. Specifically, we first compute the average future wrist camera pose $\bar{\mathbf{c}}_{w}\in\mathrm{SE}(3)$ based on the action chunk.
+L119: Then we render the surfels $\mathcal{S}$ at each timestep individually from the $\bar{\mathbf{c}}_{w}$, instead of rendering the entire surfel set jointly like VMem. This design exploits wrist-view-dependent temporal dynamics, as surfels observed at different timesteps correspond to distinct interaction stages and should not be aggregated into a single rendering, which would otherwise blur temporal cues.
+L120:  | $$\text{score}(s,t)=\frac{\langle\mathbf{n}_{s},\bar{\mathbf{v}}_{w}\rangle}{1+d_{s}}\cdot\ln(e+m_{s})\cdot\left[\lambda_{\min}+\left(1-\lambda_{\min}\right)2^{-\frac{T-t}{H}}\right],$$  |  | (2)
+L121: As shown in  cite54†Eq. 2 , each rendered surfel at timestep $t$ is assigned a score based on geometric visibility, task relevance, and temporal recency. The geometric component depends on the depth $d_{s}$, normal $\mathbf{n}_{s}$, and its alignment with the average future wrist-camera viewing direction $\bar{\mathbf{v}}_{w}$. The task-relevance component is encoded by the is_manipulated flag $m_{s}$, while the temporal decay term assigns higher weights to more recently observed surfels.
+L122: $T$ denotes the latest timestep, $H$ denotes the temporal half-life, and $\lambda_{\min}$ denotes the minimum temporal decay factor. This prioritizes observations that are both geometrically informative and closely related to the manipulation process. To further avoid redundancy, we apply non-maximum suppression (NMS) over the candidate observations.
+L123: It mitigates oversampling of repeatedly visited regions, such as cases where the wrist camera hovers above the manipulated object during a pick operation, and promotes broader scene coverage among the selected top-$K$ timestep observations $o_{g}^{1},o_{g}^{2},\ldots,o_{g}^{K}$. The overall algorithm is listed in cite55†Algorithm 1 .
+L124: ## 4 Experiments
+L125: In this section, we conduct experiments to evaluate Mem-World.
+L126: We aim to answer the following questions: (1) Can Mem-World generate consistent rollouts for long-horizon robot manipulation tasks with frequent end-effector occlusions and complex wrist camera motions? (2) Can Mem-World reliably evaluate different robot policies in imagination space on long-horizon tasks, faithfully reproducing their real-world performance? (3) Can Mem-World generate useful synthetic trajectories for improving policy performance on long-horizon manipulation tasks?
+L127: Robot Setup and Dataset. Our experiments use a Franka Emika Panda robot arm equipped with a 2 DoF gripper. The platform includes one wrist-view camera and two external third-view cameras that observe the workspace. We use DROID [cite29†16 ] as the primary source for world-model training and replay-based evaluation. It contains 95,599 trajectories, providing diverse wrist camera motions.
+L128: Training Details. Our world model is built on top of Ctrl-World [cite18†11 ]. To enable geometry-aware context conditioning, we sample 11K trajectories and construct training clips by replacing the original temporally adjacent context with geometry-related context retrieved by the training-free W-VMem.
+L129: the $\lambda_{\min}$ in cite54†Eq. 2 is set to 0.1, the temporal half-life $H$ is set to $0.3\times T_{max}$, the We fine-tune only the temporal attention layers of the world model on these samples using 8 H100 GPUs with a total batch size of 32, which takes approximately 2 days. Considering the importance of the wrist view, we upweight the loss term associated with wrist-view predictions.
+L130: ### 4.1 World Model Consistency Evaluation
+L131: 
+L132: cite56†Image: Refer to caption Figure 2: Qualitative results on long-horizon rollouts. Mem-World exhibits persistent and temporally consistent world modeling: the lid remains recoverable after transient occlusion by the gripper, and the black snack is consistently regenerated after back-and-forth camera motion.
+L133: Baselines and Evaluation Setup. We compare Mem-World against two prior action-conditioned world models: Cosmos Predict 2.5 [cite24†1 ], Ctrl-World. For Cosmos Predict 2.5, we finetune the pretrained checkpoint on single-view DROID data for third-person view action-conditioned world modeling. We do not extend this baseline to multi-view prediction due to the substantial computational cost.
+L134: To evaluate the temporal consistency, we carefully curate 34 trajectories from the DROID dataset for replay-based evaluation. Each trajectory satisfies at least one of the following conditions: (1) the manipulated object is temporarily occluded by the gripper in the wrist view and is later observed again, or (2) the wrist camera undergoes large back-and-forth motion. During rollouts, the world model autoregressively predicts future frames for 20 steps, producing 20-second trajectories.
+L135: For evaluation metrics, we use PSNR [cite57†12 ], SSIM [cite58†31 ], and LPIPS [cite59†37 ] to compare the predicted video with the ground-truth across all corresponding frames. In addition, we use SAM3 [cite60†5 ] to segment the manipulated objects from both the predicted and ground-truth videos, and compute DINOv2 [cite61†21 ] feature similarity to evaluate object-level consistency.
+L136: Table 1: Quantitative world model consistency evaluation results.
+L137: 
+L138: Evaluated Camera  | Method  | Computation-based  | Model-based
+L139: PSNR $\uparrow$  | SSIM $\uparrow$  | LPIPS $\downarrow$  | Obj. Con. $\uparrow$
+L140: Third-view Camera  | Cosmos Predict 2.5  | 22.80  | 0.819  | 0.089  | 0.579
+L141: Ctrl-World  | 23.17  | 0.828  | 0.076  | 0.573
+L142: Mem-World (Ours)  | 25.30  | 0.878  | 0.054  | 0.619
+L143: Wrist-view Camera  | Ctrl-World  | 17.34  | 0.623  | 0.281  | 0.476
+L144: Mem-World (Ours)  | 19.21  | 0.691  | 0.236  | 0.524
+L145: Experiments Results. As shown in cite62†Table 1 and cite63†Fig. 2 , Mem-World outperforms prior world models across computation-based and model-based metrics, indicating improved visual fidelity and temporal consistency in long-horizon rollouts. The gains are particularly significant on the wrist-view camera, which is more challenging due to rapid egocentric motion and frequent end-effector occlusions.
+L146: We futher provide the time-cost analysis of W-VMem and addition replay-based evaluation on randomly sampled 150 trajectories to show the generalization of Mem-World in the supplementary materials.
+L147: Table 2: Ablations on memory design.
+L148: Eval. Cam.  | Method  | Comp.-based  | Model-based
+L149: PSNR $\uparrow$  | SSIM $\uparrow$  | LPIPS $\downarrow$  | Obj. Con. $\uparrow$
+L150: Third View  | Short-term [cite23†30 ]  | 21.25  | 0.802  | 0.082  | 0.526
+L151: Stride [cite18†11 , cite19†15 ]  | 22.58  | 0.814  | 0.079  | 0.544
+L152: W-VMem (Ours)  | 24.78  | 0.869  | 0.062  | 0.597
+L153: Wrist View  | Short-term [cite23†30 ]  | 15.04  | 0.526  | 0.353  | 0.401
+L154: Stride [cite18†11 , cite19†15 ]  | 17.06  | 0.614  | 0.295  | 0.463
+L155: W-VMem (Ours)  | 18.97  | 0.680  | 0.248  | 0.502
+L156: Ablation Study of Memory Retrieval Method. We train a base model conditioned on randomly sampled context to fairly evaluate different memory retrieval methods. Here we compare our W-VMem, the stride memory adopted by Ctrl-World [cite18†11 ] and EVAC [cite19†15 ], and short-term memory adopted by Interactive World Simulator  [cite23†30 ], which selects $N$ adjacent frames as context on replay-based evaluations.
+L157: As shown in cite64†Table 2 and cite65†Fig. 3 , W-VMem effectively retrieves relevant historical frames as context, allowing the world model to recover temporally occluded or previously observed scene content under back-and-forth camera motion, leading to more persistent predictions. Additional ablation study on the parameter of W-VMem can be found in supplementary materials.
+L158: cite66†Image: Refer to caption Figure 3: Ablation on memory retrieval strategies. By retrieving geometrically relevant historical frames, W-VMem helps the world model preserve consistent object appearances across future observations. In contrast, Short-term Mem and Stride Mem provide less informative context, leading to object (spoon) distortion or disappearance during rollout.
+L159: ### 4.2 World Model for Policy Evaluation
+L160: 
+L161: In this section, we evaluate whether Mem-World can serve as an effective simulator for evaluating the generalist robot policies, including $\pi_{0}$, $\pi_{0.5}$, and whether its predicted rollouts can accurately reflect their real-world performance.
+L162: Tasks Design. We design five manipulation tasks with increasing temporal complexity. Two short-horizon tasks, pick cube to the plate and wipe table, require only a single pick-and-place operation or a unidirectional motion. Three long-horizon tasks, pick 1 object to 2 targets, pick 2 objects to 1 target, and pick 2 objects to 2 targets, require two sequential subtasks with large loop-like wrist-camera motions.
+L163: They progressively evaluate the world model’s ability to preserve objects and targets during revisits, follow policy actions, and maintain long-term consistency across increasingly complex object-target configurations. More details can be found in the supplementary materials.
+L164: cite67†Image: Refer to caption Figure 4: Quantitative correlations between real-world and world-model.
+L165: 
+L166: cite68†Image: Refer to caption Figure 5: Policy improvement. Post-training on synthetic data improves the average success rate to 72%.
+L167: Comparison Between Real-World and World Model Rollouts. We initialize real-world executions and world-model rollouts, including Ctrl-World and Mem-World, from the same initial observations and evaluate each policy under identical task conditions. Since our setup is out-of-distribution for both policy and world models due to the custom environment and different 2DoF gripper, we collect 50 episodes per task for post-training.
+L168: We fine-tune $\pi_{0}$ and $\pi_{0.5}$ for 20K steps on 4 H100 GPUs, and fine-tune the world model for 5K steps on 4 H100 GPUs to adapt to the visual domain shift. Policy evaluation is then conducted using the post-trained models. As shown in cite69†Fig. 5 , policy success rates in Mem-World are highly correlated with their real-world success rates across the five tasks ($r=0.97$, $p<0.001$).
+L169: Although the absolute success rates in Mem-World are generally lower than those in the real world, the gap is relatively uniform across tasks, with no obvious outliers, resulting in a strong linear correspondence. In contrast, Ctrl-World shows a weaker correlation ($r=0.85$, $p<0.01$), mainly due to its pronounced performance drop on long-horizon tasks.
+L170: This deviation suggests that the stride-memory design struggles to preserve scene consistency during long-horizon rollouts, leading to poorer alignment with the real world. As shown in cite70†Fig. 6 , in the pick 2 objects to 1 target task, Ctrl-World severely distorts the fork, preventing subsequent grasp completion.
+L171: cite71†Image: Refer to caption Figure 6: Comparisons between $\pi_{0.5}$ rollouts in the real-world, Ctrl-World, and Mem-World.
+L172: ### 4.3 World Model for Policy Training
+L173: We now evaluate whether Mem-World can be used to generate synthetic post-training data for improving policy models. We use the $\pi_{0.5}$ as a base policy to rollout with Mem-World in initial observation with unseen object arrangements. We generate 200 trajectories per task and retain 20–30 successful trajectories based on human success annotation, ensuring high-quality task-completion behaviors.
+--------------------------------------------------------------------------------
+MemLearner: Learning to Query Context Memory for Video World Models (https://arxiv.org/html/2606.31734v1)
+citeturn328view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2606.31734v1","lineno":null}); Total lines: 552
+--------------------------------------------------------------------------------
+RECAP-Forcing: REtaining Content APpearances for Long Video Generation (https://arxiv.org/html/2608.26671v1)
+citeturn328view2 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2608.26671v1","lineno":null}); Total lines: 416
+

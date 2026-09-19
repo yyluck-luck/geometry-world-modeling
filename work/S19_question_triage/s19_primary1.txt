@@ -1,0 +1,238 @@
+RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction (https://arxiv.org/html/2603.20588v1)
+citeturn314view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn313view0","lineno":90}); Total lines: 378
+L59: By comparing these predictions, we derive staticness weights that modulate memory state updates, suppressing interference from dynamic regions while preserving static structure. To preserve metric consistency across memory reset boundaries, we introduce reset metric alignment, estimating corrective transformations from repeated frames to restore alignment between segments.
+L60: We further propose state-aware smoothing to stabilize predicted trajectories by using the magnitude of internal state changes as an uncertainty signal to adaptively smooth pose predictions online.
+L61: We evaluate RayMap3R on benchmarks covering camera pose estimation, depth prediction, and 3D reconstruction across both synthetic and real-world datasets. RayMap3R achieves state-of-the-art performance among streaming methods, with particularly strong gains on dynamic scenes under both per-sequence and metric-scale settings, while producing high-quality 3D reconstructions at real-time speeds with constant memory usage.
+L62: 
+L63: Our key contributions are:
+L64: 
+L65:   * •
+L66: We observe that RayMap predictions exhibit a static-scene bias, and exploit this bias to derive staticness weights for dynamic-aware memory updates.
+L67: 
+L68:   * •
+L69: 
+L70: We introduce reset metric alignment and state-aware smoothing to stabilize trajectory estimation across long sequences.
+L71: 
+L72:   * •
+L73: 
+L74: Extensive experiments show that RayMap3R achieves leading performance among streaming methods across benchmarks with real-time efficiency.
+L75: ## 2 Related Work
+L76: Offline Reconstruction Models. Offline reconstruction methods require the complete set of input images before producing outputs [cite25†39 , cite41†20 , cite26†46 , cite29†10 , cite27†37 ], employing global optimization or full-sequence attention to prioritize accuracy over real-time performance. DUSt3R [cite25†39 ] pioneered pointmap representation for scene-level 3D reconstruction, inferring camera poses and aligned point clouds from image pairs.
+L77: Subsequent approaches [cite41†20 , cite26†46 , cite42†31 , cite28†11 ] extended this framework but require pairwise processing with time-consuming optimization. MASt3R [cite28†11 ] augments DUSt3R with dense local features, while Fast3R [cite43†43 ] achieves reconstruction in a single forward. VGGT [cite27†37 ] employs a DPT backbone for joint pose and geometry estimation, achieving highly accurate results, though computational cost increases rapidly with input count, limiting scalability to long sequences.
+L78: VGGT-Long [cite29†10 ] introduces chunk-based reconstruction, but memory grows with chunk size, restricting real-time applicability.
+L79: Streaming Reconstruction Models. To enable real-time 3D reconstruction, recent works introduce memory mechanisms for continuous inference [cite32†36 , cite30†47 , cite35†42 , cite33†38 , cite34†6 ]. Spann3R [cite32†36 ] extends DUSt3R with external spatial memory that retains relevant 3D information across frames, achieving fast reconstruction with efficient memory usage but remaining less robust in dynamic scenes.
+L80: StreamVGGT [cite30†47 ] distills VGGT and introduces a spatial-temporal decoder for streaming prediction, but memory consumption grows with frame count. Point3R [cite35†42 ] maintains explicit 3D point anchors to preserve and match historical information. CUT3R [cite33†38 ] adopts a recurrent design with implicit memory cache and location dictionary for efficient lookup, achieving continuous real-time reconstruction.
+L81: TTT3R [cite34†6 ] extends CUT3R with a soft gating mechanism based on cross-attention to mitigate memory forgetting, enabling stable long-range reconstruction. However, without explicit dynamic supervision during training, streaming models remain susceptible to interference from moving objects.
+L82: Structure-from-Motion and Visual SLAM. Traditional SLAM systems [cite44†1 , cite45†3 , cite46†28 , cite47†8 , cite48†25 , cite49†22 ] rely on feature correspondence and bundle adjustment for camera pose estimation but frequently fail in low-texture or moving object scenarios. Learning-based methods like DROID-SLAM [cite50†34 ] incorporate differentiable optimization frameworks, though they remain vulnerable to dynamic content.
+L83: AnyCam [cite51†41 ] fuses depth with optical flow for accurate pose estimation; DPVO [cite52†35 ] leverages patch-level features; MASt3R-GA [cite28†11 ] integrates learned features. VGGT-SLAM [cite31†21 ] augments VGGT with SL4-based backend refinement, enhancing trajectory consistency and reconstruction quality over extended sequences. However, these methods either require iterative optimization or additional motion estimation modules, incurring substantial overhead.
+L84: Dynamic Scene Reconstruction. Existing approaches generally fall into three categories: flow-based methods [cite26†46 , cite36†17 ] rely on external flow estimators with hand-tuned thresholds that generalize poorly; segmentation-based methods [cite38†33 , cite53†26 ] isolate dynamic objects via learned models yet remain constrained by training categories; and tracking-based methods [cite37†5 ] require known camera intrinsics and iterative optimization.
+L85: All three introduce additional modules with substantial overhead, limiting generalization. In contrast, our work reveals that models trained with the RayMap paradigm tend to exhibit a static-scene bias exploitable for training-free dynamic reconstruction without additional supervision.
+L86: ## 3 Methods
+L87: Our method takes a stream of input images and predicts camera poses, depths, and point clouds. In cite9†Sec. 3.1 , we introduce RayMap and the memory mechanism for streaming reconstruction. In cite10†Sec. 3.2 , we show that RayMap-based predictions exhibit a static-scene bias useful for dynamic identification. In cite11†Sec. 3.3 , we propose a dual-branch inference scheme that leverages this bias to identify dynamic regions by contrasting image-based and RayMap-only predictions.
+L88: Finally, in cite12†Secs. 3.4 and cite13†3.5 , we introduce reset metric alignment and state-aware smoothing to stabilize trajectory estimation over long sequences.
+L89: ### 3.1 RayMap and Memory Mechanism
+L90: 
+L91: RayMap Representation. RayMap is an $H\times W\times 6$ per-pixel tensor encoding the ray origin and unit direction for each pixel, determined by camera intrinsics $K\in\mathbb{R}^{3\times 3}$ and extrinsics $\mathbf{T}=[R\,|\,\bm{\tau}]$ [cite39†45 , cite33†38 , cite54†12 ]. For a pixel in homogeneous coordinates $\tilde{\mathbf{u}}=(x,y,1)^{\top}$, the RayMap is defined as
+L92:  | $$\text{RayMap}(x,y)=\big[\,\mathbf{c},\,\widehat{\mathbf{d}}(x,y)\,\big]\in\mathbb{R}^{6},$$  |  | (1)
+L93: 
+L94: where the ray origin and unit direction in world coordinates:
+L95: 
+L96:  | $$\mathbf{c}=-R^{\top}\bm{\tau},\qquad\widehat{\mathbf{d}}(x,y)=\frac{R^{\top}K^{-1}\tilde{\mathbf{u}}}{\|R^{\top}K^{-1}\tilde{\mathbf{u}}\|_{2}}.$$  |  | (2)
+L97: Under the pinhole model, $\mathbf{c}$ remains constant across all pixels as it represents the camera center, while $\widehat{\mathbf{d}}(x,y)$ encodes the viewing direction of each ray.
+L98: Memory Mechanism. Streaming 3D reconstruction models maintain a memory cache for continuous interaction with images. Methods such as CUT3R [cite33†38 ] and TTT3R [cite34†6 ] employ an implicit memory cache, enabling stable memory usage and fast inference over thousands of frames. The implicit memory is represented as a latent state $s_{t}$, encoding the understanding of the 3D scene at timestep $t$.
+L99: Training and Inference. During training, input image $I_{t}$ is patchified into image tokens $f_{t}$, while the corresponding camera pose is transformed into RayMap and patchified into RayMap tokens $r_{t}$. These tokens interact with the state through two strategies: either image tokens $f_{t}$ combined with RayMap tokens $r_{t}$, or RayMap tokens $r_{t}$ alone.
+L100: The state updates from $s_{t-1}$ to $s_{t}$ by integrating information from $f_{t}$ and $r_{t}$, then the query process decodes $s_{t}$ to predict camera pose, depth, and point clouds. During inference, after a short warmup period, the model can predict 3D information from either images or RayMap alone, enabling geometry prediction from arbitrary viewpoints without image input.
+L101: ### 3.2 Static Bias of RayMap Predictions
+L102: We observe that streaming 3D reconstruction models trained with the RayMap paradigm [cite33†38 , cite34†6 ] exhibit a static scene bias when making predictions from RayMap tokens alone. As described in cite9†Sec. 3.1 , the model can predict geometry using only RayMap tokens $r_{t}$ and the scene representation in $s_{t-1}$. Without appearance information from image features $f_{t}$, the model relies solely on geometric consistency in $r_{t}$, and tends to prioritize static structure over dynamic content.
+L103: As illustrated in cite55†Fig. 2 (left), given the same memory state $s_{t-1}$, the image-based main prediction reconstructs the scene including the dynamic foreground, while the RayMap-based prediction from the same camera pose produces geometry focused on static background, suppressing the influence of moving objects. We attribute this bias to two factors. First, training datasets are dominated by static scenes with limited dynamic annotations, causing models to develop a prior toward static structures.
+L104: Second, RayMap tokens encode only camera geometry without appearance cues, leading the model to rely on temporally consistent structure stored in memory rather than frame-specific dynamic content.
+L105: To examine whether this property holds generally, we compute the per-pixel depth discrepancy between the two branches across 108 sequences from MPI Sintel [cite56†2 ], DAVIS 2017 [cite57†24 ], and TUM RGB-D [cite58†30 ], and measure its overlap with ground-truth dynamic masks via IoU.
+L106: As shown in cite55†Fig. 2 (right), the dynamic mask IoU correlates positively with the ground-truth dynamic ratio (Spearman $\rho=0.77$, $p<10^{-22}$), indicating that the depth discrepancy between branches reflects the presence of dynamic content across diverse scenes. Qualitative examples in cite59†Fig. 3 further show that the resulting dynamic map closely aligns with ground-truth masks on both synthetic and real scenes. We leverage this property to identify dynamic regions without additional supervision.
+L107: cite60†Image: Refer to caption Figure 2: RayMap Static Bias. Left: The main prediction and RayMap prediction produce differing depth estimates in dynamic regions, suggesting a static bias in RayMap predictions. Right: The depth discrepancy correlates with ground-truth dynamic ratio across multiple datasets, suggesting a consistent signal for dynamic identification.
+L108: ### 3.3 Dynamic Identification via RayMap Remap
+L109: Building on the static bias observed in cite10†Sec. 3.2 , we propose a dual-branch inference scheme to identify dynamic regions (cite61†Fig. 4 ). At each timestep, both branches decode from the same frozen state $s_{t-1}$: the main branch processes image and RayMap features, while the RayMap branch processes only RayMap features constructed from the main branch’s predicted pose. The per-pixel depth discrepancy between branches then serves as a signal for dynamic identification.
+L110: cite62†Image: Refer to caption Figure 3: Dynamic Map Visualization. The dynamic map is the per-pixel depth difference between the main branch and RayMap-only predictions, closely aligning with ground-truth dynamic masks across both synthetic and real scenes.
+L111: Specifically, given the main branch’s predicted pose $\hat{\mathbf{T}}_{t}$, we construct a new RayMap $\mathcal{R}(\hat{\mathbf{T}}_{t})$ and feed it through the encoder to obtain RayMap tokens $r^{\prime}_{t}$. The decodings for the main and RayMap branches are given respectively by:
+L112: 
+L113:  | $$\hat{\mathbf{y}}^{\text{main}}_{t}=\text{Dec}(f_{t}+r_{t},s_{t-1}),\quad\hat{\mathbf{y}}^{\text{raymap}}_{t}=\text{Dec}(r^{\prime}_{t},s_{t-1}),$$  |  | (3)
+L114: where $f_{t}$ and $r_{t}$ are the original image and RayMap tokens. Each prediction $\hat{\mathbf{y}}_{t}$ contains a depth map $z_{t}$ and a confidence map.
+L115: We identify dynamic regions by comparing the depth and confidence maps from both branches. For each pixel $i$, we compute the absolute relative depth difference $\delta_{i}=|z^{\text{main}}_{i}-z^{\text{raymap}}_{i}|/|z^{\text{main}}_{i}|$, where higher values indicate greater likelihood of dynamic content. Since the staticness weights must operate on state tokens rather than pixels, we aggregate $\delta_{i}$ in two steps.
+L116: Pixel-level scores are first pooled into image-token-level scores $\delta^{\text{tok}}_{k}$ via confidence-weighted averaging within each patch, where the weights are the confidence scores predicted by the main branch. These are then projected onto per-state-token scores $\delta^{\text{state}}_{j}$ as a weighted average over $\delta^{\text{tok}}_{k}$ using the decoder’s cross-attention weights $A_{jk}$ between state token $j$ and image token $k$.
+L117: We convert $\delta^{\text{state}}$ to staticness weights $\alpha_{t}\in\mathbb{R}^{N}$, where $N$ is the number of state tokens:
+L118:  | $$\alpha_{t}=\sigma\left(\gamma\cdot(\text{median}(\delta^{\text{state}})-\delta^{\text{state}})\,/\,\text{IQR}(\delta^{\text{state}})\right),$$  |  | (4)
+L119: 
+L120: where $\sigma$ is the sigmoid function, $\gamma$ controls the sensitivity of dynamic-static separation, and IQR is the interquartile range as a robust scale estimate. Tokens with high $\alpha_{t}$ receive full state updates while those with low $\alpha_{t}$ are suppressed, effectively filtering dynamic regions from memory.
+L121: Finally, we apply these weights to modulate state updates. We accumulate $\alpha_{t}$ over time via exponential moving average to improve temporal stability, yielding the final weights that gate the state update: $s_{t}=s_{t-1}+\alpha_{t}\odot\Delta s_{t}$, where $\Delta s_{t}$ is the state update produced by the decoder and $\odot$ denotes element-wise multiplication.
+L122: Additionally, we use the pixel-level staticness map to construct a weighted global feature that biases pose retrieval toward static regions during memory updates. After a warmup using only the main branch, this dual-branch scheme operates at each timestep without backpropagation, enabling dynamic-aware streaming reconstruction with constant memory usage.
+L123: cite63†Image: Refer to caption Figure 4: Method Overview. Our method performs streaming 3D reconstruction via dual-branch inference. At time step $t$, the main branch predicts depth and pose from state $s_{t-1}$ using both image and RayMap features. The predicted pose $\hat{\mathbf{T}}_{t}$ is remapped into RayMap and encoded into tokens $r^{\prime}_{t}$, then queried against the frozen state $s_{t-1}$ by the RayMap branch to obtain a static-biased prediction.
+L124: The depth difference between branches is projected via image-state attention to form staticness weights $\alpha_{t}$ that suppress dynamic regions during state update ($s_{t}=s_{t-1}+\alpha_{t}\odot\Delta s_{t}$). This dual-branch scheme identifies and suppresses dynamic regions at inference time.
+L125: ### 3.4 Reset Metric Alignment
+L126: Streaming reconstruction models maintain a persistent memory to accumulate scene understanding over time. However, the memory mechanism suffers from forgetting over extended sequences, as new observations gradually interfere with earlier context. To mitigate this, memory-based methods typically employ periodic resets: the memory state is cleared and reinitialized using a repeated frame to maintain temporal continuity.
+L127: We observe that this reset process introduces a notable problem: metric misalignment across segments.
+L128: The reset mechanism alters the memory state, causing the model to produce inconsistent camera parameters and geometry for the same repeated frame before and after reset. This discrepancy manifests as scale mismatch between segments, which propagates as systematic drift throughout subsequent frames, accumulating error that degrades reconstruction quality over long sequences.
+L129: We address this by exploiting the property that the repeated frame should yield consistent reconstructions before and after reset. Since both observations capture the same physical scene, any discrepancy between their reconstructions directly reflects the metric misalignment introduced by the reset process, providing a measurable signal for correction.
+L130: Specifically, we estimate a Sim(3) transformation that aligns the point cloud reconstructions from the repeated frame before and after the reset, as both observations capture the same physical scene. This transformation captures both the scale mismatch and pose offset between segments. The estimated transformation is then applied to all subsequent frames in the new segment, restoring metric alignment and reducing error accumulation.
+L131: ### 3.5 State-Aware Smoothing
+L132: 
+L133: Streaming methods estimate camera poses sequentially, which may lead to noisy predictions that accumulate over time. While post-hoc optimization [cite50†34 , cite28†11 , cite52†35 ] can refine trajectories offline, it is incompatible with online processing. To this end, we introduce state-aware smoothing, which derives a per-frame smoothing coefficient from trajectory acceleration and internal state change magnitude to adaptively stabilize pose predictions online.
+L134: To derive the per-frame confidence, we define the state change signal $\mathrm{sc}_{t}$ as the mean $\ell_{2}$ norm of $\Delta s_{t}$ across all $N$ state tokens, computed prior to the gated update in cite11†Sec. 3.3 , so that it reflects the full proposed change. We further define the trajectory acceleration $a_{t}=\|\mathbf{d}_{t}-\mathbf{d}_{t-1}\|_{2}$, where $\mathbf{d}_{t}=\bm{\tau}_{t}-\bm{\tau}_{t-1}$ is the inter-frame camera displacement.
+L135: The product $a_{t}\times\mathrm{sc}_{t}$ captures motion irregularity and model uncertainty, reducing false positives from either signal alone: a high $a_{t}$ with low $\mathrm{sc}_{t}$ may indicate steady fast motion rather than noise, and vice versa.
+L136: To suppress unreliable predictions while preserving stable motion estimates, we convert the product $a_{t}\times\mathrm{sc}_{t}$ into a smoothing coefficient $\beta_{t}\in[0,1]$ via an inverse mapping and exponentially filter the inter-frame displacements:
+L137: 
+L138:  | $$\hat{\mathbf{d}}_{t}=\beta_{t}\,\mathbf{d}_{t}+(1-\beta_{t})\,\hat{\mathbf{d}}_{t-1},\quad\beta_{t}=\frac{1}{1+\lambda\,|a_{t}\times\mathrm{sc}_{t}|},$$  |  | (5)
+L139: where $\bm{\tau}_{t}\in\mathbb{R}^{3}$ is the translation component of the predicted pose $\hat{\mathbf{T}}_{t}$, $\lambda$ controls the sensitivity of the mapping, and $\hat{\mathbf{d}}_{0}=\mathbf{0}$. When both $a_{t}$ and $\mathrm{sc}_{t}$ are large, $\beta_{t}$ approaches zero and the filter relies on the accumulated estimate $\hat{\mathbf{d}}_{t-1}$, attenuating trajectory jitter; when the product is small, $\beta_{t}$ approaches one and the raw displacement is preserved.
+--------------------------------------------------------------------------------
+PERSIST: World Models with Persistent 3D State (https://francelico.github.io/persist.github.io/)
+citeturn314view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"turn313view1","lineno":35}); Total lines: 158
+L0: # Beyond Pixel Histories:
+L1: World Models with Persistent 3D State
+L2: 
+L3: cite0†Samuel Garcin ^{*}^{1}^{†}, cite1†Thomas Walker†tom-m-walker.github.io ^{*}^{1}^{†}, cite2†Steven McDonagh†smcdonagh.github.io ^{1}, cite3†Tim Pearce†teapearce.github.io ^{2}, cite4†Hakan Bilen†homepages.inf.ed.ac.uk ^{1}, cite5†Tianyu He†www.microsoft.com ^{2},
+L4: cite6†Kaixin Wang†kaixin96.github.io ^{2}^{†}^{‡}, cite7†Jiang Bian†sites.google.com ^{2}
+L5: ##
+L6: ICML 2026
+L7: 
+L8: ^{1}University of Edinburgh, ^{2}Microsoft Research
+L9: ^{†}Corresponding Authors, ^{‡}Team Lead
+L10: *Equal Contribution
+L11: 
+L12: cite8†Paper†arxiv.org cite9†Code†github.com cite10†arXiv†arxiv.org cite11†🤗 Models†huggingface.co L13: ## Abstract
+L14: 
+L15: Interactive world models continually generate video by responding to a user's actions, enabling open-ended generation capabilities. However, existing models typically lack a 3D representation of the environment, meaning 3D consistency must be implicitly learned from data, and spatial memory is restricted to limited temporal context windows. This results in an unrealistic user experience and presents significant obstacles to down-stream tasks such as training agents.
+L16: To address this, we present PERSIST, a new paradigm of world model which simulates the evolution of a latent 3D scene: environment, camera, and renderer. This allows us to synthesize new frames with persistent spatial memory and consistent geometry. Both quantitative metrics and a qualitative user study show substantial improvements in spatial memory, 3D consistency, and long-horizon stability over existing methods, enabling coherent, evolving 3D worlds.
+L17: We further demonstrate novel capabilities, including synthesising diverse 3D environments from a single image, as well as enabling fine-grained, geometry-aware control over generated experiences by supporting environment editing and specification directly in 3D space.
+L18: ## Pixels are a poor choice for encoding world state information
+L19: Within 3D environments, pixel observations provide partial, highly redundant, and viewpoint-dependent snapshots of the world. Rather than relying on pixels alone, could a world model maintain a persistent 3D representation of the environment that evolves over time? To investigate this question, we study world model learning in a Minecraft-inspired voxel environment.
+L20: Voxel worlds discretise space into interpretable building blocks and support rich player–environment interactions, providing a natural testbed for evaluating how explicit 3D representations influence world model simulation.
+L21: ### Without a 3D state, spatial information is lost...
+L22: 
+L23: Pixel-based memory is expensive, limiting existing world models to a few seconds of visual memory. By maintaining a persistent 3D state, PERSIST enables efficient retrieval of spatial information over extended horizons.
+L24: 
+L25: #### Without 3D state (Oasis)
+L26: 
+L27: The scene changes dramatically when looking away.
+L28: 
+L29: #### With 3D state (Ours)
+L30: 
+L31: The scene remains consistent over time thanks to the spatial information encoded within the 3D state.
+L32: ### ... and interactions with unseen objects are ignored.
+L33: 
+L34: By providing a partial view of the environment, pixel-based histories make modelling interactions with out-of-view objects difficult. We find that existing models tend to ignore these interactions. In contrast, our 3D representation tracks space all around the player, allowing PERSIST to model a broader class of agent-environment interactions.
+L35: #### Without 3D state (Oasis)
+L36: 
+L37: The model only predicts flat, uniform terrain behind the player as they move backwards.
+L38: 
+L39: #### With 3D state (Ours)
+L40: 
+L41: A collision gets successfully modelled as the player walks into a tree while moving backwards.
+L42: ### Key-frame retrieval struggles to generalise beyond past observations
+L43: Key-frame retrieval methods construct their context by selecting spatially and temporally relevant frames from the full history. However, retrieval usually necessitates warm-starting the generation pipeline with hundreds of ground truth pixel observations, and relies on these observations as a proxy for spatial memory. Exploring new regions or revisiting a scene from a new viewpoint often causes an immediate degradation in visual quality and spatial consistency.
+L44: PERSIST takes a fundamentally different approach. Rather than retrieving spatial information from past frames, it maintains a 3D representation that is actively regenerated at each timestep. As the agent moves, this representation evolves to reflect the current state of the world, enabling consistent spatial reasoning without relying on an ever-growing archive of past observations.
+L45: #### Key-frame retrieval (WorldMem)
+L46: 
+L47: Key-frame retrieval fails once the player leaves the starting area.
+L48: 
+L49: #### With 3D state (Ours)
+L50: 
+L51: PERSIST extends its 3D representation as the player explores, maintaining spatial consistency as the player moves into new areas or revisits old ones from new viewpoints.
+L52: ## Method
+L53: 
+L54: cite12†Image: PERSIST Method L55: Initialised with a single pixel frame, PERSIST evolves in an auto-regressive loop in response to user actions cite13†Image: Action icon . We first denoise the 3D environment centred on the agent in the form of a latent world frame cite14†Image: Voxel icon . Next, camera parameters cite15†Image: Camera icon are predicted with a feed-forward transformer. We then project the world to the camera plane to form a depth-ordered stack of world latents cite16†Image: Voxel frame icon .
+L56: Finally, pixel latents cite17†Image: Pixel icon are denoised, using pixel-aligned 3D information from the world latents stack cite16†Image: Voxel frame icon as guidance.
+L57: ## New Capabilities
+L58: 
+L59: In addition to its improvement to the quality and coherence of generated experiences, we find that PERSIST's 3D representation confers a number of new capabilities.
+L60: ### 3D World Generation
+L61: 
+L62: As a generative approach, our world frame flow matching model can produce diverse plausible world states from a single RGB observation at initialisation. Below, we visualise the iterative denoising of the world frame cite14†Image: Voxel icon over 20 denoising steps. Each row corresponds to a specific input RGB frame, while each column shows a distinct sample generated using a different random seed.
+L63: The generated world frames capture the structure and semantics of the original view, while outpainting unseen regions in different plausible ways. This ability allows PERSIST to generate diverse and coherent environments, supporting a wide variety of interactive experiences.
+L64: #### Initial condition
+L65: 
+L66: cite18†Image: denoising_row1 cite19†Image: denoising_row1 cite20†Image: denoising_row1 cite21†Image: denoising_row1 L67: 
+L68: #### Generated initial world frame cite14†Image: Voxel icon (3 rollouts, 20 denoising steps)
+L69: ### 3D Initialisation
+L70: 
+L71: Alternatively, we can leverage direct access to an explicit 3D representation to directly provide the model with 3D data. This explicit 3D conditioning allows a greater degree of control over the generated experience than providing an image, as the full surroundings of the agent can be specified. Here we show how closely PERSIST follows ground truth rollouts when it receives a ground truth world frame cite14†Image: Voxel icon at initialisation.
+L72: 
+L73: #### Ground Truth
+L74: #### 3D Initialisation
+L75: 
+L76: ### Dynamic World Editing
+L77: 
+L78: Our explicit 3D representation allows us to directly edit the world state mid-generation, enabling a new form of dynamic world editing that occurs directly in 3D space. We provide some examples below.
+L79: 
+L80: 💡 Tip: Click on the arrows on either side to scroll through different edits.
+L81: 
+L82: #### No edits
+L83: 
+L84: cite22†Image: No Edits L85: 
+L86: #### Add desert at frame 20
+L87: 
+L88: cite23†Image: Desert Quad L89: 
+L90: #### Add hill at frame 20
+L91: 
+L92: cite24†Image: Hill Quad L93: #### Add tree at frame 20
+L94: 
+L95: cite25†Image: Tree L96: ### Stable Extended Generations
+L97: 
+L98: Similarly to other autogressive models, PERSIST experiences visual artifacts induced by auto-regressive drift. However, we find that our 3D representation is inherently more stable and resistant to drift. As such, visual artifacts tend to recede when the model retrieves information from its 3D representation (e.g. when rotating the camera), making it possible to maintain stability over extended horizons.
+L99: The model successfully recovers from a visual artifact once the viewpoint changes at around 12 seconds.
+L100: ### Emergence of Persistent World Dynamics
+L101: 
+L102: We find that PERSIST learns to model environmental processes that evolve on their own, without direct player input. The world continues to change even when not directly observed, sometimes giving rise to unexpected interactions with the player.
+L103: 
+L104: 💡 Tip: Click on the arrows on either side to scroll through videos.
+L105: 
+L106: A deep sea cave (bottom right of 3D visualisation) gets flooded as the player swims in the ocean above.
+L107: A waterfall floods the area, causing water to appear in the player's view. (3D visualisation sliced and zoomed in for clarity)
+L108: ## Current Limitations
+L109: An important limitation of our approach is the need for 3D annotations during training. Future work could explore learning the 3D representation from partial or synthetic annotations, or in a fully self-supervised manner. Like other autoregressive models, PERSIST suffers from generation artifacts caused by error accumulation over long rollouts (autoregressive drift). This issue can be mitigated through post-training that makes the model robust to its own generations, which we did not perform here.
+L110: Despite this, we find that PERSIST's 3D representation often enables recovery from artifacts. While comparable models become unstable after a few hundred frames, PERSIST frequently maintains stability for thousands of frames, although generation artifacts become more common over time. The video below shows a 2000-frame (83-second) episode illustrating several such artifacts and recoveries.
+L111: 
+L112: cite26†YouTube video player†www.youtube.com L113: 
+L114: cite27†Image: Step 0 L115: Step 0 (0 seconds). Start of the episode. Generation is stable.
+L116: 
+L117: cite28†Image: Step 672 L118: 
+L119: Step 672 (28 seconds). A tree trunk disappears from the 3D representation. As a result only the tree foliage is rendered to the left of the agent.
+L120: 
+L121: cite29†Image: Step 888 L122: 
+L123: Step 888 (37 seconds). Several wood blocs appear in the 3D representation. They get rendered in the agent's view.
+L124: 
+L125: cite30†Image: Step 1296 L126: Step 1296 (54 seconds). The texture of the ground is drifting to a yellowish colour. The 3D representation remains stable.
+L127: 
+L128: cite31†Image: Step 1320 L129: 
+L130: Step 1320 (55 seconds). The model recovers the correct texture thanks to the grounding provided by the 3D representation.
+L131: 
+L132: cite32†Image: Step 1656 L133: 
+L134: Step 1656 (69 seconds). A collision gets mispredicted and the agent clips through a bloc. The ground texture begins to drift.
+L135: 
+L136: cite33†Image: Step 1680 L137: Step 1680 (70 seconds). The model recovers from terrain clipping and texture drift after the agent executes a jump action.
+L138: 
+L139: cite34†Image: Step 2000 L140: 
+L141: Step 2000 (83 seconds). The episode concludes on a stable frame.
+L142: ## More Results
+L143: 
+L144: [Button: Show all results ]
+L145: ## BibTeX
+L146: 
+L147:     `@inproceedings{garcin2026beyond,
+L148:       title={Beyond Pixel Histories: World Models with Persistent 3D State},
+L149:       author={Garcin, Samuel and Walker, Thomas and McDonagh, Steven and Pearce, Tim and Bilen, Hakan and He, Tianyu and Wang, Kaixin and Bian, Jiang},
+L150:       booktitle={Forty-third International Conference on Machine Learning},
+L151:       year={2026}
+L152:     }`
+L153: 
+L154: This website is licensed under a cite35†Creative Commons Attribution-ShareAlike 4.0 International License†creativecommons.org .
+L155: You are free to share and adapt the materials on this website, provided appropriate credit is given and any derivative work is distributed under the same license.
+L156: 
+L157: Website template adapted from the cite36†Nerfies project page template†github.com .
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training (https://arxiv.org/html/2509.26645v4)
+citeturn314view2 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2509.26645v4","lineno":null}); Total lines: 854
+--------------------------------------------------------------------------------
+1Introduction (https://arxiv.org/html/2510.03198v1)
+citeturn314view3 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2510.03198v1","lineno":null}); Total lines: 369
+--------------------------------------------------------------------------------
+Mitigating Compounding Error via Video Representation Regularization (https://arxiv.org/html/2607.27036v1)
+citeturn314view4 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2607.27036v1","lineno":null}); Total lines: 295
+

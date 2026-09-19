@@ -1,0 +1,602 @@
+{
+  "schema": "S81_INDEPENDENT_PURE_MATH_REFERENCE_V1",
+  "started_at_utc": "2026-09-10T17:04:25.104734+00:00",
+  "completed_at_utc": "2026-09-10T17:04:25.105258+00:00",
+  "status": "REFERENCE_CASES_PASS",
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S81_anchor_depth_reprojection/synthetic_review.py",
+  "source_sha256": "98eaac62d955276a99a297a00504df7430d7f5f094c26760b4361d14e350f312",
+  "arithmetic": "Python standard-library Fraction; exact expected values. No numpy/model imports.",
+  "checks_count": 34,
+  "checks_passed": 34,
+  "checks": [
+    {
+      "case": "zero_motion_subpixel_identity",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "241/4",
+          "float": 60.25
+        },
+        {
+          "exact": "163/4",
+          "float": 40.75
+        }
+      ],
+      "expected": [
+        {
+          "exact": "241/4",
+          "float": 60.25
+        },
+        {
+          "exact": "163/4",
+          "float": 40.75
+        }
+      ],
+      "reason": "No motion; no rounding of the feature ray."
+    },
+    {
+      "case": "known_translation_camera_space",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "-1/2",
+          "float": -0.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "2",
+          "float": 2.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "-1/2",
+          "float": -0.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "2",
+          "float": 2.0
+        }
+      ],
+      "reason": "Use Rj.T*(Ri*Xs+ci-cj), not ci+cj."
+    },
+    {
+      "case": "known_translation_pixel_direction",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "25",
+          "float": 25.0
+        },
+        {
+          "exact": "40",
+          "float": 40.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "25",
+          "float": 25.0
+        },
+        {
+          "exact": "40",
+          "float": 40.0
+        }
+      ],
+      "reason": "Right-moving camera gives left-moving fixed point."
+    },
+    {
+      "case": "ray_norm_squared",
+      "passed": true,
+      "actual": {
+        "exact": "25/16",
+        "float": 1.5625
+      },
+      "expected": {
+        "exact": "25/16",
+        "float": 1.5625
+      },
+      "reason": "Exact norm is 5/4, not 1."
+    },
+    {
+      "case": "range_10m_point",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "6",
+          "float": 6.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "8",
+          "float": 8.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "6",
+          "float": 6.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "8",
+          "float": 8.0
+        }
+      ],
+      "reason": "Range 10 m corresponds to optical Z 8 m."
+    },
+    {
+      "case": "z_10m_point",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "15/2",
+          "float": 7.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "10",
+          "float": 10.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "15/2",
+          "float": 7.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "10",
+          "float": 10.0
+        }
+      ],
+      "reason": "Optical Z 10 m is not range 10 m."
+    },
+    {
+      "case": "range_target_projection",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "1/2",
+          "float": 0.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "1/2",
+          "float": 0.5
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "reason": "Range-correct target coordinate."
+    },
+    {
+      "case": "z_target_projection",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "11/20",
+          "float": 0.55
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "11/20",
+          "float": 0.55
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "reason": "Mistaking range for Z changes the expected target coordinate."
+    },
+    {
+      "case": "inverse_crop_top_left",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "80",
+          "float": 80.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "80",
+          "float": 80.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "reason": "576 x=0 maps to original x=80."
+    },
+    {
+      "case": "inverse_crop_bottom_right",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "3355/6",
+          "float": 559.1666666666666
+        },
+        {
+          "exact": "2875/6",
+          "float": 479.1666666666667
+        }
+      ],
+      "expected": [
+        {
+          "exact": "3355/6",
+          "float": 559.1666666666666
+        },
+        {
+          "exact": "2875/6",
+          "float": 479.1666666666667
+        }
+      ],
+      "reason": "Last feature coordinates are subpixel native addresses."
+    },
+    {
+      "case": "crop_round_trip",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "651/2",
+          "float": 325.5
+        },
+        {
+          "exact": "501/2",
+          "float": 250.5
+        }
+      ],
+      "expected": [
+        {
+          "exact": "651/2",
+          "float": 325.5
+        },
+        {
+          "exact": "501/2",
+          "float": 250.5
+        }
+      ],
+      "reason": "Pure affine coordinate round trip; not a claim of RGB pixel identity under area interpolation."
+    },
+    {
+      "case": "floor_half_up_1/2",
+      "passed": true,
+      "actual": 1,
+      "expected": 1,
+      "reason": "floor(x+0.5), including exact ties."
+    },
+    {
+      "case": "floor_half_up_5/2",
+      "passed": true,
+      "actual": 3,
+      "expected": 3,
+      "reason": "floor(x+0.5), including exact ties."
+    },
+    {
+      "case": "floor_half_up_2499/1000",
+      "passed": true,
+      "actual": 2,
+      "expected": 2,
+      "reason": "floor(x+0.5), including exact ties."
+    },
+    {
+      "case": "floor_half_up_-1/2",
+      "passed": true,
+      "actual": 0,
+      "expected": 0,
+      "reason": "floor(x+0.5), including exact ties."
+    },
+    {
+      "case": "floor_half_up_-3/2",
+      "passed": true,
+      "actual": -1,
+      "expected": -1,
+      "reason": "floor(x+0.5), including exact ties."
+    },
+    {
+      "case": "negative_source_coordinate",
+      "passed": true,
+      "actual": {
+        "status": "CONTINUOUS_OUTSIDE",
+        "index": null
+      },
+      "expected": {
+        "status": "CONTINUOUS_OUTSIDE",
+        "index": null
+      },
+      "reason": "Do not clip negative coordinates into pixel zero."
+    },
+    {
+      "case": "continuous_right_boundary",
+      "passed": true,
+      "actual": {
+        "status": "CONTINUOUS_OUTSIDE",
+        "index": null
+      },
+      "expected": {
+        "status": "CONTINUOUS_OUTSIDE",
+        "index": null
+      },
+      "reason": "Right boundary is excluded."
+    },
+    {
+      "case": "rounding_beyond_right_boundary",
+      "passed": true,
+      "actual": {
+        "status": "ROUNDED_INDEX_OUTSIDE",
+        "index": [
+          640,
+          100
+        ]
+      },
+      "expected": {
+        "status": "ROUNDED_INDEX_OUTSIDE",
+        "index": [
+          640,
+          100
+        ]
+      },
+      "reason": "In continuous domain, but rounded address is invalid."
+    },
+    {
+      "case": "last_valid_depth_address",
+      "passed": true,
+      "actual": {
+        "status": "VALID_ADDRESS",
+        "index": [
+          559,
+          479
+        ]
+      },
+      "expected": {
+        "status": "VALID_ADDRESS",
+        "index": [
+          559,
+          479
+        ]
+      },
+      "reason": "Do not resize or fill depth in this reference case."
+    },
+    {
+      "case": "depth_zero",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "reason": "1/5000 is only a synthetic positive number, not a verified data encoding factor."
+    },
+    {
+      "case": "depth_negative",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "reason": "1/5000 is only a synthetic positive number, not a verified data encoding factor."
+    },
+    {
+      "case": "depth_nan",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "reason": "1/5000 is only a synthetic positive number, not a verified data encoding factor."
+    },
+    {
+      "case": "depth_infinity",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "reason": "1/5000 is only a synthetic positive number, not a verified data encoding factor."
+    },
+    {
+      "case": "depth_positive",
+      "passed": true,
+      "actual": true,
+      "expected": true,
+      "reason": "1/5000 is only a synthetic positive number, not a verified data encoding factor."
+    },
+    {
+      "case": "outside_target_fov_projection",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "650",
+          "float": 650.0
+        },
+        {
+          "exact": "40",
+          "float": 40.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "650",
+          "float": 650.0
+        },
+        {
+          "exact": "40",
+          "float": 40.0
+        }
+      ],
+      "reason": "Projected location exists outside width 576."
+    },
+    {
+      "case": "outside_target_fov_flag",
+      "passed": true,
+      "actual": false,
+      "expected": false,
+      "reason": "Out of FOV is not inferred occlusion."
+    },
+    {
+      "case": "outside_target_error_squared",
+      "passed": true,
+      "actual": {
+        "exact": "10000",
+        "float": 10000.0
+      },
+      "expected": {
+        "exact": "10000",
+        "float": 10000.0
+      },
+      "reason": "100 px error remains defined; do not remove it from all-valid summary."
+    },
+    {
+      "case": "behind_camera_coordinates",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "-1",
+          "float": -1.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "-1",
+          "float": -1.0
+        }
+      ],
+      "reason": "Target camera passes the source point."
+    },
+    {
+      "case": "behind_camera_projection",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "reason": "No e=0 substitute."
+    },
+    {
+      "case": "camera_plane_projection",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "reason": "Z=0 cannot be divided."
+    },
+    {
+      "case": "at_z_epsilon",
+      "passed": true,
+      "actual": null,
+      "expected": null,
+      "reason": "Strict Z>epsilon required."
+    },
+    {
+      "case": "rotation_180_y_behind",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "-2",
+          "float": -2.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        },
+        {
+          "exact": "-2",
+          "float": -2.0
+        }
+      ],
+      "reason": "Do not add a consumer-axis flip to optical c2w."
+    },
+    {
+      "case": "same_epipolar_line_but_30px_error",
+      "passed": true,
+      "actual": [
+        {
+          "exact": "900",
+          "float": 900.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "expected": [
+        {
+          "exact": "900",
+          "float": 900.0
+        },
+        {
+          "exact": "0",
+          "float": 0.0
+        }
+      ],
+      "reason": "Along-line displacement is invisible to target point-to-line distance."
+    }
+  ],
+  "scope": {
+    "candidate_implementation_read": false,
+    "candidate_implementation_executed": false,
+    "real_rgb_reads": 0,
+    "real_depth_reads": 0,
+    "real_camera_or_npz_reads": 0,
+    "network_calls": 0,
+    "model_calls": 0,
+    "new_method_validated": false
+  },
+  "limits": "PASS validates these reference calculations only. Does not approve future S81 code, data alignment, depth semantics, actual experiment or physical correspondence truth."
+}

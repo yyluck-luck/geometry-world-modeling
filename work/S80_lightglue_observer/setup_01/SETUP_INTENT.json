@@ -1,0 +1,24 @@
+{
+  "created_utc": "2026-09-10T15:19:42.338093+00:00",
+  "purpose": "Download official fixed LightGlue source and SIFT matcher weights into isolated work directory; no inference/install",
+  "source_commit": "eb42fee2d71449efb0aa5c10549752b5d75384d8",
+  "fetches": [
+    {
+      "name": "source.tar.gz",
+      "url": "https://codeload.github.com/cvg/LightGlue/tar.gz/eb42fee2d71449efb0aa5c10549752b5d75384d8",
+      "byte_limit": 20000000,
+      "seconds": 60
+    },
+    {
+      "name": "sift_lightglue.pth",
+      "url": "https://github.com/cvg/LightGlue/releases/download/v0.1_arxiv/sift_lightglue.pth",
+      "byte_limit": 80000000,
+      "seconds": 120
+    }
+  ],
+  "retry": 0,
+  "credentials": false,
+  "tls_verification": true,
+  "only_official_redirects": "GitHub release download may redirect to release-assets.githubusercontent.com; source to codeload.github.com",
+  "post_fetch": "SHA/size/type/source inspection before any runtime use; weights loaded weights_only=True later; no implicit runtime network fetch"
+}

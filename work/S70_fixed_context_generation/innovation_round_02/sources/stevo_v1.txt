@@ -1,0 +1,1342 @@
+                                          Out of Sight, Out of Mind? Evaluating State Evolution in Video World Models
+
+                                                                         Ziqi Ma∗         Mengzhan Liufu∗        Georgia Gkioxari
+                                                                                      California Institute of Technology
+
+                                                Video Generation with Occlusion
+
+
+
+
+arXiv:2603.13215v1 [cs.CV] 13 Mar 2026
+                                                                                                            insert occlusion               Incorrect State Evolution
+                                                Video Generation with Camera Control                                                         (water level dropped)
+
+
+
+
+                                                                                     turn camera right                         turn camera left
+                                         Figure 1. Today’s video world models “simulate” the world by generating pixels. We test whether they can separate state evolution
+                                         from what’s visible by turning the camera away or adding in-scene occlusions. StEvo-Bench evaluates three key capabilities under
+                                         lookaway/occlusion: whether evolution continues at all, whether it remains physically plausible, and whether the scene stays coherent.
+
+                                                                   Abstract                                    1. Introduction
+                                                                                                               The world evolves regardless of whether we observe it or
+                                         Evolutions in the world, such as water pouring or ice melt-
+                                                                                                               not. Consider Fig. 1. When water is being poured into
+                                         ing, happen regardless of being observed. Video world
+                                                                                                               a cup, the amount of water grows, regardless of whether
+                                         models generate “worlds” via 2D frame observations. Can
+                                                                                                               the cup is observed. Fueled by the rapid progress in video
+                                         these generated “worlds” evolve regardless of observation?
+                                                                                                               generation, today’s world models can generate visual worlds
+                                         To probe this question, we design a benchmark to evalu-
+                                                                                                               via synthesizing image frames. These image frames, by
+                                         ate whether video world models can decouple state evo-
+                                                                                                               depicting visual appearance, represent a world with objects
+                                         lution from observation. Our benchmark, StEvo-Bench,
+                                                                                                               and properties, forming the “world state”. As objects move
+                                         applies observation control to evolving processes via in-
+                                                                                                               or properties change, such as humans moving or fire burning,
+                                         structions of occluder insertion, turning off the light, or
+                                                                                                               the “world state” evolves. In the real world, we know that
+                                         specifying camera “lookaway” trajectories. By evaluating
+                                                                                                               these state evolutions are not dependent on observation –
+                                         video models with and without camera control for a di-
+                                                                                                               even if they are occluded, or out of view, the state evolves
+                                         verse set of naturally-occurring evolutions, we expose their
+                                                                                                               as expected. If video models are truly “world models”, they
+                                         limitations in decoupling state evolution from observation.
+                                                                                                               need to possess this property as well: states should correctly
+                                         StEvo-Bench proposes an evaluation protocol to automat-
+                                                                                                               evolve, even if not observed.
+                                         ically detect and disentangle failure modes of video world
+                                         models across key aspects of natural state evolution. Anal-              This is not merely an intellectual investigation. If we
+                                         ysis of StEvo-Bench results provide new insight into poten-           want our world models to generate larger worlds and enable
+                                         tial data and architecture bias of present-day video world            longer-horizon interactions, the visible frame observation
+                                         models. Project website: https://glab-caltech.                        for any given moment becomes an increasingly small frac-
+                                         github.io/STEVOBench/. Blog: https://ziqi-                            tion of the generated world. In other words, the majority
+                                         ma.github.io/blog/2026/outofsight/                                    of the generated world is unobserved. Given this, it be-
+                                                                                                               comes critical that the world models can continue evolving
+                                                                                                               the world state, decoupled from observation.
+                                           1 Equal contribution.                                                  Decoupling evolution from observation has three implicit
+
+
+                                                                                                           1
+           Benchmark Statistics
+                                                               Initial Frame                    Occlusion                                           Verifier
+ Expected Human                                                                          “a cereal box is slid in front
+ & Animal Behavior                           Continuous                                  of the glass and pitcher,          Video Model          State Progress
+                                             Evolution                                   completely blocking them            (e.g. Veo3)
+                          10.5%                                                          from the camera view”                                 Physics Plausibility
+ Causal                             26.7%
+                  12.8%
+ Change
+                                                                                                                                                  Coherence
+                                             Kinematics                                                                   Camera-controlled
+                                                          “A hand tilts a pitcher over
+                  17.4%                                                                                                                       Observation Control
+                                                          an empty glass, beginning           right-30    left-30           Video Model
+                                     16.3%   Relational     to pour water into it”                                          (e.g. Genie3)
+ State
+                            16.3%            Change            Instruction                  Camera Control                                      Action Control
+ Transformation
+
+
+Figure 2. StEvo-Bench probes whether video-based world models can decouple state evolution from observation. StEvo-Bench,
+consisting of 225 unique tasks spanning 6 categories, uses (image, text prompt, camera control) tuples to prompt video-based world models
+to generate evolutions under interrupted observation. Observation interruption is done either using text prompt (such as adding occluders,
+turning off the light), or using camera control (turning the camera view away). The generated videos go through StEvo-Bench’s automatic
+verifiers for evaluation.
+
+
+aspects: 1) The physical plausibility of state evolution: For                                   verifiers built upon VLMs, which automatically evaluate and
+example, does the water flow correctly based on gravity, and                                    disentangle critical failure modes.
+do glass containers not penetrate each other? 2) Coherence                                          StEvo-Bench allows us to probe how world models han-
+of non-evolving aspects: For example, do the cup and jug                                        dle evolving processes when observation stops, exposing
+have the same material and size across the video, without                                       interesting findings about these models. For video models
+abrupt change or disappearance? 3) The progress of state                                        [8, 11, 21, 28, 33], we find that general-purpose video gener-
+evolution while not being observed: For example, when the                                       ation models exhibit evolution stopping or incoherence when
+camera turns away and back while the water is still pouring,                                    observation control (such as occlusion or turning off the
+does water level grow?                                                                          light) is applied. For camera-controlled models [7, 25, 26],
+    Benchmarks define the goal posts for model development,                                     we notice a strong bias toward static scenes (no evolution)
+yet existing ones do not support this critical aspect of video                                  and increased difficulty in camera control when the models
+world models. Prior benchmarks of world models touch                                            are able to evolve state. We further find that memory-based
+upon 1) and 2). For example, intuitive physics benchmarks                                       architectures exacerbate the static-scene bias, and does not
+like [3, 4, 20] focus on 1) for physical processes. Consis-                                     help decouple evolution from observation. These findings
+tency benchmarks like [30], or consistency subcategories of                                     motivate further investigations about data and architecture
+[6, 10, 36], focus on 2) under full observation. Memory                                         bias of current video world models.
+benchmarks like [34] involve less-than-full observation, but                                        We make the following contributions:
+only focus on coherence for static settings. Current bench-                                     • We propose StEvo-Bench, a benchmark to measure
+marks, even when combined, only cover 1) and 2), and thus                                          whether world models can decouple state evolution from
+cannot support the growth of world models towards big-                                             observation.
+ger worlds, longer horizon, which naturally introduces more                                     • We build automatic specialist verifiers to detect and disen-
+processes that cannot be observed in their full duration.                                          tangle various axes of failure in state evolutions generated
+    We present a benchmark which evaluates all three aspects                                       by video world models.
+to verify whether video world models can decouple state evo-                                    • Quantitative analysis on StEvo-Bench reveals critical
+lution from observation. Our benchmark, StEvo-Bench,                                               findings about current state-of-the-art video world models.
+inserts occlusions or directs the camera to look away during
+an evolving process. For example, we let the model generate                                     2. Related Works
+a burning match, and then either insert an occlusion in front
+of the camera or control the camera to turn away while the                                      Video World Models. With the rapid progress in video gen-
+match is burning. When the camera turns back or the occlu-                                      eration, people started to term video models “world models”
+sion is removed, we evaluate whether the match has burned                                       due to their capability to generate realistic-looking worlds
+more than previously seen. We focus on video world mod-                                         via video frames. Video “world models” can be catego-
+els, which include image(text)-to-video models and camera-                                      rized into two types: The first type is general-purpose video
+controlled video models. StEvo-Bench contains 225 tasks,                                        generation models, such as [8, 11, 21, 28, 33, 38], which
+encompassing six evolution categories: continuous process,                                      can generate worlds based on image or text prompts. The
+kinematics, relational change, causal change, state transfor-                                   other type is action-conditioned video models [5, 7, 25, 26],
+mation, and expected human/animal behavior. To enable au-                                       which generate videos semi-autoregressively, conditioned
+tomatic evaluation, StEvo-Bench also introduces specialist                                      on actions. Many works focus on camera control (i.e. navi-
+
+
+                                                                                         2
+                                                                   Evolution criteria               Control criteria
+                           Category                     Progress      Physics   Coherence       Observation     Action
+           Physics & Common sense [3, 4, 13, 15]            ✓           ✓               ✕            ✕            ✕
+           Memory & consistency [23, 30, 34]                ✕           ✕               ✓            ✓            ✕
+           Instruction following [6, 36]                    ✕           ✕               ✕            ✕            ✓
+           StEvo-Bench                                      ✓           ✓               ✓            ✓            ✓
+
+Table 1. Evaluating state evolution decoupled from observation requires multiple criteria. While prior benchmarks for video (world)
+models only touch on subsets of them,, StEvo-Bench comprehensively evaluates all aspects to expose and disentangle failure modes of
+world models when generating evolutions that are not fully observed.
+
+gation) as action [5, 7, 25, 26]. Action space could also be         3. Benchmarking State Evolution in Video
+robotic end effector space [1], or time plus camera control             World Models
+[29]. While the definition of “world models” can be broad,
+in this work, we focus on general-domain world models of             StEvo-Bench evaluates whether video world models can
+the two types above.                                                 continue scene evolution when not the whole process is in
+                                                                     view. It consists of 225 unique tasks, spanning 6 differ-
+World Models Evaluation. Early evaluations of video                  ent categories of naturally-occurring evolutions, including
+models focus on video quality and general condition-                 continuous process, kinematics, relational change, causal
+consistency [10]. However, using video models to gen-                change, state transformation, and expected human/animal
+erate realistic “worlds”, rather than just visually-pleasing         behavior. The tasks reflect physical events that real-world
+videos, poses additional requirements, such as physics cor-          agents routinely observe: a hand turns on a stove burner and
+rectness, common sense, controllability, and dynamics.               a wet pan begins to heat, a pitcher pours water into a glass,
+General world model benchmarks such as WorldScore [6],               a wall switch is toggled and a lamp turns on, a tire pump
+WorldModelBench[13] test these aspects in simple settings.           inflates a deflated tire, a railroad crossing gate descends as
+Among specialized benchmarks, VideoPhy [3], VideoPhy2                a train approaches, or a hand turns a manual valve and a
+[4] and PAIBench [39] focus on physics realism, World Con-           sprinkler activates. The diversity of tasks and their ground-
+sistency Score [23], Stable World [12] and MIND [34] fo-             ing in everyday physical interactions make StEvo-Bench
+cus on consistency and memory. In this work, we evalu-               directly relevant to the challenges faced by embodied agents
+ate whether world models can successfully evolve processes           deployed in the real world.
+without full observation, presenting a more rigorous test of
+physical plausibility and coherence compounded with the              3.1. Task Construction
+challenges of interrupted observation.
+                                                                     Tasks in StEvo-Bench require world models to generate a
+State in World Models. Some prior works propose a “state-            continuous process evolution under interrupted observation
+ful” world model that carries an implicit world state repre-         (Fig. 2). Each task is specified by an initial image and
+sentation. Such a formulation, by definition, decouples the          a text prompt. The initial image shows a main object in
+state’s evolution from observation. Prior works in this di-          its initial state. The text prompt instructs the world model
+rection can be categorized by their different state represen-        to apply two controls: an action control that initiates an
+tations: memory as state, 2.5D/3D as state, and latent state.        evolution process of the main object (e.g., hand tips over
+WorldMem [32], VMem [14], and Long-term Spatial Mem-                 the first domino), and an observation control that interrupts
+ory [31] represent the world state as memory. WonderPlay             observation of the process mid-evolution. We evaluate the
+[17], VerseCrafter [37], and Point World[9] use depth point          state of the main object before and after observation of it is
+cloud or 3D representations as the “world state”. These              interrupted.
+states, either memory-based or 3D-based, strongly bias to-               We implement observation control in a model-specific
+wards static scenes. Finally, works like Dino-WM [40],               way. For video generation models, the text prompt instructs
+V-JEPA2 [2], Long-context SSM [22], and FloWM [18]                   the model to apply an in-scene observation interruption for
+use a latent world state. FloWM discusses latent state evo-          some prolonged period and then remove it to reveal the
+lution in simple, synthetic environments like block world.           main object again. That is either a physical occluder placed
+While prior works on stateful world models are generally             in front of the camera (e.g. a piece of cardboard or curtains)
+constrained in simple, synthetic environments, we design a           or removing all illumination (e.g. turning lights off). For
+method to probe the “statefulness” in general-purpose video-         camera-controlled video models, we specify a camera tra-
+based world models.                                                  jectory that moves the main object fully out of frame and then
+
+
+                                                                3
+                     Control verif iers                                                 Evolution verif iers
+
+
+     Observation Control           Action Control            State Progress          Phy sical Plausibilit y         Coherence
+      Does the                   Does the requested        Does the intended          No object deform or        No object teleports
+      observation control        motion happen at          dynamic process            merge into each            or disappears?
+      happen at all?             all?                      take place at all?         other?
+                                                                                                                 No abrupt
+      Does it make the           Does the motion           Is the process             No object moves            introduction of new
+      main object fully          initiate the intended     continuous?                without physical           objects?
+      invisible?                 cause & effect?                                      cause?
+                                                           Does the object                                       No scene cuts,
+      Does the main                                        state reset at any         No object floats           resets or jumps?
+      object stay invisible                                point?                     without support or
+      for long?                                                                       attachment?
+
+
+
+
+Figure 3. Automatic verifier pipeline for StEvo-Bench. Five video understanding verifiers independently assess each generated video on
+one criteria. Observation Control and Action Control jointly determine Control Success; State Progress, Physics Plausibility, and Coherence
+jointly determine Evolution Success.
+
+returns to bring it back in view (e.g., “right-30 steps, left-           yes/no question, which produces more reliable VLM judg-
+30 steps”). In both cases, the final revealed view indicates             ments than a monolithic prompt that asks the VLM to simul-
+whether the state of the main object has evolved correctly               taneously weigh and disentangle multiple aspects of success.
+during the interval it was out of sight. These strategies are            This observation is consistent with findings in prior work on
+tailored to each model’s control interface to ensure reliable            checklist-style prompting [27].
+observation interruption.
+                                                                         Control verifiers. The two control verifiers check whether
+3.2. Evaluation Criteria and Automatic Verifiers
+                                                                         the model correctly applied the requested controls:
+StEvo-Bench evaluates generated videos using a two-stage                 Observation control verifier: verifies whether the scene
+pipeline. First, we check control success: whether the model             was successfully hidden during the evolution, either by an
+applied both controls — the observation control successfully             in-scene occluder (cardboard, curtains, or lights off) or by a
+hid the scene, and the action control successfully initiated the         camera lookaway. The verifier checks that the main object
+process. Tasks that fail these control criteria are excluded             was completely blocked from view for a sustained duration
+from further evaluation, since without successful controls               while the process was underway. Partial or transient occlu-
+the process is either uninitiated or not partially observed.             sion, and occlusion that occurs only after the evolution has
+On the passing subset, we evaluate task success, which re-               already completed, are both considered unsuccessful.
+quires three evolution criteria to hold: state progress (did
+                                                                         Action control verifier: verifies that the requested action
+the process qualitatively occur during occlusion?), physical
+                                                                         event both occurred and took effect. This requires the motion
+plausibility (is the evolution physically correct?), and coher-
+                                                                         itself to be visible, and it must also correctly initiate the
+ence (does the video remain temporally consistent before
+                                                                         expected physical response. In the case of the requested
+and after occlusion?). A video achieves task success only
+                                                                         action being “finger tips over the first domino”, the tipping
+if it first achieves control success and then passes all three
+                                                                         motion must occur, and it must cause the first domino to
+evolution criteria.
+                                                                         tilt over. A completely absent tipping motion, or tipping in
+    Previous benchmarks focus on a subset of these aspects,              mid-ar, are both consider failures by this verifier.
+as shown in Tab. 1. StEvo-Bench evaluates all these as-
+pects to comprehensively quantify state evolution success
+and disentangle various failure modes.                                   Evolution verifiers. If a generated video passes the control
+    To evaluate these criteria automatically, we build a                 verifiers, then three evolution verifiers check whether the
+specialist verifier that produces a single binary judgment               world state evolved correctly in the video:
+(Fig. 3). All verifiers use Gemini 3.1 Pro as the VLM                    State progress verifier: verifies whether the intended state
+judge. Decomposing verification into independent special-                change progresses at all during occlusion or lookaway, re-
+ists serves two purposes: (1) It enables fine-grained diagno-            gardless of physical accuracy or completeness. The key
+sis of why a model fails, since current video models often               question here is whether the process evolves continuously,
+exhibit multiple entangled failure modes in a single gen-                as opposed to (a) remaining completely static, (b) discon-
+eration; (2) Each verifier poses a single, narrowly scoped               tinued during the unobserved period, or (c) having undone
+
+
+                                                                     4
+itself during the unobserved period. This verifier first uses          due to its short, 41-frame context, we only evaluate them
+the VLM’s reasoning to predict, in language, what direc-               qualitatively.
+tional change the evolution should produce, then uses a
+unanimous-vote ensemble (𝑛 = 3) of video understanding                 4.2. Findings
+models to decide whether that change progressed correctly              Can video world models decouple state evolution from
+during the unobserved period.                                          observation? Tab. 2 quantitatively evaluates whether video
+Physical plausibility verifier: verifies that the evolution is         models can successfully evolve states on StEvo-Bench
+physically correct. The verifier prompt covers a two-type              tasks, as well as their subgoal performance.
+taxonomy of violations: Type 1 covers instantaneous single-
+frame violations (e.g., rigid objects deformed without force,              Finding 1: Both video models and camera-
+objects floating against gravity); Type 2 covers dynamic vi-               controlled video models struggle to decouple state
+olations where a cause is shown but the wrong effect follows               evolution from observation.
+(e.g., smoke sinks downward instead of rising). We prompt
+the verifier to flag only active violations, not the simple lack
+                                                                           As seen in Tab. 2, both video models and camera-
+of change, to avoid conflating a missing evolution with an
+                                                                       controlled video models show less than 10% success rate in
+incorrect one. The same majority-vote ensemble approach
+                                                                       evolving state under interrupted observation. While closed-
+was used to suppress hallucinations
+                                                                       source video models such as Veo 3 and Sora 2 Pro can oc-
+Coherence verifier: verifies that the video is temporally              casionally evolve the process (state progress rate being 17%
+consistent before and after occlusion, both in the main object         and 13% respectively), they often fail to maintain coherence
+and the broader scene. Each instance in a majority-vote                and physical plausibility. Camera-controlled models almost
+ensemble (𝑛 = 3) applies a structured checklist: Does the              never evolve states, with less than 5% state progress across
+main object vanish with no physical cause? Does it teleport            closed- and open-source models. We present findings about
+to an unexplained position? Does any new object appear                 these models’ specific failure modes in the analysis below.
+abruptly? Does the scene cut, reset, or resume in a noticeably
+                                                                       How do video models fail under observation control?
+different configuration? The video passes only if none of
+                                                                       StEvo-Bench exposes two key failure modes of video mod-
+the above occurs.
+                                                                       els when observation control is applied to these models:
+                                                                       evolution stopping and incoherence. Fig. 4 highlights both
+4. Do Video World Models Evolve State Suc-
+                                                                       failure modes.
+    cessfully?
+StEvo-Bench allows us to probe whether video models can                    Finding 2: When observation control (e.g., occlu-
+successfully evolve states when part of the dynamic process                sions or “turn light off”) is introduced into an evolv-
+is occluded or out-of-view.                                                ing process, video models often stall the evolution
+                                                                           or exhibit incoherence.
+4.1. Model Candidates
+We evaluate both video models which generate videos con-
+ditioned on image and text, as well as camera-controlled               Evolution stopping. A common failure mode is stalled
+video models which additionally takes in a specified camera            state evolution. For instance, in Fig. 4, an air mattress
+trajectory.                                                            with an open valve should continue deflating; yet when we
+Video Models. We evaluate open- and closed-source                      instruct the model to “turn off the light”, the mattress stops
+general-purpose video generative models, including Veo 3               deflating. Our state progress verifier detects this issue. As
+[8], Sora 2 Pro [21], WAN 2.2 [28], CogVideoX 1.5 [33]                 shown in Tab. 2, all video models have low state progress
+and HunyuanVideo 1.5 [11].                                             rates, with open-source models particularly prone to this
+Camera-controlled Video Models. We evaluate state-of-                  failure mode.
+the-art camera- controlled video models, including Genie 3
+[7], HunyuanWorld 1.0 [25], LingBot-World [26], GEN3C                  Incoherence. A second common failure mode is loss of
+[24], VMem [14], and AETHER [42]. Among these mod-                     object coherence once an occluder disappears – for example,
+els, Hunyuan-WorldPlay, Lingbot are open-source general                the rectangular sponge becoming round in Fig. 4. The co-
+camera-conditioned video models. GEN3C incorporates                    herence verifier captures these errors, with state-of-the-art
+3D priors, VMem incorporates a memory module, and                      closed-source models achieving only about a 60% success
+AETHER pretrains on 4D reconstruction objective. Since                 rate.
+VMem always creates severe visual artifacts during camera                 To further understand whether such failures are indeed
+pan, and AETHER “forgets” the object before camera turn                caused by the observation control, we perform additional
+
+
+                                                                   5
+                                                 Model            Success      Progress    Physics     Coherence
+                                                 Veo 3              8.7          17.4        82.6         66.5
+                             Video               Sora 2 Pro         8.1          13.1        85.5         69.7
+                             models              WAN 2.2            0.9           7.7         52          58.4
+                                                 HY-Video 1.5       0.9           4.1        42.1         59.1
+                                                 CogVideoX 1.5      0.5           1.4        68.5         67.1
+                                                 Genie 3            0.0           2.9        15.2         27.3
+                             Camera-             HY-WorldPlay       0.0           0.0        72.2         88.2
+                                                 Lingbot            0.0           3.4        40.7         76.3
+                             controlled          GEN3C              0.0           0.0        30.6         82.4
+
+Table 2. Evaluation metrics for video models (top) and camera-controlled models (bottom). Both video models and camera-controlled
+video models struggle to evolve state correctly when observation control is applied. Metrics are in percentage (%).
+
+
+      Observation Interruption                                                                   Full Observability
+                                                  air mattress with an open valve
+                                                                 Mattress not
+                                                                  deflating
+
+                     light off                     pouring water onto sponge
+                                                                    Sponge
+                                                                 turned round
+
+
+             Cardboard occlusion
+Figure 4. Representative failure modes of video models when observation of the evolution process is interrupted. The model is capable
+of simulating the process correctly when the scene is fully visible. However, when observation of the process is temporarily interrupted,
+the model either stops evolving state, as seen in the mattress deflation example, or fails to preserve object coherence, as seen in the sponge
+example. These videos are generated by Veo 3.
+
+
+                                      Progress      Success                   and coherent) are significantly lower.
+           Observ. Full                   84.6        46.2                       The success of full-observability generation suggests that
+           Observ. Control                17.4        12.4                    models possesses internal knowledge of how the process
+                                                                              should evolve. However, observation control renders these
+Table 3. The effect of observation control: state progress rate and           models incapable of generating these processes correctly.
+task success rate drop significantly when observation control is              While one might argue that this problem is solvable by incor-
+applied. Metrics are averaged over Veo 3 and Sora 2 Pro.                      porating large-scale occlusion-interrupted dynamics videos
+                                                                              into training, we believe such failures expose fundamental
+                                                                              issues on how video models process context. Since the oc-
+experiments where the observation control is not inserted,                    cluding frames do not provide any useful information on the
+i.e., the process evolves while fully observed. As seen in                    state evolution, naive all-to-all bidirectional attention might
+Fig. 4, both these processes succeed when there is no oc-                     not be efficient in such cases. We hope these failure cases
+cluder or “light off” intervention. Tab. 3 provides further                   can inspire and motivate new architecture designs for video
+quantitative evidence that when observation control is ap-                    world models.
+plied, both the state progress rate (which measures whether
+the state progressed during the occlusion) and task success                   How do camera-controlled video models fail under ob-
+rate (which measures whether the full evolution is correct                    servation control?
+
+
+                                                                          6
+ Lingbot
+
+
+                                                                                                                  Ball did not drop
+
+
+
+                   turn camera right                                     turn camera left
+ WorldPlay
+
+                                                                                                                    Wave did not
+                                                                                                                     advance
+
+
+                   turn camera right                                     turn camera left
+ AETHER
+                                                                                                                    Tablet did not
+                                                                                                                        drop
+
+
+
+                                                                                                                  Scene incoherent
+                   turn camera right                                       turn camera left
+
+Figure 5. Open-source camera-controlled video models assume the scene to be static as the camera turns, and fail to correctly evolve state,
+such as the ball dropping, wave advancing, or tablet dropping.
+
+
+                                                                        camera control becomes difficult. When state evolution is
+    Finding 3: Camera-controlled video models tend to
+                                                                        being generated, the model largely ignores the camera con-
+    “freeze” the scene and fail to continue the dynamic
+                                                                        trol and keeps the camera static. Fig. 6 shows two represen-
+    process.
+                                                                        tative examples. In both cases, the user continuously directs
+                                                                        the camera to turn right. In the first example, while the
+    Camera-controlled models, when instructed to “look                  rocket launches, the camera does not turn right but slightly
+away” from a process, largely fail to evolve the process,               turns up to follow the rocket. In the second example, the
+and tend to keep the scene static as the camera moves.                  camera stays completely static despite the camera trajectory
+We observe similar behavior across models, especially                   input. While previous findings focus on whether observation
+open-source models like Hunyuan-WorldPlay, Lingbot, and                 control makes evolution difficult, these failure modes show
+GEN3C. This is also seen in the close-to-zero state progress            the converse is also true: evolution makes camera control
+rate for all camera-controlled models in Tab. 2. Fig. 5                 difficult.
+shows representative failures of such models, sourced from                  These behaviors show another aspect of the evolution-
+Hunyuan-WorldPlay and Lingbot. GEN3C, which leverages                   observation coupling: the inability for camera pan and state
+3D cache to enhance camera control, biases strongly toward              evolution to happen concurrently suggests a strong coupling
+static scene generation. AETHER, a camera-controlled                    between the model’s capability to evolve state and gener-
+video which mixes in 4D reconstruction objective during                 ating full pixel descriptions of the process from a largely
+training, is also unable to evolve state, and fails to remember         unchanged viewpoint.
+the object due to the its short context window.                             We hypothesize that both the camera-controlled models’
+                                                                        bias towards static scene and the tradeoff between dynamics
+    Finding 4: When camera-controlled video models                      and camera control they exhibit might be attributed to the
+    successfully evolve the state, camera control be-                   training data. These models usually train on a combination
+    comes difficult.                                                    of general video data, rendered 3D data, and gaming data:
+                                                                        • In order to obtain diverse camera trajectories, camera-
+   The previous finding states that camera-controlled mod-                 controlled models train on rendered videos of static
+els frequently generate static worlds. In the less frequent                scenes. For example, WorldPlay trains on renderings of
+event where they do generate dynamics, we observe that                     reconstructed 3D Gaussian Splats, and LingBot trains on
+
+
+                                                                    7
+ Genie 3                                                               Lingbot
+
+
+
+
+                       turn camera right                                                    turn camera right
+                                                        Camera control failed
+                                                         (not looking right)
+
+
+Figure 6. When camera-controlled models can successfully evolve states, the model tends to ignore camera control while the evolution is
+happening. Such behavior is seen both in Genie 3 and Lingbot.
+
+
+
+
+                                                                                               Ball did not roll
+                                                                                                    down
+
+
+                      turn camera right                    turn camera left
+
+Figure 7. Qualitative example of VMem. Due to the memory design, VMem can perfectly recall the initial frame, but fails to evolve state,
+and suffers from scene incoherence.
+   scene renderings from Unreal Engine. These videos move              door and outdoor scenes.
+   the camera but do not contain dynamics, which might re-
+   inforce the static bias, and furthermore associate complex              Finding 5: Memory-based video world models re-
+   camera movement with static scenes.                                     inforce the bias toward static scene.
+• The general video datasets that models train on, e.g., Sekai
+   [16] and DL3DV [19], mainly contain indoor and outdoor
+                                                                           As shown in Fig. 7, VMem shows a strong bias toward
+   scenes with many static objects.
+                                                                       remembering objects exactly “as is”. VMem, although pro-
+• The gaming data, which contain (action, video) pairs, usu-
+                                                                       ducing artifacts during the camera lookaway process, is able
+   ally don’t contain rich, natural physical evolutions that
+                                                                       to recall the initial frame quite accurately due to the memory
+   occur in the real world.
+                                                                       design. We argue that while memory enables the model to
+    Enabling simultanous state evolution and camera con-               store a “state” that is decoupled from observation, the archi-
+trol in world models might require different synthetic data            tecture design encourages memorization of object appear-
+strategies to mitigate data bias or post-training with prefer-         ance, rather than enabling better modeling of state evolu-
+ence optimization.                                                     tion. StEvo-Bench highlights the need for new architecture
+Do memory modules help decouple state evolution from                   designs to enable not only memorization, but also evolution
+observation? Previous findings have shown that video                   of the world that is not always fully in-view.
+world models have strong coupling between evolution and
+observation. We further study whether memory modules,                  5. Control and Verifier Analysis
+which enable the model to keep track of a “memory state”
+separate from pixel-level generations, can help decouple               5.1. Control success rate
+state evolution from observation.                                      One predicate of our evaluation is that both observation
+   While many memory-based architectures [32, 35] are                  and action control are applied correctly, i.e., the process is
+constrained to specialized domains such as Minecraft or                correctly initiated, and occlusion or lookaway happen. We
+RealEstate10k [41], we evaluate VMem [14], which is the                verify that current models can support such control by eval-
+most general-domain memory-based model, trained on in-                 uating success rate under each axis. Tab. 5 shows that video
+
+
+                                                                   8
+                                                  Evolution criteria                          Control criteria
+                         Metric      Progress   Physics   Coherence      Success     Observation     Action    Success
+                         Acc          0.795      0.700       0.860        0.810         0.878        0.903       0.849
+                   V-H ROC-AUC        0.644      0.672       0.864        0.713         0.800        0.918       0.785
+                         MRA          0.829      0.743       0.905        0.858         0.891        0.949       0.857
+                         Acc          0.747      0.722       0.911        0.737         0.659        0.885       0.692
+                   H-H ROC-AUC        0.623      0.645       0.629        0.602         0.668        0.782       0.708
+                         MRA          0.807      0.757       0.919        0.820         0.825        0.868       0.824
+
+Table 4. Agreement between the automatic verifiers and the human annotators, benchmarked against inter-human agreement across three
+metrics. Bold indicates the higher value per column. The V-H row shows agreement between the verifiers and human annotators, and the
+H-H shows agreement within the human annotators.
+
+
+                     Model            Observ.    Action               predictor. Since predictions are binary (not soft scores),
+                                                                      the ROC curve has only one interior point, so AUC reduces
+                     Veo 3              81.6       88.0               to (TPR + TNR)/2, where TPR is the fraction of ground-
+      Video          Sora 2 Pro         69.4       80.4               truth positives the predictor labels positive, and 𝑇 𝑁 𝑅 is
+      models         WAN 2.2            46.2       76.5               the fraction of ground-truth negatives the predictor labels
+                     HY-Video 1.5       31.2       81.0               negative. For verifier-vs-human comparisons, the human
+                     CogVideoX 1.5      22.2       75.5               is treated as ground truth. For human-vs-human compar-
+                     Genie 3            84.7       78.6               isons, both directions are computed for each pair and av-
+      Camera-        HY-WorldPlay       55.4       64.9               eraged symmetrically, since neither annotator is privileged.
+                     Lingbot            35.6       67.8               Model ranking agreement (MRA) sidesteps abso-
+      controlled                        90.6
+                     GEN3C                         57.6               lute calibration entirely: for every pair of models ( 𝐴, 𝐵) and
+                                                                      every shared task, it asks whether two raters agree on which
+Table 5. Success rate of observation and action control. Models       model performed better. Agreement is scored as 1.0 for a
+are largely able to follow control of StEvo-Bench tasks.              full match, 0.5 when one rater calls a tie and the other does
+                                                                      not, and 0.0 for a reversal; scores are averaged over all model
+                                                                      pairs and tasks.
+models and camera-controlled video models can correctly
+apply both observation and action control, validating the                All three metrics produce values between 0 and 1, with 1
+evaluation protocol of StEvo-Bench.                                   being perfect agreement. The agreement results are shown
+                                                                      in Tab. 4. All three metrics converge on consistent conclu-
+5.2. Evaluation of verifiers against human annota-                    sions. Human agreement is lowest on physical plausibility
+      tors                                                            and observation control. This reflects genuine ambiguity in
+                                                                      the definitions of these conflated, inter-related failure modes.
+The automatic verifiers are only useful if they reliably cap-
+                                                                      Deciding whether a physical effect constitutes a jarring vi-
+ture the intended evaluation criteria. Since visually judging
+                                                                      olation (rather than a slow or imperfect evolution) requires
+diverse videos is a subjective task, we validate the verifiers
+                                                                      nuanced domain knowledge, and different annotators apply
+by comparing them to human annotations. If a verifier agrees
+                                                                      different thresholds. Similarly, judging whether an occlu-
+with human annotators at least as well as annotators agree
+                                                                      sion was “complete enough” is subjective.
+with each other, it is performing at the ceiling of what any
+automatic system could reasonably achieve. We recruited                  Nevertheless, the verifier matches or exceeds inter-human
+three crowdsourced annotators on Upwork and collect bi-               agreement on nearly all criteria. The verifier-vs-human MRA
+nary labels (yes/no) for all five evaluation criteria. We do          meets or exceeds inter-human MRA on every single crite-
+this on a randomly selected subset (𝑛 = 180) of the generated         ria. With Accuracy, the verifier outperforms inter-human
+videos spanning all models.                                           agreement when evaluating state progress, observation con-
+   We measure agreement using three complementary met-                trol and action control. The only criteria where the verifier
+rics. Accuracy is the fraction of tasks where two raters              lags slightly is physical plausibility, which is also the hardest
+assign the same binary label, averaged over all rater pairs.          for humans. Together, these results confirm that our auto-
+ROC-AUC addresses potential label class imbalance. Given              matic verifiers are reliable proxies for well-educated human
+two raters, one is treated as ground truth and the other as           judgment: they agree with individual human annotators as
+
+
+                                                                  9
+well as annotators agree with each other, and they recover the             [4] Hritik Bansal, Clark Peng, Yonatan Bitton, Roman Golden-
+same model ordering that a human panel would produce.                          berg, Aditya Grover, and Kai-Wei Chang. Videophy-2: A
+                                                                               challenging action-centric physical commonsense evaluation
+6. Conclusions                                                                 in video generation. arXiv preprint arXiv:2503.06800, 2025.
+                                                                               2, 3
+We present StEvo-Bench, a benchmark that evaluates                         [5] Amir Bar, Gaoyue Zhou, Danny Tran, Trevor Darrell, and
+whether video world models can evolve state correctly when                     Yann LeCun. Navigation world models. In Proceedings of
+observation is interrupted. We probe this by applying obser-                   the Computer Vision and Pattern Recognition Conference,
+vation control, either as occlusions or illumination dimming                   pages 15791–15801, 2025. 2, 3
+for video models, or as “lookaway” camera commands for                     [6] Haoyi Duan, Hong-Xing Yu, Sirui Chen, Li Fei-Fei, and
+camera-controlled video models. StEvo-Bench exposes                            Jiajun Wu. Worldscore: A unified evaluation benchmark
+that video world models struggle to evolve state when the                      for world generation. In Proceedings of the IEEE/CVF In-
+observation control is applied. StEvo-Bench’s verifiers                        ternational Conference on Computer Vision (ICCV), pages
+                                                                               27713–27724, 2025. 2, 3
+disentangle various failure modes to deepen our understand-
+                                                                           [7] Google DeepMind. Genie 3: A new frontier for world mod-
+ing of the limitations of today’s video models. Evalua-
+                                                                               els. https://deepmind.google/blog/genie-3-
+tion on StEvo-Bench yields interesting findings, such as
+                                                                               a-new-frontier-for-world-models/, 2025. Ac-
+video models’ evolution stopping and incoherence failures,                     cessed: 2026-03-03. 2, 3, 5
+camera-controlled models’ strong bias towards static scenes,               [8] Google DeepMind. Veo: a text-to-video generation system.
+and the increased difficulty in camera control when a dy-                      https://storage.googleapis.com/deepmind-
+namic evolution is present. These findings lead us to reflect                  media/veo/Veo-3-Tech-Report.pdf, 2025. Ac-
+on the training data and architecture design of video world                    cessed: 2026-03-03. 2, 5
+models, such as training data bias the efficacy of memory-                 [9] Wenlong Huang, Yu-Wei Chao, Arsalan Mousavian, Ming-
+based architectures. StEvo-Bench makes the first step to-                      Yu Liu, Dieter Fox, Kaichun Mo, and Li Fei-Fei. Pointworld:
+ward evaluating the non-pixel-based “world evolution” as-                      Scaling 3d world models for in-the-wild robotic manipula-
+pect of world models. We hope StEvo-Bench inspires new                         tion. arXiv preprint arXiv:2601.03782, 2026. 3
+techniques and architectures that enable video world models               [10] Ziqi Huang, Yinan He, Jiashuo Yu, Fan Zhang, Chenyang Si,
+to truly model processes in the world, and not just generate                   Yuming Jiang, Yuanhan Zhang, Tianxing Wu, Qingyang Jin,
+coherent pixels.                                                               Nattapol Chanpaisit, Yaohui Wang, Xinyuan Chen, Limin
+                                                                               Wang, Dahua Lin, Yu Qiao, and Ziwei Liu. VBench: Com-
+                                                                               prehensive benchmark suite for video generative models. In
+7. Acknowledgments
+                                                                               Proceedings of the IEEE/CVF Conference on Computer Vi-
+We thank Aadarsh Sahoo and Damiano Marsili for valuable                        sion and Pattern Recognition, 2024. 2, 3
+discussions. Ziqi Ma is funded by CAST. Mengzhan Liufu is                 [11] Weijie Kong, Qi Tian, Zijian Zhang, Rox Min, Zuozhuo Dai,
+supported by the Cherng fellowship. Georgia acknowledges                       Jin Zhou, Jiangfeng Xiong, Xin Li, Bo Wu, Jianwei Zhang,
+the William Hurt Scholarship program for their support. We                     et al. Hunyuanvideo: A systematic framework for large video
+also thank Google for generously providing us with Gemini                      generative models. arXiv preprint arXiv:2412.03603, 2024.
+                                                                               2, 5
+credits.
+                                                                          [12] Soonwoo Kwon, Jin-Young Kim, Hyojun Go, and Kyungjune
+                                                                               Baek. Toward stable world models: Measuring and address-
+References                                                                     ing world instability in generative environments. Pattern
+ [1] Arslan Ali, Junjie Bai, Maciej Bala, Yogesh Balaji, Aaron                 Recognition, page 113351, 2026. 3
+     Blakeman, Tiffany Cai, Jiaxin Cao, Tianshi Cao, Elizabeth            [13] Dacheng Li, Yunhao Fang, Yukang Chen, Shuo Yang, Shiyi
+     Cha, Yu-Wei Chao, et al. World simulation with video founda-              Cao, Justin Wong, Michael Luo, Xiaolong Wang, Hongxu
+     tion models for physical ai. arXiv preprint arXiv:2511.00062,             Yin, Joseph E. Gonzalez, Ion Stoica, Song Han, and Yao
+     2025. 3                                                                   Lu. Worldmodelbench: Judging video generation models as
+ [2] Mido Assran, Adrien Bardes, David Fan, Quentin Garrido,                   world models. In Advances in Neural Information Processing
+     Russell Howes, Matthew Muckley, Ammar Rizvi, Claire                       Systems, 2025. 3
+     Roberts, Koustuv Sinha, Artem Zholus, et al. V-jepa 2:               [14] Runjia Li, Philip Torr, Andrea Vedaldi, and Tomas Jakab.
+     Self-supervised video models enable understanding, predic-                Vmem: Consistent interactive video scene generation
+     tion and planning. arXiv preprint arXiv:2506.09985, 2025.                 with surfel-indexed view memory. In Proceedings of the
+     3                                                                         IEEE/CVF International Conference on Computer Vision,
+ [3] Hritik Bansal, Zongyu Lin, Tianyi Xie, Zeshun Zong, Michal                pages 25690–25699, 2025. 3, 5, 8
+     Yarom, Yonatan Bitton, Chenfanfu Jiang, Yizhou Sun, Kai-             [15] Xinyi Li, Zaishuo Xia, Weyl Lu, Chenjie Hao, and Yubei
+     Wei Chang, and Aditya Grover. Videophy: Evaluating phys-                  Chen. Smallworlds: Assessing dynamics understanding
+     ical commonsense for video generation. In International                   of world models in isolated environments. arXiv preprint
+     Conference on Learning Representations, 2025. 2, 3                        arXiv:2511.23465, 2025. 3
+
+
+                                                                     10
+[16] Zhen Li, Chuanhao Li, Xiaofeng Mao, Shaoheng Lin, Ming                 Yujun Shen, and Hao Ouyang. Advancing open-source world
+     Li, Shitian Zhao, Zhaopan Xu, Xinyue Li, Yukang Feng,                  models. arXiv preprint arXiv:2601.20540, 2026. 2, 3, 5
+     Jianwen Sun, Zizhen Li, Fanrui Zhang, Jiaxin Ai, Zhixiang         [27] Vijay Viswanathan, Yanchao Sun, Shuang Ma, Xiang Kong,
+     Wang, Yuwei Wu, Tong He, Jiangmiao Pang, Yu Qiao, Yunde                Meng Cao, Graham Neubig, and Tongshuang Wu. Checklists
+     Jia, and Kaipeng Zhang. Sekai: A video dataset towards                 are better than reward models for aligning language models.
+     world exploration, 2025. 8                                             In NeurIPS, 2025. 4
+[17] Zizhang Li, Hong-Xing Yu, Wei Liu, Yin Yang, Charles Her-         [28] Team Wan, Ang Wang, Baole Ai, Bin Wen, Chaojie Mao,
+     rmann, Gordon Wetzstein, and Jiajun Wu. Wonderplay: Dy-                Chen-Wei Xie, Di Chen, Feiwu Yu, Haiming Zhao, Jianx-
+     namic 3d scene generation from a single image and actions.             iao Yang, Jianyuan Zeng, Jiayu Wang, Jingfeng Zhang, Jin-
+     In Proceedings of the IEEE/CVF International Conference                gren Zhou, Jinkai Wang, Jixuan Chen, Kai Zhu, Kang Zhao,
+     on Computer Vision, pages 9080–9090, 2025. 3                           Keyu Yan, Lianghua Huang, Mengyang Feng, Ningyi Zhang,
+[18] Hansen Jin Lillemark, Benhao Huang, Fangneng Zhan, Yilun               Pandeng Li, Pingyu Wu, Ruihang Chu, Ruili Feng, Shiwei
+     Du, and Thomas Anderson Keller. Flow equivariant world                 Zhang, Siyang Sun, Tao Fang, Tianxing Wang, Tianyi Gui,
+     models: Memory for partially observed dynamic environ-                 Tingyu Weng, Tong Shen, Wei Lin, Wei Wang, Wei Wang,
+     ments. arXiv preprint arXiv:2601.01075, 2026. 3                        Wenmeng Zhou, Wente Wang, Wenting Shen, Wenyuan Yu,
+[19] Lu Ling, Yichen Sheng, Zhi Tu, Wentian Zhao, Cheng Xin,                Xianzhong Shi, Xiaoming Huang, Xin Xu, Yan Kou, Yangyu
+     Kun Wan, Lantao Yu, Qianyu Guo, Zixun Yu, Yawen Lu, et al.             Lv, Yifei Li, Yijing Liu, Yiming Wang, Yingya Zhang, Yi-
+     Dl3dv-10k: A large-scale scene dataset for deep learning-              tong Huang, Yong Li, You Wu, Yu Liu, Yulin Pan, Yun
+     based 3d vision. In Proceedings of the IEEE/CVF Conference             Zheng, Yuntao Hong, Yupeng Shi, Yutong Feng, Zeyinzi
+     on Computer Vision and Pattern Recognition, pages 22160–               Jiang, Zhen Han, Zhi-Fan Wu, and Ziyu Liu. Wan: Open and
+     22169, 2024. 8                                                         advanced large-scale video generative models. arXiv preprint
+                                                                            arXiv:2503.20314, 2025. 2, 5
+[20] Chak-Wing Mak, Guanyu Zhu, Boyi Zhang, Hongji Li, Xi-
+                                                                       [29] Yiming Wang, Qihang Zhang, Shengqu Cai, Tong Wu, Jan
+     aowei Chi, Kevin Zhang, Yichen Wu, Yangfan He, Chun-Kai
+                                                                            Ackermann, Zhengfei Kuang, Yang Zheng, Frano Rajič, Siyu
+     Fan, Wentao Lu, Kuangzhi Ge, Xinyu Fang, Hongyang He,
+                                                                            Tang, and Gordon Wetzstein. Bullettime: Decoupled control
+     Kuan Lu, Tianxiang Xu, Li Zhang, Yongxin Ni, Youhua Li,
+                                                                            of time and camera pose for video generation. arXiv preprint
+     and Shanghang Zhang. Physicsmind: Sim and real mechan-
+                                                                            arXiv:2512.05076, 2025. 3
+     ics benchmarking for physical reasoning and prediction in
+     foundational vlms and world models, 2026. 2                       [30] Mingyang Wu, Ashirbad Mishra, Soumik Dey, Shuo Xing,
+                                                                            Naveen Ravipati, Hansi Wu, Binbin Li, and Zhengzhong Tu.
+[21] OpenAI. Sora 2. https://openai.com/index/
+                                                                            Consid-gen: View-consistent and identity-preserving image-
+     sora-2/, 2025. Accessed: 2026-03-03. 2, 5
+                                                                            to-video generation, 2026. 2, 3
+[22] Ryan Po, Yotam Nitzan, Richard Zhang, Berlin Chen, Tri            [31] Tong Wu, Shuai Yang, Ryan Po, Yinghao Xu, Ziwei Liu,
+     Dao, Eli Shechtman, Gordon Wetzstein, and Xun Huang.                   Dahua Lin, and Gordon Wetzstein. Video world models with
+     Long-context state-space video world models. In Proceed-               long-term spatial memory. In Advances in Neural Information
+     ings of the IEEE/CVF International Conference on Computer              Processing Systems, 2025. 3
+     Vision, pages 8733–8744, 2025. 3                                  [32] Zeqi Xiao, LAN Yushi, Yifan Zhou, Wenqi Ouyang, Shuai
+[23] Akshat Rakheja, Aarsh Ashdhir, Aryan Bhattacharjee, and                Yang, Yanhong Zeng, and Xingang Pan. Worldmem: Long-
+     Vanshika Sharma. World consistency score: A uni-                       term consistent world simulation with memory. In The Thirty-
+     fied metric for video generation quality. arXiv preprint               ninth Annual Conference on Neural Information Processing
+     arXiv:2508.00144, 2025. 3                                              Systems, 2025. 3, 8
+[24] Xuanchi Ren, Tianchang Shen, Jiahui Huang, Huan Ling,             [33] Zhuoyi Yang, Jiayan Teng, Wendi Zheng, Ming Ding, Shiyu
+     Yifan Lu, Merlin Nimier-David, Thomas Müller, Alexan-                 Huang, Jiazheng Xu, Yuanming Yang, Wenyi Hong, Xiao-
+     der Keller, Sanja Fidler, and Jun Gao. Gen3c: 3d-informed              han Zhang, Guanyu Feng, et al. Cogvideox: Text-to-video
+     world-consistent video generation with precise camera con-             diffusion models with an expert transformer. In International
+     trol. In Proceedings of the IEEE/CVF Conference on Com-                Conference on Learning Representations, 2025. 2, 5
+     puter Vision and Pattern Recognition, pages 6121–6132,            [34] Yixuan Ye, Xuanyu Lu, Yuxin Jiang, Yuchao Gu, Rui Zhao,
+     2025. 5                                                                Qiwei Liang, Jiachun Pan, Fengda Zhang, Weijia Wu, and
+[25] Wenqiang Sun, Haiyu Zhang, Haoyuan Wang, Junta Wu,                     Alex Jinpeng Wang. Mind: Benchmarking memory consis-
+     Zehan Wang, Zhenwei Wang, Yunhong Wang, Jun Zhang,                     tency and action control in world models, 2026. 2, 3
+     Tengfei Wang, and Chunchao Guo. Worldplay: Towards                [35] Jinjing Zhao, Fangyun Wei, Zhening Liu, Hongyang Zhang,
+     long-term geometric consistency for real-time interactive              Chang Xu, and Yan Lu. Spatia: Video generation with up-
+     world modeling. arXiv preprint arXiv:2512.14614, 2025.                 datable spatial memory. arXiv preprint arXiv:2512.15716,
+     2, 3, 5                                                                2025. 8
+[26] Robbyant Team, Zelin Gao, Qiuyu Wang, Yanhong Zeng,               [36] Dian Zheng, Ziqi Huang, Hongbo Liu, Kai Zou, Yinan He,
+     Jiapeng Zhu, Ka Leong Cheng, Yixuan Li, Hanlin Wang,                   Fan Zhang, Yuanhan Zhang, Jingwen He, Wei-Shi Zheng,
+     Yinghao Xu, Shuailei Ma, Yihang Chen, Jie Liu, Yansong                 Yu Qiao, and Ziwei Liu. VBench-2.0: Advancing video
+     Cheng, Yao Yao, Jiayi Zhu, Yihao Meng, Kecheng Zheng,                  generation benchmark suite for intrinsic faithfulness. arXiv
+     Qingyan Bai, Jingye Chen, Zehong Shen, Yue Yu, Xing Zhu,               preprint arXiv:2503.21755, 2025. 2, 3
+
+
+                                                                  11
+[37] Sixiao Zheng, Minghao Yin, Wenbo Hu, Xiaoyu Li, Ying
+     Shan, and Yanwei Fu. Versecrafter: Dynamic realistic video
+     world model with 4d geometric control. In Proceedings of
+     the IEEE/CVF Conference on Computer Vision and Pattern
+     Recognition, 2026. 3
+[38] Zangwei Zheng, Xiangyu Peng, Yuxuan Lou, Chenhui Shen,
+     Tom Young, Xinying Guo, Binluo Wang, Hang Xu, Hongxin
+     Liu, Mingyan Jiang, Wenjun Li, Yuhui Wang, Anbang Ye,
+     Gang Ren, Qianran Ma, Wanying Liang, Xiang Lian, Xi-
+     wen Wu, Yuting Zhong, Zhuangyan Li, Chaoyu Gong, Guo-
+     jun Lei, Leijun Cheng, Limin Zhang, Minghao Li, Ruijie
+     Zhang, Silan Hu, Shijie Huang, Xiaokang Wang, Yuanheng
+     Zhao, Yuqi Wang, Ziang Wei, and Yang You. Open-sora
+     2.0: Training a commercial-level video generation model in
+     $200k, 2026. 2
+[39] Fengzhe Zhou, Jiannan Huang, Jialuo Li, Deva Ramanan,
+     and Humphrey Shi. Pai-bench: A comprehensive benchmark
+     for physical ai. arXiv preprint arXiv:2512.01989, 2025. 3
+[40] Gaoyue Zhou, Hengkai Pan, Yann LeCun, and Lerrel Pinto.
+     Dino-wm: World models on pre-trained visual features en-
+     able zero-shot planning. In Forty-second International Con-
+     ference on Machine Learning, 2025. 3
+[41] Tinghui Zhou, Richard Tucker, John Flynn, Graham Fyffe,
+     and Noah Snavely. Stereo magnification: Learning view syn-
+     thesis using multiplane images. ACM Trans. Graph. (Proc.
+     SIGGRAPH), 37, 2018. 8
+[42] Haoyi Zhu, Yifan Wang, Jianjun Zhou, Wenzheng Chang,
+     Yang Zhou, Zizun Li, Junyi Chen, Chunhua Shen, Jiangmiao
+     Pang, and Tong He. Aether: Geometric-aware unified world
+     modeling. In Proceedings of the IEEE/CVF International
+     Conference on Computer Vision, pages 8535–8546, 2025. 5
+
+
+
+
+                                                                   12
+ Out of Sight, Out of Mind? Evaluating State Evolution in Video World Models
+                                                Supplementary Material
+A. Benchmark                                                           the automatic verifiers agree with human annotators at least
+                                                                       as well as human annotators agree with each other.
+We present additional tasks of StEvo-Bench in Fig. 8.
+These example tasks cover all six task categories in StEvo-            B.4. Disagreements
+Bench, each of which captures a fundamentally distinct
+                                                                       We analyze videos where the verifiers and human annotators
+category of state evolution. The categories span continu-
+                                                                       disagree. Example disagreements are shown in Fig. 14.
+ous evolutions that accumulate gradually over time, sim-
+                                                                       These often coincide with videos where human annotators
+ple few-object kinematics, irreversible structural or mate-
+                                                                       disagree with each other.
+rial transformations, causal change, and expected behavior
+                                                                           Most videos where the verifiers and human annotators
+of humans or animals. Together, they cover the physical,
+                                                                       disagree exhibit some inherent ambiguity. The ambiguity
+chemical, and social dimensions of world dynamics, provid-
+                                                                       stems from at least two distinct sources. First, sometimes a
+ing a comprehensive probe of a model’s internal simulation
+                                                                       quantitative thresholding judgement is required: for exam-
+capacity. Coupled with our diverse methods of observa-
+                                                                       ple, how much deflation constitutes a fully deflated mattress?
+tion control, strong performance on StEvo-Bench reflects
+                                                                       how dark does the room have to be for the “lights off” control
+genuine, real-world-relevant understanding.
+                                                                       to be considered successful? The verifiers and human anno-
+                                                                       tators might apply this threshold differently. Second, each
+B. Verifiers
+                                                                       party must decide which visual discrepancies are consequen-
+B.1. Qualitative Examples                                              tial enough to fail a video. A minor physics inconsistency
+                                                                       or a subtle continuity glitch may be dismissed as irrelevant
+We provide additional examples of video failures that are              noise by one annotator yet treated as a meaningful failure by
+caught by each verifier in Fig. 9 and Fig. 10. Fig. 9 provides         another. This reflects a subjective salience judgment about
+examples of videos that fail to evolve state correctly, either         what the criterion is ultimately testing. Together, these am-
+due to failure in state progress, physical implausibility, or          biguity make definitive binary labeling difficult for some
+incoherence. Fig. 10 shows examples of videos that fail                videos. When such ambiguity is present, the observed V-H
+to adhere to specified control, either failing to insert the           and H-H disagreement should be interpreted as a property
+correct observation control or failing to perform the action           of the evaluation task itself rather than a limitation of the
+that initiates the state evolution.                                    verifiers or the human annotators.
+B.2. Example Verifier Rationale                                            Occasionally, verifier errors do occur from VLM failures.
+                                                                       The VLM may not follow the verifier prompt instructions
+Fig. 11 shows two examples of the verifier rationale. The              precisely, or may overlook a subtle but decisive visual detail
+verifier considers various aspects of the criteria, and pro-           (Fig. 14). While these reflect occasional, stochastic failures
+vides a short analysis on the violating aspect.                        of the underlying VLM, we mitigate them by the ensem-
+                                                                       ble design of our verifiers. By querying the VLM multiple
+B.3. Further Verifier-Human Agreement Analysis                         times per judgment (with rephrased prompts, when appli-
+We present further analysis on agreement between the auto-             cable) and aggregating votes, we prevent single lapses from
+matic verifiers and the human annotators. Mean agreement               contaminating the final judgments in many tasks.
+measured using three metrics and their respective standard
+deviation are shown in Fig. 12. The standard deviation
+is low across all criteria and agreement metrics, meaning
+the behavior of both the verifier and the human annotators
+are consistent across all comparison pairs. This consis-
+tency assures that the Verifier-Human (V-H) agreement and
+Human-Human (H-H) agreement measures are genuine and
+reliable. We also found strong correlation between V-H
+agreement and H-H agreement for every criterion across
+tasks (Fig. 13). The correlation coefficient has 𝑝 < 10−11
+for all criteria. This means if the automatic verifier disagrees
+with the human annotators on a video, the video is likely also
+hard for human annotators to agree on. This confirms that
+
+
+                                                                   1
+                                         Instruction                                                    Instruction
+       Initial Frame                                                    Initial Frame
+                             “One end of a black gunpowder                                   “A piece of butter sits on an
+                             fuse is lit and sizzling”                                       active burning stove”
+
+
+                                          Occluder                                                       Occluder
+                                                                                             “a piece of cardboard is held up in
+                             “a heavy curtain drops from the
+                                                                                             front of the camera view,
+                             ceiling between the camera and
+                                                                                             completely blocking the butter and
+                             fuse, completely blocking the view”
+                                                                                             pan”
+
+                                         Instruction                                                     Instruction
+       Initial Frame                                                     Initial Frame       “A small metal bullet is
+                             “A tennis ball is just released by
+                                                                                             travelling fast towards a
+                             a robotic arm”
+                                                                                             suspended wood block”
+
+                                          Occluder                                                        Occluder
+                             “a piece of cardboard is held up in                             “a heavy curtain drops from the
+                             front of the camera view,                                       ceiling between the camera, wood
+                             completely blocking the ball and                                block and bullet, completely
+                             robot arm”                                                      blocking the view”
+
+
+                                        Instruction                                                     Instruction
+       Initial Frame                                                    Initial Frame       “An empty glass bowl sits
+                             “A honey dipper with a droplet
+                                                                                            empty on an outdoor table
+                             of honey is hung over a table”
+                                                                                            during heavy rainstorm”
+
+                                         Occluder                                                        Occluder
+                             “a piece of cardboard is held up in                             “a heavy curtain drops from the
+                             front of the camera view,                                       ceiling between the camera, wood
+                             completely blocking the ball and                                block and bullet, completely
+                             robot arm”                                                      blocking the view”
+
+                                        Instruction                                                     Instruction
+       Initial Frame                                                    Initial Frame
+                            “An empty wine glass is falling                                 “The hand keeps pressing the
+                            off of the edge of a table”                                     trigger of the spray can”
+
+
+                                         Occluder                                                        Occluder
+                                                                                            “a piece of cardboard is held up in
+                             “The room lights switch off, leaving
+                                                                                            front of the camera view,
+                             the glass and furniture in complete
+                                                                                            completely blocking the bowl and
+                             darkness and completely invisible”
+                                                                                            spray”
+
+
+                                       Instruction                                                     Instruction
+      Initial Frame                                                     Initial Frame       “While the sprinkler is out of
+                            “While the light is out of view,
+                                                                                            view, a hand turns a valve
+                            a hand toggles the wall switch”
+                                                                                            connected to the sprinkler”
+
+                                    Camera Control                                                  Camera Control
+                            “The camera smoothly moves left at                              “The camera smoothly moves right
+                            constant speed until the ceiling                                at constant speed until the
+                            light exits the frame”                                          sprinkler exits the frame”
+
+
+                                       Instruction                                                     Instruction
+      Initial Frame                                                     Initial Frame
+                            “Athletes in a sprinting race on                                “A white silkworm sitting on a
+                            a track in a stadium”                                           leaf is eating the leaf away”
+
+
+                                        Occluder                                                        Occluder
+                            “a piece of cardboard is held up in                             “a piece of cardboard is held up in
+                            front of the camera view,                                       front of the camera view,
+                            completely blocking the athletes                                completely blocking the athletes
+                            and track from view”                                            and track from view”
+
+
+
+
+Figure 8. Example tasks from StEvo-Bench. Each row shows two tasks from a unique category. Category from top to bottom: continuous
+evolution, kinematics, relational change, state transformation, causal change, and expected human & animal behavior.
+
+                                                                    2
+        Failures Caught By State Progress Verifier
+         HY-WorldPlay
+
+                                                                                                                ball didn’t drop
+                                                                                                                 and hit others
+
+
+                        turn camera right                                    turn camera left
+         Sora 2 Pro
+
+                                                                                                                   liquid stays
+                                                                                                                  static despite
+                                                                                                                     pushing
+
+                                               cardboard occlusion
+        Failures Caught By Physics Plausibility Verifier
+        HunyuanVideo 1.5
+
+                                                                                                                     water
+                                                                                                                  morphed into
+                                                                                                                     cereal
+         Genie 3
+
+
+                                                                                                                   block going
+                                                                                                                       up
+
+                          turn camera right                                      turn camera left
+         Failures Caught By Coherence Verifier
+         Veo 3
+                                                                                                                  shower head
+                                                                                                                   appearance
+                                                                                                                    changed
+
+                          turn camera down                                 turn camera up
+          WAN 2.2
+                                                                                                                       airplane
+                                                                                                                     incoherent
+                                                                                                                      direction
+
+
+                                                    curtain occlusion
+
+
+Figure 9. Example video generation failures that violate verifiers on the “state evolution” axes. We show separate examples that violate the
+state progress verifier, physical plausibility verifier, and the coherence verifier.
+
+
+
+
+                                                                     3
+      Failures Caught By Observation Control Verifier
+         HunyuanVideo 1.5
+
+                                                                                                            curtain did not
+                                                                                                             occlude cup
+
+
+                              (unsuccessful) curtain occlusion
+         HunyuanVideo 1.5
+
+                                                                                                             light did not
+                                                                                                             fully turn off
+
+
+                                                                       (unsuccessful) light off
+
+      Failures Caught By Action Control Verifier
+         Action control prompt: The robot strikes the cue ball with a
+         pool cue, sending it to the rack of balls
+          WAN 2.2
+
+                                                                                                             cue ball did not
+                                                                                                              go to rack of
+                                                                                                                  balls
+
+                                           light off
+          Action control prompt: The hand holding scissors cuts the
+          string
+          Sora 2 Pro
+
+                                                                                                            scissor never
+                                                                                                            touched the
+                                                                                                                string
+
+
+
+
+Figure 10. Example video generation failures that violate verifiers on the “control” axes. We show separate examples that violate the
+observation control verifier and action control verifier.
+
+
+
+
+                                                                 4
+   Video
+
+
+
+
+                      turn camera down                                           turn camera up
+
+    Coherence Verifier Full Output
+    {
+      "main_subject": "showerhead",
+      "subject_disappears": false,
+      "subject_reappears": true,
+      "background_cut": false,
+      "state_jump": false,
+      "blackout_reset": false,
+      "teleport": false,
+      "coherence": false,
+      "notes": "The video starts with a fixed, wall-mounted showerhead. After the camera pans down to
+    the water handle and then pans back up, the showerhead reappears as a completely different
+    handheld model attached to a hose, which was not present in the initial scene."
+    }
+
+
+    Video
+
+
+
+                                                                      light off
+     Action Control Verifier Full Output
+        {
+          "trigger_applied": false,
+          "notes": "The robot does not strike the cue ball toward the rack; instead, it lifts the pool cue and the
+        cue ball moves slightly to the left."
+        }
+
+
+
+Figure 11. Example verifier rationales. The verifier evaluates various aspects defined for each evaluation axis (when applicable), and
+provides an explanation of how the video violates the corresponding criteria.
+
+
+
+
+                                                                  5
+Figure 12. Mean agreement and standard deviation across three Verifier-Human (V-H) pairs and three Human-Human (H-H) pairs for each
+criterion. Agreement measured by Accuracy, ROC-AUC and Model Ranking Agreement (MRA) is shown in top, middle and
+bottom panel respectively.
+
+
+
+
+                                                                6
+Figure 13. Agreement heatmap for each criterion. V-H agreement and H-H agreement are calculated using Accuracy. With 3 human
+annotators, both V-H and H-H agreement can only take discrete values from the set {0, 1/3, 2/3, 1}. Correlation between V-H agreement
+and H-H agreement is calculated using Spearman’s correlation coefficient.
+
+
+
+
+                                                                 7
+      Disagreement: observation control
+        Veo 3
+                                                                                                                 Billiards dimly
+                                                                                                                  visible after
+                                                                                                                     lights off
+
+
+                                                     Lights off
+      Disagreement: physical plausibility
+        WAN 2.2
+                                                                                                                 Pins didn’t fall
+                                                                                                                 after ball hits
+
+
+
+                                                   Curtain drop
+      Disagreement: state progress
+        WAN 2.2
+                                                                                                                Sand pile un-grew
+                                                                                                                  after lights off
+
+
+
+                                   Lights off
+      Disagreement: physical plausibility
+        Veo 3
+                                                                                                               Verifier missed: lights
+                                                                                                               back on but mattress
+                                                                                                                   remains dark
+
+
+                                            Lights off
+      Disagreement: physical plausibility
+       LingBot-world
+                                                                                                               Verifier marked lack
+                                                                                                               of state progress as
+                                                                                                                 physical failure
+
+
+                                            Lights off
+      Disagreement: coherence
+       WAN 2.2
+                                                                                                                Verifier confused
+                                                                                                                fast stick motion
+                                                                                                                for teleportation
+
+
+                                            Lights off
+                                                                   8
+Figure 14. Example videos where the verifier and human annotators disagree with each other. The top 3 disagreements are caused by
+ambiguity in the generated videos, and bottom 3 disagreements show verifier failures when they overlooked aspects of the videos or failed
+to follow the prompts.
+B.5. Verifier Prompts
+The full prompt of each automatic verifier is provided below.
+
+
+
+
+  Observation Control Verifier Prompt
+
+  You are evaluating a generated video for whether a partial observability mechanism was correctly applied.
+
+  The following has been determined from the task specification:
+  requested occlusion: {occlusion display}
+
+  PARTIAL OBSERVABILITY:
+  The video may hide the scene via in−scene occlusion (lights off, object placed in front, smoke filling the view, etc.) OR by camera pan (camera moves away, taking the
+  subject fully out of frame). Both mechanisms are valid.
+
+  Do NOT penalise a mismatch between requested occlusion and the mechanism shown in the video. Occlusion success is judged solely by whether the subject became
+  invisible, regardless of how.
+
+  Evaluate ONE thing from the GENERATED video: occlusion done − Were the key subject and dynamic successfully hidden from view (became invisible) at the
+  appropriate moment, by ANY mechanism?
+
+  Camera pan that moves the subject fully out of frame counts as occlusion done = True, even if requested occlusion described a different in−scene method − and vice
+  versa.
+
+  TRUE only if the main subject/area became clearly invisible or fully obscured.
+  FALSE if the dynamic process already completed BEFORE the occlusion took place.
+  FALSE if the scene was never hidden at all.
+  Set to TRUE if requested occlusion is ”none”.
+
+  General guidance:
+  − Use only visual evidence from the video.
+  − Ignore timestamps, watermarks, subtitles, and UI overlays.
+
+  Return ONLY valid JSON in this exact format (no markdown, no commentary):
+  {
+    ”occlusion done”: true/false,
+    ”notes”: ”optional short explanation”
+  }
+
+
+
+
+  Action Control Verifier Prompt
+
+  ”You are evaluating a generated video for whether a trigger action was correctly applied.
+
+  The following has been determined from the task specification:
+  requested trigger: {trigger display}
+
+  Evaluate ONE thing from the GENERATED video:
+
+  trigger applied − Did the requested kickoff action occur?
+  TRUE if the action itself happened or its physical effect is clearly visible.
+  Set to true if requested trigger is ”none”.
+
+  General guidance:
+  − Use only visual evidence from the video.
+  − Ignore timestamps, watermarks, subtitles, and UI overlays.
+
+  Return ONLY valid JSON in this exact format (no markdown, no commentary):
+  {
+    ”trigger applied”: true/false,
+    ”notes”: ”optional short explanation”
+  }
+
+
+
+
+                                                                                       9
+State Progress Verifier Prompt
+
+Your job is to verify whether a video shows an expected physical process.
+
+The expected process is:
+1. An initial image showing the starting state
+2. An action/event that will occur: ”{action prompt}”
+
+Based on the initial image and the action described, what physical process or state evolution should happen?
+Describe the expected changes in the scene, including:
+− What objects or elements will change
+− How they will change (e.g., shape, position, state)
+− What the final state should look like
+
+IMPORTANT: This video includes CAMERA MOVEMENT where the camera turns away from the main object.
+You must specifically check: Did the expected process HAPPEN while the camera was turned away (when the main object was not visible)?
+This is critical − the process should evolve even when the camera is not looking at it.
+
+Watch the video carefully and answer:
+1. Did the expected process happen in the video? (Yes/No)
+2. Provide a detailed explanation of what is the object state right before it becomes invisible, and right after it is seen again.
+3. Compare what happened in the video to what was expected
+4. SPECIFICALLY address: Did the process continue/happen during the occlusion or camera movement?
+5. If the process did not happen as expected, explain what was different or missing
+
+Please ignore physical violations or artifacts. Only focus on whether the key process happened DURING the occlusion or camera movement.
+
+After your full explanation, provide a one−sentence summary on the last line in this format:
+Process: [concise one−sentence description of the expected evolution]
+
+Format your response as:
+VERDICT: [Yes/No]
+EXPLANATION: [Your detailed explanation]
+
+
+
+
+                                                                                        10
+Prompt 3: Physical Plausibility Verifier Prompt
+
+You are evaluating a generated video for physical plausibility.
+
+An ARTIFACT is any event or behavior in the video that actively violates the laws of physics or is otherwise physically impossible. There are two types:
+
+TYPE 1 − Instantaneous violations
+Something is physically wrong in a single frame or very short moment, independent of what came before or after.
+Examples:
+− A rigid object (cup, block, bottle) deforms or changes shape without any force being applied
+− An object’s color or texture changes suddenly without a physical cause
+− Two solid objects overlap, pass through each other, or merge together
+− An object abruptly moves or changes velocity with no visible contact, force, or physical cause
+− An object floats in mid−air against gravity, without support or attachment
+
+TYPE 2 − Dynamic violations
+Individual frames look plausible, but the evolution of the scene over time violates physics. The cause is shown, but the WRONG effect follows.
+Examples:
+− Water is continuously poured into a glass but the level drops or stays flat (the wrong direction of change given the cause).
+− A block slides down a ramp but then reverses upward with no visible push.
+− An object is set in motion but accelerates with no driving force.
+
+For TYPE 2, ask yourself: a cause is clearly shown − does the effect that follows actively defy physics? If yes, that is an artifact. If instead the scene simply does not
+change much (the cause has no visible effect), that is a state evolution failure, not an artifact − do NOT flag it here.
+
+INTENDED OCCLUSION CONTEXT: This task intentionally includes the following occlusion: ”{requested occlusion}”. Any scene darkening, blackout, or view
+obstruction that corresponds to this description is expected behaviour and must NOT be flagged as an artifact. Do NOT flag any irregularities related to the intended
+occlusion as artifacts. If the intended occlusion does not correctly happen, DO NOT flag it as artifact either.
+
+INTENDED STATE EVOLUTION: The following image−edit prompt describes the main physical change that was intended to occur in the scene:
+”{init2final edit prompt}”
+
+Before judging artifacts, extract a one−sentence plain−language summary of this intended change (e.g. ”the block slides to the bottom of the ramp”) and record it as ”
+intended state evolution” in your JSON response.
+
+CRITICAL DISTINCTION − artifact vs. state evolution failure:
+− ARTIFACT: something WRONG actively happens (a physically impossible event occurs, e.g. an object deforms with no force, two solids pass through each other,
+water level drops while being poured in).
+− STATE EVOLUTION FAILURE: the intended change simply does NOT happen (e.g. the scene looks frozen, nothing moves, the intended effect is absent). This is
+evaluated separately and must NOT be flagged here.
+
+Only flag as artifact if the video shows an active physical violation, not merely a lack of the intended change.
+
+SEVERITY THRESHOLD: Only flag violations that a casual viewer would find clearly jarring and physically impossible. Do NOT flag:
+− Subtle rendering imperfections (slightly uneven textures, minor flickering)
+− Small quantitative discrepancies (smoke that diffuses slightly faster than expected)
+− Sand or granular material appearing or clumping in plausible ways
+− Any effect that, while imperfect, is physically plausible
+− Video quality issues such as blurriness or noise
+
+General guidance:
+− Watch the full video before making a judgment.
+− Flag only CLEAR, VISUALLY JARRING violations that a layperson would immediately notice as impossible.
+− Use only visual evidence. Ignore timestamps, watermarks, and UI overlays.
+
+Return ONLY valid JSON in this exact format (no markdown, no commentary):
+{
+  ”intended state evolution”: ”one−sentence summary of the intended physical change”,
+  ”artifact”: true/false,
+  ”notes”: ”brief description of what was observed and why it is or is not an artifact”
+}
+
+
+
+
+                                                                                      11
+Prompt 4: Coherence Verifier Prompt
+
+
+You are evaluating a generated video for temporal and scene coherence.
+
+A COHERENCE FAILURE means the video does not appear to be a single, continuous, uninterrupted recording of one scene.
+
+INTENDED OCCLUSION: This task uses a CAMERA PAN to hide the subject.
+The camera sweeps the subject out of frame, then pans back to reveal it.
+This is intentional and expected behaviour.
+
+OCCLUSION vs. DISAPPEARANCE for camera pan:
+− Subject leaving the frame because the camera panned away = OCCLUSION. Mark subject disappears = false in this case.
+− Only mark subject disappears = true if the subject vanishes while still within the camera’s field of view, with no physical cause.
+
+Camera pan vs. scene cut:
+A pan has continuous intermediate frames of spatial motion connecting the two viewpoints. A cut jumps INSTANTANEOUSLY with zero transitional frames. If any
+sliding motion is visible, it is a pan − not a cut. Do NOT mark background cut = true for a camera pan, even a fast or direction−reversing one.
+
+STEP 1 − Identify the main subject.
+Identify the primary object or entity the video is about. Record it as main subject.
+
+STEP 2 − Occlusion vs. disappearance.
+For this task, determine whether any disappearance of the main subject is explained by the INTENDED OCCLUSION described above.
+− OCCLUSION: subject becomes invisible because something hides it (camera moves away, lights off, curtain drawn, smoke fills frame, etc.). The subject is still
+physically present − just hidden. NOT a failure.
+− DISAPPEARANCE: subject is simply absent with no physical or occlusion cause. This IS a coherence failure.
+
+STEP 3 − Fill in the checklist.
+Answer each item true or false based only on visual evidence:
+
+subject disappears − Did the main subject vanish from the scene with NO physical explanation and NO correspondence to the intended occlusion? (If the intended
+occlusion accounts for the disappearance, mark false.)
+
+subject reappears − After the subject was hidden by occlusion, did it reappear in a state or position that cannot be explained by the visible process? (A normal reveal
+after intended occlusion is fine − flag only unexpected discontinuous jumps upon reappearance.)
+
+background cut − Did the background or environment change INSTANTANEOUSLY (zero transitional frames), implying a hidden edit or scene cut? Example: table
+surface or wall color abruptly changes; a window switches sides. A camera pan has continuous motion − it is NOT a cut.
+
+state jump − Did the main subject’s state change discontinuously, with no visible transition? Example: a full glass is suddenly empty; an intact ice cube is suddenly
+fully melted, with the melting process entirely skipped.
+
+blackout reset − Did the scene briefly black out and then resume in a visibly different configuration (objects repositioned or in different states) with no physical
+explanation? (A blackout matching the intended occlusion that resumes the same scene is NOT a reset.)
+
+teleport − Did any object’s position jump discontinuously between frames, with no continuous motion connecting the two locations? Example: a block on the left of a
+ramp is suddenly at the bottom right.
+
+COHERENCE RULE:
+coherence = false if ANY checklist item above is true.
+coherence = true if ALL checklist items are false.
+
+Do NOT flag:
+− Normal continuous physical processes, even surprising or fast ones.
+− Video quality issues such as blurriness or noise.
+− subject disappears = false when the subject leaves frame due to camera pan.
+− background cut = false for any camera pan motion, including fast or direction−reversing pans (pan away to hide, pan back to reveal).
+
+General guidance:
+− Watch the full video before filling the checklist.
+− Flag only CLEAR failures. Unusual but continuous events are not failures.
+− Use only visual evidence. Ignore timestamps, watermarks, and UI overlays.
+
+Return ONLY valid JSON in this exact format (no markdown, no commentary):
+{
+  ”main subject”: ”<primary object or entity in the video>”,
+  ”subject disappears”: true/false,
+  ”subject reappears”: true/false,
+  ”background cut”: true/false,
+  ”state jump”: true/false,
+  ”blackout reset”: true/false,
+  ”teleport”: true/false,
+  ”coherence”: true/false,
+  ”notes”: ”brief explanation referencing specific observations”
+
+
+
+
+                                                                                       12
+

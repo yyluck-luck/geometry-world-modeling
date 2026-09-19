@@ -1,0 +1,89 @@
+{
+  "status": "GO_ONE_OPENSSL_METADATA_RECOVERY_ATTEMPT",
+  "recorded_utc": "2026-09-11T01:28:48.364678+00:00",
+  "reviewer": "s77_science_closure; different transport-source reviewer, no execution of indexer",
+  "source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/index_rtmv_openssl.py",
+    "bytes": 9960,
+    "sha256": "09435f1f52c9ec66cdad66bc93fa169097dc2ec92ce278503e5468c7aebccf5e"
+  },
+  "plan": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/INDEX_PLAN_OPENSSL.json",
+    "bytes": 1971,
+    "sha256": "219463b22e626e5691f902a3e961434fb52818ec42f3572329b5ed356532d850"
+  },
+  "previous_source_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/review/INDEX_SOURCE_REVIEW.json",
+    "bytes": 6013,
+    "sha256": "2d61635d2c55fe2882383c4c4ecd41ca7d60056911249c910806a5a791d5d0ef"
+  },
+  "failed_attempt": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/index_01/RECEIPT.json",
+    "bytes": 4151,
+    "sha256": "9de51a25b5cf551735697236b884a0427b13a93714b4bceb07e21eb59988eefb"
+  },
+  "failed_attempt_independent_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/review/INDEX_ACTUAL_REVIEW.json",
+    "bytes": 11885,
+    "sha256": "73fabe25d7fcb34506284e5bb041eb1b1501982386c7286e8fa0935e6c6c071b"
+  },
+  "scope": "Read complete plan and source diff versus accepted indexer, then exact final NoRedirect/manual-hop repair. Reused already accepted tar parsing/index semantics; no new network or scientific input.",
+  "transport_checks": [
+    {
+      "check": "TLS and fixed endpoint",
+      "result": "PASS_STATIC",
+      "detail": "ssl.create_default_context with standard verification; HTTPSHandler uses this context. Fixed original repository commit URL retained. Local read-only Python inspection reports OpenSSL 3.6.4 25 Aug 2026; actual run must record its runtime version."
+    },
+    {
+      "check": "Explicit bounded redirects without redirect body read",
+      "result": "PASS_AFTER_REPAIR",
+      "detail": "NoRedirect.redirect_request returns None, so standard handler exits before fp.read. HTTPError response closed without reading; explicit loop range6 permits initial request and at most5 HTTPS redirects, checks Location/scheme/hop, preserves signed query only in memory and logs scrubbed location. Nonredirect HTTP error closed and stopped."
+    },
+    {
+      "check": "Response metadata before bounded final body",
+      "result": "PASS_STATIC",
+      "detail": "Final206 and exact numeric Content-Range start/end/total required before read; declared Content-Length if present must512. Only response.read(513), then require saved512. 200/mismatchedrange rejected without reading final body. No JSON/image/depth member body requested."
+    },
+    {
+      "check": "Failure preservation",
+      "result": "PASS_STATIC",
+      "detail": "Collected raw return bytes, zero/partial saved byte count, hash, sanitized error, transport label/OpenSSL version and certificate verification written before failure assertions. Create-only index_02; original index_01 source/receipt remain untouched. No automated request retries."
+    },
+    {
+      "check": "Budget semantics",
+      "result": "PASS_STATIC",
+      "detail": "Same offset11460608, at most256 logical header requests; accepted131072B, saved returned-body cap256*513=131328B, HTTP overhead excluded. 600s cooperative guard between logical requests; timeout<=25 is per socket operation, not hard total or OS kill. No speed or success promised."
+    },
+    {
+      "check": "Unchanged matching and input source rules",
+      "result": "PASS_DIFF",
+      "detail": "Old7 local header checks, all views/full lists, duplicate isolation, out-of-archive rejected_member, first outside-scene stop, prefix-only min complete ID and false physical qualification flags unchanged from accepted source."
+    }
+  ],
+  "finding_history": [
+    {
+      "id": "OPENSSL-R1",
+      "severity": "MAJOR_BEFORE_REPAIR",
+      "status": "CLOSED_AT_CURRENT_SHA",
+      "initial_root_declared_source_sha256": "8d33884d83f70fed2d4e1ef9afb7d31812e8c444c654c07e95468bd8cad324d7",
+      "issue": "Inherited urllib redirect handler automatically read full302 body before following; final response.read513 did not bound that read.",
+      "evidence": {
+        "local_module_path": "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py",
+        "method": "HTTPRedirectHandler.http_error_302",
+        "method_source_sha256": "2a8691454b001cd6a9af613cf7e4332347529232497456c18afde05c466f21c0",
+        "relevant_behavior": "if new is None: return; otherwise later fp.read(); fp.close()"
+      },
+      "repair": "NoRedirect returns None; root closes HTTPError without reading and explicitly follows bounded HTTPS hops."
+    }
+  ],
+  "no_new_scientific_gate": "This is a one-batch transport recovery after a real TLS failure, not new data/geometry/method acceptance. Root decides and records actual execution; successful response remains unknown at this source review.",
+  "blocking_findings": [],
+  "own_actions": {
+    "network_requests": 0,
+    "indexer_runs": 0,
+    "image_depth_decodes": 0,
+    "model_runs": 0,
+    "scoring_runs": 0,
+    "new_json_body_reads": 0
+  }
+}

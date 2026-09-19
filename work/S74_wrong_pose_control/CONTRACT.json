@@ -1,0 +1,57 @@
+{
+  "created_utc": "2026-09-09T08:06:57.947658+00:00",
+  "stage": "S74_REAL_WRONG_POSE_LABEL_CONTROL",
+  "scope": "Exploratory fixed negative control on already-seen S72 real correspondences; no new images/features/model/calibration.",
+  "question": "Does fixed requested-geometry error distinguish one preselected wrong-label permutation on the same real matches?",
+  "target_ids": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "swap": {
+    "20": 23,
+    "21": 22,
+    "22": 21,
+    "23": 20
+  },
+  "real_receipt": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/execution_01/receipt.json",
+    "sha256": "7711703643cb03e447a05fcd452142912d727e659372561d1efe4b7903d13d53"
+  },
+  "real_acceptance": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/ROOT_RESULT_ACCEPTANCE.json",
+    "sha256": "aaf7a2a74e339c0bd1da023cc605546a29898636adc23291267d808a776492c5"
+  },
+  "numpy_version": "1.26.4",
+  "line_epsilon": 1e-12,
+  "quantiles": [
+    0.25,
+    0.5,
+    0.75,
+    0.95
+  ],
+  "cutoffs_px": [
+    2,
+    5,
+    10
+  ],
+  "geometry": "F_j vs F_swap(j) from acceptedS72 for source19, normalized separately. Save separation min(||Fj-Fk||F,||Fj+Fk||F) BEFORE residual calculation. Dimensionless in fixed pixel coordinates, not pose/pixel distance. Report actual floating exactzero only, no sufficient-separation threshold and no alternative permutation.",
+  "pairs": "Retain all original638 real match IDs/xy/coverage, reuse original correct residuals. Recompute wrongF symmetric point-line distances. Preserve correct-invalid, wrong-invalid, union-invalid, common-valid indices/count/coverage, raw deltas wrong-correct, quantiles, signs; no filtering/rematching/fitting. Match denominator M and common anchorN explicit. Old real23 tail remains.",
+  "event": "All four paired median deltas strictlypositive -> true, anyundefined -> null takesprecedence, otherwise false. Descriptive sensitivity only, no significance, calibration certification, camera estimation, S70 cause or novelty.",
+  "budget": {
+    "external_seconds": 30,
+    "new_images": 0,
+    "new_features": 0,
+    "new_models": 0,
+    "weight_reads": 0
+  },
+  "limits": [
+    "Four targets share one anchor and same already-seenfr2scene.",
+    "Fixed approximateK and no undistortion, false matches and view differences remain.",
+    "Swapped F may be equivalent up to scale/sign even for wrong motion; low separation can make control uninformative.",
+    "No pairing change based on outcome or deleting targets.",
+    "Correct residuals reused only from pinned acceptedS72; independent rederivation follows."
+  ],
+  "new_method_validated": false
+}

@@ -1,0 +1,244 @@
+{
+  "schema": "s15b-prefix-artificial-checks-v1",
+  "status": "PASS",
+  "started_utc": "2026-09-06T10:18:41.327501+00:00",
+  "completed_utc": "2026-09-06T10:18:41.683986+00:00",
+  "checks": [
+    {
+      "name": "valid exact manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "extra witness identity",
+      "status": "PASS",
+      "expected_error": "Unpermitted identity: target images, arrays, and dataset metadata forbidden"
+    },
+    {
+      "name": "extra arbitrary NPZ identity",
+      "status": "PASS",
+      "expected_error": "Unpermitted identity: target images, arrays, and dataset metadata forbidden"
+    },
+    {
+      "name": "13 history entries",
+      "status": "PASS",
+      "expected_error": "Ordered history indices 0..11"
+    },
+    {
+      "name": "duplicate source RGB path",
+      "status": "PASS",
+      "expected_error": "Distinct twelve RGB files"
+    },
+    {
+      "name": "reordered source indices",
+      "status": "PASS",
+      "expected_error": "Contract mismatch: source_indices"
+    },
+    {
+      "name": "four queries omits parity budget",
+      "status": "PASS",
+      "expected_error": "Contract mismatch: query_count"
+    },
+    {
+      "name": "unfrozen weight",
+      "status": "PASS",
+      "expected_error": "Pinned checkpoint SHA"
+    },
+    {
+      "name": "changed RGB SHA",
+      "status": "PASS",
+      "expected_error": "History identity binding: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_prefix_preparation/round2/synthetic_paths/history/rgb_0.png"
+    },
+    {
+      "name": "twelve allowed camera records",
+      "status": "PASS"
+    },
+    {
+      "name": "camera path mismatch",
+      "status": "PASS",
+      "expected_error": "Camera RGB path binding"
+    },
+    {
+      "name": "camera SHA mismatch",
+      "status": "PASS",
+      "expected_error": "Camera RGB SHA binding"
+    },
+    {
+      "name": "timestamp duplicate",
+      "status": "PASS",
+      "expected_error": "Twelve increasing RGB timestamps"
+    },
+    {
+      "name": "13 camera records",
+      "status": "PASS",
+      "expected_error": "Exactly twelve permitted camera poses"
+    },
+    {
+      "name": "depth-time metadata",
+      "status": "PASS",
+      "expected_error": "Camera contract: pose_time"
+    },
+    {
+      "name": "reflected optical rotation",
+      "status": "PASS",
+      "expected_error": "Given history c2w proper rotation"
+    },
+    {
+      "name": "NaN camera position",
+      "status": "PASS",
+      "expected_error": "Given history c2w shape/finite"
+    },
+    {
+      "name": "changed K",
+      "status": "PASS",
+      "expected_error": "Camera contract: K"
+    },
+    {
+      "name": "forward OLS recovers model per meter scale",
+      "status": "PASS"
+    },
+    {
+      "name": "forward OLS mapped cameras",
+      "status": "PASS"
+    },
+    {
+      "name": "forward OLS residual zero",
+      "status": "PASS"
+    },
+    {
+      "name": "OLS no reciprocal error",
+      "status": "PASS"
+    },
+    {
+      "name": "degenerate no-motion camera fit",
+      "status": "PASS",
+      "expected_error": "Degenerate metric displacement D"
+    },
+    {
+      "name": "negative fitted scale",
+      "status": "PASS",
+      "expected_error": "Nonpositive/nonfinite model-per-meter scale"
+    },
+    {
+      "name": "twelve official-shaped history views",
+      "status": "PASS"
+    },
+    {
+      "name": "eleven history views",
+      "status": "PASS",
+      "expected_error": "Official loader returned twelve histories"
+    },
+    {
+      "name": "loader order mismatch",
+      "status": "PASS",
+      "expected_error": "Official loader input order"
+    },
+    {
+      "name": "five query budget includes repeat",
+      "status": "PASS"
+    },
+    {
+      "name": "all six repeated heads exactly equal",
+      "status": "PASS"
+    },
+    {
+      "name": "five latent fields immutable",
+      "status": "PASS"
+    },
+    {
+      "name": "all thirty query heads saved",
+      "status": "PASS"
+    },
+    {
+      "name": "metric new depths use same fixed scale",
+      "status": "PASS"
+    },
+    {
+      "name": "both old and new confidences saved",
+      "status": "PASS"
+    },
+    {
+      "name": "parity_changed",
+      "status": "PASS",
+      "expected_error": "Repeated first-query byte parity failed: conf_self"
+    },
+    {
+      "name": "parity_changed preserves returned arrays before rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "state_changed",
+      "status": "PASS",
+      "expected_error": "Query modified frozen prefix latent state"
+    },
+    {
+      "name": "state_changed preserves returned arrays before rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "nonfinite_return",
+      "status": "PASS",
+      "expected_error": "Array finite gate: pts3d_in_self_view"
+    },
+    {
+      "name": "nonfinite_return preserves returned arrays before rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "query_image_encoding",
+      "status": "PASS",
+      "expected_error": "Query encoder budget"
+    },
+    {
+      "name": "query_image_encoding preserves returned arrays before rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "no NPZ input loading in runner",
+      "status": "PASS"
+    },
+    {
+      "name": "ordered image decoder guard present",
+      "status": "PASS"
+    },
+    {
+      "name": "post-model complete identity recheck present",
+      "status": "PASS"
+    },
+    {
+      "name": "official ray directions agree with separate component formula",
+      "status": "PASS"
+    },
+    {
+      "name": "official ray origins match camera center",
+      "status": "PASS"
+    },
+    {
+      "name": "twelve history frames and all 72 heads retained",
+      "status": "PASS"
+    },
+    {
+      "name": "history final five state fields retained",
+      "status": "PASS"
+    },
+    {
+      "name": "one logical 12-frame history call counted",
+      "status": "PASS"
+    },
+    {
+      "name": "raw history evidence saved before semantic gates",
+      "status": "PASS"
+    }
+  ],
+  "check_count": 50,
+  "runner_sha256": "fd2adc62038b497f4ba87236a15134c56f1c5808a85db54363324c6c9d53640e",
+  "evidence_type": "Artificial software checks only",
+  "model_instantiations": 0,
+  "actual_inference_calls": 0,
+  "actual_image_decodes": 0,
+  "actual_numpy_archives_read": 0,
+  "actual_trajectory_reads": 0,
+  "actual_weight_reads": 0,
+  "numpy_version": "1.26.4",
+  "torch_version": "2.7.0",
+  "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python"
+}

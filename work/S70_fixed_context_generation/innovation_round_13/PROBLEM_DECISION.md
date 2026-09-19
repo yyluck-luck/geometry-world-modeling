@@ -1,0 +1,25 @@
+# Round 13 — Search for an actually established FloWM residual
+
+**Decision: one aggregate residual is reported; no mechanism-specific systematic dynamic failure beyond the elementary reflection question is established by the sources inspected. The next action remains original-baseline reproduction, not a new method.**
+
+## The one supported lead, and what it does not establish
+
+[Paper §4.3/Table 2](https://arxiv.org/html/2601.01075v2) reports FloWM MSE **0.000603 for 70 predicted frames** and **0.001539 for 210**, both with 70 context frames; SSIM also declines. The longer horizon extrapolates beyond training length while retaining the original environment dynamics. This is evidence of remaining aggregate error, not a labeled failure mechanism. C.1–C.3's coordinate probe is imperfect, but its error cannot identify missing information. §6 proposes broader actions/maps/decoders as future work. I.2–I.3 report compute scaling and implementation opportunities, not a demonstrated dynamic accuracy failure from map size. Table 3's planning gap is not isolated from its short-horizon planner.
+
+**Falsifiable residual question:** in one fixed original validation trajectory, is additional late-horizon error associated with a past-identifiable object's return after being out of view, rather than ordinary rendering error or an ambiguous future? This is a localization question, not yet a hypothesis for a new algorithm. Alternative explanations include different frame content, uncertain object identity/state, accumulated dynamics error, and image readout error. Two aggregate table entries do not distinguish them or establish that their evaluated clips share identical prefixes. A growing error is not automatically catastrophic forgetting.
+
+## Author artifacts and public reports actually checked
+
+The [author reproduction wiki](https://github.com/hlillemark/flowm/wiki/Inference-and-Reproducing-Results), edited May 21, lists separate 140/280-total-frame commands. The bound configurations use the same dynamic checkpoint, validation split, 70 context frames and batch size 16; their declared total lengths differ. `PerFrameMSE` retains one value per sequence/frame, so the existing evaluation approach supports temporal error inspection. Configurations and metric code are executable specifications, not actual result receipts. No matching result/log/probe/planning artifact path appeared in the **296 blob paths** of the pinned code tree under the stated filename filter. The wiki describes logging one's runs to W&B; no author raw-run link was found in the inspected page/README. This is a bounded search result, not proof no public artifact exists elsewhere.
+
+Live repository metadata reports zero open issues and discussions disabled. The closed-issue page exposes [issue #1](https://github.com/hlillemark/flowm/issues/1), an artifact-release request; its displayed body supplies no dynamic failure observation. The all-issues API failed twice with SSL errors; subsequent web API attempts also failed. Therefore no exhaustive issue-history claim is made. Qualitative videos were not opened, and the paper's claims about weaknesses of competing models are not reclassified as failures of FloWM.
+
+## Cheapest discriminating next action and stopping rule
+
+Complete the independently qualified CPU path and reproduce **one original 70-context/70-prediction episode** first. This source review does not authorize its execution. Use batch12's past-only observability check before assigning any returning-object error to memory. If an ordinary past-inferred state plus the original reflection rule cannot predict that object's return, the case lacks the needed witness; oracle simulator state would not repair the fairness problem.
+
+Only after the baseline actually runs and a useful witness exists would one original 70-context/210-prediction trajectory be informative. It could expose both the first 70 and later 140 forecast frames from the **same run**, keeping the checkpoint, prefix, future action sequence and all outputs fixed. Report the existing full-frame metric for every frame; attach event descriptions determined without inspecting model errors. A verified association would locate a residual, not prove compression causality. If errors are not concentrated around the predeclared event, are already explained by the ordinary baseline's uncertainty, or the original FloWM predicts it correctly, stop this direction. Do not widen to invented collisions, new action rules, a different dataset, or a tuned ROI to manufacture a failure.
+
+**Local feasibility:** source/config/metric inspection is complete; model execution, episode qualification and actual performance are not evaluated here. A longer original rollout requires additional CPU work, whose runtime has not been measured by this scout. No new architecture, training, model arm, scientific-payload read, or claimed benefit follows from this batch.
+
+Actual review window: 2026-09-09T04:15:16Z to 2026-09-09T04:19:25.129002+00:00.

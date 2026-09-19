@@ -1,0 +1,76 @@
+{
+  "schema": "s18-third-author-scalar-promotion-v1",
+  "status": "PASS_ARTIFICIAL_ONLY",
+  "started_utc": "2026-09-06T11:58:34.621326+00:00",
+  "completed_utc": "2026-09-06T11:58:34.625856+00:00",
+  "source_sha256": "35c1360a1da61c1a056b8e0b02dae5881ae53d2b34a9988d3478ddbffa2afabc",
+  "numpy": "1.26.4",
+  "checks": [
+    {
+      "name": "numpy126",
+      "passed": true
+    },
+    {
+      "name": "FP32 dot .6 literal is above Python double .6",
+      "passed": true
+    },
+    {
+      "name": "radius reduction FP32 then promoted addition",
+      "passed": true
+    },
+    {
+      "name": "vote denominator and contribution promote to FP64",
+      "passed": true
+    }
+  ],
+  "observations": {
+    "strict_dot": {
+      "dot": {
+        "type": "float32",
+        "value": 0.6000000238418579
+      },
+      "python_threshold": 0.6,
+      "passes": true
+    },
+    "threshold": {
+      "mean": {
+        "type": "float32",
+        "value": 0.12333333492279053
+      },
+      "std": {
+        "type": "float32",
+        "value": 0.08219218999147415
+      },
+      "halfstd": {
+        "type": "float64",
+        "value": 0.041096094995737076
+      },
+      "threshold": {
+        "type": "float64",
+        "value": 0.1644294299185276
+      }
+    },
+    "vote": {
+      "cos": {
+        "type": "float32",
+        "value": 0.699999988079071
+      },
+      "depth": {
+        "type": "float32",
+        "value": 0.30000001192092896
+      },
+      "denominator": {
+        "type": "float64",
+        "value": 1.300000011920929
+      },
+      "contribution": {
+        "type": "float64",
+        "value": 0.5384615243539304
+      }
+    }
+  },
+  "model_calls": 0,
+  "archived_npz_reads": 0,
+  "rgb_reads": 0,
+  "gt_reads": 0
+}

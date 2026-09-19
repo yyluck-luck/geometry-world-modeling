@@ -1,0 +1,50 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:46:55.538313+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:46:55.538530+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/146",
+        "Content-Length": "30",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:46:55.538554+00:00",
+      "bytes": 30,
+      "sha256": "73fefa60db45832d86d28cc9a9bf249337c2e43a8962694d8c02bf827e4e50b7"
+    },
+    {
+      "started_utc": "2026-09-06T09:46:55.538615+00:00",
+      "requested_range": "bytes=30-67",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 30-67/146",
+        "Content-Length": "38",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:46:55.538631+00:00",
+      "bytes": 38,
+      "sha256": "c555628b6731a8c14db09cf2f7e0ec2a777283e58baaebb96b4caad337bf32f2"
+    }
+  ],
+  "members": [],
+  "body_bytes": 68,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "d0f70cbea0e0a8afb3753919aa3512d954acaba4846376c17877abcc832e5313",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases/deflate_bomb/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 146,
+  "error": "ValueError('deflate termination/budget')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 116, in execute\n    data = unpack_member(header,rest,entry,c['max_member_uncompressed_bytes'])\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 60, in unpack_member\n    require(decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail, 'deflate termination/budget')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: deflate termination/budget\n",
+  "ended_utc": "2026-09-06T09:46:55.538886+00:00"
+}

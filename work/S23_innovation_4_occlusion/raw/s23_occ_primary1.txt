@@ -1,0 +1,200 @@
+MoPe: Motion Permanence for Robust Monocular Gaussian Mapping in Dynamic Environments (https://arxiv.org/html/2606.29237v1)
+citeturn378view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2606.29237v1","lineno":null}); Total lines: 265
+L0: ##### Report GitHub Issue
+L1: 
+L2: [Button: ×]
+L3: 
+L4: Title: [Input: Enter title]
+L5: 
+L6: Content selection saved. Describe the issue below:
+L7: 
+L8: Description:
+L9: 
+L10: [Button: Submit without GitHub] [Button: Submit in GitHub]
+L11: 
+L12: cite0†Back to arXiv L13: 
+L14: cite1†Why HTML?†info.arxiv.org cite2†Report Issue cite3†Back to Abstract cite4†Download PDF L15:   1. cite5†Abstract L16:   2. cite6†I Introduction L17:   3. cite7†II Related Work L18:     1. cite8†II-A Visual SLAM in Dynamic Environments L19:     2. cite9†II-B Dynamic 3DGS-SLAM L20:     3. cite10†II-C Temporal Modeling in Dynamic 3DGS-SLAM L21:   4. cite11†III Methodology L22:     1. cite12†III-A Overview L23:     2. cite13†III-B Motion Permanence via Temporal Evidence Accumulation L24:     3. cite14†III-C Posterior-Guided Optimization and Gaussian Insertion L25:     4. cite15†III-D Gaussian-Level Post-Cleanup L26:   5. cite16†IV Experiments L27:     1. cite17†IV-A Experimental Setup L28:     2. cite18†IV-B Results L29:     3. cite19†IV-C Ablation Study L30:   6. cite20†V Limitations and Future Work L31:   7. cite21†VI Conclusion L32:   8. cite22†References L33: cite23†License: CC BY 4.0†info.arxiv.org L34: 
+L35: arXiv:2606.29237v1 [cs.RO] 28 Jun 2026
+L36: # MoPe: Motion Permanence for Robust Monocular Gaussian Mapping in Dynamic Environments
+L37: 
+L38: Qixin Xiao Affiliation: University of Michigan Email: qxiaocs@umich.edu
+L39: ###### Abstract
+L40: Robust robot autonomy depends on scene representations that remain stable enough to support localization, navigation, and downstream decision making in dynamic environments. Monocular Gaussian Splatting SLAM provides high-fidelity mapping, but current uncertainty-aware methods still treat dynamic regions largely as per-frame observations.
+L41: This makes the representation effectively memoryless: when a pedestrian slows, pauses, or reappears after occlusion, the current frame may look static, allowing dynamic content to be absorbed into the map and leaving persistent ghosting artifacts. We argue that this failure reflects a representation-level mismatch. Dynamic-ness is not an instantaneous appearance property, but a temporal property defined by motion history.
+L42: Building on this view, we introduce Motion Permanence: the principle that an object’s dynamic identity should persist over time rather than be re-decided from each frame independently. We realize this principle in MoPe, a memory-aware uncertainty filter for monocular Gaussian mapping. MoPe propagates the historical dynamic posterior through geometry-consistent SE(3) warping and fuses it with current-frame evidence using bounded Bayesian log-odds updates.
+L43: The resulting persistent posterior guides tracking, mapping, dynamic-aware Gaussian insertion, and Gaussian-level post-cleanup. On Wild-SLAM, Bonn, and TUM sequences, MoPe improves tracking robustness and reduces residual ghosting, with the strongest gains on dynamic-human scenes that most directly violate the memoryless assumption.
+L44: These results show that maintaining temporal dynamic state inside the scene representation is a practical step toward more reliable representation-centric autonomy in changing real-world environments.
+L45: ###### Index Terms:
+L46: 
+L47: Representation-Centric Autonomy, Dynamic SLAM, Gaussian Splatting, Motion Permanence, Temporal Uncertainty
+L48: ## I Introduction
+L49: Robust monocular SLAM in dynamic environments is a long-standing prerequisite for real-world robotic deployment. Recent advances in 3D Gaussian Splatting (3DGS) have substantially improved scene representation and rendering quality, but dynamic distractors remain a fundamental obstacle.
+L50: When a moving object repeatedly occludes the same background region, even brief intervals of apparent stillness can cause its appearance to be baked into the static map, leaving residual ghosting and afterimages that corrupt both geometry and novel-view rendering. Crucially, for robotic deployment this is not merely a rendering artifact: a static map corrupted by intermittent distractors can mislead any downstream planner or navigation stack that relies on it.
+L51: A representative state-of-the-art approach is WildGS-SLAM [cite24†17 ], which replaces brittle binary masking with dense uncertainty weighting. From monocular RGB input, it predicts a continuous uncertainty field from DINOv2 features [cite25†10 ] and uses it to modulate both dense bundle adjustment [cite26†13 ] during tracking and photometric/depth supervision during mapping. This soft-weighting design is well-motivated and avoids the hard, error-prone decisions of binary masks.
+L52: Its one structural blind spot is that the uncertainty field is estimated independently at every frame, purely from instantaneous image evidence. The system is therefore effectively memoryless: the moment a distractor slows, pauses, or re-emerges in a previously occluded region, the current frame alone may look sufficiently static for it to be assigned low uncertainty, and dynamic content silently contaminates both pose and map.
+L53: In a single frame, a paused pedestrian and a wall are nearly indistinguishable; what separates them is not their current appearance, but their history. For autonomous robots, this contamination is not only a rendering artifact: it can corrupt the static world model used by localization, navigation, and downstream decision-making modules.
+L54: This observation points to a conceptual mismatch. Whether a region is dynamic is treated as an appearance property—something to be read off each frame—when it is in fact a temporal property, defined over an object’s motion history rather than its momentary look. Resolving this requires an object’s dynamic identity to persist over time, rather than being re-decided from scratch at every frame.
+L55: We call this principle Motion Permanence, by analogy to object permanence in cognitive development: just as an object continues to exist when momentarily unseen, a moving object retains its dynamic identity when momentarily still. Motion Permanence is thus not an added heuristic, but the property the problem structurally demands.
+L56: We realize Motion Permanence in MoPe, a memory-aware uncertainty filter for monocular Gaussian mapping. Rather than treating uncertainty as a transient per-frame prediction, MoPe promotes it into a temporally propagated dynamic state. It warps the historical dynamic posterior into the current frame through geometry-consistent SE(3) propagation, then fuses it with current-frame evidence via a bounded Bayesian log-odds update.
+L57: The resulting posterior provides a stable estimate of persistently unreliable regions under intermittent motion and repeated occlusion, and is used online to guide tracking, mapping, dynamic-aware Gaussian insertion, and a conservative Gaussian-level post-cleanup.
+L58: Our aim is not to solve every form of dynamic SLAM, but to address a specific and common failure mode of uncertainty-based systems: temporarily stationary or intermittently moving distractors that corrupt the static map. Accordingly, MoPe yields its strongest gains on dynamic-human scenes, the regime that most directly violates the memoryless assumption. Our contributions are threefold:
+L59: 
+L60:   * •
+L61: We identify the memoryless nature of single-frame uncertainty estimation as a representation-level limitation in uncertainty-aware monocular Gaussian mapping, and reframe dynamic-ness as a persistent temporal state rather than a per-frame appearance cue.
+L62: 
+L63:   * •
+L64: 
+L65: We introduce Motion Permanence, realized through geometry-consistent SE(3) propagation and bounded Bayesian log-odds fusion, which maintains a temporally consistent dynamic posterior under intermittent motion and repeated occlusion.
+L66: 
+L67:   * •
+L68: We integrate this posterior across tracking, mapping, dynamic-aware Gaussian insertion, and Gaussian-level post-cleanup, improving robustness to residual ghosting and map contamination, with consistent gains on representative dynamic-human sequences.
+L69: 
+L70: Code: The implementation and reproduction scripts are available at cite27†https://github.com/chloeqxq/MoPe†github.com .
+L71: ## II Related Work
+L72: ### II-A Visual SLAM in Dynamic Environments
+L73: Classical visual SLAM assumes static scenes and treats dynamic objects as outliers to be rejected [cite28†1 , cite29†11 , cite30†12 ]. Dense, differentiable alignment architectures—most notably DROID-SLAM [cite26†13 ]—popularized recurrent update operators and dense bundle adjustment for accurate tracking under challenging appearance variation.
+L74: To handle dynamic interference within such dense frameworks, a complementary line of work models heteroscedastic noise and per-residual confidence [cite31†5 , cite32†2 ] to softly down-weight unreliable regions during photometric minimization. These foundations establish the value of continuous soft-weighting, but maintaining the temporal consistency of such weights during online pose-and-map optimization remains an unsolved failure mode in the wild.
+L75: ### II-B Dynamic 3DGS-SLAM
+L76: While 3DGS enables real-time, high-fidelity SLAM [cite33†8 , cite34†4 , cite35†3 ], deploying it in dynamic scenes requires robust filtering to suppress ghosting and map contamination. BDGS-SLAM [cite36†16 ] introduces a Gaussian-level Bayesian framework driven by YOLO-based semantic priors, which restricts it to known object classes.
+L77: UP-SLAM [cite37†18 ] and RGD-SLAM [cite38†15 ] operate in 2D image space but threshold motion residuals or semantic probabilities into brittle binary masks, discarding useful boundary information and struggling with open-set distractors. WildGS-SLAM [cite24†17 ] instead predicts a continuous 2D uncertainty map from foundation features to jointly weight tracking and mapping; this flexible per-frame estimate, however, remains oblivious to history—precisely the gap Motion Permanence is designed to close.
+L78: ### II-C Temporal Modeling in Dynamic 3DGS-SLAM
+L79: Existing attempts at temporal consistency operate at the object, mask, or 3D-representation level. DGS-SLAM [cite39†6 ] and DyGS-SLAM [cite40†19 ] enforce consistency through discrete object-track association or multiview geometric refinement. RGD-SLAM applies an Extended Kalman Filter, but its filtering is confined to discrete segmentation masks.
+L80: UP-SLAM includes a “temporal encoder” that merely injects frame-index positional embeddings to condition rendering—a timestamp for view synthesis, not a mechanism for propagating dynamic state across frames. VarSplat [cite41†14 ] bakes uncertainty into the 3D map as a passive byproduct of a slowly evolving static representation, while 4D Gaussian Splatting [cite42†7 ] explicitly models moving geometry, addressing a fundamentally different, non-static-map problem.
+L81: A critical gap therefore remains: continuous, image-space soft-weighting pipelines lack any explicit notion of persistent dynamic identity. MoPe fills this gap by elevating a memoryless 2D prediction into a trackable temporal state, performing cross-frame geometric propagation and Bayesian fusion directly on the dense uncertainty field—supplying the temporal memory that Motion Permanence requires.
+L82: ## III Methodology
+L83: cite43†Image: Refer to caption Fig. 1: MoPe architecture. Phase A (Motion Permanence): instantaneous uncertainty $\beta_{t}$ and an optional semantic cue are fused with the SE(3)-warped historical posterior $P_{t-1}$ via bounded Bayesian log-odds updates, yielding a temporally consistent dynamic posterior $P_{t}$. Phase B (Posterior-Guided Optimization): the posterior down-weights tracking residuals, modulates the mapping objective, and gates Gaussian insertion through a keep-mask $M_{t}^{\mathrm{keep}}$.
+L84: Phase C (Post-Cleanup): Gaussians with persistent dynamic evidence undergo opacity decay, yielding a clean static reconstruction.
+L85: ### III-A Overview
+L86: MoPe augments a monocular Gaussian mapping backbone with a single principle: a region’s dynamic identity should persist rather than be re-estimated at each frame. Concretely, we do not treat dynamic estimation as an instantaneous per-frame decision; we accumulate dynamic evidence over time and reuse the resulting temporal posterior throughout tracking, mapping, and final cleanup.
+L87: The method comprises three tightly coupled components: (i) a temporally propagated dynamic posterior that operationalizes Motion Permanence, (ii) posterior-guided optimization with dynamic-aware Gaussian insertion, and (iii) a conservative Gaussian-level post-cleanup. Together they suppress dynamic contamination before it enters the map, while retaining a final safeguard for residual errors that survive the online process. The full per-frame procedure is summarized in Algorithm cite44†1 .
+L88: Algorithm 1 MoPe: Per-Frame Motion Permanence Update
+L89: 
+L90: 0:  frame $I_{t}$, previous log-odds $L_{t-1}$, motion $T_{t-1\rightarrow t}$, depth $D_{t}$
+L91: 
+L92: 0:  dynamic posterior $p_{t}$, updated map
+L93: 
+L94: 1:  $m_{t}\leftarrow\max\big(1-w_{t}(\beta_{t}),\,d_{t}^{\mathrm{sem}}\big)$ {measurement from uncertainty $\beta_{t}$}
+L95: 
+L96: 2:  $\tilde{L}_{t-1\rightarrow t}\leftarrow\mathrm{Warp}(L_{t-1};T_{t-1\rightarrow t},D_{t})$ {SE(3) prop. (across viewpoint)}
+L97: 3:  $L_{t}\leftarrow\mathrm{clip}(\tilde{L}_{t-1\rightarrow t}+\gamma\,\mathrm{logit}(m_{t}),-c,c)$; $p_{t}\leftarrow\sigma(L_{t})$ {fusion $\rightarrow$ posterior (across time)}
+L98: 
+L99: 4:  track with $\tilde{\omega}_{t}=(1-p_{t})\,\omega_{t}$ {posterior-guided tracking}
+L100: 
+L101: 5:  $M_{t}^{\mathrm{keep}}\leftarrow\mathbf{1}[\max(p_{t},\eta M_{t}^{\mathrm{sem}})<\tau_{\mathrm{ins}}]$; update map {fail-closed insertion + mapping}
+L102: 
+L103: 6:  if keyframe, decay opacity of persistent dynamic Gaussians {post-cleanup}
+L104: 7:  return $p_{t}$, updated map
+L105: ### III-B Motion Permanence via Temporal Evidence Accumulation
+L106: 
+L107: For each frame $t$, the uncertainty branch predicts a per-pixel uncertainty map $\beta_{t}(u)$, which we convert into a confidence weight
+L108: 
+L109:  | $$w_{t}(u)=\mathrm{clip}\!\left(\frac{0.5}{\beta_{t}(u)^{2}},\,w_{\min},\,1\right),$$  |  | (1)
+L110: 
+L111: and a frame-wise dynamic evidence score
+L112: 
+L113:  | $$d_{t}^{\mathrm{unc}}(u)=1-w_{t}(u).$$  |  | (2)
+L114: To improve robustness in ambiguous regions, we optionally add a weak semantic prior $d_{t}^{\mathrm{sem}}(u)$ from an off-the-shelf segmentation model—not as a hard replacement for geometry, but as a soft floor on the dynamic likelihood of likely-transient classes. The per-frame measurement is
+L115: 
+L116:  | $$m_{t}(u)=\max\!\left(d_{t}^{\mathrm{unc}}(u),\,d_{t}^{\mathrm{sem}}(u)\right).$$  |  | (3)
+L117: Motion Permanence is realized in two stages. First, to preserve dynamic identity across changing viewpoints, we perform SE(3) kinematic propagation, warping the previous posterior into the current frame using the estimated camera motion and available geometry:
+L118: 
+L119:  | $$\tilde{p}_{t-1\rightarrow t}(u)=\mathcal{W}\!\left(p_{t-1};\,T_{t-1\rightarrow t},\,D_{t}\right)(u),$$  |  | (4)
+L120: where $T_{t-1\rightarrow t}$ is the relative camera motion, $D_{t}$ the current depth support, and $\mathcal{W}(\cdot)$ projective warping. Second, to preserve dynamic identity across time, we fuse the propagated state with the current measurement in a bounded log-odds space:
+L121: 
+L122:  | $$L_{t}(u)=\mathrm{clip}\!\left(L_{t-1\rightarrow t}(u)+\gamma\,\operatorname{logit}(m_{t}(u)),\,-c,\,c\right),$$  |  | (5)
+L123:  | $$p_{t}(u)=\sigma\!\left(L_{t}(u)\right),$$  |  | (6)
+L124: where $\gamma$ is a measurement gain, $c$ a clipping bound, and $\sigma(\cdot)$ the sigmoid. Regions that repeatedly behave dynamically accumulate durable evidence, while a single misleading “looks static” frame can no longer erase that history.
+L125: We accumulate evidence in log-odds rather than probability space for three reasons: Bayesian updates reduce to simple additions, dynamic and static evidence are treated symmetrically, and the bound $c$ keeps the posterior from saturating—so a region long believed dynamic can still recover to static once it consistently stops moving, which matters for objects that become permanently stationary.
+L126: The posterior $p_{t}(u)$ is thus a persistent estimate of dynamic identity—the concrete form Motion Permanence takes.
+L127: ### III-C Posterior-Guided Optimization and Gaussian Insertion
+L128: 
+L129: The persistent posterior is used throughout the online pipeline. For robust tracking, we down-weight residuals in high-posterior regions so that likely-dynamic observations contribute less to pose estimation,
+L130: 
+L131:  | $$\tilde{\omega}_{t}(u)=\left(1-p_{t}(u)\right)\omega_{t}(u),$$  |  | (7)
+L132: making the tracker insensitive to slowly moving or temporarily stationary distractors. For memory-aware mapping, the accumulated posterior is folded back into the rendering objective through a temporally informed uncertainty $\tilde{\beta}_{t}(u)$,
+L133: 
+L134:  | $$\mathcal{L}_{\mathrm{map}}=\sum_{u}\frac{\mathcal{L}_{\mathrm{rgb}}(u)+\lambda_{d}\mathcal{L}_{\mathrm{depth}}(u)}{\tilde{\beta}_{t}(u)^{2}}+\lambda_{u}\mathcal{L}_{\mathrm{unc}},$$  |  | (8)
+L135: so that regions with persistent dynamic evidence receive lower optimization weight. Most importantly, the posterior gates Gaussian insertion: a pixel is admitted only if its dynamic insertion score stays below a threshold,
+L136: 
+L137:  | $$s_{t}(u)=\max\!\left(p_{t}(u),\,\eta\,M_{t}^{\mathrm{sem}}(u)\right),$$  |  | (9)
+L138:  | $$M_{t}^{\mathrm{keep}}(u)=\mathbf{1}\!\left[s_{t}(u)<\tau_{\mathrm{ins}}\right],$$  |  | (10)
+L139: where $M_{t}^{\mathrm{sem}}$ is an optional semantic support mask and $\eta$ a conservative floor. This rule is deliberately fail-closed: when the dynamic region dominates or reliable support is scarce, MoPe skips insertion rather than committing ambiguous content to the static map.
+L140: We deliberately bias this gate toward skipping rather than inserting: a missed insertion can be recovered in a later frame once the region is confidently static, whereas a dynamic Gaussian baked into the map produces persistent ghosting that the downstream cleanup must then undo. Under uncertainty, omission is cheaper to fix than contamination. Because the system remembers that a region is dynamic, it refuses to bake that region into the map in the first place.
+L141: ### III-D Gaussian-Level Post-Cleanup
+L142: 
+L143: Some dynamic Gaussians may still survive due to imperfect observations, repeated occlusions, or early mistakes. As a final safeguard, we project each Gaussian $g_{i}$ into multiple keyframes and collect evidence on whether it repeatedly behaves dynamically. With $h_{i}^{\mathrm{dyn}}$ dynamic observations out of $h_{i}^{\mathrm{obs}}$ valid ones, we define the dynamic ratio
+L144: 
+L145:  | $$r_{i}^{\mathrm{dyn}}=\frac{h_{i}^{\mathrm{dyn}}}{h_{i}^{\mathrm{obs}}}.$$  |  | (11)
+L146: A Gaussian with sufficient multi-view support and a high dynamic ratio is a cleanup candidate. Rather than hard-deleting it—an aggressive operation that can damage valid background—we progressively attenuate its opacity,
+L147: 
+L148:  | $$\alpha_{i}\leftarrow\max\!\left(\rho\,\alpha_{i},\,\alpha_{\min}\right),$$  |  | (12)
+L149: 
+L150: with decay factor $\rho\in(0,1)$ and lower bound $\alpha_{\min}$. This gradual decay suppresses persistent dynamic residuals and afterimages while preserving uncertain-but-valid structure.
+L151: ## IV Experiments
+L152: ### IV-A Experimental Setup
+L153: Datasets and metrics. We evaluate MoPe on the Wild-SLAM MoCap benchmark [cite24†17 ] for camera tracking (ATE RMSE) and novel-view synthesis (PSNR, SSIM, LPIPS), and extend the tracking evaluation to the Bonn and TUM RGB-D dynamic benchmarks to assess generalization.
+L154: To directly probe residual ghosting, we additionally evaluate the challenging iphone_wandering sequence from the Wild-SLAM iPhone dataset; lacking reliable trajectory ground truth, we report background-only PSNR and MAE, with tail-only variants that isolate the hardest segment where afterimages are most likely to persist.
+L155: Baselines. We compare against representative dense and Gaussian SLAM systems—DROID-SLAM [cite26†13 ], MonoGS [cite33†8 ], Splat-SLAM [cite34†4 ], and MonST3R-SW [cite45†9 ]—and against the uncertainty-aware WildGS-SLAM [cite24†17 ], our primary baseline and the method MoPe most directly extends.
+L156: Implementation. MoPe is built on a monocular Gaussian SLAM backbone with dense uncertainty weighting. Across all evaluations, the temporal posterior is fused in both tracking and mapping, dynamic evidence is accumulated in bounded log-odds space, semantic-aware insertion gating is active, and the Gaussian-level cleanup is applied as a final stage.
+L157: The key hyperparameters—measurement gain $\gamma$, log-odds bound $c$, insertion threshold $\tau_{\mathrm{ins}}$, and opacity decay $\rho$—are held fixed across all sequences, with no per-sequence tuning.
+L158: ### IV-B Results
+L159: Tracking robustness. As shown in Table cite46†I , MoPe achieves the best tracking accuracy across all three dynamic datasets, improving over the WildGS-SLAM baseline. The gain is most pronounced in sequences with intermittently moving objects, where Motion Permanence prevents the tracker from locking onto a temporarily stationary distractor.
+L160: The relative gains are consistent across benchmarks—$17.4\%$ on Wild-SLAM ($0.46\rightarrow 0.38$), $15.6\%$ on Bonn ($2.31\rightarrow 1.95$), and $15.2\%$ on TUM ($1.51\rightarrow 1.28$)—and are largest on Wild-SLAM, which contains the most frequent intermittent human motion. This is exactly what Motion Permanence predicts: the more often a distractor stops and resumes, the more a persistent dynamic state helps over a memoryless per-frame estimate.
+L161: TABLE I: Tracking Performance Across Dynamic Datasets (ATE RMSE $\downarrow$ [cm]). MoPe’s improvements over baselines are highlighted in blue.
+L162: Method  | Wild-SLAM  | Bonn  | TUM
+L163: DROID-SLAM [cite26†13 ]  | 16.17  | 4.91  | 30.4
+L164: MonoGS [cite33†8 ]  | 47.99  | 22.80  | 26.4
+L165: Splat-SLAM [cite34†4 ]  | 8.71  | 8.80  | 1.71
+L166: MonST3R-SW [cite45†9 ]  | 12.12  | 7.30  | 1.51
+L167: WildGS-SLAM [cite24†17 ]  | 0.46  | 2.31  | 1.51
+L168: MoPe (Ours)  | 0.38  | 1.95  | 1.28
+L169: Map quality and artifact suppression. Beyond tracking, MoPe improves reconstruction by suppressing the ghosting that memoryless systems leave behind. On the MoCap comparison (Table cite47†II ), MoPe improves over the baseline on the representative human-dynamic sequences, most clearly on Crowd and Person, where both tracking and rendering metrics improve.
+L170: On the targeted artifact benchmark (Table cite48†III ), MoPe achieves the cleanest background reconstruction on iphone_wandering, with the clearest advantage in the tail segment—exactly where persistent afterimages accumulate. The qualitative results corroborate this: Figure cite49†2 shows MoPe preventing dynamic pedestrians from being baked into the static map, and Figure cite50†3 shows clean dynamic-object removal across MoCap scenes without floating residuals.
+L171: We stress that MoPe is a targeted rather than uniform improvement. On harder cluttered sequences such as ANYmal2, Stones, and Table1, a few visual metrics fall slightly below the baseline, marking the boundary of the current design. The accurate claim is therefore not blanket superiority, but preserved performance on most scenes together with a clear gain on the dynamic-human failure mode we target. The per-sequence breakdown in Table cite47†II sharpens this picture.
+L172: The clearest gains are on human-dynamic sequences with stop-and-go motion: Person improves in both ATE ($0.800\rightarrow 0.650$) and PSNR ($20.31\rightarrow 20.85$), and Crowd similarly. The small regressions instead concentrate on ANYmal2, Stones, and Table1, where motion is either continuous (a walking robot) or near-static clutter—regimes in which a persistent dynamic prior offers little benefit while conservative insertion mildly reduces fine detail.
+L173: MoPe helps precisely where its assumption holds, and is largely neutral elsewhere.
+L174: TABLE II: Comparison on Wild-SLAM MoCap. Lower is better for ATE and LPIPS; higher is better for PSNR and SSIM. Better values are highlighted in blue.
+L175: Sequence  | Baseline ATE $\downarrow$  | MoPe ATE $\downarrow$  | Baseline PSNR $\uparrow$  | MoPe PSNR $\uparrow$  | Baseline SSIM $\uparrow$  | MoPe SSIM $\uparrow$  | Baseline LPIPS $\downarrow$  | MoPe LPIPS $\downarrow$
+L176: ANYmal1  | 0.200  | 0.175  | 21.850  | 22.120  | 0.8070  | 0.8210  | 0.2110  | 0.1920
+L177: ANYmal2  | 0.300  | 0.265  | 21.460  | 21.320  | 0.8320  | 0.8250  | 0.2300  | 0.2050
+L178: Ball  | 0.200  | 0.210  | 20.060  | 20.350  | 0.7540  | 0.7680  | 0.1910  | 0.1780
+L179: Crowd  | 0.300  | 0.250  | 21.280  | 21.650  | 0.8020  | 0.8150  | 0.1760  | 0.1650
+L180: Person  | 0.800  | 0.650  | 20.310  | 20.850  | 0.8010  | 0.8180  | 0.1890  | 0.1720
+L181: Racket  | 0.400  | 0.340  | 20.870  | 21.150  | 0.7850  | 0.7980  | 0.1860  | 0.1710
+L182: Stones  | 0.300  | 0.285  | 20.520  | 20.450  | 0.7680  | 0.7650  | 0.1850  | 0.1680
+L183: Table1  | 0.600  | 0.520  | 20.330  | 20.210  | 0.7880  | 0.7810  | 0.2090  | 0.1850
+L184: Table2  | 1.300  | 1.150  | 19.160  | 19.550  | 0.7280  | 0.7450  | 0.3030  | 0.2750
+L185: Umbrella  | 0.200  | 0.190  | 20.030  | 20.250  | 0.7660  | 0.7750  | 0.2100  | 0.1980
+L186: Crowd+Person Avg.  | 0.550  | 0.450  | 20.795  | 21.250  | 0.8015  | 0.8165  | 0.1825  | 0.1685
+L187: Full 10-Seq Avg.  | 0.460  | 0.404  | 20.587  | 20.790  | 0.7831  | 0.7911  | 0.2090  | 0.1909
+L188: TABLE III: Artifact-focused comparison on iphone_wandering. Background-only metrics measure how cleanly the static scene is recovered after dynamic occlusions.
+L189: Method  | Mean BG PSNR $\uparrow$  | Mean BG MAE $\downarrow$  | Tail BG PSNR $\uparrow$  | Tail BG MAE $\downarrow$
+L190: Semantic-prior Baseline  | 18.401  | 19.187  | 18.102  | 20.649
+L191: MoPe (Ours)  | 18.410  | 19.183  | 18.418  | 20.021
+L192: cite51†Image: Refer to caption L193: 
+L194: (a) WildGS
+L195: 
+L196: cite52†Image: Refer to caption L197: 
+L198: (b) Ours
+L199: 
+L200: Fig. 2: Rendered RGB on the iPhone-wandering sequence at frame 387. MoPe yields a cleaner pedestrian region and reduces persistent afterimages. cite53†Image: Refer to caption Fig. 3: Dynamic-object removal on MoCap sequences. Input RGB (top) and MoPe output (bottom). Example: Crowd (frame 238).
+L201: Efficiency. Table cite54†IV reports per-frame runtime and memory. The temporal posterior adds only $0.3$ ms to tracking ($24.5\rightarrow 24.8$ ms), confirming that a single SE(3) warp plus an element-wise log-odds update is lightweight. Strikingly, MoPe is not merely free of net overhead but is faster overall ($65.3$ vs. $69.7$ ms) and more memory-efficient ($5.3$ vs. $5.8$ GB) than the baseline.
+L202: This is a direct consequence of Motion Permanence: by refusing to insert content it remembers as dynamic, fail-closed gating keeps the Gaussian map leaner, which accelerates mapping ($45.2\rightarrow 40.5$ ms) and lowers memory. A cleaner static representation is thus also a cheaper one—temporal filtering pays for itself.
+L203: TABLE IV: Runtime and memory. Per-frame averages on the Wild-SLAM dataset, measured on an NVIDIA RTX 4090 GPU.
+L204: Method  | Track (ms)  | Map (ms)  | Total (ms)  | Mem (GB)
+L205: WildGS-SLAM [cite24†17 ]  | 24.5  | 45.2  | 69.7  | 5.8
+L206: MoPe (Ours)  | 24.8  | 40.5  | 65.3  | 5.3
+L207: ### IV-C Ablation Study
+L208: Table cite55†V isolates the contribution of each component on iphone_wandering. Starting from temporal fusion—the log-odds accumulation at the core of Motion Permanence—we progressively add the semantic prior, fail-closed insertion gating, and opacity decay. The full pipeline attains the best values across all background metrics.
+L209: The progression is not strictly monotonic on every metric: adding insertion gating or opacity decay in isolation can slightly perturb mean PSNR, since each trades a small amount of reconstruction density for cleanliness.
+L210: The full configuration nonetheless attains the best values on all four background metrics, indicating the components are complementary rather than independently additive—fusion supplies the persistent state, gating keeps dynamic content out, and decay removes what survives, with the strongest effect on the tail segment ($20.862\rightarrow 20.021$ in MAE) where afterimages are hardest to suppress.
+L211: TABLE V: Progressive ablation on iphone_wandering. Each row adds one component. The full pipeline yields the best background preservation.
+L212: Variant  | Mean BG PSNR $\uparrow$  | Mean BG MAE $\downarrow$  | Tail BG PSNR $\uparrow$  | Tail BG MAE $\downarrow$
+L213: Temporal Fusion  | 18.364  | 19.365  | 18.026  | 20.862
+--------------------------------------------------------------------------------
+PersistGS: Differentiable Physics for Object Permanencein 4D Gaussian Splatting (https://arxiv.org/html/2606.03479v1)
+citeturn378view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2606.03479v1","lineno":null}); Total lines: 305
+--------------------------------------------------------------------------------
+Internal Error ()
+citeturn378view2 [wordlim: 200] Source: open({"ref_id":"https://openaccess.thecvf.com/content/CVPR2026/html/Yugay_Gaussian_Mapping_for_Evolving_Scenes_CVPR_2026_paper.html","lineno":null}); Total lines: 1
+

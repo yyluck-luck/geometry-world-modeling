@@ -1,0 +1,127 @@
+{
+  "schema": "s39-partial-recovery-source-review-v2",
+  "status": "PASS_SOURCE_REVIEW_NOT_EXECUTED",
+  "passed": true,
+  "reviewer": "/root/research_novelty_routes",
+  "author": "/root/s14_feature_extractor",
+  "different_author": true,
+  "review_started_utc": "2026-09-07T04:55:29+00:00",
+  "completed_utc": "2026-09-07T04:58:43.712309+00:00",
+  "reviewed_source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/recover_partial.py",
+    "sha256": "65b72714d0b186a090ab92a86d158018043951a1f0dbbdfc62e58040a110d02e",
+    "bytes": 14912
+  },
+  "reviewed_protocol": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/report.md",
+    "sha256": "3d634c8885a37db7ecfcee75c87f6589e202a0fc240060fc77f466ea56fb0d95",
+    "bytes": 5507
+  },
+  "author_preparation_receipt": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/receipt.json",
+    "sha256": "cc05d37f944c8360cabc677b484dabf04a7da22482f183baac253e12a2b85d5b",
+    "bytes": 5057
+  },
+  "prior_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/source_review_v1.json",
+    "sha256": "185b36ed16dccf0af1221d728354b3e6d75c8da11624807494483bb855941997",
+    "bytes": 1875
+  },
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/download_original_low_concurrency_attempt3.py",
+      "sha256": "83f3f448953db4356e89bf0583925d7b2a1138013378dc6c5028b992844e713f",
+      "bytes": 6579,
+      "read_scope": "whole source; terminal status/PGID/atomic final receipt"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/file_download.py",
+      "sha256": "f99d5b54b07b55d22e539023031d4572e08b388b7d32f3fa9bfe1e5ab4652ed4",
+      "bytes": 90227,
+      "read_scope": "1578-1651 official metadata identity and no retry API"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_http.py",
+      "sha256": "4587b40d0a792c88348e9d32e75d825f839e6677c22de03af9666e8736900315",
+      "bytes": 47007,
+      "read_scope": "698-754 same-Hub redirect loop and retry disabling"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_auth.py",
+      "sha256": "624baadf28baee3c479857722d2738df1bc6b8200847bfa1f9d6a35fc231a464",
+      "bytes": 19958,
+      "read_scope": "244-320 automatic OAuth refresh and SDK persistence"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/huggingface_hub/utils/_oauth_device.py",
+      "sha256": "a3b202988d35c83b75a0014d31426f3754e149f6820e90bc007612420727146c",
+      "bytes": 7983,
+      "read_scope": "155-183 exact POST refresh URL and ordinary get_session.post"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/cli-env/lib/python3.13/site-packages/httpx/_client.py",
+      "sha256": "c43f941baefe58c91e96d00039e1868fe719d91453026d7db1647194563bff8d",
+      "bytes": 65714,
+      "read_scope": "450-472 and 964-997 auth selection, pre-send hooks and follow_redirects=False"
+    }
+  ],
+  "checks": {
+    "terminal_before_partial_open": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Fixed attempt3 receipt checks repo/revision/size/SHA, explicit failure terminal/finished_utc, child/group False; current killpg(pgid,0) must raise ProcessLookupError before any partial bytes. Source writer commits final receipt atomically after cleanup. Repeats receipt SHA and PGID absence before network."
+    },
+    "source_preservation": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Exact registered hardlink pathname, no symlink via O_NOFOLLOW, registered dev/inode, regular file and stable size/mtime/ctime before/after independent copy; source opened read-only. No size-to-prefix-validity inference."
+    },
+    "hub_and_oauth_auth_boundary": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "HF_ENDPOINT fixed; pre-send hook permits only HTTPS huggingface.co default/443; <=3 HEAD and separately <=1 POST exact /oauth/token without query. Original SDK constructs body, not script. httpx follow_redirects=False prevents OAuth body redirect; SDK manually followed HEAD stays same guarded host."
+    },
+    "cdn_separation": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Official same repo/revision metadata commit/size/LFS SHA must match. Signed HTTPS non-Hub URL rejects userinfo/fragments/non443; new client no SDK auth/cookie state and trust_env=False, verify=True, follow_redirects=False. No signed query or headers/body persisted."
+    },
+    "range_and_no_full_restart": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "One explicit bytes=copied..SIZE-1 GET; strict206 and exact Content-Range tuple; identity encoding; optional Content-Length exact; iter_raw bound and exact final tail count. Any200/redirect/short/extra/mismatch fails with no automatic from-zero fallback."
+    },
+    "complete_identity_publication": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Full candidate hash with descriptor/path stat equality; full expected byte count and published SHA needed before exclusive link into new directory. Already-full apparent source takes no network and still must pass complete SHA."
+    },
+    "failure_and_budget": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Explicit1..7200s total covering copy/network/hash, periodic ticks and SIGALRM; failure candidate and receipt remain, original/canonical untouched; only internal code or external exception type logged. No external traceback/exception text leaks signed URL."
+    },
+    "v2_incremental_scope": {
+      "verdict": "PASS_SOURCE",
+      "evidence": "Compared full v1 to v2 diff; only endpoint env, OAuth event list, request guard and response status routing changed. No Range/hash/terminal change."
+    }
+  },
+  "blocking_findings": [],
+  "execution": {
+    "network_requests": 0,
+    "model_or_scientific_runs": 0,
+    "tests": 0,
+    "candidate_module_imports": 0,
+    "active_partial_bytes_read": 0,
+    "process_inspection_or_signal_calls": 0,
+    "credential_files_read": 0,
+    "canonical_files_changed": 0,
+    "static_ast_parse": true
+  },
+  "limitations": [
+    "This is a source review, not evidence that the current attempt is terminal, that the preserved prefix is valid, or that TLS/Range access works.",
+    "Review does not authorize recovery while the original process is live; the script must enforce the actual future terminal receipt and absent PGID.",
+    "Terminal truth relies on the root-owned attempt3 receipt producer whose source was read; a deliberately fabricated receipt is not authenticated by this script.",
+    "Signal-driven deadline and final receipt cannot guarantee cleanup/persistence under SIGKILL, power loss or full disk.",
+    "Fresh candidate full SHA validates the original whole-file identity; no additional source/data provenance or model correctness follows."
+  ],
+  "next": "Root waits for actual attempt3 terminal; if still needed, one separately bounded execution with this exact reviewed source and all failures retained. No repeat of successful prior tests.",
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/partial_recovery/source_review_v2.md",
+    "sha256": "82af271331414dbc96eb3fda0ee45b179243cc739d4353b864c4346f5846a79b",
+    "bytes": 2075
+  }
+}

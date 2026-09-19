@@ -1,0 +1,104 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v4",
+  "review_kind": "primary",
+  "status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V12",
+  "verdict": "PASS_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "reviewed_identities": {
+    "camera_guard.py": "02114d4a845bd83e3dcd35f663bf64f2a75eb5fb17fc0f3515b84222bd51281f",
+    "supervise_camera_guard.py": "179184084bbaabf5e5c7c6f6332f7a44f8292dcbeda993370642d585cfd6380c",
+    "PROTOCOL.md": "25f30e22fa14a745135393744b1d969ed1ffecc0378ba344efd4b72b45bec739",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "b5eee02b5aadc9339feb0f618ee8c6ab565074f101b413b23fb5a729f4da6bfe",
+    "synthetic_selftest.py": "ab04c655c2bfdd385befda30e24417baac35c2bb327de2785f161ed84fe05666",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "author_role": "/root/execution_resumption_audit",
+  "reviewer_role": "/root/figure_repo_reading_resume",
+  "reviewer_task_id": "/root/figure_repo_reading_resume",
+  "reviewer_turn_id": "C1_V12_PRIMARY_20260908T145341_FREEZE_REVIEW",
+  "completed_utc": "2026-09-08T15:00:29.796737+00:00",
+  "reviewer_independence": {
+    "source_authors": [
+      "/root/c2_v5_lifecycle_review",
+      "/root/execution_resumption_audit"
+    ],
+    "reviewer_is_source_author": false,
+    "candidate_sources_modified": false,
+    "inherited_V11_vote": false,
+    "turn_id_is_declared_external_correlation_label_not_internal_UUID": true
+  },
+  "frozen_source_set_sha256": "48f65820cda24b71679629785ffd884c12ff7902b99ef4d91095e8c00645e469",
+  "author_receipt_sha256": "837f9e70b0025baf31c937dcd01efeda9b8123d9076fbca083bdd2fc54a5681a",
+  "executed": false,
+  "c1_tensor_bodies_read": 0,
+  "c1_tensor_body_bytes_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "formal_runner_calls": 0,
+  "model_calls": 0,
+  "real_scientific_arrays_mapped": 0,
+  "binding_or_governance_calls": 0,
+  "blocking_findings": [],
+  "review_scope": "Five-source complete bytes/SHA validation; whole V11-to-V12 diffs saved, every nonadministrative change read with V11/V12-only label substitutions normalized; full Python AST comparison and necessary current source context. Direct review of worker.write_all, exact external constructor/emitter, bounded failure diagnostic, production pre-emission closes/except/final return, disposable child and outer roundtrip, CLI dispatch, protocol changes and complete binding template. No claim of rerereading every unchanged comment or executing formal_supervision.",
+  "decisive_findings": [
+    {
+      "id": "SHARED_REAL_EMISSION",
+      "verdict": "PASS",
+      "evidence": "formal_supervision and synthetic_controlled_emission both call emit_external_pass_seal. That function constructs/serializes the exact existing document, checks 0 < bytes <= 65536, calls the existing worker.write_all, then flushes and returns 0. worker.write_all advances by the actual positive write count and rejects no progress. The worker module/function remains callable after its retained source FD is closed."
+    },
+    {
+      "id": "REAL_PROCESS_IO_AND_EXIT",
+      "verdict": "PASS_SYNTHETIC_TAIL_ONLY",
+      "evidence": "Six reviewer-owned existing CLI entrypoints (3.12/3.13 worker/supervisor/integration) returned 0 with empty parent stderr. Four suites spawned 20 actual emission children (the same five modes, not 20 new cases). Independently reparsed saved raw stdout/stderr, byte counts, hashes and captured child exit codes. NORMAL and 17-byte SHORT_WRITE produced canonical complete 1697-byte JSON with exit 0 and empty stderr; WRITE_ERROR produced 0-byte stdout and exit 2; PARTIAL_WRITE_ERROR left 7 bytes and exit 2; FLUSH_ERROR left complete 1697-byte JSON but exit 2 and was rejected. Each error produced a 302-byte canonical diagnostic within the 4096-byte bound."
+    },
+    {
+      "id": "POST_CLOSE_FAILURE_OBSERVABILITY",
+      "verdict": "PASS",
+      "evidence": "The production BaseException handler calls emit_supervisor_failure_diagnostic before cleanup, including after output_fd/lock_fd/parent_fd become None. It preserves bounded phase, error type and text without reopening result paths. The child uses the same diagnostic helper. Available stderr is verified by actual write/partial/flush cases; unavailable stderr remains a stated best-effort limitation and never changes nonzero failure to success."
+    },
+    {
+      "id": "GUARDS_AND_AUTHORITY_UNCHANGED",
+      "verdict": "PASS",
+      "evidence": "All 56 worker definitions are unchanged after version-label normalization; only three pins changed. Supervisor changes are the shared emitter/diagnostic, their production calls and finite synthetic I/O/CLI wiring. Existing numeric final-cache anchor, inclusive 1e-6 threshold, strict prebound record/HMAC/schema checks, role/upstream/one-attempt/resource gates, held-FD publication and required closes remain intact. All 12 source/reference identities matched current files and the five sources remained unchanged after tests."
+    },
+    {
+      "id": "NO_FULL_FORMAL_OR_SCIENTIFIC_CLAIM",
+      "verdict": "PASS_BOUNDARY",
+      "evidence": "This fresh review repairs the V11 evidence gap: V11 tests stopped at constructor/serialization and its failed formal attempt remains failed. Current tests reach actual shared emitter, flush and externally observed child exit using disposable fixtures. They still do not run the entire formal_supervision with real governance/binding/camera bodies. A complete JSON document alone is not a valid PASS; formal stdout/exit and later independent result review remain necessary."
+    }
+  ],
+  "evidence_manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/primary_review_evidence/EVIDENCE_MANIFEST.json",
+    "sha256": "dffbee72a77ac29faac996f50dab9810375669003dbc1f5a667985b1be8b75ea"
+  },
+  "six_entrypoint_results": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/primary_review_evidence/SIX_ENTRYPOINT_RESULTS.json",
+    "sha256": "4fe4c24d970a941feb4cd403a2d8b82b728985389f3ee425b1ce1203971ff0b1"
+  },
+  "independent_child_io_reparse": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v12/primary_review_evidence/CHILD_IO_REPARSE.json",
+    "sha256": "50cd699d57ba0df18490a38b152fcc9bac629e79ba07f8b06aa1ad8fb66bff0c"
+  },
+  "known_limits": [
+    "Formal containment remains macOS-specific: Seatbelt sandbox_init and libproc must pass runtime probes; no fallback.",
+    "Memory is a fail-closed acceptance/kill monitor, not a kernel allocation reservation.",
+    "External governance identities and capture of complete supervisor stdout plus actual process exit remain orchestration trust boundaries.",
+    "The bounded stderr diagnostic is best effort when stderr itself is unavailable; failure remains nonzero.",
+    "Synthetic fixtures are not a real C1 numeric result, pixel score, method gain or novelty."
+  ],
+  "formal_state_at_completion": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V12.json": false,
+    "BINDING_REVIEW_V12.json": false,
+    "GOVERNANCE_ATTESTATION_V12.json": false
+  },
+  "authorization_effect": "SOURCE_REVIEW_ONLY_NO_BINDING_FORMAL_ATTEMPT_PIXEL_SCORE_OR_METHOD_AUTHORIZATION",
+  "publication_rule": "Self-check complete before delivery; final 0444 report and explicit SHA are immutable. Any later correction must be a separate erratum."
+}

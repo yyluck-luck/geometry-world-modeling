@@ -1,0 +1,72 @@
+{
+  "schema": "s46-c1-root-static-preparation-audit-v1",
+  "status": "PASS_ROOT_STATIC_PREPARATION_AUDIT_NOT_SOURCE_AUTHORIZATION",
+  "reviewed_utc": "2026-09-08T02:07:54Z",
+  "reviewer_role": "/root",
+  "candidate_author_role": "/root/c1_blind_score_builder",
+  "independent_source_reviewer": false,
+  "authorization": "NONE",
+  "reviewed_source_sha256": {
+    "score_c1_blind_candidate.py": "ada2ba80eceebe83a514fd929c6cc82b69669e6525e261ff4729064f2bac3f1a",
+    "recompute_c1_independent_candidate.py": "9373fd035b18ccc81dc848e18612f906a7d32a44cd1c7d2903eb67b7627e9b8f",
+    "bind_identity_only.py": "32f80b585ab8e511a64df08c8bb230e1a03835cf6ec33f98c6e8d2a80175ee60",
+    "synthetic_crosscheck.py": "7e6c4549dd052ac935bee026249c868a6981e1dac6029cc08a82ff3db0bc43e3"
+  },
+  "reviewed_template_sha256": {
+    "C1_SCORING_CONTRACT_TEMPLATE.json": "79299749250c22dd9719d93964b9c179a8884f01c530bf07a45625c59395ab7b",
+    "C1_BLINDNESS_ATTESTATION_TEMPLATE.json": "6a8659ae686c637ed3da017715ca38d71998a8cd045891781ffc37ce82d06fb5",
+    "C1_INDEPENDENT_RECOMPUTE_BINDING_TEMPLATE.json": "dda75a1d6cf590972ea2b33d547e9a94efb6b68dacfa85917f86f8ece20fd0aa"
+  },
+  "checks": [
+    {
+      "id": "MATH_CONTRACT",
+      "status": "PASS",
+      "evidence": "C1, ID0/ID8, four 192x192 outer regions, float64 division by 255, 442368 RGB scalars, strict MSE > 0.01, fixed diagnostics, and copy guards match the frozen S42/B0 rule."
+    },
+    {
+      "id": "TWO_IMPLEMENTATIONS",
+      "status": "PASS_WITH_AUTHORSHIP_LIMIT",
+      "evidence": "The recompute kernel does not import the primary kernel. Both were produced by the same candidate-author agent, so cross-implementation agreement is not a different-author result."
+    },
+    {
+      "id": "SYNTHETIC_PRIMARY",
+      "status": "PASS",
+      "evidence": "Synthetic-only execution returned PASS_SYNTHETIC_PRIMARY_MATH_ONLY with MSE hex 0x1.0000000000000p+0 and strict event true."
+    },
+    {
+      "id": "SYNTHETIC_RECOMPUTE",
+      "status": "PASS",
+      "evidence": "Synthetic-only execution returned PASS_SYNTHETIC_INDEPENDENT_MATH_ONLY with the same MSE hex and no primary-scorer import."
+    },
+    {
+      "id": "SYNTHETIC_CROSSCHECK",
+      "status": "PASS",
+      "evidence": "Primary, region, full-frame, three diagnostic pairs, strict event, equality marker, and row status agreed exactly on generated arrays."
+    },
+    {
+      "id": "FAIL_CLOSED",
+      "status": "PASS",
+      "evidence": "Both math candidates exited nonzero without --synthetic-self-test; neither contains a C1 result/archive/readback path or a formal execution wrapper."
+    },
+    {
+      "id": "IDENTITY_ONLY_BINDER",
+      "status": "PASS_FOR_CANDIDATE_SCOPE",
+      "evidence": "The binder pins its templates, restricts eight upstream labels and nine ordered pixel identities, rejects result-like keys, preserves the frozen-math canonical hash, and writes a fresh direct child only. It does not open referenced payloads."
+    }
+  ],
+  "blocking_findings": [],
+  "operations": {
+    "synthetic_array_runs": 3,
+    "c1_payload_bytes_read": 0,
+    "c1_images_decoded_or_viewed": 0,
+    "formal_readback_runs": 0,
+    "formal_scoring_runs": 0,
+    "model_or_generation_runs": 0
+  },
+  "claim_boundary": [
+    "This establishes only that the identity-unbound preparation is internally coherent and fails closed.",
+    "It is not either of the two required different-author scorer source reviews.",
+    "It does not authorize identity binding, blindness attestation, readback, scoring, recomputation, visual inspection, a cohort conclusion, a causal claim, a method gain, or novelty."
+  ],
+  "next_gate": "Wait for valid different-author terminal reviews and an independently reviewed S45 readback before binding C1 pixel identities."
+}

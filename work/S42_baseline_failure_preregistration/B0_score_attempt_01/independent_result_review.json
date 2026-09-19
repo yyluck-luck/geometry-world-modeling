@@ -1,0 +1,108 @@
+{
+  "schema": "s42-b0-sealed-result-review-v1",
+  "status": "PASS_B0_SEALED_RESULT_REVIEW",
+  "verdict": "PASS_SEALED_METADATA_REVIEW_NO_PIXEL_RECOMPUTATION",
+  "completed_utc": "2026-09-07T15:52:05Z",
+  "review_scope": "Independent static review of the sealed B0 attempt-01 receipt and report, limited to JSON/text metadata and file identities.",
+  "receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/receipt.json",
+  "receipt_sha256": "93c90e24e404aa1f87e111ed3a7c79d51de9d9bf35babd060ac807af9d99f2ad",
+  "report_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/report.json",
+  "report_sha256": "13b190b126e925ae18f43728781c323d5cece8d9a591b73e6e9bf3a865aa8a8e",
+  "attempt": 1,
+  "output_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01",
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "executed": false,
+  "main_scorer_rerun": false,
+  "pixel_metrics_recomputed": false,
+  "s40_generated_images_or_montages_viewed": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "bound_identities": {
+    "scorer_sha256": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "contract_sha256": "1143f700855ab32df3d703fc91b2ff8707ca3dc3e217407156be9247d677c11b",
+    "preregistration_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "primary_source_review_sha256": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "adversarial_source_review_sha256": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "blindness_attestation_sha256": "e4b18ed519832f43518fede0e32cb9efe5408cbb0f814dbd9ade4974553d8cf5",
+    "s40_generation_receipt_sha256": "4c771df1e46f96e218b92f01339b55ebd056ef002fdc28e0083a5bb0907300d4",
+    "s40_readback_supervisor_receipt_sha256": "f69b903b2f2987547e7e612c1234eaa7e1d3caa86a8ce2f2e7bee9f04178a894",
+    "s40_readback_result_review_sha256": "ef56ef5e49da7f3da5df873b92c5bc3f16197c2c460eaf4b2519289db787f6d5",
+    "s40_archive_manifest_sha256": "4e2acb3448589710aedcf6945d2d278bfa1b6d194b94adaad0d9b371697e153b",
+    "s40_archive_events_sha256": "bca5c9148a81ba6a070cb4d10c67db384bf1d96f06a0233f746b117a3228a7b1"
+  },
+  "checks": {
+    "receipt_report_binding": {
+      "passed": true,
+      "receipt_report_path_matches_reviewed_report": true,
+      "receipt_report_sha256_matches_reviewed_report": true,
+      "receipt_attempt_equals_report_attempt": true
+    },
+    "attempt_uniqueness": {
+      "passed": true,
+      "only_fixed_attempt_directory_present": "B0_score_attempt_01",
+      "staging_directories_present": 0,
+      "receipt_attempt": 1,
+      "report_attempt": 1
+    },
+    "review_attestation_and_upstream_binding": {
+      "passed": true,
+      "fixed_identity_entries_checked": 14,
+      "fixed_identity_entries_matching": 14,
+      "primary_and_adversarial_source_reviews_are_distinct_and_passed": true,
+      "blindness_attestation_postdates_both_source_reviews": true,
+      "score_start_postdates_blindness_attestation": true,
+      "attested_attempt_and_output_path_match_attempt_01": true,
+      "attested_pre_score_view_or_selection_flags_are_all_false": true
+    },
+    "registry_and_file_descriptor_closure": {
+      "passed": true,
+      "receipt_reported_complete_tensor_registry_entries": 1951,
+      "report_reported_complete_tensor_registry_entries": 1951,
+      "receipt_reported_same_fd_immutable_tensor_snapshots_verified_at_close": 20,
+      "report_reported_same_fd_immutable_tensor_snapshots_verified_at_close": 20,
+      "receipt_and_report_counts_agree": true,
+      "boundary": "Counts and hashes were checked from sealed metadata only; tensor and image bodies were not opened or decoded."
+    },
+    "reported_metric_and_event_semantics": {
+      "passed": true,
+      "primary_mse_reported": 0.005278160708699555,
+      "severe_discrepancy_threshold": 0.01,
+      "comparison_operator": ">",
+      "primary_mse_exceeds_threshold": false,
+      "receipt_row_event": false,
+      "report_row_event": false,
+      "score_event": false,
+      "receipt_status": "PASS_B0_MACHINE_SCORE_SINGLE_ROW_COHORT_INCOMPLETE",
+      "report_row_status": "B0_TECHNICALLY_VALID_NO_SEVERE_DISCREPANCY_EVENT",
+      "cohort_status": "INCOMPLETE",
+      "reported_region_count": 4,
+      "reported_authoritative_pixel_identity_count": 9,
+      "reported_images_opened_or_emitted": 0
+    },
+    "claim_boundary": {
+      "passed": true,
+      "supported": [
+        "B0 is a technically valid single development-row score under the sealed metadata chain.",
+        "The reported B0 MSE is below the preregistered strict greater-than 0.01 severe-discrepancy threshold.",
+        "B0 therefore reports no severe-discrepancy row event."
+      ],
+      "not_supported": [
+        "Completed C1/C2 cohort confirmation",
+        "Visual-quality pass",
+        "Visual camera-obedience pass",
+        "Memory or mean causal attribution",
+        "Repeatability",
+        "Novelty"
+      ]
+    }
+  },
+  "result_interpretation": "PASS is limited to sealed receipt/report metadata consistency for B0 attempt 01. The B0 row is technically valid and reports no severe-discrepancy event, while the preregistered cohort remains incomplete until C1 and C2 are scored and independently reviewed.",
+  "limitations": [
+    "No scorer, readback, model, renderer, or gate was run or imported.",
+    "No pixel metric was recomputed.",
+    "No tensor or image payload body was read or decoded.",
+    "No generated image or montage was viewed.",
+    "The review validates sealed metadata consistency and its claim boundary; it does not independently reproduce pixel values."
+  ],
+  "blocking_findings": []
+}

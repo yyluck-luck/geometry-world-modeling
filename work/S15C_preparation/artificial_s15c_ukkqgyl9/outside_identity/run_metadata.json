@@ -1,0 +1,123 @@
+{
+  "schema": "s15c-observed-depth-run-v1",
+  "mode": "score",
+  "status": "FAILED",
+  "started_utc": "2026-09-06T10:23:54.391861+00:00",
+  "executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+  "python": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+  "reads": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_ukkqgyl9/stage_manifest.json",
+      "role": "Frozen S15C contract and identity list",
+      "format": "json",
+      "attempted_utc": "2026-09-06T10:23:54.392370+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:23:54.392448+00:00"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_ukkqgyl9/extra_identity_seal.json",
+      "role": "S15C calibrated prediction seal",
+      "format": "json",
+      "attempted_utc": "2026-09-06T10:23:54.439129+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:23:54.439181+00:00"
+    }
+  ],
+  "identity_hashes": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_ukkqgyl9/stage_manifest.json",
+      "role": "Externally root-frozen stage manifest",
+      "attempted_utc": "2026-09-06T10:23:54.392294+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:23:54.392366+00:00",
+      "sha256": "64692f1d2df8ca9eb63c99e11f5a695c3ace2a65396cc6812d6e52caad29211f"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py",
+      "role": "Fixed scorer/calibrator source",
+      "attempted_utc": "2026-09-06T10:23:54.394651+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:23:54.394696+00:00",
+      "sha256": "eea26cc7cbc8acfc96083949214722d0e0c9c79911131f22bee6c1bc645065f9"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15C_preparation/artificial_s15c_ukkqgyl9/extra_identity_seal.json",
+      "role": "external calibrated prediction seal",
+      "attempted_utc": "2026-09-06T10:23:54.439059+00:00",
+      "completed": true,
+      "completed_utc": "2026-09-06T10:23:54.439125+00:00",
+      "sha256": "00f231a5ce92c67fbfdc2a71409de801dd26a66a32bd8630e15e22985a0df727"
+    }
+  ],
+  "counters": {
+    "identity_hash_attempts": 3,
+    "identity_hash_successes": 3,
+    "json_decode_attempts": 2,
+    "json_decoded": 2,
+    "npz_open_attempts": 0,
+    "npz_opened": 0,
+    "npz_array_decode_attempts": 0,
+    "npz_arrays_decoded": 0,
+    "depth_open_attempts": 0,
+    "depth_opened": 0,
+    "depth_decode_attempts": 0,
+    "depths_decoded": 0,
+    "rgb_decodes": 0,
+    "trajectory_decodes": 0,
+    "model_calls": 0
+  },
+  "observed_rgb_is_model_input": true,
+  "new_method_test": false,
+  "novel_view": false,
+  "video_generated": false,
+  "phase": "verify_s15c_calibrated_prediction_seal_before_eval_depth",
+  "updated_utc": "2026-09-06T10:23:54.438706+00:00",
+  "manifest_sha256": "64692f1d2df8ca9eb63c99e11f5a695c3ace2a65396cc6812d6e52caad29211f",
+  "contract": {
+    "device": "cpu",
+    "wall_seconds": 600,
+    "max_rss_bytes": 8589934592,
+    "resize": [
+      299,
+      224
+    ],
+    "crop": [
+      37,
+      0,
+      261,
+      224
+    ],
+    "depth_divisor": 5000,
+    "calibration_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "evaluation_indices": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  },
+  "numpy_version": "1.26.4",
+  "pillow_version": "10.3.0",
+  "completed_utc": "2026-09-06T10:23:54.439794+00:00",
+  "error": "ValueError('Prediction seal must contain exactly the calibration directory files; no outside identities')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 451, in main\n    else:score(args,m,rec)\n         ^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 367, in score\n    directory=verify_prediction_seal(args,m,rec)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 304, in verify_prediction_seal\n    require(members and set(ids)==members,'Prediction seal must contain exactly the calibration directory files; no outside identities')\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s15c_observed_depth.py\", line 37, in require\n    raise ValueError(message)\nValueError: Prediction seal must contain exactly the calibration directory files; no outside identities\n",
+  "wall_seconds": 0.048131666000699624,
+  "process_peak_rss_bytes": 44236800
+}

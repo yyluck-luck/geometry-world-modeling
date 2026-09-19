@@ -1,0 +1,2951 @@
+I3DM: Implicit 3D-aware Memory Retrieval and Injection for Consistent Video Scene Generation
+// Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+/* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1
+Introduction
+2
+Related Work
+Generalizable Novel View Synthesis.
+Consistent Video Scene Generation.
+3
+Method
+3.1
+Preliminaries
+Camera-Conditioned Video Generation.
+Feed-forward Novel View Synthesis.
+3.2
+Implicit 3D-aware Memory Retrieval
+3D-aware Scoring Network.
+Training.
+Inference.
+3.3
+Adaptive 3D-aligned Memory Injection
+Adaptive 3D Alignment.
+Memory-Conditioned Video Generation.
+4
+Experiments
+4.1
+Experimental Setup
+Datasets.
+Implementation Details.
+Evaluation Metrics.
+4.2
+Comparisons
+Baseline Models.
+Results on RealEstate10K.
+Results on Tanks-and-Temples.
+4.3
+Ablation Study
+Memory Retrieval Strategy.
+Memory Injection Mechanism.
+5
+Conclusion
+References
+I3DM: Implicit 3D-aware Memory Retrieval and Injection
+for Consistent Video Scene Generation
+Supplementary Material
+1
+Discussion and Limitations
+Inference Time Analysis.
+Drifting and Error Accumulation.
+2
+Details of 3D-aware Memory Retrieval
+Visualization of Confidence Maps.
+Maximum Coverage Selection Algorithm.
+3
+Details of Adaptive Memory Injection
+4
+Implementation Details
+Training of Memory Retrieval Module.
+Training of Video Generation Module.
+Camera Control Metrics.
+5
+Additional Ablation Studies
+Choice of Feature Layer.
+Qualitative Analysis of Retrieval Strategies.
+Generality of Our Retrieval Strategy.
+6
+Additional Comparisons & Visual Results
+Qualitative Comparison with Baselines.
+OOD Generalization.
+Results on the RealEstate10K Dataset.
+References
+License: arXiv.org perpetual non-exclusive license
+arXiv:2603.23413v2 [cs.CV] 31 Jul 2026
+I3DM: Implicit 3D-aware Memory Retrieval and Injection
+for Consistent Video Scene Generation
+Jia Li
+†
+†
+thanks:
+Work done during internship at Vertex Lab.
+Han Yan
+Yihang Chen
+Siqi Li
+Xibin Song
+Yifu Wang
+Jianfei Cai
+Tien-Tsin Wong
+Pan Ji
+Abstract
+Despite remarkable progress in video generation, maintaining long-term scene consistency upon revisiting previously explored areas remains challenging. Existing solutions rely either on explicitly constructing 3D geometry, which suffers from error accumulation and scale ambiguity, or on naive camera Field-of-View (FoV) retrieval, which typically fails under complex occlusions. To overcome these limitations, we propose
+I3DM
+, a novel implicit 3D-aware memory mechanism for consistent video scene generation that bypasses explicit 3D reconstruction. At the core of our approach is a 3D-aware memory retrieval strategy, which leverages the intermediate features of a pre-trained Feed-Forward Novel View Synthesis (FF-NVS) model to score view relevance, enabling robust retrieval even in highly occluded scenarios. Furthermore, to fully utilize the retrieved historical frames, we introduce a 3D-aligned memory injection module. This module implicitly warps historical content to the target view and adaptively conditions the generation on reliable warping regions, leading to improved revisit consistency and accurate camera control. Extensive experiments demonstrate that our method outperforms state-of-the-art approaches, achieving superior revisit consistency, generation fidelity, and camera control precision. Project page:
+https://riga2.github.io/i3dm/
+.
+1
+Monash University
+2
+Vertex Lab
+3
+Shanghai Jiao Tong University
+Figure 1:
+Overview of
+I3DM
+, an implicit 3D-aware memory mechanism for consistent video generation.
+Given an input image and a user-specified camera trajectory, I3DM enables consistent scene exploration via a 3D-aware memory retrieval network and a 3D-aligned memory injection module. Our method ensures consistent revisiting even under complex occlusions; e.g., after entering an occluded room (blue trajectory), the camera can return to the same area observed earlier (orange trajectory).
+1
+Introduction
+Recent advances in video generation
+(
+Qin et al. 2024
+;
+Wan et al. 2025
+;
+Brooks et al. 2024
+;
+Kong et al. 2024
+;
+Mao et al. 2025
+;
+Parker-Holder et al. 2024
+)
+have enabled exploration of diverse and high-fidelity virtual worlds. Given an initial observation and a desired camera trajectory, these models synthesize continuous video streams.
+However, maintaining long-term scene consistency remains challenging due to the absence of long-term memory. As a result, models often exhibit a “turn-and-forget” phenomenon: hallucinating inconsistent content upon revisiting previously explored areas, thereby eroding visual realism and plausibility.
+Figure 2:
+Limitations of existing memory mechanisms. Top: Explicit geometry-based methods (e.g., Gen3C
+(
+Ren et al. 2025
+)
+) suffer from scale ambiguity, causing inaccurate camera navigation (e.g., colliding with the wall) and revisit inconsistencies. Bottom: Implicit FoV-based methods (e.g., WorldPlay
+(
+Sun et al. 2025
+)
+) fail under occlusions, as FoV overlap ignores actual visibility. Retrieving irrelevant historical frames causes repeated content and inconsistent revisits. Frames with matching colors denote the same viewpoint and should be strictly consistent. Red circles and boxes indicate inconsistencies and repeated content.
+To enable long-term memory in video generation, existing methods primarily fall into two categories. The first category, explicit 3D geometry-based methods
+(
+Zhao et al. 2026
+;
+Yang et al. 2026
+;
+Huang et al. 2025b
+;
+Kong et al. 2025
+;
+Ren et al. 2025
+;
+Wu et al. 2025
+)
+, incrementally reconstructs persistent 3D representations (e.g., point clouds, 3D Gaussians) during novel view generation. They employ reconstruction models
+(
+Wang et al. 2025a
+;
+Wang et al. 2025b
+;
+Wang et al. 2025c
+)
+to estimate geometry and render partial target views, relying on generative models to inpaint missing regions. While conceptually sound, they suffer from inherent scale ambiguity during reconstruction, easily leading to misalignment between the estimated geometry and the user-defined camera trajectory in actual practice. This often causes inaccurate camera navigation and introduces revisit inconsistencies, as shown in Fig.
+2
+(top).
+Instead of explicit reconstruction, the second category, implicit multi-view-based methods
+(
+Xiao et al. 2025
+;
+Yu et al. 2025
+;
+Sun et al. 2025
+;
+Wang et al. 2026
+)
+, retrieves relevant historical frames based on camera Field-of-View (FoV) overlap to condition video generation.
+However, such FoV-based retrieval ignores geometric occlusions: frames whose visible regions are occluded from the target view may still be selected, as illustrated in Fig.
+2
+(bottom). This leads to visual inconsistencies and repeated content. While some works
+(
+Li et al. 2025
+;
+Huang et al. 2025a
+)
+attempt to mitigate this by reconstructing coarse 3D proxies for indexing, they reintroduce the scale estimation biases as in explicit methods.
+In this work, we propose an implicit method for 3D-aware memory retrieval while avoiding the overhead and scale biases of explicit 3D reconstruction.
+A key finding in our work is that the 3D priors of existing novel-view synthesis models can be utilized to help retrieve historical frames with significantly improved accuracy and occlusion awareness.
+In particular, the intermediate features of Feed-Forward Novel View Synthesis (FF-NVS) models
+(
+Jin et al. 2024
+;
+Jia et al. 2026
+)
+inherently encode rich 3D correspondence cues.
+Building upon this, we propose a learning-based 3D-aware memory retrieval module. Specifically, we employ a lightweight Convolutional Neural Network (CNN) to process these features from the FF-NVS model and assess the view relevance of candidate frames to the target view.
+Instead of rule-based selection
+(
+Yu et al. 2025
+;
+Xiao et al. 2025
+)
+, our learning-based strategy captures the underlying 3D spatial relationships among generated images, allowing robust occlusion-aware retrieval without explicitly maintaining 3D geometry.
+Retrieving correct frames is only half the challenge; effectively utilizing them is the other. Previous implicit methods
+(
+Yu et al. 2025
+;
+Xiao et al. 2025
+;
+Sun et al. 2025
+)
+typically condition video generation directly on raw historical frames. This forces the network to learn complex 3D correspondences from scratch via computationally expensive full-parameter training. Furthermore, the absence of geometrically aligned guidance frequently leads to hallucinated repetitive visual content and degraded camera control. To address this, we propose an adaptive 3D-aligned memory injection mechanism. We employ a pre-trained FF-NVS module to warp the historical content to the target view, producing geometrically aligned guidance for the diffusion model. However, since NVS typically degrades under extrapolation and occlusion, we jointly fine-tune this module with the video diffusion model. This allows the system to emphasize reliable regions (mainly from interpolation) while suppressing unreliable extrapolated content. Consequently, the video diffusion model effectively benefits from the geometrically aligned guidance, achieving efficient training, superior generation consistency, and accurate camera control.
+In summary, our contributions are as follows:
+•
+We propose a learning-based memory retrieval strategy that leverages implicit 3D-aware features to assess view relevance, enabling robust retrieval of relevant historical frames under occlusion without explicit 3D modeling.
+•
+We introduce an adaptive 3D-aligned memory injection module that implicitly aligns the retrieved frames to the target view while adaptively attending to reliable conditioning regions, thereby enhancing both revisit consistency and camera control precision for video generation.
+•
+Extensive experiments demonstrate that our method outperforms the state-of-the-art memory-conditioned video generation methods in terms of revisit consistency, generation fidelity, and camera control accuracy.
+2
+Related Work
+Generalizable Novel View Synthesis.
+Novel view synthesis (NVS) synthesizes unseen views of an underlying 3D scene from given source images. Existing generalizable NVS methods can be categorized into interpolation-based
+(
+Chen et al. 2024
+;
+Jin et al. 2024
+;
+Sajjadi et al. 2022
+;
+Jiang et al. 2025
+;
+Szymanowicz et al. 2026
+)
+and extrapolation-based
+(
+Yu et al. 2024
+;
+Zhou et al. 2025
+;
+Wang et al. 2024b
+;
+Sargent et al. 2024
+)
+approaches. Interpolation methods are typically deterministic, employing neural networks to predict explicit 3D representations
+(
+Chen et al. 2024
+;
+Jiang et al. 2025
+)
+or directly regress target views
+(
+Jin et al. 2024
+;
+Sajjadi et al. 2022
+)
+in a feed-forward manner. While producing high-fidelity interpolated views, they inherently struggle to generate entirely new scene content. Instead, extrapolation methods rely on generative models, particularly camera-controlled video diffusion models
+(
+Wang et al. 2024b
+;
+Yu et al. 2024
+;
+Bai et al. 2025
+;
+Huang et al. 2025b
+)
+, to synthesize views beyond observed regions (also termed Video Scene Generation). However, they struggle to maintain global consistency with previously generated scenes over long durations.
+Consistent Video Scene Generation.
+To equip video scene generation with long-term consistency, memory mechanisms have been introduced, categorized into explicit 3D geometry-based and implicit multi-view-based approaches.
+Explicit methods maintain a persistent 3D geometry for view re-projection and inpainting. Some works
+(
+Ren et al. 2025
+;
+Wu et al. 2025
+;
+Zhao et al. 2026
+;
+Huang et al. 2025b
+)
+leverage off-the-shelf estimators
+(
+Wang et al. 2025c
+;
+Wang et al. 2025b
+;
+Chen et al. 2025
+;
+Wang et al. 2025a
+)
+to construct point clouds, while others
+(
+Yu et al. 2024
+;
+Kong et al. 2025
+;
+Yang et al. 2026
+)
+further optimize 3D Gaussians to enhance visual quality. Nevertheless, these methods are bottlenecked by reconstruction errors and scale ambiguity, causing inaccurate navigation and severe inconsistencies upon scene revisits.
+Implicit methods maintain a memory bank of previously generated frames, retrieving historical context based on camera FoV overlap
+(
+Xiao et al. 2025
+;
+Yu et al. 2025
+;
+Sun et al. 2025
+)
+. However, this strategy ignores geometric occlusions, often selecting frames invisible from the target view. Some works
+(
+Li et al. 2025
+;
+Huang et al. 2025a
+)
+mitigate this by reconstructing coarse geometry, but they reintroduce scale biases. Retrieved frames are then used to condition video generation through cross-attention
+(
+Xiao et al. 2025
+)
+, latent concatenation
+(
+Yu et al. 2025
+;
+Sun et al. 2025
+;
+Wu et al. 2026
+;
+Wang et al. 2026
+)
+, or a dedicated generative NVS model
+(
+Li et al. 2025
+)
+. However, such geometrically unaligned context tends to compromise camera control and produce repetitive, inconsistent results.
+To bridge this gap, our method introduces an implicit, 3D-aware memory mechanism, ensuring occlusion-robust consistency and accurate camera navigation without incurring the overhead of explicit 3D maintenance.
+3
+Method
+We introduce
+I3DM
+for consistent video scene generation, as shown in Fig.
+3
+. I3DM comprises two key components: an implicit
+3D-aware memory retrieval
+module (Sec.
+3.2
+) to select the most relevant historical frames, and an adaptive
+3D-aligned memory injection
+module (Sec.
+3.3
+) to align the retrieved frames with the target view and condition the video diffusion model.
+Figure 3:
+Overview of the proposed
+I3DM
+framework. Left:
+3D-aware Memory Retrieval.
+For each historical frame in the memory bank, we first extract 3D-aware intermediate features using a pre-trained NVS model. A lightweight scoring network then evaluates their spatial relevance to the target view to select the most relevant frames. Right:
+3D-aligned Memory Injection.
+The retrieved frames are processed by an Adaptive NVS Module to align them with the target view. These aligned results are then used to condition the Wan-DiT backbone for consistent video scene generation.
+3.1
+Preliminaries
+Camera-Conditioned Video Generation.
+Our framework builds upon Wan 2.1
+(
+Wan et al. 2025
+)
+, a full-sequence latent video diffusion model comprising a causal 3D VAE and a Diffusion Transformer (DiT)
+(
+Peebles and Xie 2023
+)
+denoiser. To enable camera control, we adopt a pre-trained camera-conditioned adaptation
+(
+He et al. 2024
+)
+of the Wan model.
+Specifically, camera extrinsic and intrinsic parameters are encoded as 6D Plücker ray embeddings
+(
+Plucker 1865
+)
+𝐏
+\mathbf{P}
+, which are mapped to camera features by a camera adapter and injected into video latents via element-wise addition for camera-controlled video generation.
+Feed-forward Novel View Synthesis.
+We adopt LVSM, a feed-forward NVS framework
+(
+Jin et al. 2024
+)
+, to facilitate 3D-aware memory retrieval and injection.
+Given
+N
+N
+source images and their Plücker ray embeddings
+{
+(
+𝐈
+i
+,
+𝐏
+i
+)
+}
+i
+=
+1
+N
+\{(\mathbf{I}_{i},\mathbf{P}_{i})\}_{i=1}^{N}
+, LVSM synthesizes a novel target view
+𝐈
+t
+\mathbf{I}^{\text{t}}
+by querying the target Plücker ray embedding
+𝐏
+t
+\mathbf{P}^{\text{t}}
+. Each source RGB-ray pair is concatenated channel-wise, patchified, and linearly projected into source tokens
+{
+𝐒
+i
+}
+i
+=
+1
+N
+\{\mathbf{S}_{i}\}_{i=1}^{N}
+, while the target rays are projected to target tokens
+𝐒
+t
+\mathbf{S}^{\text{t}}
+separately:
+{
+𝐒
+i
+}
+i
+=
+1
+N
+\displaystyle\{\mathbf{S}_{i}\}_{i=1}^{N}
+=
+Linear
+in
+​
+(
+Patchify
+⁡
+(
+{
+(
+𝐈
+i
+,
+𝐏
+i
+)
+}
+i
+=
+1
+N
+)
+)
+,
+\displaystyle=\mathrm{Linear}_{\text{in}}(\mathrm{Patchify}(\{(\mathbf{I}_{i},\mathbf{P}_{i})\}_{i=1}^{N})),
+(1)
+𝐒
+t
+\displaystyle\mathbf{S}^{\text{t}}
+=
+Linear
+tgt
+​
+(
+Patchify
+⁡
+(
+𝐏
+t
+)
+)
+.
+\displaystyle=\mathrm{Linear}_{\text{tgt}}(\mathrm{Patchify}(\mathbf{P}^{\text{t}})).
+(2)
+The source and target tokens are then jointly processed by
+L
+L
+Transformer layers
+Φ
+\Phi
+to obtain target-view-aligned features:
+𝐑
+t
+=
+Φ
+1
+→
+L
+​
+(
+{
+𝐒
+i
+}
+i
+=
+1
+N
+,
+𝐒
+t
+)
+.
+\mathbf{R}^{\text{t}}=\mathrm{\Phi}_{1\to L}(\{\mathbf{S}_{i}\}_{i=1}^{N},\mathbf{S}^{\text{t}}).
+(3)
+Finally, the output features
+𝐑
+t
+\mathbf{R}^{\text{t}}
+are regressed to RGB values and unpatchfied to the synthesized novel view
+𝐈
+^
+t
+\hat{\mathbf{I}}^{\text{t}}
+:
+𝐈
+^
+t
+=
+Unpatchify
+⁡
+(
+Sigmoid
+⁡
+(
+Linear
+out
+​
+(
+𝐑
+t
+)
+)
+)
+.
+\hat{\mathbf{I}}^{\text{t}}=\mathrm{Unpatchify}(\mathrm{Sigmoid}(\mathrm{Linear}_{\text{out}}(\mathbf{R}^{\text{t}}))).
+(4)
+3.2
+Implicit 3D-aware Memory Retrieval
+To maintain scene consistency in long-term video generation, our first goal is to retrieve relevant historical frames that maximize scene overlap with the target view. However, relying on explicit 3D modeling for this task often introduces estimation biases, and a simple FoV-based scheme fails under complex occlusions. To overcome these challenges, our idea is to leverage the intermediate features of a pre-trained feed-forward NVS model
+(
+Jin et al. 2024
+)
+, which inherently encode rich 3D correspondences. Specifically, we propose an implicit
+3D-aware memory retrieval
+module (illustrated in Fig.
+4
+) that utilizes these features to select optimal historical frames by naturally reasoning about spatial occlusions.
+Figure 4:
+3D-aware Memory Retrieval Module. We first set the last frame as an anchor. For each historical candidate frame, we extract implicit 3D-aware features from the
+l
+th
+l^{\text{th}}
+layer of the frozen LVSM. Based on these features, a Scoring CNN then predicts a spatial uncertainty map for the target view. Notably, the full Transformer is executed
+only during training
+to provide supervision; during inference, the process terminates at the
+l
+th
+l^{\text{th}}
+layer to efficiently deduce the score map.
+3D-aware Scoring Network.
+Let
+𝒱
+=
+{
+(
+𝐈
+i
+,
+𝐏
+i
+)
+}
+i
+=
+1
+\mathcal{V}=\{(\mathbf{I}_{i},\mathbf{P}_{i})\}_{i=1}
+denote the memory bank containing
+historical
+frames and their Plücker ray embeddings. Given a target view with Plücker rays
+𝐏
+t
+\mathbf{P}^{\text{t}}
+, our goal is to select a subset of geometrically relevant frames from
+𝒱
+\mathcal{V}
+. As the last frame typically preserves significant visual overlap with the target view, we mandatorily set it as an anchor. For each remaining frame in the memory bank, we treat it as a candidate and evaluate its relevance to the target view by comparing it with the anchor frame.
+Specifically, we tokenize the last and candidate frames into
+𝐒
+last
+\mathbf{S}^{\mathrm{last}}
+and
+𝐒
+cand
+\mathbf{S}^{\mathrm{cand}}
+using Eq. (
+1
+), and the target-view rays into
+𝐒
+t
+\mathbf{S}^{\mathrm{t}}
+using Eq. (
+2
+). We then feed these tokens into the frozen LVSM Transformer. Instead of executing full Transformer layers, we only extract intermediate features from the shallow
+l
+th
+l^{\text{th}}
+layer. These shallow-layer features are capable of assessing multi-view relevance while maintaining lightweight computation during inference. Then, a lightweight, trainable scoring CNN decodes them to a spatial uncertainty score map:
+σ
+=
+CNN
+θ
+​
+(
+Φ
+1
+→
+l
+​
+(
+𝐒
+last
+,
+𝐒
+cand
+,
+𝐒
+t
+)
+)
+,
+\mathbf{\sigma}=\text{CNN}_{\theta}(\mathrm{\Phi}_{1\to l}(\mathbf{S}^{\mathrm{last}},\mathbf{S}^{\mathrm{cand}},\mathbf{S}^{\text{t}})),
+(5)
+where
+σ
+∈
+ℝ
+H
+p
+×
+W
+p
+\mathbf{\sigma}\in\mathbb{R}^{\frac{H}{p}\times\frac{W}{p}}
+represents the spatial uncertainty of synthesizing the target frame using this specific candidate frame and the last frame. Here,
+H
+×
+W
+H\times W
+denotes the image resolution of the candidate frame and
+p
+p
+is the patch size.
+Training.
+To train the scoring CNN without explicit 3D ground truth, we draw inspiration from prior visual geometry work
+(
+Wang et al. 2024a
+;
+Kendall and Gal 2017
+)
+and optimize an uncertainty loss
+ℒ
+un
+\mathcal{L}_{\text{un}}
+for each candidate frame:
+ℒ
+un
+=
+1
+2
+∑
+u
+,
+v
+(
+e
+−
+σ
+⁡
+(
+u
+,
+v
+)
+⋅
+OPEN
+sg
+​
+[
+MSE
+⁡
+(
+𝐈
+^
+t
+​
+(
+u
+,
+v
+)
+,
+𝐈
+t
+​
+(
+u
+,
+v
+)
+)
+]
++
+σ
+⁡
+(
+u
+,
+v
+)
+)
+,
+\mathcal{L}_{\text{un}}=\frac{1}{2}\sum_{u,v}\biggl(e^{-\mathbf{\sigma}(u,v)}\cdot\\
+\text{sg}\!\left[\mathrm{MSE}\!\left(\mathbf{\hat{I}}^{\text{t}}(u,v),\mathbf{I}^{\text{t}}(u,v)\right)\right]+\mathbf{\sigma}(u,v)\biggr),
+(6)
+where
+σ
+⁡
+(
+u
+,
+v
+)
+\mathbf{\sigma}(u,v)
+,
+𝐈
+^
+t
+​
+(
+u
+,
+v
+)
+\mathbf{\hat{I}}^{\text{t}}(u,v)
+, and
+𝐈
+t
+​
+(
+u
+,
+v
+)
+\mathbf{I}^{\text{t}}(u,v)
+are the predicted uncertainty map, synthesized NVS image, and ground truth image for patch
+(
+u
+,
+v
+)
+(u,v)
+.
+sg
+​
+[
+⋅
+]
+\text{sg}[\cdot]
+denotes the stop-gradient operation. The intuition is that the pre-trained NVS model naturally synthesizes high-fidelity image patches in observed regions (yielding low MSE and driving
+σ
+⁡
+(
+u
+,
+v
+)
+\mathbf{\sigma}(u,v)
+down), while producing blurry results in unobserved or occluded regions. Minimizing this loss encourages the network to produce high uncertainty
+σ
+⁡
+(
+u
+,
+v
+)
+\mathbf{\sigma}(u,v)
+in unreliable regions. Note that we only execute the full LVSM Transformer during this training phase to predict
+𝐈
+^
+t
+\mathbf{\hat{I}}^{\text{t}}
+for loss calculation.
+Inference.
+During inference, we define the spatial confidence map for each historical candidate frame as its negative predicted uncertainty,
+𝐦
+:=
+−
+σ
+\mathbf{m}:=-\mathbf{\sigma}
+. To retrieve
+K
+K
+additional reference frames (
+K
++
+1
+K+1
+including the last frame), a naive way would be Top-
+K
+K
+selection based on the spatially averaged
+𝐦
+\mathbf{m}
+. However, this often yields severe redundancy, as temporally adjacent frames share similar high-confidence regions.
+To promote broader scene coverage for a target view, we formulate the reference frame selection as a
+greedy maximum coverage problem
+.
+We maintain a global confidence canvas
+𝐦
+g
+∈
+ℝ
+H
+p
+×
+W
+p
+\mathbf{m}^{\mathrm{g}}\in\mathbb{R}^{\frac{H}{p}\times\frac{W}{p}}
+, initialized to zero, which aggregates the coverage from selected reference frames. Our goal is to select
+K
+K
+reference frames whose confidence maps collectively maximize the
+𝐦
+g
+\mathbf{m}^{\mathrm{g}}
+via a patch-wise maximization operation.
+Let
+𝒞
+\mathcal{C}
+denote the set of currently selected frame indices, initialized to
+∅
+\emptyset
+. At each iteration, for each unselected candidate frame
+i
+i
+in the memory bank
+𝒱
+\mathcal{V}
+, excluding the anchor frame, we evaluate the marginal gain over the current global confidence
+𝐦
+g
+\mathbf{m}^{\mathrm{g}}
+through a patch-wise maximum operation. We then select the candidate index
+i
+∗
+i^{*}
+with the largest gain:
+i
+∗
+=
+arg
+⁡
+max
+i
+∉
+𝒞
+​
+∑
+u
+,
+v
+[
+max
+⁡
+(
+𝐦
+g
+​
+(
+u
+,
+v
+)
+,
+𝐦
+i
+​
+(
+u
+,
+v
+)
+)
+−
+𝐦
+g
+​
+(
+u
+,
+v
+)
+]
+.
+i^{*}=\underset{i\notin\mathcal{C}}{\arg\max}\sum_{u,v}\left[\max\left(\mathbf{m}^{\mathrm{g}}(u,v),\mathbf{m}_{i}(u,v)\right)-\mathbf{m}^{\mathrm{g}}(u,v)\right].
+(7)
+We then update the selected frame set
+𝒞
+←
+𝒞
+∪
+{
+i
+∗
+}
+\mathcal{C}\leftarrow\mathcal{C}\cup\{i^{*}\}
+and global confidence
+𝐦
+g
+​
+(
+u
+,
+v
+)
+←
+max
+⁡
+(
+𝐦
+g
+​
+(
+u
+,
+v
+)
+,
+𝐦
+i
+∗
+​
+(
+u
+,
+v
+)
+)
+\mathbf{m}^{\mathrm{g}}(u,v)\leftarrow\max\!\left(\mathbf{m}^{\mathrm{g}}(u,v),\,\mathbf{m}_{i^{*}}(u,v)\right)
+. This procedure repeats until
+K
+K
+reference frames are selected. By evaluating incremental patch-wise gains, this redundancy-aware strategy promotes complementary coverage among selected candidates. Together, the last frame preserves local temporal continuity, while the selected historical frames provide additional context for target regions insufficiently observed in the last frame.
+When processing a sequence of
+T
+T
+target views, we maintain one global confidence canvas for each view. At each iteration, we select the candidate frame that maximizes the average marginal gain across ALL
+T
+T
+canvases. Since this iterative greedy maximum coverage search only uses simple operations (e.g., patch-wise maximum and average) executed at a reduced patch resolution, it incurs negligible inference overhead. Algorithm details are provided in the Appendix.
+3.3
+Adaptive 3D-aligned Memory Injection
+Having retrieved geometrically relevant historical frames in
+𝒞
+\mathcal{C}
+, the next challenge is to effectively condition the video diffusion model. Directly injecting unaligned historical frames forces the diffusion backbone to learn complex spatial transformations from scratch, often causing degraded generation consistency and repetitive visual content. To address this, we introduce a 3D-aligned memory injection mechanism (Fig.
+3
+, right) that leverages a pre-trained NVS module to adaptively produce spatially aligned guidance for the diffusion model.
+Adaptive 3D Alignment.
+Given the retrieved frame set
+𝒞
+\mathcal{C}
+and the last frame, we use the pre-trained LVSM
+(
+Jin et al. 2024
+)
+to warp them to the target view following Eq.
+4
+. The key idea is to leverage the rich 3D priors inherently encoded in the pre-trained LVSM as a powerful geometric scaffold for accurate spatial alignment. This design decouples complex 3D transformations from the generative process, allowing the diffusion model to focus entirely on its core strength: generating new content in unobserved regions.
+However, the pre-trained LVSM is reliable only when interpolating within observed regions and introduces warping artifacts when extrapolating into unobserved regions, interfering with subsequent generation. Although explicit 3D memory methods also provide 3D-aligned guidance, they rely on rigid, non-differentiable representations (e.g., point clouds). In contrast, our fully neural architecture enables
+joint fine-tuning
+of the NVS module with the diffusion model. This crucial design shifts the NVS objective from strict photometric reconstruction to learning optimal conditioning features. The fine-tuned NVS module learns to produce sharp, accurate content observed in
+𝒞
+\mathcal{C}
+while providing soft, uncertainty-aware features in extrapolated areas.
+This enables the downstream diffusion model to adaptively attend to the guidance: relying on high-fidelity aligned regions for strict consistency, while downweighting uncertain areas to fall back on internal generative priors (see Appendix for examples).
+Memory-Conditioned Video Generation.
+We encode the adaptively aligned memory
+𝐈
+^
+t
+\hat{\mathbf{I}}^{\text{t}}
+using the VAE encoder, yielding the latent condition
+𝐳
+mem
+\mathbf{z}^{\text{mem}}
+. It is channel-wise concatenated with the noisy latent
+𝐳
+t
+\mathbf{z}_{t}
+as
+𝐳
+′
+=
+[
+𝐳
+t
+,
+𝐳
+mem
+]
+\mathbf{z}^{\prime}=[\mathbf{z}_{t},\mathbf{z}^{\text{mem}}]
+and fed into the LoRA-equipped DiT blocks for conditioned generation (Fig.
+3
+). To preserve pre-trained generative priors, we freeze the VAE, text encoder, camera adapter, and original DiT weights. For global temporal coherence, the last frame is injected as the first frame of each clip through a trainable reference convolutional layer. We train the framework with the flow-matching loss
+(
+Lipman et al. 2022
+)
+. By back-propagating the generation loss through the VAE to the NVS module, the system adaptively learns optimal conditioning signals for the best generative outcome.
+4
+Experiments
+In this section, we first detail the experimental setup of
+I3DM
+(Sec.
+4.1
+). We then compare our approach with state-of-the-art camera-controlled video generation methods (Sec.
+4.2
+). Furthermore, we perform ablation studies to validate the effectiveness of our memory retrieval and injection strategies (Sec.
+4.3
+). More experiments are provided in our Appendix.
+4.1
+Experimental Setup
+Datasets.
+We evaluate on two public real-world datasets: RealEstate10K (Re10K)
+(
+Zhou et al. 2018
+)
+and Tanks-and-Temples (T&T)
+(
+Knapitsch et al. 2017
+)
+, both containing diverse indoor and outdoor scenes with camera annotations. We caption all video clips for text conditioning using Qwen2.5-VL-7B
+(
+Team 2025
+)
+. We only train our model on the Re10K training set, while evaluating on the Re10K test set and T&T dataset to assess out-of-distribution generalization.
+Implementation Details.
+(1) Training of Memory Retrieval. We use the pre-trained LVSM
+(
+Jin et al. 2024
+)
+as the feature extractor. For efficiency, input images are resized to
+256
+×
+256
+256\times 256
+, and features are extracted from the
+6
+th
+6^{\text{th}}
+Transformer layer. These features are processed by a 3-layer scoring CNN with channels 256, 64, and 1. We train this module using a learning rate of
+5
+×
+10
+−
+5
+5\times 10^{-5}
+and batch size of 64.
+(2) Training of Video Generation. We use Wan-CamCtrl-1.3B
+(
+Wan et al. 2025
+)
+as the backbone and train on 77-frame clips at
+640
+×
+352
+640\times 352
+resolution, conditioned on 4 reference frames randomly sampled from the full video sequence. The Adaptive NVS Module is initialized from the pre-trained LVSM. We jointly fine-tune the NVS Transformer blocks, the reference convolution layer, and the DiT LoRA layers for 11k steps with batch size 4.
+(3) Long Video Inference. We generate long videos autoregressively, one clip at a time. For each 77-frame target clip, we uniformly sample 20 views as retrieval queries. Using our retrieval module, we select
+K
+=
+3
+K=3
+relevant historical frames and the last frame from the memory bank. After each clip, every
+fourth
+generated frame is added to the memory bank to support subsequent generation.
+Evaluation Metrics.
+We assess performance across three dimensions:
+(1) Video Generation Quality. We use Fréchet Inception Distance (FID)
+(
+Heusel et al. 2017
+)
+and Fréchet Video Distance (FVD)
+(
+Unterthiner et al. 2018
+)
+to measure distributional divergence from ground truth, and the Imaging Quality (IMQ) metric from VBench
+(
+Huang et al. 2024
+)
+when ground truth is unavailable.
+(2) Camera Control Precision. We estimate camera poses of generated videos using Pi3
+(
+Wang et al. 2025
+)
+, and report rotation (
+R
+e
+​
+r
+​
+r
+∘
+R_{err}^{\circ}
+) and translation (
+T
+e
+​
+r
+​
+r
+T_{err}
+) errors against the ground-truth trajectory. Both trajectories are aligned by setting the first frame as reference and normalizing translation scale using the farthest frame.
+(3) Revisit Consistency. Following Vmem
+(
+Li et al. 2025
+)
+, we use forward-and-reverse camera trajectories and compare generated frames at the same viewpoint using PSNR, SSIM
+(
+Wang et al. 2004
+)
+, and LPIPS
+(
+Zhang et al. 2018
+)
+.
+Table 1:
+Comparisons on Re10K (top) and T&T (bottom).
+Method
+Visual Quality
+Camera Control
+Revisit Consistency
+FID
+↓
+\downarrow
+FVD
+↓
+\downarrow
+𝑹
+𝐞𝐫𝐫
+∘
+↓
+\boldsymbol{R_{\mathrm{err}}^{\circ}}\!\downarrow
+𝑻
+𝐞𝐫𝐫
+↓
+\boldsymbol{T_{\mathrm{err}}}\!\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+LPIPS
+↓
+\downarrow
+Re10K Dataset
+ViewCrafter
+58.63
+–
+71.116
+0.7867
+9.29
+0.270
+0.6797
+Voyager
+31.90
+377.86
+17.801
+0.3471
+14.75
+0.499
+0.4708
+Gen3C
+29.05
+292.56
+8.183
+0.1450
+15.23
+0.553
+0.4397
+WorldWarp
+21.90
+181.95
+13.003
+0.2161
+14.77
+0.592
+0.4828
+WorldPlay
+24.14
+192.52
+15.298
+0.2848
+15.71
+0.560
+0.3878
+NeoVerse
+30.69
+222.68
+21.140
+0.4114
+15.48
+0.605
+0.4554
+LB-World-F
+27.58
+327.04
+17.331
+0.4327
+13.46
+0.453
+0.4742
+Inf-World
+24.86
+213.55
+21.776
+0.4610
+14.66
+0.476
+0.4136
+Spatia
+22.47
+185.66
+15.979
+0.3077
+15.35
+0.534
+0.4680
+VMem
+33.73
+–
+6.782
+0.3615
+23.97
+0.727
+0.1670
+Ours
+15.56
+118.27
+2.044
+0.0507
+24.76
+0.828
+0.0743
+FID
+↓
+\downarrow
+IMQ
+↑
+\uparrow
+𝑹
+𝐞𝐫𝐫
+∘
+↓
+\boldsymbol{R_{\mathrm{err}}^{\circ}}\!\downarrow
+𝑻
+𝐞𝐫𝐫
+↓
+\boldsymbol{T_{\mathrm{err}}}\!\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+LPIPS
+↓
+\downarrow
+T&T Dataset
+Voyager
+166.76
+61.87
+33.751
+0.2980
+12.85
+0.278
+0.5644
+Gen3C
+113.62
+57.55
+6.853
+0.0862
+17.96
+0.519
+0.2910
+WorldWarp
+113.76
+64.52
+9.691
+0.1828
+15.43
+0.442
+0.4577
+WorldPlay
+96.00
+73.94
+24.751
+0.6214
+12.90
+0.334
+0.4575
+NeoVerse
+168.05
+63.62
+29.154
+0.4953
+12.14
+0.301
+0.5884
+LB-World-F
+155.14
+67.97
+33.811
+0.3784
+10.53
+0.262
+0.5984
+Inf-World
+160.26
+70.32
+36.001
+0.6682
+11.34
+0.250
+0.6027
+Spatia
+106.69
+66.01
+26.438
+0.6161
+13.56
+0.317
+0.4635
+VMem
+128.25
+–
+5.819
+0.6301
+21.38
+0.562
+0.1994
+Ours
+96.26
+70.75
+2.793
+0.0750
+21.24
+0.674
+0.0997
+Table 2:
+Ablation studies of memory retrievals (top) and memory injection mechanisms (bottom) on Re10K Dataset.
+Method
+FID
+↓
+\downarrow
+FVD
+↓
+\downarrow
+𝑹
+𝐞𝐫𝐫
+∘
+↓
+\boldsymbol{R_{\mathrm{err}}^{\circ}}\!\downarrow
+𝑻
+𝐞𝐫𝐫
+↓
+\boldsymbol{T_{\mathrm{err}}}\!\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+LPIPS
+↓
+\downarrow
+Temporal
+23.67
+189.39
+5.617
+0.1277
+13.78
+0.522
+0.4660
+Random
+18.50
+141.88
+2.075
+0.0566
+19.25
+0.687
+0.2027
+FoV-based
+17.63
+134.69
+1.895
+0.0510
+22.72
+0.781
+0.1084
+Geo-based
+17.79
+133.66
+2.027
+0.0511
+20.94
+0.738
+0.1346
+I3D-TopK
+17.59
+134.13
+2.046
+0.0498
+22.33
+0.769
+0.1138
+I3D-Ours
+17.55
+131.66
+1.991
+0.0505
+24.73
+0.828
+0.0756
+w/o mem.
+21.43
+169.28
+6.096
+0.1551
+12.73
+0.516
+0.4910
+w/o align.
+43.12
+314.40
+16.399
+0.2554
+15.14
+0.568
+0.4666
+w/ fz. NVS
+16.02
+121.56
+1.993
+0.0591
+24.46
+0.828
+0.0760
+w/ ft. NVS
+17.55
+131.66
+1.991
+0.0505
+24.73
+0.828
+0.0756
+Figure 5:
+Qualitative comparison on the Re10K (left) and T&T (right) datasets. The frames with matching colors should remain strictly consistent; red circles and arrows highlight visual inconsistencies and inaccurate camera motion, respectively.
+4.2
+Comparisons
+Baseline Models.
+We compare our method against ten representative open-source baselines with memory mechanisms: (1) Explicit methods: ViewCrafter
+(
+Yu et al. 2024
+)
+, Gen3C
+(
+Ren et al. 2025
+)
+, WorldWarp
+(
+Kong et al. 2025
+)
+, Voyager
+(
+Huang et al. 2025b
+)
+, NeoVerse
+(
+Yang et al. 2026
+)
+and Spatia
+(
+Zhao et al. 2026
+)
+; (2) Implicit methods: WorldPlay
+(
+Sun et al. 2025
+)
+, LingBot-World-Fast
+(
+Team et al. 2026
+)
+and Infinity-World
+(
+Wu et al. 2026
+)
+; and (3) Hybrid methods: Vmem
+(
+Li et al. 2025
+)
+. We follow their official implementations and evaluate on the same datasets for fair comparison.
+Results on RealEstate10K.
+Since we focus on long-horizon evaluation, we filter out scenes with fewer than 230 frames from the Re10K test set and test on 507 scenes. Following the cycle-trajectory protocol of Vmem
+(
+Li et al. 2025
+)
+, we randomly sample 228 consecutive frames per scene as the forward trajectory and append its reverse, yielding a 456-frame sequence. Video quality and camera control metrics are computed over the full sequence, while revisit consistency is measured between spatially aligned frame pairs from the forward and reverse trajectories. Since Vmem generates discrete frames, we evaluate it at its native stride of 10, following its original setting. As shown in Tab.
+1
+(top), our method outperforms all baselines across all metrics. Qualitative comparisons are shown in Fig.
+5
+(left). Gen3C and NeoVerse show severe inconsistencies in revisited regions. WorldPlay mitigates this but still fails to preserve strict consistency, while Vmem yields unsatisfactory results due to inaccurate camera control (e.g., colliding with walls). In contrast, our method produces convincing results with accurate camera control and well-preserved visual consistency in revisited areas.
+Results on Tanks-and-Temples.
+To evaluate generalization, we test on the T&T dataset. Since it consists of discrete image collections rather than continuous video, we apply
+15
+×
+15\times
+temporal interpolation between adjacent frames to synthesize smooth camera motion. We evaluate all six scenes and apply the same cycle-trajectory protocol on the first 304 interpolated frames, yielding a sequence of 608 frames per scene. As shown at the Tab.
+1
+(bottom) and Fig.
+5
+(right), our method achieves better results in camera control and revisit consistency. Although Vmem achieves slightly higher PSNR for consistency, it suffers from severe translation errors that restrict novel content generation (i.e., the camera fails to move as instructed). In contrast, our method accurately follows target camera trajectories to explore more novel regions while maintaining strict revisit consistency.
+Figure 6:
+Ablation of memory retrieval strategies. Frames with the same color should remain strictly consistent. Red circles highlight visual inconsistencies. Temporal and random strategies fail to maintain scene consistency. Geometry-, FoV- and I3D-TopK-based approaches improve revisit consistency but still exhibit artifacts, while our full I3D-based retrieval strategy robustly maintains strict consistency.
+Figure 7:
+Ablation of memory injection mechanisms. Removing memory or spatial alignment compromises revisit consistency, while freezing the NVS module causes inaccurate camera motion and navigation failures (e.g., failing to enter the room). Jointly fine-tuning the NVS module ensures both consistent generation and accurate camera control.
+4.3
+Ablation Study
+Memory Retrieval Strategy.
+We evaluate our implicit 3D-aware memory retrieval strategy against five alternatives:
+(1) temporal retrieval, selecting
+K
+K
+the most recent views;
+(2) random retrieval, selecting
+K
+K
+views randomly;
+(3) FoV-based retrieval, selecting the top-
+K
+K
+views by target-view FoV overlap, following Worldmem
+(
+Xiao et al. 2025
+)
+;
+(4) geometry-based retrieval, selecting the
+K
+K
+most frequently referenced views using surfel-indexed retrieval and non-maximum suppression, as in Vmem
+(
+Li et al. 2025
+)
+;
+(5) I3D-based (TopK) retrieval, selecting the top-
+K
+K
+views with the highest averaged confidence score using implicit 3D priors.
+To ensure fair comparison, all methods share the same generation backbone and differ only in the retrieval. As reported in Tab.
+2
+(top), our method outperforms alternatives on almost all metrics, improving revisit PSNR by 2.02 dB over the second-best baseline. Qualitatively (Fig.
+6
+), temporal and random retrieval fail to maintain consistency during revisits. Geometry-based retrieval improves consistency but still shows artifacts, while FoV-based retrieval struggles under occlusions and fails to retrieve correct historical content. I3D-based Top-K selection still exhibits inconsistencies. In contrast, our full implicit 3D-aware retrieval strategy robustly preserves strict revisit consistency even under complex occlusions.
+Memory Injection Mechanism.
+We evaluate our adaptive memory injection module in Tab.
+2
+(bottom) and Fig.
+7
+. All variants are trained on Re10K using the same fine-tuning settings as our final model.
+(1) “w/o mem.”: the baseline (Wan-CamCtrl
+(
+Wan et al. 2025
+)
+) fails to maintain scene consistency during revisits.
+(2) “w/o align.”: this variant directly conditions the diffusion model via frame-wise concatenation with retrieved historical frames, yielding degraded visual quality and camera control. We attribute this to the difficulty of implicitly learning complex 3D correspondences solely through LoRA fine-tuning.
+(3) “w/ fz. NVS”: this variant uses a pre-trained frozen LVSM
+(
+Jin et al. 2024
+)
+to align historical frames with the target view before injection. While revisit consistency improves, extrapolation errors from the frozen NVS module interfere with camera motion, causing navigation failures (e.g., the camera fails to enter the bathroom), as shown in Fig.
+7
+.
+(4) “w/ ft. NVS”: In contrast, using adaptive NVS module ensures both revisit consistency and accurate camera control by jointly fine-tuning the NVS module with the diffusion backbone.
+5
+Conclusion
+In this paper, we present
+I3DM
+, an implicit 3D-aware memory mechanism designed to ensure long-term scene consistency in video generation. To address limitations of existing explicit geometry-based and implicit multi-view-based memory mechanisms, we propose an implicit 3D-aware memory retrieval strategy to achieve robust, occlusion-aware historical context retrieval without explicit geometry modeling. We further introduce an adaptive 3D-aligned memory injection module that aligns retrieved historical frames with the target view and adaptively guides the generation process. Extensive experiments show that I3DM achieves superior revisit consistency, visual fidelity, and camera control, providing insights for memory mechanisms in future world models.
+References
+Bai et al. (2025)
+Bai, J.; Xia, M.; Fu, X.; Wang, X.; Mu, L.; Cao, J.; Liu, Z.; Hu, H.; Bai, X.;
+Wan, P.; et al. 2025.
+Recammaster: Camera-controlled generative rendering from a single
+video.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision
+, 14834–14844.
+Brooks et al. (2024)
+Brooks, T.; Peebles, B.; Holmes, C.; DePue, W.; Guo, Y.; Jing, L.; Schnurr, D.;
+Taylor, J.; Luhman, T.; Luhman, E.; et al. 2024.
+Video generation models as world simulators.
+OpenAI Blog
+, 1(8): 1.
+Chen et al. (2025)
+Chen, X.; Chen, Y.; Xiu, Y.; Geiger, A.; and Chen, A. 2025.
+Ttt3r: 3d reconstruction as test-time training.
+arXiv preprint arXiv:2509.26645
+.
+Chen et al. (2024)
+Chen, Y.; Xu, H.; Zheng, C.; Zhuang, B.; Pollefeys, M.; Geiger, A.; Cham,
+T.-J.; and Cai, J. 2024.
+Mvsplat: Efficient 3d gaussian splatting from sparse multi-view
+images.
+In
+European conference on computer vision
+, 370–386. Springer.
+He et al. (2024)
+He, H.; Xu, Y.; Guo, Y.; Wetzstein, G.; Dai, B.; Li, H.; and Yang, C. 2024.
+Cameractrl: Enabling camera control for text-to-video generation.
+arXiv preprint arXiv:2404.02101
+.
+Heusel et al. (2017)
+Heusel, M.; Ramsauer, H.; Unterthiner, T.; Nessler, B.; and Hochreiter, S.
+2017.
+Gans trained by a two time-scale update rule converge to a local nash
+equilibrium.
+Advances in neural information processing systems
+, 30.
+Huang et al. (2025a)
+Huang, J.; Hu, X.; Han, B.; Shi, S.; Tian, Z.; He, T.; and Jiang, L.
+2025a.
+Memory forcing: Spatio-temporal memory for consistent scene
+generation on minecraft.
+arXiv preprint arXiv:2510.03198
+.
+Huang et al. (2025b)
+Huang, T.; Zheng, W.; Wang, T.; Liu, Y.; Wang, Z.; Wu, J.; Jiang, J.; Li, H.;
+Lau, R.; Zuo, W.; et al. 2025b.
+Voyager: Long-range and world-consistent video diffusion for
+explorable 3d scene generation.
+ACM Transactions on Graphics (TOG)
+, 44(6): 1–15.
+Huang et al. (2024)
+Huang, Z.; He, Y.; Yu, J.; Zhang, F.; Si, C.; Jiang, Y.; Zhang, Y.; Wu, T.;
+Jin, Q.; Chanpaisit, N.; Wang, Y.; Chen, X.; Wang, L.; Lin, D.; Qiao, Y.; and
+Liu, Z. 2024.
+VBench: Comprehensive Benchmark Suite for Video Generative Models.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+.
+Jia et al. (2026)
+Jia, X.; Sun, Y.; You, J.; Wong, S.; Zou, Z.; Yan, J.; Wu, Z.; and Jiang, Y.-G.
+2026.
+Efficient-LVSM: Faster, Cheaper, and Better Large View Synthesis
+Model via Decoupled Co-Refinement Attention.
+arXiv preprint arXiv:2602.06478
+.
+Jiang et al. (2025)
+Jiang, L.; Mao, Y.; Xu, L.; Lu, T.; Ren, K.; Jin, Y.; Xu, X.; Yu, M.; Pang, J.;
+Zhao, F.; et al. 2025.
+Anysplat: Feed-forward 3d gaussian splatting from unconstrained
+views.
+ACM Transactions on Graphics (TOG)
+, 44(6): 1–16.
+Jin et al. (2024)
+Jin, H.; Jiang, H.; Tan, H.; Zhang, K.; Bi, S.; Zhang, T.; Luan, F.; Snavely,
+N.; and Xu, Z. 2024.
+Lvsm: A large view synthesis model with minimal 3d inductive bias.
+arXiv preprint arXiv:2410.17242
+.
+Kendall and Gal (2017)
+Kendall, A.; and Gal, Y. 2017.
+What uncertainties do we need in bayesian deep learning for computer
+vision?
+Advances in neural information processing systems
+, 30.
+Knapitsch et al. (2017)
+Knapitsch, A.; Park, J.; Zhou, Q.-Y.; and Koltun, V. 2017.
+Tanks and Temples: Benchmarking Large-Scale Scene Reconstruction.
+ACM Transactions on Graphics
+, 36(4).
+Kong et al. (2025)
+Kong, H.; Yang, X.; Zheng, X.; and Wang, X. 2025.
+WorldWarp: Propagating 3D Geometry with Asynchronous Video Diffusion.
+arXiv preprint arXiv:2512.19678
+.
+Kong et al. (2024)
+Kong, W.; Tian, Q.; Zhang, Z.; Min, R.; Dai, Z.; Zhou, J.; Xiong, J.; Li, X.;
+Wu, B.; Zhang, J.; et al. 2024.
+Hunyuanvideo: A systematic framework for large video generative
+models.
+arXiv preprint arXiv:2412.03603
+.
+Li et al. (2025)
+Li, R.; Torr, P.; Vedaldi, A.; and Jakab, T. 2025.
+VMem: Consistent Interactive Video Scene Generation with
+Surfel-Indexed View Memory.
+arXiv preprint arXiv:2506.18903
+.
+Lipman et al. (2022)
+Lipman, Y.; Chen, R. T.; Ben-Hamu, H.; Nickel, M.; and Le, M. 2022.
+Flow matching for generative modeling.
+arXiv preprint arXiv:2210.02747
+.
+Mao et al. (2025)
+Mao, X.; Lin, S.; Li, Z.; Li, C.; Peng, W.; He, T.; Pang, J.; Chi, M.; Qiao,
+Y.; and Zhang, K. 2025.
+Yume: An interactive world generation model.
+arXiv preprint arXiv:2507.17744
+.
+Parker-Holder et al. (2024)
+Parker-Holder, J.; Ball, P.; Bruce, J.; Dasagi, V.; Holsheimer, K.; Kaplanis,
+C.; Moufarek, A.; Scully, G.; Shar, J.; Shi, J.; et al. 2024.
+Genie 2: A large-scale foundation world model.
+URL: https://deepmind.
+google/discover/blog/genie-2-a-large-scale-foundation-world-model
+.
+Peebles and Xie (2023)
+Peebles, W.; and Xie, S. 2023.
+Scalable diffusion models with transformers.
+In
+Proceedings of the IEEE/CVF international conference on
+computer vision
+, 4195–4205.
+Plucker (1865)
+Plucker, J. 1865.
+Xvii. on a new geometry of space.
+Philosophical Transactions of the Royal Society of London
+,
+(155): 725–791.
+Qin et al. (2024)
+Qin, Y.; Shi, Z.; Yu, J.; Wang, X.; Zhou, E.; Li, L.; Yin, Z.; Liu, X.; Sheng,
+L.; Shao, J.; et al. 2024.
+Worldsimbench: Towards video generation models as world simulators.
+arXiv preprint arXiv:2410.18072
+.
+Ren et al. (2025)
+Ren, X.; Shen, T.; Huang, J.; Ling, H.; Lu, Y.; Nimier-David, M.; Müller,
+T.; Keller, A.; Fidler, S.; and Gao, J. 2025.
+Gen3c: 3d-informed world-consistent video generation with precise
+camera control.
+In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference
+, 6121–6132.
+Sajjadi et al. (2022)
+Sajjadi, M. S.; Meyer, H.; Pot, E.; Bergmann, U.; Greff, K.; Radwan, N.; Vora,
+S.; Lučić, M.; Duckworth, D.; Dosovitskiy, A.; et al. 2022.
+Scene representation transformer: Geometry-free novel view synthesis
+through set-latent scene representations.
+In
+Proceedings of the IEEE/CVF conference on computer vision
+and pattern recognition
+, 6229–6238.
+Sargent et al. (2024)
+Sargent, K.; Li, Z.; Shah, T.; Herrmann, C.; Yu, H.-X.; Zhang, Y.; Chan, E. R.;
+Lagun, D.; Fei-Fei, L.; Sun, D.; et al. 2024.
+Zeronvs: Zero-shot 360-degree view synthesis from a single image.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, 9420–9429.
+Sun et al. (2025)
+Sun, W.; Zhang, H.; Wang, H.; Wu, J.; Wang, Z.; Wang, Z.; Wang, Y.; Zhang, J.;
+Wang, T.; and Guo, C. 2025.
+Worldplay: Towards long-term geometric consistency for real-time
+interactive world modeling.
+arXiv preprint arXiv:2512.14614
+.
+Szymanowicz et al. (2026)
+Szymanowicz, S.; Chen, M.; Wang, J.; Rupprecht, C.; and Vedaldi, A. 2026.
+LagerNVS: Latent Geometry for Fully Neural Real-time Novel View
+Synthesis.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, 15443–15453.
+Team (2025)
+Team, Q. 2025.
+Qwen2.5-VL.
+Team et al. (2026)
+Team, R.; Gao, Z.; Wang, Q.; Zeng, Y.; Zhu, J.; Cheng, K. L.; Li, Y.; Wang, H.;
+Xu, Y.; Ma, S.; Chen, Y.; Liu, J.; Cheng, Y.; Yao, Y.; Zhu, J.; Meng, Y.;
+Zheng, K.; Bai, Q.; Chen, J.; Shen, Z.; Yu, Y.; Zhu, X.; Shen, Y.; and
+Ouyang, H. 2026.
+Advancing Open-source World Models.
+arXiv preprint arXiv:2601.20540
+.
+Unterthiner et al. (2018)
+Unterthiner, T.; Van Steenkiste, S.; Kurach, K.; Marinier, R.; Michalski, M.;
+and Gelly, S. 2018.
+Towards accurate generative models of video: A new metric &
+challenges.
+arXiv preprint arXiv:1812.01717
+.
+Wan et al. (2025)
+Wan, T.; Wang, A.; Ai, B.; Wen, B.; Mao, C.; Xie, C.-W.; Chen, D.; Yu, F.;
+Zhao, H.; Yang, J.; et al. 2025.
+Wan: Open and advanced large-scale video generative models.
+arXiv preprint arXiv:2503.20314
+.
+Wang et al. (2025a)
+Wang, J.; Chen, M.; Karaev, N.; Vedaldi, A.; Rupprecht, C.; and Novotny, D.
+2025a.
+Vggt: Visual geometry grounded transformer.
+In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference
+, 5294–5306.
+Wang et al. (2025b)
+Wang, Q.; Zhang, Y.; Holynski, A.; Efros, A. A.; and Kanazawa, A.
+2025b.
+Continuous 3d perception model with persistent state.
+In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference
+, 10510–10522.
+Wang et al. (2025c)
+Wang, R.; Xu, S.; Dai, C.; Xiang, J.; Deng, Y.; Tong, X.; and Yang, J.
+2025c.
+Moge: Unlocking accurate monocular geometry estimation for
+open-domain images with optimal training supervision.
+In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference
+, 5261–5271.
+Wang et al. (2024a)
+Wang, S.; Leroy, V.; Cabon, Y.; Chidlovskii, B.; and Revaud, J.
+2024a.
+Dust3r: Geometric 3d vision made easy.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, 20697–20709.
+Wang et al. (2025d)
+Wang, Y.; Zhou, J.; Zhu, H.; Chang, W.; Zhou, Y.; Li, Z.; Chen, J.; Pang, J.;
+Shen, C.; and He, T. 2025d.
+pi3: Permutation-Equivariant Visual Geometry Learning.
+arXiv preprint arXiv:2507.13347
+.
+Wang et al. (2004)
+Wang, Z.; Bovik, A. C.; Sheikh, H. R.; and Simoncelli, E. P. 2004.
+Image quality assessment: from error visibility to structural
+similarity.
+IEEE transactions on image processing
+, 13(4): 600–612.
+Wang et al. (2026)
+Wang, Z.; Liu, Z.; Li, J.; Huang, K.; Xu, B.; Kang, F.; An, M.; Wang, P.;
+Jiang, B.; Wei, Y.; et al. 2026.
+Matrix-game 3.0: Real-time and streaming interactive world model with
+long-horizon memory.
+arXiv preprint arXiv:2604.08995
+.
+Wang et al. (2024b)
+Wang, Z.; Yuan, Z.; Wang, X.; Li, Y.; Chen, T.; Xia, M.; Luo, P.; and Shan, Y.
+2024b.
+Motionctrl: A unified and flexible motion controller for video
+generation.
+In
+ACM SIGGRAPH 2024 Conference Papers
+, 1–11.
+Wu et al. (2026)
+Wu, R.; He, X.; Cheng, M.; Yang, T.; Zhang, Y.; Kang, Z.; Cai, X.; Wei, X.;
+Guo, C.; Li, C.; et al. 2026.
+Infinite-World: Scaling Interactive World Models to 1000-Frame
+Horizons via Pose-Free Hierarchical Memory.
+arXiv preprint arXiv:2602.02393
+.
+Wu et al. (2025)
+Wu, T.; Yang, S.; Po, R.; Xu, Y.; Liu, Z.; Lin, D.; and Wetzstein, G. 2025.
+Video World Models with Long-term Spatial Memory.
+arXiv preprint arXiv:2506.05284
+.
+Xiao et al. (2025)
+Xiao, Z.; Lan, Y.; Zhou, Y.; Ouyang, W.; Yang, S.; Zeng, Y.; and Pan, X. 2025.
+Worldmem: Long-term consistent world simulation with memory.
+arXiv preprint arXiv:2504.12369
+.
+Yang et al. (2026)
+Yang, Y.; Fan, L.; Shi, Z.; Peng, J.; Wang, F.; and Zhang, Z. 2026.
+NeoVerse: Enhancing 4D World Model with in-the-wild Monocular Videos.
+arXiv preprint arXiv:2601.00393
+.
+Yu et al. (2025)
+Yu, J.; Bai, J.; Qin, Y.; Liu, Q.; Wang, X.; Wan, P.; Zhang, D.; and Liu, X.
+2025.
+Context as memory: Scene-consistent interactive long video generation
+with memory retrieval.
+In
+Proceedings of the SIGGRAPH Asia 2025 Conference Papers
+,
+1–11.
+Yu et al. (2024)
+Yu, W.; Xing, J.; Yuan, L.; Hu, W.; Li, X.; Huang, Z.; Gao, X.; Wong, T.-T.;
+Shan, Y.; and Tian, Y. 2024.
+Viewcrafter: Taming video diffusion models for high-fidelity novel
+view synthesis.
+arXiv preprint arXiv:2409.02048
+.
+Zhang et al. (2018)
+Zhang, R.; Isola, P.; Efros, A. A.; Shechtman, E.; and Wang, O. 2018.
+The unreasonable effectiveness of deep features as a perceptual
+metric.
+In
+Proceedings of the IEEE conference on computer vision and
+pattern recognition
+, 586–595.
+Zhao et al. (2026)
+Zhao, J.; Wei, F.; Liu, Z.; Zhang, H.; Xu, C.; and Lu, Y. 2026.
+Spatia: Video generation with updatable spatial memory.
+In
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition
+, 4245–4257.
+Zhou et al. (2025)
+Zhou, J.; Gao, H.; Voleti, V.; Vasishta, A.; Yao, C.-H.; Boss, M.; Torr, P.;
+Rupprecht, C.; and Jampani, V. 2025.
+Stable virtual camera: Generative view synthesis with diffusion
+models.
+arXiv preprint arXiv:2503.14489
+.
+Zhou et al. (2018)
+Zhou, T.; Tucker, R.; Flynn, J.; Fyffe, G.; and Snavely, N. 2018.
+Stereo magnification: Learning view synthesis using multiplane
+images.
+arXiv preprint arXiv:1805.09817
+.
+I3DM: Implicit 3D-aware Memory Retrieval and Injection
+for Consistent Video Scene Generation
+Supplementary Material
+1
+Monash University
+2
+Vertex Lab
+3
+Shanghai Jiao Tong University
+This supplementary material is organized as follows:
+∙
+\bullet
+Sec.
+1
+:
+Discussion and Limitations.
+∙
+\bullet
+Sec.
+2
+:
+Details of 3D-aware Memory Retrieval.
+∙
+\bullet
+Sec.
+3
+:
+Details of Adaptive Memory Injection.
+∙
+\bullet
+Sec.
+4
+:
+Implementation Details.
+∙
+\bullet
+Sec.
+5
+:
+Additional Ablation Studies.
+∙
+\bullet
+Sec.
+6
+:
+Additional Comparisons & Visual Results.
+We highly recommend
+watching our supplementary video
+for a clearer visualization of the experimental results.
+1
+Discussion and Limitations
+Despite the effectiveness of our memory retrieval and injection mechanisms, certain limitations are discussed below.
+Inference Time Analysis.
+We report the average per-frame inference time as the video length increases in Tab.
+1
+. The retrieval time grows nearly linearly with video length but remains manageable, accounting for only 15.5% of total inference time even at 989 frames. This overhead is comparable to WorldMem
+(
+Xiao et al. 2025
+)
+, which reports a 10–20% retrieval overhead at 1K frames. Since our focus is accurate retrieval in complex environments, we leave acceleration through spatial pruning or more efficient architectures such as Efficient-LVSM
+(
+Jia et al. 2026
+)
+for future improvement.
+Table 1:
+Per-frame runtime (sec) as generated video length increases.
+Bank size
+denotes the number of frames in the memory bank for retrieval before generating the current clip.
+Frames
+Bank size
+Retrieval time
+Total time
+Ratio
+77
+4
+0.00
+1.24
+0.0%
+229
+44
+0.04
+1.32
+3.1%
+457
+104
+0.10
+1.36
+7.3%
+609
+144
+0.14
+1.39
+9.9%
+837
+204
+0.19
+1.47
+13.2%
+989
+244
+0.23
+1.50
+15.5%
+Drifting and Error Accumulation.
+Temporal drifting caused by inherent error accumulation for long video generation remains a challenge, which mainly stems from the train-test gap of the base diffusion model. We report a result in Fig.
+1
+, which compares our method with a variant without memory on 1233-frame generation. Although our memory mechanism can reduce error accumulation by retrieving relatively clean early frames to guide later generation, our method does not focus on solving this problem. There is a line of work (as known as “Forcing” methods)
+(
+Huang et al. 2025
+;
+Liu et al. 2025
+;
+Yang et al. 2025
+)
+exclusively targeting on this problem, and combining our method with these techniques could further mitigate this issue.
+Figure 1:
+Our method alleviates temporal drifting by memory mechanism.
+Figure 2:
+Visualization of confidence maps and greedy maximum-coverage selection. Given the anchor frame and target Plücker rays, our network predicts a spatial confidence map for each candidate (middle row). The selected candidates provide complementary marginal gains that collectively cover the target view (bottom row).
+2
+Details of 3D-aware Memory Retrieval
+Visualization of Confidence Maps.
+Figure
+2
+visualizes the retrieval process for a target view. For each candidate, our network takes the candidate frame, the last frame as the anchor, and the target Plücker rays as inputs, and predicts a target-aligned spatial confidence map indicating how reliably the candidate covers each target-view region (middle row). Based on these confidence maps, the greedy maximum-coverage algorithm sequentially selects three candidates by maximizing the marginal information gain at each step, promoting complementary target-view coverage while reducing redundancy (bottom row). The target image is shown only for reference and is not used during retrieval.
+Maximum Coverage Selection Algorithm.
+After obtaining the set of spatial confidence maps for each frame in the memory bank (excluding the last frame) using our proposed scoring CNN, we perform a
+greedy maximum coverage selection
+to retrieve relevant historical frames that maximally cover the scene of the target query views. The algorithm is summarized in Alg.
+1
+.
+Algorithm 1
+Multi-View Maximum Coverage Selection For One Target View
+1:
+2:
+i
+last
+i_{\text{last}}
+: index of the last frame
+3:
+N
+N
+: number of conditioning frames
+4:
+𝒱
+=
+{
+(
+𝐈
+i
+,
+𝐏
+i
+)
+}
+i
+=
+1
+i
+last
+\mathcal{V}=\{(\mathbf{I}_{i},\mathbf{P}_{i})\}_{i=1}^{i_{\text{last}}}
+: memory bank of historical frames and Plücker rays.
+5:
+ℳ
+=
+{
+𝐦
+i
+}
+i
+=
+1
+i
+last
+−
+1
+\mathcal{M}=\{\mathbf{m}_{i}\}_{i=1}^{i_{\text{last}}-1}
+: candidate confidence maps, with
+𝐦
+i
+∈
+ℝ
+H
+p
+×
+W
+p
+\mathbf{m}_{i}\in\mathbb{R}^{\frac{H}{p}\times\frac{W}{p}}
+6:
+7:
+𝒞
+\mathcal{C}
+: indices of selected frames
+8:
+9:
+𝒞
+←
+∅
+\mathcal{C}\leftarrow\emptyset
+⊳
+\triangleright
+Initialize the selected indices
+10:
+K
+←
+min
+⁡
+(
+N
+−
+1
+,
+|
+𝒱
+|
+−
+1
+)
+K\leftarrow\min(N-1,|\mathcal{V}|-1)
+⊳
+\triangleright
+Number of frames to retrieve
+11:
+ℐ
+←
+{
+1
+,
+2
+,
+…
+,
+i
+last
+−
+1
+}
+\mathcal{I}\leftarrow\{1,2,\dots,i_{\text{last}}-1\}
+⊳
+\triangleright
+Indices in the memory bank
+12:
+𝐦
+g
+←
+𝟎
+H
+p
+×
+W
+p
+\mathbf{m}^{\text{g}}\leftarrow\mathbf{0}^{\frac{H}{p}\times\frac{W}{p}}
+⊳
+\triangleright
+Initialize global confidence
+13:
+for
+s
+​
+t
+​
+e
+​
+p
+=
+1
+step=1
+to
+K
+K
+do
+14:
+g
+∗
+←
+−
+∞
+g^{*}\leftarrow-\infty
+15:
+i
+∗
+←
+−
+1
+i^{*}\leftarrow-1
+16:
+for
+each
+i
+∈
+ℐ
+i\in\mathcal{I}
+do
+17:
+𝐦
+~
+g
+←
+max
+⁡
+(
+𝐦
+g
+,
+𝐦
+i
+)
+\tilde{\mathbf{m}}^{\text{g}}\leftarrow\max(\mathbf{m}^{\text{g}},\mathbf{m}_{i})
+⊳
+\triangleright
+Element-wise maximum
+18:
+g
+←
+∑
+(
+𝐦
+~
+g
+−
+𝐦
+g
+)
+g\leftarrow\sum(\tilde{\mathbf{m}}^{\text{g}}-\mathbf{m}^{\text{g}})
+⊳
+\triangleright
+Calculate the information gain
+19:
+if
+g
+>
+g
+∗
+g>g^{*}
+then
+20:
+g
+∗
+←
+g
+g^{*}\leftarrow g
+21:
+i
+∗
+←
+i
+i^{*}\leftarrow i
+22:
+end
+if
+23:
+end
+for
+24:
+if
+i
+∗
+≠
+−
+1
+i^{*}\neq-1
+then
+25:
+𝒞
+←
+𝒞
+∪
+{
+i
+∗
+}
+\mathcal{C}\leftarrow\mathcal{C}\cup\{i^{*}\}
+⊳
+\triangleright
+Include the best candidate
+26:
+ℐ
+←
+ℐ
+∖
+{
+i
+∗
+}
+\mathcal{I}\leftarrow\mathcal{I}\setminus\{i^{*}\}
+⊳
+\triangleright
+Remove from candidate pool
+27:
+𝐦
+g
+←
+max
+⁡
+(
+𝐦
+g
+,
+𝐦
+i
+∗
+)
+\mathbf{m}^{\text{g}}\leftarrow\max(\mathbf{m}^{\text{g}},\mathbf{m}_{i^{*}})
+⊳
+\triangleright
+Update global confidence
+28:
+end
+if
+29:
+end
+for
+30:
+𝒞
+←
+𝒞
+∪
+{
+i
+last
+}
+\mathcal{C}\leftarrow\mathcal{C}\cup\{i_{\text{last}}\}
+⊳
+\triangleright
+Include the last frame
+31:
+return
+𝒞
+\mathcal{C}
+Figure 3:
+Visual comparison of the frozen and adaptive NVS modules. The purple dashed boxes indicate warping errors introduced by the frozen NVS module, which causes inaccurate camera motion in the generated results (highlighted by red dashed boxes). The adaptive NVS module suppresses these unreliable warped regions, allowing the model to fall back on its internal generative priors to produce convincing results with accurate camera motion.
+3
+Details of Adaptive Memory Injection
+We utilize the pre-trained LVSM
+(
+Jin et al. 2024
+)
+as our NVS module to warp the retrieved historical frames to the target view, providing spatially aligned guidance to condition the diffusion model. However, the frozen NVS module produces unreliable warping outputs in extrapolated regions (Fig.
+3
+, second row), providing misleading guidance that interferes with the diffusion model and causes inaccurate camera motion in the generated results (Fig.
+3
+, fourth row). In contrast, jointly fine-tuning the NVS module with the diffusion model enables it to produce clear guidance in reliably aligned regions while suppressing unreliable extrapolated content (Fig.
+3
+, third row), thereby adaptively guiding the diffusion model to generate plausible results with accurate camera motion (Fig
+3
+, fifth row).
+4
+Implementation Details
+Training of Memory Retrieval Module.
+We utilize the decoder-only variant of the pre-trained LVSM
+(
+Jin et al. 2024
+)
+as the feature extractor. Input images are resized to
+256
+×
+256
+256\times 256
+, and features are extracted from the
+6
+th
+6^{\text{th}}
+Transformer layer. The scoring CNN has 3 layers with output channels of 256, 64, and 1, respectively. We freeze the entire LVSM model and solely train the scoring CNN on the RealEstate10K
+(
+Zhou et al. 2018
+)
+training set using a learning rate of
+5
+×
+10
+−
+5
+5\times 10^{-5}
+and a total batch size of 64. We train it for 16k steps, which takes approximately 10 hours on 4 NVIDIA RTX 4090 GPUs.
+Training of Video Generation Module.
+Our video generation model is based on Wan2.1-Fun-V1.1-1.3B-Control-Camera
+(
+Wan et al. 2025
+;
+He et al. 2024
+)
+. We generate video clips at a resolution of
+640
+×
+352
+640\times 352
+with 77 frames, conditioned on 4 frames randomly sampled from the same scene. The Adaptive NVS Module is initialized from the pre-trained LVSM. Because the original pretrained LVSM does not support 4 input views and arbitrary resolutions, we solely fine-tune the LVSM decoder-only variant for 6k steps using its original configuration, except for the number of input views and frame resolution. After that, we train our video generation model by jointly fine-tuning the Transformer blocks of the Adaptive NVS Module, the reference convolution layer, and the LoRA layers injected into the DiT blocks for 11k steps. The rank of the LoRA layers is set to 1024. Training employs the AdamW optimizer with a learning rate of
+1
+×
+10
+−
+4
+1\times 10^{-4}
+and a total batch size of 4. The training process takes approximately 1.8 days on 4 NVIDIA H200 GPUs.
+Camera Control Metrics.
+Following existing work
+(
+Li et al. 2025
+;
+Kong et al. 2025
+;
+Bai et al. 2025
+;
+Zhang et al. 2025
+;
+He et al. 2024
+)
+, we express estimated camera poses relative to the first frame and normalize the translation by the furthest frame. After extracting poses of generated views using Pi3
+(
+Wang et al. 2025
+)
+, we calculate the rotation error (
+R
+e
+​
+r
+​
+r
+∘
+R_{err}^{\circ}
+) and the translation error (
+T
+e
+​
+r
+​
+r
+T_{err}
+) against the ground truth as follows:
+R
+e
+​
+r
+​
+r
+∘
+\displaystyle R_{{err}}^{\circ}
+=
+arccos
+⁡
+(
+0.5
+​
+(
+tr
+​
+(
+𝐑
+gen
+​
+𝐑
+gt
+T
+)
+−
+1
+)
+)
+,
+\displaystyle=\arccos\left(0.5\left(\text{tr}(\mathbf{R}_{\text{gen}}\mathbf{R}_{\text{gt}}^{T})-1\right)\right),
+(1)
+T
+e
+​
+r
+​
+r
+\displaystyle T_{{err}}
+=
+‖
+𝐓
+gt
+−
+𝐓
+gen
+‖
+2
+,
+\displaystyle=\|\mathbf{T}_{\text{gt}}-\mathbf{T}_{\text{gen}}\|_{2},
+(2)
+where
+𝐑
+gen
+\mathbf{R}_{\text{gen}}
+and
+𝐓
+gen
+\mathbf{T}_{\text{gen}}
+denote the rotation matrix and translation vector of generated views, and
+𝐑
+gt
+\mathbf{R}_{\text{gt}}
+and
+𝐓
+gt
+\mathbf{T}_{\text{gt}}
+denote their ground truth counterparts.
+tr
+denotes the trace of a matrix.
+Table 2:
+Ablation studies of different feature layers for memory retrieval on the Re10K dataset. Time costs are averaged per video clip and reported in seconds (s).
+Layer
+Visual Quality
+Revisit Consistency
+Per-clip Time Cost
+FID
+↓
+\downarrow
+FVD
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+LPIPS
+↓
+\downarrow
+Retrieval
+↓
+\downarrow
+Generation
+↓
+\downarrow
+L0
+18.655
+148.764
+17.183
+0.634
+0.2764
+0.1853
+56.7241
+L4
+18.098
+133.384
+24.609
+0.823
+0.0786
+1.3481
+58.3389
+L6
+17.553
+131.657
+24.732
+0.828
+0.0756
+1.9739
+59.0871
+L12
+17.656
+134.054
+24.771
+0.828
+0.0761
+3.8737
+61.4180
+L24
+17.599
+128.981
+24.823
+0.830
+0.0742
+7.6167
+64.9117
+5
+Additional Ablation Studies
+Choice of Feature Layer.
+We evaluate the impact of using different intermediate feature layers from the pre-trained LVSM
+(
+Jin et al. 2024
+)
+to predict the spatial uncertainty map for historical frame retrieval. Tab.
+2
+reports the visual quality and revisit consistency evaluated over the entire generated videos (6 consecutive clips), and the average per-clip (77 frames) time cost. Here, L0 (raw tokens before Transformer blocks) yields the poorest revisit consistency, indicating that features without spatial correspondence learning fail to provide effective 3D priors for retrieval. Features extracted from deeper layers yield more accurate uncertainty maps, improving revisit consistency. However, this performance gain comes at the cost of linearly increasing retrieval times. To strike a good balance, we adopt the
+6
+th
+6^{\text{th}}
+layer in our default implementation. At this layer, the retrieval overhead accounts for
+3.3
+%
+3.3\%
+of the total per-clip generation time, which is acceptable.
+Qualitative Analysis of Retrieval Strategies.
+To further validate our implicit 3D-aware memory retrieval strategy, we conduct a comparative experiment, as illustrated in Fig.
+5
+.
+Specifically, we initialize the memory bank using ground-truth images from the first four video clips (blue dashed trajectories in Fig.
+5
+) and aim to generate the fifth clip (orange dashed trajectory).
+Using the target camera poses of the fifth clip, we retrieve relevant historical frames from the memory bank to evaluate four different selection strategies: FoV-based, geometry-based, I3D-based (Top-K), and our proposed approach.
+Note that the memory bank contains the same ground-truth frames across all strategies for a fair comparison.
+These retrieved frames (shown on the left of Fig.
+5
+) are then fed into the pre-trained NVS model
+(
+Jin et al. 2024
+)
+to synthesize the target views (shown on the right).
+As demonstrated by the results, the FoV-based strategy retrieves frames where the target region is occluded by the wardrobe, leading to severe information loss and blurry NVS results. While the geometry-based approach mitigates this occlusion issue, it still exhibits noticeable artifacts. The I3D-based (Top-K) method retrieves highly similar frames with redundant information overlap, resulting in blurry synthesis in regions lacking spatial reference. In contrast, our full implicit 3D-aware retrieval strategy successfully selects unoccluded frames while maximizing complementary scene coverage for the target view, ultimately yielding the highest NVS quality.
+Figure 4:
+Replacing the FoV-based retrieval of Matrix-Game-3.0
+(
+Wang et al. 2026
+)
+with our 3D-aware retrieval strategy improves revisit consistency while retaining its original frame-concatenation injection.
+Generality of Our Retrieval Strategy.
+Our implicit 3D-aware memory retrieval strategy can be integrated into other memory-based video generation frameworks. For example, Matrix-Game-3.0
+(
+Wang et al. 2026
+)
+uses FoV overlap for memory retrieval and frame concatenation for memory injection. Replacing only its FoV-based retrieval with ours, while retaining the original injection mechanism, improves revisit consistency, as shown in Fig.
+4
+.
+6
+Additional Comparisons & Visual Results
+Qualitative Comparison with Baselines.
+We provide additional qualitative comparisons in Figs.
+6
+and
+7
+. As highlighted, most works
+(
+Kong et al. 2025
+;
+Ren et al. 2025
+;
+Wu et al. 2026
+;
+Yang et al. 2026
+;
+Team et al. 2026
+;
+Zhao et al. 2025
+;
+Sun et al. 2025
+)
+fail to maintain strict consistency during revisits. Meanwhile, Vmem
+(
+Li et al. 2025
+)
+tends to produce repetitive content and exhibits inaccurate camera motion. In contrast, our method generates plausible scene content during exploration and maintains strict consistency upon revisiting, all while accurately adhering to the target camera trajectory.
+OOD Generalization.
+We conduct further generalization experiments on out-of-distribution scenes, as shown in Fig.
+8
+. We capture two real-world scenes and synthesize long camera trajectories (over 910 and 680 frames, respectively) starting from the reference photo, comparing our method against WorldPlay
+(
+Sun et al. 2025
+)
+. As demonstrated in Fig.
+8
+, our method generates plausible novel content during exploration and maintains good consistency during revisits. Although WorldPlay exhibits less color shifting due to its large-scale training data, it still suffers from severe artifacts during exploration, as highlighted by the red dashed boxes in Fig.
+8
+.
+Results on the RealEstate10K Dataset.
+We provide additional visual results on the RealEstate10K dataset in Fig.
+9
+. As demonstrated, our method successfully maintains strict scene consistency while revisiting the same regions.
+Figure 5:
+Qualitative comparison of different memory retrieval strategies. (Top) The camera trajectory illustrates the memory bank initialization (blue) and the target sequence to be generated (orange), alongside the ground truth (GT) frames. (Bottom) For each strategy, the left panel shows the four retrieved historical frames, while the right panel displays the corresponding target views synthesized by the pre-trained NVS model. Red dashed circles highlight artifacts caused by suboptimal retrieval.
+Figure 6:
+Qualitative comparison on an outdoor RealEstate10K scene. Black dashed arrows link corresponding frames that should remain consistent; red dashed circles highlight visual inconsistencies, red dashed arrows indicate inaccurate camera motion, and red dashed boxes denote repetitive generated content.
+Figure 7:
+Qualitative comparison on an indoor RealEstate10K scene. Black dashed arrows link corresponding frames that should remain consistent; red dashed circles highlight visual inconsistencies.
+Figure 8:
+Qualitative comparison on the out-of-distribution scenes. Red dashed boxes denote the generated artifacts.
+Figure 9:
+Our visual results on the RealEstate10K dataset. Black dashed arrows link corresponding frames that should remain consistent.
+References
+Bai et al. (2025)
+Bai, J.; Xia, M.; Fu, X.; Wang, X.; Mu, L.; Cao, J.; Liu, Z.; Hu, H.; Bai, X.;
+Wan, P.; et al. 2025.
+Recammaster: Camera-controlled generative rendering from a single
+video.
+In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision
+, 14834–14844.
+He et al. (2024)
+He, H.; Xu, Y.; Guo, Y.; Wetzstein, G.; Dai, B.; Li, H.; and Yang, C. 2024.
+Cameractrl: Enabling camera control for text-to-video generation.
+arXiv preprint arXiv:2404.02101
+.
+Huang et al. (2025)
+Huang, X.; Li, Z.; He, G.; Zhou, M.; and Shechtman, E. 2025.
+Self forcing: Bridging the train-test gap in autoregressive video
+diffusion.
+arXiv preprint arXiv:2506.08009
+.
+Jia et al. (2026)
+Jia, X.; Sun, Y.; You, J.; Wong, S.; Zou, Z.; Yan, J.; Wu, Z.; and Jiang, Y.-G.
+2026.
+Efficient-LVSM: Faster, Cheaper, and Better Large View Synthesis
+Model via Decoupled Co-Refinement Attention.
+arXiv preprint arXiv:2602.06478
+.
+Jin et al. (2024)
+Jin, H.; Jiang, H.; Tan, H.; Zhang, K.; Bi, S.; Zhang, T.; Luan, F.; Snavely,
+N.; and Xu, Z. 2024.
+Lvsm: A large view synthesis model with minimal 3d inductive bias.
+arXiv preprint arXiv:2410.17242
+.
+Kong et al. (2025)
+Kong, H.; Yang, X.; Zheng, X.; and Wang, X. 2025.
+WorldWarp: Propagating 3D Geometry with Asynchronous Video Diffusion.
+arXiv preprint arXiv:2512.19678
+.
+Li et al. (2025)
+Li, R.; Torr, P.; Vedaldi, A.; and Jakab, T. 2025.
+VMem: Consistent Interactive Video Scene Generation with
+Surfel-Indexed View Memory.
+arXiv preprint arXiv:2506.18903
+.
+Liu et al. (2025)
+Liu, K.; Hu, W.; Xu, J.; Shan, Y.; and Lu, S. 2025.
+Rolling forcing: Autoregressive long video diffusion in real time.
+arXiv preprint arXiv:2509.25161
+.
+Ren et al. (2025)
+Ren, X.; Shen, T.; Huang, J.; Ling, H.; Lu, Y.; Nimier-David, M.; Müller,
+T.; Keller, A.; Fidler, S.; and Gao, J. 2025.
+Gen3c: 3d-informed world-consistent video generation with precise
+camera control.
+In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference
+, 6121–6132.
+Sun et al. (2025)
+Sun, W.; Zhang, H.; Wang, H.; Wu, J.; Wang, Z.; Wang, Z.; Wang, Y.; Zhang, J.;
+Wang, T.; and Guo, C. 2025.
+Worldplay: Towards long-term geometric consistency for real-time
+interactive world modeling.
+arXiv preprint arXiv:2512.14614
+.
+Team et al. (2026)
+Team, R.; Gao, Z.; Wang, Q.; Zeng, Y.; Zhu, J.; Cheng, K. L.; Li, Y.; Wang, H.;
+Xu, Y.; Ma, S.; Chen, Y.; Liu, J.; Cheng, Y.; Yao, Y.; Zhu, J.; Meng, Y.;
+Zheng, K.; Bai, Q.; Chen, J.; Shen, Z.; Yu, Y.; Zhu, X.; Shen, Y.; and
+Ouyang, H. 2026.
+Advancing Open-source World Models.
+arXiv preprint arXiv:2601.20540
+.
+Wan et al. (2025)
+Wan, T.; Wang, A.; Ai, B.; Wen, B.; Mao, C.; Xie, C.-W.; Chen, D.; Yu, F.;
+Zhao, H.; Yang, J.; et al. 2025.
+Wan: Open and advanced large-scale video generative models.
+arXiv preprint arXiv:2503.20314
+.
+Wang et al. (2025)
+Wang, Y.; Zhou, J.; Zhu, H.; Chang, W.; Zhou, Y.; Li, Z.; Chen, J.; Pang, J.;
+Shen, C.; and He, T. 2025.
+pi3: Permutation-Equivariant Visual Geometry Learning.
+arXiv preprint arXiv:2507.13347
+.
+Wang et al. (2026)
+Wang, Z.; Liu, Z.; Li, J.; Huang, K.; Xu, B.; Kang, F.; An, M.; Wang, P.;
+Jiang, B.; Wei, Y.; et al. 2026.
+Matrix-game 3.0: Real-time and streaming interactive world model with
+long-horizon memory.
+arXiv preprint arXiv:2604.08995
+.
+Wu et al. (2026)
+Wu, R.; He, X.; Cheng, M.; Yang, T.; Zhang, Y.; Kang, Z.; Cai, X.; Wei, X.;
+Guo, C.; Li, C.; et al. 2026.
+Infinite-World: Scaling Interactive World Models to 1000-Frame
+Horizons via Pose-Free Hierarchical Memory.
+arXiv preprint arXiv:2602.02393
+.
+Xiao et al. (2025)
+Xiao, Z.; Lan, Y.; Zhou, Y.; Ouyang, W.; Yang, S.; Zeng, Y.; and Pan, X. 2025.
+Worldmem: Long-term consistent world simulation with memory.
+arXiv preprint arXiv:2504.12369
+.
+Yang et al. (2025)
+Yang, S.; Huang, W.; Chu, R.; Xiao, Y.; Zhao, Y.; Wang, X.; Li, M.; Xie, E.;
+Chen, Y.; Lu, Y.; et al. 2025.
+Longlive: Real-time interactive long video generation.
+arXiv preprint arXiv:2509.22622
+.
+Yang et al. (2026)
+Yang, Y.; Fan, L.; Shi, Z.; Peng, J.; Wang, F.; and Zhang, Z. 2026.
+NeoVerse: Enhancing 4D World Model with in-the-wild Monocular Videos.
+arXiv preprint arXiv:2601.00393
+.
+Zhang et al. (2025)
+Zhang, C.; Li, B.; Wei, M.; Cao, Y.-P.; Gambardella, C. C.; Phung, D.; and Cai,
+J. 2025.
+Unified Camera Positional Encoding for Controlled Video Generation.
+arXiv preprint arXiv:2512.07237
+.
+Zhao et al. (2025)
+Zhao, J.; Wei, F.; Liu, Z.; Zhang, H.; Xu, C.; and Lu, Y. 2025.
+Spatia: Video Generation with Updatable Spatial Memory.
+arXiv preprint arXiv:2512.15716
+.
+Zhou et al. (2018)
+Zhou, T.; Tucker, R.; Flynn, J.; Fyffe, G.; and Snavely, N. 2018.
+Stereo magnification: Learning view synthesis using multiplane
+images.
+arXiv preprint arXiv:1805.09817
+.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:
+Click the "Report Issue"
+(
+)
+button, located in the page header.
+Tip:
+You can select the relevant text first, to include it in your report.
+Our team has already identified
+the following issues
+. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a
+list of packages that need conversion
+, and welcome
+developer contributions
+.
+We gratefully acknowledge support from
+        our
+major funders
+,
+member institutions
+,
+,
+        and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status
+(opens in new tab)
+Major funding support from

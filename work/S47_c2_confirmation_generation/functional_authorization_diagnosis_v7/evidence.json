@@ -1,0 +1,234 @@
+{
+  "schema": "s47-c2-functional-authorization-diagnostic-evidence-v1",
+  "started_utc": "2026-09-08T12:23:40.787640+00:00",
+  "completed_utc": "2026-09-08T12:23:40.883503+00:00",
+  "unmodified_validator_error": {
+    "type": "RuntimeError",
+    "message": "C2 authorization attempt lease is incomplete, conflicting, or unsealed"
+  },
+  "actual_producer_authorization_identity": {
+    "device": 16777234,
+    "inode": 262348870,
+    "size": 2599,
+    "mode": 292
+  },
+  "actual_reader_snapshot_identity": {
+    "device": 16777234,
+    "inode": 262348870,
+    "size": 2599,
+    "mode": 292,
+    "mtime_ns": 1788869955655191499,
+    "ctime_ns": 1788869955655781791
+  },
+  "missing_from_producer_keys": [
+    "ctime_ns",
+    "mtime_ns"
+  ],
+  "shared_fields_all_equal": true,
+  "existing_conjuncts_evaluated": [
+    {
+      "index": 0,
+      "expression": "set(started) == {'schema', 'status', 'attempt_path', 'attempt_identity', 'started_utc', 'tool_source_sha256', 'manifest_sha256', 'retry_permitted'}",
+      "passed": true
+    },
+    {
+      "index": 1,
+      "expression": "set(lease) == {'schema', 'status', 'attempt_path', 'attempt_identity', 'attempt_started_sha256', 'authorization_path', 'authorization_sha256', 'authorization_identity', 'tool_source_sha256', 'manifest_sha256', 'completed_utc', 'retry_permitted', 'generation_calls', 'pixels_decoded', 'terminal_shape', 'terminal_success'}",
+      "passed": true
+    },
+    {
+      "index": 2,
+      "expression": "started_utc < completed_utc",
+      "passed": true
+    },
+    {
+      "index": 3,
+      "expression": "started.get('schema') == 's47-c2-authorization-attempt-start-v2'",
+      "passed": true
+    },
+    {
+      "index": 4,
+      "expression": "started.get('status') == 'ATTEMPT_LEASE_CLAIMED'",
+      "passed": true
+    },
+    {
+      "index": 5,
+      "expression": "started.get('attempt_path') == str(AUTHORIZATION_ATTEMPT)",
+      "passed": true
+    },
+    {
+      "index": 6,
+      "expression": "started.get('tool_source_sha256') == tool_sha",
+      "passed": true
+    },
+    {
+      "index": 7,
+      "expression": "started.get('manifest_sha256') == expected",
+      "passed": true
+    },
+    {
+      "index": 8,
+      "expression": "started.get('attempt_identity') == attempt_directory.identity",
+      "passed": true
+    },
+    {
+      "index": 9,
+      "expression": "started.get('retry_permitted') is False",
+      "passed": true
+    },
+    {
+      "index": 10,
+      "expression": "lease.get('schema') == 's47-c2-authorization-attempt-receipt-v2'",
+      "passed": true
+    },
+    {
+      "index": 11,
+      "expression": "lease.get('status') == 'AUTHORIZED_AND_ATTEMPT_SEALED'",
+      "passed": true
+    },
+    {
+      "index": 12,
+      "expression": "lease.get('attempt_path') == str(AUTHORIZATION_ATTEMPT)",
+      "passed": true
+    },
+    {
+      "index": 13,
+      "expression": "lease.get('attempt_started_sha256') == started_sha",
+      "passed": true
+    },
+    {
+      "index": 14,
+      "expression": "lease.get('authorization_path') == str(LAUNCH_AUTHORIZATION)",
+      "passed": true
+    },
+    {
+      "index": 15,
+      "expression": "lease.get('authorization_sha256') == authorization_sha",
+      "passed": true
+    },
+    {
+      "index": 16,
+      "expression": "lease.get('tool_source_sha256') == tool_sha",
+      "passed": true
+    },
+    {
+      "index": 17,
+      "expression": "lease.get('manifest_sha256') == expected",
+      "passed": true
+    },
+    {
+      "index": 18,
+      "expression": "lease.get('attempt_identity') == attempt_directory.identity",
+      "passed": true
+    },
+    {
+      "index": 19,
+      "expression": "lease.get('authorization_identity') == authorization_identity",
+      "passed": false
+    },
+    {
+      "index": 20,
+      "expression": "lease.get('retry_permitted') is False",
+      "passed": true
+    },
+    {
+      "index": 21,
+      "expression": "lease.get('generation_calls') == 0",
+      "passed": true
+    },
+    {
+      "index": 22,
+      "expression": "lease.get('pixels_decoded') == 0",
+      "passed": true
+    },
+    {
+      "index": 23,
+      "expression": "lease.get('terminal_shape') == ['attempt_started.json', 'success_receipt.json']",
+      "passed": true
+    },
+    {
+      "index": 24,
+      "expression": "lease.get('terminal_success') is True",
+      "passed": true
+    }
+  ],
+  "failed_conjunct_count": 1,
+  "minimal_inmemory_projection": "Normalize the existing durable authorization identity to device/inode/size/mode once in require_launch_authorization after read_json_snapshot; keep complete six-field live descriptor identity validation in read_regular_snapshot and RegularBinding.",
+  "after_identity_projection": {
+    "require_launch_authorization": "PASS_DIAGNOSTIC_READ_ONLY",
+    "open_launch_control_lease_actual_mode": {
+      "type": "RuntimeError",
+      "message": "One held C2 launch-control file became writable"
+    },
+    "open_launch_control_lease_under_mode_projection": "PASS_REMAINING_DIAGNOSTIC_READ_ONLY_CHAIN",
+    "held_directories": 3,
+    "held_files": 12,
+    "control_validate": "PASS_DIAGNOSTIC_READ_ONLY",
+    "metadata_only_check": "PASS_DIAGNOSTIC_READ_ONLY",
+    "frozen_manifest_before_Gate_binding": {
+      "type": "NameError",
+      "message": "name 'GATE' is not defined"
+    },
+    "frozen_manifest_after_inmemory_Gate_binding": "PASS_DIAGNOSTIC_READ_ONLY"
+  },
+  "second_minimal_fix_candidate": "Bind GATE to HERE / generation_gate.py in generation_gate.py, or replace only the two uses within frozen_manifest with that already frozen path. No relaxation of source hash checks.",
+  "actual_formal_file_modes": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_01.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/attempt_started.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/success_receipt.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/manifest.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/receipt.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/metadata_gate.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/manifest_core.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/receipt.json": "0o444",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/generation_gate.py": "0o644",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/create_launch_authorization.py": "0o644",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_generation.py": "0o644",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/FINAL_ATTACHMENT_REVIEW.json": "0o644",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/LAUNCH_READINESS_REVIEW.json": "0o444"
+  },
+  "mode_diagnostic_assumption": "Only the returned in-memory validate() mode for terminal_review_final_attachment was projected from actual 0644 to required 0444 after original live byte/path/inode validation. The actual file was not chmodded. Remaining-chain results are conditional on separately resolving this real blocker.",
+  "formal_artifact_sha256_before_and_after": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_01.json": "3420b14eb7f1643de03b1a778a62645dce7ecbe688f4be99254598acc9ac6004",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/attempt_started.json": "3de01dfee42ce4fa402c32b9d467feb2992e79dbdb89fa0c11c6e7868c704559",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_authorization_attempt_01/success_receipt.json": "545ba853c6d404df17d1e964769cedc8036d8d2d63e1e0ca6a2bc4abd168f15f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/manifest.json": "3b46f3016ac3755ac96bd8c955dee0a577f6a5b83ebf039343a799a6f55e2217",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/receipt.json": "50f5c99ac2ded49a5d203cb802e72051fe955266b3d98ae4983073c50d7c5f66",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/review_attachment_01/metadata_gate.json": "cb76b3ee72be087811507b6ef7784f8d2f95a5e66da26cda70096014fa948f1f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/manifest_core.json": "99f62b480a9dbead14a79eadafad43a520a110501e224e56702bcdc8ede10b07",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/freeze_attempt_01/receipt.json": "a71ad6ad30a43f3ff655f2d6da6f14bf4f9a0e2d1b648375350f12178b5187f6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/generation_gate.py": "5add4e5b6170f42ff75cdede7f40a061cd1b98a253f0fb6411444990155255ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/create_launch_authorization.py": "209d6b141e154574d8ddd59e252839c27c911e4ec6fba4b18da5a9aca16ec89e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/launch_generation.py": "4a96ba1e49a8ce2dae4885f70cf3b55debcacde594425dbaae1d59268dafc974",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/FINAL_ATTACHMENT_REVIEW.json": "0403ab19eecefb26118fa44f84ed90f17b8213fa5f8151aa9bc8f54c83320cdd",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/LAUNCH_READINESS_REVIEW.json": "3732816e385e55b84c16d14d475db8bad9fd6a5258d1d917114680429e5bf9ee"
+  },
+  "formal_reserved_paths_still_absent": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/execution_01": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/.execution_01.watchdog_failure.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S47_c2_confirmation_generation/.execution_01.supervisor_failure.json": true,
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S47_C2_confirmation_generation": true
+  },
+  "scientific_modules_present": [],
+  "execution_boundary": {
+    "formal_launcher_calls": 0,
+    "authorization_tool_calls": 0,
+    "prepare_attach_calls": 0,
+    "new_attempts_created": 0,
+    "frozen_source_or_bundle_edits": 0,
+    "models_loaded": 0,
+    "scientific_imports": 0,
+    "component_bodies_read": 0,
+    "input_bodies_read": 0,
+    "pixels_decoded": 0,
+    "generation_calls": 0,
+    "real_pipeline_executed": false,
+    "tests_rerun": 0,
+    "real_file_permission_changes": 0
+  },
+  "limitations": [
+    "The two in-memory source adaptations and one explicitly simulated review-mode projection are diagnostic evidence only. They are not executable production authority, a new source freeze, a new authorized attempt, or generation.",
+    "No scientific body was opened and no full-resource gate was invoked; later model/runtime behavior remains untested.",
+    "The sole public launcher failure is preserved. The metadata checks cannot determine policy for any future retry or source rebase; root must preserve all frozen control artifacts and use a separately recorded repair path."
+  ]
+}

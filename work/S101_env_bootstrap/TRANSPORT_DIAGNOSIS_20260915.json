@@ -1,0 +1,24 @@
+{
+  "schema": "SSH_TRANSPORT_DIAGNOSIS_v1",
+  "recording_date_local": "2026-09-15",
+  "host": "superpod.ust.hk",
+  "job_status_still_unknown": "584548",
+  "ssh_verbose_observation": {
+    "tcp_established": true,
+    "client_banner_sent": true,
+    "server_banner_seen": false,
+    "user_authentication_reached": false,
+    "error": "kex_exchange_identification: Connection closed by remote host"
+  },
+  "system_dns_result": "198.18.0.84",
+  "udp_dns_query_to_1_1_1_1_result": "198.18.0.84",
+  "system_route": {"gateway": "198.18.0.1", "interface": "utun9"},
+  "system_proxy": {"http": "127.0.0.1:7897", "https": "127.0.0.1:7897", "socks": "127.0.0.1:7897"},
+  "https_dns": {"url": "https://dns.google/resolve?name=superpod.ust.hk&type=A", "status": 0, "answer": "143.89.184.2"},
+  "raw_tcp_to_https_dns_ip": {"ip": "143.89.184.2", "port": 22, "tcp_established": true, "banner": "", "elapsed_seconds": 5.008196},
+  "inference": "Failure occurs before SSH user authentication. Local DNS/route includes a tunnel/proxy path; observations do not identify whether closure originates locally, in transit, or at the university.",
+  "settings_changed": false,
+  "jobs_resubmitted": false,
+  "private_key_contents_read": false,
+  "next_action": "Use existing credentials and strict host verification after the network path recovers; inspect job584548 before any mutation. No repeated key or package changes are justified by this evidence."
+}

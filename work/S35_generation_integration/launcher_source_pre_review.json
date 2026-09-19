@@ -1,0 +1,54 @@
+{
+  "schema": "s35-launcher-independent-source-review-v1",
+  "status": "PASS_LAUNCHER_SOURCE_PRE_REVIEW_ONLY",
+  "passed": true,
+  "reviewed_utc": "2026-09-06T23:05:58.415991+00:00",
+  "reviewer": "/root/supervisor_full_readthrough",
+  "runner_sha256": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+  "contract_sha256": "203c4fd73d6622497c5675e269e9965f2e1cdd6309814fef4aef29b8cc26fcd5",
+  "identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launch_original.py": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launcher_contract.md": "203c4fd73d6622497c5675e269e9965f2e1cdd6309814fef4aef29b8cc26fcd5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launcher_initial_review.json": "6f05760d1746d424763eba0ef3f7f8b8c07e297b78008a7f330d989392a5b4c5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/history_launcher_timing_revision/launch_original.py": "da1d6585720028063d2b4341525bf3c2ad89faafd1c8ed7e4905fc8013fe4d58",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/resource_gate.py": "c949f85573b8fa23db59c8782354608cb6ca1334ea782712fcd9c334337df759",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/runtime_factory.py": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/integrate_original.py": "adf819e1cda3de4f830d2c3e5776664591607a0109d50f59cdc1addeb684b0ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_outputs.py": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57"
+  },
+  "review_scope": "Full original 434-line launcher and contract read, followed by entire bounded timing diff against preserved da1d658 source; relevant shared gate/runtime/integration/archive and original trace schema already source-reviewed. Actual revised 438-line code compiled in Python 3.12 without module import.",
+  "resolved_findings": {
+    "phase2_boundary": "previous_trace_poll_start retained independently; first discovered completion uses previous trace-read start or t0; neither RSS/disk work-end nor event wall clock may advance the phase start.",
+    "maximum_poll_gap": "Successive actual RSS/disk sample completion timestamps include intervening trace parsing, sampling, monitor writes, sleep and scheduler delays; first sample interval starts at t0.",
+    "contract": "Section budget bullet5 and polling paragraph now exactly describe revised timing and sampled-monitor limits."
+  },
+  "checks": {
+    "manifest_and_missing_resources": "Frozen manifest/self/runtime checked; metadata-only resource gate before parent psutil/Popen; only full worker gate permits scientific imports or any model loading. No resource download/installation.",
+    "full_hash_budget": "Worker full input/component verification once, included in first 1800s; later cheap source/stat validate_gate no repeated GB SHA.",
+    "original_route": "One fresh worker, exact original stable run_original interface, same instance initialize/left/right without retry or reseeding.",
+    "actual_trace_boundary": "Manifest-bound recorded-execution hash chain with actual begin/cache/map/complete data, ID1..4/history5 and ID5..8/history9; still not full scientific verifier.",
+    "limits": "1800s each conservative phase,3600s total,45GiB sampled tracked process tree,10GiB minimum free disk; zero optional budget extension or rerun.",
+    "termination": "Fresh group plus tracked PID/create_time descendants; TERM/KILL bounded wait, errors/survivors and direct Popen returncode retained; normal return with surviving discovered work fails.",
+    "result_boundary": "Worker and parent best statuses pending independent review, scientific_status NOT_EVALUATED; incomplete trace/limits/failure events/nonzero exit/residual descendants cannot become completed external run.",
+    "fresh_evidence": "Fresh execution/output roots and exclusive result files; old failed/partial artifacts remain. Hard kill/disk failure limits explicitly documented."
+  },
+  "validation": {
+    "python_executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "python_version": "3.12.14 (main, Aug 25 2026, 13:50:33) [Clang 22.1.3 ]",
+    "ast_parse_and_in_memory_compile": "PASS",
+    "launcher_import_or_execution": false,
+    "synthetic_test_execution": false,
+    "scientific_model_ga_renderer_execution": false,
+    "real_weight_image_array_gt_read": false,
+    "network_requests": 0
+  },
+  "limits": [
+    "No actual negative entry or synthetic wiring checks run by this reviewer; upcoming parent-owned artificial test source remains separate.",
+    "No full-model loading, two-batch generation, output-level verification, or sampled budget feasibility established.",
+    "This source-only verdict does not bind or approve any future full real execution core; four-component resources and final reviewed core still required."
+  ],
+  "prior_revision_required_receipt_preserved": true,
+  "whole_run_core_approved": false,
+  "original_or_author_source_edited_by_reviewer": false
+}

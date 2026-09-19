@@ -1,0 +1,34 @@
+"""Audit-only Python access guard; macOS sandbox also covers native operations."""
+import os
+from pathlib import Path
+import sys
+original=Path(os.environ['AUDIT_ORIGINAL']).absolute()
+workspace=Path(os.environ['AUDIT_OLD_WORKSPACE']).absolute()
+root=Path(os.environ['AUDIT_ROOT']).absolute()
+output=Path(os.environ['AUDIT_OUTPUT']).absolute()
+def location(v):
+    if not isinstance(v,(str,bytes)):return None
+    return Path(os.path.abspath(os.fsdecode(v)))
+def forbidden(p):
+    return ((p.is_relative_to(original) and not p.is_relative_to(original/'.venv')) or
+        (p.is_relative_to(workspace) and not p.is_relative_to(output)))
+def guard(event,args):
+    if event.startswith('socket.') and event not in ('socket.__new__',):
+        raise PermissionError('Offline Python guard prohibits networking: '+event)
+    if event in ('open','os.listdir','os.scandir') and args:
+        p=location(args[0])
+        if p is None:return
+        if forbidden(p):raise PermissionError('Original project/workspace read denied: '+str(p))
+        if event=='open' and p.is_relative_to(root):
+            mode=args[1] if len(args)>1 else None;flags=args[2] if len(args)>2 else 0
+            if (isinstance(mode,str) and any(x in mode for x in 'wax+')) or (isinstance(flags,int) and flags&(os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND)):
+                raise PermissionError('Extracted evidence is read-only: '+str(p))
+    # Relative dir_fd targets are ultimately handled by the OS sandbox.
+    if event in ('os.remove','os.rmdir') and len(args)>1 and isinstance(args[1],int) and args[1]>=0:return
+    if event=='os.mkdir' and len(args)>2 and isinstance(args[2],int) and args[2]>=0:return
+    if event in ('os.remove','os.rmdir','os.mkdir','os.rename','os.link','os.symlink','os.chmod','os.truncate'):
+        for value in args[:2] if event in ('os.rename','os.link') else args[:1]:
+            p=location(value)
+            if p is not None and (p.is_relative_to(root) or forbidden(p)):
+                raise PermissionError('Protected mutation denied: '+str(p))
+sys.addaudithook(guard)

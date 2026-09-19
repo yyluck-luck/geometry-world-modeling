@@ -1,0 +1,557 @@
+                                  2013 IEEE Conference on Computer Vision and Pattern Recognition
+
+
+
+
+                                      Scene Coordinate Regression Forests
+                                  for Camera Relocalization in RGB-D Images
+
+     Jamie Shotton Ben Glocker Christopher Zach Shahram Izadi Antonio Criminisi Andrew Fitzgibbon
+                                  Microsoft Research, Cambridge, UK
+
+                             Abstract
+      We address the problem of inferring the pose of an
+   RGB-D camera relative to a known 3D scene, given only
+   a single acquired image. Our approach employs a regres-
+   sion forest that is capable of inferring an estimate of each                                                        C
+   pixel’s correspondence to 3D points in the scene’s world
+   coordinate frame. The forest uses only simple depth and                                                 B
+   RGB pixel comparison features, and does not require the                                        A
+   computation of feature descriptors. The forest is trained
+   to be capable of predicting correspondences at any pixel,                      Input            Input           Ground           Inferred
+   so no interest point detectors are required. The camera                         RGB             Depth            Truth            Inliers
+   pose is inferred using a robust optimization scheme. This
+                                                                              A
+   starts with an initial set of hypothesized camera poses, con-
+   structed by applying the forest at a small fraction of image
+   pixels. Preemptive RANSAC then iterates sampling more
+   pixels at which to evaluate the forest, counting inliers, and              B
+   reﬁning the hypothesized poses. We evaluate on several var-
+   ied scenes captured with an RGB-D camera and observe
+   that the proposed technique achieves highly accurate relo-
+   calization and substantially out-performs two state of the                 C
+   art baselines.
+
+   1. Introduction                                                          Figure 1. Scene coordinate regression labels. (Top) A 3D rep-
+       This paper presents a new, efﬁcient algorithm for esti-              resentation of a scene’s shared world coordinate frame, with over-
+   mating the camera pose from a single RGB-D image, rela-                  laid ground truth camera frusta for the images below. The color
+   tive to a known scene (or environment). This has important               visualization maps scene coordinates to the RGB cube. A scene
+   applications in robotics (the ‘lost robot’ problem), SLAM,               coordinate regression forest (SCoRe Forest) is trained to infer the
+   augmented reality, and navigation. A standard approach for               scene coordinates at any image pixel. (Bottom) Three test frames:
+                                                                            the input RGB and depth images; the ground truth scene coordi-
+   solving the problem is ﬁrst to ﬁnd a set of putative cor-
+                                                                            nate pixel labels; and the inliers inferred by the SCoRe Forest after
+   respondences between image pixels and 3D points in the                   camera pose optimization. For this visualization we show all in-
+   scene, and second to optimize the camera pose to mini-                   lier pixels, but note that the optimization algorithm only actually
+   mize some energy function deﬁned over these correspon-                   evaluates the forest at a much sparser set of pixels. Fig. 7 shows
+   dences. In this work, we ﬁrst demonstrate how regression                 example inferred camera poses.
+   forests can be used to predict the correspondences, and fur-
+   ther show how to optimize the camera pose efﬁciently.                    using RGB-D images with known camera poses. The depth
+       Our main contribution is the scene coordinate regression             maps and camera poses are sufﬁcient to compute scene co-
+   forest (SCoRe Forest). As illustrated in Fig. 1, the forest is           ordinate training labels at every pixel. These labels are used
+   trained to directly predict correspondences from any image               in a standard regression objective to learn the forest. SCoRe
+   pixel to points in the scene’s 3D world coordinate frame.                Forests employ only simple RGB and depth image pixel
+   The aim is that, in one go, the forest can remove the need for           comparison features which are fast to compute.
+   the traditional pipeline of feature detection, description, and             Our second contribution is an efﬁcient test-time camera
+   matching. A SCoRe Forest is trained on a particular scene,               pose optimization algorithm based on RANSAC; see Fig. 2.
+
+1063-6919/13 $26.00 © 2013 IEEE                                      2930
+                                                                     2928
+DOI 10.1109/CVPR.2013.377
+The algorithm assumes only a single RGB-D image as in-                  be applied as sparsely or densely as required, avoiding this
+put. We optimize an energy function that measures the num-              problem.
+ber of pixels for which the SCoRe Forest predictions agree                 Sharing a similar spirit to our work, the LayoutCRF
+with a given pose hypothesis. Because we trained the forest             [12, 35] deﬁnes a coarse grid of classiﬁcation labels that
+densely, we are free to test the forest at whichever (valid)            roughly cover an object, and then exploits layout consis-
+image pixels we please. The RANSAC algorithm can thus                   tency terms in an MRF optimization framework to segment
+efﬁciently evaluate the SCoRe Forest at only a sparse, ran-             the objects. Our approach instead regresses more precise
+domly sampled set of pixels. Note that the optimization                 labels deﬁned on 3D world space, and avoids expensive
+does not require an explicit 3D model of the scene; instead,            image-space optimization. Taylor et al. [32] use a regres-
+the forest implicitly encodes the scene structure. This could           sion forest to infer correspondences between each depth im-
+be useful when a 3D model is not available, or in low power             age pixels and points in a canonical articulated 3D human
+(e.g. cellphone) scenarios. Our approach is also completely             mesh. Our approach extends [32] by: introducing an ef-
+stateless: we are able to localize the camera from a single             ﬁcient camera pose optimization that evaluates the forest
+frame without tracking.                                                 sparsely; showing that the regression approach works well
+   We validate the proposed camera pose estimation tech-                on arbitrary scene model topologies and on RGB-D input
+nique on a new dataset of seven varied scenes which will                data; and demonstrating how to effectively exploit the sev-
+be made available for research purposes. Our experiments                eral predictions given by multiple trees in a forest.
+demonstrate superior localization accuracy compared to
+two state of the art baselines, and high accuracy at recog-             2. Scene Coordinate Regression Forests
+nizing to which scene a particular image belongs.
+                                                                            In this section we provide some background on regres-
+1.1. Related work                                                       sion forests, detail our new scene coordinate pixel labeling,
+                                                                        and discuss how this labeling is used to train a forest for
+    Two common approaches for image-based camera re-                    each scene. Sec. 3 will then describe how the camera pose
+localization use global image matching and sparse feature               is optimized by evaluating the forest at a sparse set of pixels.
+matching, though other approaches exist e.g. [23].
+    In global image matching (e.g. [17]), an approximate                2.1. Regression forests
+camera pose is hypothesized by computing whole-image                       We give a brief introduction to regression forests; for
+similarity measures between a query image and a set of                  more details, please see [7]. Decision forests have proven
+keyframes with known associated keyposes. Given the set                 highly capable learning machines. They are most com-
+of best matching images, the ﬁnal camera pose is computed               monly used for classiﬁcation tasks, e.g. [1, 18, 31], though
+as a weighted average of the keyposes. This approach was                increasingly for regression problems, e.g. [10, 20, 32]. We
+extended to use synthetic RGB-D views in [11].                          employ a fairly standard regression forest approach, opti-
+    A perhaps more prevalent alternative uses sparse key-               mizing a reduction-in-spatial-variance objective.
+point matching. Here a set of interest points are detected                 A regression forest is an ensemble of T decision trees,
+in the image, assigned a descriptor based on appearance,                each consisting of split (internal) and leaf nodes. Each split
+and matched against a database of descriptors. Much work                node contains a ‘weak learner’ represented by its parame-
+has focused on efﬁciency, scalability, and learning of fea-             ters θ = (φ, τ ): feature parameters φ (see below), and a
+ture detection [13, 26], description [4, 27, 34], and match-            scalar threshold τ . To evaluate a regression tree at a 2D
+ing [18, 25, 29]. Closely related to our approach, Lepetit et           pixel location p in an image, we start at the root node and
+al. [18] learn to match particular discrete features in images          descend to a leaf by repeatedly evaluating the weak learner:
+with random forests. Our approach goes beyond this by us-                                                          
+ing a regression approach such that every pixel can provide                            h(p; θn ) = fφ (p) ≥ τn ,                  (1)
+                                                                                                         n
+correspondence to the scene, without feature detectors.
+    Given sparse keypoint matches, pose estimation is                   where n denotes the index of a node in the tree, [·] is the 0-1
+achieved either via intermediate image retrieval [2, 8, 14] or          indicator, and fφ is one of the feature response functions
+by directly establishing 2D-3D correspondences for a robust             we deﬁne below in Sec. 2.2. If h(p; θ n ) evaluates to 0, the
+pose optimization [19, 28]. Efﬁcient keypoint-based relo-               path branches to the left child of n, otherwise it branches to
+calization modules have been proposed for visual SLAM                   the right. This repeats until leaf node lt (p) is reached for
+[9, 33] and robotics [30].                                              tree t in the forest.
+    A limitation of keypoint-based approaches lies in their                 Each leaf node in a regression tree stores a distribution
+inherent sparse representation of the scene: the number of              Pl (m) over a continuous variable m. In our application
+correctly detected and matched points directly impacts the              these m ∈ R3 are the coordinates in the scene’s 3D world
+accuracy of the pose estimation. Our SCoRe Forests can                  space, as described in Sec. 2.3. For efﬁciency, we represent
+
+
+
+                                                                 2931
+                                                                 2929
+the distribution Pl (m) as a set Ml of modes of the distribu-              coordinate frame as m = Hx. Our labels are simply de-
+tion, which are found using mean shift. The ﬁnal prediction                ﬁned as these scene world positions, m.
+of the forest at pixel p is 
+                            simply the union of these modes                   We train the forest using pixels drawn from all training
+across all trees: M(p) = t Mlt (p) .                                       images, so the forest can be applied at any test image pixel.
+                                                                           In particular, one can evaluate the forest at any sparse set
+2.2. Image features                                                        of test pixels. If the forest were a perfect predictor, only
+    We investigate three variants of regression forests, each              three pixel predictions would be required to infer the camera
+of which uses a different combination of RGB and depth                     pose. In practice, the forest instead makes noisy predictions,
+features. We will refer to the variants as ‘Depth’, ‘Depth-                and so we employ the efﬁcient optimization described in
+Adaptive RGB’ (DA-RGB), and ‘Depth-Adaptive RGB +                          Sec. 3 to accurately infer the camera pose.
+Depth’ (DA-RGB + D) forests.                                               2.4. Forest training
+    All features are based on simple pixel comparisons [18,
+31] and so are extremely fast to evaluate. The two types of                   Given the scene coordinate pixel labeling deﬁned above,
+feature responses can be computed as follows:                              we can now grow the regression forest using the standard
+                                                                       greedy forest training algorithm [7], summarized next. For
+                             δ1                  δ2                        each tree, we randomly choose a set S of labeled example
+ f depth (p) = D p +                −D p+                  (2)
+  φ                        D(p)                D(p)                        pixels (p, m).1 The tree growing then proceeds recursively,
+                                                                       starting at the root node. At each node n, a set of candidate
+                            δ1                     δ2
+f da-rgb (p) = I p +            , c1 − I p +            , c2               weak learner parameters θ is sampled at random. Each can-
+ φ                        D(p)                   D(p)
+                                                                           didate θ is evaluated in turn by (1) to partition the set Sn
+                                                           (3)
+                                                                           into left and right subsets SnL and SnR respectively. Given
+Here, δ indicates a 2D offset, D(p) indicates a depth pixel                this partition, a tree training objective function Q(θ) is com-
+lookup, and I(p, c) indicates an RGB pixel lookup in chan-                 puted. We have found the following simple reduction-in-
+nel c. Each split node in the forest stores a unique set of pa-            spatial-variance objective to work well:
+rameters φn ⊆ {δ 1 , δ 2 , c1 , c2 , z}, with z ∈ {depth, da-rgb}                                           |S d (θ)|
+                                                                              Q(Sn , θ) = V (Sn ) −                 n
+                                                                                                                         V (Snd (θ)) , (4)
+indicating the type of feature to use. Pixels with undeﬁned                                                        |Sn |
+                                                                                                            d∈{L,R}
+depth and those outside the image boundary are assigned
+D = 6m, and are not used as examples for training or test.                                                  1      
+                                                                                       with V (S) =                        m − m̄22 ,              (5)
+    These features can implicitly encode contextual informa-                                               |S|
+                                                                                                                 (p,m)∈S
+tion, as the offsets can be fairly long range. The division by
+D(p) makes the features largely depth invariant, and is sim-               and m̄ being the mean of m in S. The candidate param-
+ilar in spirit to [36]. We assume a reasonable registration                eter set θ which results in the largest reduction in vari-
+of depth and RGB images, such as is provided by standard                   ance is taken, and the training recurses on the resulting left
+RGB-D camera APIs. However, the registration need not be                   and right children. Tree growing terminates when a node
+perfect as the forest will learn some degree of tolerance to               reaches a maximum depth Dmax , or the set Sn has only one
+misregistration.                                                           element.
+                                                                           Mode ﬁtting.       Once the tree has been grown, the ﬁnal
+2.3. Scene coordinate labels                                               stage of training is to summarize the distribution over m as
+                                                                           a set of modes Ml , for each leaf node l. To reduce training
+   One of the main contributions of this work is the use of
+                                                                           time, we sub-sample the set Sl of training pixels reaching
+scene coordinates to deﬁne the labels used to train the re-
+                                                                           leaf l to at most Nss = 500 examples. We then run mean
+gression forest. By using scene coordinate labels, the for-
+                                                                           shift mode detection [6] with a Gaussian kernel of band-
+est will learn to directly predict the position in the scene’s
+                                                                           width κ = 0.1m. This clusters the points m in Sl into a
+world space that corresponds to a test pixel.
+                                                                           small set of modes. In our current implementation, we keep
+   Our training set consists of a set of RGB-D frames with
+                                                                           only a single mode at a leaf node: the mode to which the
+known 6 d.o.f. camera pose matrices H that encode the 3D
+                                                                           largest number of examples was assigned.
+rotation and translation from camera space to world space.
+This data could be captured in several ways, for example                   3. Camera Pose Optimization
+by tracking from depth camera input [15, 21], or by using
+dense reconstruction and tracking from RGB input [22].                        The regression forest described in the previous section is
+   Our labels are deﬁned as follows. At pixel p, the cal-                  capable of associating scene coordinates with any 2D im-
+ibrated depth D(p) allows us to compute the 3D camera                      age pixel. We now discuss how to use this information to
+space coordinate x. Using homogeneous coordinates, this                        1 For notational clarity p is used to uniquely index a pixel within a par-
+
+camera position can be transformed into the scene’s world                  ticular image. Training pixels are sampled up to the image boundary.
+
+
+
+
+                                                                    2932
+                                                                    2930
+                                                                                             depth image pixels. We use a top-hat error function ρ with
+                                                                                             a width of 0.1m. Pixels for which ρ evaluates to 0 are con-
+                                                                                             sidered inliers, and pixels for which ρ evaluates to 1 are
+                                                                                             considered outliers. The energy function above thus counts
+                                                                                             the number of outliers for a given camera hypothesis H.
+                                                                                                 Note that computing this energy does not require an ex-
+                      RGB                            Depth
+                                                                                             plicit 3D model of the scene: the model is implicitly en-
+                                                                                             coded in the regression forest. Because the forest has been
+                      SCoRe Forest p                            p                            trained to work at any image pixel, we can randomly sam-
+                                        tree 1                         tree T                ple pixels at test time. This sampling avoids both the need
+                                                 …                                           to compute interest points and the expense of densely eval-
+                                                                                             uating the forest. The summation in (7) is thus computed
+
+
+
+
+RANSAC optimization
+                                                 ℳ                                        over a subset I of all possible image pixels; the larger the
+                                     ℳ                                                    size of this subset, the more useful the energy E can be at
+                                                                                             ranking pose hypotheses. The minimization over predic-
+                                                                                             tions m ∈ Mi means that at each pixel, the mode that is
+                                                                                             closest to the transformed observed pixel will be chosen.
+                                                                                             A consequence of this is that the minimization will infer at
+                                                                                             each pixel which tree in the forest gave the best prediction
+                                                                                             under a given hypothesis.
+
+                                                                                             3.2. Optimization
+                            Hypothesis inliers           Inferred camera pose                    To optimize this energy, we use an adapted version of
+Figure 2. Camera pose estimation. Top: An example RGB-D                                      preemptive RANSAC [24] (see Algorithm 1). The algo-
+test input. Middle: Our RANSAC optimization uses a scene coor-                               rithm starts by sampling a set of Kinit initial hypotheses. It
+dinate regression forest (SCoRe Forest) to obtain image to scene                             then randomly samples a new batch of B pixels, evaluates
+correspondences. The algorithm maintains a set of inlier pixels                              the forest at these pixels, and updates the energies for each
+for each of several camera pose hypotheses. Bottom right: The                                hypothesis based on the forest predictions. The hypotheses
+hypothesis with the lowest energy (highest number of inliers) is                             are re-ranked by energy, and the highest energy half of the
+chosen as the ﬁnal inferred pose (shown as the blue frustum; the                             hypotheses is discarded (‘preempted’). Each remaining hy-
+ground truth is shown in red). For clarity of exposition, we show
+                                                                                             pothesis is then reﬁned [5] based on the set of inliers com-
+all image pixels that are inliers to each hypothesis; in fact our al-
+                                                                                             puted as a by-product of evaluating the energy at Line 9 of
+gorithm samples pixels sparsely and does not need to evaluate the
+SCoRe Forest at every pixel.                                                                 Algorithm 1. The while loop terminates when only a single
+                                                                                             hypothesis remains.
+estimate the camera location and orientation. The problem                                        The iteration could instead be stopped earlier, either for
+is cast as the energy minimization                                                           efﬁciency, or if desired to obtain the top K hypotheses. The
+                                                                                             algorithm as presented evaluates the forest on-the-ﬂy; al-
+                                     H ∗ = argmin E(H)                          (6)          ternatively the forest could be evaluated at the B log2 Kinit
+                                                 H
+                                                                                             required pixels in advance, though this would require extra
+over the camera pose matrix H. An overview of the method                                     storage. Other RANSAC schedules (e.g. no preemption) are
+is given in Fig. 2.                                                                          possible, though not investigated here.
+                                                                                             Initial hypothesis sampling. Each initial pose hypothesis
+3.1. Energy function                                                                         is sampled as follows. The forest is evaluated at three pixels
+                We deﬁne our energy function as follows                                      (the minimal number required), and at each of those pixels
+                                                                                             a random mode m ∈ Mi is sampled. These putative cor-
+                                                   
+                                                                                             respondences are passed to the Kabsch algorithm [16] (also
+                E(H) =     ρ min m − Hxi 2 =          ei (H) ,
+                                     m∈Mi                                                    known as orthogonal Procrustes alignment) which uses a
+                              i∈I                                i∈I
+                                                          (7)                                singular value decomposition (SVD) to solve for the cam-
+where: i ∈ I is a pixel index; ρ is a robust error function;                                 era pose hypothesis with least squared error.
+Mi = M(pi ) represents the set of modes (3D locations in                                     Pose reﬁnement.         Experimentally we found a pose re-
+the scene’s world space) predicted by the trees in the forest                                ﬁnement step [5] to be crucial to achieving accurate local-
+at pixel pi ; and xi are the 3D coordinates in camera space                                  ization. We simply re-run the Kabsch algorithm on the en-
+corresponding to pixel pi , obtained by back-projecting the                                  larged set of inliers. For efﬁciency, we only store and update
+
+
+
+                                                                                      2933
+                                                                                      2931
+Algorithm 1 Pseudocode for RANSAC optimization                            4.3. Baselines
+ 1: K ← Kinit                                                                 We compare our approach against two complementary
+ 2: sample initial hypotheses {Hk }K    k=1                               baseline methods: the ‘sparse’ baseline exploits matches
+ 3: initialize energies Ek ← 0 for k = 1, . . . , K
+                                                                          between extracted features and a sparse 3D point cloud
+ 4: while K > 1 do
+ 5:    sample random set of B test pixels I                               model, while the ‘tiny-image’ baseline matches down-
+ 6:    for all i ∈ I do                                                   sampled whole images to hypothesize putative camera
+ 7:        evaluate forest to obtain Mi                                   poses.
+ 8:        for all k ∈ {1, . . . , K} do                                  Sparse baseline. This baseline uses state of the art feature-
+ 9:           Ek ← Ek + ei (Hk )                                          matching techniques. The approach employs the fast ORB
+10:    sort hypotheses (Hk , Ek ) by Ek                                   descriptor [27] for feature detection and description. We
+11:    K ← K    2
+                                                                         build a (sparse) 3D point cloud with attached ORB descrip-
+12:    reﬁne hypotheses Hk for k = 1, . . . , K                           tors using the RGB-D training images. At test time (using
+13: return best pose H1 and energy E1
+                                                                          only RGB), features are matched to the 3D point cloud by
+                                                                          hashing 14-bit descriptor substrings. We consider a 2D-3D
+                                                                          correspondence a putative match if the Hamming distance
+the means and covariance matrices used by the SVD. Note                   between descriptor bit-strings is at most 50. The set of po-
+that the reﬁnement step means the ﬁnal pose can be much                   tential inliers is geometrically veriﬁed using RANSAC and
+more accurate than the individual forest pixel predictions of             the perspective 3-point method. The ﬁnal camera pose is
+the inliers.                                                              reﬁned using a gold-standard method computed on all inlier
+                                                                          2D-3D correspondences.
+4. Evaluation                                                             Tiny-image baseline. This baseline represents state of the
+                                                                          art whole-image matching approaches [11, 17]. All training
+4.1. Dataset                                                              images are stored with their camera poses, after downsam-
+                                                                          pling to 40 × 30 pixels and applying a Gaussian blur of
+    We introduce a new RGB-D dataset, ‘7 Scenes’, to eval-
+                                                                          σ = 2.5 pixels [17]. At test time, to achieve the best possi-
+uate our technique and compare with other approaches. We
+                                                                          ble accuracy for this baseline (at the expense of speed), we
+will release this dataset to facilitate future research and
+                                                                          use brute-force matching against the entire training set, us-
+comparison with our approach. All scenes were recorded
+                                                                          ing the normalized Euclidean distance of [11]. The camera
+from a handheld Kinect RGB-D camera at 640×480 reso-
+                                                                          pose is ﬁnally computed as a weighted average of the poses
+lution. We use an implementation of the KinectFusion sys-
+                                                                          of the 100 closest matches [11]. We compare below with
+tem [15, 21] to obtain the ‘ground truth’ camera tracks, and
+                                                                          RGB, depth, and RGB-D variants of this approach.
+a dense 3D model (used only for visualization and the ICP
+experiments below). Several sequences were recorded per                   4.4. Main results
+scene by different users, and split into distinct training and
+testing sequence sets. An overview of the scenes and cam-                     We present our main results and comparisons in Table 1.
+era tracks are shown in Fig. 3, and more details are given                Our approach considerably outperforms both baselines on
+in Table 1. Both RGB and depth images exhibit ambigui-                    all but one of the scenes. The tiny-image baseline fails al-
+ties (e.g. repeated steps in Stairs), specularities (e.g. reﬂec-          most completely under our strict metric: the poses of the
+tive cupboards in RedKitchen), motion-blur, lighting condi-               images in the training set are simply too far from the poses
+tions, ﬂat surfaces, and sensor noise. The varying difﬁcul-               in the test set, and this approach cannot generalize well.2
+ties of the scenes are reﬂected in the error metrics, consis-             The sparse baseline does a reasonable job, though struggles
+tently across all approaches.                                             when too few features are detected. This can happen under
+                                                                          motion blur, when viewing textureless surfaces, and when
+4.2. Metrics                                                              noise levels are high. While our approach is also sparse,
+                                                                          the SCoRe Forests can be evaluated at any pixel in the im-
+   As our main test metric we report the percentage of test               age, and so we are not dependent on feature detection. We
+frames for which the inferred camera pose is essentially                  present some qualitative results in Fig. 7, showing both suc-
+‘correct’. We employ a fairly strict deﬁnition of correct: the            cesses and failures of our algorithm and the sparse baseline.
+pose must be within 5cm translational error and 5◦ angular                    Of the three forest feature modalities we test, depth-only
+error of the ground truth (for comparison, our scenes have                always performs worst. This is to be expected given the
+size up to 6m3 ). The belief is that correctly localizing the             large amount of noise (especially holes) in the depth im-
+pose under this metric might already be sufﬁcient for some
+augmented reality applications, and should certainly be suf-                  2 The tiny-image baseline does however provide a sensible rough local-
+
+ﬁcient to restart any good model-based tracking system.                   ization, good enough for model-based pose reﬁnement (Sec. 4.7).
+
+
+
+
+                                                                   2934
+                                                                   2932
+          Chess                                                                            RedKitchen                         Stairs
+                             Fire          Heads               Pumpkin
+
+
+
+
+Figure 3. The 7 Scenes dataset. These renderings show the scene coordinate representations for each scene as RGB colors. The green and
+red camera tracks show the positions of the cameras in the training and test sequences. The Ofﬁce scene is shown in Fig. 1.
+                   Spatial    # Frames                   Baselines                          Our Results                Frame-to-Frame
+        Scene      Extent    Train  Test     Tiny-image RGB-D Sparse RGB          Depth   DA-RGB DA-RGB + D               Tracking
+        Chess       3m3       4k     2k             0.0%           70.7%          82.7%    92.6%        91.5%              95.5%
+           Fire     4m3       2k     2k             0.5%           49.9%          44.7%    82.9%        74.7%              86.2%
+        Heads       2m3       1k     1k             0.0%           67.6%          27.0%    49.4%        46.8%              50.7%
+        Ofﬁce      5.5m3      6k     4k             0.0%           36.6%          65.5%    74.9%        79.1%              86.8%
+      Pumpkin       6m3       4k     2k             0.0%           21.3%          58.6%    73.7%        72.7%              76.1%
+    RedKitchen      6m3       7k     5k             0.0%           29.8%          61.3%    71.8%        72.9%              82.4%
+         Stairs     5m3       2k     1k             0.0%            9.2%          12.2%    27.8%        24.4%              39.2%
+Table 1. Main results. We list: properties of our dataset; the results of the two baselines; the results of our approach using SCoRe Forests
+trained with three different feature types; and results from a simple frame-to-frame extension of our approach (Sec. 4.5), here using DA-
+RGB features. The percentages are the proportion of ‘correct’ test frames (within 5cm translational and 5◦ angular error). Our approach
+outperforms both baselines on all but one scene. The tiny-image baseline gives only imprecise localization and so fails almost completely
+under our tight metric (though see also Fig. 6). We tested multiple random restarts of RANSAC; all standard deviations were < 1%.
+
+ages. We also observe that DA-RGB performs better than                    ±130 pixel meters; and |M(l)| = 1, i.e. one mode predic-
+DA-RGB + D in 5 out of 7 scenes. This slightly surprising                 tion m per tree. The sparse baseline uses almost identical
+result may be due to sub-optimal settings of the forest train-            RANSAC parameters. The tiny-image baseline uses the pa-
+ing parameters (see below), but in any case both modalities               rameters from [11, 17].
+outperform the baseline in all but one scene.                                 We have not optimized the parameters of our approach:
+   In Fig. 4 we see that our inferred camera poses form a                 they were chosen by hand once and ﬁxed. Preliminary in-
+remarkably smooth track compared to the sparse baseline.                  vestigation suggests considerable insensitivity of the pose
+This is likely because our algorithm is able to sample more               optimization to changes in the training parameters, though
+putative matches than the sparse feature-based approach. Of               it is reasonable to assume a more thorough optimization of
+course, if one were building a real tracking system, both                 these parameters would improve our accuracy.
+approaches could be smoothed much further.                                Image resolution. Fig. 5(a) illustrates that our approach
+                                                                          is robust to nearest-neighbor image downsampling.
+Failure modes. Our main failure modes are (i) impre-
+                                                                          Timings. Our unoptimized C++ test time implementa-
+cise localization, and (ii) failures due to ambiguities. As
+                                                                          tion takes approximately 100ms per frame on a single mod-
+an example, if we widen our metric to allow 10cm transla-
+                                                                          ern CPU core. Of course, this depends heavily on the
+tional errors, our DA-RGB forests achieve 100% accuracy
+                                                                          RANSAC parameters, and one could easily trade speed for
+on Chess, 58.8% on Heads, and 49.0% on Stairs. If we fur-
+                                                                          accuracy. In comparison, the sparse baseline (also not opti-
+ther use an oracle to pick the most accurate pose from the
+                                                                          mized) takes approximately 250ms per frame, and the (de-
+top 10 hypotheses, we achieve 68.4% on Stairs, highlight-
+                                                                          liberately inefﬁcient brute-force) tiny-image baseline takes
+ing the inherent ambiguity in this sequence. (See also Fig. 7
+                                                                          500ms-3000ms according to the number of images in the
+bottom right).
+                                                                          training database. Training takes around 1-10 minutes per
+Pose reﬁnement. The pose reﬁnement step in Algorithm 1                    scene according to parameter settings.
+proved crucial to achieving good results. With this turned
+off, our DA-RGB forests achieve only 31% accuracy on                      4.5. Frame-to-frame tracking
+Chess and 9.5% on Ofﬁce, for example.                                        A simple adaptation to our approach allows a basic form
+Parameter settings. In all the experiments presented, the                 of frame-to-frame tracking. Here, we initialize one hypoth-
+following parameters were used: initial number of hypothe-                esis (out of the Kinit ) with the camera pose inferred at the
+ses Kinit = 1024; batch size B = 500; T = 5 trees in the                  previous frame. This can bias the optimization to ﬁnding a
+forest, trained to depth Dmax = 16; 500 training images                   good solution when the camera motion is not too great. We
+per tree and 5000 example pixels per training image, both                 achieved the improvements in pose accuracy shown in the
+randomly chosen; feature offsets δ having a maximum of                    ﬁnal column of Table 1. For all scenes there is an improve-
+
+
+
+                                                                   2935
+                                                                   2933
+                                                                                                                                                                                                                          RedKitchen
+                                                                             (a) 100%                                                                              (b)
+                                                                                                                                                                               Chess   Fire    Heads   Office   Pumpkin                Stairs
+                                                                           Proportion of
+                                                                                                               90%
+                                                                                                               80%
+                                                                                                                                                               Chess 100.0 0.0 0.0 0.0 0.0 0.0 0.0
+                                                                                                               70%                                               Fire 2.0 98.0 0.0 0.0 0.0 0.0 0.0
+                                                                          frames correct                       60%                                            Heads 0.0 0.0 100.0 0.0 0.0 0.0 0.0
+                                                                                                               50%                                            Office 0.0 0.5 4.0 95.5 0.0 0.0 0.0
+                                                                                                                                                            Pumpkin 0.0 0.0 0.0 0.0 100.0 0.0 0.0
+                                                                                                                                                          RedKitchen 2.8 1.2 3.6 0.0 0.0 92.4 0.0
+                                                                                                                      Test Image Resolution                    Stairs 0.0 0.0 10.0 0.0 0.0 0.0 90.0
+
+                                                                         Figure 5. (a) Effect of image resolution on accuracy for DA-RGB
+                                                                         Chess. (b) Scene recognition confusion matrix. For Chess, Heads,
+                                                                         and Pumpkin we achieve correct recognition for all test frames.
+
+                                                                                                        100%
+
+
+
+
+                                                                         Proportion of frames correct
+                                                                                                         90%
+Figure 4. Camera tracks for the Chess scene. Red: ground truth.                                          80%
+Blue: our result using a DA-RGB forest. Green: sparse baseline.                                          70%
+                                                                                                         60%
+Our algorithm gives remarkably smooth camera tracks from single                                          50%
+                                                                                                         40%
+frames at a time.                                                                                        30%
+                                                                                                         20%
+ment over our standard algorithm, greater than 10 percent-                                               10%
+                                                                                                          0%
+age points for the Ofﬁce, RedKitchen, and Stairs results.                                                            Chess
+                                                                                                         Baseline: Tiny-Image Depth
+                                                                                                                                    Fire            Heads
+                                                                                                                                        Baseline: Tiny-Image RGB
+                                                                                                                                                                    Office          Pumpkin       RedKitchen
+                                                                                                                                                                         Baseline: Tiny-Image RGB-D
+                                                                                                                                                                                                                      Stairs
+                                                                                                                                                                                                         Baseline: ICP Residual
+
+We expect an even greater improvement could be obtained                                                  Baseline: Sparse RGB           Ours: Depth                      Ours: DA-RGB                    Ours: DA-RGB + D
+
+
+by initializing (possibly multiple) hypotheses from the pre-             Figure 6. Accuracy after ICP to a 3D model. As expected, all
+vious frame using a motion model.                                        results improve compared to Table 1.
+
+4.6. Scene recognition                                                   add a brute-force ‘ICP Residual’ baseline which, for each
+    Beyond relocalizing within a particular scene, one might             test frame, runs ICP starting from each training keyposes
+also want to recognize to which scene a particular camera                (for tractability, a frame becomes a keypose if it is > 5cm
+view belongs. We built the following simple scene recog-                 away from the previous selected keypose), and takes the re-
+nition system to investigate this. For a given test frame,               sulting pose with lowest ICP residual error. Our DA-RGB
+our pose optimization algorithm is run, separately for each              and DA-RGB + D forests outperform all baselines on all
+scene’s SCoRe Forest. The scene with the lowest energy                   scenes, and even give a perfect result for Chess. Note that
+(largest number of inliers) is then taken as the result.                 the complete failure of the tiny-image baseline in Table 1
+    Evaluated on every 20th frame in our entire test set us-             is much improved, suggesting that this baseline approach is
+ing the DA-RGB modality, the confusion matrix is given                   only useful when paired with a reﬁnement step.
+in Fig. 5(b). We observe very high scene recognition accu-
+racy: the mean of the diagonal is 96.6%, with several scenes             5. Conclusions
+achieving perfect recognition. The energy (7) returned by                   We have demonstrated how scene coordinate regression
+the RANSAC optimization appears to be an accurate mea-                   forests (SCoRe Forests) can be trained to directly predict
+sure for disambiguating scenes.                                          correspondences between image pixels and a scene’s world
+    An alternative, not investigated here, would be to embed             space. For known environments, SCoRe Forests thus of-
+all the scenes in a shared 3D world so that the coordinate               fer an alternative to the traditional pipeline of sparse fea-
+pixel labels uniquely identify a point in a particular scene.            ture detection, description, and matching. Our efﬁcient
+A single forest could thus encapsulate all scenes, and scene             RANSAC optimization is able to sparsely sample image
+recognition would simply be a by-product of pose estima-                 pixels at which to evaluate the forest. The comparison on
+tion. A downside of this approach would be the need to                   the challenging new 7 Scenes dataset with two baselines in-
+retrain everything in order to add new scenes.                           dicates that our algorithm achieves state of the art camera
+4.7. Model-based pose reﬁnement                                          relocalization.
+   The results above demonstrate that accurate relocaliza-                  As future work we believe that our approach will extend
+tion is achievable without an explicit 3D model. However,                very naturally to RGB-only test images. We also plan to
+if such a model is available (e.g. from [15, 21]), then it               investigate sampling additional training data by rendering
+is possible to reﬁne our inferred camera pose against that               new views from 3D scene reconstructions. Finally, we hope
+model. To investigate, we ran an experiment which per-                   that an optimized implementation could be extended to sup-
+forms an ICP-based pose reﬁnement [3] starting at our in-                port on-line model learning and relocalization.
+ferred pose. In Fig. 6 we compare the pose accuracy after                Acknowledgements. We thank Pushmeet Kohli and the
+ICP for our algorithm and the two baselines. We further                  anonymous reviewers for their valuable input.
+
+
+
+                                                                  2936
+                                                                  2934
+Figure 7. Example results. In each test example, we show the RGB and depth images, and a 3D visualization of the underlying scene
+with camera frusta overlaid: the ground truth pose (red), our inferred pose using a DA-RGB SCoRe Forest (blue), the sparse baseline result
+(green), and the closest pose in the training set (yellow). Observe good generalization across a variety of scenes to views not present during
+training. The bottom row shows failure cases, e.g. due to repeated structures in the scene. Best viewed digitally at high zoom.
+References                                                                         [20] A. Montillo and H. Ling. Age regression from faces using random
+                                                                                        forests. In ICIP, 2009. 2
+ [1] Y. Amit and D. Geman. Shape quantization and recognition with                 [21] R. Newcombe, S. Izadi, O. Hilliges, D. Molyneaux, D. Kim, A. Davi-
+     randomized trees. Neural Computation, 9(7), 1997. 2                                son, P. Kohli, J. Shotton, S. Hodges, and A. Fitzgibbon. KinectFu-
+ [2] G. Baatz, K. Köser, D. Chen, R. Grzeszczuk, and M. Pollefeys.                     sion: Real-time dense surface mapping and tracking. In Proc. IS-
+     Leveraging 3D city models for rotation invariant place-of-interest                 MAR, 2011. 3, 5, 7
+     recognition. IJCV, 2011. 2
+                                                                                   [22] R. A. Newcombe, S. J. Lovegrove, and A. J. Davison. DTAM: Dense
+ [3] P. Besl and N. McKay. A method for registration of 3-D shapes.                     tracking and mapping in real-time. In Proc. CVPR, 2011. 3
+     IEEE Trans. PAMI, 14(2), 1992. 7
+                                                                                   [23] K. Ni, A. Kannan, A. Criminisi, and J. Winn. Epitomic location
+ [4] M. Calonder, V. Lepetit, C. Strecha, and P. Fua. BRIEF: Binary
+                                                                                        recognition. IEEE Trans. PAMI, 2009. 2
+     robust independent elementary features. In Proc. ECCV, 2010. 2
+                                                                                   [24] D. Nistér. Preemptive RANSAC for live structure and motion esti-
+ [5] O. Chum, J. Matas, and J. Kittler. Locally optimized RANSAC. In
+                                                                                        mation. In Proc. ICCV, 2003. 4
+     In Proc. DAGM, 2003. 4
+                                                                                   [25] D. Nistér and H. Stewénius. Scalable recognition with a vocabulary
+ [6] D. Comaniciu and P. Meer. Mean shift: A robust approach toward
+                                                                                        tree. In Proc. CVPR, 2006. 2
+     feature space analysis. IEEE Trans. PAMI, 24(5), 2002. 3
+ [7] A. Criminisi and J. Shotton. Decision Forests for Computer Vision             [26] E. Rosten, R. Porter, and T. Drummond. FASTER and better: A
+     and Medical Image Analysis. Springer, 2013. 2, 3                                   machine learning approach to corner detection. IEEE Trans. PAMI,
+                                                                                        32, 2010. 2
+ [8] Z. Dong, G. Zhang, J. Jia, and H. Bao. Keyframe-based real-time
+     camera tracking. In Proc. ICCV, 2009. 2                                       [27] E. Rublee, V. Rabaud, K. Konolige, and G. Bradski. ORB: an efﬁ-
+ [9] E. Eade and T. Drummond. Uniﬁed loop closing and recovery for                      cient alternative to SIFT or SURF. In Proc. ICCV, 2011. 2, 5
+     real time monocular SLAM. In Proc. BMVC, 2008. 2                              [28] T. Sattler, B. Leibe, and L. Kobbelt. Fast image-based localization
+[10] J. Gall, A. Yao, N. Razavi, L. Van Gool, and V. Lempitsky. Hough                   using direct 2D-to-3D matching. In Proc. ICCV, 2011. 2
+     Forests for object detection, tracking, and action recognition. IEEE          [29] G. Schindler, M. Brown, and R. Szeliski. City-scale location recog-
+     Trans. PAMI, 33(11), 2011. 2                                                       nition. In Proc. CVPR, 2007. 2
+[11] A. Gee and W. Mayol-Cuevas. 6D relocalisation for RGBD cameras                [30] S. Se, D. Lowe, and J. Little. Vision-based global localization and
+     using synthetic view regression. In Proc. BMVC, 2012. 2, 5, 6                      mapping for mobile robots. IEEE Trans. on Robotics, 21(3), 2005. 2
+[12] D. Hoiem, C. Rother, and J. Winn. 3D LayoutCRF for multi-view                 [31] J. Shotton, A. Fitzgibbon, M. Cook, T. Sharp, M. Finocchio,
+     object class recognition and segmentation. In Proc. CVPR, 2007. 2                  R. Moore, A. Kipman, and A. Blake. Real-time human pose recog-
+[13] S. Holzer, J. Shotton, and P. Kohli. Learning to efﬁciently detect                 nition in parts from a single depth image. In Proc. CVPR, 2011. 2,
+     repeatable interest points in depth data. In Proc. ECCV, 2012. 2                   3
+[14] A. Irschara, C. Zach, J.-M. Frahm, and H. Bischof. From SfM point             [32] J. Taylor, J. Shotton, T. Sharp, and A. Fitzgibbon. The Vitruvian
+     clouds to fast location recognition. In Proc. CVPR, 2009. 2                        Manifold: Inferring dense correspondences for one-shot human pose
+[15] S. Izadi, D. Kim, O. Hilliges, D. Molyneaux, R. Newcombe, P. Kohli,                estimation. In Proc. CVPR, 2012. 2
+     J. Shotton, S. Hodges, D. Freeman, A. Davison, and A. Fitzgibbon.             [33] B. Williams, G. Klein, and I. Reid. Automatic relocalization and loop
+     KinectFusion: real-time 3D reconstruction and interaction using a                  closing for real-time monocular SLAM. IEEE Trans. PAMI, 33(9),
+     moving depth camera. In Proc. UIST, 2011. 3, 5, 7                                  2011. 2
+[16] W. Kabsch. A solution for the best rotation to relate two sets of             [34] S. Winder and M. Brown. Learning local image descriptors. In Proc.
+     vectors. Acta Crystallographica, 1976. 4                                           CVPR, 2007. 2
+[17] G. Klein and D. Murray. Improving the agility of keyframe-based               [35] J. Winn and J. Shotton. The layout consistent random ﬁeld for rec-
+     slam. In Proc. ECCV, 2008. 2, 5, 6                                                 ognizing and segmenting partially occluded objects. In Proc. CVPR,
+[18] V. Lepetit and P. Fua. Keypoint recognition using randomized trees.                2006. 2
+     IEEE Trans. PAMI, 28(9), 2006. 2, 3                                           [36] C. Wu, B. Clipp, X. Li, J. Frahm, and M. Pollefeys. 3D model match-
+[19] Y. Li, N. Snavely, and D. Huttenlocher. Location recognition using                 ing with viewpoint-invariant patches (VIP). In Proc. CVPR, 2008. 3
+     prioritized feature matching. In Proc. ECCV, 2010. 2
+
+
+
+
+                                                                            2937
+                                                                            2935
+

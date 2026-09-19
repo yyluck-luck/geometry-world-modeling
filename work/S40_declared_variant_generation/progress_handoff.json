@@ -1,0 +1,75 @@
+{
+  "schema": "s40-progress-handoff-v2",
+  "recorded_utc": "2026-09-07T06:13:44.370154+00:00",
+  "goal_turn_classification": "progress",
+  "goal_complete": false,
+  "actual_progress": [
+    "Original CLIP, CUT3R and the declared ft-mse VAE companion are complete and SHA-256 verified",
+    "Official VMem Xet attempt4 is the only active large transfer; its fresh incomplete file reached 4046360433 bytes while child PID 8585 remained alive",
+    "S39 post-success serial playbook has an independent read-only audit",
+    "S40 two-batch declared-variant generation source and S40 result-readback v2 source have independent PASS reviews but have not executed",
+    "The canonical A0-A5 and F00-F11 causal protocol passed document-level independent regression and S42 label reconciliation"
+  ],
+  "active_resource_transfer": {
+    "status": "RUNNING_UNVERIFIED",
+    "session_id": 54832,
+    "child_pid": 8585,
+    "process_group": 8585,
+    "transport": "official huggingface_hub 1.30.0 plus hf_xet 1.6.0",
+    "repo": "liguang0115/vmem",
+    "revision": "ac5921080a57f5a634f4b9acbbc8f3db67c9d113",
+    "source": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S41_vmem_xet_attempt4/download_attempt4.py",
+    "source_sha256": "a708d23cc0b64c8b3f5a23d427a6414a12fe1e1fb935beb8726b3e698102aa15",
+    "receipt": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S41_vmem_xet_attempt4/execution_01/receipt.json",
+    "download_started_utc": "2026-09-07T05:39:30.970271+00:00",
+    "external_total_seconds": 5400,
+    "target": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vmem_recovery/xet_attempt4_01/vmem_weights.pth",
+    "expected_bytes": 5056346672,
+    "expected_sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4",
+    "last_live_observation_utc": "2026-09-07T06:13:44.370154+00:00",
+    "incomplete_bytes_at_observation": 4046360433,
+    "terminal_gate": "Only exit 0 plus a stable 5056346672-byte target plus full matching SHA-256 is success. Do not start a duplicate transfer."
+  },
+  "terminal_resource_attempts": {
+    "attempt3": "TIMEOUT; 3479430365-byte unverified partial retained; not loadable",
+    "strict_range_recovery": "CONNECT_ERROR after 0 new bytes; retained candidate remains unverified",
+    "companion_clip": "VERIFIED_COMPLETE; 3944517836 bytes; SHA-256 0084e753...",
+    "companion_cut3r": "VERIFIED_COMPLETE; 3173761006 bytes; SHA-256 45f7e98a...",
+    "companion_ft_mse_vae": "VERIFIED_COMPLETE; 334643276 bytes; SHA-256 a1d993..."
+  },
+  "s39": {
+    "status": "BLOCKED_ONLY_ON_ATTEMPT4_TERMINAL_SUCCESS",
+    "playbook_review": "work/S41_vmem_xet_attempt4/S39_NEXT_STEPS_REVIEW.md",
+    "ordered_next_steps": [
+      "freeze_manifest.py prepare exactly once using the verified attempt4 target directly",
+      "obtain two reviews from different authors against the actual core_sha256",
+      "attach reviews using the prepare receipt core_file_sha256 and consume the returned manifest_path",
+      "run the metadata gate",
+      "run one CPU8 FP32 loading attempt bounded by 1800 seconds and 45 GiB",
+      "obtain an independent review of the four loading-evidence hashes"
+    ]
+  },
+  "s40": {
+    "status": "SOURCE_REVIEW_PASS_NOT_EXECUTED",
+    "variant_label": "VMem plus ft-mse declared component variant; exact original SD2.1 VAE identity remains UNKNOWN",
+    "generation_review": "work/S40_declared_variant_generation/independent_source_review.json",
+    "readback_review": "work/S40_result_readback/source_review_v2.json",
+    "runtime_authorized": false,
+    "model_loads": 0,
+    "videos_generated": 0,
+    "scientific_results": 0
+  },
+  "innovation_protocol": {
+    "status": "DOCUMENT_LOGIC_PASS_NOT_EXECUTED",
+    "canonical_protocol": "work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md",
+    "canonical_protocol_sha256": "fd07dfc743f9a0c3f350f5d719936b74d5d902f3f10910c1a0b30b8ecda4059a",
+    "final_regression_review": "work/S41_gemini_adversarial_review/root_review_incremental_v3.json",
+    "reconciliation": "work/S42_causal_memory_gap_search/RECONCILIATION.md",
+    "reconciliation_verdict": "PASS",
+    "evidence_boundary": "No baseline output, causal effect or novelty has been established."
+  },
+  "last_workflow_check_utc": "2026-09-07T05:55:50.537386+00:00",
+  "next_workflow_target_utc": "2026-09-07T06:25:50.537386+00:00",
+  "next_workflow_deadline_utc": "2026-09-07T06:28:50.537386+00:00",
+  "next": "Continue session 54832 to terminal verification. On exact success, execute the audited S39 chain serially before any S40 generation."
+}

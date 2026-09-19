@@ -1,0 +1,738 @@
+                          This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                       Except for this watermark, it is identical to the accepted version;
+                                 the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+          VGGSfM: Visual Geometry Grounded Deep Structure From Motion
+
+        Jianyuan Wang1,2              Nikita Karaev 1,2             Christian Rupprecht1                David Novotny2
+                    1                                                                              2
+                        Visual Geometry Group, University of Oxford                                    Meta AI
+
+                                              https://vggsfm.github.io
+
+
+                          Abstract
+    Structure-from-motion (SfM) is a long-standing problem
+in the computer vision community, which aims to recon-
+struct the camera poses and 3D structure of a scene from
+a set of unconstrained 2D images. Classical frameworks
+solve this problem in an incremental manner by detecting
+and matching keypoints, registering images, triangulating
+3D points, and conducting bundle adjustment. Recent re-
+search efforts have predominantly revolved around harness-
+ing the power of deep learning techniques to enhance spe-
+cific elements (e.g., keypoint matching), but are still based
+on the original, non-differentiable pipeline. Instead, we
+propose a new deep pipeline VGGSfM, where each compo-
+nent is fully differentiable and thus can be trained in an end-
+to-end manner. To this end, we introduce new mechanisms
+and simplifications. First, we build on recent advances in
+deep 2D point tracking to extract reliable pixel-accurate
+tracks, which eliminates the need for chaining pairwise
+matches. Furthermore, we recover all cameras simultane-
+ously based on the image and track features instead of grad-
+ually registering cameras. Finally, we optimise the cameras
+and triangulate 3D points via a differentiable bundle adjust-
+ment layer. We attain state-of-the-art performance on three
+popular datasets, CO3D, IMC Phototourism, and ETH3D.
+
+
+1. Introduction
+Reconstructing the camera parameters and the 3D struc-
+ture of a scene from a set of unconstrained 2D images is
+a long-standing problem in the computer vision commu-
+nity. Among many other applications [8, 27, 29, 53, 79], it          Figure 1. Reconstruction of In-the-wild Photos with VGGSfM,
+has recently emerged as an important component of learn-             displaying estimated point clouds (in blue) and cameras (orange).
+ing neural fields [10, 28, 34, 37, 48, 76]. The problem is
+usually solved via the Structure-from-Motion (SfM) frame-            correspondence-rich images as initialization, and gradually
+work which estimates the 3D point cloud (Structure) and              adds more views into the reconstruction, through keypoint
+the parameters of each camera (Motion) in the scene. State-          detection, matching, verification, image registration, trian-
+of-the-art methods [25, 39] follow the incremental SfM               gulation, bundle adjustment (BA), and so on [2, 20, 26, 59].
+paradigm whose origins can be traced back to the early                  Recent research efforts have predominantly revolved
+2000s [23, 58]. It usually begins with a small set of                around leveraging the power of deep learning techniques to
+
+
+
+                                                                  21686
+ Input images                               Tracks                     Initial cameras , initial point cloud                       Cameras , point cloud
+
+
+
+
+                       Deep point tracker
+                                                      Deep camera
+
+
+
+                                                                                                               Differentiable 𝙱𝙰
+                                                      predictor 𝔗𝒫
+
+
+
+                                                          Deep
+                                                     triangulator 𝔗X
+
+
+
+Learnable components                                                              Training loss
+
+Figure 2. Overview of VGGSfM. Our method extracts 2D tracks from input images, reconstructs cameras using image and track features,
+initializes a point cloud based on these tracks and camera parameters, and applies a bundle adjustment layer for reconstruction refinement.
+The whole framework is fully differentiable and designed for end-to-end training.
+
+
+enhance specific elements within the original pipeline while                                tures, VGGSfM estimates all cameras jointly via a Trans-
+preserving the incremental SfM framework as a whole. For                                    former [72], and subsequently all 3D points. Different from
+instance, SuperPoint and SuperGlue [14, 57] focus on im-                                    Incremental SfM, this approach is simpler and easier to
+proving keypoint detection and matching. Pixel-perfect                                      differentiate as it does not depend on a discrete, combi-
+SfM [39] proposes deep feature-metric refinement to adjust                                  natorial correspondence chaining step. Finally, for bun-
+both keypoints and bundles. Detector-free feature match-                                    dle adjustment, we replace the commonly employed non-
+ing methods [12, 64, 75] bypass early keypoint detection                                    differentiable Ceres solver [3] with the fully differentiable
+by means of attention, which is powerful in poorly textured                                 second-order Theseus solver [54].
+scenes. Detector-free SfM [25] builds a coarse SfM model                                       Hence, we fuse all the SfM components into a single
+through quantized detector-free matches and then iteratively                                fully differentiable reconstruction function f . Besides that,
+refines it with multi-view consistency constraints. These ad-                               in our experiments, we also show that the individual mod-
+vancements successfully combine deep learning approaches                                    ules perform well in isolation. Ultimately, end-to-end train-
+(such as deep feature matching) with well-established hand-                                 ing yields another performance improvement, that surpasses
+engineered components, such as the incremental camera                                       the performance of isolated components.
+registration of COLMAP [59].                                                                   We evaluate VGGSfM for the task of camera pose esti-
+    The widespread success of end-to-end training warrants                                  mation on the CO3Dv2 [55] and IMC Phototourism [31]
+the question of what benefits it can bring to long-standing                                 datasets, and for 3D triangulation on the ETH3D [60]
+frameworks such as SfM. Naturally, it is often difficult                                    dataset. Our method attains strong performance on all
+to assess the merits of new approaches when compared                                        benchmarks. At the same time, we conduct in-the-wild re-
+with decades of continuous improvements. Nonetheless,                                       construction to validate the generalization ability of our pro-
+in this paper, we answer this question by introducing a                                     posed framework, as shown in Fig. 1.
+fully-differentiable SfM pipeline, dubbed Visual Geometry
+Grounded Deep Structure From Motion (VGGSfM), which                                         2. Related Work
+trains in an end-to-end manner. We find that this allows the
+pipeline to be simpler than prior frameworks while achiev-                                  Structure from Motion is a fundamental problem in
+ing better or comparable performance. Training end-to-end                                   computer vision and has been investigated for decades [23,
+allows each component to generate outputs that facilitate                                   52, 53]. The classical pipelines usually solve the SfM prob-
+the task of its successor.                                                                  lem in a global [13, 50, 80] or incremental [2, 19, 59, 63, 81]
+    To build a fully-differentiable pipeline, we make several                               manner. Both of which are usually based on pairwise im-
+substantial changes to the SfM procedures and overall ob-                                   age keypoint matching. Incremental SfM is arguably the
+tain better performance. Specifically, our model builds on                                  most widely adopted strategy (e.g., the popular framework
+recent advances in deep 2D point tracking [15, 16, 22, 32] to                               COLMAP [59]). Therefore, in the following sections, we
+directly extract reliable pixel-accurate tracks. This simpli-                               refer to incremental SfM as “classical” or “traditional” SfM.
+fies the correspondence estimation step in traditional SfM,                                 We defer the discussion of global SfM to the supplementary.
+which first estimates pairwise matches and then connects                                       Traditional SfM frameworks often start by detecting key-
+them into tracks. Then, based on the image and track fea-                                   points and feature descriptors [4, 42, 43, 46]. They then
+
+
+
+                                                                                       21687
+search for image pairs with overlapping frusta by matching           ing and dense Optical Flow with joint point tracking. How-
+these keypoints across different images (e.g., with a nearest-       ever, these works are designed for videos, i.e. temporally-
+neighbour search) [2, 41, 59]. These image pairs are fur-            ordered sequences of frames. In our point tracker, given the
+ther verified via two-view epipolar geometry or homogra-             input frames are unordered, we do not assume a temporal
+phy [23] through RANSAC [18]. Then, a pair or a small                relationship between input frames. We therefore process all
+set of images is carefully selected for initialization. New          frames jointly, avoiding windowed inference of [32]. Since
+images are gradually registered by solving the Perspective-          SfM relies on highly accurate correspondences, our tracks
+n-Point (PnP) problem [44], followed by triangulating 3D             are further refined in a coarse-to-fine manner to achieve sub-
+points, and bundle adjustment [69]. This process is iter-            pixel accuracy.
+ated until all the frames are either registered or discarded.
+2D correspondences (multi-view tracks) are the basis of              3. Method
+the whole process, however, they are usually simply con-
+structed by chaining two-view matches [59].                          In this section, we describe the components of VG-
+   Many deep-learning approaches have been proposed to               GSfM and how they are composed in a fully differentiable
+enhance this framework. For example, [14, 70, 84] provide            pipeline. An overview of our framework is shown in Fig. 2.
+better keypoint detection and [11, 30, 40, 57, 61] focus             Problem setting Given a set of free-form images observ-
+on matching. Furthermore, detector-free matching meth-               ing a scene, VGGSfM estimates their corresponding cam-
+ods [12, 64, 75] propose to avoid sparse keypoint detection          era parameters and the 3D scene shape represented as a
+by building semi-dense matches via self and cross attention.         point cloud. Formally, given a tuple I = I1 , ..., INI
+[7] solves the subproblems of SfM by graph attention net-            of NI ∈ N RGB images Ii ∈ R3×H×W , VGGSfM esti-
+works. Some studies improve the performance of RANSAC                mates the corresponding camera          projection matrices P =
+by making it trainable [5, 6, 77]. Recent state-of-the-art             P1 , ..., PNI Pi ⊂ R3×4 and the scene cloud X =
+methods are PixSfM [39] and the concurrent Detector-free             {xj }N                                     j      3
+                                                                            j=1 of Nx ∈ N 3D points x ∈ R . Each projec-
+                                                                              x
+
+SfM (DFSfM) [25]. PixSfM refines the tracks and structure            tion matrix Pi consists of extrinsics (pose) gi ∈ SE(3) and
+estimated by COLMAP through feature-metric keypoint ad-              intrinsics Ki ∈ R3×3 .
+justment and feature-metric bundle adjustment. Detector-                A 3D point xj can be projected to the i-th camera yield-
+free SfM proposes to first build a coarse SfM model using            ing a 2D screen coordinate yij = Pi (xj ) ∼ λKi x̂ji ; λ ∈
+detector-free matches and COLMAP (or other frameworks),              R+ , where x̂ji = gi xj is the world coordinate xj ex-
+and then to iteratively refine the tracks and the structure of       pressed in view-coordinates of the i-th camera. The pro-
+the coarse model by enforcing multi-view consistency.                jection of the point xj to all         input cameras is a track
+   Recently, fully differentiable SfM pipelines have also            T j = (y1j , v1j )..., (yN
+                                                                                              j
+                                                                                                I
+                                                                                                  , v j
+                                                                                                     NI   ) consisting of NI matching
+been explored. They usually use deep neural networks to              2D points yij ∈ R2 , and their corresponding binary indica-
+regress camera poses and depths [65, 66, 68, 71, 73, 78, 87].        tors vij ∈ {0, 1} denoting visibility of the j-th point in the
+Although using an approximation of bundle adjustment [65,
+                                                                     i-th camera. We denote Ti = {Ti1 , ..., TiNT } as the set of all
+68, 78], these methods suffer from limited generalizability
+and scalability (very few input frames) [65, 71, 73, 78, 87],        tracks Tij in the i-th camera.
+or rely on temporal relationship [66, 68]. Meanwhile,
+                                                                     3.1. Method overview
+some methods are category-specific [45, 82, 83]. The re-
+cent efforts on deep camera pose estimation can scale up             VGGSfM implements SfM via a single function fθ
+to more than 50 frames, but they do not reconstruct the
+scene [36, 62, 74, 85].                                                                                                                f_\theta (\setI ) = \setP , X \vspace {-1mm}                                                                      (1)
+Point tracking. Since VGGSfM proposes a novel point                  accepting the set of NI scene images I and outputting the
+track predictor, next, we review recent advances in this field.      camera parameters P and the scene point cloud X. Impor-
+Inspired by the optical-flow architecture of RAFT [67],              tantly, fθ is fully differentiable and, as such, its parameters
+PIPs [22] revisited point tracking, a task related to Par-           θ are learned by minimizing the training loss L:
+ticle Video [56], and proposed a highly accurate tracker
+of isolated points in a video. TAP-Vid [15] (i.e., “Track-
+                                                                                \label {eq:main_loss} \theta ^\star = \argmin _\theta \sum _{s=1}^{S} \mathcal {L}(f_\theta (\setI _s), \setP ^\star _s, \setT ^\star _s, X_s^\star ), \vspace {-1mm}    (2)
+ing Any Point”) introduced a benchmark for point track-
+ing and a baseline model, which was later improved in
+TAPIR [16] by integrating the iterative update mechanism             summing over S ∈ N training image sets Is annotated with
+from PIPs. PointOdyssey [86] simplified PIPs and proposed            ground-truth cameras Ps⋆ , tracks Ts⋆ , and point clouds Xs⋆ .
+a benchmark for the long-term version of point tracking.             We defer the details of L to Sec. 3.5 and, in the following
+CoTracker [32] closed the gap between single point track-            paragraphs, discuss the architecture of fθ .
+
+
+
+                                                                  21688
+                                                                                                                                                                                                                                                                                        Deep point tracker         Coarse Tracking                     Coarse tracks
+The reconstruction function Following traditional SfM
+                                                                                                                                                                                                                                                                                     Query
+[59], VGGSfM decomposes the reconstruction function fθ
+                                                                                                                                                                                                                                                                                                                        Cost Volume
+into four seamless stages: 1) point tracking T, 2) initial cam-
+
+                                                                                                                                                                                                                                                                                                                               Transformer
+era estimator TP , 3) triangulator TX and, 4) Bundle Adjust-                                                                                                                                                                                                                                                  2D
+ment BA, as follows:                                                                                                                                                                                                                                                                                         CNN
+
+                                                                                                                                                                                                                                                                                                                 Init                        Updated
+                        \vspace {-1mm} \begin {aligned} \setT &= \tracker (\setI ) \\ \hat {\setP } &= \tformer _{\setP }(\setI , \setT ) \\ \hat {X} &= \tformer _X(\setT , \hat {\setP }) \\ \setP , X &= \badj (\setT , \hat {\setP }, \hat {X}). \\ \end {aligned}                                         tracks                         tracks
+
+                                                                                                                                                                                                                                                                                           Fine tracks             Fine Tracking
+                                                                                                                                                                                                                                                                          (3)
+                                                                                                                                                                                                                                                                                   Figure 3. Architecture of Tracker T. We adopt a coarse-to-fine
+                                                                                                                                                                                                                                                                                   design for the tracker. The coarse tracker first locates the approx-
+                                                                                                                                                                                                                                                                                   imate positions of corresponding points, and the fine tracker then
+The track predictor T, hereafter referred to as “tracker”, es-                                                                                                                                                                                                                     refines these initial predictions.
+timates 2D tracks T given input images I. Subsequently,
+TP and TX provide initial cameras P̂ and an initial point
+cloud X̂ respectively. Finally, BA enhances accuracy by re-                                                                                                                                                                                                                        set of NI tracked 2D locations yij together with predicted
+fining the cameras and 3D points together.                                                                                                                                                                                                                                         visibility indicators vij .
+3.2. Tracking                                                                                                                                                                                                                                                                          It is worth noting that, differently from [22, 32], our
+                                                                                                                                                                                                                                                                                   tracker does not assume temporal continuity. Therefore, we
+Establishing precise 2D correspondences is important for                                                                                                                                                                                                                           avoid the sliding window approach and, instead, attend to
+achieving accurate 3D reconstruction. Traditionally, SfM                                                                                                                                                                                                                           all the input frames together. Furthermore, unlike in [32],
+frameworks first estimate pairwise image-to-image corre-                                                                                                                                                                                                                           we predict each track independently of others. This allows
+spondences that are later chained into multi-image tracks                                                                                                                                                                                                                          to track a larger number of points at test time leading to
+T [25, 39, 59]. Here, typically only point-pair matching                                                                                                                                                                                                                           increased density of reconstructed point clouds.
+benefits from learned components [14, 40, 57, 70], while
+                                                                                                                                                                                                                                                                                   Predicting tracking confidence In SfM, it is crucial to
+the chaining of pairwise correspondences remains a hand-
+                                                                                                                                                                                                                                                                                   filter out any outlier correspondences as they can negatively
+engineered process.
+                                                                                                                                                                                                                                                                                   impact the subsequent reconstruction stages. To this end,
+   Instead, VGGSfM significantly simplifies SfM corre-
+                                                                                                                                                                                                                                                                                   we enhance the tracker with the ability to estimate confi-
+spondence tracking by employing a deep feed-forward
+                                                                                                                                                                                                                                                                                   dence for each track-point prediction.
+tracking function. It accepts a collection of images and di-
+                                                                                                                                                                                                                                                                                       More specifically, we leverage the aleatoric uncertainty
+rectly outputs a set of reliable point trajectories across all
+                                                                                                                                                                                                                                                                                   [33, 51] model which predicts variance σij together with
+images. We achieve this by exploiting recent advances in
+video point tracking methods [15, 16, 22, 32]. Although                                                                                                                                                                                                                            each 2D track point yij , so that the resulting normal dis-
+developed for video-point tracking, these methods are in-                                                                                                                                                                                                                          tribution N (yij⋆ |yij , σij ) tightly peaks around each ground-
+herently appropriate for SfM which requires a very com-                                                                                                                                                                                                                            truth 2D track point yij⋆ . Hence, during training, the ℓ1 /ℓ2
+pact set of highly accurate tracks (e.g., dense optical flow is                                                                                                                                                                                                                    loss, originally used in video point tracking, is replaced with
+too memory-demanding). Furthermore, point trackers miti-                                                                                                                                                                                                                           the (negated) logarithm of the latter probability evaluated at
+gate the potential errors (sometimes called drift) caused by                                                                                                                                                                                                                       each ground truth point yij⋆ . Once trained, the confidence
+chaining of pairwise matches. However, as we describe be-                                                                                                                                                                                                                          measure 1/σij is proportional to the inverse of the predicted
+low, our design differs from video trackers because SfM,                                                                                                                                                                                                                           variance. In practice, we assume a diagonal covariance ma-
+which accepts free-form images, cannot assume temporal                                                                                                                                                                                                                             trix resulting in horizontal and vertical uncertainties σij .
+smoothness or ordering, and requires sub-pixel accuracy.                                                                                                                                                                                                                           Coarse-to-fine tracking Moreover, since SfM requires
+Tracker architecture The design of our tracker T fol-                                                                                                                                                                                                                              highly accurate (pixel or sub-pixel level) correspondences,
+lows [22, 32], and is illustrated in Fig. 3. More specifi-                                                                                                                                                                                                                         we employ a coarse-to-fine point-tracking strategy. As de-
+cally, given NT query points {ŷi1 , ...ŷiNT } in a frame Ii ,                                                                                                                                                                                                                    scribed above, we first coarsely track image points using
+we bilinearly sample their corresponding query descriptors                                                                                                                                                                                                                         feature maps that fully cover the input images I. Then,
+{m1i , ..., miNT } from image feature maps output by a 2D                                                                                                                                                                                                                          we form P × P patches by cropping input images around
+CNN. Then, each query descriptor is correlated with the                                                                                                                                                                                                                            the coarse point estimates and execute the tracking again
+feature maps of all NI frames at different spatial resolu-                                                                                                                                                                                                                         to obtain a sub-pixel estimate. Recall that, differently from
+tions, which constructs a cost-volume pyramid. Flatten-                                                                                                                                                                                                                            the chained matching of traditional SfM, our tracker is fully
+ing the latter yields tokens V ∈ RNT ×NI ×C , where C                                                                                                                                                                                                                              differentiable. This enables back-propagating the gradient
+is the total number of elements in the cost-volume pyra-                                                                                                                                                                                                                           of the training loss L through the whole framework to the
+mid. Feeding the tokens to a Transformer, we obtain tracks                                                                                                                                                                                                                         tracker parameters. This reinforces the synergy between the
+              NT
+T = {T j }j=1     . Recall that each track T j comprises the                                                                                                                                                                                                                       tracking and the ensuing stages, which are described next.
+
+
+
+                                                                                                                                                                                                                                                                                21689
+3.3. Learnable camera & point initialization                                                                                                                                             mizes the reprojection loss LBA [1, 2, 23, 59]:
+As discussed above, a traditional SfM pipeline [39, 59] usu-                                                                                                                                                                                                         \label {eq:ba_repro_loss} \begin {aligned} X, \setP &= \badj (\setT , \hat {X}, \hat {\setP }) = \argmin _{X, \setP } \mathcal {L}_\text {BA} \\ \mathcal {L}_\text {BA} &= \sum _{i=1}^{N_I} \sum _{j=1}^{N_\x } v_i^j \| P_i(\x ^j) - y_i^j \|, \end {aligned} 
+ally relies on an an incremental loop, which often initial-
+izes with a correspondence-rich image pair, gradually reg-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            (6)
+isters new frames, enlarges the point cloud, and conducts
+joint optimization (e.g., BA). However, although the frame-
+work has been fortified in robustness and accuracy through
+decades of improvements, this cumulative process has in-                                                                                                                                 summing over all reprojection errors ∥Pi (xj ) − yij ∥ each
+evitably led to increased complexity. Furthermore, Incre-                                                                                                                                comprising the distance between the projection Pi (xj ) of
+mental SfM is largely non-differentiable which complicates                                                                                                                               the point cloud xj ∈ X to camera Pi ∈ P, and the i-th 2D
+end-to-end learning from annotated data.                                                                                                                                                 point yij ∈ T j of the track T j . Additionally, the error terms
+    Thus, in pursuit of simplicity and differentiability, our                                                                                                                            are filtered out if the corresponding points have low visibil-
+method departs from the classical SfM scheme. Inspired by                                                                                                                                ity, low confidence, or do not fit the geometric constraints
+recent advances in deep camera pose estimators [36, 74, 85],                                                                                                                             defined by [59]. Points with large reprojections errors are
+we propose to initialize the cameras and the point cloud                                                                                                                                 also filtered [59, 63, 81]. More details are provided in the
+with a pair of deep Transformer [72] networks. Importantly,                                                                                                                              supplementary material.
+we register all cameras and reconstruct all scene points col-                                                                                                                            Differentiable Levenberg-Marquardt Following com-
+lectively in a non-incremental differentiable fashion.                                                                                                                                   mon practice [39, 59], we minimize Eq. (6) with second-
+Learnable camera initializer The predictor of initial                                                                                                                                    order Levenberg-Marquardt (LM) optimizer [49]. However,
+cameras P̂ is implemented as a deep Transformer architec-                                                                                                                                optimizing the main training loss (Eq. (2)) via backprop-
+ture TP :                                                                                                                                                                                agation requires differentiability of Eq. (6) which is non-
+     \label {eq:pose_transformer} \hat {\setP } = \tformer _{\setP }( \{ \phi (I_i) | I_i \in \setI \}, \{ d^{\setP }(y_i^j) | \forall T_i \in \setT ~ \forall y_i^j \in T_i \} ).       trivial. Therefore, we leverage the recently proposed The-
+                                                                                                                                                                                         seus library [54] which exploits the implicit function the-
+                                                                                                                                                                              (4)
+                                                                                                                                                                                         orem to backpropagate through deep networks with nested
+It accepts a set of tokens comprising global ResNet50 [24]
+                                                                                                                                                                                         optimization loops.
+features ϕ(Ii ) of input images I, and the set of descriptors
+dP (yij ) of track points yij ∈ Ti ∈ T . Here, each track de-                                                                                                                            3.5. Method details
+scriptor is output by an auxiliary branch of the tracker T.
+Given these inputs, TP first applies cross-attention between                                                                                                                             Camera parameterization Each camera pose P ∈ P is
+the global image feature (query) and the track-descriptor                                                                                                                                parameterized with 8-degrees of freedom: the quaternion
+(key-value) pairs yielding NI = |I| tokens per scene. The                                                                                                                                q(R) ∈ R4 of the rotation R ∈ SO(3) and the transla-
+output of cross-attention is then concatenated with an em-                                                                                                                               tion t ∈ R3 components of P ’s extrinsics g ∈ SE(3),
+bedding of a preliminary camera estimated by the 8-point                                                                                                                                 and the logarithm ln(f) ∈ R of the camera focal length
+algorithm taking the correspondences between track points                                                                                                                                f ∈ R+ . Given these values, the 3 × 4 pose matrix is
+yij as input. Finally, we feed this concatenation to a Trans-                                                                                                                            defined as P = KR[I3 |t], with the calibration matrix
+                                                                                                                                                                                         K = [f, 0, px ; 0, f, py ; 0, 0, 1] ⊂ R3×3 (row major order).
+former trunk resulting in the initial cameras P̂.
+                                                                                                                                                                                         Following standard practice [39, 59], we set the principal-
+Learnable triangulation Given initial cameras P̂ and 2D                                                                                                                                  point coordinates px , py ∈ R to the center of the image.
+tracks T , the triangulator outputs the initial point cloud X̂.
+                                                                                                                                                                                         Training loss The training loss L (Eq. (2)) is defined as:
+Similar to the camera predictor, the triangulator is a Trans-
+former TX
+                                 \hat {X} = \tformer _X( \{ d^X(y_i^j) | \forall T_i \in \setT \forall y_i^j \in T_i \} )                                                 (5)              \label {eq:detailed_loss} \begin {aligned} &\mathcal {L}(f_\theta (\setI ),\setP ^\star ,\setT ^\star ,X^\star ) = \sum _{j=1}^{N_T} | \x ^{\star j} - \x ^{j} |_\epsilon + | \x ^{\star j} - \hat {\x }^{j} |_\epsilon + \\ & + \sum _{i=1}^{N_I} e_\setP ( P^\star _i, P_i) + e_\setP ( P^\star _i, \hat {P}_i) - \sum _{i=1}^{N_I}\sum _{j=1}^{N_T} \log \mathcal {N}(\y ^{j\star }_i | \y _i^j, \sigma _i^j) \end {aligned} 
+
+accepting descriptors dX (yij ) each comprising a tracker
+feature, and a positional harmonic embedding [47] of points
+x̄j ∈ X̄ from a preliminary point cloud X̄. The prelimi-
+nary point cloud is formed via closed-form multi-view Di-                                                                                                                                                                                             (7)
+rect Linear Transform (DLT) 3D triangulation [23] of the                                                                                                                                 Here, |x⋆j −xj |ϵ and |x⋆j − x̂j |ϵ evaluate the ϵ-thresholded
+tracks T given the initial cameras P̂. Please refer to the                                                                                                                               pseudo-Huber loss | · |ϵ [9] between the ground truth 3D
+supplementary for a detailed description of both initializers.                                                                                                                           points x⋆j and the initial and BA-refined 3D points x̂j ∈ X,
+                                                                                                                                                                                         xj ∈ X̂ respectively. The camera errors eP (Pi⋆ , Pi ) and
+3.4. Bundle adjustment
+                                                                                                                                                                                         eP (Pi⋆ , P̂i ) compare the predicted initial pose P̂i ∈ P̂ and
+Given the tracks T (Sec. 3.2), initial cameras P̂, and the ini-                                                                                                                          bundle-adjusted camera pose Pi ∈ P to the ground truth
+tial point cloud X̂ (Sec. 3.3), Bundle Adjustment BA mini-                                                                                                                               camera annotation Pi⋆ ∈ Pi⋆ . Here, eP (P, P ′ ) is defined as
+
+
+
+                                                                                                                                                                                      21690
+            Figure 4. Camera and point-cloud reconstructions of VGGSfM on Co3D (left) and IMC Phototourism (right).
+
+
+the Huber-loss | · |ϵ between the parameterizations of poses             tains 1M crowd-sourced images depicting 196 tourism land-
+P , P ′ . Finally, log N (yij⋆ |yij , σij ) computes the likelihood      marks, auto-annotated with SfM tools. Hyper-parameters
+of a ground-truth track point yij⋆ ∈ Ti⋆ under a probabilistic           are tuned using the IMC validation set. As in prior
+track-point estimate defined by a 2D gaussian with mean                  work [25, 40], some scenes of MegaDepth are excluded
+and variance predictions yij and σij respectively (i.e. the              from training due to their low quality or due to overlap with
+aleatoric uncertainty model described in Sec. 3.2).                      the IMC test set. For Co3Dv2, we conduct training and
+                                                                         evaluation on 41 categories as in [36, 74, 85].
+4. Experiments                                                               We chose a multi-stage training strategy for better sta-
+                                                                         bility. We first train the tracker T on the synthetic
+In this section, we first introduce the datasets together with           Kubric dataset [21] following the training protocol of [15,
+the protocols for training and evaluation. Then, we provide              32]. Then, the tracker is fine-tuned solely on Co3D or
+comparison to existing methods and ablation studies.                     MegaDepth, depending on the test dataset. Subsequently,
+Datasets. Following prior work [25, 39, 74], we evaluate                 we train the camera initializer, with the tracker frozen.
+camera pose estimation on Co3Dv2 [55] and IMC Photo-                     Next, the triangulator is trained with the aforementioned
+tourism datasets [31], and 3D triangulation on ETH3D [60].               two components held frozen. Finally, all components are
+Co3D is an object-centric dataset comprising turntable-style             trained end-to-end. In all stages, we randomly sample a
+videos from 51 categories of MS COCO [38]. IMC Photo-                    training batch of 3 to 30 frames.
+tourism, provided by Image Matching Challenge [31], con-                 Testing. Given input test frames I, we first select the
+tains 8 testing scenes and 3 validation scenes of famous                 query frame by identifying the image that is closest to all
+landmarks. Generally, the Co3D scenes have much wider                    others based on the cosine similarity between global de-
+baselines, making them challenging for traditional frame-                scriptors extracted by an off-the-shelf ResNet50 [24]. Then,
+works such as COLMAP, while the IMC samples often have                   we extract SuperPoint and SIFT keypoints from the query
+sufficiently overlapping fursta, which is where COLMAP                   frame to serve as the query points for the tracker T. Al-
+excels. ETH3D provides highly accurate point clouds (cap-                though our method can track any query point, it performs
+tured by laser scanner) for 13 indoor and outdoor scenes,                better when the queries are distinctive. To improve accu-
+and hence is suitable for the evaluation of triangulation.               racy, we iterate the whole reconstruction function fθ mul-
+Training. For the model evaluated on IMC Phototourism                    tiple times until reaching sub-pixel BA reprojection error
+and ETH3D, we follow the protocol of [25, 39, 57] and                    LBA . After the first iteration, the query image for each
+train on the MegaDepth dataset [35]. MegaDepth con-                      subsequent iteration is the one that is farthest from the
+
+
+
+                                                                      21691
+            Query                                                                        Tracking Results                              Ours           GT
+
+
+
+
+Figure 5. Qualitative Evaluation of Tracking. In each row, the left-most frame contains the query image with query points (crosses). The
+predicted track points yij (dots) are shown to the right. The top-right part also highlights our track-point confidence predictions (described
+in Sec. 3.2), illustrated as ellipses with extent proportional to the predicted variance σij . Note how the uncertainty corresponds to an
+expectation, e.g., a keypoint covering a vertical stripe has higher uncertainty along the y-axis.
+
+     Co3D Dataset                   Incremental SfM                                                     Deep
+        Method       COLMAP (SP + SG)         PixSfM (SP + SG)   RelPose[85]   PoseReg[74]   RelPose++[36]     PoseDiffusion[74]   Ours w/o Joint   Ours
+      RRE@15◦                31.6                     33.7          57.1          53.2           82.3                80.5              88.2         92.1
+      RTE@15◦                27.3                     32.9           -            49.1           77.2                79.8              83.4         88.3
+      AUC@30◦                25.3                     30.1           -            45.0           65.1                66.5              70.7         74.0
+
+
+Table 1. Camera Pose Estimation on Co3D, where the proposed method outperforms previous methods by a large margin. Ours w/o
+Joint indicates the variant of our framework without training all components jointly.
+
+
+ IMC Dataset          Method             AUC@3◦       AUC@5◦     AUC@10◦          translation and rotation error, which are later compared to a
+     Deep
+                     DeepSFM               10.27        19.36     31.35           threshold yielding accuracies RTE and RRE respectively.
+                    PoseDiffusion          12.31        23.17     36.82
+                                                                                  For a range of thresholds, AUC picks the lower between
+                 COLMAP (SIFT+NN)          23.58        32.66     44.79
+                 PixSfM (SIFT + NN)        25.54        34.80     46.73
+                                                                                  RRE and RTE, and outputs the area under the accuracy-
+  Incremental                                                                     threshold curve. The results on IMC and CO3D are pre-
+      SfM          PixSfM (LoFTR)          44.06        56.16     69.61
+                  PixSfM (SP + SG)         45.19        57.22     70.47           sented in Tab. 1 and Tab. 2 respectively. For a fair com-
+                   DFSfM (LoFTR)           46.55        58.74     72.19
+                    Ours w/o Joint         38.23        51.60     68.35           parison on IMC, we finetune DeepSFM [78] and PoseD-
+     Deep
+                        Ours               45.23        58.89     73.92           iffusion [74] on MegaDepth using their open-source code.
+                                                                                  The results of Incremental SfM methods are copied from
+Table 2. Camera Pose Estimation on IMC. Our method achieves                       Detector-free SfM [25].
+better accuracy than state-of-the-art Incremental SfM approaches
+on 2 out of 3 AUC thresholds.
+                                                                                      Results indicate that VGGSfM outperforms existing
+                                                                                  methods by a large margin (+9 accuracy points for each
+query image of the previous iteration (as measured by the
+                                                                                  metric) on the CO3D dataset. Here, traditional SfM
+ResNet50 cosine similarity). The re-projections of the point
+                                                                                  pipelines suffer because of the wide baselines between
+cloud from the current iteration initialize the tracking in the
+                                                                                  test frames. On IMC, with a good overlap between
+next iteration.
+                                                                                  views, traditional SfM remains superior to recent data-
+                                                                                  driven deep-learning pipelines [74, 78]. Our end-to-end
+4.1. Camera pose estimation
+                                                                                  trained VGGSfM, however, outperforms all other methods
+Following [25, 31, 39, 74], we report the metric area-under-                      on AUC@10 and AUC@5, and ranks second on AUC@3,
+curve (AUC) to evaluate camera pose accuracy. In Co3D,                            convincingly demonstrating its ability to perform well in
+similar to [74], we also report the relative rotation error                       both narrow- and wide-baseline regimes. The accuracy and
+(RRE) and relative translation error (RTE). More specifi-                         completeness of our point clouds can be further qualita-
+cally, for every pair of input frames, we compute the angular                     tively evaluated in Fig. 4.
+
+
+
+                                                                               21692
+                          Accuracy (%)          Completeness (%)                     PixSfM(SP + SG)   PixSfM(Our Tracks)      Ours(SP + LG)    Ours
+       Method
+                       1cm     2cm     5cm     1cm    2cm     5cm         AUC@10◦         70.47                70.62               68.78        73.92
+
+  PatchFlow (LoFTR)    66.73   78.73   89.93   3.48   11.34   30.96
+    PixSfM (LoFTR)     74.42   84.08   92.63   2.91    9.39   27.31      Table 4. Tracking or Pairwise Matching. We respectively
+  PixSfM (SIFT + NN)   76.18   85.60   93.16   0.17    0.71    3.29      provide tracks predicted by our tracker or matches estimated by
+   PixSfM (SP + SG)    79.01   87.04   93.80   0.75    2.77   11.28      SP+SG to PixSfM and to our VGGSfM.
+    DFSfM (LoFTR)      80.38   89.01   95.83   3.73   11.07   29.54
+         Ours          80.62   89.49   96.52   4.52   13.11   33.96                                 PoseDiffusion      Our Camera Initializer
+                                                                                      DLT              62.18                   69.42
+                                                                                 Our Triangulator      66.37                   73.92
+Table 3. 3D Triangulation on ETH3D [60] reporting the accuracy
+and completeness metrics at different thresholds.
+                                                                         Table 5. Ablation Study for Camera Initializer and Triangu-
+                                                                         lator. A clear performance drop is observed when replacing our
+4.2. 3D triangulation                                                    camera initializer by deep camera prediction method PoseDiffu-
+                                                                         sion, or replacing triangulator by DLT.
+We evaluate the accuracy and completeness of 3D trian-
+gulation on the ETH3D dataset [60] using the same pro-
+tocol as [17, 25, 39], which triangulates points with fixed              tion SP+SG. Instead, directly feeding SP+SG tracks to our
+camera poses and intrinsics. Results are shown in Tab. 3,                framework leads to a performance drop. We attribute this
+where metrics are averaged over all scenes. Our VGGSfM                   to the fact that using SP+SG tracks cannot benefit from the
+achieves better accuracy and completeness than all base-                 joint training. We also provide a qualitative evaluation of
+lines (PatchFlow [17], PixSfM [39], and DFSfM [25]), re-                 our tracking accuracy in Fig. 5 on the IMC dataset.
+gardless of which keypoint detection or matching method                  Camera Initializer and Triangulator. We also validate
+they use. This is especially obvious from the completeness               the design of our camera initializer TP and triangulator
+attained at the 5cm threshold, with our 33.96% compared to               TX on the IMC dataset. As reported in Tab. 5, AUC@10
+29.54% of the best prior work.                                           drops clearly if we replace them with alternatives, proving
+                                                                         that they provide sufficiently accurate initialization for our
+4.3. Ablation study
+                                                                         global bundle adjustment BA, without the need for incre-
+End-to-end Training. As reported in Tab. 1 and Tab. 2,                   mental camera registration.
+the end-to-end joint training of the whole framework is im-              Coarse-to-fine Tracking. As dicussed above, accurate
+portant for achieving state-of-the-art performance. Specifi-             correspondences are important for structure from motion.
+cally, comparing VGGSfM to an ablation which lacks end-                  We demonstrate the significance of our coarse-to-fine track-
+to-end training (Ours w/o joint) we record an improvement                ing mechanism for the method performance. By conducting
+from 70.7% AUC@30 to 74.0% on the Co3D dataset, and                      an ablation study where the fine tracker is removed, we ob-
+68.35% AUC@10 to 73.92% on the IMC dataset. This                         serve a significant performance drop on the IMC dataset,
+demonstrates the benefits of our fully-differentiable design,            with AUC@10 dropping from 73.92% to 62.30%.
+and the synergy between its components.
+
+Tracking or Pairwise Matching. We compare the perfor-                    5. Conclusion
+mance of our predicted tracks to pairwise matching methods
+on the IMC dataset. Specifically, we split our 2D tracks into            In this paper, we have presented VGGSfM, a fully differ-
+pairwise matches and feed these matches to PixSfM. Also,                 entiable SfM approach. We find that even long-standing
+we construct 2D tracks by pairwise matching (based on the                pipelines, such as Structure-from-Motion, benefit from a
+open-source implementation of PixSfM) and feed them to                   learned adaptation between their components. This al-
+our framework. It is worth noting that tracks from pairwise              lows VGGSfM to be simpler than traditional SfM frame-
+matching have a lot of “holes” because pairwise matching                 works while achieving better performance across bench-
+cannot guarantee proper point tracking. We fix these holes               mark datasets. Moreover, our framework is fully imple-
+by setting their locations as the point locations in the query           mented in Python, which will allow for easy modification
+frame, marking them as invisible. At the same time, for fair             and improvements in the future. While VGGSfM already
+comparison, cameras are still initialized using our tracks,              achieves good performance, it cannot yet compete with es-
+because SP+SG cannot provide track features to our cam-                  tablished pipelines in all application domains. For example,
+era initializer. The results are shown in Tab. 4. Although               it currently lacks the capability to process thousands of im-
+COLMAP (the basis of PixSfM) is designed and care-                       ages as in traditional SfM frameworks. Nonetheless, we
+fully engineered for pairwise matching, our tracks achieve               find differentiable SfM a promising direction of research,
+a slightly better result than the state-of-the-art matching op-          and our approach lays the foundation for further advances.
+
+
+
+                                                                      21693
+References                                                                  computer vision and pattern recognition workshops, pages
+                                                                            224–236, 2018. 2, 3, 4
+ [1] Sameer Agarwal, Noah Snavely, Steven M Seitz, and
+                                                                       [15] Carl Doersch, Ankush Gupta, Larisa Markeeva, Adria Re-
+     Richard Szeliski. Bundle adjustment in the large. In Com-
+                                                                            casens Continente, Kucas Smaira, Yusuf Aytar, Joao Car-
+     puter Vision–ECCV 2010: 11th European Conference on
+                                                                            reira, Andrew Zisserman, and Yi Yang. Tap-vid: A bench-
+     Computer Vision, Heraklion, Crete, Greece, September 5-11,
+                                                                            mark for tracking any point in a video. In NeurIPS Datasets
+     2010, Proceedings, Part II 11, pages 29–42. Springer, 2010.
+                                                                            Track, 2022. 2, 3, 4, 6
+     5
+                                                                       [16] Carl Doersch, Yi Yang, Mel Vecerik, Dilara Gokay, Ankush
+ [2] Sameer Agarwal, Yasutaka Furukawa, Noah Snavely, Ian Si-
+                                                                            Gupta, Yusuf Aytar, Joao Carreira, and Andrew Zisser-
+     mon, Brian Curless, Steven M Seitz, and Richard Szeliski.
+                                                                            man. Tapir: Tracking any point with per-frame initialization
+     Building rome in a day. Communications of the ACM, 54
+                                                                            and temporal refinement. arXiv preprint arXiv:2306.08637,
+     (10):105–112, 2011. 1, 2, 3, 5
+                                                                            2023. 2, 3, 4
+ [3] Sameer Agarwal, Keir Mierle, and The Ceres Solver Team.
+                                                                       [17] Mihai Dusmanu, Johannes L Schönberger, and Marc Polle-
+     Ceres Solver, 2022. 2
+                                                                            feys. Multi-view optimization of local feature geometry. In
+ [4] Herbert Bay, Andreas Ess, Tinne Tuytelaars, and Luc Van                Computer Vision–ECCV 2020: 16th European Conference,
+     Gool. Speeded-Up Robust Features (SURF). CVIU, 110(3),                 Glasgow, UK, August 23–28, 2020, Proceedings, Part I 16,
+     2008. 2                                                                pages 670–686. Springer, 2020. 8
+ [5] Eric Brachmann and Carsten Rother. Neural-guided ransac:          [18] Martin A Fischler and Robert C Bolles. Random sample
+     Learning where to sample model hypotheses. In Proceedings              consensus: a paradigm for model fitting with applications to
+     of the IEEE/CVF International Conference on Computer Vi-               image analysis and automated cartography. Communications
+     sion, pages 4322–4331, 2019. 3                                         of the ACM, 24(6):381–395, 1981. 3
+ [6] Eric Brachmann, Alexander Krull, Sebastian Nowozin,               [19] Jan-Michael Frahm, Pierre Fite-Georgel, David Gallup, Tim
+     Jamie Shotton, Frank Michel, Stefan Gumhold, and Carsten               Johnson, Rahul Raguram, Changchang Wu, Yi-Hung Jen,
+     Rother. Dsac-differentiable ransac for camera localization.            Enrique Dunn, Brian Clipp, Svetlana Lazebnik, et al. Build-
+     In Proceedings of the IEEE conference on computer vision               ing rome on a cloudless day. In Computer Vision–ECCV
+     and pattern recognition, pages 6684–6692, 2017. 3                      2010: 11th European Conference on Computer Vision, Her-
+ [7] Lucas Brynte, José Pedro Iglesias, Carl Olsson, and Fredrik           aklion, Crete, Greece, September 5-11, 2010, Proceedings,
+     Kahl. Learning structure-from-motion with graph attention              Part IV 11, pages 368–381. Springer, 2010. 2
+     networks. arXiv preprint arXiv:2308.15984, 2023. 3                [20] Yasutaka Furukawa, Brian Curless, Steven M. Seitz, and
+ [8] Jonathan L Carrivick, Mark W Smith, and Duncan J                       Richard Szeliski. Towards Internet-scale multi-view stereo.
+     Quincey. Structure from Motion in the Geosciences. John                In Proc. CVPR. IEEE, 2010. 1
+     Wiley & Sons, 2016. 1                                             [21] Klaus Greff, Francois Belletti, Lucas Beyer, Carl Doersch,
+ [9] Pierre Charbonnier, Laure Blanc-féraud, Gilles Aubert, and            Yilun Du, Daniel Duckworth, David J Fleet, Dan Gnanapra-
+     Michel Barlaud. Deterministic edge-preserving regulariza-              gasam, Florian Golemo, Charles Herrmann, Thomas Kipf,
+     tion in computed imaging. IEEE Trans. Image Processing,                Abhijit Kundu, Dmitry Lagun, Issam Laradji, Hsueh-
+     6:298–311, 1997. 5                                                     Ti (Derek) Liu, Henning Meyer, Yishu Miao, Derek
+[10] Anpei Chen, Zexiang Xu, Andreas Geiger, Jingyi Yu, and                 Nowrouzezahrai, Cengiz Oztireli, Etienne Pot, Noha Rad-
+     Hao Su. Tensorf: Tensorial radiance fields. In European                wan, Daniel Rebain, Sara Sabour, Mehdi S. M. Sajjadi,
+     Conference on Computer Vision, pages 333–350. Springer,                Matan Sela, Vincent Sitzmann, Austin Stone, Deqing Sun,
+     2022. 1                                                                Suhani Vora, Ziyu Wang, Tianhao Wu, Kwang Moo Yi,
+[11] Hongkai Chen, Zixin Luo, Jiahui Zhang, Lei Zhou, Xuyang                Fangcheng Zhong, and Andrea Tagliasacchi. Kubric: a scal-
+     Bai, Zeyu Hu, Chiew-Lan Tai, and Long Quan. Learning                   able dataset generator. 2022. 6
+     to match features with seeded graph matching network. In          [22] Adam W Harley, Zhaoyuan Fang, and Katerina Fragkiadaki.
+     Proceedings of the IEEE/CVF International Conference on                Particle video revisited: Tracking through occlusions using
+     Computer Vision, pages 6301–6310, 2021. 3                              point trajectories. In ECCV, 2022. 2, 3, 4
+[12] Hongkai Chen, Zixin Luo, Lei Zhou, Yurun Tian, Ming-              [23] Richard Hartley and Andrew Zisserman. Multiple View Ge-
+     min Zhen, Tian Fang, David Mckinnon, Yanghai Tsin, and                 ometry in Computer Vision. Cambridge University Press,
+     Long Quan. Aspanformer: Detector-free image matching                   2000. 1, 2, 3, 5
+     with adaptive span transformer. In European Conference on         [24] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+     Computer Vision, pages 20–36. Springer, 2022. 2, 3                     Deep Residual Learning for Image Recognition. arXiv
+[13] Zhaopeng Cui and Ping Tan. Global structure-from-motion                preprint arXiv:1512.03385, 2015. 5, 6
+     by similarity averaging. In Proceedings of the IEEE Inter-        [25] Xingyi He, Jiaming Sun, Yifan Wang, Sida Peng, Qixing
+     national Conference on Computer Vision, pages 864–872,                 Huang, Hujun Bao, and Xiaowei Zhou. Detector-free struc-
+     2015. 2                                                                ture from motion. In arxiv, 2023. 1, 2, 3, 4, 6, 7, 8
+[14] Daniel DeTone, Tomasz Malisiewicz, and Andrew Rabi-               [26] Jared Heinly, Johannes L. Schonberger, Enrique Dunn, and
+     novich. Superpoint: Self-supervised interest point detection           Jan-Michael Frahm. Reconstructing the world* in six days
+     and description. In Proceedings of the IEEE conference on              *(as captured by the yahoo 100 million image dataset). In
+
+
+
+
+                                                                    21694
+     Proceedings of the IEEE Conference on Computer Vision              [41] Yin Lou, Noah Snavely, and Johannes Gehrke. Matchminer:
+     and Pattern Recognition (CVPR), 2015. 1                                 Efficient spanning structure mining in large image collec-
+[27] Jakob Iglhaut, Carlos Cabo, Stefano Puliti, Livia Piermat-              tions. In Computer Vision–ECCV 2012: 12th European Con-
+     tei, James O’Connor, and Jacqueline Rosette. Structure                  ference on Computer Vision, Florence, Italy, October 7-13,
+     from motion photogrammetry in forestry: A review. Current               2012, Proceedings, Part II 12, pages 45–58. Springer, 2012.
+     Forestry Reports, 5:155–168, 2019. 1                                    3
+[28] Hanwen Jiang, Zhenyu Jiang, Kristen Grauman, and Yuke              [42] David G. Lowe. Object Recognition from Local Scale-
+     Zhu. Few-view object reconstruction with unknown cate-                  Invariant Features. In Proc. ICCV, 1999. 2
+     gories and camera poses. ArXiv, 2212.04492, 2022. 1                [43] David G. Lowe. Distinctive Image Features from Scale-
+[29] San Jiang, Cheng Jiang, and Wanshou Jiang. Efficient struc-             Invariant Keypoints. IJCV, 60(2), 2004. 2
+     ture from motion for large-scale uav images: A review and a        [44] Xiao Xin Lu. A review of solutions for perspective-n-point
+     comparison of sfm tools. ISPRS Journal of Photogrammetry                problem in camera pose estimation. In Journal of Physics:
+     and Remote Sensing, 167:230–251, 2020. 1                                Conference Series, page 052009. IOP Publishing, 2018. 3
+[30] Wei Jiang, Eduard Trulls, Jan Hosang, Andrea Tagliasacchi,         [45] Wei-Chiu Ma, Anqi Joyce Yang, Shenlong Wang, Raquel
+     and Kwang Moo Yi. Cotr: Correspondence transformer for                  Urtasun, and Antonio Torralba. Virtual correspondence: Hu-
+     matching across images. In Proceedings of the IEEE/CVF                  mans as a cue for extreme-view geometry. In Proceedings of
+     International Conference on Computer Vision, pages 6207–                the IEEE/CVF Conference on Computer Vision and Pattern
+     6217, 2021. 3                                                           Recognition, pages 15924–15934, 2022. 3
+[31] Yuhe Jin, Dmytro Mishkin, Anastasiia Mishchuk, Jiri Matas,         [46] Jiri Matas, Ondrej Chum, Martin Urban, and Tomás Pajdla.
+     Pascal Fua, Kwang Moo Yi, and Eduard Trulls. Image                      Robust Wide Baseline Stereo from Maximally Stable Ex-
+     matching across wide baselines: From paper to practice.                 tremal Regions. In Proc. BMVC, 2002. 2
+     International Journal of Computer Vision, 129(2):517–547,          [47] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik,
+     2021. 2, 6, 7                                                           Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf:
+                                                                             Representing scenes as neural radiance fields for view syn-
+[32] Nikita Karaev, Ignacio Rocco, Benjamin Graham, Natalia
+                                                                             thesis. Proc. ECCV, 2020. 5
+     Neverova, Andrea Vedaldi, and Christian Rupprecht. Co-
+     Tracker: It is better to track together. 2023. 2, 3, 4, 6          [48] Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik,
+                                                                             Jonathan T Barron, Ravi Ramamoorthi, and Ren Ng. Nerf:
+[33] Alex Kendall and Yarin Gal. What Uncertainties Do We
+                                                                             Representing scenes as neural radiance fields for view syn-
+     Need in Bayesian Deep Learning for Computer Vision?
+                                                                             thesis. Communications of the ACM, 65(1):99–106, 2021.
+     Proc. NeurIPS, 2017. 4
+                                                                             1
+[34] Bernhard Kerbl, Georgios Kopanas, Thomas Leimkühler,
+                                                                        [49] Jorge J Moré. The levenberg-marquardt algorithm: imple-
+     and George Drettakis. 3d gaussian splatting for real-time
+                                                                             mentation and theory. In Numerical analysis: proceedings
+     radiance field rendering. ACM Transactions on Graphics, 42
+                                                                             of the biennial Conference held at Dundee, June 28–July 1,
+     (4), 2023. 1
+                                                                             1977, pages 105–116. Springer, 2006. 5
+[35] Zhengqi Li and Noah Snavely. Megadepth: Learning single-           [50] Pierre Moulon, Pascal Monasse, and Renaud Marlet. Global
+     view depth prediction from internet photos. In Proceed-                 fusion of relative motions for robust, accurate and scalable
+     ings of the IEEE conference on computer vision and pattern              structure from motion. In Proceedings of the IEEE inter-
+     recognition, pages 2041–2050, 2018. 6                                   national conference on computer vision, pages 3248–3255,
+[36] Amy Lin, Jason Y Zhang, Deva Ramanan, and Shubham Tul-                  2013. 2
+     siani. Relpose++: Recovering 6d poses from sparse-view             [51] David Novotny, Diane Larlus, and Andrea Vedaldi. Learning
+     observations. arXiv preprint arXiv:2305.04926, 2023. 3, 5,              3d object categories by looking around them. In Proc. ICCV,
+     6, 7                                                                    2017. 4
+[37] Chen-Hsuan Lin, Wei-Chiu Ma, Antonio Torralba, and Si-             [52] John Oliensis. A critique of structure-from-motion algo-
+     mon Lucey. Barf: Bundle-adjusting neural radiance fields. In            rithms. Computer Vision and Image Understanding, 80(2):
+     IEEE International Conference on Computer Vision (ICCV),                172–214, 2000. 2
+     2021. 1                                                            [53] Onur Özyeşil, Vladislav Voroninski, Ronen Basri, and Amit
+[38] Tsung-Yi Lin, Michael Maire, Serge J. Belongie, James                   Singer. A survey of structure from motion*. Acta Numerica,
+     Hays, Pietro Perona, Deva Ramanan, Piotr Dollár, and                   26:305–364, 2017. 1, 2
+     C. Lawrence Zitnick. Microsoft COCO: Common Objects                [54] Luis Pineda, Taosha Fan, Maurizio Monge, Shobha
+     in Context. In Proc. ECCV, 2014. 6                                      Venkataraman, Paloma Sodhi, Ricky TQ Chen, Joseph Ortiz,
+[39] Philipp Lindenberger, Paul-Edouard Sarlin, Viktor Larsson,              Daniel DeTone, Austin Wang, Stuart Anderson, et al. The-
+     and Marc Pollefeys. Pixel-Perfect Structure-from-Motion                 seus: A library for differentiable nonlinear optimization. Ad-
+     with Featuremetric Refinement. arXiv.cs, abs/2108.08291,                vances in Neural Information Processing Systems, 35:3801–
+     2021. 1, 2, 3, 4, 5, 6, 7, 8                                            3818, 2022. 2, 5
+[40] Philipp Lindenberger, Paul-Edouard Sarlin, and Marc Polle-         [55] Jeremy Reizenstein, Roman Shapovalov, Philipp Henzler,
+     feys. Lightglue: Local feature matching at light speed. arXiv           Luca Sbordone, Patrick Labatut, and David Novotny. Com-
+     preprint arXiv:2306.13643, 2023. 3, 4, 6                                mon objects in 3d: Large-scale learning and evaluation of
+
+
+
+
+                                                                     21695
+     real-life 3d category reconstruction. In Proceedings of the          [69] Bill Triggs, Philip F. McLauchlan, Richard I. Hartley, and
+     IEEE/CVF International Conference on Computer Vision,                     Andrew W. Fitzgibbon. Bundle Adjustment - A Modern Syn-
+     pages 10901–10911, 2021. 2, 6                                             thesis. In Proc. ICCV Workshop, 2000. 3
+[56] Peter Sand and Seth Teller. Particle video: Long-range mo-           [70] Michał Tyszkiewicz, Pascal Fua, and Eduard Trulls. Disk:
+     tion estimation using point trajectories. International journal           Learning local features with policy gradient. Advances in
+     of computer vision, 80:72–91, 2008. 3                                     Neural Information Processing Systems, 33:14254–14265,
+[57] Paul-Edouard Sarlin, Daniel DeTone, Tomasz Malisiewicz,                   2020. 3, 4
+     and Andrew Rabinovich. Superglue: Learning feature                   [71] Benjamin Ummenhofer, Huizhong Zhou, Jonas Uhrig, Niko-
+     matching with graph neural networks. In Proceedings of                    laus Mayer, Eddy Ilg, Alexey Dosovitskiy, and Thomas
+     the IEEE/CVF conference on computer vision and pattern                    Brox. Demon: Depth and motion network for learning
+     recognition, pages 4938–4947, 2020. 2, 3, 4, 6                            monocular stereo. In Proceedings of the IEEE conference on
+[58] Frederik Schaffalitzky and Andrew Zisserman. Multi-view                   computer vision and pattern recognition, pages 5038–5047,
+     Matching for Unordered Image Sets, or ”How Do I Organize                  2017. 3
+     My Holiday Snaps?”. In Proc. ECCV, 2002. 1                           [72] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+[59] Johannes Lutz Schönberger and Jan-Michael Frahm.                         reit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and Illia
+     Structure-from-motion revisited. In Conference on Com-                    Polosukhin. Attention is all you need. Proc. NeurIPS, 2017.
+     puter Vision and Pattern Recognition (CVPR), 2016. 1, 2,                  2, 5
+     3, 4, 5                                                              [73] Jianyuan Wang, Yiran Zhong, Yuchao Dai, Stan Birchfield,
+[60] Thomas Schops, Johannes L Schonberger, Silvano Galliani,                  Kaihao Zhang, Nikolai Smolyanskiy, and Hongdong Li.
+     Torsten Sattler, Konrad Schindler, Marc Pollefeys, and An-                Deep two-view structure-from-motion revisited. In Proceed-
+     dreas Geiger. A multi-view stereo benchmark with high-                    ings of the IEEE/CVF conference on Computer Vision and
+     resolution images and multi-camera videos. In Proceed-                    Pattern Recognition, pages 8953–8962, 2021. 3
+     ings of the IEEE conference on computer vision and pattern           [74] Jianyuan Wang, Christian Rupprecht, and David Novotny.
+     recognition, pages 3260–3269, 2017. 2, 6, 8                               Posediffusion: Solving pose estimation via diffusion-aided
+                                                                               bundle adjustment. In Proceedings of the IEEE/CVF Inter-
+[61] Yan Shi, Jun-Xiong Cai, Yoli Shavit, Tai-Jiang Mu, Wensen
+                                                                               national Conference on Computer Vision, pages 9773–9783,
+     Feng, and Kai Zhang. Clustergnn: Cluster-based coarse-to-
+                                                                               2023. 3, 5, 6, 7
+     fine graph neural network for efficient feature matching. In
+                                                                          [75] Qing Wang, Jiaming Zhang, Kailun Yang, Kunyu Peng, and
+     Proceedings of the IEEE/CVF Conference on Computer Vi-
+                                                                               Rainer Stiefelhagen. Matchformer: Interleaving attention in
+     sion and Pattern Recognition, pages 12517–12526, 2022. 3
+                                                                               transformers for feature matching. In Proceedings of the
+[62] Samarth Sinha, Jason Y Zhang, Andrea Tagliasacchi, Igor
+                                                                               Asian Conference on Computer Vision, pages 2746–2762,
+     Gilitschenski, and David B Lindell. Sparsepose: Sparse-
+                                                                               2022. 2, 3
+     view camera pose regression and refinement. In Proceed-
+                                                                          [76] Zirui Wang, Shangzhe Wu, Weidi Xie, Min Chen, and
+     ings of the IEEE/CVF Conference on Computer Vision and
+                                                                               Victor Adrian Prisacariu. NeRF−−: Neural radiance
+     Pattern Recognition, pages 21349–21359, 2023. 3
+                                                                               fields without known camera parameters. arXiv preprint
+[63] Noah Snavely, Steven M Seitz, and Richard Szeliski. Photo                 arXiv:2102.07064, 2021. 1
+     tourism: exploring photo collections in 3d. In ACM siggraph          [77] Tong Wei, Yash Patel, Alexander Shekhovtsov, Jiri Matas,
+     2006 papers, pages 835–846. 2006. 2, 5                                    and Daniel Barath. Generalized differentiable ransac. In
+[64] Jiaming Sun, Zehong Shen, Yuang Wang, Hujun Bao, and                      Proceedings of the IEEE/CVF International Conference on
+     Xiaowei Zhou. Loftr: Detector-free local feature matching                 Computer Vision, pages 17649–17660, 2023. 3
+     with transformers. In Proceedings of the IEEE/CVF con-               [78] Xingkui Wei, Yinda Zhang, Zhuwen Li, Yanwei Fu, and Xi-
+     ference on computer vision and pattern recognition, pages                 angyang Xue. Deepsfm: Structure from motion via deep
+     8922–8931, 2021. 2, 3                                                     bundle adjustment. In Computer Vision–ECCV 2020: 16th
+[65] Chengzhou Tang and Ping Tan. Ba-net: Dense bundle ad-                     European Conference, Glasgow, UK, August 23–28, 2020,
+     justment network. arXiv preprint arXiv:1806.04807, 2018.                  Proceedings, Part I 16, pages 230–247. Springer, 2020. 3, 7
+     3                                                                    [79] Matthew J Westoby, James Brasington, Niel F Glasser,
+[66] Zachary Teed and Jia Deng. Deepv2d: Video to depth                        Michael J Hambrey, and Jennifer M Reynolds. ‘structure-
+     with differentiable structure from motion. arXiv preprint                 from-motion’photogrammetry: A low-cost, effective tool
+     arXiv:1812.04605, 2018. 3                                                 for geoscience applications. Geomorphology, 179:300–314,
+[67] Zachary Teed and Jia Deng. Raft: Recurrent all-pairs field                2012. 1
+     transforms for optical flow. In Computer Vision–ECCV                 [80] Kyle Wilson and Noah Snavely. Robust global translations
+     2020: 16th European Conference, Glasgow, UK, August 23–                   with 1dsfm. In Computer Vision–ECCV 2014: 13th Eu-
+     28, 2020, Proceedings, Part II 16, pages 402–419. Springer,               ropean Conference, Zurich, Switzerland, September 6-12,
+     2020. 3                                                                   2014, Proceedings, Part III 13, pages 61–75. Springer, 2014.
+[68] Zachary Teed and Jia Deng. Droid-slam: Deep visual slam                   2
+     for monocular, stereo, and rgb-d cameras. Advances in neu-           [81] Changchang Wu. Towards linear-time incremental struc-
+     ral information processing systems, 34:16558–16569, 2021.                 ture from motion. In 2013 International Conference on 3D
+     3                                                                         Vision-3DV 2013, pages 127–134. IEEE, 2013. 2, 5
+
+
+
+
+                                                                       21696
+[82] Shangzhe Wu, Christian Rupprecht, and Andrea Vedaldi.
+     Unsupervised learning of probably symmetric deformable
+     3d objects from images in the wild. In Proceedings of
+     the IEEE/CVF Conference on Computer Vision and Pattern
+     Recognition, pages 1–10, 2020. 3
+[83] Shangzhe Wu, Ruining Li, Tomas Jakab, Christian Rup-
+     precht, and Andrea Vedaldi. MagicPony: Learning articu-
+     lated 3d animals in the wild. 2023. 3
+[84] Kwang Moo Yi, Eduard Trulls, Vincent Lepetit, and Pascal
+     Fua. LIFT: Learned Invariant Feature Transform. In Proc.
+     ECCV, 2016. 3
+[85] Jason Y Zhang, Deva Ramanan, and Shubham Tulsiani. Rel-
+     pose: Predicting probabilistic relative rotation for single ob-
+     jects in the wild. In ECCV, pages 592–611. Springer, 2022.
+     3, 5, 6, 7
+[86] Yang Zheng, Adam W Harley, Bokui Shen, Gordon Wet-
+     zstein, and Leonidas J Guibas. Pointodyssey: A large-scale
+     synthetic dataset for long-term point tracking. In Proceed-
+     ings of the IEEE/CVF International Conference on Com-
+     puter Vision, pages 19855–19865, 2023. 3
+[87] Tinghui Zhou, Matthew Brown, Noah Snavely, and David G
+     Lowe. Unsupervised learning of depth and ego-motion from
+     video. In Proceedings of the IEEE conference on computer
+     vision and pattern recognition, pages 1851–1858, 2017. 3
+
+
+
+
+                                                                       21697
+

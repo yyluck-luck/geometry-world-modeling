@@ -1,0 +1,1487 @@
+                                                    This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                                                   The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+                                                Using Self-Contradiction to Learn Confidence Measures in Stereo Vision
+
+                                               Christian Mostegel        Markus Rumpler          Friedrich Fraundorfer       Horst Bischof
+                                                        Institute for Computer Graphics and Vision, Graz University of Technology∗
+                                                                                                {surname}@icg.tugraz.at
+
+
+
+
+arXiv:1604.05132v1 [cs.CV] 18 Apr 2016
+                                                                     Abstract
+
+                                            Learned confidence measures gain increasing impor-
+                                         tance for outlier removal and quality improvement in stereo
+                                         vision. However, acquiring the necessary training data is
+                                         typically a tedious and time consuming task that involves
+                                         manual interaction, active sensing devices and/or synthetic
+                                         scenes. To overcome this problem, we propose a new, flexi-
+                                         ble, and scalable way for generating training data that only
+                                         requires a set of stereo images as input. The key idea of
+                                         our approach is to use different view points for reason-
+                                         ing about contradictions and consistencies between multi-
+                                         ple depth maps generated with the same stereo algorithm.
+                                         This enables us to generate a huge amount of training data
+                                         in a fully automated manner. Among other experiments,
+                                         we demonstrate the potential of our approach by boost-
+                                         ing the performance of three learned confidence measures
+                                         on the KITTI2012 dataset by simply training them on a
+                                         vast amount of automatically generated training data rather                   Figure 1. Our approach automatically detects and classifies con-
+                                         than a limited amount of laser ground truth data.                             tradictions and consistencies between multiple depth maps to gen-
+                                                                                                                       erate labeled training images, which can be used for training con-
+                                                                                                                       fidence measures. From top to bottom: RGB input images, depth
+                                                                                                                       maps created with a query stereo algorithm (here [26]), label im-
+                                         1. Introduction                                                               ages based on laser ground truth [7] and our automatically gener-
+                                                                                                                       ated label images. In the label images, green stands for positive
+                                             Many works have demonstrated that machine learning
+                                                                                                                       samples, red for negative and blue is ignored during training.
+                                         can be greatly beneficial for stereo vision [23, 31, 36, 24,
+                                         10]. All these works have one thing in common:
+                                         They require training data – the more the better.                             fort. The third source is to record ground truth data with
+                                             Previous approaches used three main sources of training                   active depth sensors, which is currently the most popular
+                                         data. The first source is manual labeling. While this is the                  source [32, 7, 21, 27]. If a projector based setup is used [27],
+                                         traditional approach in the fields of classification and seg-                 the ground truth can achieve a very high accuracy, but the
+                                         mentation (e.g. [5, 33, 29]), it requires hundreds of man-                    data acquisition takes a lot of time and is restricted to indoor
+                                         hours even in 2D. Because the task becomes even more                          scenes. For outdoor scenes the method of choice is typically
+                                         taxing in 3D, only very few manually labeled datasets ex-                     the use of a laser scanner [32, 7, 21]. Aside from requiring a
+                                         ist in this domain (e.g. [18]). The second source is syn-                     non-trivial registration between the laser reconstruction and
+                                         thetic data generation [2, 24]. Unfortunately, pure synthetic                 the recorded images, this method is also subject to a range
+                                         data generation has not yet reached the level where it gen-                   of assumptions itself. This fact makes a manual removal of
+                                         eralizes to natural images without an extreme modeling ef-                    obviously incorrect ground truth data necessary for outdoor
+                                           ∗ The research leading to these results has received funding from the
+                                                                                                                       datasets [7, 21]. Some approaches, like [21], combine these
+                                         EC FP7 project 3D-PITOTI (ICT-2011-600545) and from the Austrian Re-
+                                                                                                                       three sources. They combine active sensing with synthetic
+                                         search Promotion Agency (FFG) as Vision+ project 836630 and together          car models and manual annotation to increase the quality of
+                                         with OMICRON electronics GmbH as Bridge1 project 843450.                      ground truth data.
+
+
+                                                                                                                   1
+          This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+         The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+    None of these methods is easily portable to very spe-              of a depth value being correct and is typically computed
+cific application areas such as under water reconstruction or          using image intensities, disparity values and/or matching
+3D reconstruction with micro aerial vehicles. Furthermore,             costs. Some surveys about confidence measures are avail-
+none of these methods shows good scaling properties in the             able in [16, 3, 4]. In the simplest way a confidence mea-
+sense of required man-hours per training data.                         sure can be used to remove very likely wrong measure-
+    This motivated us to propose a novel way of generat-               ments from the depth map. This process is called sparsi-
+ing training data without a synthetic model, active devices            fication. The most common way for sparsification without
+or manual interaction. Instead of explicitly generating a              training is the left-right consistency check [16]. While this
+ground truth, we compare multiple depth maps of the same               check already detects many outliers, it cannot detect errors
+scene obtained with the same stereo approach with each                 caused by a systematic problem of an approach (e.g. fore-
+other and thus collect positive and negative training data.            ground fattening). Haeusler et al. [10] showed that ensem-
+As input we require a set of stereo images observing a                 ble learning of many different features with random deci-
+static scene from multiple viewing angles. After computing             sion forests can significantly improve the sparsification per-
+the relative poses and generating depth maps, we evaluate              formance. Note that confidence measures are also learned
+which parts of the depth maps can likely be trusted, which             in similar fashion in the domain of optical flow, e.g. [20, 6].
+parts contradict each other and for which parts we simply              Spyropoulos et al. [31] used the confidence prediction as
+do not have enough information available to make this deci-            a soft-constraint in a Markov random field to improve the
+sion. This results in a set of partially labeled images, similar       stereo output. In the very recent work of Park and Yoon [23]
+to ground truth, which can be used for training (see Fig. 1).          the confidence prediction is used to modulate the match-
+    For the evaluation of our method we use three pub-                 ing cost of a semi-global matcher [15] and thus increase
+licly available datasets, which are namely the multi-view              its performance. As the performance of the above men-
+stereo dataset of Strecha et al. [32], the Middlebury2014              tioned approaches depends on how well the confidence of
+dataset [27] and the KITTI2012 stereo dataset [7]. On these            a measurement can be predicted, the area under the sparsifi-
+datasets we demonstrate that the performance of learned                cation curve is one of the most important evaluation criteria
+confidence measures can be boosted by simply training                  in this domain [10, 23]. Hence, we found that this crite-
+them on large amounts of domain specific training data,                rion is ideally suited to benchmark the quality of our train-
+which our approach can cheaply provide.                                ing data generation, aside from comparing it directly to the
+                                                                       ground truth. In our experiments, we use three recent ap-
+2. Related Work                                                        proaches [10, 31, 23] that compute confidence measures and
+                                                                       analyze the change of performance depending on the used
+    To the best of our knowledge, we are the first to ap-              training data (laser ground truth vs. automatically generated
+proach the topic of stereo training data generation in a self-         training data) on the KITTI2012 dataset [7].
+supervised manner. In order to demonstrate the usefulness
+of our groundtruth generation, we show that existing stereo
+vision approaches, which already have been evaluated on
+one or more of the afore mentioned stereo datasets, can also               Aside from stereo vision, there exist some works that
+be successfully trained on our generated data.                         deal with learning the matchability of features. Some of
+    Thus, we first give a short overview of the most relevant          these works [1, 34, 11] use ground truth data collected
+learning based stereo approaches. While most approaches                by [1]. To generate the ground truth data they use the
+pose the problem of learning reconstruction errors as a bi-            dense multi-view stereo reconstruction algorithm provided
+nary classification problem (correct matches/depth values              by Goesele et al. [9] and trust this approach to be accurate
+versus incorrect matches/depth values), Kong and Tao [17]              enough. The problem with applying this approach to dense
+propose to use an additional class for failures due to fore-           stereo is that a learning algorithm will try to tune its out-
+ground fattening. Using these predicted class probabilities            put to reproduce any systematic error made by [9]. Philbin
+they adjust the initial matching cost. Peris et al. [24] train         et al. [25] use SIFT [19] nearest-neighbors together with
+a multi-class Linear Discriminant Analysis (LDA) classi-               a RANSAC verification to generate negative and positive
+fier to compute disparities together with a confidence map.            training data, whereas Simonyan et al. [30] first compute a
+Žbontar and LeCun [36] improve the matching cost compu-               homography between images using SIFT and RANSAC and
+tation by learning a similarity measure between small image            then establish region correspondences using the homogra-
+patches using a convolutional neural network.                          phy. Hartmann et al. [14] learn the matchability of SIFT fea-
+    The approaches mentioned above are very specific in                tures by collecting features that survive the matching stage
+their formulation, but many other works use a so called                and those which are rejected as positive and negative train-
+”confidence measure” as a basis for improving the stereo               ing data. All of these approaches focus on a specific type of
+output. A confidence measure should predict the likelihood             sparse feature and do not generalize well to dense stereo.
+
+                                                                   2
+             This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+            The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+         Setup           Generating Training Data   Training Data
+  Generating Redundant
+      Depthmaps
+                                  Stage 1:                                     query camera
+                             Support Assessment
+
+
+
+
+                                   Stage 2:
+                              Consistency Voting
+                                                                                               reference camera
+
+                                                                        Figure 3. Consistency Voting. There are three possibilities for vot-
+                                                                        ing. A positive vote (center) is only cast if the reference measure-
+                                   Stage 3:
+                              Outlier Detection                         ment is within the uncertainty boundary of the query measurement.
+                                                                        A negative vote is either cast if a reference measurement would
+                                                                        block the line of sight of the query camera (left) or the other way
+                                                                        around (right).
+      Figure 2. Fully Automatic Training Data Generation.
+                                                                        depth uncertainty. This means that a measurement with a
+3. Fully Automatic Training Data Generation                             high uncertainty is not well suited for determining whether
+    The core idea of our training data generation                       a measurement with a lower uncertainty is correct or not.
+approach is to relax the aim from labeling each                         To estimate this uncertainty we use the model proposed
+pixel as correct/incorrect to labeling them as self-                    by [12]. This model allows us to compute a covariance
+consistent/contradicting. We use the word self-consistent               matrix for each 3D point corresponding to a depth value
+in the sense that depth maps generated with the same                    through first-order backward covariance propagation under
+algorithm from different view points shall not contradict               the assumption of isotropic Gaussian image noise, which is
+each other through free space violation or occlusion. Note              explained in more detail in [13].
+that the use of different view points is important as the                  As we aim to produce 2D label images, we address this
+errors in depth maps are in general strongly correlated, if             problem on a per-pixel basis. So for each pixel of a depth
+they are generated from the same view point with the same               map, we first collect the support of other depth maps. A
+stereo algorithm. In this work we use the observation that              reference depth map is only allowed to express its support
+this correlation is small when the relative observation angle           for the 3D point pquery associated with a query pixel if it
+between two depth maps is large to reduce the influence                 fulfills the following two criteria.
+of systematic errors. The basic steps of our approach are                  First, the viewpoints shall be sufficiently different. We
+visualized in Fig. 2.                                                   define that a viewpoint is different enough if the observa-
+    As input our approach requires a set of stereo images               tion angle difference between two stereo pairs is sufficiently
+with known poses. First, we execute the query algorithm,                large ( αdiff > αmin ). We compute this observation angle
+which yields a set of depth maps (Setup). Then we assess                as αdiff = ](−  p− −−−→ −−−−−−−→
+                                                                                          query cref , pquery cquery ), where cx is the mean
+which parts of a depth map are supported by other depth                 camera center of a stereo pair.
+maps with a significantly different observation angle (Stage               Second, the reference measurement shall be within a
+1). In the next stage (Stage 2), we then use this support to            fixed theoretical tolerance σmax of the query measurement.
+influence the voting process. In the final stage (Stage 3),             For this evaluation we use the Mahalanobis distance based
+we detect outliers which were missed in the previous stage              on the covariance matrix with the smaller uncertainty (ei-
+using an augmented depth map. In the remainder of this                  ther reference or query).
+section, we describe all involved steps in more detail.                    In order to avoid being too much biased by a single ob-
+                                                                        servation direction, a 3D point fulfilling these criteria is not
+3.1. Stage 1: Support Assessment                                        directly allowed to vote, but instead can activate its corre-
+   Given many depth maps of the same scene, we want to                  sponding bin depending on the observation angle. We use
+separate parts of the scene where many depth maps agree on              angular bins of αmin degree, where each activated bin in-
+the structure (consistent parts) from those where they either           creases the support for the query point by one.
+disagree or we simply do not have enough view points to
+                                                                        3.2. Stage 2: Consistency Voting
+rule out systematic errors.
+   In performing this separation, we have to account for two                The basic idea of this stage is to let all depth maps vote
+problems. The first problem is that if the camera poses of              for the (in)consistency of a query depth map. Similar to
+two stereo pairs are too similar, the depth maps will very              works in depth map fusion (e.g. [22]), negative votes are
+likely contain the same systematic error. To remedy this sit-           cast by free space violations and occlusions and positive
+uation, we try to decrease the error correlation in using dif-          votes are cast by measurements which are sufficiently close
+ferent observation angles. The second problem originates                to each other (see Fig. 3). Opposed to fusion approaches, we
+from the finite precision of cameras, which introduces a                aim for a completely different output. While works in depth
+
+
+                                                                    3
+          This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+         The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+map fusion try to improve/fuse the depth map, we only aim              absolutely no consensus can be reached, because they only
+to decide which parts of the depth map cause contradictions            contain outliers (e.g. top left corner in Fig. 5). In this stage,
+and which parts are sufficiently consistent. Furthermore,              we aim to detect these outliers for enhancing our negative
+we have to reduce the influence of systematic errors in the            training data.
+voting scheme, which we achieve with the support of a ref-                 First, we label trivial outliers which either lie behind the
+erence measurement computed in the previous stage. In par-             camera or do not project into the second stereo camera. For
+ticular this means that only parts which have a support from           the remaining unlabeled regions we compare the depth val-
+at least one significantly different observation angle are eli-        ues of the query camera to a specially augmented depth
+gible for voting.                                                      map. Our procedure for obtaining this augmented depth
+    The proposed voting scheme looks as follows. For cast-             map is inspired by the stability-based depth map fusion pro-
+ing a positive vote v+ a reference measurement has to ful-             posed by Merrell et al. [22]. The main difference is that we
+fill two properties. First, it shall be more accurate than             do not aim for high performance or even the perfect depth
+the query measurement. We evaluate this property with the              map, but a depth map which rather prefers lower depth val-
+largest Eigen value of the corresponding covariance matrix.            ues which are sufficiently plausible. We found that under-
+Second, the reference measurement has to be within a fixed             estimating the depth values helps us to keep the number of
+theoretical tolerance of σmax of the query measurement. For            false negatives (inconsistent but correct) low, while at the
+this evaluation we use the Mahalanobis distance based on               same time allowing us to recover many true negatives (in-
+the covariance matrix of the query 3D point. We define a               consistent and incorrect). Further, we avoid any smoothness
+positive vote as:                                                      assumptions to preserve fine objects.
+                          p                                                For computing the augmented depth map, we collect all
+                    v+ = iref · supportref                 (1)         depth values of the other depth maps that would project into
+where iref is the smallest Eigen value of the Fisher infor-            a pixel of the query image. Then we sort these depth val-
+mation matrix of the reference 3D point. This means that               ues and search for the closest depth value which obtains a
+measurements with√a low theoretic uncertainty get a higher             positive score in a voting scheme. This voting scheme is
+                                √                                      very similar to the one proposed in the previous stage, but
+voting strength, as iref = 1/ uref , where uref is the largest
+                                                     √                 many more depth values will end up with a positive score
+Eigen value of the covariance matrix and hence uref can
+be interpreted as the standard deviation along the axis of the         although they are incorrect.
+highest uncertainty.                                                       There are 4 differences to the other voting scheme: (1)
+   For casting a negative vote a reference measurement has             Every depth map can vote (without accuracy restrictions),
+to fulfill three properties. First, it also has to be more ac-         (2) the border between consistent and contradicting vote is
+                                                                                  √              √
+curate than the query measurement. Second, it has to be                set to (1/ uquery + 1/ uref ) · σmax , (3) supportref = 1 for
+outside the fixed theoretical tolerance of σmax . Third, it has        all measurements and (4) a depth value has to obtain at least
+to cause a free space violation or occlusion as depicted in            three votes to be considered valid. If no such depth value is
+Fig. 3. In a free space violation, a reference measurement             found, the original depth is kept.
+would block the line of sight of a query measurement (left                 Using the augmented depth map, we now treat a depth
+side in Fig. 3), whereas the other way around would cause              value as a negative sample if the following two criteria are
+an occlusion (right side in Fig. 3). If these properties are           met. First, the query depth value has to be smaller than the
+met, a negative vote is cast:                                          depth value of the augmented depth map. Second, the dif-
+                                                                       ference between those two depth values has to be larger than
+                           p
+                   v− = − iref · supportref                                       √
+                                                            (2)        σmax · 1/ uaugmented , where uaugmented stands for the largest
+                                                                       Eigen value of the covariance matrix of the augmented mea-
+   For each pixel in the query depth map the votes are col-
+                                                                       surement if we pretend that it is only visible from the query
+lected. The label of a pixel with more than zero votes is then
+                                                                       stereo pair. The final training data is then a combination of
+set depending on the sign of the final sum of votes.
+                                                                       the negative samples from this stage with the positive and
+3.3. Stage 3: Outlier Detection                                        negative training samples from the previous stage.
+   In the previous step, we only allowed measurements with             4. Experiments
+a minimal support from a different observation angle to vote
+and only then if they are more accurate than the query mea-               In our experiments, we use three publicly available
+surement. This restriction is necessary because otherwise              datasets, which are namely the KITTI2012 dataset [7],
+the training data would contain a great percentage of incor-           the Middlebury2014 dataset [27], and the Strecha fountain
+rectly labeled samples, i.e. false positives (consistent but in-       dataset [32].
+correct) and false negatives (inconsistent but correct). How-             The main focus of our experiments is on the KITTI2012
+ever, this also causes many regions to be missed in which              dataset [7] because it is well-suited to demonstrate our ap-
+
+
+                                                                   4
+          This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+         The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+                                                                                                                                SGM Rank 1 Frame 102
+proach and has already been used before for the evalu-                                             0.035
+                                                                                                                                                      Optimum
+ation of confidence prediction algorithms [10, 23]. The                                                 0.03                                          LRD
+                                                                                                                                                      Ensemble-Ours
+KITTI2012 dataset does not only let us evaluate the cov-                                               0.025
+                                                                                                                                                      Ensemble-Laser
+                                                                                                                                                      Park-Ours
+
+
+
+
+                                                                                  Bad pixel rate [1]
+erage and accuracy of our approach, but also lets us high-                                              0.02
+                                                                                                                                                      Park-Laser
+                                                                                                                                                      GCP-Ours
+light the usefulness of our approach in boosting the perfor-                                       0.015
+                                                                                                                                                      GCP-Laser
+
+mance of confidence prediction approaches by simply train-                                              0.01
+ing them on the automatically generated training data.
+                                                                                                   0.005
+
+
+4.1. General Setup                                                                                        0
+                                                                                                               0   0.1    0.2   0.3    0.4 0.5 0.6 0.7
+                                                                                                                                      Sparsification [1]
+                                                                                                                                                           0.8   0.9   1
+
+
+    For all experiments we used the same set of parameters.                                                              (a) SGM Sequence 102.
+The parameter αmin (= 10◦ ) can be used to adjust the trade-
+                                                                                                                                 SPS Rank 1 Frame 102
+off between coverage and label error. As a general rule,                                               0.025
+                                                                                                                                                      Optimum
+we can say that if one increases this parameter, the false                                                                                            LRD
+                                                                                                                                                      Ensemble-Ours
+                                                                                                        0.02
+positive rate becomes lower, but at the same time the label                                                                                           Ensemble-Laser
+                                                                                                                                                      Park-Ours
+
+
+
+
+                                                                                  Bad pixel rate [1]
+coverage decreases as well. The parameter σmax (= 2) can                                           0.015                                              Park-Laser
+                                                                                                                                                      GCP-Ours
+be used to express desired accuracy of a query algorithm as                                                                                           GCP-Laser
+                                                                                                        0.01
+a multiple of the σ bound.
+    As query algorithms, we use two different stereo al-                                           0.005
+
+gorithms. The first algorithm is a Semi-Global Match-
+                                                                                                          0
+ing (SGM) [15] implementation by Rothermel et al. [26]                                                         0   0.1    0.2   0.3    0.4 0.5 0.6 0.7
+                                                                                                                                      Sparsification [1]
+                                                                                                                                                           0.8   0.9   1
+
+
+which uses the census transform for computing the match-                                                                 (b) SPS Sequence 102.
+ing cost. As a second algorithm we chose the recently pro-
+                                                                      Figure 4. Sparsification curves for sequence 102 of the KITTI
+posed Slanted Plane Smoothing (SPS) approach of Yam-
+                                                                      training dataset. We display all combinations of query algorithm
+aguchi et al. [35]. We chose this approach because it shows           (SGM [26] and SPS [35]), confidence prediction algorithm (En-
+a very good performance on the KITTI datasets [7, 21], and            semble [10], GCP [31], Park [23]) and training data (Laser and
+gives a completely different output than a SGM (piece-wise            Ours). As a baseline method we also show the Left-Right dispar-
+planar super pixels vs. unrestricted transitions).                    ity Difference (LRD).
+    For analyzing the benefit of our approach for learning,
+we have chosen three different recent approaches [10, 31,             random forest framework of Schulter at al. [28]. For train-
+23] which are based on confidence prediction. All three               ing the forest we used the same settings in all our experi-
+approaches use random forests for the confidence predic-              ments. We used 20 trees with a maximum depth of 20 and a
+tion, which made it possible to reimplement them in a com-            minimum leaf size of 100. For choosing a split function we
+mon framework. The difference between the approaches                  use the standard entropy and draw 2000 random samples
+lies in which hand-crafted features they feed to the ran-             per node and 500 random thresholds per feature channel.
+dom forest. Ensemble learning [10] uses the peak ratio,               For every training setup we balanced the dataset on image
+entropy of disparities, perturbation, left-right disparity dif-       basis. This means that every image contributed as many
+ference, horizontal gradient, disparity map variance, dispar-         positive training examples as negative examples. For the fi-
+ity ambiguity, zero mean sum of absolute differences and              nal evaluation, we always considered the complete image.
+the local SGM energy, which results through considera-                For obtaining the pose estimation on the KITTI2012 dataset
+tion of multiple scales in a feature vector of 23 dimensions.         we use [8].
+Ground Control Point (GCP) learning [31] uses eight fea-
+                                                                      4.2. KITTI Dataset
+tures, which are the matching cost, distance to border, max-
+imum margin, attainable maximum likelihood, left-right                    We use the KITTI2012 dataset [7] to evaluate three prop-
+consistency, left-right difference, distance to discontinuity         erties of our ground truth generation, which are namely ac-
+and difference with median disparity. Park et al. [23] use a          curacy, coverage and training performance. The first two,
+feature vector with 22 dimensions, which contains the peak            we obtain by comparing our automatically generated label
+ratio, naive peak ratio, matching score, maximum margin,              images to label images produced with the laser ground truth
+winner margin, maximum likelihood, perturbation, negative             provided for the training dataset. For the SGM [26] data we
+entropy, left-right difference, local curvatures, local vari-         reach an accuracy of 97.3% (STD: 1.4%) at an average cov-
+ance of disparity values, distance to discontinuity, median           erage of the laser ground truth of 47.8% (STD: 11.8%). For
+deviations of disparities, left-right consistency, magnitude          the SPS [35] data we obtain an accuracy of 95.3% (STD:
+of image gradient and the distance to border.                         5.7%) at an average coverage of 48.6% (STD: 13.4%). Note
+    For the implementation we used the publicly available             that the coverage mostly depends on the camera motion.
+
+
+                                                                  5
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 5. Qualitative results for sequence 102 of the KITTI training dataset. In the first column we show the depth maps of SGM [26] and
+SPS [35] together with the RGB input image. The second column shows the resulting label images once produced with the laser ground
+truth (Laser) and once with our approach (Ours). Note that our approach only assigns a positive label to parts of the scene that are observed
+under significantly different view points (the car is making a turn to the left in the sequence). The remaining 3 columns show the confidence
+prediction output of Ensemble [10], GCP [31] and Park [23] once trained on Laser and once on Ours. The confidence ranges from low
+(black) to high (white). Note the confidence prediction is much smoother for Ours and contains less artifacts (especially for GCP).
+The ideal case to demonstrate our approach would be a cir-               nus the eight sequences that were used for training on the
+cular motion around an object, whereas no motion will re-                laser ground truth. Thus, there is no overlap between train-
+sult in no labeled images. As the KITTI dataset contains                 ing and testing for Laser as well as Ours. Also note that
+some sequences with very little motion, this results in a high           Ours has not seen a single ground truth laser scan. In train-
+standard deviation of the coverage.                                      ing, we used all available training samples from the laser
+    While accuracy and coverage are relevant, the much                   ground truth and roughly ten times this number from our
+more interesting factor is how well the data is suited for               automatically generated data. Note that this is less than one
+training an algorithm. To analyze this factor, we bench-                 percent of all available training data. With this setup our
+mark the change of the confidence prediction performance                 implementation used ∼20GB of memory for training.
+of three recent confidence prediction approaches, which we
+                                                                            In Fig. 30 we show the mean, minimum and maximum
+further refer to as Ensemble [10], GCP [31] and Park [23].
+                                                                         AUSC values of the three confidence prediction algorithms
+For benchmarking this performance we evaluate the Area
+                                                                         for all combinations of query algorithm and training data. In
+Under the Sparsification Curve (AUSC) as in [16, 10, 23].
+                                                                         Tab. 1 we show the AUSC for each approach divided by the
+A sparsification curve plots the bad pixel rate over the spar-
+                                                                         optimal AUSC over all evaluated sequences of the KITTI
+sification factor. For drawing the curve the pixels are sorted
+                                                                         dataset. In all cases, using our training data resulted in a
+by confidence values and always the lowest values are re-
+                                                                         performance boost. In some cases the AUSC even dropped
+moved. The AUSC is a very good indicator for the predic-
+                                                                         by 10%. A visual comparison of the difference in the confi-
+tion performance of a confidence measure. Sparsification
+                                                                         dence prediction can be found in Fig. 5 and the supplemen-
+curves for frame 102 of the dataset are shown in Fig. 4,
+                                                                         tary material. Note that our training data leads to a smoother
+while further sparsification curves can be found in the sup-
+                                                                         confidence prediction with significantly fewer artifacts.
+plementary material.
+    For training on the laser ground truth, we follow the eval-              As a matter of completeness, we executed our training
+uation protocol of [10, 23]. This means that we select the               data generation only on the eight same sequences that were
+frames 43, 71, 82, 87, 94, 120, 122 and 180 of the KITTI                 used for training Laser. One has to note that the coverage of
+training dataset for training. The labels correct/incorrect              our approach depends on the camera motion and one of the
+are set by comparing the query depth maps with the laser                 sequences (180) contains no useful motion, which leaves
+ground truth using the standard three pixel disparity thresh-            our approach with 7 sequences. Using only this limited
+old. Further on, we will mark a confidence measure trained               amount of training data, the AUSC increased by ∼10% for
+on this data with the suffix ”Laser”. As our approach re-                all approaches compared to using the 195 testing sequences.
+quires multiple images that view the same scene, we use                  This is not surprising, as each of our training images can be
+the 195 sequences of 21 stereo pairs of the KITTI testing                considered as weaker compared to the laser ground truth,
+dataset for automatically generating our label images. Fur-              in the sense that consistency alone cannot uncover all er-
+ther on, we will mark a confidence measure trained on this               rors and that the coverage of our labeling depends on the
+data with the suffix ”Ours”. Example label images can be                 camera motion. But this experiment clearly shows that us-
+found in Fig. 5 and the supplementary material. For testing              ing ten times more ”weak” training samples, which can be
+we once again follow the protocol of [10, 23] and evaluate               cheaply generated with our method, still leads to a better
+the confidence prediction on the KITTI training dataset mi-              performance than fewer ”strong” training samples.
+
+
+                                                                     6
+                      This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                     The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+                                                        SGM                                                                                                                         SGM
+                                                                                                                                          0.35
+            Optimum                                                                                                                                  Optimum
+  0.07      LRD                                                                                                                            0.3       LRD
+            Mean-Laser                                                                                                                               Ensemble-Kitti
+                                                                                                                                          0.25
+  0.06                                                                                                                                               Ensemble-Middle
+
+
+
+                                                                                                                           AUSC value
+            Mean-Ours
+            Min-Laser                                                                                                                      0.2       Park-Kitti
+  0.05      Min-Ours                                                                                                                                 Park-Middle
+                                                                                                                                          0.15       GCP-Kitti
+            Max-Laser
+                                                                                                                                                     GCP-Middle
+  0.04      Max-Ours                                                                                                                       0.1
+
+  0.03                                                                                                                                    0.05
+
+                                                                                                                                            0
+  0.02                                                                                                                                           0      2               4      6           8          10          12       14
+                                                                                                                                                                                      SPS sorted by optimal AUSC values
+                                                                                                                                                     Middlebury additional dataset, frames
+  0.01                                                                                                                                    0.35
+                                                                                                                                                      Optimum
+                                                                                                                                           0.3        LRD
+                20        40       60             80            100          120          140     160     180                                         Ensemble-Kitti
+                                                                                                                                          0.25
+                               KITTI dataset, frames sorted by AUSC values of Mean-Ours                                                               Ensemble-Middle
+
+
+
+                                                                                                                             AUSC value
+                                                                                                                                           0.2        Park-Kitti
+                                                                                                                                                      Park-Middle
+                                                                                                                                          0.15        GCP-Kitti
+                                                         SPS                                                                                          GCP-Middle
+                                                                                                                                           0.1
+           Optimum
+ 0.04                                                                                                                                     0.05
+           LRD
+           Mean-Laser                                                                                                                        0
+0.035      Mean-Ours                                                                                                                             0       2              4       6          8           10         12        14
+           Min-Laser                                                                                                                                 Middlebury additional dataset, frames sorted by optimal AUSC values
+ 0.03
+           Min-Ours
+0.025      Max-Laser
+           Max-Ours                                                                                                  Figure 7. Area under the Sparsification Curve (AUSC) values
+ 0.02
+
+0.015
+                                                                                                                     for all 13 frames of the additional Middlebury dataset. The
+ 0.01                                                                                                                frames were sorted according to the optimal area under the curve
+0.005                                                                                                                value. We display all combinations of query algorithm (SGM [26]
+   0
+              20         40       60              80            100           120         140      160     180       and SPS [35]), confidence prediction algorithm (Ensemble [10],
+                               KITTI dataset, frames sorted by AUSC values of Mean-Ours
+                                                                                                                     GCP [31], Park [23]) and training data (Kitti [7] and Middle [27]).
+  Figure 6. Mean, minimum and maximum AUSC values over the                                                           As a baseline method we also show the Left-Right disparity Dif-
+  three confidence prediction algorithms (Ensemble [10], GCP [31],                                                   ference (LRD). Note that the red symbols (Middle) are in many
+  Park [23]) for all frames of the KITTI training dataset minus the                                                  cases drastically lower than their blue counter parts (Kitti).
+  eight frames used for training. We display all combinations of
+  query algorithm (SGM [26] and SPS [35]) and training data (Laser                                                                                            LRD            Ens.[10]               Park[23]               GCP[31]
+  and Ours). The frames were sorted according to mean AUSC value                                                       SGM-Kitti                              2.10             1.24                   1.25                   1.78
+  of Ours. As a baseline method we also show the Left-Right dis-                                                      SGM-Middle                              2.10             1.19                   1.20                   1.50
+  parity Difference (LRD). Note that Ours (red) is lower than Laser                                                    Reduction                                -             3.29%                  3.30%                 15.86%
+  (blue) in most cases. For SGM, all approaches perform always
+  better than LRD if they are trained on Ours, while if they are                                                       SPS-Kitti                              1.41             1.48                   1.81                   2.05
+  trained on Laser they sometimes perform worse (e.g. 142). For                                                       SPS-Middle                              1.41             1.39                   1.42                   1.44
+  SPS stereo, the number of severe errors is significantly higher for                                                  Reduction                                -             6.32%                 21.63%                 29.82%
+  Laser than for Ours (compare blue versus red peaks above 160).                                                     Table 2. Area under the sparsification curve divided by optimal
+                                                                                                                     area on the Middlebury dataset. We display all combinations of
+                               LRD           Ens.[10]                 Park[23]                  GCP[31]              query algorithm (SGM [26] and SPS [35]), confidence prediction
+         SGM-Laser             2.81            1.97                     1.93                      2.50               algorithm (Ensemble [10], GCP [31], Park [23]) and training data
+         SGM-Ours              2.81            1.95                     1.92                      2.45               (Kitti [7] and Middle [27]). The reduction is computed as 1 −
+          Reduction              -            0.94%                    0.78%                     2.02%               AU SCM iddle /AU SCKitti .
+         SPS-Laser             7.60            5.86                     6.23                      8.28               objects as well as untextured areas.
+          SPS-Ours             7.60            5.43                     5.61                      7.95                  Due to the limitation that only stereo pairs and no multi-
+          Reduction              -            7.28%                    9.93%                     3.98%               view sequences are provided, we are not able to evaluate
+  Table 1. Area under the sparsification curve divided by opti-                                                      the accuracy performance of our ground truth generation.
+  mal area on the KITTI dataset. We display all combinations                                                         But we can still evaluate the performance of the confidence
+  of query algorithm (SGM [26] and SPS [35]), confidence pre-                                                        measures previously learned on the KITTI to evaluate their
+  diction algorithm (Ensemble [10], GCP [31], Park [23]) and                                                         generalization performance from outdoor to indoor scenes.
+  training data (Laser and Ours). The reduction is computed as                                                       Figure 7 shows the resulting AUSC curve for SGM [26] and
+  1 − AU SCOurs /AU SCLaser .                                                                                        SPS [35], respectively. In Tab. 2 we show the AUSC over
+                                                                                                                     the optimal values.
+  4.3. Middlebury Dataset
+                                                                                                                        For all combinations of query algorithm and confidence
+      The Middlebury2014 [27] dataset contains a set of 23                                                           prediction approach, training on the Middlebury increased
+  high resolution stereo pairs for which known camera cal-                                                           the performance compared to training on the KITTI and
+  ibration parameters and ground truth disparity maps ob-                                                            evaluating on the Middlebury. The percentage of area re-
+  tained with a structured light scanner are available. The set                                                      duction strongly depends on the used confidence prediction
+  is divided into 10 stereo pairs for training and additional 13                                                     approach. We assume that the large variation in area reduc-
+  stereo pairs that we used for testing. The images in the Mid-                                                      tion (3%-30%) is caused by features which are very setup
+  dlebury dataset all show static indoor scenes with varying                                                         specific (e.g. distance to border). Despite the large reduc-
+  difficulties including repetitive structures, occlusions, wiry                                                     tion variation, all approaches benefit from training on the
+
+
+                                                                                                                 7
+          This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+         The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+                                      0.2                                                                                                 LRD      Ens.[10]    Park[23]     GCP[31]
+                                                                                              Optimum
+                                     0.18                                                     LRD
+                                                                                              Ensemble-Ours
+                                                                                                                           Kitti RA       2.12       1.81        1.91         3.54
+                                     0.16                                                     Ensemble-Middle
+
+                                     0.14
+                                                                                              Ensemble-Kitti
+                                                                                              Park-Ours
+                                                                                                                          Middle RA       2.12       1.43        1.59         2.60
+
+            Bad pixel rate [1]
+                                     0.12
+                                                                                              Park-Middle
+                                                                                              Park-Kitti                   Ours RA        2.12       1.40        1.51         2.01
+                                                                                              GCP-Ours
+                                      0.1
+
+                                     0.08
+                                                                                              GCP-Middle
+                                                                                              GCP-Kitti                    Kitti Red        -      22.34%      21.04%       45.30%
+                                     0.06                                                                                 Middle Red        -       1.86%       5.02%       23.53%
+                                     0.04
+
+                                     0.02
+                                                                                                                        Table 3. Area under the sparsification curve divided by optimal
+                                       0                                                                                area (Relative Area RA) on the Strecha fountain dataset. We dis-
+                                            0   0.1   0.2    0.3    0.4    0.5   0.6    0.7      0.8   0.9      1
+                                                                   Sparsification [1]                                   play all combinations of confidence prediction algorithm (Ensem-
+                                                        (a) SGM Pair 2+3.                                               ble [10], GCP [31], Park [23]) and training data (Kitti [7], Mid-
+                                                                                                                        dle [27] and Ours) for the SGM output [26]. The reduction is
+                                     0.25
+                                                                                              Optimum
+                                                                                                                        computed as 1 − AU SCx /AU SCOurs for each confidence pre-
+                                                                                              LRD
+                                                                                              Ensemble-Ours             diction approach.
+                                      0.2                                                     Ensemble-Middle
+                                                                                              Ensemble-Kitti
+                                                                                              Park-Ours
+
+
+
+
+                Bad pixel rate [1]
+                                                                                              Park-Middle
+                                     0.15                                                     Park-Kitti
+                                                                                              GCP-Ours
+                                                                                              GCP-Middle
+                                                                                                                        (STD: 5.0%). In Fig. 8 we show the resulting two sparsi-
+                                                                                              GCP-Kitti
+                                      0.1
+                                                                                                                        fication curves and the AUSC reduction statistics in Tab. 3.
+                                     0.05
+                                                                                                                        All combinations of query algorithms and confidence pre-
+                                                                                                                        diction approaches performed better trained on the Middle-
+                                        0
+                                            0   0.1   0.2    0.3     0.4   0.5   0.6    0.7      0.8   0.9      1       bury than on the KITTI. In all cases the performance was
+                                                                   Sparsification [1]
+                                                                                                                        further increased by tuning them specifically to this scene
+                                                            (b) SGM Pair 6+7                                            in using our automatically generated training data.
+Figure 8. Sparsification curves for testing stereo pair on the
+Strecha fountain dataset. We display all combinations of confi-
+dence prediction algorithm (Ensemble [10], GCP [31], Park [23])
+and training data (Kitti [7], Middle [27] and Ours) for the SGM                                                         5. Conclusion
+output [26]. As a baseline method we also show the Left-Right
+disparity Difference (LRD).
+                                                                                                                            In this paper we present a novel way to train confidence
+Middlebury rather than the KITTI. This means that tuning                                                                prediction approaches for stereo vision in a cheap and scal-
+towards a special setup can make a large difference in per-                                                             able manner. We collect positive and negative training data
+formance.                                                                                                               by analyzing the consistency between depthmaps that ob-
+                                                                                                                        serve the same physical scene. Consistency is a necessary
+4.4. Strecha Dataset
+                                                                                                                        but not sufficient criterion for correctness. On the one hand,
+    To further demonstrate the value of our approach, we an-                                                            this means that consistency is perfectly suited for unveiling
+alyze the sparsification performance in a completely differ-                                                            incorrect depth values and thus to collect negative training
+ent setup. For this experiment we used the multi-view stereo                                                            data. On the other hand, it can never be guaranteed that
+dataset of Strecha et al. [32]. This dataset provides images                                                            all incorrect depth values are detected through consistency
+together with camera poses and two ground truth meshes.                                                                 alone, as they can be consistent and incorrect at the same
+From the two available meshes, the Herz-Jesu mesh is a                                                                  time. To keep the number of incorrect samples in the pos-
+good example that also active sensors have their limitations.                                                           itive training data low, we only consider parts of the scene
+In this mesh all the thin structures (hand rails and bars) are                                                          which have been viewed from significantly different obser-
+simply missing. As these errors would cause problems in                                                                 vation angles for the generation of positive training data. In
+the evaluation, we only used the second dataset (Fountain),                                                             our experiments, we demonstrate that the resulting training
+which does not contain any thin structures. This dataset                                                                data can be a great benefit for learning-based confidence
+consists of 11 images aligned to the ground truth mesh. For                                                             prediction. On the KITTI2012 dataset, the amount and di-
+this experiment we split the images into a training set con-                                                            versity of our training data allowed us to improve the av-
+taining 3 image pairs and a test set with 2 image pairs. The                                                            erage confidence prediction performance of three different
+training pairs are made of images 0+1, 4+5 and 8+9 and the                                                              approaches by 1 to 10% without changing the algorithms
+testing pairs of 2+3 and 6+7. Each pair was then rectified                                                              themselves. Further, we demonstrated that all three confi-
+using [26]. As the SPS implementation [35] failed to pro-                                                               dence prediction approaches can significantly benefit from
+duce any reasonable output on this kind of data, we limit                                                               learning application specific properties. With our approach,
+this experiment to the SGM [26] reconstruction.                                                                         these specific properties can be learned at low cost; even
+    In this setup our ground truth generation reached an                                                                for applications, such as aerial or under water robotics, that
+accuracy of 95.1% (STD: 2.6%) at a coverage 30.4%                                                                       typically lack ground truth data.
+
+
+                                                                                                                    8
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+References                                                                 [16] X. Hu and P. Mordohai. A quantitative evaluation of con-
+                                                                                fidence measures for stereo vision. Pattern Analysis and
+ [1] M. Brown, G. Hua, and S. Winder. Discriminative learning                   Machine Intelligence, IEEE Transactions on, 34(11):2121–
+     of local image descriptors. IEEE Transactions on Pattern                   2133, Nov 2012. 2, 6
+     Analysis and Machine Intelligence, 33(1), 2011. 2
+                                                                           [17] D. Kong and H. Tao. A method for learning matching errors
+ [2] D. J. Butler, J. Wulff, G. B. Stanley, and M. J. Black. A
+                                                                                for stereo computation. In BMVC, volume 1, page 2, 2004.
+     naturalistic open source movie for optical flow evaluation.
+                                                                                2
+     In European Conference on Computer Vision, 2012. 1
+                                                                           [18] L. Ladick, P. Sturgess, C. Russell, S. Sengupta, Y. Bastanlar,
+ [3] G. Egnal, M. Mintz, and R. P. Wildes. A stereo confi-
+                                                                                W. Clocksin, and P. Torr. Joint optimization for object class
+     dence metric using single view imagery with comparison to
+                                                                                segmentation and dense stereo reconstruction. International
+     five alternative approaches. Image and Vision Computing,
+                                                                                Journal of Computer Vision, 100(2):122–133, 2012. 1
+     22(12):943 – 957, 2004. Proceedings from the 15th Interna-
+                                                                           [19] D. G. Lowe. Distinctive image features from scale-invariant
+     tional Conference on Vision Interface. 2
+                                                                                keypoints. International Journal of Computer Vision, 60,
+ [4] G. Egnal and R. Wildes.           Detecting binocular half-
+                                                                                2004. 2
+     occlusions: empirical comparisons of five approaches. Pat-
+     tern Analysis and Machine Intelligence, IEEE Transactions             [20] O. Mac Aodha, A. Humayun, M. Pollefeys, and G. Bros-
+     on, 24(8):1127–1133, Aug 2002. 2                                           tow. Learning a confidence measure for optical flow. Pattern
+                                                                                Analysis and Machine Intelligence, IEEE Transactions on,
+ [5] M. Everingham, L. van Gool, C. Williams, J. Winn, and
+                                                                                35(5):1107–1120, May 2013. 2
+     A. Zisserman. The pascal visual object classes (voc) chal-
+     lenge. International Journal of Computer Vision, 88(2),               [21] M. Menze and A. Geiger. Object scene flow for autonomous
+     2010. 1                                                                    vehicles. In Conference on Computer Vision and Pattern
+ [6] S. Gehrig and T. Scharwachter. A real-time multi-cue frame-                Recognition (CVPR), 2015. 1, 5
+     work for determining optical flow confidence. In Computer             [22] P. Merrell, A. Akbarzadeh, L. Wang, P. Mordohai, J.-M.
+     Vision Workshops (ICCV Workshops), 2011 IEEE Interna-                      Frahm, R. Yang, D. Nister, and M. Pollefeys. Real-time
+     tional Conference on, pages 1978–1985, Nov 2011. 2                         visibility-based fusion of depth maps. In Computer Vision,
+ [7] A. Geiger, P. Lenz, and R. Urtasun. Are we ready for Au-                   2007. ICCV 2007. IEEE 11th International Conference on,
+     tonomous Driving? The KITTI Vision Benchmark Suite. In                     pages 1–8, Oct 2007. 3, 4
+     IEEE Conference on Computer Vision and Pattern Recogni-               [23] M.-G. Park and K.-J. Yoon. Leveraging stereo matching with
+     tion, 2012. 1, 2, 4, 5, 7, 8, 11                                           learning-based confidence measures. In Computer Vision
+ [8] A. Geiger, J. Ziegler, and C. Stiller. StereoScan: Dense 3D                and Pattern Recognition (CVPR), 2015 IEEE Conference on,
+     Reconstruction in Real-time. In Intelligent Vehicles Sympo-                pages 101–109, June 2015. 1, 2, 5, 6, 7, 8, 11, 12, 13, 14, 15,
+     sium (IV), 2011. 5                                                         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+ [9] M. Goesele, N. Snavely, B. Curless, H. Hoppe, and S. Seitz.                32, 33
+     Multi-view stereo for community photo collections. In IEEE            [24] M. Peris, A. Maki, S. Martull, Y. Ohkawa, and K. Fukui.
+     International Conference on Computer Vision, 2007. 2                       Towards a simulation driven stereo vision system. In Pro-
+[10] R. Haeusler, R. Nair, and D. Kondermann. Ensemble learn-                   ceedings of International Conference on Pattern Recogni-
+     ing for confidence measures in stereo vision. In Computer                  tion, 2012. 1, 2
+     Vision and Pattern Recognition (CVPR), 2013 IEEE Confer-              [25] J. Philbin, M. Isard, J. Sivic, and A. Zisserman. Descrip-
+     ence on, pages 305–312, June 2013. 1, 2, 5, 6, 7, 8, 11, 12,               tor learning for efficient retrieval. In K. Daniilidis, P. Mara-
+     13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,            gos, and N. Paragios, editors, Computer Vision ECCV 2010,
+     29, 30, 31, 32, 33                                                         volume 6313 of Lecture Notes in Computer Science, pages
+[11] X. Han, T. Leung, Y. Jia, R. Sukthankar, and A. C. Berg.                   677–691. Springer Berlin Heidelberg, 2010. 2
+     Matchnet: Unifying feature and metric learning for patch-             [26] M. Rothermel, K. Wenzel, D. Fritsch, and N. Haala. SURE:
+     based matching. In Computer Vision and Pattern Recogni-                    Photogrammetric Surface Reconstruction from Imagery. In
+     tion (CVPR), 2015 IEEE Conference on, pages 3279–3286,                     Proceedings LC3D Workshop, 2012. 1, 5, 6, 7, 8, 11, 12, 13,
+     June 2015. 2                                                               14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 33
+[12] S. Haner and A. Heyden. Optimal view path planning for vi-            [27] D. Scharstein, H. Hirschmüller, Y. Kitajima, G. Krathwohl,
+     sual SLAM. In Proceedings of the 17th Scandinavian Con-                    N. Nešić, X. Wang, and P. Westling. High-resolution stereo
+     ference on Image Analysis, 2011. 3                                         datasets with subpixel-accurate ground truth. In X. Jiang,
+[13] R. Hartley and A. Zisserman. Multiple View Geometry in                     J. Hornegger, and R. Koch, editors, Pattern Recognition, vol-
+     Computer Vision. 2 edition, 2004. 3                                        ume 8753 of Lecture Notes in Computer Science, pages 31–
+[14] W. Hartmann, M. Havlena, and K. Schindler. Predicting                      42. Springer International Publishing, 2014. 1, 2, 4, 7, 8
+     matchability. In IEEE Conference on Computer Vision and               [28] S. Schulter, C. Leistner, P. Wohlhart, P. M. Roth,
+     Pattern Recognition, 2014. 2                                               and H. Bischof. Accurate object detection with joint
+[15] H. Hirschmüller. Stereo processing by semiglobal matching                 classification-regression random forests. In IEEE Confer-
+     and mutual information. Pattern Analysis and Machine In-                   ence on Computer Vision and Pattern Recognition, 2014. 5
+     telligence, IEEE Transactions on, 30(2):328–341, Feb 2008.            [29] J. Shotton, J. Winn, C. Rother, and A. Criminisi. Textonboost
+     2, 5                                                                       for image understanding: Multi-class object recognition and
+
+
+                                                                       9
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+     segmentation by jointly modeling texture, layout, and con-
+     text. International Journal of Computer Vision, 81(1), 2009.
+     1
+[30] K. Simonyan, A. Vedaldi, and A. Zisserman. Learning lo-
+     cal feature descriptors using convex optimisation. Pattern
+     Analysis and Machine Intelligence, IEEE Transactions on,
+     36(8):1573–1585, Aug 2014. 2
+[31] A. Spyropoulos, N. Komodakis, and P. Mordohai. Learning
+     to detect ground control points for improving the accuracy of
+     stereo matching. In Computer Vision and Pattern Recogni-
+     tion (CVPR), 2014 IEEE Conference on, pages 1621–1628,
+     June 2014. 1, 2, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33
+[32] C. Strecha, W. von Hansen, L. Van Gool, P. Fua, and
+     U. Thoennessen. On benchmarking camera calibration and
+     multi-view stereo for high resolution imagery. In IEEE Con-
+     ference on Computer Vision and Pattern Recognition, 2008.
+     1, 2, 4, 8
+[33] A. Torralba, B. Russell, and J. Yuen. Labelme: Online image
+     annotation and applications. Proceedings of the IEEE, 98(8),
+     2010. 1
+[34] T. Trzcinski, M. Christoudias, V. Lepetit, and P. Fua. Learn-
+     ing image descriptors with the boosting-trick. In F. Pereira,
+     C. Burges, L. Bottou, and K. Weinberger, editors, Advances
+     in Neural Information Processing Systems 25, pages 269–
+     277. Curran Associates, Inc., 2012. 2
+[35] K. Yamaguchi, D. McAllester, and R. Urtasun. Efficient joint
+     segmentation, occlusion labeling, stereo and flow estimation.
+     In D. Fleet, T. Pajdla, B. Schiele, and T. Tuytelaars, editors,
+     Computer Vision ECCV 2014, volume 8693 of Lecture Notes
+     in Computer Science, pages 756–771. Springer International
+     Publishing, 2014. 5, 6, 7, 8, 11, 12, 13, 14, 24, 25, 26, 27,
+     28, 29, 30, 31, 32, 33
+[36] J. Žbontar and Y. LeCun. Computing the stereo matching
+     cost with a convolutional neural network. In Computer Vi-
+     sion and Pattern Recognition (CVPR), 2015 IEEE Confer-
+     ence on, 2015. 1, 2
+
+
+
+
+                                                                        10
+          This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+         The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+A. Supplementary Material
+    Figures 9, 10 and 11 are extensions to Fig. 5 in
+the original paper. These figures each show the spar-
+sification curves for three frames of the KITTI2012
+dataset [7]. To give a fair overview of good and bad ex-
+amples, we ranked the frames depending on the benefit
+of our training data. As we ran multiple combinations
+of query algorithm (SGM [26] and SPS [35]) and con-
+fidence prediction algorithm (Ensemble [10], GCP [31],
+Park [23]), we decided to base the ranking on the com-
+bination with the lowest total Area Under the Sparsifica-
+tion Curve (AUSC) which turned out to be ”SGM-Park”
+(see Tab. 1 in the original paper). Thus, we used the ra-
+tio AU SCSGM −P ark−Ours /AU SCSGM −P ark−Laser for
+ranking the frames of the KITTI training dataset in ascend-
+ing order. Based on this ranking we selected the three best
+frames (Fig. 9), the three frames around the median index
+(Fig. 10) and the three worst frames (Fig. 11).
+    For each of these nine frames we show two additional
+figures (one for SGM [26] (Fig. 4-12) and one for SPS [35]
+(Fig. 13-21)). Each of these figures shows the RGB input
+image, the depth image produced by the query algorithm
+(SGM or SPS), the label images generated with the laser
+ground truth [7] and with our approach, as well as the con-
+fidence prediction output for all combinations of confidence
+prediction algorithm (Ensemble [10], GCP [31], Park [23])
+and training data (Laser [7] and Ours).
+    For the label image generation, note that the amount of
+generated positive training data is strongly influenced by the
+camera motion. We require at least one reference measure-
+ment which is more accurate than the query measurement
+and has a minimum relative observation angle of at least
+10◦ (compare Fig. 12 and Fig. 17). This leads to a low cov-
+erage in the middle of the road, while on the side of the
+image the labels are more dense.
+    For the confidence prediction, note that the prediction
+output trained on our label images (Ours) is less noisy and
+impact of the distance to border features becomes smoother
+(e.g. Fig. 12 left margin and bottom right corner of the im-
+age). It seems that the random forests over-fit if we only use
+the limited amount of label images generated with the laser
+ground truth. In contrast, our more diverse training data re-
+duces the chance of over-fitting, which in turn leads to an
+improved overall prediction performance.
+    As a matter of completeness, Figure 30 shows a differ-
+ent version of Fig. 6 in the original paper. While Fig. 6 in
+the original paper shows the mean, minimum and maximum
+values across the three confidence prediction approaches
+(Ensemble [10], GCP [31], Park [23]), Fig. 30 shows each
+approach individually. The sequences in Fig. 30 were sorted
+by the optimal AUSC values.
+
+
+
+
+                                                                 11
+                                  This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                                 The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+                                                         SGM Rank 1 Frame 102                                                                                             SPS Rank 1 Frame 102
+                      0.035                                                                                                   0.025
+                                                                               Optimum                                                                                                          Optimum
+                                0.03                                           LRD                                                                                                              LRD
+                                                                               Ensemble-Ours                                    0.02                                                            Ensemble-Ours
+                                                                               Ensemble-Laser                                                                                                   Ensemble-Laser
+                          0.025
+                                                                               Park-Ours                                                                                                        Park-Ours
+
+
+
+
+     Bad pixel rate [1]                                                                                  Bad pixel rate [1]
+                                                                               Park-Laser                                 0.015                                                                 Park-Laser
+                                0.02                                           GCP-Ours                                                                                                         GCP-Ours
+                                                                               GCP-Laser                                                                                                        GCP-Laser
+                      0.015
+                                                                                                                                0.01
+
+                                0.01
+                                                                                                                          0.005
+                      0.005
+
+                                  0                                                                                                                0
+                                       0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                                      0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                               Sparsification [1]                                                                                              Sparsification [1]
+
+                                            (a) SGM Frame 102 (details in Fig. 18).                                                                          (b) SPS Frame 102 (details in Fig. 27).
+
+                                                          SGM Rank 2 Frame 56                                                                                             SPS Rank 2 Frame 56
+                                0.06                                                                                      0.012
+                                                                               Optimum                                                                                                          Optimum
+                                                                               LRD                                                                                                              LRD
+                                0.05                                           Ensemble-Ours                                    0.01                                                            Ensemble-Ours
+                                                                               Ensemble-Laser                                                                                                   Ensemble-Laser
+                                0.04                                           Park-Ours                                  0.008                                                                 Park-Ours
+
+
+
+
+           Bad pixel rate [1]                                                                            Bad pixel rate [1]
+                                                                               Park-Laser                                                                                                       Park-Laser
+                                                                               GCP-Ours                                                                                                         GCP-Ours
+                                0.03                                           GCP-Laser                                  0.006                                                                 GCP-Laser
+
+                                0.02                                                                                      0.004
+
+
+                                0.01                                                                                      0.002
+
+
+                                  0                                                                                                                0
+                                       0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                                      0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                               Sparsification [1]                                                                                              Sparsification [1]
+
+                                             (c) SGM Frame 56 (details in Fig. 15).                                                                              (d) SPS Frame 56 (details in Fig. 24).
+
+                                                          SGM Rank 3 Frame 0                                                                ×10−3                          SPS Rank 3 Frame 0
+                      0.035                                                                                                                  6
+                                                                               Optimum                                                                                                          Optimum
+                                0.03                                           LRD                                                                                                              LRD
+                                                                               Ensemble-Ours                                                       5                                            Ensemble-Ours
+                                                                               Ensemble-Laser                                                                                                   Ensemble-Laser
+                          0.025
+                                                                               Park-Ours                                                           4                                            Park-Ours
+
+
+
+
+     Bad pixel rate [1]                                                                                                       Bad pixel rate [1]
+                                                                               Park-Laser                                                                                                       Park-Laser
+                                0.02                                           GCP-Ours                                                                                                         GCP-Ours
+                                                                               GCP-Laser                                                           3                                            GCP-Laser
+                      0.015
+                                                                                                                                                   2
+                                0.01
+
+                      0.005                                                                                                                        1
+
+
+                                  0                                                                                                                0
+                                       0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                                      0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                               Sparsification [1]                                                                                              Sparsification [1]
+
+                                                 (e) SGM Frame 0 (details in Fig. 12).                                                                           (f) SPS Frame 0 (details in Fig. 21).
+Figure 9. Sparsification curves for the three best frames with (102,56, and 0) of the KITTI training dataset. The ranking was obtained by
+the ratio AU SCSGM −P ark−Ours /AU SCSGM −P ark−Laser . We display all combinations of query algorithm (SGM [26] and SPS [35]),
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). As a baseline method we also
+show the Left-Right disparity Difference (LRD).
+
+
+
+                                                                                                    12
+                                  This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                                 The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+                                                       SGM Rank 92 Frame 85                                                                                 SPS Rank 92 Frame 85
+                                0.05                                                                                        0.016
+                                                                             Optimum                                                                                              Optimum
+                      0.045                                                  LRD                                        0.014                                                     LRD
+                                0.04                                         Ensemble-Ours                                                                                        Ensemble-Ours
+                                                                             Ensemble-Laser                             0.012                                                     Ensemble-Laser
+                      0.035                                                  Park-Ours                                                                                            Park-Ours
+
+
+
+
+     Bad pixel rate [1]                                                                                Bad pixel rate [1]
+                                0.03                                         Park-Laser                                           0.01                                            Park-Laser
+                                                                             GCP-Ours                                                                                             GCP-Ours
+                          0.025                                              GCP-Laser                                  0.008                                                     GCP-Laser
+                                0.02                                                                                    0.006
+                      0.015
+                                                                                                                        0.004
+                                0.01
+                      0.005                                                                                             0.002
+
+                                  0                                                                                                 0
+                                       0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                          0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                             Sparsification [1]                                                                                  Sparsification [1]
+
+                                             (a) SGM Frame 85 (details in Fig. 16).                                                                (b) SPS Frame 85 (details in Fig. 25).
+
+                                                       SGM Rank 93 Frame 126                                                                               SPS Rank 93 Frame 126
+                                 0.1                                                                                        0.025
+                                                                             Optimum                                                                                              Optimum
+                                0.09                                         LRD                                                                                                  LRD
+                                0.08                                         Ensemble-Ours                                        0.02                                            Ensemble-Ours
+                                                                             Ensemble-Laser                                                                                       Ensemble-Laser
+                                0.07                                         Park-Ours                                                                                            Park-Ours
+
+
+
+
+           Bad pixel rate [1]                                                                          Bad pixel rate [1]
+                                0.06                                         Park-Laser                                 0.015                                                     Park-Laser
+                                                                             GCP-Ours                                                                                             GCP-Ours
+                                0.05                                         GCP-Laser                                                                                            GCP-Laser
+                                0.04                                                                                              0.01
+                                0.03
+                                0.02                                                                                    0.005
+                                0.01
+                                  0                                                                                                 0
+                                       0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                          0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                             Sparsification [1]                                                                                  Sparsification [1]
+
+                                            (c) SGM Frame 126 (details in Fig. 19).                                                            (d) SPS Frame 126 (details in Fig. 28).
+
+                                                       SGM Rank 94 Frame 88                                                                                 SPS Rank 94 Frame 88
+                                0.14                                                                                              0.08
+                                                                             Optimum                                                                                              Optimum
+                                0.12                                         LRD                                                  0.07                                            LRD
+                                                                             Ensemble-Ours                                                                                        Ensemble-Ours
+                                                                             Ensemble-Laser                                       0.06                                            Ensemble-Laser
+                                 0.1
+                                                                             Park-Ours                                                                                            Park-Ours
+
+
+
+
+           Bad pixel rate [1]                                                                                Bad pixel rate [1]
+                                                                             Park-Laser                                           0.05                                            Park-Laser
+                                0.08                                         GCP-Ours                                                                                             GCP-Ours
+                                                                             GCP-Laser                                            0.04                                            GCP-Laser
+                                0.06
+                                                                                                                                  0.03
+                                0.04
+                                                                                                                                  0.02
+
+                                0.02                                                                                              0.01
+
+                                  0                                                                                                 0
+                                       0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                          0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                             Sparsification [1]                                                                                  Sparsification [1]
+
+                                             (e) SGM Frame 88 (details in Fig. 17).                                                                (f) SPS Frame 88 (details in Fig. 26).
+Figure 10. Sparsification curves for the three median frames (85,126,88) of the KITTI training dataset. The ranking was obtained by
+the ratio AU SCSGM −P ark−Ours /AU SCSGM −P ark−Laser . We display all combinations of query algorithm (SGM [26] and SPS [35]),
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). As a baseline method we also
+show the Left-Right disparity Difference (LRD).
+
+
+
+                                                                                                  13
+                             This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                            The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+                                                  SGM Rank 184 Frame 151                                                                        SPS Rank 184 Frame 151
+                           0.12                                                                                         0.1
+                                                                        Optimum                                                                                        Optimum
+                                                                        LRD                                            0.09                                            LRD
+                            0.1                                         Ensemble-Ours                                                                                  Ensemble-Ours
+                                                                                                                       0.08
+                                                                        Ensemble-Laser                                                                                 Ensemble-Laser
+                                                                        Park-Ours                                      0.07                                            Park-Ours
+                           0.08
+
+
+
+      Bad pixel rate [1]                                                                          Bad pixel rate [1]
+                                                                        Park-Laser                                     0.06                                            Park-Laser
+                                                                        GCP-Ours                                                                                       GCP-Ours
+                           0.06                                         GCP-Laser                                      0.05                                            GCP-Laser
+                                                                                                                       0.04
+                           0.04
+                                                                                                                       0.03
+                                                                                                                       0.02
+                           0.02
+                                                                                                                       0.01
+                             0                                                                                           0
+                                  0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                    0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                        Sparsification [1]                                                                            Sparsification [1]
+
+                                       (a) SGM Frame 151 (details in Fig. 20).                                                      (b) SPS Frame 151 (details in Fig. 29).
+
+                                                  SGM Rank 185 Frame 35                                                                         SPS Rank 185 Frame 35
+                           0.12                                                                                        0.06
+                                                                        Optimum                                                                                        Optimum
+                                                                        LRD                                                                                            LRD
+                            0.1                                         Ensemble-Ours                                  0.05                                            Ensemble-Ours
+                                                                        Ensemble-Laser                                                                                 Ensemble-Laser
+                           0.08                                         Park-Ours                                      0.04                                            Park-Ours
+
+
+
+
+      Bad pixel rate [1]                                                                          Bad pixel rate [1]
+                                                                        Park-Laser                                                                                     Park-Laser
+                                                                        GCP-Ours                                                                                       GCP-Ours
+                           0.06                                         GCP-Laser                                      0.03                                            GCP-Laser
+
+                           0.04                                                                                        0.02
+
+
+                           0.02                                                                                        0.01
+
+
+                             0                                                                                           0
+                                  0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                    0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                        Sparsification [1]                                                                            Sparsification [1]
+
+                                        (c) SGM Frame 35 (details in Fig. 13).                                                          (d) SPS Frame 35 (details in Fig. 22).
+
+                                                  SGM Rank 186 Frame 42                                                                         SPS Rank 186 Frame 42
+                           0.25                                                                                        0.12
+                                                                        Optimum                                                                                        Optimum
+                                                                        LRD                                                                                            LRD
+                                                                        Ensemble-Ours                                   0.1                                            Ensemble-Ours
+                            0.2
+                                                                        Ensemble-Laser                                                                                 Ensemble-Laser
+                                                                        Park-Ours                                      0.08                                            Park-Ours
+
+
+
+
+      Bad pixel rate [1]                                                                          Bad pixel rate [1]
+                           0.15                                         Park-Laser                                                                                     Park-Laser
+                                                                        GCP-Ours                                                                                       GCP-Ours
+                                                                        GCP-Laser                                      0.06                                            GCP-Laser
+                            0.1
+                                                                                                                       0.04
+
+                           0.05
+                                                                                                                       0.02
+
+
+                             0                                                                                           0
+                                  0   0.1   0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9   1                                    0   0.1     0.2   0.3    0.4 0.5 0.6 0.7     0.8   0.9    1
+                                                        Sparsification [1]                                                                            Sparsification [1]
+
+                                        (e) SGM Frame 42 (details in Fig. 14).                                                          (f) SPS Frame 42 (details in Fig. 23).
+Figure 11. Sparsification curves for the three worst frames (151,35,42) of the KITTI training dataset. The ranking was obtained by the
+ratio AU SCSGM −P ark−Ours /AU SCSGM −P ark−Laser . We display all combinations of query algorithm (SGM [26] and SPS [35]),
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). As a baseline method we also
+show the Left-Right disparity Difference (LRD).
+
+
+
+                                                                                             14
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 12. Visual comparison of outputs for frame 0 and SGM [26] as query algorithm (rank 3 - best). Top row: RGB input image and
+SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   15
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 13. Visual comparison of outputs for frame 35 and SGM [26] as query algorithm (rank 185 - worst). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    16
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 14. Visual comparison of outputs for frame 42 and SGM [26] as query algorithm (rank 186 - worst). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    17
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 15. Visual comparison of outputs for frame 56 and SGM [26] as query algorithm (rank 2 - best). Top row: RGB input image and
+SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   18
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 16. Visual comparison of outputs for frame 85 and SGM [26] as query algorithm (rank 92 - median). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    19
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 17. Visual comparison of outputs for frame 88 and SGM [26] as query algorithm (rank 94 - median). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    20
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 18. Visual comparison of outputs for frame 102 and SGM [26] as query algorithm (rank 1 - best). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    21
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 19. Visual comparison of outputs for frame 126 and SGM [26] as query algorithm (rank 93 - median). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    22
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 20. Visual comparison of outputs for frame 151 and SGM [26] as query algorithm (rank 184 - worst). Top row: RGB input image
+and SGM [26] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    23
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 21. Visual comparison of outputs for frame 0 and SPS [35] as query algorithm (rank 3 - best). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   24
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 22. Visual comparison of outputs for frame 35 and SPS [35] as query algorithm (rank 185 - worst). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   25
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 23. Visual comparison of outputs for frame 42 and SPS [35] as query algorithm (rank 186 - worst). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   26
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 24. Visual comparison of outputs for frame 56 and SPS [35] as query algorithm (rank 2 - best). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   27
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 25. Visual comparison of outputs for frame 85 and SPS [35] as query algorithm (rank 92 - median). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   28
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 26. Visual comparison of outputs for frame 88 and SPS [35] as query algorithm (rank 94- median). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   29
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 27. Visual comparison of outputs for frame 102 and SPS [35] as query algorithm (rank 1 - best). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   30
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 28. Visual comparison of outputs for frame 126 and SPS [35] as query algorithm (rank 93 - median). Top row: RGB input image
+and SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images
+computed with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative
+and blue is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations
+of confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                    31
+           This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+          The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+Figure 29. Visual comparison of outputs for frame 151 and SPS [35] as query algorithm (rank 184 - worst). Top row: RGB input image and
+SPS [35] depthmap. The color in the depth images ranges from blue (far away) to red (very close). Second row: Label images computed
+with laser ground truth and with our approach. In the label images the color green stands for positive samples, red for negative and blue
+is ignored during training and evaluation. In the remaining rows, we display the confidence prediction output for all combinations of
+confidence prediction algorithm (Ensemble [10], GCP [31], Park [23]) and training data (Laser and Ours). The color ranges from black
+(low confidence) to white (high confidence).
+
+
+
+
+                                                                   32
+                     This paper was accepted to the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
+                    The copyright was transfered to IEEE. The official version of the paper will be made available on IEEE Xplore R .
+
+
+
+
+                                                                                  SGM
+
+                                  Optimum
+                        0.07      LRD
+                                  Ensemble-Laser
+                        0.06      Ensemble-Ours
+                                  Park-Laser
+                        0.05      Park-Ours
+
+
+       AUSC value
+                                  GCP-Laser
+                        0.04      GCP-Ours
+
+                        0.03
+
+                        0.02
+
+                        0.01
+
+
+                                     20             40      60             80            100          120        140   160     180
+                                                           KITTI dataset, frames sorted by optimal AUSC values
+                                                                                    SPS
+
+                                   Optimum
+                         0.04      LRD
+                                   Ensemble-Laser
+                        0.035
+                                   Ensemble-Ours
+                         0.03      Park-Laser
+                                   Park-Ours
+
+
+           AUSC value
+                        0.025      GCP-Laser
+                                   GCP-Ours
+                         0.02
+
+                        0.015
+
+                         0.01
+
+                        0.005
+
+                           0
+                                      20            40      60             80            100          120        140   160    180
+                                                           KITTI dataset, frames sorted by optimal AUSC values
+Figure 30. Area under the Sparsification Curve (AUSC) values for all frames of the KITTI training dataset minus the eight frames used
+for training. The frames were sorted according to the optimal area under the curve value. We display all combinations of query algorithm
+(SGM [26] and SPS [35]), confidence prediction algorithm (Ensemble [10],GCP [31],Park [23]) and training data(Laser and Ours). As a
+baseline method we also show the Left-Right disparity Difference (LRD).
+
+
+
+
+                                                                               33
+

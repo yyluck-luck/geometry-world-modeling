@@ -1,0 +1,81 @@
+{
+  "schema": "s48_post_selection_hook_source_audit_v1",
+  "created_utc": "2026-09-08T06:27:52.395975+00:00",
+  "evidence_type": "static_source_no_import_no_model",
+  "source": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/vendor/vmem_snapshot/modeling/pipeline.py",
+  "source_sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+  "pipeline_class": "VMemPipeline",
+  "checks": {
+    "exact_pipeline_sha": true,
+    "context_keys_present": true,
+    "context_does_not_return_support": true,
+    "render_exposes_surfel_index_map": true,
+    "retrieval_uses_surfel_to_timestep": true,
+    "global_embedding_mean_dim0": true,
+    "condition_has_required_paths": true,
+    "single_post_selection_pre_cond_boundary": true,
+    "current_reset_misses_live_state": true
+  },
+  "evidence": {
+    "context_return_keys": [
+      "context_Ks",
+      "context_c2ws",
+      "context_encoder_embeddings",
+      "context_latents",
+      "context_time_indices"
+    ],
+    "context_function_lines": [
+      505,
+      765
+    ],
+    "get_cond_function_lines": [
+      1123,
+      1192
+    ],
+    "global_embedding_mean_lines": [
+      1124
+    ],
+    "consumer_method": "_generate_frames_for_trajectory",
+    "get_context_info_call_lines": [
+      1249
+    ],
+    "get_cond_call_lines": [
+      1267
+    ],
+    "reset_function_lines": [
+      135,
+      146
+    ],
+    "reset_fields": [
+      "Ks",
+      "all_pil_frames",
+      "focal_lengths",
+      "global_step",
+      "poses",
+      "rgb_encoder_embeddings",
+      "rgb_vae_latents",
+      "surfel_Ks",
+      "surfel_depths",
+      "surfel_to_timestep",
+      "surfels"
+    ],
+    "live_fields_missing_from_reset": [
+      "c2ws",
+      "encoder_embeddings",
+      "latents",
+      "pil_frames"
+    ],
+    "required_condition_paths": [
+      "concat",
+      "crossattn",
+      "dense_vector",
+      "replace"
+    ]
+  },
+  "interpretation": {
+    "hook_status": "SOURCE_BOUNDARY_EXISTS_BUT_SUPPORT_API_MISSING",
+    "consumer_asymmetry_hypothesis": "slotwise latent replace is preserved while source embeddings are globally averaged",
+    "execution_authorization": "NONE",
+    "novelty_authorization": "NONE"
+  }
+}

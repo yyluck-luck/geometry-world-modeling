@@ -1,0 +1,157 @@
+{
+  "schema": "s44-c1-launch-readiness-independent-review-v1",
+  "status": "READY_TO_LAUNCH_S44_C1_SINGLE_ATTEMPT",
+  "reviewed_utc": "2026-09-07T17:59:33Z",
+  "reviewer_role": "/root/c1_launch_readiness",
+  "row": "C1",
+  "variant": {
+    "name": "VMem + stabilityai/sd-vae-ft-mse (declared VAE component variant)",
+    "repo": "stabilityai/sd-vae-ft-mse",
+    "revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+    "subfolder": "",
+    "original_sd21_vae_identity": "UNKNOWN",
+    "exact_original_baseline": false
+  },
+  "canonical_manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/manifest.json",
+    "sha256": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+    "schema": "s44-c1-confirmation-two-batch-v1",
+    "status": "FROZEN_C1_BASELINE_CONFIRMATION_TWO_BATCH_EXECUTION",
+    "core_sha256_recomputed": "40303f660f8e3db3c14ebc0768d9a716c3bfc7a4f332389505ba34ec1d428215",
+    "manifest_and_core_match": true
+  },
+  "attachment_chain": {
+    "receipt": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/receipt.json",
+      "sha256": "5eedc39f6609112ebe893f0529682a7025976c8f851ba555578082886bdd62d8",
+      "status": "S44_C1_REVIEWS_ATTACHED_METADATA_GATE_PASSED",
+      "exact_manifest_and_core_binding": true,
+      "source_unchanged_at_close": true
+    },
+    "metadata_gate": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/metadata_gate.json",
+      "sha256": "b1fd914a6a2eef8ae20fd79622794b5875c4dd357d8577ca27d403d5435e4683",
+      "status": "PASS_METADATA_ONLY",
+      "manifest_binding_match": true,
+      "execution_authorized_field_is_false_by_design": true,
+      "note": "The metadata-only record cannot itself authorize execution; this independent point-in-time review supplies the separate single-attempt readiness verdict."
+    },
+    "source_core_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/freeze_attempt_01/source_core_review.json",
+      "sha256": "92317207762da7def66997b2e0c6e9b3cf8f032266c402614f4d7130836d3f2a",
+      "status": "PASS_S44_C1_GENERATION_SOURCE_REVIEW",
+      "reviewer_role": "/root/c1_revised_source_audit",
+      "core_binding_match": true
+    },
+    "runtime_freshness_core_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/freeze_attempt_01/runtime_freshness_core_review.json",
+      "sha256": "5a3e9268e459fd6bf94eb9e5a4634c06f369bec2e09c159ef9767028e2bed961",
+      "status": "READY_TO_ATTEMPT_S44_C1_BASELINE_GENERATION",
+      "reviewer_role": "/root/c1_revised_adversarial",
+      "core_binding_match": true
+    },
+    "two_distinct_non_root_reviewers": true
+  },
+  "source_verification": {
+    "method": "Independent full SHA-256 of only the 218 manifest-bound source files; no component weight body was read.",
+    "source_count": 218,
+    "source_total_bytes_hashed": 2092020,
+    "all_paths_absolute_regular_non_symlink_files": true,
+    "all_manifest_sha256_match": true,
+    "mismatches": [],
+    "c1_source_hashes": {
+      "generation_gate.py": "961b9550f5ea438a338eb24ba9f36dd18f22d7f0719f9b54109e182755ab43dc",
+      "runtime_adapter.py": "afedaadca7bff62616368541d980a28f24131e1256eafef7af81275aa09dfb4e",
+      "launch_generation.py": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b",
+      "PROTOCOL.md": "77c72263f6f58f77e5990a7db1557773013b9b84b14fb040f20faaaae6e701b5"
+    },
+    "supporting_small_file_hashes": {
+      "freeze_c1_manifest.py": "c91400d5b00362507f01379ebaab8fb768fcff9be97cc2f066f1e7548e11c732",
+      "FREEZE_PROTOCOL.md": "aa103a3fa58f03a5969be754f5f55abba11d0f3966386d5a9c02445035e1defe",
+      "inference_seed43.yaml": "2fb88eb0a15c449b876386df5c9c0d2aad8da43c6be5aeccbd9b8d72be1908aa"
+    }
+  },
+  "model_identity_evidence": {
+    "basis": "Exact SHA-256 of the just-completed runtime/freshness core review plus inspection of its full-hash evidence; the 12.5 GB component bodies were deliberately not rehashed in this launch-readiness review and will be rechecked by the launcher's full gate.",
+    "runtime_review_sha256_matches_manifest_binding": true,
+    "runtime_review_component_bytes_fully_hashed": 12509269337,
+    "component_full_sha256_matches_recorded_by_runtime_review": true,
+    "component_files_stable_during_runtime_review_hashing": true,
+    "component_payloads_deserialized_by_runtime_review": 0,
+    "model_constructors_called_by_runtime_review": 0,
+    "all_bound_loading_evidence_hashes_match": true,
+    "prior_component_loading_passed": true,
+    "all_prior_state_dict_loads_complete": true,
+    "network_attempts": 0,
+    "launch_full_gate_will_recheck_component_hashes": true,
+    "identity_scope": "Declared official ft-mse VAE component variant only; exact original SD2.1 VAE identity remains unknown."
+  },
+  "runtime_and_budget": {
+    "python_executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "python_executable_is_file_and_executable": true,
+    "all_pythonpath_entries_exist": true,
+    "device": "cpu",
+    "dtype": "float32",
+    "threads": 8,
+    "seed": 43,
+    "seconds_per_batch": 1800,
+    "total_seconds": 3600,
+    "rss_cap_bytes": 48318382080,
+    "minimum_free_disk_bytes": 10737418240,
+    "poll_seconds": 0.5,
+    "cpu8_fp32_controls_match_manifest": true,
+    "same_variant_components_runtime_and_nonseed_controls_as_s40": true
+  },
+  "point_in_time_resources": {
+    "observed_utc": "2026-09-07T17:56:10Z",
+    "disk_available_bytes": 1328997933056,
+    "minimum_free_disk_bytes": 10737418240,
+    "disk_pass": true,
+    "physical_memory_bytes": 68719476736,
+    "system_wide_memory_free_percent": 93,
+    "swapins": 0,
+    "swapouts": 0,
+    "rss_cap_bytes": 48318382080,
+    "memory_readiness_pass": true,
+    "memory_basis": "The 45 GiB monitored RSS cap is below 64 GiB physical memory, the live macOS pressure query reported 93 percent free, and the launcher will terminate the process tree if the cap is exceeded.",
+    "comparable_s40_parent_peak_process_tree_rss_bytes": 25862127616,
+    "comparable_s40_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/execution_01/receipt.json",
+    "comparable_s40_receipt_sha256": "4c771df1e46f96e218b92f01339b55ebd056ef002fdc28e0083a5bb0907300d4",
+    "comparable_s40_had_no_limit_exceeded": true,
+    "resource_boundary": "This is a point-in-time launch-readiness observation, not a guarantee of completion; the launcher performs its own disk check and continuous RSS, disk, and wall-time monitoring."
+  },
+  "freshness_and_processes": {
+    "observed_utc": "2026-09-07T17:59:25Z",
+    "execution_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/execution_01",
+    "execution_directory_lexists": false,
+    "scientific_output_root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S44_C1_confirmation_generation",
+    "scientific_output_root_lexists": false,
+    "candidate_c1_or_s40_generation_processes": [],
+    "candidate_process_count": 0,
+    "fresh_for_single_outer_launch": true
+  },
+  "launch": {
+    "cwd": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling",
+    "exact_argv": [
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+      "-B",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/launch_generation.py",
+      "--manifest",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/review_attachment_01/manifest.json",
+      "--manifest-sha256",
+      "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+      "--execution-directory",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/execution_01"
+    ],
+    "outer_invocation_omits_worker_flag": true,
+    "single_attempt_ready": true,
+    "authorization_scope": "One outer C1 launch attempt with the exact argv only; any changed hash, occupied path, competing process, or failed gate must block rather than retry under this review."
+  },
+  "blocking_findings": [],
+  "executed": false,
+  "model_or_scientific_imports": 0,
+  "pixels_decoded": 0,
+  "generation_calls": 0,
+  "component_bodies_rehashed_in_this_review": 0,
+  "scientific_claim_boundary": "This review authorizes only an attempt of the frozen C1 strong-baseline row. It is not model execution, image decode, generation success, readback, scoring, visual quality evidence, a natural-failure result, method gain, or novelty evidence. C2 remains mandatory."
+}

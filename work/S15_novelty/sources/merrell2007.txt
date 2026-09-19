@@ -1,0 +1,461 @@
+                        Real-Time Visibility-Based Fusion of Depth Maps
+
+       Paul Merrell1 , Amir Akbarzadeh2 , Liang Wang2 , Philippos Mordohai1 , Jan-Michael Frahm1 ,
+                            Ruigang Yang2 , David Nistér2 , and Marc Pollefeys1
+         1                                         2
+           Department of Computer Science            Center for Visualization and Virtual Environments
+   University of North Carolina, Chapel Hill, USA           University of Kentucky, Lexington, USA
+
+
+                        Abstract
+
+   We present a viewpoint-based approach for the quick fu-
+sion of multiple stereo depth maps. Our method selects
+depth estimates for each pixel that minimize violations of
+visibility constraints and thus remove errors and inconsis-
+tencies from the depth maps to produce a consistent surface.
+We advocate a two-stage process in which the first stage
+generates potentially noisy, overlapping depth maps from a          Figure 1. Aerial View and Detailed Views of reconstructed models
+                                                                    from a 170,000 frame video
+set of calibrated images and the second stage fuses these
+depth maps to obtain an integrated surface with higher ac-
+curacy, suppressed noise, and reduced redundancy. We                an interest in ground-based models as the next logical step
+show that by dividing the processing into two stages we             in creating a more effective city visualization tool. Visual-
+are able to achieve a very high throughput because we               izations from ground imagery are possible in the form of
+are able to use a computationally cheap stereo algorithm            panoramic mosaics [21, 16] or simple geometric models [2]
+and because this architecture is amenable to hardware-              which require less data to construct, but limit the user’s abil-
+accelerated (GPU) implementations. A rigorous formula-              ity to freely navigate the environment. For unconstrained
+tion based on the notion of stability of a depth estimate is        navigation, accurate and detailed 3D models are needed.
+presented first. It aims to determine the validity of a depth       Video-based 3D reconstruction can deliver this type of con-
+estimate by rendering multiple depth maps into the refer-           tent, but only once it is capable of overcoming the chal-
+ence view as well as rendering the reference depth map              lenge of processing massive amounts of imagery. Typical
+into the other views in order to detect occlusions and free-        multiple-view reconstruction algorithms that process all im-
+space violations. We also present an approximate alterna-           ages simultaneously are unable to create models such as the
+tive formulation that selects and validates only one hypoth-        one in Fig. 1 which is made from 170,000 frames.
+esis based on confidence. Both formulations enable us to
+                                                                        In this paper, we investigate the reconstruction of accu-
+perform video-based reconstruction at up to 25 frames per
+                                                                    rate 3D models from video. We employ a two-stage ap-
+second. We show results on the Multi-View Stereo Eval-
+                                                                    proach designed to achieve high processing speeds. In the
+uation benchmark datasets and several outdoors video se-
+                                                                    first stage, depth maps are quickly reconstructed from cal-
+quences. Extensive quantitative analysis is performed using
+                                                                    ibrated images. Due to the speed of the algorithm, we ex-
+an accurately surveyed model of a real building as ground
+                                                                    pect that the raw stereo depth maps contain many errors and
+truth.
+                                                                    that they do not completely agree with one another. These
+                                                                    conflicts and errors are identified and resolved in the fu-
+1. Introduction                                                     sion stage. In this step, a set of depth maps from neighbor-
+                                                                    ing camera positions are combined into a single depth map,
+   The problem of 3D reconstruction from video is a very            the fused depth map, for one of the views. Then consecu-
+important topic in computer vision. It has received renewed         tive fused depth maps are merged together. The final result
+attention recently due to applications such as Google Earth         is a fused surface represented by a mesh and a set of im-
+and Microsoft Virtual Earth which have been introduced              ages for texture-mapping. By decoupling the problem into
+for delivering effective visualizations of large scale mod-         a stereo reconstruction stage followed a fusion stage, we
+els based on aerial and satellite imagery. This has sparked         are able to use fast algorithms that can be easily ported to a
+
+
+                                                                1
+programmable Graphics Processing Unit (GPU). Since it is         ized from the depth estimates and modulated according to
+impossible to process thousands of images simultaneously,        an image-based cost function and smoothness. Koch et al.
+processing is performed in a sliding window.                     [10] first establish binocular pixel correspondences and then
+   Another benefit of the fusion step is that it produces        propagate them to more images. When a match is consis-
+a compact representation of the data since the number of         tent with a new camera, the camera is added to the chain
+fused depth maps that are outputted is a small fraction of       that supports the match. The position of the point is updated
+the original number of depth maps. Much of the infor-            using the wider baseline, reducing the sensitivity to noise.
+mation in the original depth maps is redundant since many        Narayanan et al. [13] compute depth maps using multi-
+nearby viewpoints observe the same surface. After fusion,        baseline stereo and merge them to produce viewpoint-based
+the surface is constructed by detecting any overlap between      visible surface models. Holes due to occlusion are filled in
+consecutive fused depth maps and merging the overlapping         from nearby depth maps. Hernández et al. [7] compute the
+surfaces. A compact representation is especially important       probability that a point in a volumetric grid is visible from
+for long video sequences since it allows the end-user to vi-     depth maps and then segment the volume into foreground
+sualize very large models.                                       and background using graph cuts.
+                                                                    Koch et al. [11] also presented a volumetric approach
+2. Related Work                                                  for fusion. Given depth maps for all images, the depth
+                                                                 estimates for all pixels are projected in the voxelized 3D
+    Large scale reconstruction systems typically generate        space. Each depth estimate votes for a voxel probabilisti-
+partial reconstructions which are then merged. Conflicts         cally and the surfaces are extracted by thresholding. Sato
+and errors in these partial reconstructions are identified and   et al. [18] also advocated a volumetric method based on
+resolved during the merging process. Surface fusion has          voting. Each depth estimate votes not only for the most
+received considerable attention in the literature mostly for     likely surface but also for the presence of free space be-
+data produced by range finders, where the noise level and        tween the camera and the surface. Morency et al. [12] op-
+the fraction of outliers is typically lower than what is en-     erate on a linked voxel space to rapidly produce triangula-
+countered using passive sensors. Multiple-view reconstruc-       tions. Information is fused in each voxel while connectivity
+tion methods based only on images have also been thor-           information is maintained and updated in order to produce
+oughly investigated [19], but many of them are limited to        the final meshes. Goesele et al. [6] presented a two-stage
+single objects and can not be applied to large scale scenes      approach which merges depth maps produced by a simple
+due to computation and memory requirements.                      algorithm. Normalized cross-correlation is computed for
+    Turk and Levoy [22] proposed a method for registering        each depth estimate between the reference view and several
+and merging two triangular meshes. They remove any over-         target views. The depth estimates are rejected if the cross-
+lapping parts of the meshes, connect the mesh boundaries         correlation is not large enough for at least two target views.
+and then update the positions of the vertices. Soucy and         The remaining depth estimates are used for surface recon-
+Laurendeau [20] introduced a similar algorithm which first       struction using the technique of [3].
+updates the positions of the vertices and then connects them
+to form the triangular mesh. A different approach was pre-
+                                                                 3. Plane-Sweeping Stereo
+sented by Curless and Levoy [3] who employ a volumet-
+ric representation of the space and compute a cumulative             In the first of the two processing stages, depth maps
+weighted distance function from the depth estimates. This        are computed from a set of images captured by a mov-
+signed distance function is an implicit representation of the    ing camera with known pose, using plane-sweeping stereo
+surface. A volumetric approach that explicitly takes into ac-    [1, 5, 24]. Plane-sweeping was chosen primarily because
+count boundaries and holes was published by Hilton et al.        it can be computed efficiently on the GPU, but since the
+[8]. Wheeler et al. [23] adapted the method of [3] to only       two stages are designed to operate independently, any other
+consider potential surfaces in voxels that are supported by      stereo matching algorithm could have been used instead.
+some consensus, instead of just one range image, to increase         The depth maps are computed using the plane-sweeping
+its robustness to outliers. An online algorithm that uses a      technique described in [5]. Each depth map is computed
+structured light sensor was introduced by Rusinkiewicz et        for the central image in a set of typically 5 to 11 images.
+al. [17]. It can merge partial reconstructions in the form of    At each pixel, several depth hypotheses are tested in the
+point clouds in real-time by quantizing the space in voxels      form of planes. For each plane hypothesis, the depth for
+and aggregating the information in each voxel. A slower,         a pixel is computed by intersecting the ray emanating from
+more accurate algorithm was also described.                      the pixel with the hypothesized plane. All images are pro-
+    Among the first approaches for passive data was that         jected onto the plane, via a set of homographies, and a cost
+of Fua [4] who adopted a particle based representation.          for the hypothesized depth is calculated based on how well
+The positions and orientations of the particles are initial-     the images match on the plane. Here, we use absolute inten-
+sity difference as the cost. The set of images is divided in      3D point seen at pixel x of the reference view is called
+two halves, one preceding and one following the reference         F̂ (x). Ri (X) is the distance between the center of projec-
+image. The sum of the absolute differences between each           tion of viewpoint i and the 3D point X. We define the term
+half of the images and the reference view, projected onto         fˆ(x) ≡ Rref (F̂ (x)) which is the distance of the current
+the plane, is calculated in square windows. The minimum           depth estimate F̂ (x) for the reference camera.
+of the two sums is the cost of the depth hypothesis [9]. This         The first step of fusion is to render each depth map into
+scheme is effective against occlusions, since in general the      the reference view. When multiple depth values project onto
+visibility of a pixel does not change more than once during       the same pixel, the nearest depth is kept. Let Diref be the
+an image sequence. The depth of each pixel is estimated           depth map Di rendered into the reference view and Ciref be
+to be the depth d0 with the lowest cost. Each pixel is pro-       the confidence map rendered in the reference view. Given a
+cessed independently which allows non-planar surfaces to          3D point X, we need a notation to describe the value of the
+be reconstructed.                                                 depth map Di at the location where X projects into view
+    The depth with the lowest cost may not be the true depth      i. Let Pi (X) be the image coordinates of the 3D point X
+due to noise, occlusion, lack of texture, surfaces that are not   projected into view i. To simplify the notation, we define
+aligned with the plane direction, and many other factors.         the term Di (X) ≡ Di (Pi (X)). Di (X) is likely to be dif-
+Parts of the image with little texture are especially difficult   ferent from Ri (X) which is the distance between X and the
+to accurately reconstruct using stereo. A measurement of          camera center.
+the confidence of each depth estimate is important. To es-            Our approach considers three types of visibility relation-
+timate the confidence, we use the following heuristic. We         ships between hypothesized depths in the reference view
+assume the cost is perturbed by Gaussian noise. Let c(x, d)       and computed depths in the other views. These relations
+be the matching cost for depth d at pixel x. We wish to es-       are illustrated in Fig. 2(a). The point A0 observed in view i
+timate the likelihood that the true depth, do , does not have     is behind the point A observed in the reference view. There
+the lowest cost after the cost is perturbed. This likelihood is   is a conflict between the measurement and the hypothesized
+                                     2   2
+proportional to: e−(c(x,d)−c(x,d0 )) /σ for some σ that de-       depth since view i would not be able to observe A0 if there
+pends on the strength of the noise. The confidence C(x) is        truly was a surface at A. We say that A violates the free
+defined as the inverse of the sum of these probabilities for      space of A0 . This occurs when Ri (A) < Di (A).
+all possible depths:                                                  In Fig. 2(a), B 0 is in agreement with B since they are in
+                                                     −1          the same location. In practice, we define points B and B 0
+                                                                                                       (B)−Rref (B 0 )|
+                  
+                                                                                                  |R
+                      X                      2   2                as being in agreement when ref Rref (B)               < .
+        C(x) =             e−(c(x,d)−c(x,d0 )) /σ        (1)
+                                                                      The point C 0 observed in view i is in front of the point
+                    d6=d0
+                                                                  C observed in the reference view. There is a conflict be-
+   This equation produces a high confidence when the cost         tween these two measurements since it would be impossible
+has a single sharp minimum. The confidence is low when            to observe C if there truly was a surface at C 0 . We say that
+the cost has a shallow minimum or several low minima.             C 0 occludes C. This occurs when Diref (C0 ) < fˆ(C) =
+                                                                  Dref (C).
+4. Visibility-Based Depth Map Fusion                                  Note that operations for a pixel are not performed on a
+                                                                  single ray, but on rays from all cameras. Occlusions are
+   Due to the speed of the stereo algorithm, the raw stereo       defined on the rays of the reference view, but free space
+depth maps contain errors and do not completely agree with        violations are defined on the rays of the other depth maps.
+each other. These conflicts and errors are identified and re-     The reverse depth relations (such as A behind A0 or C in
+solved in the fusion stage. In this step, a set of depth maps     front of C 0 ) do not represent visibility conflicts.
+from neighboring camera positions are combined into a sin-            The raw stereo depth maps give different estimates of the
+gle fused depth map for one of the views. From the fused          depth at a given pixel in the reference view. We first present
+depth maps we show how to construct a triangulated surface        a method that tests each of these estimates and selects the
+in Sec. 4.3.                                                      most likely candidate by exhaustively considering all occlu-
+   The input to the fusion step is a set of N depth maps          sions and free-space constraints. We then present an alter-
+denoted by D1 (x), D2 (x), . . . , DN (x) which record the        native approach that selects a likely candidate upfront based
+estimated depth of each pixel of the N images. Each               on the confidence and then verifies that this estimate agrees
+depth map has an associated confidence map labeled                with most of the remaining data. The type of computations
+C1 (x), C2 (x), . . . , CN (x) computed according to (1). One     required in both approaches are quite similar. Most of the
+of the viewpoints, typically the central one, is selected as      computation time is spent rendering a depth map seen in
+the reference viewpoint. We seek a depth estimate for each        one viewpoint into another viewpoint. These computations
+pixel of the reference view. The current estimate of the          can be performed efficiently on the GPU.
+ (a) Visibility relations between points              (b) Stability calculation                   (c) Support estimation
+Figure 2. (a) Visibility relations between points. The point A0 seen in view i has its free space violated by A seen in the reference view.
+B 0 supports B. C seen in the reference view is occluded by C 0 . (b) Stability Calculation. In this example, there are two occlusions which
+raise stability and one free-space violations which lowers it. The stability is +1. (c) Support calculation. Three measurements are close to
+the current estimate and add support to it. Outside the support region, there is one occlusion and one free-space violation which lower the
+support.
+
+
+                                                                         the closest stable depth. To begin, all of the depth maps are
+                                                                         rendered into the reference view. In the example shown in
+                                                                         Fig. 2(b), five depth maps are rendered into the reference
+                                                                         view. The closest depth is selected as the initial estimate. In
+                                                                         the example, the closest depth is D1ref (x) and so its stability
+                                                                         is evaluated first. The point is tested against each depth map
+                                                                         to determine if the depth map occludes it or if it violates the
+Figure 3. A stereo depth map for a dataset from [19], the fused          depth map’s free space. If the depth estimate is found to
+depth map using stability-based fusion and the final confidence
+                                                                         be unstable, we move onto the next closest depth. Since
+map (black corresponds to maximum confidence).
+                                                                         there are N possible choices, the proper depth estimate is
+                                                                         guaranteed to be found after N − 1 iterations. The total
+4.1. Algorithm 1: Stability-Based Fusion                                 number of depth map renderings is bound by O(N 2 ). In the
+                                                                         example, the closest two depths D1ref (x) and D3ref (x) were
+    If a depth map occludes a depth hypothesis F̂ (x), this              tested first. Figure 2(b) shows the test being performed on
+indicates that the hypothesis is too far away from the refer-            the third closest depth D2ref (x). A free-space violation and
+ence view. If the current depth hypothesis violates a free-              two occlusions are found and thus the stability is positive.
+space constraint, this indicates the hypothesis is too close             In this example, D2ref (x) is the closest stable depth.
+to the reference view. The stability of a point S(x) is de-                  The final step is to compute a confidence value for the es-
+fined as the number of depth maps that occlude F̂ (x) minus              timated depth. The distance to the selected depth Ri (F̂ (x))
+the number of free-space violations. Stability measures the              is compared with the estimate in depth map i given by
+balance between these two types of visibility violations. A              Di (F̂ (x)). If these values are within , the depth map sup-
+point is stable if the stability is greater than or equal to zero.       ports the final estimate. The confidences of all the estimates
+If the stability is negative, then most of the depth maps indi-          that support the selected estimate are added. The resulting
+cate that F̂ (x) is too close to the camera to be correct. If the        fused confidence map is passed on to the mesh construction
+stability is positive then at least half of the depth maps indi-         module. An example of an input depth map and the fused
+cate that F̂ (x) is far enough away from the reference cam-              depth map and confidence map can be seen in Fig. 3.
+era. Stability generally increases as the point moves further
+away from the camera. The final fused depth is selected
+                                                                         4.2. Algorithm 2: Confidence-Based Fusion
+to be the closest depth to the camera for which stability is
+non-negative. This depth is not the median depth along the                  Stability-based fusion tests up to N − 1 different depth
+viewing ray since free-space violations are defined on rays              hypotheses. In practice, most of these depth hypotheses are
+that do not come from the reference view. This depth is                  close to one another, since the true surface is likely to be
+balanced in the sense that the amount of evidence that indi-             visible and correctly reconstructed in several depth maps.
+cates it is too close is equal to the amount of evidence that            Instead of testing so many depth estimates, an alternative
+indicates it is too far away.                                            approach is to combine multiple close depth estimates into
+    With this goal in mind, we construct an algorithm to find            a single estimate and then perform only one test. Because
+there is only one hypothesis to test, there are only O(N )
+renderings to compute. This approach is typically faster                        Ĉk+1 (x) = Ĉk (x) − Ci (Pi (F̂ (x)))         (5)
+than stability-based fusion which tests N − 1 hypotheses
+and computes O(N 2 ) renderings, but the early commitment              We have now added the confidence of all the depth maps
+may introduce additional errors.                                    that support the current depth estimate and subtracted the
+                                                                    confidence of all those that contradict it. If the support is
+                                                                    positive, the majority of the evidence supports the depth es-
+Combining Consistent Estimates Confidence-based fu-
+                                                                    timate and it is kept. If the support is negative, the depth
+sion also begins by rendering all the depth maps into the
+                                                                    estimate is discarded as an outlier. The fused depth map at
+reference view. The depth estimate with the highest confi-
+                                                                    this stage contains estimates with high confidence and holes
+dence is selected as the initial estimate for each pixel. At
+                                                                    where the estimates have been rejected.
+each pixel x, we keep track of two quantities which are up-
+dated iteratively: the current depth estimate and its level of
+support. Let fˆ0 (x) and Ĉ0 (x) be the initial depth estimate      Hole filling After discarding the outliers, there are many
+and its confidence value. fˆk (x) and Ĉk (x) are the depth         holes in the fused depth map. In practice, the depth maps
+estimate and its support at iteration k, while F̂ (x) is the        of most real-world scenes are piecewise smooth and we as-
+corresponding 3D point.                                             sume that any small missing parts of the depth map are most
+   If another depth map Diref (x) produces a depth estimate         likely to have a depth close to their neighbors. To fill in the
+within  of the initial depth estimate fˆ0 (x), it is very likely   gaps, we find all inliers within a w × w window centered at
+that the two viewpoints have both correctly reconstructed           the pixel we wish to estimate. If there are enough inliers to
+the same surface. In the example of Fig. 2(c), the esti-            make a good estimate, we assign the median of the inliers
+mates D3 (F̂ (x)) and D5 (F̂ (x)) are close to the initial es-      as the depth of the pixel. If there are only a few neighbor-
+timate. These close observations are averaged into a single         ing inliers, the depth map is left blank. Essentially, this is
+estimate. Each observation is weighted by its confidence            a median filter that ignores the outliers. In the final step, a
+according to the following equations:                               median filter with a smaller window ws is used to smooth
+                                                                    out the inliers.
+                     fˆk (x)Ĉk (x) + Diref (x)Ci (x)
+         fˆk+1 (x) =                                         (2)    4.3. Surface Reconstruction
+                              Ĉk (x) + Ci (x)
+                                                                        We have presented two algorithms for generating fused
+                 Ĉk+1 (x) = Ĉk (x) + Ci (x)                (3)    depth maps. Consecutive fused depth maps partially over-
+   The result is a combined depth estimate fˆk (x) at each          lap one another. It is likely that these overlapping surfaces
+pixel of the reference image and a support level Ĉk (x) mea-       will not be aligned perfectly. The desired output of our sys-
+suring how well the depth maps agree with the depth esti-           tem is a smooth and consistent model of the scene. To this
+mate. The next step is to find how many of the depth maps           end, consistency between consecutive fused depth maps is
+contradict fˆk (x) in order to verify its correctness.              enforced in the final model. Each fused depth map is com-
+                                                                    pared with the previous fused depth map as it is being gen-
+                                                                    erated. If a new estimate violates the free space of the previ-
+Conflict Detection The total amount of support for each
+                                                                    ous fused depth maps, the new estimate is rejected. If a new
+depth estimate must be above the threshold Cthres or else
+                                                                    depth estimate is within  of the previous fused depth map,
+it is discarded as an outlier and is not processed any fur-
+                                                                    the two estimates are merged into one vertex which is gen-
+ther. The remaining points are checked using visibility con-
+                                                                    erated only once in the output. Thus redundancy is removed
+straints. Figure 2(c) shows that D1 (F̂ (x)) and D3 (F̂ (x))
+                                                                    along with any gaps in the model where two representations
+occlude F̂ (x). However, D3 (F̂ (x)) is close enough (within
+                                                                    of the same surface are not connected. More than one previ-
+) to F̂ (x) to be within its support region and so this occlu-
+                                                                    ous fused depth map should be kept in memory to properly
+sion does not count against the current estimate. D1 (F̂ (x))
+                                                                    handle surfaces that disappear and become visible again. In
+is occluding F̂ (x) outside the support region and thus con-
+                                                                    most cases, two previous fused depth maps are sufficient.
+tradicts the current estimate. When such an occlusion takes
+                                                                        After duplicate surface representations have been
+place the support of the current estimate is decreased by:
+                                                                    merged, a mesh is constructed taking into account the cor-
+                                                                    responding confidence map to suppress any remaining out-
+               Ĉk+1 (x) = Ĉk (x) − Ciref (x)               (4)
+                                                                    liers. By using the image plane as a reference both for ge-
+   When a free-space violation occurs outside the support           ometry and for appearance, we can construct a triangular
+region, as occurs with the depth D4 (F̂ (x)) in Fig. 2(c), the      mesh very quickly. We employ a multi-resolution quad-
+confidence of the conflicting depth estimate is subtracted          tree algorithm in order to minimize the number of triangles
+from the support according to:                                      while maintaining geometric accuracy as in [14]. We use
+a top-down approach rather than a bottom-up approach to            horizontally and the other was tilted up 30o . The videos
+lower the number of triangles that need to be processed.           from each camera were processed separately. The Firestone
+Starting from a coarse resolution, we form triangles and test      building was surveyed to an accuracy of 6 mm and the re-
+if they correspond to nonplanar parts of the depth map, if         constructed model (Fig. 4(a)) was directly compared with
+they bridge depth discontinuities or if points with low con-       the surveyed model (Fig. 4(b) inset). There are several ob-
+fidence (below Cthres ) are included within them. If any of        jects such as parked cars that are visible in the video, but
+these events occur, the quad, which is formed out of two ad-       were not surveyed. The ground which slopes away from
+jacent triangles, is subdivided. The process is repeated on        the building also was not surveyed. Objects included in
+the subdivided quads up to the finest resolution.                  the video that were not surveyed were manually removed
+    We use the following simple planarity test proposed in         from the evaluation. To measure the accuracy of each re-
+[15] for each vertex of each triangle:                             constructed vertex, the distance from the vertex to the near-
+                                                                   est triangle of the ground truth model is calculated. The
+                  z−1 − z0   z0 − z1                               error measurements for each part of a reconstructed model
+                           −         < t.                   (6)
+                    z−1         z1                                 are displayed in Fig. 4(b). We also evaluated the complete-
+                                                                   ness of the reconstruction which measures how much of
+Where z0 is the z-coordinate, in the camera coordinate sys-        the building was reconstructed and is defined similar to the
+tem, of the vertex being tested and t is a threshold. z−1          completeness measurement in [19]. Sample points are cho-
+and z1 are the z-coordinates of the two neighboring vertices       sen at random on the surface of the ground truth model with
+of the current vertex on an image row. (The distance be-           a density of 50 sample points per square meter of surface
+tween the corresponding pixels of two neighboring vertices         area. The distance from each sample point to the nearest re-
+is equal to the size of the quad’s edges.) The same test is        constructed point is measured. A visualization of these dis-
+repeated along an image column. If either the vertical or          tances is shown for one of the reconstructions in Fig. 4(c).
+the horizontal tests fails for any of the vertices of the trian-
+                                                                       We performed a quantitative evaluation between raw
+gle, the triangle is not part of a planar surface and so the
+                                                                   stereo depth maps and the results of the fusion algorithms.
+quad is subdivided. For these tests, we have found that 3D
+                                                                   For the results labeled as stereo-reference, we evaluate the
+coordinates are more effective than disparity values. Since
+                                                                   raw depth maps from each of the fusion reference views.
+we do not require a manifold mesh and are interested in fast
+                                                                   For the results labeled stereo-exhaustive, we evaluated the
+processing speeds, we do not maintain a restricted quad-tree
+                                                                   depth maps from all images as the representation of the
+[14].
+                                                                   scene. We also implemented the real-time algorithm of
+                                                                   Rusinkiewicz et al. [17] using a grid of 5cm voxels. This
+5. Results                                                         algorithm produces a point cloud from which surface re-
+   Our methods were tested on videos of urban environ-             construction is not trivial. Table 1 contains the median and
+ments and on the Multi-View Stereo Evaluation dataset              mean error values for each method as well as the complete-
+(http://vision.middlebury.edu/mview/) [19]. On the ur-             ness achieved on the Firestone building. Volumetric meth-
+ban datasets, the plane-sweeping stereo algorithm used 48          ods that handle outliers such as [23] could be applied in our
+planes and matched 7 images to obtain each stereo depth            settings, but they would not be real-time.
+map. Every 17 frames, 17 stereo depth maps were used                   The results show that the raw stereo depth maps
+to produce a fused depth map. Using these settings and             are highly inaccurate and contain many large outliers.
+stability-based fusion a processing rate of 23 frames per          Confidence-based and stability-based fusion improve the
+second can be achieved on a high-end personal computer             accuracy of the reconstruction, but lose some completeness,
+with an NVidia GeForce 8800 GPU. If confidence-based               since some of the points removed as outliers might have
+fusion is used instead, processing speed reaches 25 frames         been near the surface. Depth estimates created in the hole-
+per second. On the Multi-View dataset, the plane-sweeping          filling stage of confidence-based fusion are not guaranteed
+step used 94 planes and matched five images. Every five            to satisfy visibility constraints, but are typically reasonable
+frames, 15 stereo depth maps were fused together. On               resulting in increased completeness at the expense of some
+both datasets, the following parameters were used:  =             accuracy as shown in the results. The real-time technique
+0.05, σ = 120, w = 8 pixels, ws = 4 pixels, and Cthres =           of Rusinkiewicz et al. [17] does not improve accuracy and
+5. The image sizes are 512 × 384 for the urban videos and          does not reduce the number of points in the model effec-
+640 × 480 for the Multi-View dataset.                              tively without a significant loss of resolution.
+   To evaluate the ability of our method to reconstruct urban          Our methods were also used on several videos of urban
+environments, a 3,000 frame video of the exterior of a Fire-       environments using the same camera configuration and set-
+stone store was captured with two cameras to obtain a more         tings. The reconstructed models are shown in Fig. 6 and 7.
+complete reconstruction. One of the cameras was pointed            A very long 170,000 frame video was used to reconstruct a
+             Fusion Method            Stereo-exhaustive       Stereo-reference      Rusinkiewicz        Confidence       Stability
+            Median Error(cm)                 4.87                   4.19                12.9              2.60             2.19
+             Mean Error(cm)                 40.61                  39.20                25.6              6.60             4.79
+              Completeness                   94%                    83%                 84%               73%              66%
+            Number of Vertices            9,074,377               544,558            4,106,755           539,807         214,940
+              Table 1. Accuracy and Completeness for different fusion methods using the default parameters (both cameras).
+
+
+
+
+(a) Reconstructed Model using Confidence-based (b) Accuracy evaluation. White indicates unsur-   (c) Completeness of the Firestone building. Red
+fusion                                         veyed areas. (Inset) Surveyed Model               areas mostly correspond to unobserved or untex-
+                                                                                                 tured areas.
+Figure 4. Firestone Building Accuracy and Completeness Evaluation. (b,c) Blue, green and red indicate errors of 0cm, 30cm and 60+cm,
+respectively. Please view on a color display.
+
+
+large model shown in Fig. 1. We achieve processing rates
+of 25 frames per second for typical settings. Even though
+our approach is viewpoint-based, we are still able to han-
+dle multiple depth layers (see Fig. 6, 7, and supplemental
+video) due to the redundancy in the depth maps.
+   The two algorithms were also evaluated on the Multi-
+View Stereo Evaluation benchmark dataset [19]. This eval-
+uation provides metrics on the accuracy and completeness
+of the reconstruction. The accuracy metric is the distance
+d such that 90% of the reconstructed surface is within d
+from the ground truth surface. Completeness is the percent-
+age of ground truth within 1.25 mm of the model. The re-                  Figure 5. Results on the Multi-View Stereo Evaluation data
+sults of the evaluation on the ring datasets for both objects,            set. First row shows Stability-based fusion, second row shows
+as well as the total runtime using our GPU implementation                 Confidence-based fusion. Computing times ranged from 19 to 28
+                                                                          seconds.
+are given in Table 2. The fusion process only for stability-
+based fusion on the “TempleRing” dataset took 153 sec-
+onds implemented on the CPU and 16 seconds when run
+on the GPU. The fusion process for the confidence-based
+algorithm on the same dataset took 40 seconds on the CPU
+and 14 on the GPU. The remaining time was spent reading
+in the data, constructing silhouettes, and computing depth
+maps. Images of the reconstructed models are shown in
+Fig. 5.
+
+                    Accuracy        Completeness        Time
+  T EMPLE
+   Stability        0.76 mm            85.2%            22 sec            Figure 6. Reconstructed buildings using stability-based fusion
+   Confidence       0.83 mm            88.0%            19 sec
+  D INO
+   Stability        0.73 mm            73.1%            28 sec            6. Conclusion
+   Confidence       0.84 mm            83.1%            21 sec               We have presented a fast, visibility-based approach for
+Table 2. Quantitative evaluation for the ring datasets of the Multi-
+                                                                          reconstructing 3D shape from video in a two-stage process.
+view Stereo Evaluation
+                                                                          Two alternative algorithms were presented for fusing the
+                                                                          depth maps. In both cases, occlusions and free-space viola-
+                                    Figure 7. Reconstructed buildings using confidence-based fusion
+
+
+tions are used to guide the search for a plausible depth for           [8] A. Hilton, A. Stoddart, J. Illingworth, and T. Windeatt. Re-
+each pixel. Stability-based fusion is more robust and pro-                 liable surface reconstruction from multiple range images. In
+duces slightly more accurate results. Since its complexity                 CVPR, pages 117–126, 1996.
+scales quadratically with the number of input depth maps, it           [9] S. Kang, R. Szeliski, and J. Chai. Handling occlusions in
+becomes significantly slower than confidence-based fusion                  dense multi-view stereo. In CVPR, pages 103–110, 2001.
+                                                                      [10] R. Koch, M. Pollefeys, and L. Van Gool. Multi viewpoint
+as the number of depth maps increases. Confidence-based
+                                                                           stereo from uncalibrated video sequences. In ECCV, vol-
+fusion is a greedy algorithm since it makes an initial com-
+                                                                           ume I, pages 55–71, 1998.
+mitment to the most likely candidate. Its linear complexity           [11] R. Koch, M. Pollefeys, and L. Van Gool. Robust calibration
+allows for real-time performance on larger input sets.                     and 3d geometric modeling from large collections of uncali-
+   Our methods are suitable for large scale reconstructions                brated images. In DAGM, pages 413–420, 1999.
+because they can process large amounts of data in pipeline            [12] L. Morency, A. Rahimi, and T. Darrell. Fast 3d model acqui-
+mode at rates near real time. The accuracy of the recon-                   sition from stereo images. In 3DPVT, pages 172–176, 2002.
+struction was evaluated using a surveyed model of a real              [13] P. Narayanan, P. Rander, and T. Kanade. Constructing virtual
+building and was found to be accurate within a few centime-                worlds using dense stereo. In ICCV, pages 3–10, 1998.
+ters. We also participated in the Multi-View Stereo Evalu-            [14] R. Pajarola. Overview of quadtree-based terrain triangulation
+ation obtaining satisfactory results with at least an order of             and visualization. Technical report, 2002.
+magnitude faster processing than the state of the art. Our fu-        [15] R. Pajarola, Y. Meng, and M. Sainz. Fast depth-image mesh-
+                                                                           ing and warping. Technical report, 2002.
+ture work will focus on improving the visual quality of the
+                                                                      [16] A. Román, G. Garg, and M. Levoy. Interactive design of
+models by detecting features such as planar surfaces and
+                                                                           multi-perspective images for visualizing urban landscapes.
+straight lines and ensuring they are represented as such.                  In IEEE Visualization, pages 537–544, 2004.
+                                                                      [17] S. Rusinkiewicz, O. Hall-Holt, and M. Levoy. Real-time 3d
+Acknowledgments: Supported by the DTO under the VACE                       model acquisition. SIGGRAPH, 21(3):438–446, 2002.
+program and by DARPA under the UrbanScape project. Approved           [18] T. Sato, M. Kanbara, N. Yokoya, and H. Takemura. Dense
+for Public Release, Distribution Unlimited.                                3-d reconstruction of an outdoor scene by hundreds-baseline
+Project Website: http://cs.unc.edu/Research/urbanscape/                    stereo using a hand-held video camera. IJCV, 47(1-3):119–
+                                                                           129, 2002.
+References                                                            [19] S. M. Seitz, B. Curless, J. Diebel, D. Scharstein, and
+                                                                           R. Szeliski. A comparison and evaluation of multi-view
+ [1] R. Collins. A space-sweep approach to true multi-image                stereo reconstruction algorithms. In CVPR, pages 519–528,
+     matching. In CVPR, pages 358–363, 1996.                               2006.
+ [2] N. Cornelis, K. Cornelis, and L. Van Gool. Fast compact city     [20] M. Soucy and D. Laurendeau. A general surface approach to
+     modeling for navigation pre-visualization. In CVPR, 2006.             the integration of a set of range views. PAMI, 17(4):344–358,
+ [3] B. Curless and M. Levoy. A volumetric method for building             1995.
+     complex models from range images. SIGGRAPH, 30:303–              [21] S. Teller, M. Antone, Z. Bodnar, M. Bosse, S. Coorg,
+     312, 1996.                                                            M. Jethwa, and N. Master. Calibrated, registered images of
+ [4] P. Fua. From multiple stereo views to multiple 3-d surfaces.          an extended urban area. IJCV, 53(1):93–107, June 2003.
+     IJCV, 24(1):19–35, 1997.                                         [22] G. Turk and M. Levoy. Zippered polygon meshes from range
+ [5] D. Gallup, J.-M. Frahm, P. Mordohai, Q. Yang, and M. Polle-           images. In SIGGRAPH, pages 311–318, 1994.
+     feys. Real-time plane-sweeping stereo with multiple sweep-       [23] M. Wheeler, Y. Sato, and K. Ikeuchi. Consensus surfaces for
+     ing directions. In CVPR, 2007.                                        modeling 3d objects from multiple range images. In ICCV,
+ [6] M. Goesele, B. Curless, and S. M. Seitz. Multi-view stereo            pages 917–924, 1998.
+     revisited. In CVPR, pages 2402–2409, 2006.                       [24] R. Yang and M. Pollefeys. A versatile stereo implementa-
+ [7] C. Hernández, G. Vogiatzis, and R. Cipolla. Probabilistic            tion on commodity graphics hardware. Journal of Real-Time
+     visibility for multi-view stereo. In CVPR, 2007.                      Imaging, 11(1):7–18, 2005.
+

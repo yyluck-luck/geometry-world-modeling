@@ -1,0 +1,218 @@
+{
+  "recorded_utc": "2026-09-05T22:42:40.461364+00:00",
+  "recorded_beijing": "2026-09-06T06:42:40.461364+08:00",
+  "search_started_utc": "2026-09-05T22:37:30+00:00",
+  "scope": "S12 coverage-complementary fixed-budget frame selection; separate from closed fixed-output caching candidate B",
+  "verdict": "PLAIN_GREEDY_COVERAGE_IS_DIRECT_PRIOR_ART_AND_REQUIRED_BASELINE_NOT_ESTABLISHED_NOVELTY",
+  "core_papers": [
+    {
+      "id": "VMem",
+      "title": "VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory",
+      "authors": [
+        "Runjia Li",
+        "Philip Torr",
+        "Andrea Vedaldi",
+        "Tomas Jakab"
+      ],
+      "year": 2025,
+      "status": "ICCV 2025; methods read in author arXiv v3",
+      "version": "2506.18903v3",
+      "version_date": "2025-08-14",
+      "url": "https://arxiv.org/html/2506.18903v3",
+      "file": "vmem_arxiv_v3.html",
+      "locators": [
+        "§3.1 Reading from the memory / Fig. 4",
+        "§4.1 Implementation details",
+        "§4.4 / Table 4"
+      ],
+      "object": "historical RGB frames",
+      "evidence": "rendered surfel source-index frequency; pose NMS",
+      "budget": "K=4 efficient model; K=17 also studied",
+      "relationship": "existing actual consumer; already accounts for target visibility and pose diversity, without residual-union greedy in the read procedure",
+      "source_path": "work/S12_literature_sources/vmem_arxiv_v3.html",
+      "source_sha256": "50808186a54348be44ac701a645be329e69bb3e9022714c6c7c5f1e234271f13",
+      "source_bytes": 264191
+    },
+    {
+      "id": "COVRAG",
+      "title": "Retrieve What's Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation",
+      "authors": [
+        "Minseok Joo",
+        "Dogyun Park",
+        "Taehoon Lee",
+        "Kyujin Lee",
+        "Hyunwoo J. Kim"
+      ],
+      "year": 2026,
+      "status": "arXiv preprint; venue acceptance not verified",
+      "version": "2606.02479v1",
+      "version_date": "2026-06-01",
+      "url": "https://arxiv.org/html/2606.02479v1",
+      "file": "covrag_arxiv_v1.html",
+      "locators": [
+        "§4.1 Eq.(2–3)",
+        "§4.2 Eq.(4–6), Algorithm 1",
+        "§5 implementation; §5.3; Appendix C"
+      ],
+      "object": "historical RGB frames",
+      "evidence": "depth-warped binary target-pixel coverage; residual uncovered coverage greedy",
+      "budget": "n=2 retrieved, plus temporal context δ=5 or 2",
+      "relationship": "direct counterexample to novelty of independent scores → complementary coverage selection",
+      "source_path": "work/S12_literature_sources/covrag_arxiv_v1.html",
+      "source_sha256": "a95bc73710488c700924cc80ede4ae969054249c77127786a04537dcdc90830d",
+      "source_bytes": 262436
+    },
+    {
+      "id": "I3DM",
+      "title": "I3DM: Implicit 3D-aware Memory Retrieval and Injection for Consistent Video Scene Generation",
+      "authors": [
+        "Jia Li",
+        "Han Yan",
+        "Yihang Chen",
+        "Siqi Li",
+        "Xibin Song",
+        "Yifu Wang",
+        "Jianfei Cai",
+        "Tien-Tsin Wong",
+        "Pan Ji"
+      ],
+      "year": 2026,
+      "status": "arXiv preprint; venue acceptance not verified",
+      "version": "2603.23413v2",
+      "version_date": "2026-07-31",
+      "url": "https://arxiv.org/html/2603.23413v2",
+      "file": "i3dm_review/paper_v2.html",
+      "locators": [
+        "§3.2 Eq.(5–7)",
+        "§4.1 Implementation Details",
+        "Supplementary §2 Maximum Coverage Selection Algorithm / Algorithm 1"
+      ],
+      "object": "historical whole RGB frames; score granularity is target patches",
+      "evidence": "learned FF-NVS uncertainty → confidence; patch-wise maximum marginal gains",
+      "budget": "K=3 additional + last frame = 4; 20 target views per 77-frame clip",
+      "relationship": "very direct fixed-four and jointly complementary retrieval precedent; confidence is learned, not measured depth visibility",
+      "source_path": "work/S12_literature_sources/i3dm_review/paper_v2.html",
+      "source_sha256": "8b2ae75bb57ae988baa35e362d4b98d5250114d768d8ea8ca486d0fc094f4a39",
+      "source_bytes": 303016
+    },
+    {
+      "id": "AnchorWeave",
+      "title": "AnchorWeave: World-Consistent Video Generation with Retrieved Local Spatial Memories",
+      "authors": [
+        "Zun Wang",
+        "Han Lin",
+        "Jaehong Yoon",
+        "Jaemin Cho",
+        "Yue Zhang",
+        "Mohit Bansal"
+      ],
+      "year": 2026,
+      "status": "arXiv preprint; venue acceptance not verified",
+      "version": "2602.14941v1",
+      "version_date": "2026-02-16",
+      "url": "https://arxiv.org/html/2602.14941v1",
+      "file": "anchorweave_arxiv_v1.html",
+      "locators": [
+        "§3.2–3.4 / Fig. 2",
+        "§4.1 Implementation details",
+        "Appendix B / Algorithm 1"
+      ],
+      "object": "per-frame local point clouds rendered into anchor clips",
+      "evidence": "FoV filter, then greedy additional visibility coverage over target trajectory chunks",
+      "budget": "at most K=4 per D=8-frame training chunk; invisible padding if fewer",
+      "relationship": "direct local-geometry complementarity precedent; consumer receives rendered anchor clips and trained fusion, not merely four raw photos",
+      "source_path": "work/S12_literature_sources/anchorweave_arxiv_v1.html",
+      "source_sha256": "144eb6933817ca613afc93513ca0d9f0c55ae3bb4566a24beba38aa67d6f6653",
+      "source_bytes": 284699
+    },
+    {
+      "id": "BoostMVSNeRFs",
+      "title": "BoostMVSNeRFs: Boosting MVS-based NeRFs to Generalizable View Synthesis in Large-scale Scenes",
+      "authors": [
+        "Chih-Hai Su",
+        "Chih-Yao Hu",
+        "Shr-Ruei Tsai",
+        "Jie-Ying Lee",
+        "Chin-Yang Lin",
+        "Yu-Lun Liu"
+      ],
+      "year": 2024,
+      "status": "SIGGRAPH 2024 Conference Papers, verified author project + arXiv metadata",
+      "version": "2407.15848v1",
+      "version_date": "2024-07-22",
+      "url": "https://arxiv.org/html/2407.15848v1",
+      "file": "boostmvsnerfs_arxiv_v1.html",
+      "locators": [
+        "§3.2 Eq.(3–4)",
+        "§3.4 Algorithm 1",
+        "§4.3 Table 3",
+        "Appendix C"
+      ],
+      "object": "support cost volumes, each constructed from three input views",
+      "evidence": "soft 2D visibility masks; residual coverage greedy and support-volume fusion",
+      "budget": "K cost volumes; not K distinct RGB frames",
+      "relationship": "earlier NVS maximum-coverage precedent; explicitly compares nearest-pose, independent-visibility and greedy coverage",
+      "source_path": "work/S12_literature_sources/boostmvsnerfs_arxiv_v1.html",
+      "source_sha256": "f3cd0be379af904f4979b5cb067d9119ea1aa310004d888deba6f5515587bc45",
+      "source_bytes": 550894
+    }
+  ],
+  "limits": [
+    "Bounded scout, not a systematic review or proof of novelty absence/presence.",
+    "Only methods/definitions and specified experimental design passages were checked; no model, renderer, selector, timing or new data experiment ran.",
+    "No paper performance number is adopted as a local expected gain; different backbones, context budgets, geometry and datasets remain separate.",
+    "COVRAG Eq.(2) is projected-pixel occupancy. The inspected definition does not specify target-depth agreement or a complete cross-source nearest-surface visibility check; do not equate it to TUM measured co-visibility.",
+    "AnchorWeave Appendix B prose says first rendered frame, while Algorithm 1 starts P_latest. Initialization identity is unresolved without code audit; no exact policy implementation claim.",
+    "BoostMVSNeRFs §3.4 has overly broad polynomial-optimal wording. This review does not adopt it as an exact-optimality or approximation theorem; Algorithm 1 also uses ambiguous P subscripts.",
+    "I3DM confidence is negative predicted uncertainty, not a calibrated binary visibility probability. Its global confidence canvas starts at zero; last frame is the anchor/input and mandatory context, not a claimed initial coverage canvas.",
+    "Aalto Ji thesis was only accessible as institutional metadata/abstract: no public full-text link found in the opened item; Nam et al. 2022 was only verified bibliographically. Neither is core method evidence.",
+    "S7/S8 are already-seen local conditions. New coverage evaluation on them would be exploratory diagnosis, not unseen-scene method confirmation."
+  ],
+  "query_log": "work/S12_literature_sources/query_log.json",
+  "primary_download_manifests": [
+    "work/S12_literature_sources/download_manifest.json",
+    "work/S12_literature_sources/download_manifest_second.json",
+    "work/S12_literature_sources/i3dm_review/download_receipt.json",
+    "work/S12_literature_sources/i3dm_review/download_v2_receipt.json"
+  ],
+  "local_context_read": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "a1d0d00611ebebc9ad92be59bb1d7097d7277a5c7c796e0079142ade321517f4"
+    },
+    {
+      "path": "RESEARCH_MEMORY.md",
+      "sha256": "39e5415349a53125f6ca27dd554fff1ea9b58c1f40fd3a5a4f4e7c0c6068e0f8"
+    },
+    {
+      "path": "RESEARCH_LOG.md",
+      "sha256": "8416e83cb39964fe6877f8f52eb4b324c91c4f11fe050226d4d017cfdca57cfe"
+    },
+    {
+      "path": "docs/S9_B_NOVELTY_EVIDENCE.md",
+      "sha256": "6f4369343389286849a7b0c312893d69c86be94985e54fced45e5d22093d937a"
+    },
+    {
+      "path": "docs/LITERATURE_SYNTHESIS_V2.md",
+      "sha256": "aa26d7354c46648de880c05857e2e6b8aa955743f825e134a381202269894e38"
+    },
+    {
+      "path": "docs/S7_RESULTS.md",
+      "sha256": "621c1085d77264418beb49453fe83ef955c2bab14d48e40982bfcecf5b830d61"
+    },
+    {
+      "path": "docs/S8_RESULTS.md",
+      "sha256": "13033a42cc62abcfb3f7085c99b57dc18416f31af626573e9e5a0603b2aa897f"
+    }
+  ],
+  "claim_status": {
+    "fixed_four_novel": false,
+    "joint_residual_coverage_novel": false,
+    "new_generator_improvement_established": false,
+    "global_novelty_claim_supported": false,
+    "ordinary_greedy_is_appropriate_baseline": true,
+    "candidate_B_reopened": false
+  },
+  "no_experiment": true,
+  "no_ledger_edit": true
+}

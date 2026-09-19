@@ -1,0 +1,130 @@
+{
+  "schema": "s72-independent-source-review-v1",
+  "status": "PASS_S72_V2_SOURCE_REVIEW",
+  "reviewer_role": "/root/c2_v9_source_primary",
+  "author_role": "/root",
+  "finalized_utc": "2026-09-09T06:35:38.473312+00:00",
+  "source_sha256": "98c980295a65c2bf7ba9bb786ba1a724d0be2b7310526169bb062be35b402f20",
+  "contract_sha256": "14e72eafa5131a3734fa9386f7ae073bb9ccf72b9be9223e9655c30099910940",
+  "blockers": [],
+  "check_results": {
+    "full_exact_source_and_contract_read": true,
+    "stdlib_compile_only": true,
+    "camera_descriptor_matches_S69_metadata": true,
+    "history19_RGB_and_K_cache_pins_match_S69_accepted_metadata": true,
+    "four_reference_target_pins_match_S71": true,
+    "actual_dataset_identity_freiburg2_desk": true,
+    "original_S71_SIFT_and_version_settings": true,
+    "all_mutual_matches_retained_no_geometric_fit_filter": true,
+    "optical_source_to_target_pose_and_F_direction_correct": true,
+    "no_extra_D_or_internal_scale": true,
+    "point_line_distances_and_symmetric_mean_pixels_correct": true,
+    "unit_Frobenius_normalization_and_line_denominator_guards": true,
+    "baseline_le_1e_minus9_insufficient_not_error_zero": true,
+    "no_eight_match_requirement": true,
+    "all_four_targets_and_invalid_counts_retained": true,
+    "create_only_output_and_caught_exception_retention": true,
+    "preprocessing_spatial_dimensions_and_crop_match_S68_S70": true,
+    "full_v2_diff_reviewed_against_fully_read_v1": true,
+    "exact_original_four_helper_AST_extract_and_environment_wiring": true,
+    "v2_and_four_helpers_stdlib_compile": true,
+    "runtime_anchor_tensor_hash_assertion_matches_actual_S68_history19_metadata": true,
+    "exact_S70_uint8_conversion_source_reused": true,
+    "geometry_and_matching_unchanged_from_v1": true,
+    "execution_01_absent_at_final_source_check": true
+  },
+  "nonblocking_limitations": [
+    {
+      "issue": "Payload values not independently read during source audit",
+      "detail": "Whole NPZ byte SHA is checked by worker and fields decoded selectively: ids/c2ws plus K_pixels_576. Existing bound camera validation is reused. Actual baseline, K values, matches, line validity and residuals await real execution and independent arithmetic."
+    },
+    {
+      "issue": "Terminal behavior",
+      "detail": "Caught failures preserve earlier pairs; an external hard stop can leave only partial artifacts. COMPLETE_REAL_CONTROL_DIAGNOSTIC means the loop finished, including explicit insufficient outcomes, not camera or scientific PASS."
+    }
+  ],
+  "scope": "Complete original v1 source and contract read; complete v2 changes read; original four helper definitions/source and original S70/S68 call/mapping sites checked. Only stdlib compile and metadata identity comparisons executed. No measure import, Torch/model instantiation, images, arrays, GT bodies or weights read during this source review.",
+  "upcoming_runtime": "Root owns the already requested one 60-second external execution of measure_v2.py with CONTRACT_v2 SHA. Successful execution will still be a descriptive real-control diagnostic, pending actual numeric review.",
+  "interpretation_limits": [
+    "Approximate ROS K and no undistortion remain; no calibrated lens claim.",
+    "Real fr2_desk identity is bound by actual metadata; prior fr1 discussion is inapplicable.",
+    "Fixed F tests a necessary relation only; low error does not validate pose/depth, correspondence truth, generated-image geometry or memory causality.",
+    "All fractions <=2/5/10 px are descriptive, with valid-line denominators and invalid counts explicit."
+  ],
+  "reads": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/measure.py",
+      "bytes": 7620,
+      "sha256": "41d169c2db58353f441ebd2318394001ae134172f2b2fa52de1203dd740c143e"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/CONTRACT.json",
+      "bytes": 5195,
+      "sha256": "4bcadd5c79e85d2e35c7b1b25e9a1e3fc4ef412b0c7c78741c834292595ca7c7"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/INPUTS.json",
+      "bytes": 20119,
+      "sha256": "9b66b2f7b4449e11f400c342068d069e95b96caae84e659dc497123cb5e5238f"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/execution_01/optical_cameras.json",
+      "bytes": 856,
+      "sha256": "f41c5423c2ece54146420bb355e0ea86c778eeba834b5385023293308a8a75a0"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/PROTOCOL.md",
+      "bytes": 5790,
+      "sha256": "29e424e4f56429ebf2de3121f557adb8d27e4ec5901fb482b334c6286b01902e"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S68_tum_vmem_cache_bridge/encode_history.py",
+      "bytes": 15610,
+      "sha256": "52c51abe34ff7911c89951788cf5253e6c14ddb87a9a34b0e28223e61c21d3a9"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py",
+      "bytes": 45708,
+      "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S71_s70_framing_diagnosis/CONTRACT.json",
+      "bytes": 5551,
+      "sha256": "0a38f1bf3e3e56622f4937e6684b2bad3cc3138fcae5ee8896e5ba31ba366707"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/SCORING_CONTRACT.json",
+      "bytes": 5543,
+      "sha256": "a776fd9cc1af9014de2e9226364f8990e9a2461c45b23aa6e03e5354370df8ac"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/SCORING_CONTRACT.md",
+      "bytes": 3066,
+      "sha256": "b485c70ac06f36b1dee6c78b0b7c3421991f838bad883b498ca293dbf14630fb"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/score_fixed_contexts.py",
+      "bytes": 9268,
+      "sha256": "4c698efddeca50a2c35812632516ca458ab0f1a8f9dec8f4aa4cdde0f1584ab5"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/measure_v2.py",
+      "bytes": 9080,
+      "sha256": "98c980295a65c2bf7ba9bb786ba1a724d0be2b7310526169bb062be35b402f20"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/CONTRACT_v2.json",
+      "bytes": 5969,
+      "sha256": "14e72eafa5131a3734fa9386f7ae073bb9ccf72b9be9223e9655c30099910940"
+    }
+  ],
+  "new_method_validated": false,
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/measure_v2.py",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/CONTRACT_v2.json",
+  "supersedes_for_execution": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/source_review_01/SOURCE_REVIEW.json",
+    "sha256": "3501bf883230d01d0748b971306309675f0f145ee9996659ce348ce5d78df162",
+    "note": "Prior v1 source/contract/review unchanged; v1 was not executed. Use this v2 review for the actual run."
+  },
+  "resolved_v1_issue": "V2 replaces OpenCV uint8 anchor resampling with pinned original load_img_and_K/transform_img_and_K in CPU8 FP32. It checks actual resulting tensor bytes against accepted S68 history19 SHA before applying the exact S70 reference uint8 mapping. This establishes the intended source path; actual tensor equality remains a runtime observation. The anchor PNG is exported and hashed for later reproducibility."
+}

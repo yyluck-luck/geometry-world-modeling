@@ -1,0 +1,32 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-root-correction-history-v1",
+  "status": "BLOCKER_CONFIRMED_OLD_SOURCE_SET_WITHDRAWN_AND_CORRECTED",
+  "recorded_utc": "2026-09-08T03:56:36Z",
+  "checker_role": "/root",
+  "source_author_role": "/root/c1_blind_score_builder",
+  "withdrawn_camera_guard_sha256": "cd35f7af93a22a191be668dae9798f3c689fd66390231b2ff0d7218fa09eaec0",
+  "blocking_finding": "The withdrawn runner pinned ast.dump hashes produced by CPython 3.13.0. CPython 3.12.14 serializes the same whole-file-SHA-bound B0 functions differently, so the frozen local execution environment would fail preflight.",
+  "failed_cross_version_evidence": {
+    "python_3_13_0": {
+      "max_abs_ast_sha256": "2fb188526b33309a6b4140de94e9213a8b0bfe4160667ebf955d796223578636",
+      "verify_requested_camera_conditions_ast_sha256": "504c1abb04f2c141fc5313c4fadb5c917b1cd4675be8e09ec257baa527cc86a8"
+    },
+    "python_3_12_14": {
+      "max_abs_ast_sha256": "5040329fb00157c88213beb51f0ea3959794f264214f8dc3f58b80f0f77ba8d8",
+      "verify_requested_camera_conditions_ast_sha256": "842396d6cd5ab1ca5cb2de988506004a32e74504581bb8b67f1941441590281e"
+    }
+  },
+  "correction_design": {
+    "whole_b0_file_sha256": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "max_abs_exact_source_segment_sha256": "5b19516bcaa6d650b7259d4e806266ab40762a358989190f2d3327fbaceb3fd4",
+    "verify_requested_camera_conditions_exact_source_segment_sha256": "7dfa29e4bdaca569cf485b8c575f1d48f5dbcabb61011f6ab1998fea79b9a8e3",
+    "source_segment_result_equal_across_python_3_12_14_and_3_13_0": true
+  },
+  "executed_formal_guard": false,
+  "real_c1_tensor_bodies_read": 0,
+  "real_scientific_arrays_mapped": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "formal_paths_created": 0,
+  "evidence_boundary": "Correction history only. It is not a source PASS, binding, formal camera result, pixel score, visual result, method gain, or novelty claim."
+}

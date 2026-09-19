@@ -1,0 +1,326 @@
+{
+  "schema": "s38-paper-learning-agent-b-v1",
+  "recorded_utc": "2026-09-07T03:23:14.949678+00:00",
+  "research_scope": "Four selected formal 2024/2025 conference papers within requested 2023–2026 range; method-learning exercise, not an exhaustive survey or current-SOTA certification.",
+  "papers": [
+    {
+      "id": "vggsfm",
+      "title": "VGGSfM: Visual Geometry Grounded Deep Structure From Motion",
+      "authors": [
+        "Jianyuan Wang",
+        "Nikita Karaev",
+        "Christian Rupprecht",
+        "David Novotny"
+      ],
+      "venue": "CVPR",
+      "year": 2024,
+      "formal_proceedings_verified": true,
+      "venue_evidence_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/vggsfm_venue.html",
+      "venue_evidence_sha256": "f40068ddd0e77b941cc683f13d1a4b1bf473278bcff8d9ae4e575a44cc0de726",
+      "primary_pdf": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/vggsfm.pdf",
+      "pdf_sha256": "4485b03ad66208e218ab2745a111a82b07e933ce49ea8b79ec270dad0f30f7c9",
+      "primary_text": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/vggsfm.txt",
+      "text_sha256": "a563add991b86932ba1f52430414a21a046969e3987b38dfe3b9ad8469395a94",
+      "read_scope": [
+        "Introduction pp.21687–21688",
+        "Sections 3.1–3.5 pp.21688–21691",
+        "Section4.2/4.3, Tables3–5 p.21693; joint-training comparison paragraph"
+      ],
+      "not_read": "Not a full supplemental/code/reproduction audit; unrelated results and full references not systematically reviewed.",
+      "four_axes": {
+        "object": "tracks/cameras/3D points",
+        "mechanism": "joint differentiable tracking, initialization, triangulation, BA",
+        "input_granularity": "unordered multiview image set",
+        "setting": "static SfM; not strict causal stream"
+      },
+      "transfer_failure_notes": [
+        "Swapped matching control retains own camera initialization.",
+        "Additional input/compute and training are not free when transferred."
+      ],
+      "venue_url": "https://openaccess.thecvf.com/content/CVPR2024/html/Wang_VGGSfM_Visual_Geometry_Grounded_Deep_Structure_From_Motion_CVPR_2024_paper.html",
+      "pdf_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Wang_VGGSfM_Visual_Geometry_Grounded_Deep_Structure_From_Motion_CVPR_2024_paper.pdf",
+      "access_started_utc": "2026-09-07T03:16:23.718247+00:00",
+      "access_completed_utc": "2026-09-07T03:16:41.537757+00:00"
+    },
+    {
+      "id": "monst3r",
+      "title": "MonST3R: A Simple Approach for Estimating Geometry in the Presence of Motion",
+      "authors": [
+        "Junyi Zhang",
+        "Charles Herrmann",
+        "Junhwa Hur",
+        "Varun Jampani",
+        "Trevor Darrell",
+        "Forrester Cole",
+        "Deqing Sun",
+        "Ming-Hsuan Yang"
+      ],
+      "venue": "ICLR",
+      "year": 2025,
+      "formal_proceedings_verified": true,
+      "venue_evidence_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/monst3r_venue.html",
+      "venue_evidence_sha256": "3a0d0e0f3e3b9a64ea20125a5cbd3457a49fb5db4cdcc3c7af647a5f3b6d11c4",
+      "primary_pdf": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/monst3r.pdf",
+      "pdf_sha256": "a7f8f18951ccc3ef4b1f3b2bf14668be265f6bd0b89221ecb3268c330eef3eb5",
+      "primary_text": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/monst3r.txt",
+      "text_sha256": "cf4d5d93e55224adb7639e41c42d02460cfc54fd56bc9697991945c036486e46",
+      "read_scope": [
+        "Introduction/Fig2 failure explanation (also author arXiv v2 read)",
+        "Sections3.1–3.4 pp.4–7, equations1–7",
+        "Section4.1 setup; Section4.3 protocol also read in arXiv v2; Section4.5/Table5 pp.9–10"
+      ],
+      "not_read": "Not a full supplemental/code/reproduction audit; unrelated results and full references not systematically reviewed.",
+      "four_axes": {
+        "object": "per-timestep dynamic pointmaps and camera parameters",
+        "mechanism": "dynamic-domain decoder/head finetuning, alignment plus static-masked flow and camera smoothness",
+        "input_granularity": "image pair/window video graph",
+        "setting": "dynamic monocular reconstruction; not test-time model finetuning"
+      },
+      "transfer_failure_notes": [
+        "Dynamics and generator inconsistency cannot be equated.",
+        "A pose benefit does not imply depth or generated-video benefit.",
+        "Official conference PDF became available after HTML author-version fallback; final method facts checked in the conference PDF."
+      ],
+      "venue_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/ce1710ff5b66f89b0d707bf1ec2850bf-Abstract-Conference.html",
+      "pdf_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/ce1710ff5b66f89b0d707bf1ec2850bf-Paper-Conference.pdf",
+      "access_started_utc": "2026-09-07T03:16:23.719642+00:00",
+      "access_completed_utc": "2026-09-07T03:16:53.706209+00:00"
+    },
+    {
+      "id": "slam3r",
+      "title": "SLAM3R: Real-Time Dense Scene Reconstruction from Monocular RGB Videos",
+      "authors": [
+        "Yuzheng Liu",
+        "Siyan Dong",
+        "Shuzhe Wang",
+        "Yingda Yin",
+        "Yanchao Yang",
+        "Qingnan Fan",
+        "Baoquan Chen"
+      ],
+      "venue": "CVPR",
+      "year": 2025,
+      "formal_proceedings_verified": true,
+      "venue_evidence_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/slam3r_venue.html",
+      "venue_evidence_sha256": "2f93041f9e5181b81a288a19238930fd1ceac2c031fdad144ef24626cdbd29bc",
+      "primary_pdf": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/slam3r.pdf",
+      "pdf_sha256": "2e84db1cdd8a0da9d461678925dfb13ae65a2f5db25357b6388a21e0766fe91a",
+      "primary_text": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/slam3r.txt",
+      "text_sha256": "62435cad7c997f29e9cb2e8804812b0a681e3c4d93fb3de988bcb6db9f025307",
+      "read_scope": [
+        "Sections2/3 overview pp.16652–16653",
+        "Sections3.1/3.2 pp.16653–16655",
+        "Section4 implementation/comparisons/analyses, Tables1–5 pp.16656–16658",
+        "Section5 limitations p.16658"
+      ],
+      "not_read": "Not a full supplemental/code/reproduction audit; unrelated results and full references not systematically reviewed.",
+      "four_axes": {
+        "object": "local and world pointmaps",
+        "mechanism": "multiview I2P and learned L2W with bounded reservoir reference retrieval",
+        "input_granularity": "sliding windows and historical registered frames",
+        "setting": "static reconstruction; centered window uses future relative to keyframe"
+      },
+      "transfer_failure_notes": [
+        "Cameras derived from predicted points can remain worse than pose-specialized SLAM.",
+        "Compare NoConf and matched view count; future access differs from strict online."
+      ],
+      "venue_url": "https://openaccess.thecvf.com/content/CVPR2025/html/Liu_SLAM3R_Real-Time_Dense_Scene_Reconstruction_from_Monocular_RGB_Videos_CVPR_2025_paper.html",
+      "pdf_url": "https://openaccess.thecvf.com/content/CVPR2025/papers/Liu_SLAM3R_Real-Time_Dense_Scene_Reconstruction_from_Monocular_RGB_Videos_CVPR_2025_paper.pdf",
+      "access_started_utc": "2026-09-07T03:15:52.418359+00:00",
+      "access_completed_utc": "2026-09-07T03:15:57.903898+00:00"
+    },
+    {
+      "id": "memory_adapters",
+      "title": "Memory-based Adapters for Online 3D Scene Perception",
+      "authors": [
+        "Xiuwei Xu",
+        "Chong Xia",
+        "Ziwei Wang",
+        "Linqing Zhao",
+        "Yueqi Duan",
+        "Jie Zhou",
+        "Jiwen Lu"
+      ],
+      "venue": "CVPR",
+      "year": 2024,
+      "formal_proceedings_verified": true,
+      "venue_evidence_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/memory_adapters_venue.html",
+      "venue_evidence_sha256": "93e379e71688810252602dc3d491acf4966e6ab13de1eb9d64283a039ba8e431",
+      "primary_pdf": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/memory_adapters.pdf",
+      "pdf_sha256": "08112a4540c119ced0adc25f4c45a68b4017fe1e0c4f2052251f1ac125ba3454",
+      "primary_text": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/memory_adapters.txt",
+      "text_sha256": "d12b166ae364063a50a65537d7ee7d7bd43f45ef9124d2e758792ec59ff80b56",
+      "read_scope": [
+        "Introduction p.21605",
+        "Sections3.1–3.4 pp.21606–21608, equations1–7",
+        "Section4.1 setup and online benchmark protocol pp.21609–21610",
+        "Section4.3/Tables3–5 pp.21610–21611"
+      ],
+      "not_read": "Not a full supplemental/code/reproduction audit; unrelated results and full references not systematically reviewed.",
+      "four_axes": {
+        "object": "image and point-cloud perception features",
+        "mechanism": "queued voxel max aggregation, residual adapters, channel memory, 3D-to-2D context",
+        "input_granularity": "posed RGB-D streaming frames",
+        "setting": "supervised offline adapter training followed by online detection/segmentation inference"
+      },
+      "transfer_failure_notes": [
+        "Aligned RGB-D is stronger input than generated monocular observations.",
+        "A geometric projection error could poison features; frozen-backbone control is essential."
+      ],
+      "venue_url": "https://openaccess.thecvf.com/content/CVPR2024/html/Xu_Memory-based_Adapters_for_Online_3D_Scene_Perception_CVPR_2024_paper.html",
+      "pdf_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Xu_Memory-based_Adapters_for_Online_3D_Scene_Perception_CVPR_2024_paper.pdf",
+      "access_started_utc": "2026-09-07T03:17:14.634184+00:00",
+      "access_completed_utc": "2026-09-07T03:17:18.016716+00:00"
+    }
+  ],
+  "search": {
+    "discovery_queries": [
+      "site:openaccess.thecvf.com VGGSfM Visual Geometry Grounded Deep Structure From Motion CVPR 2024",
+      "site:openreview.net MonST3R dynamic geometry ICLR 2025",
+      "site:openaccess.thecvf.com SLAM3R CVPR 2025",
+      "site:ecva.net LoopSplat ECCV 2024",
+      "\"Memory-based Adapters for Online 3D Scene Perception\""
+    ],
+    "discovery_timestamps": "Exact initial web-call UTC was not separately recorded; do not infer from this receipt. Durable primary downloads below have actual timestamps.",
+    "mechanism_keyword_groups": [
+      {
+        "group": "mechanism+memory+domain",
+        "query": "\"view dependent uncertainty\" \"memory\" \"3D\" reconstruction"
+      },
+      {
+        "group": "mechanism+consumer",
+        "query": "\"uncertainty\" \"view selection\" \"geometry\" \"generation\""
+      },
+      {
+        "group": "state-conflict+recency",
+        "query": "\"memory\" \"3D\" \"conflicting\" \"2026\""
+      }
+    ],
+    "mechanism_domains": [
+      "openaccess.thecvf.com",
+      "proceedings.iclr.cc",
+      "openreview.net"
+    ],
+    "mechanism_query_time": "Executed after 2026-09-07T03:17:18Z and before 03:19:01Z; exact tool-call wall clock not separately recorded.",
+    "2026_scope_guard": [
+      {
+        "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Shan_NI-Tex_Non-isometric_Image-based_Garment_Texture_Generation_CVPR_2026_paper.html",
+        "title": "NI-Tex: Non-isometric Image-based Garment Texture Generation",
+        "status": "official metadata/search result surfaced; not a fifth deeply read paper; no numerical/method claims imported"
+      },
+      {
+        "url": "https://openaccess.thecvf.com/content/CVPR2026/papers/Xu_AREA3D_Active_Reconstruction_Agent_with_Unified_Feed-Forward_3D_Perception_and_CVPR_2026_paper.pdf",
+        "title": "AREA3D: Active Reconstruction Agent with Unified Feed-Forward 3D Perception and Vision-Language Guidance",
+        "status": "primary search result surfaced; follow-up novelty obstacle only, not fully read or accepted as a tested baseline here"
+      },
+      {
+        "url": "https://openreview.net/pdf/13b03447437f26eb7486b075a3920a89a1f7a9e9.pdf",
+        "status": "search result states published ICLR2026 and uncertainty viewpoint selection; title and formal decision not independently resolved, so excluded from the four verified papers"
+      }
+    ],
+    "unselected": [
+      "LoopSplat discovery query was not developed into a verified primary reading.",
+      "Under-review OpenReview results are not treated as accepted papers."
+    ],
+    "deduplication": "Bounded rg of work/S23_innovation_*/sources.json: selected4 titles not found; VGGT was found and avoided. This is not proof the project never read a selected title.",
+    "novelty_boundary": "Four selected works provide a four-axis positioning exercise. New 2026 search leads are not resolved into a complete closest-prior survey; absence of an exact match cannot certify originality."
+  },
+  "skills_applied": {
+    "supervisor_commit": "207bc6f7a1aa107e544099c2c7cc86816fba9628",
+    "handbook_2_2": [
+      "baseline-to-concrete-failure reasoning",
+      "component swaps, same-view/compute controls, ablative attribution"
+    ],
+    "handbook_2_3": [
+      "hidden-assumption probes: staticness, uniform confidence, representation-consumer equivalence",
+      "importance and technology-cycle questions; no disruptive claim"
+    ],
+    "idea_evaluator": [
+      "F1/F9 audit before candidate score",
+      "three actual mechanism keyword groups; four verified paper comparisons",
+      "mechanism-based scores only, no invented measured gains",
+      "student lifecycle/compute limitations; lack of hours recorded as unknown",
+      "conditional test versus rejected current method proposal"
+    ],
+    "claude_scientific_critical_thinking": [
+      "causation versus association",
+      "controls for extra input, training, filtering, camera intrinsics and diffusion randomness",
+      "construct validity: geometry/pose/context/video are different outcomes",
+      "independent scene unit; previously seen TUM is exploratory"
+    ],
+    "application_limits": [
+      "Not a full literature survey, statistical review or conference-readiness audit.",
+      "No Claude model/CLI invocation.",
+      "No scientific illustration required for this short textual comparison; no image-generation tool called."
+    ]
+  },
+  "candidate_audit": {
+    "count": 1,
+    "positioning": "New-setting question, not an established new mechanism.",
+    "hypothesis": "Query direction can change which existing memory geometry disagreements are harmful to actual generation; a single global reliability score may miss that interaction.",
+    "two_priority_risks": [
+      {
+        "id": "F1",
+        "severity": "UNRESOLVED",
+        "detection": "Error propagation, uncertainty weighting and viewpoint selection are already known; setting difference alone does not establish substantive novelty.",
+        "response": "Do not claim a method; resolve most proximate generation-selection papers before any method commitment."
+      },
+      {
+        "id": "F9",
+        "severity": "UNRESOLVED",
+        "detection": "No project-specific real generated failure has yet motivated this candidate.",
+        "response": "First require a natural failure and a discriminating counterfactual with simple strong controls."
+      }
+    ],
+    "severity_note": "No arbitrary weeks assigned, no mechanical contradictory MAJOR-count escalation. Untested does not equal data-refuted.",
+    "five_dimensions": {
+      "Higher": {
+        "score": 5,
+        "basis": "No actual consumer improvement or sufficient causal mechanism evidence."
+      },
+      "Faster": {
+        "score": 5,
+        "basis": "No demonstrated speed claim."
+      },
+      "Stronger": {
+        "score": 6,
+        "basis": "Mechanism-based only: projected geometric disagreements depend on query direction; generation consequence untested."
+      },
+      "Cheaper": {
+        "score": 5,
+        "basis": "No demonstrated cost reduction."
+      },
+      "Broader": {
+        "score": 6,
+        "basis": "Mechanism-based link from reconstruction evidence to generation-context diagnosis; current top-neighbor duplication unresolved."
+      }
+    },
+    "paradigm_probe": {
+      "first_principles": "Partial",
+      "elephant_in_room": "No evidence",
+      "technology_cycle": "Partial",
+      "hamming_importance": "Unproven"
+    },
+    "lifecycle_category": "Frontier exploration; no publication timetable asserted",
+    "capability": {
+      "weekly_effective_hours": "unknown",
+      "student_skill_depth": "beginner self-description; no invented numerical ratings",
+      "infrastructure": "M3 Max 64GB, no confirmed remote GPU; original generation runtime readiness owned by root"
+    },
+    "verdict": "Reject and Pivot for current method proposal; preserve exactly one falsifiable diagnostic question. No claimed PhD/CCF-A readiness.",
+    "falsifiers": [
+      "No natural query-dependent ranking reversal under controlled inputs.",
+      "Rank changes do not predict actual generated-return consistency.",
+      "Global confidence, visible coverage/pose diversity or simple reprojection ranking matches or beats the candidate with matched budget.",
+      "Any benefit disappears with common K, source count, history, NMS state and noise."
+    ],
+    "research_boundary": "Do not revive S34 ordinary scale/getter repair as innovation; do not infer generated-video gain from geometry metrics. New independent scenes and frozen evaluation are required after exploratory known TUM."
+  },
+  "retrieval_receipts": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/retrieval_receipt.json",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/retrieval_fallback_receipt.json",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/memory_cvpr_retrieval.json",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_b_geometry/primary/venue_retrieval_receipt.json"
+  ],
+  "access_failures": "Initial web open 403/internal errors; urllib TLS EOF for several URLs; OpenReview alternate PDF 403. Preserved receipts, successful final PDF identities used."
+}

@@ -1,0 +1,115 @@
+{
+  "schema": "S86_FIXED_COMPARISON_EXPORT_V1",
+  "prepared_utc": "2026-09-10T21:37:27.821575+00:00",
+  "status": "SOURCE_ONLY_PREPARED_NOT_EXECUTED",
+  "exporter_sha256": "cb6cc298b9ba2e5e91c125ffbf7e51e349d2e013f691bf47ebc22758350b2da4",
+  "generation_contract": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/CONTRACT.json",
+    "bytes": 8083,
+    "sha256": "954c4353745280d5d3f48ac9db124b8a23aa877e1c59e9ecdd13f399416e844f"
+  },
+  "scoring_contract": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/SCORING_CONTRACT.json",
+    "bytes": 5892,
+    "sha256": "7cebfeb86b3e86b68fede211c5da496367746227eeddfc709b19ad060a25c787"
+  },
+  "root_binding_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/ROOT_EXPORT_BINDING.json",
+  "root_binding_schema": {
+    "schema": "S86_ROOT_EXPORT_BINDING_V1",
+    "accepted": true,
+    "accepted_utc": "Root records actual acceptance UTC here after completion; this is a schema example, not actual acceptance",
+    "generation_receipt_sha256": "Root supplies actual complete generation RECEIPT SHA",
+    "scoring_receipt_sha256": "Root supplies actual complete scoring RECEIPT SHA"
+  },
+  "root_binding_meaning": "Root binding of already accepted complete generation and scoring, not a new experiment or an additional independent result. Exporter refuses absent/unaccepted binding and verifies both exact receipt identities before any display/reference array reads.",
+  "reference": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/scoring_01/transformed_targets_uint8.npy",
+    "bytes": 3981440,
+    "sha256": "e144e842fc36c795baa05841761670555a21bc7b9c36e0a56b8440b6a2324442"
+  },
+  "output_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/visuals_01",
+  "argv": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "-I",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/export_comparison.py"
+  ],
+  "versions": {
+    "numpy": "1.26.4",
+    "Pillow": "10.3.0"
+  },
+  "font": {
+    "path": "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "bytes": 23278008,
+    "sha256": "876af2cd4854644e7f3e7feb2f688997fdb3343c6df6693611209c9dfb47ccec"
+  },
+  "target_order": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "method_order": [
+    "G0",
+    "Gpaste",
+    "Gterminal",
+    "Gguide"
+  ],
+  "overview": {
+    "rows": [
+      20,
+      21,
+      22,
+      23
+    ],
+    "columns": [
+      "saved real reference",
+      "historical warp with holes marked",
+      "G0",
+      "Gpaste",
+      "Gterminal",
+      "Gguide"
+    ],
+    "size_px": [
+      3540,
+      2720
+    ],
+    "native_tile_px": [
+      576,
+      576
+    ],
+    "resizing": false,
+    "labels": "Chinese/English target and role labels outside each tile; top caption states historical RGB/predicted geometry and checkerboard is no support, not GT visibility."
+  },
+  "native_outputs": {
+    "method_pngs": 16,
+    "reference_pngs": 4,
+    "warp_zero_pngs": 4,
+    "warp_holes_marked_pngs": 4,
+    "mask_pngs": 4,
+    "total_native_pngs": 32,
+    "total_pngs_including_overview": 33,
+    "native_size_px": [
+      576,
+      576
+    ],
+    "pixel_integrity": "Native method/reference RGB bytes unchanged; labels in filenames, PNG iTXt Description and IMAGE_INDEX, with burned-in labels only outside native tiles in overview."
+  },
+  "display_rules": {
+    "methods_reference": "Use already emitted uint8 NHWC from accepted generation/scoring; do not decode raw predictions or rerun quantizer.",
+    "warp": "Generation saved float32 [4,3,576,576] -> NHWC; verify finite RGB01 and zero-fill holes. Display uint8=floor(float64(RGB)*255+.5); preserve separate zero-hole version.",
+    "holes": "Only mask-false display-copy pixels replaced by 16px gray checkerboard184/224; supported pixels unchanged.",
+    "mask": "Generation saved bool[4,1,576,576] -> native L8,white255 support/black0 hole.",
+    "scientific_meaning": "Warp has real historical colors placed by predicted geometry, not target capture/new generation. Mask is predicted support, not confidence, correctness or physical visibility."
+  },
+  "read_boundary": "Only accepted generation/scoring JSON, four emitted uint8 arrays, generation warp_rgb01/image_mask and fixed S70 transformed reference; no running arrays, original RGB, depth, models, weights, credentials or AI generation. Font bytes are a display resource.",
+  "readback": "Every written PNG reopened with Pillow: mode,size,all pixel bytes exact; save file bytes/SHA and pixel SHA. Pixel readback is distinct from root visual QA.",
+  "limits": {
+    "seconds": 120,
+    "peak_rss_bytes": 1073741824,
+    "output_bytes": 134217728,
+    "enforcement": "SIGALRM time; sampled self RSS/output, not kernel hard caps"
+  },
+  "failure": "Unique visuals_01 mkdir; preserve partial outputs/error receipt, no overwrite or automatic retries.",
+  "preparation_checks": "AST parse only. No exporter/import/image loading/array read performed; font byte hash recorded.",
+  "new_method_validated": false
+}

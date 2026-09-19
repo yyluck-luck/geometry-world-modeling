@@ -1,0 +1,17 @@
+{
+  "schema": "gwm-s103-predictor-intrinsics-fix-v1",
+  "recorded_at_local": "2026-09-16T18:43:00+08:00",
+  "status": "PASS_SOFTWARE_AND_EXACT_BOUNDARY",
+  "defect": "History intrinsics were cropped twice after concatenation, while query intrinsics multiplied the full 3x3 matrix by 1.2 and changed the homogeneous element from 1 to 1.2.",
+  "impact_if_unfixed": "History and query camera matrices would use inconsistent principal points and invalid homogeneous normalization, making any generated result scientifically uninterpretable.",
+  "fix": "All eight frames now use one model_grid_K transform: scale the first two rows once, subtract x=96 once, preserve [0,0,1], and assert identical transformed intrinsics at runtime.",
+  "historical_artifacts_preserved_at": "work/S103_selector_free_baseline/history_before_intrinsics_consistency_fix_20260916/",
+  "new_predictor": {"path": "work/S103_selector_free_baseline/predictor_s103.py", "bytes": 9988, "sha256": "534fd553e24b667fb50f01a6019d9d792b591d9bf3785024eaeadc40cfd46585"},
+  "regressions": {"predictor_static_contract": "10/10 PASS", "scorer_chain": "4/4 PASS", "formal_chain": "11/11 PASS", "validator_self_test": "7/7 PASS", "launch_guard": "9/9 PASS"},
+  "replacement_runtime_binding_sha256": "732c222536395664dd9cb99a66cf8818e97ac679c62b0b096c4b33e124b39a92",
+  "replacement_exact_isolation": {"job_id": "590696", "node": "dgx-27", "state": "COMPLETED", "exit_code": "0:0", "elapsed": "00:00:49", "receipt_sha256": "dc69ee8c794cf9b4d60103b3585b1211579778ccfd757ac954ae27ecc56f24a5"},
+  "replacement_contract": {"path": "work/S103_selector_free_baseline/window_scene13_w001_20260916/GATE0_CONTRACT_CANDIDATE_v5.json", "sha256": "f0597ad547e6f443917c57dd8bf49f62daeb755f6ab1621587d9784793fa50ca", "protocol_sha256": "bfc3e843957ad6e3e0b26302d2ca47be1b67a9d93767e86acf18d4b2f7721df8", "status": "BLOCKED_INDEPENDENT_REVIEWS_ONLY"},
+  "model_forward": false,
+  "future_outcome_opened": false,
+  "scientific_result": false
+}

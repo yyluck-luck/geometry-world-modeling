@@ -1,0 +1,11 @@
+# S63之后的下一步：一次明确标注的完整单位修复变体
+
+当前S63外部真实两路径已return0（20:23:36.359549–20:23:39.312174Z，2.952651秒），原711空列表异常精确重现，组件路径返回四个真实缓存条件。不同作者于20:27:52.451397Z完成独立结果PASS，最终JSON SHA为90c3eff57423f0360ada6bdfb3ebcbbdf428b707962568698634eae63528a426，root已核收。以下为下一项工作，尚未启动完整生成。
+
+1. 新建独立生产目录，例如尚未使用的work/S64_unit_repaired_generation；沿用已有C2 V9有效运行和监督代码，只声明这一次科学行为差异。新runtime返回前安装实例renderer hook，使用固定S61 adapter；返回maps给原调用者，每次单位receipt另存。不要改原pipeline/S35厂函数，不影响类或其他任务。安装次序、unwrap底层原source、wrapper自身source和完整身份清单都须明确。具体源码路径和位置见本目录PRODUCTION_NEXT_STEP_ASSESSMENT.md与SOURCE_RECEIPT。
+2. 在新protocol/manifest/runtime_loading中一致记录retrieval_variant；原ft-mse VAE身份也保留。现有gate仅允许输入/seed差异，需要显式加入这个renderer变体及其实际文件身份。保留原资源/生命周期核验，不另建一套权限状态机；仅对实际代码差异做必要独立审查。生产hook既有原观察器位于外层，render_input为换算前、render_output为规范深度结果，不能再叫直接未改renderer证据。require_source精确函数位于integrate_original.py:261–267，评估报告的行号轻微偏移已单独记主账。
+3. 从living_room.jpg、seed44、CPU8/FP32重新执行initialize→turn_left(5)→turn_right(5)，保持576×576、T8/context4/target4、50步、400次几何迭代、两批间不重置RNG。最后采样RNG快照seq36之后，几何优化器仍消耗随机数；五份缓存和较早RNG不足以作严格续跑检查点。新运行单独命名和输出，不复用V9已消费的execution_01或其授权回执。
+4. 一次完整生成按B0/C1实测估算45–50分钟，保留每批1800秒、总3600秒、45GiB进程树及至少10GiB空盘限制。检查实际进程和当前机器资源后启动，保存真实监控/终态。S60/S61/S62/S63已经成功且仍适用的数值验收不再无故重跑，不新增扫参矩阵。
+5. 取得真实完整退出和两批档案后，再复用现有后处理方法做新输入绑定、真实缓存消费核验、九帧评分和可见图像。所有失败和部分结果保留；外部return0也不自动等于科学成功。修复变体是看过C2失败后设计的工程恢复，不能补成原cohort同条件C2行、救回原2/3事件假说或提高创新成熟度。
+
+本步骤不需要用户再次许可，但需要完成具体实现与结果审查；现有广泛本地科研授权有效，没有新邮件/个人信息/Claude模型调用。主方法仍NO_METHOD_SELECTED、novelty_authorization=NONE、new_method_validated=false。组件恢复只是可信基线所需工作；完整生成后回到原proposal的长期几何一致性、真实缺陷、强近邻和可证伪机制。

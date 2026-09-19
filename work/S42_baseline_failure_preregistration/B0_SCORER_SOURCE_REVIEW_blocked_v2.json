@@ -1,0 +1,81 @@
+{
+  "schema": "s42-b0-blind-scorer-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "BLOCKED_BEFORE_B0_EXECUTION",
+  "completed_utc": "2026-09-07T15:30:29Z",
+  "review_scope": "Second-round different-author static source review of the exact final B0 v3.3.1 candidate. This artifact is not an execution authorization, score, visual review, or scientific result.",
+  "scorer_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/score_b0_blind.py",
+  "scorer_sha256": "543f9fb4cdfd7009e4a5c8be83d99bcb0b83658549c2ea8964ed453f201e2738",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_SCORING_CONTRACT.json",
+  "contract_sha256": "1143f700855ab32df3d703fc91b2ff8707ca3dc3e217407156be9247d677c11b",
+  "preregistration_protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+  "preregistration_protocol_sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+  "revision_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_REBASE_V3_3_1_RECEIPT.json",
+  "revision_receipt_sha256": "56207ef932b74bc42c7a46562bbfe5e2ab5206f4a05a3ed50023199cf2e83495",
+  "executed": false,
+  "scorer_imported": false,
+  "s40_generated_images_viewed": false,
+  "s40_result_arrays_decoded": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "model_generation_renderer_readback_or_gate_runs": 0,
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit",
+  "blocking_findings": [
+    {
+      "id": "B0-SOURCE-V2-BLOCKER-001",
+      "title": "An exception after report construction can still publish a report for a failed attempt",
+      "evidence": [
+        "score_b0_blind.py:1025-1061 assigns a non-null report before the successful receipt update has completed.",
+        "score_b0_blind.py:1082-1096 catches TechnicalInvalid and every BaseException but neither exception branch unconditionally clears report nor resets technically_valid to false.",
+        "A KeyboardInterrupt, MemoryError, or other BaseException delivered after report assignment, including around receipt.update at lines 1062-1081, therefore reaches the terminal stage with report still non-null. If interruption occurs after receipt.update returns, technically_valid may also remain true while status is rewritten as a failure.",
+        "score_b0_blind.py:1115-1128 decides whether to write report.json solely from report is not None and returns solely from technically_valid. It can therefore publish a failure report, or a contradictory failure-status/technically-valid receipt, through the otherwise atomic staging path.",
+        "B0_SCORING_CONTRACT.json:193-200 requires a technical failure to publish only a terminal receipt and never a report."
+      ],
+      "impact": "A narrow but real asynchronous-exception path violates the blind first-valid-attempt policy: a canonical failed attempt can expose metric output, and in one interleaving can return success from a receipt whose status says failure.",
+      "minimum_strict_fix": "In both exception handlers, unconditionally assign report = None and receipt['technically_valid'] = False before recording the failure. Permit report staging only when report is non-null, receipt.status is exactly PASS_B0_MACHINE_SCORE_SINGLE_ROW_COHORT_INCOMPLETE, and technically_valid is exactly true. On every other terminal state, require that no staged report exists. Before atomic publication, validate the same success/report iff invariant from the staged terminal receipt. Do not change any metric, ROI, pair, threshold, tensor, camera, or claim logic."
+    }
+  ],
+  "closed_prior_blockers": {
+    "concurrent_attempts_are_serialized_by_fixed_nonblocking_lock": true,
+    "hash_to_path_memmap_TOCTOU_replaced_by_same_FD_immutable_snapshot": true,
+    "event_tensor_descriptors_equal_complete_frozen_manifest_registry": true,
+    "blind_attestation_is_real_attempt_specific_and_dual_review_bound": true
+  },
+  "checks_passed": {
+    "exact_scorer_contract_revision_receipt_and_protocol_hashes_match": true,
+    "attempt02_generation_readback_and_independent_result_review_pins_retained": true,
+    "raw_tensor_provenance_and_ordinary_dict_separation_retained": true,
+    "list_tuple_and_exact_scalar_type_checks_retained": true,
+    "complete_1951_descriptor_and_3912_file_registry_counts_checked": true,
+    "all_registered_tensor_body_and_sidecar_paths_checked_for_presence_regular_type_and_size_before_numeric_read": true,
+    "event_descriptor_full_equality_to_registry_precedes_body_open": true,
+    "used_tensor_body_and_sidecar_manifest_identities_checked": true,
+    "tensor_body_opened_once_without_symlink_following": true,
+    "same_FD_snapshot_hash_and_descriptor_plus_snapshot_hash_checked": true,
+    "metric_arrays_are_read_only_views_of_immutable_snapshot_bytes": true,
+    "same_FD_closing_stat_rehash_and_canonical_path_inode_check_precede_report_construction": true,
+    "fixed_lock_is_acquired_before_attempt_enumeration_and_staging_creation": true,
+    "lock_is_held_through_atomic_directory_rename_and_parent_fsync": true,
+    "preexisting_staging_or_receiptless_attempt_blocks_retry": true,
+    "successful_report_and receipt_files_are_create_only_and_fsynced_inside_hidden_same_parent_staging": true,
+    "blind_attestation_binds_attempt_01_absolute_output_manifest_scorer_contract_and_both_reviews": true,
+    "blind_attestation_time_is_after_both_reviews_and_no_later_than_score_start": true,
+    "scorer_author_primary_reviewer_and_adversarial_reviewer_are_required_pairwise_distinct": true,
+    "M_outer4_regions_pixel_and_RGB_scalar_counts_unchanged": true,
+    "ID0_to_ID8_uint8_to_float64_divide_255_MSE_semantics_unchanged": true,
+    "strict_unrounded_MSE_greater_than_0_01_and_equality_non_event_unchanged": true,
+    "fixed_generated_only_diagnostic_pairs_unchanged": true,
+    "copy_guard_matches_both_preregistered_degeneracy_cases": true,
+    "requested_camera_guard_remains_condition_only_not_visual_camera_pass": true,
+    "B0_remains_single_development_row_with_cohort_INCOMPLETE": true,
+    "memory_mean_camera_visual_quality_repeatability_and_novelty_claims_remain_prohibited": true,
+    "deadline_seconds": 300
+  },
+  "limitations": [
+    "No scorer import or execution, B0 scoring, readback, model, renderer, generation, or gate was performed.",
+    "No S40 image, PNG, montage, tensor body, image payload body, or scientific result array was opened, decoded, mapped, or viewed.",
+    "The review is a static control-flow and contract audit only; it does not validate numeric output or visual quality.",
+    "Because blocking_findings is nonempty, B0_SCORER_SOURCE_REVIEW.json must not be created and the real attestation and B0 attempt must remain absent."
+  ],
+  "next_gate": "Apply only the failure/report invariant repair, preserve this candidate and blocked review, update the exact source and revision-receipt identities, and obtain a fresh different-author static review before creating the attestation or executing B0."
+}

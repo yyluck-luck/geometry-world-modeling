@@ -1,0 +1,27 @@
+{
+  "recorded_utc": "2026-09-05T23:11:37.379710+00:00",
+  "reviewed_report_sha256": "62d5960768a41cedab34d67d33739584c6fa713008fb825296a83ca395a74284",
+  "reviewer_role": "S12 runner author, distinct from S12 report author; manuscript-level verification, not an additional independent underlying audit",
+  "findings": [
+    {
+      "severity": "MINOR",
+      "line": 70,
+      "required": true,
+      "quote": "首次解码旧评分字段",
+      "issue": "The stored timestamp is a marker written before retrieving support/valid arrays, not a measured actual decode start.",
+      "fix": "首次评分字段解码前标记"
+    }
+  ],
+  "optional_clarifications": [
+    {
+      "line": 62,
+      "text": "Name the 24 calls as recording decision_trace and explicitly distinguish complete get_context_info; existing wording makes no contradictory claim."
+    },
+    {
+      "line": 73,
+      "text": "State independent audit 1e-12 only for derived percentage-point/mean arithmetic; source distances/IDs/integer counts/old proportions are exact."
+    }
+  ],
+  "tables_passed": true,
+  "reruns_or_new_numerical_experiments": false
+}

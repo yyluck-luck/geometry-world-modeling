@@ -1,0 +1,517 @@
+{
+  "schema": "S85_FIXED_GEOMETRY_HARD_ZBUFFER_V1",
+  "created_utc": "2026-09-10T20:11:16.192747+00:00",
+  "status": "SOURCE_FROZEN_FOR_INDEPENDENT_PRE_REVIEW_REAL_INPUTS_NOT_DECODED",
+  "runner_sha256": "344ad059365bc775af0c8336eeffdaf0b44c073626aca3a4c3a10e138c2d3019",
+  "output_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/execution_01",
+  "command": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "-I",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/project_fixed_geometry.py"
+  ],
+  "question": "What predicted target-grid support and collisions result from one fixed four-history geometry state across all four requested optical cameras?",
+  "expected_computation": "All16source-target pairs retained, mutually exclusive source statuses and all eligible positive footprints, deterministic hard depth winner/second item, holes explicitly retained. These are implementation checks, not geometry quality success criteria.",
+  "inputs": [
+    {
+      "role": "frozen_geometry",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/execution_01/FINAL_BEFORE_CLEAN.npz",
+      "bytes": 18957328,
+      "sha256": "fd4e4c0c7c515b0dcf78387561d9674d287226824d3a6f0c94791f7adcf4fad2",
+      "fields": {
+        "depth": {
+          "shape": [
+            4,
+            384,
+            512
+          ],
+          "dtype": "float32",
+          "body_sha256": "559a9a4a6e3a5da081ae0c59df2b3aac9745a215d1e7792c2b258316b525c88d"
+        },
+        "colors": {
+          "shape": [
+            4,
+            384,
+            512,
+            3
+          ],
+          "dtype": "float32",
+          "body_sha256": "60fcef3b3f41bfeb08683712038913b0071f05ed3a851a0584e217bbd08a10a8"
+        },
+        "K": {
+          "shape": [
+            4,
+            3,
+            3
+          ],
+          "dtype": "float32",
+          "body_sha256": "8843700ba92b73378c584775bc11a9296ef737072cd6396afdc23a043c5b4a21"
+        },
+        "c2w": {
+          "shape": [
+            4,
+            4,
+            4
+          ],
+          "dtype": "float32",
+          "body_sha256": "a55d30da4ffb001730d9725080153daeeac896c4a3210e8636b3ff9b565cb137"
+        },
+        "history_ids": {
+          "shape": [
+            4
+          ],
+          "dtype": "int64",
+          "body_sha256": "69493fc8f20d521934b76f7fba0f769749af997fcf2300112b21b5a5c0bf51b7"
+        }
+      }
+    },
+    {
+      "role": "target_camera_archive",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/execution_01/optical_cameras.npz",
+      "bytes": 2062,
+      "sha256": "599543102f5c799ca4005ead413b69ee10e42269ef36a7942410f9066556d325",
+      "fields": {
+        "ids": {
+          "shape": [
+            9
+          ],
+          "dtype": "int64",
+          "body_sha256": "11a567f79c9913fc285a038e9c4f428cdaf7dae2d9978308b82e9e0cebabe925"
+        },
+        "c2ws": {
+          "shape": [
+            9,
+            4,
+            4
+          ],
+          "dtype": "float64",
+          "body_sha256": "e4a374c6b9f9253f8d3e80c6c5f174e7321e2bac03c3ee38314deacd7ad46830"
+        }
+      }
+    }
+  ],
+  "input_identity_basis": "Inherited from accepted S83/S69 textual receipts; actual file bytes and decoded selected field body hashes are checked at real execution. Preparation did not reopen numeric NPZ values.",
+  "input_open_scope": "Read/hash each whole original NPZ byte string once, decode only specified fields from the same BytesIO. S83 contains bundled unused confidence/world points/etc but none decoded. S69 c2ws decodes9cameras; only targetIDs20/21/22/23 participate. No source RGB files or checkpoint or target RGB/sensor file reads.",
+  "history_ids": [
+    12,
+    13,
+    18,
+    19
+  ],
+  "generation_history_priority": [
+    19,
+    18,
+    13,
+    12
+  ],
+  "target_ids": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "camera_archive_ids": [
+    12,
+    13,
+    14,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "target_K": [
+    [
+      630.0,
+      0.0,
+      287.4000244140625
+    ],
+    [
+      0.0,
+      630.0,
+      287.4000244140625
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "source_geometry": "Saved FP32 depth/K/c2w values; numerical projection promotes toFP64. No nominal-K replacement, scale fit, optical axis flip, recentering, timestamp substitution, undistortion or pose optimization. Source RGB keptFP32 for exact winner copy.",
+  "coordinates": {
+    "source_hw": [
+      384,
+      512
+    ],
+    "target_hw": [
+      576,
+      576
+    ],
+    "source_N_per_pair": 196608,
+    "source_N_per_target": 786432,
+    "source_N_all_16_pairs": 3145728,
+    "target_pixels_per_target": 331776,
+    "arithmetic": "Pinhole ray followed by explicit scalar-coefficient3x3 transforms inFP64; no BLAS/einsum",
+    "pose_validation_atol": 1e-05,
+    "pose_validation_meaning": "Structural numerical guard, not pose accuracy",
+    "source_status_priority": [
+      {
+        "code": 0,
+        "name": "VALID"
+      },
+      {
+        "code": 1,
+        "name": "SOURCE_NONFINITE"
+      },
+      {
+        "code": 2,
+        "name": "SOURCE_NONPOSITIVE"
+      },
+      {
+        "code": 3,
+        "name": "TARGET_NONFINITE",
+        "detail": "XYZ nonfinite first; positive-Z division that yields nonfiniteUV also enters this class"
+      },
+      {
+        "code": 4,
+        "name": "TARGET_NONPOSITIVE",
+        "detail": "FiniteXYZ and targetZ<=0; never divide"
+      },
+      {
+        "code": 5,
+        "name": "OUTSIDE",
+        "detail": "Finite positive-Z center outside closed[0,575]^2; no clip or boundary rescue"
+      }
+    ],
+    "footprint": "Strictly positive weights on00,10,01,11 floor neighbors with in-bounds integer coordinates, only for continuous centers inside closed domain. No approximate zero, epsilon, snap or filling.",
+    "hard_order": "Target pixel primary, targetZ ascending, priority19/18/13/12, original pixelID ascending; slot final key only for deterministic completeness and cannot duplicate a pixel in valid2x2 footprints.",
+    "second_candidate": "Second item of full order, including equal-Z ties; never second distinct depth layer",
+    "color": "One winner RGB copied exactly; weights only determine footprint qualification, no average/weighted color",
+    "holes": "maskFalse/RGB0/IDs-1/ZNaN; missing support not GT invisible or known black"
+  },
+  "filtering": {
+    "confidence": false,
+    "depth_range": false,
+    "posthoc_scale": false,
+    "clean_pointcloud": false,
+    "target_reference": false
+  },
+  "runtime": {
+    "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "observed_python_version": "3.12.14",
+    "numpy": "1.26.4",
+    "platform": "darwin",
+    "worker_threads": 1,
+    "thread_control": "Six NumPy/OpenMP/BLAS environment variables set to1 before NumPy import; projection uses explicit elementwise multiplies/sums and lexsort, no BLAS call."
+  },
+  "resources": {
+    "attempts": 1,
+    "automatic_retry": false,
+    "wall_seconds": 300,
+    "rss_bytes": 10737418240,
+    "output_bytes": 2147483648,
+    "control": "Internal SIGALRM, per-stage peak-self RSS checks, conservative uncompressed-output prewrite estimates+16MiB reserve. Not a kernel hard address-space limit; root records external process exit/time.",
+    "raw_target_output_upper_bound_bytes": 189272104,
+    "raw_four_target_upper_bound_bytes": 757088416,
+    "memory_preflight": "Sequential targets, at most3,145,728footprints per target; fixed arrays and sorting copies estimated below1.5GiB before execution, not measured. Actual peak sampled from ru_maxrss.",
+    "output_format": "Uncompressed NPZ only for scientific arrays; no PNG rendering, CSV duplication or giant logs in this run."
+  },
+  "outputs": {
+    "INPUT_GEOMETRY.npz": "Actual consumed source depth/colors/savedFP32 K/P/historyIDs plus selected targetFP64P/K/IDs; input copy for saved-output recomputation, no unconsumed arrays.",
+    "TARGET_{20,21,22,23}.npz": {
+      "four_files_all_16_pairs": true,
+      "C": "Target-dependent total positive footprint candidates, 0<=C<=3,145,728; sorted in hard-order, losses retained",
+      "fields": {
+        "history_ids": {
+          "shape": [
+            4
+          ],
+          "dtype": "int64",
+          "meaning": "Array row ID order12,13,18,19"
+        },
+        "source_pixel_id": {
+          "shape": [
+            196608
+          ],
+          "dtype": "int32",
+          "meaning": "C-order pixel ID shared by all histories"
+        },
+        "source_uv": {
+          "shape": [
+            196608,
+            2
+          ],
+          "dtype": "int32",
+          "meaning": "u=id%512, v=id//512; no half-pixel offset"
+        },
+        "source_status": {
+          "shape": [
+            4,
+            196608
+          ],
+          "dtype": "uint8",
+          "meaning": "Exactly one status per source point"
+        },
+        "target_xyz": {
+          "shape": [
+            4,
+            196608,
+            3
+          ],
+          "dtype": "float64",
+          "meaning": "Target camera XYZ; NaN if source invalid; nonfinite transform retained"
+        },
+        "target_uv": {
+          "shape": [
+            4,
+            196608,
+            2
+          ],
+          "dtype": "float64",
+          "meaning": "Continuous target coordinates; undefined NaN for unprojected/behind; outside finite coordinates retained"
+        },
+        "footprint_target_index": {
+          "shape": [
+            4,
+            196608,
+            4
+          ],
+          "dtype": "int32",
+          "meaning": "Slots00,10,01,11; -1 when ineligible"
+        },
+        "footprint_weight": {
+          "shape": [
+            4,
+            196608,
+            4
+          ],
+          "dtype": "float64",
+          "meaning": "Strictly positive eligible bilinear weight; zero at ineligible slots; no epsilon/snap"
+        },
+        "footprint_winner": {
+          "shape": [
+            4,
+            196608,
+            4
+          ],
+          "dtype": "bool",
+          "meaning": "Candidate won its target pixel; false for loser/ineligible, distinguished by index"
+        },
+        "candidate_target_index": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "int32",
+          "meaning": "Flattened target pixel"
+        },
+        "candidate_Z": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "float64",
+          "meaning": "Positive target optical-Z"
+        },
+        "candidate_source_row": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "int8",
+          "meaning": "Source history row"
+        },
+        "candidate_pixel_id": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "int32",
+          "meaning": "Original source pixel ID"
+        },
+        "candidate_slot": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "uint8",
+          "meaning": "Bilinear footprint slot"
+        },
+        "candidate_weight": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "float64",
+          "meaning": "Positive qualification weight, not color mixing weight"
+        },
+        "candidate_rank": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "int32",
+          "meaning": "Zero-based complete rank at this target pixel"
+        },
+        "candidate_winner": {
+          "shape": [
+            "C"
+          ],
+          "dtype": "bool",
+          "meaning": "rank==0; all losers remain"
+        },
+        "mask": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "bool",
+          "meaning": "At least one eligible candidate; not GT visibility"
+        },
+        "candidate_count": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int32",
+          "meaning": "All eligible footprint candidates, not distinct depth layers"
+        },
+        "warp_rgb": {
+          "shape": [
+            576,
+            576,
+            3
+          ],
+          "dtype": "float32",
+          "meaning": "Exact source RGB of winner; holes zero-filled, not observed black"
+        },
+        "winner_source_row": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int8",
+          "meaning": "Winner; absent identity=-1/Z=NaN"
+        },
+        "winner_pixel_id": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int32",
+          "meaning": "Winner; absent identity=-1/Z=NaN"
+        },
+        "winner_slot": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int8",
+          "meaning": "Winner; absent identity=-1/Z=NaN"
+        },
+        "winner_Z": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "float64",
+          "meaning": "Winner; absent identity=-1/Z=NaN"
+        },
+        "winner_history_id": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int16",
+          "meaning": "Winner; absent identity=-1/Z=NaN"
+        },
+        "second_candidate_source_row": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int8",
+          "meaning": "Second means complete-sort item2, may equal winner Z; absent identity=-1/Z=NaN"
+        },
+        "second_candidate_pixel_id": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int32",
+          "meaning": "Second means complete-sort item2, may equal winner Z; absent identity=-1/Z=NaN"
+        },
+        "second_candidate_slot": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int8",
+          "meaning": "Second means complete-sort item2, may equal winner Z; absent identity=-1/Z=NaN"
+        },
+        "second_candidate_Z": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "float64",
+          "meaning": "Second means complete-sort item2, may equal winner Z; absent identity=-1/Z=NaN"
+        },
+        "second_candidate_history_id": {
+          "shape": [
+            576,
+            576
+          ],
+          "dtype": "int16",
+          "meaning": "Second means complete-sort item2, may equal winner Z; absent identity=-1/Z=NaN"
+        },
+        "target_id": {
+          "shape": [],
+          "dtype": "int64",
+          "meaning": "Requested target frame ID"
+        }
+      }
+    },
+    "SUMMARY.json": "Incremental PARTIAL after each target; final16pair source/status/footprint/win/loss counts and4target coverage/holes/collisions with fixed denominators. No sensor/image accuracy scoring.",
+    "RECEIPT.json": "Actual input read/decode list, byte/body validation, source/contract/runtime identity, target progress, all NPZ SHA/schema, summary SHA, runtime/RSS/output bytes, true failure and completion state.",
+    "TRACEBACK.txt": "Only on failure; partial files retained. Any input/schema/color structural failure may stop before scientific rows; no invented complete output."
+  },
+  "implementation_test": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/AUTHOR_SYNTHETIC_01.json",
+    "sha256": "c694a8778ec69a68121f439f850c67c929bce9653d80145d092cb0c1ec3d96d6",
+    "scope": "Three hand fixtures plus endpoint/outside/rotation/nonfinite/color/all-hole artificial cases only; once, no real arrays or batches."
+  },
+  "design_sources": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/ROOT_DESIGN_REVIEW.json",
+      "sha256": "823cffef46e40de6878fc48f7b06c416560b0df28a9969d7ac099b298f600073"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/NEXT_RUN_DESIGN.md",
+      "sha256": "471f0e2748ca666559e52f287cfda06be911c4826438591bbbbc28c316cf3aae"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/PROJECTOR_HAND_CHECKS.md",
+      "sha256": "426500b1b9c238719fc07933aea19c4bf7182363fc9b47629e4cfc4d791a31dd"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/SPLAT_SEMANTICS_NEIGHBOR.md",
+      "sha256": "5520dbe8cbc289a70e7ca2871e6b9f568765cb036d6c71f77b58106723044630"
+    }
+  ],
+  "metadata_sources": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/execution_01/RECEIPT.json",
+      "sha256": "e0482a8fe7852ba5fa484e38b822eba34e5459ac85f73bdb3140f757a6f102e7"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/execution_01/optical_cameras.json",
+      "sha256": "f41c5423c2ece54146420bb355e0ea86c778eeba834b5385023293308a8a75a0"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S72_fixed_requested_geometry/execution_01/receipt.json",
+      "sha256": "7711703643cb03e447a05fcd452142912d727e659372561d1efe4b7903d13d53"
+    }
+  ],
+  "scientific_limits": [
+    "Predicted support is not physical visibility, occlusion truth, calibrated confidence or accuracy.",
+    "Single exposed scene and historical selection limitations persist.",
+    "A fixed100step state is used by design, not selected because of1.2mm reference change.",
+    "No new video, guidance consumer, scale fitting or method claim; G0/Gpaste/Gguide frozen separately later."
+  ],
+  "novelty_authorization": "NONE",
+  "new_method_validated": false
+}

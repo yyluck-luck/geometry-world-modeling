@@ -1,0 +1,24 @@
+{
+  "experiment": "S93-FrameProbe",
+  "recorded_at_utc": "2026-09-12T09:12:00Z",
+  "status": "GATE0_NOT_PASSED",
+  "budget_bytes": 10000000,
+  "media_bytes": {"rgb_avi": 8059298, "depth_prefix": 1048576, "total": 9107874},
+  "unintended_full_rgb_download": true,
+  "files": [
+    {"path":"rgb_movie_full_unintended.bin","bytes":8059298,"sha256":"1820b52939af2a2e7afdf78f6398cfbc7816399c8809b3836a9ba8da9bef8022"},
+    {"path":"depth_movie_prefix_1MiB.bin","bytes":1048576,"sha256":"784e8bd7fc1b59e4ae2c76f347058aac1ab63cc59524c7d753eaa32ec8df8173"},
+    {"path":"decode/rgb0.png","bytes":313734,"sha256":"67e268735fd76136c79eb7f7c1fab206e3c3f08bffdf069441cda521fc863e29","mode":"RGB","size":"640x480"},
+    {"path":"decode/depth0.png","bytes":58381,"sha256":"3049d02924f1501d29bac5d9c43c32272982507233e8820d32d0b1b02904a1f7","mode":"RGB_8bit","size":"640x480"}
+  ],
+  "checks": {
+    "rgb_decodable": true,
+    "depth_decodable": true,
+    "depth_16bit_png": false,
+    "original_absolute_timestamp": false,
+    "gt_pose_available": true,
+    "timestamp_binding": false,
+    "gate0": false
+  },
+  "stop_reason": "AVI relative 30fps PTS lacks original TUM timestamp mapping; MPEG-4 depth decode is 8-bit RGB, not original 16-bit depth PNG."
+}

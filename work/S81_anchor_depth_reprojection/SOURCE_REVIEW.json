@@ -1,0 +1,83 @@
+{
+  "schema": "S81_DIFFERENT_AUTHOR_PREEXECUTION_REVIEW_V1",
+  "completed_at_utc": "2026-09-10T17:10:25.096938+00:00",
+  "decision": "PASS_FOR_ONE_BOUNDED_EXPLORATORY_EXECUTION",
+  "reviewed_source_sha256": "ce9f929e2d106b831144a262ff9f616e4e45d5ba8d82f733fc1af70524cd8d73",
+  "reviewed_contract_sha256": "ae317145a909f12fe94cd0ad221fa54da1a032855f585b73bc996b3ec0cc57a4",
+  "substantive_blockers": [],
+  "gates": [
+    {
+      "gate": "G1_INPUT_IDENTITY_AND_TIME",
+      "status": "PASS_FOR_DECLARED_APPROXIMATION",
+      "finding": "合同锁定S8原RGB19/depth关联，深度晚17.126ms；Z=raw/5000、零值缺失、OpenNI RGB注册、1.031已应用来源由SOURCE_FEASIBILITY提供。新PNG只在实际执行读并核SHA/bytes/16bit grayscale/size。沿用原光学metric c2w与FP32-origin K；明确不作时间补偿/轴翻转/重新标定。不同步仍是限制。"
+    },
+    {
+      "gate": "G2_PURE_GEOMETRY_AND_BOUNDARIES",
+      "status": "PASS",
+      "finding": "原独立精确Fraction34检查作为数学参考保留；实际root sample/project另用人工数组28检查通过。新增明确覆盖冻结的<=639/479及<=575连续域、half-up、零深度、NaN、后方/epsilon、平移/旋转方向、Z而非range及出视野保留。"
+    },
+    {
+      "gate": "G3_FIXED_SCORE_CONSUMPTION",
+      "status": "PASS",
+      "finding": "main受__name__守卫，合同/源码必须匹配传入SHA；不存在RGB/匹配器/模型/网络调用。depth只用于评分；1313源点先唯一取样并对四目标缓存投影，各arm/matcher复用。逐点检查期望点在原目标极线以及点误差>=目标单向线距，不错误使用双向均值。"
+    },
+    {
+      "gate": "G4_DENOMINATORS_AND_PAIRING",
+      "status": "PASS",
+      "finding": "锁定24行与7757记录，source N1313；原接受索引/源xy身份回读核对，全部记录保存、无效为NaN/null/空CSV字段并有原因。M/V/N与无效数、出视野有限误差保留，阈值无真值准确率主张。28组固定shared-source比较，交集缺失保留；同目标图完整BF/LG相同特征边作相等检查。"
+    }
+  ],
+  "independent_math_reference": {
+    "path": "synthetic_review.py",
+    "sha256": "98eaac62d955276a99a297a00504df7430d7f5f094c26760b4361d14e350f312",
+    "receipt_sha256": "3f3797d245bd043f76065c015bf3e8f3eb1661ae30ee1613e5b0f5fcf2ca545a",
+    "checks": 34,
+    "meaning": "Reference arithmetic only; its [0,width) sample domain differs from frozen candidate and is not claimed as candidate coverage."
+  },
+  "candidate_helper_tests": {
+    "path": "implementation_synthetic_review.py",
+    "sha256": "27b6ee4cca2c654a89574d2713e1e2d1221b7d5bd6b8e7c06bd64cd3d18571f6",
+    "receipt": "IMPLEMENTATION_SYNTHETIC_REVIEW.json",
+    "receipt_sha256": "e3190be5a86fb851f77ff2beb28524247871dbe00d56c684722db7802a9fa444",
+    "checks": 28,
+    "passed": 28,
+    "called": [
+      "sample",
+      "project"
+    ],
+    "main_called": false
+  },
+  "nonblockers": [
+    {
+      "id": "N1_CONSERVATIVE_BOUNDARY",
+      "detail": "Contract continuous native domain <=639/479 excludes fractional border strip admitted by previous reference [0,width). Native coordinates(639.2,100)/(200,479.2) and source576(575,575) are deliberately SOURCE_OUTSIDE although rounded address may exist. Target in-FOV uses<=575. This rule is frozen and retained, not silently treated as reference-equivalent."
+    },
+    {
+      "id": "N2_TEMPORAL_AND_IMAGING_LIMIT",
+      "detail": "Associated depth is17.126ms later and assigned on unrounded RGB feature ray with nearest-neighbour local-constant approximation. No target depth or visibility truth, no distortion/temporal compensation. Supports conditional descriptive consistency only."
+    },
+    {
+      "id": "N3_FIXED_NONEMPTY_ROWS",
+      "detail": "Some divisions assume M>0; applicable because all frozen S80 rows have nonempty accepted sets. This is not a generic empty-row runner; changed inputs would require a new contract. Shared-source empty intersections are represented without fabricated scores."
+    },
+    {
+      "id": "N4_COLUMN_MEANING",
+      "detail": "ALL_RECORDS.csv target_id means target feature index, not frame20-23; row_id identifies target frame/arm/matcher. Paired JSON explicitly names target_feature_id. Use row_id for joins and describe this in readout."
+    }
+  ],
+  "execution_boundary": "Root may invoke the exact reviewed source/contract once under60s budget in unique execution_01; no permission for automatic retries, tuning, new matching or generation. Real output acceptance belongs to later independent saved-data review.",
+  "scope": {
+    "source_and_metadata_only": true,
+    "synthetic_arrays_used": true,
+    "real_RGB_reads": 0,
+    "real_depth_reads": 0,
+    "real_NPZ_reads": 0,
+    "real_GT_file_reads": 0,
+    "model_calls": 0,
+    "network_calls": 0,
+    "report_modified": false,
+    "candidate_real_execution": false
+  },
+  "new_method_validated": false,
+  "novelty_authorization": "NONE"
+}

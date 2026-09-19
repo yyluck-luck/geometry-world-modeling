@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "review_type": "official_text_and_http_metadata_only",
+  "clock_anchor_utc": "2026-09-05T17:45:57+00:00",
+  "clock_anchor_local": "2026-09-06T01:45:57+08:00",
+  "draft_clock_utc": "2026-09-05T17:47:10+00:00",
+  "clock_note": "Clock anchors were actually read during retrieval and before drafting, not inferred task duration.",
+  "data_archives_downloaded": false,
+  "new_dataset_images_read": false,
+  "models_run": false,
+  "experimental_results_inspected": false,
+  "sources": [
+    {
+      "id": "tum_paper",
+      "url": "https://cvg.cit.tum.de/_media/spezial/bib/sturm12iros.pdf",
+      "title": "A Benchmark for the Evaluation of RGB-D SLAM Systems",
+      "year": 2012,
+      "read_scope": "Extracted original text including abstract and sections III, IV, VI.B; no image inspection. A later deeper-page fetch timed out; earlier relevant text was retrieved successfully.",
+      "supports": [
+        "fr1 office versus fr2 industrial hall",
+        "fr2 desk setup in motion capture area",
+        "different physical Kinect sensors",
+        "nominal capture frequencies",
+        "registration",
+        "depth correction already applied",
+        "historical CC BY 3.0"
+      ]
+    },
+    {
+      "id": "tum_download",
+      "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download",
+      "read_scope": "Official fr2/desk and fr3/long_office_household entries and TGZ hrefs",
+      "supports": [
+        "scene descriptions",
+        "duration and GT duration",
+        "trajectory length",
+        "fr3 Asus Xtion",
+        "TGZ URLs",
+        "displayed approximate sizes"
+      ]
+    },
+    {
+      "id": "tum_formats",
+      "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats",
+      "read_scope": "Color/depth, ground truth, RGB/IR/depth calibration sections",
+      "supports": [
+        "640x480 PNG formats",
+        "pre-registration",
+        "depth divide 5000",
+        "zero is missing",
+        "RGB camera-to-world pose format",
+        "intrinsics and distortion",
+        "default intrinsics recommended without extra undistortion",
+        "depth correction already applied"
+      ]
+    },
+    {
+      "id": "tum_home",
+      "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset",
+      "read_scope": "Overview, citation, license",
+      "supports": [
+        "30 Hz RGB-D",
+        "100 Hz motion capture",
+        "current CC BY 4.0 data and BSD-2-Clause code",
+        "required paper attribution"
+      ]
+    },
+    {
+      "id": "tum_tools",
+      "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools",
+      "read_scope": "Official indexed text on timestamp association",
+      "supports": [
+        "RGB and depth lists require timestamp association"
+      ]
+    }
+  ],
+  "recommended_sequence": "rgbd_dataset_freiburg2_desk",
+  "recommendation_is_pre_result": true,
+  "independence": {
+    "prior_sequence": "rgbd_dataset_freiburg1_xyz",
+    "new_physical_environment_verified": true,
+    "different_physical_camera_verified": true,
+    "different_sensor_type": false,
+    "cross_dataset": false,
+    "evidence": "Original paper section III identifies fr1 office (6x6m) and fr2 industrial hall (10x12m), with fr2/desk set up inside its motion capture area; section IV explicitly assigns distinct Kinect units to fr1 and fr2.",
+    "limitation": "Scene and physical sensor change jointly; effects cannot be causally separated. One extra scene does not establish broad generalization."
+  },
+  "candidates": [
+    {
+      "sequence": "rgbd_dataset_freiburg2_desk",
+      "role": "first_choice",
+      "duration_seconds_official": 99.36,
+      "duration_with_groundtruth_seconds_official": 69.15,
+      "trajectory_length_meters_official": 18.88,
+      "sensor": "Microsoft Kinect; different physical unit from fr1",
+      "approx_size_summary_page_GB": 2.01,
+      "approx_size_detail_page_GB": 1.76,
+      "http_probe": {
+        "method": "HEAD",
+        "requested_utc": "2026-09-05T17:46:49.699841+00:00",
+        "url": "https://cvg.cit.tum.de/rgbd/dataset/freiburg2/rgbd_dataset_freiburg2_desk.tgz",
+        "final_url": "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg2/rgbd_dataset_freiburg2_desk.tgz",
+        "status": 200,
+        "content_length_bytes": 1893351095,
+        "last_modified": "Fri, 30 Sep 2011 15:17:05 GMT",
+        "etag": "\"70da3eb7-4ae2a1e2d7e40\"",
+        "accept_ranges": "bytes",
+        "body_downloaded": false
+      },
+      "archive_sha256": null
+    },
+    {
+      "sequence": "rgbd_dataset_freiburg3_long_office_household",
+      "role": "documented_backup_only_not_selected",
+      "duration_seconds_official": 87.09,
+      "duration_with_groundtruth_seconds_official": 87.1,
+      "trajectory_length_meters_official": 21.455,
+      "sensor": "Asus Xtion, from sequence-specific official description",
+      "new_physical_environment_relative_to_fr1": "Not established by the sequence text retrieved in this bounded review",
+      "approx_size_summary_page_GB": 1.58,
+      "approx_size_detail_page_GB": 1.38,
+      "http_probe": {
+        "method": "HEAD",
+        "requested_utc": "2026-09-05T17:46:49.700125+00:00",
+        "url": "https://cvg.cit.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz",
+        "final_url": "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz",
+        "status": 200,
+        "content_length_bytes": 1483556251,
+        "last_modified": "Tue, 07 Aug 2012 18:51:42 GMT",
+        "etag": "\"586d459b-4c6b17c31eb80\"",
+        "accept_ranges": "bytes",
+        "body_downloaded": false
+      },
+      "archive_sha256": null
+    }
+  ],
+  "suggested_fr2_geometry_convention": {
+    "basis": "Official recommended ROS default parameter set for pre-registered depth; a documented approximation, not exact calibration",
+    "width": 640,
+    "height": 480,
+    "K": [
+      [
+        525.0,
+        0.0,
+        319.5
+      ],
+      [
+        0.0,
+        525.0,
+        239.5
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_applied": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "extra_undistortion": false,
+    "depth_png_divisor": 5000.0,
+    "depth_zero_is_missing": true,
+    "depth_is_registered_to_rgb": true,
+    "depth_axis": "Z in the official pinhole backprojection formula",
+    "fr2_depth_correction_already_applied": 1.031,
+    "additional_depth_correction": 1.0,
+    "fr2_rgb_calibration_metadata_only": {
+      "fx": 520.9,
+      "fy": 521.0,
+      "cx": 325.1,
+      "cy": 249.7,
+      "distortion": [
+        0.2312,
+        -0.7849,
+        -0.0033,
+        -0.0001,
+        0.9172
+      ]
+    },
+    "fr3_rgb_metadata_only": {
+      "fx": 535.4,
+      "fy": 539.2,
+      "cx": 320.1,
+      "cy": 247.6,
+      "distortion": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "already_undistorted": true,
+      "depth_correction_already_applied": 1.0
+    },
+    "resize_crop_recommendation": "Record the actual pixel-coordinate transform A and use K_out=A*K; preserve the verified transform convention across prediction and measurement. Do not silently substitute different calibration or undistort RGB alone."
+  },
+  "timing_and_pose": {
+    "nominal_rgbd_hz": 30,
+    "nominal_groundtruth_hz": 100,
+    "groundtruth_columns": [
+      "timestamp",
+      "tx",
+      "ty",
+      "tz",
+      "qx",
+      "qy",
+      "qz",
+      "qw"
+    ],
+    "timestamp_unit": "seconds since Unix epoch",
+    "pose_frame": "RGB optical center relative to motion-capture world origin, interpreted as camera-to-world",
+    "rgb_depth_timestamp_matching_required": true,
+    "actual_frame_intervals_verified": false,
+    "actual_groundtruth_gaps_verified": false,
+    "protocol_recommendation": "Freeze RGB-depth tolerance, GT maximum interpolation gap and boundary rules, fixed temporal sampling, and failure behavior before new images or model results; do not interpolate across large missing-GT intervals."
+  },
+  "license": {
+    "current_official_data": "CC BY 4.0 unless stated otherwise",
+    "current_official_code": "BSD-2-Clause",
+    "historical_2012_paper_data": "CC BY 3.0",
+    "archive_specific_license_inspected": false,
+    "citation": "J. Sturm, N. Engelhard, F. Endres, W. Burgard, D. Cremers. A Benchmark for the Evaluation of RGB-D SLAM Systems. IROS, 2012."
+  },
+  "unverified": [
+    "Downloaded archive integrity and SHA256",
+    "RGB/depth frame counts",
+    "Actual associated frame count",
+    "GT gaps and evaluable fixed windows",
+    "Depth missingness",
+    "Archive README or specific license",
+    "Any new image visual QA",
+    "Any new-scene experiment result"
+  ],
+  "retrieval_limitations": [
+    "Web TGZ click returned internal errors; HTML href extraction and independent HEAD requests succeeded without downloading bodies",
+    "A later paper page fetch timed out; previously retrieved original text already supported the recorded environment, sensor and correction claims",
+    "Official summary and detail approximate GB displays disagree; exact HTTP content lengths were retained instead"
+  ],
+  "next_step": "Parent freezes S8 protocol using the source-only recommendation, then performs metadata-first download validation under the predeclared rules.",
+  "completed_utc": "2026-09-05T17:48:59+00:00"
+}

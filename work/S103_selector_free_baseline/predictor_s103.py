@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""S103-VMemBase: fixed four-history/four-command-camera development forward.
+Only staged history RGB/pose, K and command_camera are read by this process.
+Future RGB-D/pose files are scorer inputs and are never opened here.
+
+Disclosure (see contract protocol.future_modality_disclosure): the four
+command_camera C2W matrices are the dataset's estimated poses for the four
+target frames.  Target-frame pose is therefore an INPUT to this predictor.  Only
+future RGB and future depth are withheld.  The seal fields below are measured by
+a CPython audit hook, not asserted as constants.
+"""
+from __future__ import annotations
+import hashlib, io, json, os, random, sys, time
+from pathlib import Path
+import numpy as np
+
+def sha_bytes(b: bytes) -> str: return hashlib.sha256(b).hexdigest()
+def sha_file(p: Path) -> str: return sha_bytes(p.read_bytes())
+def require(x, msg):
+    if not x: raise RuntimeError(msg)
+
+RUN=Path(os.environ.get('RUN_ROOT','/home/yliutz/gwm_source_transport_20260915'))
+STAGE=Path(os.environ.get('PREDICTOR_ROOT',''))
+OUT=Path(os.environ.get('PREDICTOR_OUT',''))
+WEIGHTS=Path('/home/yliutz/gwm_weights_20260915')
+BUNDLE=Path(__file__).resolve().parent
+require(STAGE.is_dir() and OUT.is_dir(), 'PREDICTOR_ROOT/PREDICTOR_OUT required')
+# The isolation launcher provides this allowlist; reject environment drift.
+require(os.environ.get('EXECUTION_BOUNDARY_ID','').strip(), 'missing execution boundary id')
+
+# --- GWM-ACCESS-RECORDER-V2-BEGIN (identical text in predictor and scorer) ---
+# Replaces the 2026-09-16 open-only hook, which had three defects found on
+# 2026-09-17: it filtered every PEP 578 event except 'open'; it capped its
+# recorded list at 64 while reporting len(list) under a field named '..._count',
+# silently under-reporting past the cap (500 events certified as 64 in
+# test_access_recorder.py); and it declared no channel model.  Counts here are
+# exact and never truncated; sample lists are bounded and say so.  This observes
+# and reports.  It does not enforce: the container mount whitelist is the
+# enforcing boundary, and PEP 578 is not a sandbox.
+# Self-contained imports: this block is inlined into files that may not
+# import os themselves.  scorer_s103.py did not, and the omission surfaced
+# as NameError inside the audit hook on 2026-09-17.
+import collections as _collections
+import os as _os
+_FILE_EVENTS = ('open', 'mmap.__new__', 'os.truncate', 'shutil.copyfile')
+_LISTING_EVENTS = ('os.listdir', 'os.scandir', 'glob.glob', 'pathlib.Path.glob')
+_OPAQUE_EVENTS = ('subprocess.Popen', 'os.system', 'os.exec', 'os.posix_spawn',
+                  'os.fork', 'socket.connect', 'socket.getaddrinfo',
+                  'socket.gethostbyname', 'urllib.Request', 'ctypes.dlopen',
+                  'ctypes.dlsym', 'ctypes.call_function')
+_CHANNEL_MODEL = {
+    'instrument': 'CPython sys.addaudithook, PEP 578',
+    'observed_event_classes': {'file_content': list(_FILE_EVENTS),
+                               'directory_listing': list(_LISTING_EVENTS),
+                               'opaque_delegation': list(_OPAQUE_EVENTS)},
+    'not_observable': [
+        'reads performed inside a child process after an opaque event',
+        'reads performed by native code that does not traverse the CPython layer',
+        'reads through a file descriptor inherited before the hook was installed',
+        'any channel that is not raised as a Python audit event'],
+    'enforcement_is_elsewhere': ('The container mount whitelist is the enforcing '
+                                 'boundary. This recorder observes and reports; '
+                                 'it does not enforce and is not a sandbox.')}
+
+class _AccessRecorder(object):
+    def __init__(self, allowed_roots, forbidden_roots, watched_roots=(), sample_cap=64):
+        self.allowed = tuple(str(p) for p in allowed_roots)
+        self.forbidden = tuple(str(p) for p in forbidden_roots)
+        self.watched = {str(k): tuple(str(p) for p in v) for k, v in dict(watched_roots).items()}
+        self.sample_cap = int(sample_cap)
+        self.counts = _collections.Counter()
+        self.event_counts = _collections.Counter()
+        self.watched_counts = _collections.Counter()
+        self.samples = {'forbidden': [], 'outside': [], 'opaque': [], 'listing': []}
+        self._seen = dict((k, set()) for k in self.samples)
+        self.truncated = dict((k, False) for k in self.samples)
+    def _record(self, bucket, value):
+        self.counts[bucket] += 1
+        if value in self._seen[bucket]:
+            return
+        if len(self.samples[bucket]) < self.sample_cap:
+            self._seen[bucket].add(value); self.samples[bucket].append(value)
+        else:
+            self.truncated[bucket] = True
+    def _path_of(self, args):
+        try:
+            target = _os.fspath(args[0]) if args else ''
+        except (TypeError, ValueError, IndexError):
+            return None
+        return target if isinstance(target, str) and target.startswith('/') else None
+    def hook(self, event, args):
+        self.event_counts[event] += 1
+        if event in _OPAQUE_EVENTS:
+            self._record('opaque', event); return
+        listing = event in _LISTING_EVENTS
+        if not listing and event not in _FILE_EVENTS:
+            return
+        target = self._path_of(args)
+        if target is None:
+            return
+        for label, roots in self.watched.items():
+            if target.startswith(roots):
+                self.watched_counts[label] += 1
+        if target.startswith(self.forbidden):
+            self._record('forbidden', target)
+        elif listing:
+            self._record('listing', target)
+        elif not target.startswith(self.allowed):
+            self._record('outside', target)
+    def report(self):
+        return {
+            'access_accounting_method': ('CPython sys.addaudithook over the full PEP 578 '
+                                         'event stream; counts are exact and never truncated; '
+                                         'sample lists are capped with an explicit flag'),
+            'channel_model': _CHANNEL_MODEL,
+            'sample_cap': self.sample_cap,
+            'exact_counts': {'forbidden_root_events': self.counts['forbidden'],
+                             'outside_allowlist_events': self.counts['outside'],
+                             'opaque_delegation_events': self.counts['opaque'],
+                             'directory_listing_events': self.counts['listing']},
+            'watched_root_events': dict(self.watched_counts),
+            'samples': dict((k, sorted(v)) for k, v in self.samples.items()),
+            'sample_truncated': dict(self.truncated),
+            'observed_event_names': dict(sorted(self.event_counts.items())),
+            'boundary_clean': (self.counts['forbidden'] == 0 and self.counts['opaque'] == 0)}
+# --- GWM-ACCESS-RECORDER-V2-END ---
+
+ALLOWED_OPEN_ROOTS=tuple(str(Path(x)) for x in (
+    sys.prefix, RUN, WEIGHTS, STAGE, OUT, BUNDLE,
+    '/usr','/lib','/lib64','/bin','/sbin','/etc','/proc','/sys','/dev','/run','/tmp','/var','/opt'))
+FORBIDDEN_OPEN_ROOTS=('/home/yliutz/geometry-world-modeling','/home/yliutz/datasets')
+ACCESS=_AccessRecorder(ALLOWED_OPEN_ROOTS, FORBIDDEN_OPEN_ROOTS)
+sys.addaudithook(ACCESS.hook)
+
+SOURCE=RUN/'vmem'; sys.path[:0]=[str(SOURCE),str(SOURCE/'extern/CUT3R'),str(SOURCE/'extern/CUT3R/src')]
+os.environ.update(HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',HF_HUB_DISABLE_IMPLICIT_TOKEN='1',PYTHONDONTWRITEBYTECODE='1')
+import torch
+from omegaconf import OmegaConf
+import huggingface_hub
+from diffusers.models import AutoencoderKL
+import open_clip
+
+def local_hf(repo_id, filename, *args, **kwargs):
+    table={('liguang0115/vmem','vmem_weights.pth'):WEIGHTS/'vmem_weights.pth',('liguang0115/cut3r','cut3r_512_dpt_4_64.pth'):WEIGHTS/'cut3r_512_dpt_4_64.pth'}
+    p=table.get((repo_id,filename)); require(p is not None and p.exists(),f'unbound HF request {repo_id}/{filename}'); return str(p)
+huggingface_hub.hf_hub_download=local_hf
+orig_vae=AutoencoderKL.from_pretrained
+def local_vae(repo,*args,**kwargs):
+    # The formal source and checkpoint mounts are read-only.  Both required VAE
+    # files already live in WEIGHTS, so no runtime directory/symlink creation is
+    # permitted or needed.
+    return orig_vae(str(WEIGHTS),local_files_only=True,force_download=False,low_cpu_mem_usage=False,use_safetensors=True)
+AutoencoderKL.from_pretrained=local_vae
+orig_clip=open_clip.create_model_and_transforms
+def local_clip(name,*args,**kwargs): return orig_clip(name,pretrained=str(WEIGHTS/'open_clip_model.safetensors'))
+open_clip.create_model_and_transforms=local_clip
+orig_load=torch.load
+def verified_load(path,*args,**kwargs):
+    if str(path) in {str(WEIGHTS/'vmem_weights.pth'),str(WEIGHTS/'cut3r_512_dpt_4_64.pth')}: kwargs['weights_only']=False
+    return orig_load(path,*args,**kwargs)
+torch.load=verified_load
+from modeling.network import VMemModel, VMemModelParams, VMemWrapper
+from modeling.modules.autoencoder import AutoEncoder
+from modeling.modules.conditioner import CLIPConditioner
+from modeling.sampling import DDPMDiscretization, DiscreteDenoiser, create_samplers
+from modeling.pipeline import VMemPipeline
+from utils import load_img_and_K, encode_vae_image, encode_image, do_sample, tensor_to_pil
+
+# The immutable bundle carries the reviewed contract; bind sampling knobs and
+# checkpoint identity to it instead of trusting unverified process-local values.
+contract=json.loads((BUNDLE/'contract.json').read_text())
+protocol=contract['protocol']
+require(contract.get('schema')=='gwm-gate0-staged-v2' and protocol.get('status')=='FROZEN','bundle contract invalid')
+expected=protocol['expected_config']
+# Re-verify every checkpoint in-process immediately before deserialisation.  The
+# two .pth files are loaded with weights_only=False, so their bytes must be the
+# reviewed bytes at load time, not merely at probe time in an earlier job.
+checkpoint_digests={}
+for name,ref in sorted(protocol['checkpoints'].items()):
+    p=Path(ref['path']); actual=sha_file(p)
+    require(p.stat().st_size==ref['bytes'] and actual==ref['sha256'],f'checkpoint identity mismatch {name} {p}')
+    checkpoint_digests[name]={'path':str(p),'bytes':ref['bytes'],'sha256':actual}
+
+# Manifest is generated before launch and is the only identity source.
+manifest=json.loads((STAGE/'predictor_inputs.json').read_text())
+require(manifest.get('roles')==['history_rgb','history_pose','command_camera','camera_intrinsics'],'unexpected predictor roles')
+records=manifest['records']; require(len(records)==13,'expected 4 history RGB + 4 history pose + 4 camera commands + K')
+reads=[]
+def read(ref, role):
+    p=Path(ref['path']); require(p.is_relative_to(STAGE),f'{role} escapes stage'); b=p.read_bytes(); actual=sha_bytes(b)
+    require(actual==ref['sha256'] and len(b)==ref['bytes'],f'{role} identity mismatch {p}')
+    reads.append({'role':role,'path':str(p),'bytes':len(b),'sha256':actual}); return b
+# Load only declared staged files. No dataset archive or outcome root is reachable here.
+by_role={}
+for row in records: by_role.setdefault(row['role'],[]).append(row)
+require(len(by_role.get('history_rgb',[]))==4 and len(by_role.get('history_pose',[]))==4
+        and len(by_role.get('command_camera',[]))==4 and len(by_role.get('camera_intrinsics',[]))==1,
+        'predictor role counts differ')
+ordered=[]
+for rgb,pose in zip(sorted(by_role['history_rgb'],key=lambda x:int(x['frame_id'])),
+                    sorted(by_role['history_pose'],key=lambda x:int(x['frame_id']))):
+    require(rgb['frame_id']==pose['frame_id'],'history RGB/pose IDs differ')
+    ordered.append((rgb,pose))
+config=OmegaConf.load(SOURCE/'configs/inference/inference.yaml')
+# Official reference configuration: VMemPipeline.__init__ defaults to
+# dtype=torch.float32 and app.py constructs VMemPipeline(CONFIG, DEVICE) without
+# overriding it, while utils.do_sample wraps sampling in
+# torch.autocast(device_type='cuda', enabled=True).  Parameters are therefore
+# fp32 with automatic mixed precision at sampling time, NOT manually cast fp16.
+# Job 594069 failed because manual fp16 latents collided with pipeline.py:1156
+# c_replace, which is allocated without an explicit dtype and is thus fp32.
+device='cuda'; dtype=torch.float32
+# Runtime and model binding are fixed by the contract/launcher, not command-line overrides.
+THREADS=int(expected['runtime.torch_num_threads']); INTEROP=int(expected['runtime.torch_num_interop_threads'])
+CHUNK=int(expected['runtime.autoencoder_chunk_size']); SEED=int(expected['seed'])
+STEPS=int(expected['model.inference_num_steps']); CFG=float(expected['sampling.cfg'])
+CFG_MIN=float(expected['sampling.cfg_min']); GUIDER=int(expected['sampling.guider_types'])
+DECODING_T=int(expected['sampling.decoding_t'])
+torch.set_num_threads(THREADS); torch.set_num_interop_threads(INTEROP)
+random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED); torch.cuda.manual_seed_all(SEED)
+model=VMemModel(VMemModelParams()).to(device,dtype); state=torch.load(WEIGHTS/'vmem_weights.pth',map_location='cpu',weights_only=False); state={k.replace('module.','') if 'module.' in k else k:v for k,v in state.items()}; info=model.load_state_dict(state,strict=True); require(not info.missing_keys and not info.unexpected_keys,'VMem state mismatch'); del state
+model=VMemWrapper(model).eval()
+ae=AutoEncoder(chunk_size=CHUNK).to(device,dtype).eval()
+clip=CLIPConditioner().to(device,dtype).eval()
+# Use original preprocessing and K transformation; source K is unnormalised 640x480.
+K0=np.asarray(json.loads(read(by_role['camera_intrinsics'][0]['file'],'camera_intrinsics').decode())['K'],dtype=np.float32)
+def model_grid_K(source_K):
+    """Apply 640x480 -> 768x576 resize and x=[96,672) crop exactly once."""
+    k=torch.tensor(source_K,dtype=torch.float32).clone()
+    k[0]*=1.2; k[1]*=1.2; k[0,2]-=96.
+    require(torch.allclose(k[2],torch.tensor([0.,0.,1.])), 'transformed K homogeneous row changed')
+    return k
+images=[]; Ks=[]; c2ws=[]; ids=[]
+for rgb,pose in ordered:
+    rgb_bytes=read(rgb['file'],'history_rgb'); pose_bytes=read(pose['file'],'history_pose')
+    rgb_path=STAGE/'history'/f"{int(rgb['frame_id']):06d}.color.png"; pose_path=STAGE/'history'/f"{int(pose['frame_id']):06d}.pose.txt"
+    # Manifest file path is authoritative; use temporary in-memory decode to avoid alternate paths.
+    from PIL import Image
+    img=Image.open(io.BytesIO(rgb_bytes)).convert('RGB'); arr=np.asarray(img)
+    t=torch.from_numpy(arr.transpose(2,0,1).copy()).float()/255.; t=t.unsqueeze(0)
+    # Explicit equivalent to source transform: resize 640x480 -> 768x576, crop x=96.
+    t=torch.nn.functional.interpolate(t,(576,768),mode='area')[:,:, :,96:672]*2.-1.
+    k=model_grid_K(K0)
+    images.append(t[0]); Ks.append(k)
+    c2ws.append(np.loadtxt(io.StringIO(pose_bytes.decode()),dtype=np.float32).reshape(4,4))
+    ids.append(int(rgb['frame_id']))
+images=torch.stack(images).to(device,dtype); Ks=torch.stack(Ks).to(device); c2ws=torch.tensor(np.stack(c2ws),device=device,dtype=torch.float32)
+# Existing VMem helper methods are called with a geometry carrier; camera arithmetic stays FP32.
+carrier=object.__new__(VMemPipeline); carrier.camera_scale=2.0; carrier.device=torch.device(device); carrier.dtype=torch.float32; carrier.config=config
+with torch.inference_mode():
+    lat=encode_vae_image(images,ae,device,dtype)
+    emb=encode_image(images,clip,device,dtype)
+# Query camera commands are predeclared and are the dataset's target-frame poses.
+# This is a declared input, not a withheld outcome; see future_modality_disclosure.
+query=[]; command_ids=[]
+for cam in sorted(by_role['command_camera'],key=lambda x:int(x['frame_id'])):
+    payload=json.loads(read(cam['file'],'command_camera').decode()); query.append(np.asarray(payload['c2w'],dtype=np.float32)); command_ids.append(int(cam['frame_id']))
+query_c2w=torch.tensor(np.stack(query),device=device,dtype=torch.float32)
+# Match the official VMem pipeline: concatenate context and target cameras first,
+# then apply one common centering/scaling transform to all eight cameras.
+raw_all_c2w=torch.cat([c2ws,query_c2w],0)
+with torch.inference_mode():
+    scale,all_c2w=VMemPipeline.get_translation_scaling_factor(carrier,raw_all_c2w.clone())
+before_delta=raw_all_c2w[:,None,:3,3]-raw_all_c2w[None,:,:3,3]
+after_delta=all_c2w[:,None,:3,3]-all_c2w[None,:,:3,3]
+require(torch.allclose(before_delta,after_delta,rtol=0,atol=1e-5),
+        'common camera centering did not preserve all8 relative translations')
+query_K=model_grid_K(K0).to(device)
+all_K=torch.cat([Ks,query_K.unsqueeze(0).repeat(len(query),1,1)],0)
+require(torch.allclose(all_K[:,2],torch.tensor([0.,0.,1.],device=device).expand(8,-1)),
+        'history/query K homogeneous rows differ')
+require(torch.allclose(all_K[:,0,2],torch.full((8,),288.,device=device)),
+        'history/query K principal points differ')
+require(torch.allclose(all_K,query_K.unsqueeze(0).expand(8,-1,-1)),
+        'history/query transformed intrinsics differ')
+mask=torch.tensor([True]*4+[False]*4,device=device)
+with torch.inference_mode():
+    cond=VMemPipeline.get_cond(carrier,lat,all_c2w,all_K,scale,emb,mask)
+    den=DiscreteDenoiser(DDPMDiscretization(),num_idx=1000,device=device)
+    sampler=create_samplers(guider_types=GUIDER,discretization=DDPMDiscretization(),num_frames=8,num_steps=STEPS,cfg_min=CFG_MIN,device=device)[0]
+    outputs=do_sample(model,ae,den,sampler,cond['c'],cond['uc'],cond['all_c2ws'],cond['all_Ks'],cond['input_masks'],H=576,W=576,C=4,F=8,T=8,cfg=CFG,decoding_t=DECODING_T,verbose=False,global_pbar=None,return_latents=True,device=device)
+samples,latents=outputs; target=samples[4:].detach().float().cpu().numpy(); latent_out=latents.detach().float().cpu().numpy()
+np.save(OUT/'predicted_target_rgb_fp32.npy',target,allow_pickle=False); np.save(OUT/'all8_latents_fp32.npy',latent_out,allow_pickle=False)
+# Every access field below is derived from the audit-hook record, never asserted
+# as a constant.  target_pose_gt_provided_as_command is a declared disclosure:
+# the command cameras ARE the dataset target-frame poses.
+disclosure=protocol.get('future_modality_disclosure') or {}
+withheld=list(disclosure.get('future_modalities_withheld',['future_rgb','future_depth']))
+receipt={'schema':'s103-vmem-development-prediction-v2','status':'PREDICTION_COMPLETE',
+ 'scope':'selector_free_development_baseline','run_id':os.environ.get('RUN_ID',''),
+ 'execution_boundary_id':os.environ['EXECUTION_BOUNDARY_ID'],
+ 'history_frame_ids':ids,'command_camera_frame_ids':command_ids,'target_command_count':4,
+ 'resolution':[576,576],'context_num_frames':4,'target_num_frames':4,
+ 'sampling_steps':STEPS,'seed':SEED,
+ 'sampling':{'cfg':CFG,'cfg_min':CFG_MIN,'guider_types':GUIDER,'decoding_t':DECODING_T},
+ 'runtime':{'torch_num_threads':THREADS,'torch_num_interop_threads':INTEROP,
+            'autoencoder_chunk_size':CHUNK},
+ 'dtype':'fp32_params_cuda_autocast_fp32_saved_outputs','verified_checkpoints':checkpoint_digests,
+ 'reads':reads,
+ 'output_files':[{'path':str(p),'bytes':p.stat().st_size,'sha256':sha_file(p)} for p in sorted(OUT.glob('*.npy'))],
+ 'target_pose_gt_provided_as_command':True,
+ 'withheld_future_modalities':withheld,
+ 'access_record':ACCESS.report(),
+ 'access_accounting_method':ACCESS.report()['access_accounting_method'],
+ 'forbidden_root_opens':sorted(ACCESS.samples['forbidden']),
+ 'outside_allowlist_opens':sorted(ACCESS.samples['outside']),
+ 'outside_allowlist_open_count':ACCESS.counts['outside'],
+ 'withheld_future_modality_files_opened':ACCESS.counts['forbidden']>0,
+ 'unauthorized_input_reads':ACCESS.counts['forbidden'],
+ 'completed_utc':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat()}
+(OUT/'PREDICTION_RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps(receipt,indent=2))

@@ -1,0 +1,48 @@
+{
+  "recorded_utc": "2026-09-08T14:40:29.489648+00:00",
+  "type": "STATIC_COMPATIBILITY_AND_EXISTING_TEST_COVERAGE_NOT_REAL_RESULT",
+  "unchanged_frozen_inputs": {
+    "score_c1_blind_candidate.py": {
+      "path": "work/S46_c1_blind_scoring_preparation/score_c1_blind_candidate.py",
+      "sha256": "ada2ba80eceebe83a514fd929c6cc82b69669e6525e261ff4729064f2bac3f1a",
+      "bytes": 6356
+    },
+    "C1_SCORING_CONTRACT_TEMPLATE.json": {
+      "path": "work/S46_c1_blind_scoring_preparation/C1_SCORING_CONTRACT_TEMPLATE.json",
+      "sha256": "79299749250c22dd9719d93964b9c179a8884f01c530bf07a45625c59395ab7b",
+      "bytes": 4444
+    },
+    "bind_identity_only.py": {
+      "path": "work/S46_c1_blind_scoring_preparation/bind_identity_only.py",
+      "sha256": "32f80b585ab8e511a64df08c8bb230e1a03835cf6ec33f98c6e8d2a80175ee60",
+      "bytes": 13663
+    }
+  },
+  "math_canonical_sha256": "9bee0abe9392e04e061adb7cf8b39297d7730e7045ed856486f1e03ee8d82812",
+  "required_row_assertions_exactly_equal": [
+    "generation_first_technically_valid_attempt",
+    "readback_independently_reviewed",
+    "cache_readback_guard_pass",
+    "requested_pose_K_guard_pass",
+    "all_nine_authoritative_pixels_identified",
+    "no_visual_QA_before_machine_score"
+  ],
+  "authoritative_identity_chain": "Original contract template requires nine ID0-ID8 identities; existing identity-only binder renders exact path/hash/pointers, wrapper validate_numeric_review requires six true assertions and the exact S45 nine-item identities, and validate_contract matches these to bound slots. Numeric review not yet supplied or accepted by this preparation.",
+  "pixel_identity_source_record_label": "row_validity_review",
+  "pixel_identities_json_pointer": "/authoritative_pixel_identities",
+  "row_validity_assertions_json_pointer": "/row_validity_assertions",
+  "kernel_scope": "The unchanged kernel checks nine exact arrays, copy degeneracy, and frozen arithmetic only. The wrapper and bound metadata contract perform row-validity/identity gating. Do not claim the math kernel independently validates review provenance.",
+  "expected_numeric_review_schema": "s45b-c1-numeric-camera-guard-independent-result-review-v1",
+  "expected_numeric_review_status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_INDEPENDENT_RESULT_REVIEW_V11",
+  "numeric_review_validated_in_this_preparation": false,
+  "source_delta_verified": "Exact original wrapper text with only V9-to-V11 labels and WRAPPER_AUTHOR_ROLE substitution. Selftest bytes identical; binding template changes wrapper path only. Protocol documents the administrative revision and coauthorship.",
+  "invariants": [
+    "original scorer bytes and math hash unchanged",
+    "ROI and ID0/8, strict MSE>0.01 and diagnostic pairs unchanged",
+    "same-FD read/close and byte hashing functions unchanged",
+    "four false blindness fields unchanged",
+    "fixed unique C1_score_attempt_01 and staging unchanged",
+    "no formal binding or output created"
+  ],
+  "new_frameworks_or_attack_matrices": 0
+}

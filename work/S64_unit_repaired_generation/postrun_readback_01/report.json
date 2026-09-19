@@ -1,0 +1,3001 @@
+{
+  "row": "C2_UNIT_REPAIRED_S64",
+  "retrieval_variant": {
+    "id": "s64_positive_camera_depth_median_units_v1",
+    "scope": "renderer_boundary_instance_hook",
+    "length_unit_rule": "median_of_all_strictly_positive_camera_z",
+    "scaled_fields": [
+      "surfel.position",
+      "surfel.radius",
+      "pose.translation"
+    ],
+    "preserved_fields": [
+      "rotation",
+      "focal",
+      "normal",
+      "source_ID",
+      "cache"
+    ],
+    "depth_unit": "dimensionless_camera_depth_in_positive_median_units",
+    "retrieval_weight": "original_cos_over_1_plus_dimensionless_depth",
+    "physical_length_unit": "UNKNOWN",
+    "hook": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/unit_renderer_hook.py",
+      "sha256": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d"
+    },
+    "adapter": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py",
+      "sha256": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+    },
+    "designed_after_C2_failure": true,
+    "eligible_for_original_cohort": false,
+    "new_method_validated": false
+  },
+  "terminal_and_unit_binding": {
+    "row": "C2_UNIT_REPAIRED_S64",
+    "retrieval_variant": {
+      "id": "s64_positive_camera_depth_median_units_v1",
+      "scope": "renderer_boundary_instance_hook",
+      "length_unit_rule": "median_of_all_strictly_positive_camera_z",
+      "scaled_fields": [
+        "surfel.position",
+        "surfel.radius",
+        "pose.translation"
+      ],
+      "preserved_fields": [
+        "rotation",
+        "focal",
+        "normal",
+        "source_ID",
+        "cache"
+      ],
+      "depth_unit": "dimensionless_camera_depth_in_positive_median_units",
+      "retrieval_weight": "original_cos_over_1_plus_dimensionless_depth",
+      "physical_length_unit": "UNKNOWN",
+      "hook": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/unit_renderer_hook.py",
+        "sha256": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d"
+      },
+      "adapter": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py",
+        "sha256": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+      },
+      "designed_after_C2_failure": true,
+      "eligible_for_original_cohort": false,
+      "new_method_validated": false
+    },
+    "expected_calls_on_complete": 1,
+    "calls": [
+      {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S64_unit_repaired_generation/retrieval_unit_call_0001.json",
+        "sha256": "26e840fa79daf6e71df5c1e0578d17232a8b9acbcd561871c16f7d57cd06ffe6",
+        "sequence": 1,
+        "status": "RENDERED_IN_CANONICAL_UNITS"
+      }
+    ],
+    "complete": true
+  },
+  "engineering_consumption": {
+    "variant": {
+      "name": "VMem + stabilityai/sd-vae-ft-mse (declared VAE component variant)",
+      "repo": "stabilityai/sd-vae-ft-mse",
+      "revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+      "subfolder": "",
+      "original_sd21_vae_identity": "UNKNOWN",
+      "exact_original_baseline": false
+    },
+    "manifest_sha256": "34c2bad90c5627b6e9742fe65f8c8b4a1ff76da730a2c0d87bbcedcc38b28619",
+    "archive_files": 6698,
+    "archive_bytes": 229336164,
+    "trace_events": 327,
+    "archive_events": 102,
+    "actual_selected_context_ids": [
+      [
+        0
+      ],
+      [
+        0,
+        2,
+        4,
+        1
+      ]
+    ],
+    "verified_generated_ids_in_second_context": [
+      2,
+      4,
+      1
+    ],
+    "comparisons": [
+      {
+        "comparison": "batch_1:sampler_output->all_samples_z",
+        "bytes": 663552,
+        "shape": [
+          8,
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "batch_1:all_target_samples->actual_encode_image_input",
+        "bytes": 27869184,
+        "shape": [
+          7,
+          3,
+          576,
+          576
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "batch_1:actual_encode_image_output->all_commit_embeddings",
+        "bytes": 28672,
+        "shape": [
+          7,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:latents:cache0->context0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:oldlatents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_latents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_latents1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_latents2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_latents3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_latents4",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:encoder_embeddings:cache0->context0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:oldencoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_encoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_encoder_embeddings1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_encoder_embeddings2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_encoder_embeddings3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_encoder_embeddings4",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:c2ws:cache0->context0",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "FP64_to_FP32_then_bitwise"
+      },
+      {
+        "comparison": "b1:oldc2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_c2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_c2ws1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_c2ws2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_c2ws3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_c2ws4",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:Ks:cache0->context0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:oldKs0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_Ks0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_Ks1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_Ks2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_Ks3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:map_preserves_Ks4",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:sample_slot_to_latent1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:actual_clip_to_cache1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_c2ws->cache1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_Ks->cache1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:sample_slot_to_latent2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:actual_clip_to_cache2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_c2ws->cache2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_Ks->cache2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:sample_slot_to_latent3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:actual_clip_to_cache3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_c2ws->cache3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_Ks->cache3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:sample_slot_to_latent4",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:actual_clip_to_cache4",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_c2ws->cache4",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:target_Ks->cache4",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:context_latents->actual_get_cond",
+        "bytes": 82944,
+        "shape": [
+          1,
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:context_encoder_embeddings->actual_get_cond",
+        "bytes": 4096,
+        "shape": [
+          1,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:context_cameras->translation_input",
+        "bytes": 64,
+        "shape": [
+          1,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:all_target_cameras->translation_input",
+        "bytes": 448,
+        "shape": [
+          7,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:translated_cameras->get_cond",
+        "bytes": 512,
+        "shape": [
+          8,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:translation_scalar->get_cond",
+        "mode": "same_python_scalar_bits",
+        "type": "float"
+      },
+      {
+        "comparison": "b1:context_Ks->get_cond",
+        "bytes": 36,
+        "shape": [
+          1,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:all_target_Ks->get_cond",
+        "bytes": 252,
+        "shape": [
+          7,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:c.crossattn->sampler",
+        "bytes": 32768,
+        "shape": [
+          8,
+          1,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:c.replace->sampler",
+        "bytes": 829440,
+        "shape": [
+          8,
+          5,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:c.concat->sampler",
+        "bytes": 1161216,
+        "shape": [
+          8,
+          7,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:c.dense_vector->sampler",
+        "bytes": 995328,
+        "shape": [
+          8,
+          6,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:uc.crossattn->sampler",
+        "bytes": 32768,
+        "shape": [
+          8,
+          1,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:uc.replace->sampler",
+        "bytes": 829440,
+        "shape": [
+          8,
+          5,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:uc.concat->sampler",
+        "bytes": 1161216,
+        "shape": [
+          8,
+          7,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:uc.dense_vector->sampler",
+        "bytes": 995328,
+        "shape": [
+          8,
+          6,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:all_c2ws->sampler",
+        "bytes": 512,
+        "shape": [
+          8,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:all_Ks->sampler",
+        "bytes": 288,
+        "shape": [
+          8,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:input_masks->sampler",
+        "bytes": 8,
+        "shape": [
+          8
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b1:selected_latent0->sampler_channels",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "batch_2:sampler_output->all_samples_z",
+        "bytes": 663552,
+        "shape": [
+          8,
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "batch_2:all_target_samples->actual_encode_image_input",
+        "bytes": 15925248,
+        "shape": [
+          4,
+          3,
+          576,
+          576
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "batch_2:actual_encode_image_output->all_commit_embeddings",
+        "bytes": 16384,
+        "shape": [
+          4,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:latents:cache0->context0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:latents:cache2->context1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:latents:cache4->context2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:latents:cache1->context3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldlatents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldlatents1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldlatents2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldlatents3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldlatents4",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents4",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents5",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents6",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents7",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_latents8",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:encoder_embeddings:cache0->context0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:encoder_embeddings:cache2->context1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:encoder_embeddings:cache4->context2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:encoder_embeddings:cache1->context3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldencoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldencoder_embeddings1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldencoder_embeddings2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldencoder_embeddings3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldencoder_embeddings4",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings4",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings5",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings6",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings7",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_encoder_embeddings8",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c2ws:cache0->context0",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "FP64_to_FP32_then_bitwise"
+      },
+      {
+        "comparison": "b2:c2ws:cache2->context1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c2ws:cache4->context2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c2ws:cache1->context3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldc2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldc2ws1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldc2ws2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldc2ws3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldc2ws4",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws4",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws5",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws6",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws7",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_c2ws8",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:Ks:cache0->context0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:Ks:cache2->context1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:Ks:cache4->context2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:Ks:cache1->context3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldKs0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldKs1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldKs2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldKs3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:oldKs4",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks4",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks5",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks6",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks7",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:map_preserves_Ks8",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:sample_slot_to_latent5",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:actual_clip_to_cache5",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_c2ws->cache5",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_Ks->cache5",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:sample_slot_to_latent6",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:actual_clip_to_cache6",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_c2ws->cache6",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_Ks->cache6",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:sample_slot_to_latent7",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:actual_clip_to_cache7",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_c2ws->cache7",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_Ks->cache7",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:sample_slot_to_latent8",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:actual_clip_to_cache8",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_c2ws->cache8",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:target_Ks->cache8",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:context_latents->actual_get_cond",
+        "bytes": 331776,
+        "shape": [
+          4,
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:context_encoder_embeddings->actual_get_cond",
+        "bytes": 16384,
+        "shape": [
+          4,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:context_cameras->translation_input",
+        "bytes": 256,
+        "shape": [
+          4,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:all_target_cameras->translation_input",
+        "bytes": 256,
+        "shape": [
+          4,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:translated_cameras->get_cond",
+        "bytes": 512,
+        "shape": [
+          8,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:translation_scalar->get_cond",
+        "mode": "same_python_scalar_bits",
+        "type": "float"
+      },
+      {
+        "comparison": "b2:context_Ks->get_cond",
+        "bytes": 144,
+        "shape": [
+          4,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:all_target_Ks->get_cond",
+        "bytes": 144,
+        "shape": [
+          4,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c.crossattn->sampler",
+        "bytes": 32768,
+        "shape": [
+          8,
+          1,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c.replace->sampler",
+        "bytes": 829440,
+        "shape": [
+          8,
+          5,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c.concat->sampler",
+        "bytes": 1161216,
+        "shape": [
+          8,
+          7,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:c.dense_vector->sampler",
+        "bytes": 995328,
+        "shape": [
+          8,
+          6,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:uc.crossattn->sampler",
+        "bytes": 32768,
+        "shape": [
+          8,
+          1,
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:uc.replace->sampler",
+        "bytes": 829440,
+        "shape": [
+          8,
+          5,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:uc.concat->sampler",
+        "bytes": 1161216,
+        "shape": [
+          8,
+          7,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:uc.dense_vector->sampler",
+        "bytes": 995328,
+        "shape": [
+          8,
+          6,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:all_c2ws->sampler",
+        "bytes": 512,
+        "shape": [
+          8,
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:all_Ks->sampler",
+        "bytes": 288,
+        "shape": [
+          8,
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:input_masks->sampler",
+        "bytes": 8,
+        "shape": [
+          8
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:selected_latent0->sampler_channels",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:selected_latent1->sampler_channels",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:selected_latent2->sampler_channels",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "b2:selected_latent3->sampler_channels",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "initial:latents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:latents0",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:latents1",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:latents2",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:latents3",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:latents4",
+        "bytes": 82944,
+        "shape": [
+          4,
+          72,
+          72
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "initial:encoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:encoder_embeddings0",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:encoder_embeddings1",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:encoder_embeddings2",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:encoder_embeddings3",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:encoder_embeddings4",
+        "bytes": 4096,
+        "shape": [
+          1024
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "initial:c2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:c2ws0",
+        "bytes": 128,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:c2ws1",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:c2ws2",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:c2ws3",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:c2ws4",
+        "bytes": 64,
+        "shape": [
+          4,
+          4
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "initial:Ks0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:Ks0",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:Ks1",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:Ks2",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:Ks3",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      },
+      {
+        "comparison": "cross_batch:Ks4",
+        "bytes": 36,
+        "shape": [
+          3,
+          3
+        ],
+        "mode": "same_dtype_bitwise"
+      }
+    ],
+    "actual_call_counts": {
+      "vae_encode": 1,
+      "clip_forward": 3,
+      "euler_step": 100,
+      "main_model_forward": 100,
+      "vae_decode": 2,
+      "construct_scene": 2
+    },
+    "euler_steps_by_batch": {
+      "batch_1": 50,
+      "batch_2": 50
+    },
+    "trace_batch_states": {
+      "batch_1": {
+        "state": "batch_complete",
+        "callbacks": 50,
+        "event_sequences": {
+          "batch_begin": 4,
+          "sample_call": 5,
+          "sampler_enter": 6,
+          "sampler_return": 157,
+          "sample_return": 159,
+          "cache_commit": 161,
+          "map_commit": 163,
+          "batch_complete": 164
+        }
+      },
+      "batch_2": {
+        "state": "batch_complete",
+        "callbacks": 50,
+        "event_sequences": {
+          "batch_begin": 165,
+          "sample_call": 166,
+          "sampler_enter": 167,
+          "sampler_return": 318,
+          "sample_return": 320,
+          "cache_commit": 322,
+          "map_commit": 324,
+          "batch_complete": 325
+        }
+      }
+    },
+    "actual_archive_capture_counts": {
+      "navigator_begin": 3,
+      "initial_input": 1,
+      "encode_vae_image_input": 1,
+      "encode_vae_image_output": 1,
+      "encode_image_input": 3,
+      "encode_image_output": 3,
+      "initial_output": 1,
+      "navigator_return": 3,
+      "context_input": 2,
+      "context_output": 2,
+      "batch_input": 2,
+      "translation_input": 2,
+      "translation_output": 2,
+      "condition_input": 2,
+      "condition_output": 2,
+      "sampler_input": 2,
+      "sampler_output": 2,
+      "sample_output": 2,
+      "cache_commit": 2,
+      "geometry_input": 2,
+      "geometry_output": 2,
+      "map_commit": 2,
+      "render_input": 1,
+      "render_output": 1,
+      "retrieval_output": 1,
+      "nms_threshold": 1,
+      "nms_selection": 1,
+      "integration_return": 1
+    },
+    "scope": "Selective actual tensor-body checks: two completed batches, real cache -> get_cond -> sampler -> retained cache; archive inventory and metadata, not every archive body"
+  },
+  "first_prefix": {
+    "scope": "first occurrence only; diagnostic, never an engineering-success or retry gate",
+    "fields": [
+      {
+        "field": "noise",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/a73be9731243e3978504fd022094227e8acb1e7604be4f0244195f25d5768c9e.bin",
+          "byteorder": "little",
+          "bytes_sha256": "416120b90c2759ade9b9dde9cc3c3990b0cb9b73d518129920a1edae38bee6ad",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 663552,
+          "order": "C",
+          "sha256": "a73be9731243e3978504fd022094227e8acb1e7604be4f0244195f25d5768c9e",
+          "shape": [
+            8,
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/a73be9731243e3978504fd022094227e8acb1e7604be4f0244195f25d5768c9e.bin",
+          "byteorder": "little",
+          "bytes_sha256": "416120b90c2759ade9b9dde9cc3c3990b0cb9b73d518129920a1edae38bee6ad",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 663552,
+          "order": "C",
+          "sha256": "a73be9731243e3978504fd022094227e8acb1e7604be4f0244195f25d5768c9e",
+          "shape": [
+            8,
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "samples_z",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/c05102dad72ac2259826baeeba721bd3f156393e9d3ee1607955848a36497e24.bin",
+          "byteorder": "little",
+          "bytes_sha256": "5e479fa54d44f2d6f6dc2651ddc4082e32aa115bf0772a5425f75c8646c731eb",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 663552,
+          "order": "C",
+          "sha256": "c05102dad72ac2259826baeeba721bd3f156393e9d3ee1607955848a36497e24",
+          "shape": [
+            8,
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/c05102dad72ac2259826baeeba721bd3f156393e9d3ee1607955848a36497e24.bin",
+          "byteorder": "little",
+          "bytes_sha256": "5e479fa54d44f2d6f6dc2651ddc4082e32aa115bf0772a5425f75c8646c731eb",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 663552,
+          "order": "C",
+          "sha256": "c05102dad72ac2259826baeeba721bd3f156393e9d3ee1607955848a36497e24",
+          "shape": [
+            8,
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "samples",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/7f9703ba60295414d911cc17c9c27051e031bc25bf018a0f83e1c1ca47af361d.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4e9574aa4464c31a6715185c71f2419f4f0df43682b8433915f9111207f55a16",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 31850496,
+          "order": "C",
+          "sha256": "7f9703ba60295414d911cc17c9c27051e031bc25bf018a0f83e1c1ca47af361d",
+          "shape": [
+            8,
+            3,
+            576,
+            576
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/7f9703ba60295414d911cc17c9c27051e031bc25bf018a0f83e1c1ca47af361d.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4e9574aa4464c31a6715185c71f2419f4f0df43682b8433915f9111207f55a16",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 31850496,
+          "order": "C",
+          "sha256": "7f9703ba60295414d911cc17c9c27051e031bc25bf018a0f83e1c1ca47af361d",
+          "shape": [
+            8,
+            3,
+            576,
+            576
+          ]
+        }
+      },
+      {
+        "field": "cache.latents.0",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/1f2e7b1a327888830a5f3fb9085389f9dd9635f53e5623023dd86221303db700.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c624addc4dd0b915b8c36eeeff514abd10e50dc66e89c4c136b8959dc6aa98b1",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "1f2e7b1a327888830a5f3fb9085389f9dd9635f53e5623023dd86221303db700",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/1f2e7b1a327888830a5f3fb9085389f9dd9635f53e5623023dd86221303db700.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c624addc4dd0b915b8c36eeeff514abd10e50dc66e89c4c136b8959dc6aa98b1",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "1f2e7b1a327888830a5f3fb9085389f9dd9635f53e5623023dd86221303db700",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "cache.latents.1",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/4dbed75bf21e7d78bc575f85d2e25a89f94b320926b4709ad054d9c9f918414a.bin",
+          "byteorder": "little",
+          "bytes_sha256": "daae14cba151e13cb26f93621d072c84fdaae948da2fa7ab14d77f319a448e5e",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "4dbed75bf21e7d78bc575f85d2e25a89f94b320926b4709ad054d9c9f918414a",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/4dbed75bf21e7d78bc575f85d2e25a89f94b320926b4709ad054d9c9f918414a.bin",
+          "byteorder": "little",
+          "bytes_sha256": "daae14cba151e13cb26f93621d072c84fdaae948da2fa7ab14d77f319a448e5e",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "4dbed75bf21e7d78bc575f85d2e25a89f94b320926b4709ad054d9c9f918414a",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "cache.latents.2",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/7bf8cfdf4d23b802fedc595bcb7cd292de4f697f89135af1de111b2176655acf.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4e786fb97889d59a7af5d22517c593107a7f75f6c9b1e6ba64fa40ff95cebf3a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "7bf8cfdf4d23b802fedc595bcb7cd292de4f697f89135af1de111b2176655acf",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/7bf8cfdf4d23b802fedc595bcb7cd292de4f697f89135af1de111b2176655acf.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4e786fb97889d59a7af5d22517c593107a7f75f6c9b1e6ba64fa40ff95cebf3a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "7bf8cfdf4d23b802fedc595bcb7cd292de4f697f89135af1de111b2176655acf",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "cache.latents.3",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/a89114cf2bda821d1b25105cc51b336d5ad3218ae9dd52f2789467c291515b58.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a8b6c64e2cc3f76a5da56d8f87f9bb2494c2a2da48e2a335df10abad83141e2b",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "a89114cf2bda821d1b25105cc51b336d5ad3218ae9dd52f2789467c291515b58",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/a89114cf2bda821d1b25105cc51b336d5ad3218ae9dd52f2789467c291515b58.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a8b6c64e2cc3f76a5da56d8f87f9bb2494c2a2da48e2a335df10abad83141e2b",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "a89114cf2bda821d1b25105cc51b336d5ad3218ae9dd52f2789467c291515b58",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "cache.latents.4",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/06ef5044fa5a1522739dedd4af39e545b69fc21d6349e74db10b8b320bc517e2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c96ccaf51fc59db62c8591321e957a5a1186e254c7dbc3e8455413193d8e0e0a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "06ef5044fa5a1522739dedd4af39e545b69fc21d6349e74db10b8b320bc517e2",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/06ef5044fa5a1522739dedd4af39e545b69fc21d6349e74db10b8b320bc517e2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c96ccaf51fc59db62c8591321e957a5a1186e254c7dbc3e8455413193d8e0e0a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 82944,
+          "order": "C",
+          "sha256": "06ef5044fa5a1522739dedd4af39e545b69fc21d6349e74db10b8b320bc517e2",
+          "shape": [
+            4,
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "field": "cache.encoder_embeddings.0",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/3718bd20b4d1616c28b2523c07a0bb97de26bb190097c095d5987ef0aba2b444.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c1ebbf0816fa45e1e10f5f5e8514ee5b1332e7ad07c045804ed0205813c112b0",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "3718bd20b4d1616c28b2523c07a0bb97de26bb190097c095d5987ef0aba2b444",
+          "shape": [
+            1024
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/3718bd20b4d1616c28b2523c07a0bb97de26bb190097c095d5987ef0aba2b444.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c1ebbf0816fa45e1e10f5f5e8514ee5b1332e7ad07c045804ed0205813c112b0",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "3718bd20b4d1616c28b2523c07a0bb97de26bb190097c095d5987ef0aba2b444",
+          "shape": [
+            1024
+          ]
+        }
+      },
+      {
+        "field": "cache.encoder_embeddings.1",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/0c48c85d03b0e1246628e5980bc8ce31cec4637cce168fac0a5d8e04f58d5ede.bin",
+          "byteorder": "little",
+          "bytes_sha256": "3398f93a15b850c4bca623ee6ef7f7e5f7728e19e0fdae098b20870946e37729",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "0c48c85d03b0e1246628e5980bc8ce31cec4637cce168fac0a5d8e04f58d5ede",
+          "shape": [
+            1024
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/0c48c85d03b0e1246628e5980bc8ce31cec4637cce168fac0a5d8e04f58d5ede.bin",
+          "byteorder": "little",
+          "bytes_sha256": "3398f93a15b850c4bca623ee6ef7f7e5f7728e19e0fdae098b20870946e37729",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "0c48c85d03b0e1246628e5980bc8ce31cec4637cce168fac0a5d8e04f58d5ede",
+          "shape": [
+            1024
+          ]
+        }
+      },
+      {
+        "field": "cache.encoder_embeddings.2",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/4a705ab6208075cbe6a5a44e52889c6f4870409fef54ae934fbad1c134826d6e.bin",
+          "byteorder": "little",
+          "bytes_sha256": "2a8b2c3241566a1a1a232ee25ff47f25854a6a9da93da3e67dd674935b4dc900",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "4a705ab6208075cbe6a5a44e52889c6f4870409fef54ae934fbad1c134826d6e",
+          "shape": [
+            1024
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/4a705ab6208075cbe6a5a44e52889c6f4870409fef54ae934fbad1c134826d6e.bin",
+          "byteorder": "little",
+          "bytes_sha256": "2a8b2c3241566a1a1a232ee25ff47f25854a6a9da93da3e67dd674935b4dc900",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "4a705ab6208075cbe6a5a44e52889c6f4870409fef54ae934fbad1c134826d6e",
+          "shape": [
+            1024
+          ]
+        }
+      },
+      {
+        "field": "cache.encoder_embeddings.3",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/c3175f1284b0ed81e602d90ff095f64c8ecb3894e0017458654f52c3497a1732.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a4e5c37c2acaa814a1f53460d4f5faee6129a432d64d905fdc69cee29cd5b93a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "c3175f1284b0ed81e602d90ff095f64c8ecb3894e0017458654f52c3497a1732",
+          "shape": [
+            1024
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/c3175f1284b0ed81e602d90ff095f64c8ecb3894e0017458654f52c3497a1732.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a4e5c37c2acaa814a1f53460d4f5faee6129a432d64d905fdc69cee29cd5b93a",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "c3175f1284b0ed81e602d90ff095f64c8ecb3894e0017458654f52c3497a1732",
+          "shape": [
+            1024
+          ]
+        }
+      },
+      {
+        "field": "cache.encoder_embeddings.4",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/2561ade44939dcadc1628151b9c160780124e58112bebbab4ef4d7a2ca4a1fc2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "9434a6cacba10bf030f75f76368429d191ff007a098fc57716f6364a08d72b20",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "2561ade44939dcadc1628151b9c160780124e58112bebbab4ef4d7a2ca4a1fc2",
+          "shape": [
+            1024
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/2561ade44939dcadc1628151b9c160780124e58112bebbab4ef4d7a2ca4a1fc2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "9434a6cacba10bf030f75f76368429d191ff007a098fc57716f6364a08d72b20",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 4096,
+          "order": "C",
+          "sha256": "2561ade44939dcadc1628151b9c160780124e58112bebbab4ef4d7a2ca4a1fc2",
+          "shape": [
+            1024
+          ]
+        }
+      },
+      {
+        "field": "cache.c2ws.0",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/5b364f1bbe2801a5e4c004f9fcc6225d339e94ad4d57a676d17f6cb2718b92bd.bin",
+          "byteorder": "little",
+          "bytes_sha256": "ccc7977ae7987f37c2235e57c320a5142d6b58413825b6457a4a1c9fe469ac1c",
+          "dtype": "float64",
+          "kind": "tensor",
+          "nbytes": 128,
+          "order": "C",
+          "sha256": "5b364f1bbe2801a5e4c004f9fcc6225d339e94ad4d57a676d17f6cb2718b92bd",
+          "shape": [
+            4,
+            4
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/5b364f1bbe2801a5e4c004f9fcc6225d339e94ad4d57a676d17f6cb2718b92bd.bin",
+          "byteorder": "little",
+          "bytes_sha256": "ccc7977ae7987f37c2235e57c320a5142d6b58413825b6457a4a1c9fe469ac1c",
+          "dtype": "float64",
+          "kind": "tensor",
+          "nbytes": 128,
+          "order": "C",
+          "sha256": "5b364f1bbe2801a5e4c004f9fcc6225d339e94ad4d57a676d17f6cb2718b92bd",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      {
+        "field": "cache.c2ws.1",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/38928674f03602629f9c7780bbeb8f214e4c610f55514b20cc8046bc74b00996.bin",
+          "byteorder": "little",
+          "bytes_sha256": "f64a5377bc3869bf75bb909b2f11bfbb78323cde3e479b2da8482091cad45d4e",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "38928674f03602629f9c7780bbeb8f214e4c610f55514b20cc8046bc74b00996",
+          "shape": [
+            4,
+            4
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/38928674f03602629f9c7780bbeb8f214e4c610f55514b20cc8046bc74b00996.bin",
+          "byteorder": "little",
+          "bytes_sha256": "f64a5377bc3869bf75bb909b2f11bfbb78323cde3e479b2da8482091cad45d4e",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "38928674f03602629f9c7780bbeb8f214e4c610f55514b20cc8046bc74b00996",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      {
+        "field": "cache.c2ws.2",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/9f39467c383a863a1ee337e9ca70d5bfa70bc0f8f6ef208ccb9089b4f8f19b59.bin",
+          "byteorder": "little",
+          "bytes_sha256": "1c86122b54eedbe6ad01422029800a6cdeb360938bd6dc2eaa84aec9391a7390",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "9f39467c383a863a1ee337e9ca70d5bfa70bc0f8f6ef208ccb9089b4f8f19b59",
+          "shape": [
+            4,
+            4
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/9f39467c383a863a1ee337e9ca70d5bfa70bc0f8f6ef208ccb9089b4f8f19b59.bin",
+          "byteorder": "little",
+          "bytes_sha256": "1c86122b54eedbe6ad01422029800a6cdeb360938bd6dc2eaa84aec9391a7390",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "9f39467c383a863a1ee337e9ca70d5bfa70bc0f8f6ef208ccb9089b4f8f19b59",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      {
+        "field": "cache.c2ws.3",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/b770a0de351275679adafa6bc0885d825a31f3db16cbfff8fc490aec3c126723.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c8e453b1f01397c79a0220b296518f3abbda7e426f430ce761f725c2db67e8bf",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "b770a0de351275679adafa6bc0885d825a31f3db16cbfff8fc490aec3c126723",
+          "shape": [
+            4,
+            4
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/b770a0de351275679adafa6bc0885d825a31f3db16cbfff8fc490aec3c126723.bin",
+          "byteorder": "little",
+          "bytes_sha256": "c8e453b1f01397c79a0220b296518f3abbda7e426f430ce761f725c2db67e8bf",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "b770a0de351275679adafa6bc0885d825a31f3db16cbfff8fc490aec3c126723",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      {
+        "field": "cache.c2ws.4",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/72ea2be47fe445c0c56ea0e76add802321220a9654debea85e09d392f49c4397.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4f679b0297123231b69cca8676d44f1da2e3ec44f2f5f3c0300b5e819373ca10",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "72ea2be47fe445c0c56ea0e76add802321220a9654debea85e09d392f49c4397",
+          "shape": [
+            4,
+            4
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/72ea2be47fe445c0c56ea0e76add802321220a9654debea85e09d392f49c4397.bin",
+          "byteorder": "little",
+          "bytes_sha256": "4f679b0297123231b69cca8676d44f1da2e3ec44f2f5f3c0300b5e819373ca10",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 64,
+          "order": "C",
+          "sha256": "72ea2be47fe445c0c56ea0e76add802321220a9654debea85e09d392f49c4397",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      {
+        "field": "cache.Ks.0",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.Ks.1",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.Ks.2",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.Ks.3",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.Ks.4",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45.bin",
+          "byteorder": "little",
+          "bytes_sha256": "18c3936bfb153aec9c5ec383bbaa90aa1d752e92260fea6397e3a36354ef4043",
+          "dtype": "float32",
+          "kind": "tensor",
+          "nbytes": 36,
+          "order": "C",
+          "sha256": "85f8f3c8d31846f318890cd28ee86b344f4afa85e76d91d8f4201c4f3ee67f45",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.pil_frames.1.pixels",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/ff322d68f20fc058c8582f36fa95cc261f6a6a8d65a71af17dbfe0fb94de78a2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "13ba8dea675cfbebfdec1b58f89fac3bdf6823ecbeac3e788359cbe14cce0ae3",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "ff322d68f20fc058c8582f36fa95cc261f6a6a8d65a71af17dbfe0fb94de78a2",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/ff322d68f20fc058c8582f36fa95cc261f6a6a8d65a71af17dbfe0fb94de78a2.bin",
+          "byteorder": "little",
+          "bytes_sha256": "13ba8dea675cfbebfdec1b58f89fac3bdf6823ecbeac3e788359cbe14cce0ae3",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "ff322d68f20fc058c8582f36fa95cc261f6a6a8d65a71af17dbfe0fb94de78a2",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.pil_frames.2.pixels",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/7fc5fd56e5785e798e3c522eb7967eac9abff96f8a88ad19ddb9709bde4278be.bin",
+          "byteorder": "little",
+          "bytes_sha256": "1689b25681bc59e30ee5ff82b06c1a6d427288a7bb330f85383ae0a17ec8aaef",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "7fc5fd56e5785e798e3c522eb7967eac9abff96f8a88ad19ddb9709bde4278be",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/7fc5fd56e5785e798e3c522eb7967eac9abff96f8a88ad19ddb9709bde4278be.bin",
+          "byteorder": "little",
+          "bytes_sha256": "1689b25681bc59e30ee5ff82b06c1a6d427288a7bb330f85383ae0a17ec8aaef",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "7fc5fd56e5785e798e3c522eb7967eac9abff96f8a88ad19ddb9709bde4278be",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.pil_frames.3.pixels",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/ecf3cb4df78718ba4786fa937abe78ab511fcd1961a34aa9797e2f4271a6ad7b.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a4018b8a3dbd4676148b11b9a3fd9a4c25a504701859ba9cb20a329adcd4f293",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "ecf3cb4df78718ba4786fa937abe78ab511fcd1961a34aa9797e2f4271a6ad7b",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/ecf3cb4df78718ba4786fa937abe78ab511fcd1961a34aa9797e2f4271a6ad7b.bin",
+          "byteorder": "little",
+          "bytes_sha256": "a4018b8a3dbd4676148b11b9a3fd9a4c25a504701859ba9cb20a329adcd4f293",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "ecf3cb4df78718ba4786fa937abe78ab511fcd1961a34aa9797e2f4271a6ad7b",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        }
+      },
+      {
+        "field": "cache.pil_frames.4.pixels",
+        "declared_content_identity_equal": true,
+        "actual_body_identity_equal": true,
+        "old_descriptor": {
+          "blob": "tensors/d5cd270977b291bd9c7b5622fa6197d671cac25e3fe8011ca5fc001a340aad66.bin",
+          "byteorder": "little",
+          "bytes_sha256": "3946129ae6ffa6e119a2746d1a37f878bf09522d0229072172bc4bf2f4162a66",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "d5cd270977b291bd9c7b5622fa6197d671cac25e3fe8011ca5fc001a340aad66",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        },
+        "new_descriptor": {
+          "blob": "tensors/d5cd270977b291bd9c7b5622fa6197d671cac25e3fe8011ca5fc001a340aad66.bin",
+          "byteorder": "little",
+          "bytes_sha256": "3946129ae6ffa6e119a2746d1a37f878bf09522d0229072172bc4bf2f4162a66",
+          "dtype": "uint8",
+          "kind": "tensor",
+          "nbytes": 995328,
+          "order": "C",
+          "sha256": "d5cd270977b291bd9c7b5622fa6197d671cac25e3fe8011ca5fc001a340aad66",
+          "shape": [
+            576,
+            576,
+            3
+          ]
+        }
+      }
+    ],
+    "all_actual_body_identities_equal": true,
+    "difference_is_not_causal_proof": true,
+    "image_display_count": 0
+  },
+  "evidence_kind": "existing_generated_data_readback",
+  "quality_status": "NOT_EVALUATED",
+  "eligible_for_original_cohort": false,
+  "new_method_validated": false
+}

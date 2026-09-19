@@ -1,0 +1,104 @@
+{
+  "schema": "s35-full-archive-source-preparation-v1",
+  "status": "SOURCE_PREPARED_AST_COMPILE_ONLY_NOT_EXECUTED",
+  "started_utc": "2026-09-06T22:45:12.229965+00:00",
+  "finished_utc": "2026-09-06T22:45:12.233640+00:00",
+  "author_role": "Archive-module author, distinct from original-loop integrator and independent source reviewer",
+  "python_executable": "/opt/homebrew/opt/python@3.13/bin/python3.13",
+  "python_version": "3.13.0 (main, Oct  7 2024, 05:02:14) [Clang 16.0.0 (clang-1600.0.26.3)]",
+  "validation": {
+    "command": "python3 heredoc: ast.parse(source, filename=str(p)); compile(source, str(p), \"exec\", dont_inherit=True)",
+    "ast_parse": "PASS",
+    "in_memory_compile": "PASS",
+    "module_imports_executed": 0,
+    "artificial_interface_or_model_tests_executed": 0,
+    "real_images_gt_weights_npz_read": 0,
+    "scientific_runs": 0,
+    "scope": "Only Python syntax/compilation and source/metadata hashing; no archive constructor, tensor materialization or model behavior executed"
+  },
+  "source_identities": {
+    "work/S35_generation_integration/archive_outputs.py": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_outputs.py",
+      "sha256": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+      "bytes": 16611,
+      "scope": "New implementation, full static read, AST parse and in-memory compile; not imported or called"
+    },
+    "work/S35_generation_integration/archive_contract.md": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_contract.md",
+      "sha256": "c82dfac465ff85b943e6e6c0a68a6a1f8ffb65f30d538eb23ad3640d3863dbd3",
+      "bytes": 9406,
+      "scope": "New archival contract, full read"
+    },
+    "docs/S20_GENERATION_TRACE_CONTRACT.md": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S20_GENERATION_TRACE_CONTRACT.md",
+      "sha256": "d7be737383fa2436d1e6f74aec3ad1505af873a79bb3b001679b1e7fb3d77300",
+      "bytes": 12065,
+      "scope": "Full archival contract read"
+    },
+    "docs/S20_MINIMAL_VIDEO_PROTOCOL_DRAFT.md": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S20_MINIMAL_VIDEO_PROTOCOL_DRAFT.md",
+      "sha256": "02d95bcddd8401e3df397d58269f3dcf6ba479d9cdfc47b446bb556bd52d60ad",
+      "bytes": 17668,
+      "scope": "Full draft protocol read in sections"
+    },
+    "docs/S20_TRACE_INTERFACE_REVIEW.md": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S20_TRACE_INTERFACE_REVIEW.md",
+      "sha256": "2023ce9a7f9dc5e856d2a5fd1af6fa25f48c929c9770c8c3faeb56665c5e1951",
+      "bytes": 5483,
+      "scope": "Full independent-interface report read"
+    },
+    "src/s20_generation_trace.py": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py",
+      "sha256": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57",
+      "bytes": 28718,
+      "scope": "Canonical tensor codec/writer and batch/commit interfaces; offline verifier not re-audited"
+    },
+    "work/S20_protocol_review/source_hashes.json": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_protocol_review/source_hashes.json",
+      "sha256": "9b6ca7a2988df7458fbbc309604f92c447de10df87ba5a44a7c7bf08a4311a28",
+      "bytes": 5847,
+      "scope": "Existing metadata source identities read"
+    },
+    "work/S35_generation_integration/review_requirements.md": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/review_requirements.md",
+      "sha256": "6c22e264f6adc9677bcb56811931316f0368d9ef72fb6435eeea5a61c8174b78",
+      "bytes": 11304,
+      "scope": "Full independent S35 review requirements read"
+    },
+    "work/S17C_interface_preparation/isolated_vmem_source/modeling/pipeline.py": {
+      "absolute_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_interface_preparation/isolated_vmem_source/modeling/pipeline.py",
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+      "bytes": 62176,
+      "scope": "Symbol/call-location search only; not the future S35 runtime identity, which integrator binds separately"
+    }
+  },
+  "api": {
+    "constructor": "FullOutputArchive(directory, *, evidence_kind, source_identities, manifest_sha256=None, required_events=())",
+    "capture": "capture(name, payload) -> ordered archive reference, synchronous full raw tree serialization",
+    "finalize": "finalize(*, status=\"COMPLETE\"|\"PARTIAL\", metadata=None) -> manifest path/SHA/archive status; scientific_status NOT_EVALUATED",
+    "fail": "fail(error, *, phase=\"caller\") -> best-effort partial archive; caller re-raises original failure"
+  },
+  "scope": {
+    "known_frozen_codec_reused": true,
+    "same_name_events_ordered": true,
+    "required_events": "Required names/minimum counts only, not scientific validation",
+    "own_and_codec_small_source_sha": "Checked before and at finalization",
+    "big_source_or_weight_sha": "Caller responsibility; supplied identities only, no large-file reread",
+    "PIL": "Already-loaded L/RGB/RGBA only; raw pixels and lossless PNG, not original JPEG bytes nor VAE/CLIP re-encoding",
+    "rng": "Only explicitly supplied states; archive does not call RNG getter/draw/seed",
+    "array_bits": "Full S20 canonical C-order/little-endian bytes with dtype/shape/SHA, not fingerprints alone"
+  },
+  "integration_requirements_pending": [
+    "Actual sampler-received noise/c/uc/c2w/K/mask and read-only RNG before/after must be captured passively by integrator, not reconstructed from get_cond output",
+    "Original all-eight-slot samples/samples_z, full seven/four target CLIP rows, canonical history one/five/nine, all dense geometry and original map/K/depth caches must be supplied by integration caller",
+    "Stable loop wiring, root-owned explicit artificial interface check, independent source review, original component resources and separate formal run contract are pending"
+  ],
+  "limitations": [
+    "No actual archival data written or decoded in this preparation",
+    "ARCHIVE_COMPLETE or closed trace cannot certify generation or actual generated-cache conditioning",
+    "Do not use S34 packets or surrogate caches as generation outputs",
+    "Potential CPU-copy/PNG/hash overhead not measured; must count against external runtime budget",
+    "Abrupt kill or full disk may preserve only fsynced prefix and partial blobs; never auto-resume or overwrite"
+  ],
+  "changes_to_prior_S20_or_canonical_files": false
+}

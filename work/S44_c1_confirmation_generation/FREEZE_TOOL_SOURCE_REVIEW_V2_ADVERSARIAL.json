@@ -1,0 +1,192 @@
+{
+  "schema": "s44-c1-freeze-tool-source-review-v2-adversarial",
+  "status": "PASS_S44_C1_FREEZE_TOOL_SOURCE_REVIEW",
+  "reviewed_utc": "2026-09-07T17:35:43.391677+00:00",
+  "author_role": "/root",
+  "reviewer_role": "/root/c1_revised_adversarial",
+  "review_mode": "independent_adversarial_read_only_static_control_flow_hash_ast_source_domain_and_filesystem_publication_review",
+  "independence": {
+    "prior_review_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW_V2.json",
+    "prior_review_sha256": "f53bbdd7f7ae8cda91ad97af4a323d8b4860390fe4fcc271a7bcc329899dcdfa",
+    "prior_review_conclusion_trusted": false,
+    "procedure": "Recomputed every reviewed-file hash, read the current source control flow, independently traced all executable and failed publication paths, rebuilt the 218-entry source-domain check, inspected the pinned S35 parents, and tested Darwin RENAME_EXCL only in disposable non-project directories."
+  },
+  "reviewed_files": {
+    "freeze_c1_manifest.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/freeze_c1_manifest.py",
+      "sha256": "c91400d5b00362507f01379ebaab8fb768fcff9be97cc2f066f1e7548e11c732"
+    },
+    "generation_gate.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/generation_gate.py",
+      "sha256": "961b9550f5ea438a338eb24ba9f36dd18f22d7f0719f9b54109e182755ab43dc"
+    },
+    "runtime_adapter.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/runtime_adapter.py",
+      "sha256": "afedaadca7bff62616368541d980a28f24131e1256eafef7af81275aa09dfb4e"
+    },
+    "launch_generation.py": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/launch_generation.py",
+      "sha256": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b"
+    },
+    "PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/PROTOCOL.md",
+      "sha256": "77c72263f6f58f77e5990a7db1557773013b9b84b14fb040f20faaaae6e701b5"
+    },
+    "FREEZE_PROTOCOL.md": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_PROTOCOL.md",
+      "sha256": "aa103a3fa58f03a5969be754f5f55abba11d0f3966386d5a9c02445035e1defe"
+    },
+    "inference_seed43.yaml": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/inference_seed43.yaml",
+      "sha256": "2fb88eb0a15c449b876386df5c9c0d2aad8da43c6be5aeccbd9b8d72be1908aa"
+    }
+  },
+  "parent_and_input_identities": {
+    "s40_manifest": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+      "sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe"
+    },
+    "s42_preregistration": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+      "sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+    },
+    "s35_runtime_factory": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/runtime_factory.py",
+      "sha256": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0"
+    },
+    "s35_launcher": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launch_original.py",
+      "sha256": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e"
+    },
+    "c1_input": {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/jesus.jpg",
+      "size_bytes": 663677,
+      "sha256": "d611976bb9d3e8d6e1740b86ead24028bfd7857944eba118458e09e7e645f3e1",
+      "pixels_decoded": 0
+    }
+  },
+  "adversarial_findings": [
+    {
+      "id": "A1_HIDDEN_STAGE_AND_ATOMIC_NO_REPLACE",
+      "verdict": "PASS_CURRENT_THREAT_MODEL",
+      "source_locations": [
+        "freeze_c1_manifest.py:79-101",
+        "freeze_c1_manifest.py:331-332",
+        "freeze_c1_manifest.py:362-390",
+        "freeze_c1_manifest.py:393-418"
+      ],
+      "evidence": "The only formal prepare or attach destination is checked with lexists before staging and immediately before publication. tempfile.mkdtemp creates a random create-exclusive directory under the same resolved HERE parent; the CLI admits only the exact same-parent destination constants. Darwin's local SDK defines RENAME_EXCL as 0x00000004, and the local renamex_np manual specifies EEXIST when the destination exists. Independent disposable tests returned EEXIST without replacement for an existing file, directory, and broken symlink. Two legitimate concurrent tool calls therefore cannot overwrite each other."
+    },
+    {
+      "id": "A2_FAILURE_BUNDLES_CANNOT_BECOME_EXECUTABLE",
+      "verdict": "PASS",
+      "source_locations": [
+        "freeze_c1_manifest.py:273-307",
+        "freeze_c1_manifest.py:388-418",
+        "generation_gate.py:286-334",
+        "generation_gate.py:435-445"
+      ],
+      "evidence": "Post-staging exceptions retain the stage only under a unique failed_* name; preflight exceptions retain only a unique JSON record. Even if a failed attachment stage already contains manifest.json, the execution gate resolves the supplied path and accepts only review_attachment_01/manifest.json. A successfully renamed canonical directory is already a complete commit containing metadata, terminal success receipt, and manifest; there is no fallible validation or write after the atomic publication call."
+    },
+    {
+      "id": "A3_CANONICAL_MANIFEST_REQUIRES_COMPLETE_ATTACHMENT",
+      "verdict": "PASS",
+      "source_locations": [
+        "generation_gate.py:286-334",
+        "generation_gate.py:435-550",
+        "freeze_c1_manifest.py:250-307",
+        "launch_original.py:295-333",
+        "launch_original.py:211-272"
+      ],
+      "evidence": "Both the launcher's metadata-only parent gate and the worker full gate call check_manifest without the private bypass. That default path requires the exact canonical manifest, a sibling receipt with the attach success status and exact manifest/core/review/tool/protocol bindings, and a sibling metadata file whose full hash and content match the receipt. validate_gate repeats the default metadata path. The private _allow_unpublished_attachment keyword appears at exactly one call site, the freeze tool's temporary metadata-only preflight; it is rejected for a full gate, returns execution_authorized=false, and is never passed by the launcher or runtime adapter."
+    },
+    {
+      "id": "A4_PREFLIGHT_PRECEDES_FORMAL_PATH_CONSUMPTION",
+      "verdict": "PASS",
+      "source_locations": [
+        "freeze_c1_manifest.py:310-328",
+        "freeze_c1_manifest.py:335-390"
+      ],
+      "evidence": "Before mkdtemp, main validates mode/output and complete mode-specific arguments, verifies destination absence and renamex_np availability, pins protocols and all row sources, imports only the metadata gate, rechecks reserved roots, and completes either the full core build or full temporary attachment preflight. Core preparation hashes the exact input and seed-derived config before staging. No formal freeze_attempt_01 or review_attachment_01 path is created until this sequence succeeds."
+    },
+    {
+      "id": "A5_CORE_REVIEWS_AND_218_SOURCE_DOMAIN",
+      "verdict": "PASS",
+      "source_locations": [
+        "freeze_c1_manifest.py:175-186",
+        "freeze_c1_manifest.py:211-247",
+        "generation_gate.py:134-140",
+        "generation_gate.py:446-478"
+      ],
+      "evidence": "Attach requires the unique canonical freeze_attempt_01 core path, its exact file SHA supplied by the caller, equality to the exact builder policy, and the review-excluded canonical core SHA. Each review must bind that exact core path, file SHA and canonical SHA, row C1, exact variant, its role-specific status, author_role=/root, a non-root reviewer role, zero execution/scientific imports/pixel decode, and no blockers; the roles must be distinct. Independent reconstruction found 214 unique inherited S39 source paths plus four non-overlapping C1 paths, for 218 unique current identities, and all 218 hashes matched. The gate rehashes every bound identity."
+    },
+    {
+      "id": "A6_SEED43_IS_THE_ONLY_RUNTIME_CONFIG_CHANGE",
+      "verdict": "PASS",
+      "source_locations": [
+        "generation_gate.py:92-101",
+        "generation_gate.py:164-180",
+        "runtime_adapter.py:23-77"
+      ],
+      "evidence": "The pinned S35 runtime AST contains exactly four integer-42 sites: random.seed, numpy.random.seed and torch.manual_seed at line 74, plus the config.seed guard at line 78. The adapter changes precisely positions (74,20), (74,39), (74,61), and (78,29), and inverse transformation restores the complete pinned AST. The 880-byte C1 YAML equals the 879-byte S40 YAML after its single seed: 42 to seed: 43 replacement plus one trailing newline. The manifest controls differ from S40 only at seed."
+    },
+    {
+      "id": "A7_LAUNCHER_DERIVATION_AND_SCIENTIFIC_IMPORT_BOUNDARY",
+      "verdict": "PASS",
+      "source_locations": [
+        "launch_generation.py:26-132",
+        "runtime_adapter.py:23-77"
+      ],
+      "evidence": "The source-isolated compile-only proof restored the complete S35 launcher AST, with exactly two resource-gate route substitutions, one runtime-factory substitution, one HERE substitution and the declared label counts. Building the derived runtime callable without invoking it restored the complete S35 runtime AST and loaded none of torch, numpy, diffusers, OmegaConf, open_clip, huggingface_hub, PIL, cv2 or scipy."
+    }
+  ],
+  "requested_special_judgments": {
+    "freeze_tool_does_not_consume_v2_source_review": {
+      "verdict": "NON_BLOCKING_PROCEDURAL_GATE",
+      "reason": "Neither C1 protocol says that the freeze executable itself must ingest its preliminary source-review receipt. That review is an external authorization step, while the formal protocol-enforced reviews are the two later exact-core reviews attached before execution. The live workflow checker requires two PASS reports containing every current source hash before its next step changes to prepare. For this run the orchestrator must still enforce that dual-current-review condition; executing the CLI in isolation does not prove it. A future CLI review argument could strengthen policy enforcement, but it is not needed to satisfy the current frozen protocol and hard-pinning a review hash in reviewed source would create an avoidable review/tool hash cycle."
+    },
+    "stage_real_directory_and_same_parent_recheck": {
+      "verdict": "NON_BLOCKING_UNDER_SINGLE_USER_RESEARCH_AND_LEGITIMATE_CONCURRENCY",
+      "reason": "The stage is created as a real mode-0700 directory by tempfile.mkdtemp under resolved HERE, and both accepted destinations are constants in the same parent. RENAME_EXCL contains the only normal concurrent race and no fallible operation follows a successful publish. A no-follow lstat/inode comparison like the B0 recomputer would add defense against a hostile same-UID process that guesses and swaps the random staging entry, plus clearer crash-durability evidence, but that stronger adversarial-security threat model is not part of the current single-user research protocol."
+    }
+  },
+  "non_blocking_limitations": [
+    "The preliminary dual source-review requirement is enforced by orchestration and the live workflow checker, not by freeze_c1_manifest.py itself; this PASS therefore authorizes prepare only when the external second PASS is also current.",
+    "The publisher does not retain and compare a staging inode or fsync the HERE directory after rename. This is fail-safe for ordinary crashes and legitimate concurrent calls, but is weaker than the B0 recomputer against a hostile same-UID staging-path substitution or power-loss durability audit.",
+    "Mode-0444 files express create-only evidence convention but do not make their owner cryptographically unable to replace directory entries. Later exact hashes, review bindings and the caller-supplied manifest SHA detect ordinary post-freeze drift."
+  ],
+  "current_fresh_state": {
+    "freeze_attempt_01_lexists": false,
+    "review_attachment_01_lexists": false,
+    "execution_01_lexists": false,
+    "scientific_output_root_lexists": false,
+    "staging_or_failure_entries_observed": []
+  },
+  "blocking_findings": [],
+  "authorization_effect": "Together with a separately authored current-hash PASS, this review permits the external orchestrator to make one prepare-only core-freeze attempt. It does not authorize attach before two exact-core reviews, and it does not authorize model loading, image decoding, generation, scoring, quality, method-gain, or novelty claims.",
+  "executed": false,
+  "freeze_main_calls": 0,
+  "prepare_calls": 0,
+  "attach_calls": 0,
+  "launcher_main_calls": 0,
+  "runtime_creation_calls": 0,
+  "model_or_scientific_imports": 0,
+  "component_bodies_read": 0,
+  "input_body_bytes_hashed": 663677,
+  "pixels_decoded": 0,
+  "images_opened": 0,
+  "generation_calls": 0,
+  "static_standard_library_checks": {
+    "source_domain_count": 218,
+    "source_domain_all_hashes_match": true,
+    "runtime_derivation_callable_built_without_calling_it": true,
+    "runtime_inverse_full_ast_equal": true,
+    "launcher_compile_only_proof": true,
+    "launcher_inverse_full_ast_equal": true,
+    "scientific_modules_loaded": [],
+    "rename_excl_existing_file_returns_eexist": true,
+    "rename_excl_existing_directory_returns_eexist": true,
+    "rename_excl_broken_symlink_returns_eexist": true
+  },
+  "scientific_claim_boundary": "This is an adversarial source-readiness review only. It is not a freeze execution, attached-review bundle, model load, image decode, generation, archive/readback, score, quality result, baseline-failure result, method gain, or novelty result."
+}

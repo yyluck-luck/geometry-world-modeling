@@ -1,0 +1,50 @@
+{
+  "schema": "s75-post-execution-source-and-verification-review-v1",
+  "status": "PASS_SOURCE_SCOPE_READY_FOR_ONE_SAVED_RESULT_VERIFICATION",
+  "reviewer_role": "/root/c2_v9_source_primary",
+  "measurement_author": "/root/next_control_feasibility",
+  "root_prelaunch_reviewer": "/root",
+  "reviewed_utc": "2026-09-09T08:30:45.111613+00:00",
+  "measurement_source_sha256": "4e0777e1fa94879040b0fb51220d1c74b6bf29aae32ab4c03924c9abcb2a1d18",
+  "measurement_contract_sha256": "a39d5c33a561cae46702e7e90cb268059de86fd4b949f7bc0dea57fdb4b938fd",
+  "root_source_review_sha256": "e53035329abbae6ef0901b6a747e441e024003295a12e0945428c8fe335645d5",
+  "verifier_source_sha256": "89e536c7fe2fca8412e91d664222a23c5d1b15bac67e243bc2c22c5a4eade0d0",
+  "binding_sha256": "a061f8e74553c164ca249c6d196345724bbb827ce1ff53d13f973d8a3b3c40de",
+  "blockers": [],
+  "source_findings": [
+    "Original wrapper decode divides the cached .18215-scaled mean latent exactly once; batch1/chunk1 yields one module decode per recorded history. Five-wrapper-call and one-weight-byte-consumer assertions are explicit.",
+    "Local from_pretrained redirection declares ft-mse weights; it does not certify original SD2.1 VAE identity. Full loading-info checks and source/receipt call telemetry can corroborate execution, not replace independent live observation.",
+    "Reference FP32 tensor SHA guard binds the saved body to accepted S68. Raw MSE/MAE uses unclipped FP64 differences on declared minus1plus1 scale.",
+    "PNG quantizer is fixed nearest uint8, applied equally to saved reference/reconstruction; its clipping is isolated from raw errors. Matching is descriptive mutual SIFT with no fit/filter; nulls and N/M denominators are explicit."
+  ],
+  "independent_arithmetic": [
+    "Python float differences and math.fsum of squares/absolute values replace NumPy mean reductions.",
+    "Scalar floor(min(255,max(0,127.5*v+128))) generates HWC bytes; every PNG decoded pixel byte is compared exactly.",
+    "Scalar hypot, sorted interpolation quantiles, integer cutoff counts and grid cells recompute saved matching arithmetic without feature extraction."
+  ],
+  "frozen_tolerances": {
+    "raw_mse_mae": {
+      "absolute": 1e-12,
+      "relative": 1e-10
+    },
+    "coordinate_statistics": {
+      "absolute": 1e-09,
+      "relative": 1e-12
+    },
+    "exact": [
+      "all file/body SHA",
+      "quantized PNG pixel bytes",
+      "counts",
+      "fractions",
+      "reference=S68 tensor bytes"
+    ]
+  },
+  "scope": "Post-execution source audit, not a retroactive prelaunch approval. Complete source/contract/root review, original 1692-byte AutoEncoder wrapper and small result schema/progress metadata were read. Saved array/PNG bodies have not yet been read by this verifier. Compile only; source and identity/tolerances frozen before single numerical run.",
+  "prospective_argv": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "-B",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S75_vae_history_roundtrip/independent_review_01/verify.py"
+  ],
+  "external_seconds": 60,
+  "new_method_validated": false
+}

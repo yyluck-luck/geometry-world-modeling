@@ -1,0 +1,44 @@
+{
+  "recorded_utc": "2026-09-06T08:55:42.600338+00:00",
+  "status": "CLARIFIED_BEFORE_REAL_EXECUTION",
+  "author": "s14e_camera_calibration_audit",
+  "supersedes": "adopted alignment direction and scale multiplication/division in original audit only",
+  "unchanged_originals": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S14E_CALIBRATION_AND_COORDINATES_AUDIT.md",
+      "sha256": "ebfb152fc6f6924eaa4899f6fe77f3469257adb286b2870e29377af14c9841b3"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S14E_calibration_audit/receipt.json",
+      "sha256": "156ec259661f3da3506b0cff690d4c84c327b4d1ab15b17a7721ba9a609a58d1"
+    }
+  ],
+  "final_design_read": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S14E_KNOWN_CAMERA_DESIGN_DRAFT.md",
+    "sha256": "7a00391940c2fbbcb018c0316a1daaef50b6bde8e31511a0630348a5c76fb02d"
+  },
+  "final_scale_unit": "model units per meter",
+  "regressor": "known GT history displacement rotated by predicted-first/GT-first orientation alignment",
+  "regressand": "predicted model history displacement",
+  "target_transform": "R_model=A*R_GT; t_model=s*A*t_GT+c",
+  "score": "self_z_model/s",
+  "denominator_min_exclusive_m2": 1e-12,
+  "artificial_counterexample": {
+    "GT_displacements": [
+      1,
+      2
+    ],
+    "model_displacements": [
+      1,
+      3
+    ],
+    "selected_model_per_metric": 1.4,
+    "inverse_selected": 0.7142857142857143,
+    "unselected_reverse_OLS": 0.7,
+    "product": 0.9799999999999999,
+    "pass_non_equivalence": true
+  },
+  "real_data_decodes": 0,
+  "model_calls": 0,
+  "clarification_sha256": "2b60bca4ebe0c2fb23e1dab0c00fb45160083e23bb7d712a7c531a2ed466a981"
+}

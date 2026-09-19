@@ -1,0 +1,36 @@
+{
+  "schema": "gwm-container-capability-probe-receipt-v1",
+  "job_id": "588626",
+  "host": "dgx-09",
+  "launched_via": "remote tmux session gwm-cap-probe",
+  "slurm_state": "COMPLETED",
+  "exit_code": "0:0",
+  "gpu_requested": true,
+  "model_constructed": false,
+  "dataset_read": false,
+  "future_outcome_read": false,
+  "files": {
+    "slurm-588626.out": {
+      "bytes": 5245,
+      "sha256": "07e037da5e4a1715b722976dae66bc6419b9b61d92b7e74ff6360c2abe8eef79"
+    },
+    "sbatch_submission.txt": {
+      "bytes": 7,
+      "sha256": "8e413312891146ad9ee69bdf4f17e4d6305935f69cacf28d8e44e998b43d9c0d"
+    }
+  },
+  "findings": {
+    "apptainer": "1.1.9 at /cm/local/apps/apptainer/current/bin/apptainer; --nv and --bind/--no-home/--containall supported",
+    "slurm_pyxis": "container-image/container-mounts/no-container-mount-home/container-readonly supported",
+    "enroot": "available but login-node config points to inaccessible /raid/local; compute-node support indicated by wrapper; no image listed",
+    "unshare": "not tested in this probe; prior CUDA304 receipt remains immutable"
+  },
+  "recommended_boundary": "Use Slurm Pyxis --container-image with --no-container-mount-home, --container-readonly, explicit --container-mounts for staged history and output; invoke predictor inside container and keep future scorer mount absent until prediction seal. Validate image digest and mount policy before formal run.",
+  "scope_note": "Infrastructure capability only; no model/data/forward/scoring.",
+  "failed_cpu_probe_evidence": {
+    "path": "work/S102_gate0_3dmatch/adapter_v1/container_probe_receipt/cpu_probe_rejection.txt",
+    "bytes": 406,
+    "sha256": "4e15fb1b1acb24e2e3861f47c14eedf7b1fa72ce84b9460db916afccb42b56f7",
+    "reason": "SuperPOD QOSMinGRES requires a GPU allocation even for this capability-only probe"
+  }
+}

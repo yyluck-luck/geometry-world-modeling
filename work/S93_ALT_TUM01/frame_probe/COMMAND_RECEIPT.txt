@@ -1,0 +1,12 @@
+S93-FrameProbe command receipt (recorded 2026-09-12 Asia/Shanghai)
+
+1) malformed range attempt (do not repeat):
+curl -L --max-time 20 --range -65536: <official-rgb-avi> -o rgb_movie_full_unintended.bin
+Observed: curl warning invalid range; HTTP 200; 8,059,298 bytes; final host webshare.cvg.cit.tum.de.
+
+2) bounded depth prefix:
+curl -L --fail --max-time 20 --range 0-1048575 <official-depth-avi> -o depth_movie_prefix_1MiB.bin
+Observed: HTTP 206; 1,048,576 bytes; final host webshare.cvg.cit.tum.de.
+
+3) offline only:
+ffprobe/ffmpeg decode checks on saved files; no further network after step 2.

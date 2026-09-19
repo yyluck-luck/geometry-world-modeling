@@ -1,0 +1,28 @@
+{
+  "new_contract_version": "S94-v2-proposal",
+  "do_not_apply_automatically": true,
+  "fields": {
+    "gate0.history_candidates_min": "at_least_k_max (8 for current sensitivity)",
+    "query_camera": {
+      "available_at_ns": "timestamp before selection",
+      "provenance": "predeclared_plan|historical_observation|future_frame_pose",
+      "future_frame_pose_is_forbidden": true
+    },
+    "risk_score": {
+      "components": ["reprojection_px_normalized", "depth_absrel", "visibility_unitless"],
+      "normalizers": "fit only on development/calibration; frozen before test",
+      "aggregation": "predeclared weighted sum or vector-valued score; units recorded"
+    },
+    "tail_metrics": {
+      "worst5": "top ceil(0.05*N) errors with deterministic fractional boundary",
+      "cvar95": "same empirical upper-tail integral including fractional boundary mass",
+      "empty_tail": "forbidden; exact finite-sample rule must always return a number"
+    },
+    "inference": {
+      "cluster_unit": "trajectory",
+      "minimum_n": 5,
+      "n5_claim": "descriptive/pilot only unless power and exact paired test preregistered",
+      "effect_threshold": "freeze practical minimum effect before test"
+    }
+  }
+}

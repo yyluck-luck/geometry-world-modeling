@@ -1,0 +1,485 @@
+{
+  "schema_version": 1,
+  "perspective": "evaluation",
+  "recorded_at": "2026-09-06T00:28:57.252298+08:00",
+  "search_started_at": "2026-09-05T23:57:04+08:00",
+  "timestamp_policy": "首两轮记录了实时UTC；其余未单独记时的查询只保留顺序/时间区间，全文下载有独立精确时间。中途被人为中断后恢复，不将间隔算作工作工时。",
+  "brief": "../LITERATURE_RESEARCH_BRIEF_V2.md",
+  "scope": "主源先广搜后窄搜；7项核心；文献证据与项目实验分开；未修改实验协议或记忆账本。",
+  "queries": [
+    {
+      "round": "1-wide",
+      "time_utc": "2026-09-05T15:57:04Z",
+      "queries": [
+        "camera controlled video generation geometric consistency benchmark reconstruction evaluation WorldScore",
+        "world models spatial consistency evaluation benchmark camera trajectory occlusion",
+        "TUM RGB D benchmark ground truth evaluation relative pose error absolute trajectory error official"
+      ],
+      "findings": "发现 WorldScore、TUM 官方工具、WorldExam、WorldRoamBench，收窄至评测模型、回访和遮挡。"
+    },
+    {
+      "round": "2-narrow",
+      "time_utc": "2026-09-05T15:57:22Z",
+      "queries": [
+        "WorldConsist benchmark world video generation geometric consistency official paper",
+        "WorldScore Duan Yu 3D consistency reprojection error DUSt3R occlusion camera control",
+        "WorldExam Yang Shang scene revisit 3D consistency camera control benchmark paper",
+        "WorldRoamBench long horizon stability memory action decoupled benchmark"
+      ],
+      "findings": "发现 GeCo、相似名称 WCS；WorldRoamBench 明确提出控制误差会混淆回访。"
+    },
+    {
+      "round": "2-verification",
+      "time_note": "实际发生于第二轮后、2026-09-06 00:05 源快照前；未单独读钟，不补造秒级时点。",
+      "queries": [
+        "\"WorldConsist\" benchmark",
+        "\"GeCo\" \"Geometric Consistency\" video arxiv",
+        "\"World Consistency Score: A Unified Metric for Video Generation Quality\"",
+        "\"A Benchmark for the Evaluation of RGB-D SLAM Systems\" Sturm Engelhard Endres Burgard Cremers"
+      ],
+      "findings": "核对 GeCo 题名和作者；WCS 摘要写实验蓝图，不应作为已完成大规模实验证据。TUM 标题作者核对通过。"
+    },
+    {
+      "round": "3-citation-chain",
+      "time_note": "实际发生于第二轮后、2026-09-06 00:05 源快照前；未单独读钟。",
+      "queries": [
+        "\"WorldConsist\" VMem",
+        "\"MEt3R\" metric multi view consistency authors",
+        "\"WorldScore\" \"DROID\" camera",
+        "\"WorldExam\" \"Scene Revisit\" reconstruction"
+      ],
+      "findings": "补齐 MEt3R；发现直接批评神经几何评测器的 SysCON3D 原始论文。"
+    },
+    {
+      "round": "3-existence-and-resource-check",
+      "time_note": "实际发生于第二轮后、2026-09-06 00:05 源快照前；未单独读钟。",
+      "queries": [
+        "\"WorldScore: A Unified Evaluation Benchmark\" arxiv",
+        "\"Can These Views Be One Scene\" Paul Kaushik Yuille",
+        "\"WorldConsist\" \"benchmark\" video",
+        "\"MEt3R\" \"github\""
+      ],
+      "findings": "确认 SysCON3D 作者页面、论文与代码；MEt3R 官方 CUDA/PyTorch3D 依赖；WorldConsist 精确名称仍未确认。"
+    }
+  ],
+  "source_snapshots": [
+    {
+      "id": "worldscore",
+      "url": "https://arxiv.org/html/2504.00983v2",
+      "retrieved_utc": "2026-09-05T16:05:08.388502+00:00",
+      "sha256": "159086a26fa0b2aab226e12757d1be5ea1fc73a84be18659a9cb64af1e4649f4",
+      "text_lines": 1482
+    },
+    {
+      "id": "met3r",
+      "url": "https://arxiv.org/html/2501.06336v2",
+      "retrieved_utc": "2026-09-05T16:05:09.405202+00:00",
+      "sha256": "0c3c22087a8a2e957153bc508637277767f352f2e402d82d13f1b8825bcf0a30",
+      "text_lines": 964
+    },
+    {
+      "id": "geco",
+      "url": "https://arxiv.org/html/2512.22274v5",
+      "retrieved_utc": "2026-09-05T16:05:09.384004+00:00",
+      "sha256": "4f67a0d62e6452bda5e20904bd61f1455f002973b147c80a8a3c66988d382f98",
+      "text_lines": 1439
+    },
+    {
+      "id": "syscon3d",
+      "url": "https://arxiv.org/html/2605.18754v1",
+      "retrieved_utc": "2026-09-05T16:05:09.318880+00:00",
+      "sha256": "b29aae3c0bfb2a54f5341baad7584f86f2eca1be35b9c294a73534f5ec66d293",
+      "text_lines": 2739
+    },
+    {
+      "id": "worldexam",
+      "url": "https://arxiv.org/html/2608.02603v1",
+      "retrieved_utc": "2026-09-05T16:05:09.384490+00:00",
+      "sha256": "3c57cf0cd851ff2b83c90b55277021093eadbe124ddd8a753f8647a866c02933",
+      "text_lines": 2621
+    },
+    {
+      "id": "worldroam",
+      "url": "https://arxiv.org/html/2606.31672v1",
+      "retrieved_utc": "2026-09-05T16:05:08.932133+00:00",
+      "sha256": "11074b68b1aea3f46c19b20499b4a6e416276685c5cb646f0bb689612696e768",
+      "text_lines": 2204
+    }
+  ],
+  "references": [
+    {
+      "id": "E1",
+      "title": "A Benchmark for the Evaluation of RGB-D SLAM Systems",
+      "authors": [
+        "Jürgen Sturm",
+        "Nikolas Engelhard",
+        "Felix Endres",
+        "Wolfram Burgard",
+        "Daniel Cremers"
+      ],
+      "year": 2012,
+      "version": "IROS 2012; official dataset documentation checked at retrieval",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://jsturm.de/publications/data/sturm12iros.pdf",
+            "https://cvg.cit.tum.de/data/datasets/rgbd-dataset"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools",
+          "locations": [
+            "Evaluation; Absolute Trajectory Error; Relative Pose Error"
+          ],
+          "claim": "TUM 提供 Kinect RGB-D 与外部动作捕捉相机轨迹；ATE 对齐后比较整条轨迹位置，RPE 比较指定间隔的相对运动，官方提供离线脚本。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "RGB-D + mocap trajectory → timestamp association → alignment / pose-pair comparison → ATE / RPE",
+      "gt_usage": "轨迹参考来自外部 mocap；Kinect depth 是测量。file_formats 规定 PNG 深度除5000、0为无效、深度尺度已预先修正。",
+      "conditions_and_ablations": "原论文39段、两个室内环境。项目当前仅fr1_xyz，分成时间块不等于跨场景。要分开标注尺度校准与测试图。",
+      "limitations": "ATE/RPE不评估记忆来源关联、选帧、生成画面。全序列拟合尺度与首帧校准属于不同协议；不能事后替换旧主指标。",
+      "rq_support": [
+        "RQ2: 外部几何/位姿参照",
+        "RQ3: 本机公开测量诊断"
+      ],
+      "relations": [
+        "与E2/E3的无场景GT自一致性不同"
+      ],
+      "local_feasibility": "官方离线脚本及已有本地TUM数据可支持CPU级评分；需要另建版本固定的补充协议。",
+      "supporting_urls": [
+        "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats",
+        "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools"
+      ]
+    },
+    {
+      "id": "E2",
+      "title": "WorldScore: A Unified Evaluation Benchmark for World Generation",
+      "authors": [
+        "Haoyi Duan",
+        "Hong-Xing Yu",
+        "Sirui Chen",
+        "Li Fei-Fei",
+        "Jiajun Wu"
+      ],
+      "year": 2025,
+      "version": "ICCV 2025; full text arXiv:2504.00983v2",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://openaccess.thecvf.com/content/ICCV2025/html/Duan_WorldScore_A_Unified_Evaluation_Benchmark_for_World_Generation_ICCV_2025_paper.html",
+            "https://arxiv.org/abs/2504.00983"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2504.00983v2",
+          "locations": [
+            "3.3; C.1-C.3; C.8-C.9; D"
+          ],
+          "claim": "把控制、质量、动态分开；静态3D一致性用DROID-SLAM优化后共同可见点的重投影残差；相机控制对照给定轨迹并拟合平移尺度。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "initial scene + next-scene prompt + trajectory → generated video → DROID-SLAM pose/depth + other estimators → separate scores",
+      "gt_usage": "给定轨迹是控制目标，不是生成场景的外部三维真值；3D分数是重建自一致性代理。",
+      "conditions_and_ablations": "3000例（2000 static/1000 dynamic），室内/室外、真实感/风格化；人类偏好验证。",
+      "limitations": "共同可见区域外的错误可能遗漏；分数依赖SLAM与经验归一化边界。arXiv摘要元数据写19模型，而同v2正文与CVF写20，引用实验规模应注明以正文为准。",
+      "rq_support": [
+        "RQ2: 控制/几何/外观分别评价",
+        "RQ3: 可借用维度与公开任务"
+      ],
+      "relations": [
+        "E4补其遮挡盲点",
+        "E6/E7增加回访诊断"
+      ],
+      "local_feasibility": "官方代码https://github.com/haoyi-duan/WorldScore 已确认；未在本机安装运行全套，不能把公开实现当MPS兼容证据。"
+    },
+    {
+      "id": "E3",
+      "title": "MEt3R: Measuring Multi-View Consistency in Generated Images",
+      "authors": [
+        "Mohammad Asim",
+        "Christopher Wewer",
+        "Thomas Wimmer",
+        "Bernt Schiele",
+        "Jan Eric Lenssen"
+      ],
+      "year": 2025,
+      "version": "CVPR 2025; inspected arXiv:2501.06336v2; repository has subsequent options",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://arxiv.org/abs/2501.06336",
+            "https://vip.mpi-inf.mpg.de/met3r/"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2501.06336v2",
+          "locations": [
+            "3; experiments; Appendix C"
+          ],
+          "claim": "无需给定相机位姿：DUSt3R点图把DINO/FeatUp特征投影到共同视角，再比较特征；目标是跨视图一致性而非单图真实感。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "image pair → DUSt3R geometry → feature warping + overlap → symmetric feature disagreement",
+      "gt_usage": "不需要成对生成图GT或输入位姿；依赖学习几何和特征。",
+      "conditions_and_ablations": "论文比较不同新视角/视频生成方法，包含RealEstate10K；图像质量与一致性分开。",
+      "limitations": "共同支持域、骨干与特征影响分数；E5提供失效测试，不能把论文的稳健性宣称无限外推。当前官方README默认backbone=mast3r，论文基础描述是DUSt3R，复现必须固定配置。",
+      "rq_support": [
+        "RQ2: 生成一致性可独立于图像质量",
+        "RQ3: 可设计低成本图对诊断但需适配"
+      ],
+      "relations": [
+        "E4指出细微变形敏感性不足",
+        "E5直接检查其骨干与聚合失效"
+      ],
+      "local_feasibility": "官方https://github.com/mohammadasim98/met3r 明列CUDA>=11.3、PyTorch3D>=0.7.5，测试CUDA11.8；未验证Mac，不能承诺开箱即用。"
+    },
+    {
+      "id": "E4",
+      "title": "GeCo: Evaluating Geometric Consistency for Video Generation via Motion and Structure",
+      "authors": [
+        "Leslie Gu",
+        "Junhwa Hur",
+        "Charles Herrmann",
+        "Fangneng Zhan",
+        "Todd Zickler",
+        "Deqing Sun",
+        "Hanspeter Pfister"
+      ],
+      "year": 2025,
+      "version": "arXiv:2512.22274v5, revised 2026-08-19; v1 title was A Differentiable Geometric Consistency Metric for Video Generation",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://arxiv.org/abs/2512.22274",
+            "https://geco-geoconsistency.github.io/"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2512.22274v5",
+          "locations": [
+            "3.1; 4.1-4.3; 6; B.1"
+          ],
+          "claim": "光流残余运动检测可共同看见表面的变形；深度重投影补遮挡前后结构变化，两者融合为逐像素诊断图。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "static video → UFM flow + VGGT depth/pose → motion + structure maps → fused geometric error",
+      "gt_usage": "WarpBench人工TPS位移、OccluBench合成遮挡编辑用于已知异常校验；TartanAir v2比较预测与GT几何，DL3DV给真实视频噪声底。",
+      "conditions_and_ablations": "显式做运动/结构消融、预测/GT几何与噪声实验；GeCo-Eval四类静态场景。",
+      "limitations": "真实物体运动可被误罚；估计器误差仍存在。OccluBench IoU/F1使用逐图最优阈值，是诊断上界式设置，不是固定阈值部署结果。指导生成用H200且增加耗时，不能外推Mac。",
+      "rq_support": [
+        "RQ2: 几何/可见性评价分解",
+        "RQ3: 可借鉴已知异常校验"
+      ],
+      "relations": [
+        "互补E2/E3",
+        "与E5共同要求审查评测骨干"
+      ],
+      "local_feasibility": "https://github.com/ShixuanGu/GeCo 已公开UFM/VGGT实现，README测试CUDA12.8。此分支没有运行。"
+    },
+    {
+      "id": "E5",
+      "title": "Can These Views Be One Scene? Evaluating Multiview 3D Consistency when 3D Foundation Models Hallucinate",
+      "authors": [
+        "Soumava Paul",
+        "Prakhar Kaushik",
+        "Alan Yuille"
+      ],
+      "year": 2026,
+      "version": "arXiv:2605.18754v1, 2026-05-18; preprint",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://arxiv.org/abs/2605.18754",
+            "https://mvp18.github.io/3d-consistency-metrics/"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2605.18754v1",
+          "locations": [
+            "3.1-3.2; 4-7; F; L.3-L.4"
+          ],
+          "claim": "SysCON3D发现学习骨干可给无关场景/噪声虚构几何支持；分解骨干、残差和聚合，并用COLMAP注册、密集支持和失败信息交叉评价。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "controlled corruptions → backbone / residual / aggregation ablation; SfM+MVS → support × agreement × coverage; human comparison",
+      "gt_usage": "无真实场景GT的指标，已知人工扰动提供排序参照；人类研究把3D一致性、真实感、与输入合理性分开。",
+      "conditions_and_ablations": "Mip-NeRF360受控扰动；真实NVS比较含DL3DV24场景、Mip-NeRF3609场景；11人959对比较，K=3/6/9。",
+      "limitations": "COLMAP也会因弱纹理、重复结构、低重叠失败；差输出全失败时排序粗糙。受控噪声压力测试不是自然视频生成失败率。论文高相关属于有限模型/场景排序，不是普遍定理。",
+      "rq_support": [
+        "RQ1: 学习几何支持不自动可信",
+        "RQ2: 不可循环地用同一模型证明自己",
+        "RQ3: 失败也应进入分母"
+      ],
+      "relations": [
+        "对E3的直接反证",
+        "约束E4/E6/E7学习重建指标的解释"
+      ],
+      "local_feasibility": "https://github.com/mvp18/3DConsistency-metrics 有代码和SysCON3D清单；官方神经环境为CUDA，论文COLMAP约5分钟/RTX3090；不能把这个时间用于本机预算。"
+    },
+    {
+      "id": "E6",
+      "title": "WorldRoamBench: An Open-World Benchmark for Long-Horizon Stability of Interactive World Models",
+      "authors": [
+        "Ting-Bing Xu",
+        "Jiacheng Sui",
+        "Zhe Gao",
+        "Kewei Shi",
+        "Wenjin Yang",
+        "Zhicheng Liu",
+        "Zhaoxu Sun",
+        "Mingchao Sun",
+        "Hongyu Pan",
+        "Fan Jiang",
+        "Mu Xu",
+        "Qi Fan",
+        "Yong Li",
+        "Baoquan Chen"
+      ],
+      "year": 2026,
+      "version": "arXiv:2606.31672v1, 2026-06-30; website is later mutable snapshot",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://arxiv.org/abs/2606.31672",
+            "https://worldroam.amap.com/"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2606.31672v1",
+          "locations": [
+            "3.4; F.1; H"
+          ],
+          "claim": "固定对称帧会混合回访记忆与动作误差；按实际转向点分段、重建并对齐两段点云，再分别量化保留与新增但无旧支持的几何。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "video + action → executed transition → depth/pose clouds → semantic/depth filtering → registration → retention/anti-hallucination",
+      "gt_usage": "动作指令辅助定位；几何来自估计而非外部扫描GT，最近邻距离阈值随场景对角线缩放。",
+      "conditions_and_ablations": "v1为600+例、10–60秒、室内/自然/城市及第一/第三视角；网站后续写1000+，不能混算。",
+      "limitations": "点云对齐可能吸收整体位姿偏差；未观察到的真实新表面不应自动解释为幻觉。分割/深度过滤改变计分范围，需报告保留率。仅借鉴设计不宣称已复现。",
+      "rq_support": [
+        "RQ2: 排除回访相机误差混淆",
+        "RQ3: 逐段报告优于仅首末帧"
+      ],
+      "relations": [
+        "比E2增加长时记忆",
+        "E7采用位姿最近的回访图，二者干预位置不同"
+      ],
+      "local_feasibility": "可在本机复用已有点图做事先固定的补充诊断；完整官方模型/VLM依赖未在此分支核验运行。"
+    },
+    {
+      "id": "E7",
+      "title": "WorldExam: Benchmarking World Models from Apparent Appearance to Inherent Reactivity",
+      "authors": [
+        "Yuxue Yang",
+        "Shuyao Shang",
+        "Jiahe Wang",
+        "Zitong Zhou",
+        "Liang Tan",
+        "Junhan Zeng",
+        "Ruizhi Li",
+        "Junyan Li",
+        "Yu Liu",
+        "Xiao Yang",
+        "Yong Li",
+        "Jun Zhu",
+        "Hongsheng Li",
+        "Tieniu Tan",
+        "Lue Fan",
+        "Zhaoxiang Zhang"
+      ],
+      "year": 2026,
+      "version": "arXiv:2608.02603v1, 2026-08-03; preprint",
+      "verification": {
+        "existence": {
+          "grade": "VERIFIED",
+          "urls": [
+            "https://arxiv.org/abs/2608.02603",
+            "https://worldexam.github.io/"
+          ],
+          "finding": "标题、作者与原始来源对应。"
+        },
+        "claim_match": {
+          "grade": "VERIFIED",
+          "url": "https://arxiv.org/html/2608.02603v1",
+          "locations": [
+            "3, Static-Scene Track: Camera Control; Scene Revisit; General metrics"
+          ],
+          "claim": "回访须同时满足相机返回和场景保留；在返回时间窗找估计位姿最近的图，分别报告返回成功和PSNR/LPIPS/SSIM，再组合。"
+        },
+        "verified_in_session": true
+      },
+      "method_signature": "outgoing + inverse control → recovered poses → nearest revisit frame → camera success + appearance score",
+      "gt_usage": "初始RGB是回访外观参照；相机/几何由VGGT-Ω估计，不是外部GT；3D一致性改用其几何往返投影。",
+      "conditions_and_ablations": "1474例、8任务、20模型；静态/动态互动分轨，避免把不支持互动的接口当等价任务。",
+      "limitations": "近似回到原位仍可能有视差，外观差不唯一归因记忆；学习位姿质量影响选图。2026-09-06读取官方GitHub仅README和teaser图，不能说评测代码已完整开源。",
+      "rq_support": [
+        "RQ2: 回访双条件与控制接口分层",
+        "RQ3: 可借鉴逐项呈现"
+      ],
+      "relations": [
+        "E6用云对齐，E7用位姿选回访帧；都依赖估计几何",
+        "扩展E2质量/控制区分"
+      ],
+      "local_feasibility": "https://github.com/YuxueYang1204/worldexam 仓库存在，但读取时未见可执行评测实现。"
+    }
+  ],
+  "not_core": [
+    {
+      "name": "WorldConsist",
+      "verdict": "UNVERIFIABLE",
+      "reason": "三次精确名称检索未确认对应原始论文/基准，不引用；不声称不存在。"
+    },
+    {
+      "name": "World Consistency Score: A Unified Metric for Video Generation Quality",
+      "url": "https://arxiv.org/abs/2508.00144",
+      "verdict": "VERIFIED metadata/abstract only, excluded from core",
+      "reason": "作者Akshat Rakheja, Aarsh Ashdhir, Aryan Bhattacharjee, Vanshika Sharma已确认；摘要把验证描述为blueprint，不以其证明已实测的优越性。"
+    },
+    {
+      "name": "Quantitative Video World Model Evaluation for Geometric-Consistency",
+      "url": "https://arxiv.org/abs/2605.15185",
+      "verdict": "candidate only, excluded",
+      "reason": "与本轮覆盖重叠；未完成双步全文核验，不用于主张。"
+    }
+  ],
+  "blind_spots": [
+    "没有核实某个统一公开benchmark可直接把三维误差、来源关联错误、检索排序、生成质量串成单因素因果链；本轮核心评价方法大多从生成图/视频开始评分，未观察内部检索。",
+    "未确认被测模型预训练是否包含当前TUM序列；跨时间块不能解决训练污染或跨场景泛化。",
+    "动态世界和长期物体状态并非本项目当前静态照片组件实验已覆盖内容。",
+    "完整视频生成仍未发生；公开示例不能冒充本项目生成。"
+  ],
+  "actionable_recommendations": [
+    "保持S0-S6旧协议和结果。新增评价必须另行冻结：输入、尺度规则、掩码、采样、阈值、失败处理、主次指标。",
+    "先利用现有真实RGB-D，另取明确不同环境/序列作为场景级留出；调参只用开发场景。若仍只有fr1_xyz，只称同场景诊断。",
+    "外部测量深度/位姿仅供封存选择后的评分；若输入GT位姿/尺度，单列oracle条件。训练和测试边界与查询写回政策单独记录。",
+    "成对比较使用共同有效像素以免挑掉难点；同时公布每法自身覆盖、共同覆盖、无效与遮挡数量。深度残差、边界/遮挡分层与相机差分别报告。",
+    "选帧变化只表示结果不同。另用事先固定的独立可见性参照量化历史参考支持；固定候选池、帧数、NMS等，单独消融几何更新和检索规则，加入相同预算的最近位姿/均匀历史基线。",
+    "给评测器增加干净图对、重复图、已知局部错位/遮挡编辑等正负对照；重复图可一致但没有新视角覆盖，因此同时报告视点变化，避免把静止当漫游成功。这属于人工诊断，单列。",
+    "有真实生成视频后才做相同初图/相机/种子/预算的成对实验，分别报告相机执行、共同可见几何、回访外观与主观质量；回访先查实际位姿，不能只按帧号配对。",
+    "本机优先复算已有数组和TUM官方离线轨迹指标；MEt3R/GeCo/WorldScore/COLMAP完整分数仅在依赖与小样本预算实测后采用，不把CUDA论文计时当Mac可运行性证明。"
+  ]
+}

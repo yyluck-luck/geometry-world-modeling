@@ -1,0 +1,48 @@
+{
+  "schema": "gwm-s103-formal-chain-software-receipt-v2",
+  "recorded_at_local": "2026-09-16T18:43:00+08:00",
+  "status": "PASS_SOFTWARE_ONLY_BLOCKED_FOR_REAL_REVIEWS",
+  "scope": "synthetic sealing, immutable-bundle gating, static Slurm isolation, and launch-guard regression only",
+  "artifacts": {
+    "sealer": {"path": "work/S103_selector_free_baseline/seal_predictions_s103.py", "bytes": 6552, "sha256": "e8063041902975514c936930d78da5f1e3f4701d18f79615ec5b7c2bacb68aca"},
+    "bundle_preparer": {"path": "work/S103_selector_free_baseline/prepare_formal_bundle_s103.py", "bytes": 4350, "sha256": "7e8a1423971ea61a533512d18aac6259b8ec42ec73b5641d42d823fde07cc65d"},
+    "formal_sbatch": {"path": "work/S103_selector_free_baseline/run_s103_vmem_base.slurm", "bytes": 2337, "sha256": "9dc445d3f90c63489a1b878bbe0ffd80df039a65d8f690d2887d91f54ce00fbe"},
+    "regression": {"path": "work/S103_selector_free_baseline/test_s103_formal_chain.py", "bytes": 8334, "sha256": "fe78253ea489a9dd06488873d66df63ac10a8865704ddd50694b394fa9693b13"}
+  },
+  "formal_chain_checks": {
+    "passed": 11,
+    "total": 11,
+    "results": [
+      "valid synthetic prediction seals and unlocks scoring",
+      "existing seal cannot be overwritten",
+      "reported future access blocks a success seal",
+      "failed predictor attempt is sealed but never score-unlocked",
+      "zero-error PRE_RUN_READY creates an immutable scorer-free bundle",
+      "blocked validator cannot create a formal bundle",
+      "source, weights and stage binds are read-only",
+      "only prediction output is read-write",
+      "project and dataset roots are not bound",
+      "formal job contains no scorer invocation",
+      "successful and failed attempts are both sealed"
+    ]
+  },
+  "other_regressions": {
+    "gate0_validator": "7/7 PASS",
+    "scorer_and_independent_recompute": "4/4 PASS",
+    "predictor_static_contract_after_K_fix": "10/10 PASS",
+    "launch_guard": "9/9 PASS"
+  },
+  "real_candidate_negative_test": {
+    "contract": "work/S103_selector_free_baseline/window_scene13_w001_20260916/GATE0_CONTRACT_CANDIDATE_v5.json",
+    "contract_sha256": "f0597ad547e6f443917c57dd8bf49f62daeb755f6ab1621587d9784793fa50ca",
+    "result": "REFUSED_NOT_PRE_RUN_READY",
+    "formal_bundle_created": false,
+    "prediction_job_created": false
+  },
+  "model_loaded": false,
+  "model_forward": false,
+  "future_outcome_opened": false,
+  "scoring_run": false,
+  "formal_gate0_status": "BLOCKED_INDEPENDENT_REVIEWS_ONLY",
+  "claim_boundary": "software closure only; not a Gate0 pass and not a scientific result"
+}

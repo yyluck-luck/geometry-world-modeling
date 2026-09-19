@@ -1,0 +1,123 @@
+{
+  "schema": "raima-v4-compute-manifest-v1",
+  "status": "STAGE_D_MINIMAL_ONLY_AFTER_ALL_GATES_STAGE_C_BLOCKED_ON_LOCAL_MACHINE",
+  "execution_authorization": "NONE",
+  "machine": {
+    "memory_bytes": 68719476736,
+    "memory_label": "64 GiB",
+    "remote_gpu_available": false,
+    "safe_generation_concurrency": 1,
+    "reason": "historical process-tree peak is approximately 22.53 to 24.08 GiB; reserve headroom for loading, OS and evidence supervision"
+  },
+  "historical_runtime_evidence": [
+    {
+      "run": "S40 declared variant two-batch CPU run",
+      "receipt_sha256": "4c771df1e46f96e218b92f01339b55ebd056ef002fdc28e0083a5bb0907300d4",
+      "wall_seconds": "2737.9838646250137",
+      "peak_process_tree_rss_bytes": 25862127616
+    },
+    {
+      "run": "S44 C1 baseline two-batch CPU run",
+      "receipt_sha256": "44753718ca666d134ac9500ffcd6ada6b0e7e4e6ce6cbfc3bfa9f50de85dcb18",
+      "wall_seconds": "2684.242237083032",
+      "peak_process_tree_rss_bytes": 24187961344
+    }
+  ],
+  "evidence_boundary": "runtime values are extrapolated planning inputs, not measured RAIMA/S48 arm runtimes",
+  "arm_accounting": {
+    "primary_source_target_units_per_scene": 2,
+    "trajectories_per_scene": 2,
+    "primary_units_per_trajectory": 1,
+    "seeds_per_unit": 5,
+    "minimum_target_processes_per_seed_unit": 28,
+    "expanded_target_processes_per_seed_unit": 44,
+    "minimum_structure": "A0 F00 plus 3 replay processes and 24 edit/zero negative/positive cells",
+    "expanded_structure": "minimum plus provisional 16 target processes for Pilot-B-like controlled path cells",
+    "prohibited_savings": [
+      "removing positive, negative, replay, sham or placebo controls",
+      "dropping failed seeds",
+      "using one seed as an independent scene",
+      "selecting only the cheaper endpoint after Stage D",
+      "reusing a snapshot without an exact state/RNG/source/consumer/output equivalence proof"
+    ]
+  },
+  "stage_budgets": [
+    {
+      "stage": "Stage D one source-target one seed",
+      "scientific_status": "discovery and hook falsification only",
+      "scene_trajectory_seed_groups": 1,
+      "minimum_target_processes": 28,
+      "expanded_target_processes": 44,
+      "minimum_serial_hours": "10.8639",
+      "authorization": "blocked until legal C1/C2 baselines and fresh-reviewed S48 V7"
+    },
+    {
+      "stage": "Stage C1 futility look",
+      "scene_count": 10,
+      "scene_trajectory_seed_groups": 100,
+      "minimum_target_processes": 2800,
+      "expanded_target_processes": 4400,
+      "minimum_serial_hours": "1086.386875",
+      "minimum_serial_days": "45.2661197917",
+      "expanded_serial_hours": "1685.544125",
+      "expanded_serial_days": "70.2310052083",
+      "local_verdict": "BLOCKED"
+    },
+    {
+      "stage": "Stage C2 maximum",
+      "scene_count": 20,
+      "scene_trajectory_seed_groups": 200,
+      "minimum_target_processes": 5600,
+      "expanded_target_processes": 8800,
+      "minimum_serial_hours": "2172.773750",
+      "minimum_serial_days": "90.5322395833",
+      "expanded_serial_hours": "3371.088250",
+      "expanded_serial_days": "140.4620104167",
+      "local_verdict": "BLOCKED"
+    }
+  ],
+  "expected_two_stage_budget": {
+    "under_p0_0_20": {
+      "expected_scene_count": "13.222004736",
+      "minimum_serial_days": "59.8508850265760",
+      "expanded_serial_days": "92.8594683478624000"
+    },
+    "under_p1_0_50": {
+      "expected_scene_count": "19.453125",
+      "minimum_serial_days": "88.0567486572265625",
+      "expanded_serial_days": "136.6212523193359375"
+    },
+    "warning": "expected duration is not a deadline or guarantee and omits failures, metrics, references, review and I/O"
+  },
+  "snapshot_reuse_gate": {
+    "status": "UNPROVEN",
+    "required_equivalence": [
+      "model and optimizer-free inference state",
+      "all RNG states",
+      "ordinary selected source identities and order",
+      "consumer inputs and downstream state",
+      "saved baseline output identity",
+      "fresh-process trace"
+    ],
+    "rule": "reuse can remove only duplicated first-batch cost; it cannot remove registered target arms"
+  },
+  "resource_gate_before_stage_c": {
+    "required": [
+      "fresh-reviewed active S48 V7 binding",
+      "exact 20-scene data roster and candidate-frame SHA",
+      "measured one-seed Stage D runtime and failure rate",
+      "exact disk and evidence-retention budget",
+      "auditable compute resource able to finish the frozen maximum design",
+      "fresh non-author review of any parallelization or snapshot-equivalence mechanism"
+    ],
+    "allowed_resolution": "obtain auditable accelerated/parallel resources or freeze a new statistically reviewed design before any Stage C output is revealed",
+    "forbidden_resolution": "silently reduce scenes, seeds, arms, references or controls"
+  },
+  "current_counts": {
+    "model_runs": 0,
+    "raima_arms": 0,
+    "stage_c_scenes": 0,
+    "stage_c_payloads": 0,
+    "pixels_read": 0
+  }
+}

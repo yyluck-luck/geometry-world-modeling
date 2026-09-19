@@ -1,0 +1,845 @@
+{
+  "schema": "s50-heldout-reference-metadata-feasibility-v1",
+  "started_utc": "2026-09-08T11:43:47.457815+00:00",
+  "completed_utc": "2026-09-08T11:43:47.570709+00:00",
+  "evidence_kind": "LOCAL_TEXT_METADATA_AND_PATH_STAT_ONLY",
+  "audit_attempt_note": "The first audit execution stopped before writing evidence because a global unique-timestamp assertion failed on original fr2 groundtruth (one repeated timestamp with differing poses). The collector then explicitly selected the already-frozen guarded trajectory, kept both source hashes/counts, and checked candidate bracketing rows match the raw trajectory. No dataset was modified; exact first-attempt clock was not separately captured.",
+  "verdict": "CANDIDATE_WITH_EXPLICIT_MISSING_PROVENANCE_NOT_READY",
+  "scope": {
+    "image_bodies_read_or_hashed": 0,
+    "image_decodes": 0,
+    "tensor_payload_reads": 0,
+    "model_calls": 0,
+    "downloads": 0,
+    "c1_c2_pixels_read": 0,
+    "zero_counts_basis": "this audit code and commands; not an OS-wide access attestation"
+  },
+  "selection_rule": "Reuse pre-existing S8 block0 first target index20 and immediately preceding source19 / alternative18 as an illustrative candidate. No target image, generated image, measured error, or predicted score used to select.",
+  "sequences": {
+    "fr1_xyz": {
+      "root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz",
+      "rgb_index_rows": 798,
+      "rgb_path_exists_count": 798,
+      "depth_index_rows": 798,
+      "gt_rows": 3000,
+      "gt_distinct_timestamp_count": 3000,
+      "gt_duplicate_timestamp_text": [],
+      "rgb_first_last_time_text": [
+        "1305031102.175304",
+        "1305031128.747363"
+      ],
+      "gt_first_last_time_text": [
+        "1305031098.6659",
+        "1305031128.7555"
+      ],
+      "gt_columns": [
+        "timestamp",
+        "tx",
+        "ty",
+        "tz",
+        "qx",
+        "qy",
+        "qz",
+        "qw"
+      ],
+      "image_body_read_count": 0,
+      "distinct_sequence": true
+    },
+    "fr2_desk_original": {
+      "root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk",
+      "rgb_index_rows": 2965,
+      "rgb_path_exists_count": 2965,
+      "depth_index_rows": 2964,
+      "gt_rows": 20957,
+      "gt_distinct_timestamp_count": 20956,
+      "gt_duplicate_timestamp_text": [
+        "1311868229.5760"
+      ],
+      "rgb_first_last_time_text": [
+        "1311868164.363181",
+        "1311868263.185529"
+      ],
+      "gt_first_last_time_text": [
+        "1311868163.8697",
+        "1311868263.2342"
+      ],
+      "gt_columns": [
+        "timestamp",
+        "tx",
+        "ty",
+        "tz",
+        "qx",
+        "qy",
+        "qz",
+        "qw"
+      ],
+      "image_body_read_count": 0,
+      "distinct_sequence": true
+    },
+    "fr2_desk_guarded_alias": {
+      "root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk",
+      "rgb_index_rows": 2965,
+      "rgb_path_exists_count": 2965,
+      "depth_index_rows": 2964,
+      "gt_rows": 20926,
+      "gt_distinct_timestamp_count": 20926,
+      "gt_duplicate_timestamp_text": [],
+      "rgb_first_last_time_text": [
+        "1311868164.363181",
+        "1311868263.185529"
+      ],
+      "gt_first_last_time_text": [
+        "1311868163.8697",
+        "1311868263.2342"
+      ],
+      "gt_columns": [
+        "timestamp",
+        "tx",
+        "ty",
+        "tz",
+        "qx",
+        "qy",
+        "qz",
+        "qw"
+      ],
+      "image_body_read_count": 0,
+      "distinct_sequence": false
+    }
+  },
+  "candidate_chain": [
+    {
+      "role": "provisional_alternative",
+      "existing_block": 0,
+      "existing_frame_index": 18,
+      "rgb_capture_timestamp_text": "1311868171.299368",
+      "rgb_capture_timestamp_ns": 1311868171299368000,
+      "rgb_file": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.299368.png",
+        "existence": true,
+        "body_opened": false,
+        "image_hash_recomputed": false,
+        "size_bytes": 538723,
+        "inode": 261589198,
+        "device": 16777234,
+        "mtime_ns": 1788637106662913416,
+        "resolved_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.299368.png"
+      },
+      "associated_depth_timestamp_text": "1311868171.313542",
+      "rgb_minus_depth_ns": -14174000,
+      "rgb_time_gt_bracket": {
+        "before_values_as_published_text": [
+          "1311868171.2968",
+          "0.0977",
+          "-2.4281",
+          "1.5783",
+          "-0.7786",
+          "0.3086",
+          "-0.1907",
+          "0.5120"
+        ],
+        "after_values_as_published_text": [
+          "1311868171.3001",
+          "0.0980",
+          "-2.4286",
+          "1.5781",
+          "-0.7785",
+          "0.3082",
+          "-0.1906",
+          "0.5125"
+        ],
+        "gap_ns": 3300000,
+        "gt_source": "fr2_desk_guarded_alias/groundtruth.txt",
+        "bracketing_rows_identical_in_original_raw_trajectory": true,
+        "interpolation_fraction": "0.7781818181818181818181818182",
+        "interpolated_pose_computed_this_audit": false
+      },
+      "historical_s8_image_entry": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.299368.png",
+        "sha256": "af5f79113a5c74591f2ca4c033e3d13552718061685ed230bc25697d67c8c933"
+      },
+      "historical_s8_view_flags": {
+        "frame": 18,
+        "img_mask": [
+          true
+        ],
+        "ray_mask": [
+          false
+        ],
+        "update": [
+          true
+        ],
+        "reset": [
+          false
+        ]
+      },
+      "historical_hash_status": "COPIED_FROM_PRIOR_TEXT_RECEIPT_NOT_REHASHED",
+      "historically_model_exposed": true
+    },
+    {
+      "role": "provisional_original_source",
+      "existing_block": 0,
+      "existing_frame_index": 19,
+      "rgb_capture_timestamp_text": "1311868171.663411",
+      "rgb_capture_timestamp_ns": 1311868171663411000,
+      "rgb_file": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.663411.png",
+        "existence": true,
+        "body_opened": false,
+        "image_hash_recomputed": false,
+        "size_bytes": 530537,
+        "inode": 261589209,
+        "device": 16777234,
+        "mtime_ns": 1788637106672474916,
+        "resolved_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.663411.png"
+      },
+      "associated_depth_timestamp_text": "1311868171.680537",
+      "rgb_minus_depth_ns": -17126000,
+      "rgb_time_gt_bracket": {
+        "before_values_as_published_text": [
+          "1311868171.6601",
+          "0.1341",
+          "-2.5092",
+          "1.5626",
+          "-0.7955",
+          "0.2748",
+          "-0.1805",
+          "0.5090"
+        ],
+        "after_values_as_published_text": [
+          "1311868171.6635",
+          "0.1345",
+          "-2.5098",
+          "1.5623",
+          "-0.7957",
+          "0.2744",
+          "-0.1802",
+          "0.5091"
+        ],
+        "gap_ns": 3400000,
+        "gt_source": "fr2_desk_guarded_alias/groundtruth.txt",
+        "bracketing_rows_identical_in_original_raw_trajectory": true,
+        "interpolation_fraction": "0.9738235294117647058823529412",
+        "interpolated_pose_computed_this_audit": false
+      },
+      "historical_s8_image_entry": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.663411.png",
+        "sha256": "c7127660fd25468f35db330cc3200bf68451cec4e13adef640ee7b16c27f32ee"
+      },
+      "historical_s8_view_flags": {
+        "frame": 19,
+        "img_mask": [
+          true
+        ],
+        "ray_mask": [
+          false
+        ],
+        "update": [
+          true
+        ],
+        "reset": [
+          false
+        ]
+      },
+      "historical_hash_status": "COPIED_FROM_PRIOR_TEXT_RECEIPT_NOT_REHASHED",
+      "historically_model_exposed": true
+    },
+    {
+      "role": "provisional_target",
+      "existing_block": 0,
+      "existing_frame_index": 20,
+      "rgb_capture_timestamp_text": "1311868172.063426",
+      "rgb_capture_timestamp_ns": 1311868172063426000,
+      "rgb_file": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.063426.png",
+        "existence": true,
+        "body_opened": false,
+        "image_hash_recomputed": false,
+        "size_bytes": 524279,
+        "inode": 261589221,
+        "device": 16777234,
+        "mtime_ns": 1788637106682798916,
+        "resolved_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.063426.png"
+      },
+      "associated_depth_timestamp_text": "1311868172.048421",
+      "rgb_minus_depth_ns": 15005000,
+      "rgb_time_gt_bracket": {
+        "before_values_as_published_text": [
+          "1311868172.0501",
+          "0.1900",
+          "-2.5943",
+          "1.5276",
+          "0.8149",
+          "-0.2595",
+          "0.1682",
+          "-0.4902"
+        ],
+        "after_values_as_published_text": [
+          "1311868172.0635",
+          "0.1924",
+          "-2.5966",
+          "1.5263",
+          "0.8150",
+          "-0.2590",
+          "0.1672",
+          "-0.4907"
+        ],
+        "gap_ns": 13400000,
+        "gt_source": "fr2_desk_guarded_alias/groundtruth.txt",
+        "bracketing_rows_identical_in_original_raw_trajectory": true,
+        "interpolation_fraction": "0.9944776119402985074626865672",
+        "interpolated_pose_computed_this_audit": false
+      },
+      "historical_s8_image_entry": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868172.063426.png",
+        "sha256": "0551c248bdd3d4c1e485392e9883675f54470597497772beeb9ebd775670a991"
+      },
+      "historical_s8_view_flags": {
+        "frame": 20,
+        "img_mask": [
+          true
+        ],
+        "ray_mask": [
+          false
+        ],
+        "update": [
+          false
+        ],
+        "reset": [
+          false
+        ]
+      },
+      "historical_hash_status": "COPIED_FROM_PRIOR_TEXT_RECEIPT_NOT_REHASHED",
+      "historically_model_exposed": true
+    }
+  ],
+  "candidate_contract_status": {
+    "preexisting_capture_identity_and_file_presence": true,
+    "published_rgb_time_gt_brackets_available": true,
+    "calibration": {
+      "historically_declared_native_K": [
+        [
+          525,
+          0,
+          319.5
+        ],
+        [
+          0,
+          525,
+          239.5
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "historically_declared_resolution": [
+        640,
+        480
+      ],
+      "historically_derived_224_K": [
+        [
+          245.2734375,
+          0,
+          112
+        ],
+        [
+          0,
+          245,
+          111.5
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "reference": "scripts/run_s8_replay.py native_intrinsics; docs/S15B_PREFIX_PROTOCOL.md; results/S14E_known_camera_prepare/frozen_manifest.json",
+      "fresh_sensor_calibration_verified": false,
+      "future_576_preprocessing_and_K_binding": "MISSING"
+    },
+    "old_target_pose_time": "depth",
+    "old_target_pose_can_be_reused_as_rgb_pose_without_conversion": false,
+    "new_generation_exclusion_manifest": "MISSING",
+    "new_upstream_geometry_input_exclusion_manifest": "MISSING",
+    "target_never_conditioned_in_current_candidate_generation": "NOT_ESTABLISHED_NO_SUCH_RUN",
+    "globally_never_model_seen": false,
+    "historically_independent_confirmation": false,
+    "matched_original_alternative_pose_fov_visibility_eligibility": "NOT_YET_ESTABLISHED",
+    "fixed_valid_scoring_domain": "MISSING",
+    "allowable_next_stage": "future explicitly discovery-only split after positive exclusion provenance is frozen; no existing generation scoring authorization"
+  },
+  "historical_usage": {
+    "fr1_s24": {
+      "manifest": "work/S24_baseline_expansion/run_manifest.json",
+      "declared_input_count": 796,
+      "manifest_previously_exposed": true,
+      "cut3r_status": "PASS",
+      "cut3r_frames_completed": 796,
+      "two_other_indexed_rgb": [
+        {
+          "rgb_time": 1305031108.876515,
+          "rgb_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz/rgb/1305031108.876515.png",
+          "reason": "No one-to-one GT timestamp match under frozen strict <20ms greedy association"
+        },
+        {
+          "rgb_time": 1305031108.911364,
+          "rgb_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz/rgb/1305031108.911364.png",
+          "reason": "No one-to-one GT timestamp match under frozen strict <20ms greedy association"
+        }
+      ],
+      "two_other_rgb_never_used": "UNKNOWN; S24 exclusion was only one-to-one timestamp matching, not global exposure proof"
+    },
+    "fr2_s8": {
+      "block0_images": 24,
+      "target20_img_mask": [
+        true
+      ],
+      "target20_update": [
+        false
+      ],
+      "interpretation": "No state update is not absence of image conditioning. Candidate target20 has positive historical RGB input evidence."
+    },
+    "fr2_s14d": {
+      "history_manifest_image_count": 20,
+      "actual_opened_image_count": 20,
+      "counters": {
+        "history_rgb_decoded": 20,
+        "query_rgb_decoded": 0,
+        "gt_files_decoded": 0,
+        "query_calls": 5,
+        "history_image_open_attempts": 20,
+        "history_images_opened": 20,
+        "query_call_attempts": 5,
+        "query_image_encoder_batches": 0,
+        "query_ray_encoder_calls": 5
+      },
+      "target20_present_in_open_list": false,
+      "scope": "Historical run receipt supports a 20-RGB history-only rerun, but its synthetic target-camera probe and old S14E depth-time target cameras are not a new VMem real-RGB target binding."
+    },
+    "bonn": {
+      "index_rgb_count": 1752,
+      "index_depth_count": 1765,
+      "local_data_unique_rgb_filenames": [
+        "1548340550.99864.png",
+        "1548340551.40132.png",
+        "1548340551.80368.png",
+        "1548340552.20564.png",
+        "1548340552.60757.png",
+        "1548340553.00969.png",
+        "1548340553.41207.png",
+        "1548340553.78085.png",
+        "1548340554.18341.png",
+        "1548340554.58564.png",
+        "1548340554.98913.png",
+        "1548340555.39205.png",
+        "1548340555.79391.png",
+        "1548340556.19226.png",
+        "1548340556.59441.png",
+        "1548340557.00004.png",
+        "1548340557.40070.png",
+        "1548340557.80267.png",
+        "1548340558.20454.png",
+        "1548340558.60632.png"
+      ],
+      "local_data_unique_rgb_filename_count": 20,
+      "s15a_actual_opened_count": 20,
+      "s15a_counters": {
+        "identity_hash_attempts": 302,
+        "identity_hash_successes": 302,
+        "history_image_open_attempts": 20,
+        "history_images_opened": 20,
+        "history_rgb_decoded": 20,
+        "target_rgb_decoded": 0,
+        "target_depth_decoded": 0,
+        "history_forward_attempts": 1,
+        "history_forward_calls": 1,
+        "history_image_encoder_calls": 1,
+        "history_image_encoder_frames": 20,
+        "history_ray_encoder_calls": 1,
+        "history_frames_saved": 20,
+        "query_calls": 0
+      },
+      "future_four": [
+        {
+          "sample_index": 20,
+          "rgb_timestamp": "1548340559.00853",
+          "archive_member_name": "rgbd_bonn_static_close_far/rgb/1548340559.00853.png",
+          "local_matches_in_data": [],
+          "absence_scope": "filename/stat inventory under project data only, not global access history"
+        },
+        {
+          "sample_index": 21,
+          "rgb_timestamp": "1548340559.41073",
+          "archive_member_name": "rgbd_bonn_static_close_far/rgb/1548340559.41073.png",
+          "local_matches_in_data": [],
+          "absence_scope": "filename/stat inventory under project data only, not global access history"
+        },
+        {
+          "sample_index": 22,
+          "rgb_timestamp": "1548340559.77978",
+          "archive_member_name": "rgbd_bonn_static_close_far/rgb/1548340559.77978.png",
+          "local_matches_in_data": [],
+          "absence_scope": "filename/stat inventory under project data only, not global access history"
+        },
+        {
+          "sample_index": 23,
+          "rgb_timestamp": "1548340560.18212",
+          "archive_member_name": "rgbd_bonn_static_close_far/rgb/1548340560.18212.png",
+          "local_matches_in_data": [],
+          "absence_scope": "filename/stat inventory under project data only, not global access history"
+        }
+      ],
+      "optical_pose_semantics": "UNRESOLVED_POSE_SEMANTICS in existing docs/S15B_BONN_POSE_RESOLUTION.md",
+      "native_K_and_distortion": "historical public calibration exists, but this audit did not reacquire or certify optical pose / distortion / clock mapping"
+    }
+  },
+  "current_generation": [
+    {
+      "stage": "S40",
+      "manifest": "work/S40_declared_variant_generation/freeze_attempt_01/manifest_core.json",
+      "input_image": {
+        "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/changi.jpg",
+        "sha256": "12fc2c4ddfccee952d5390b147b813a8f062209832ec675013f82283e796e54a",
+        "scope": "Fixed original changi pathname; full bytes hashed during freeze, pixels not decoded"
+      },
+      "controls": {
+        "device": "cpu",
+        "dtype": "float32",
+        "threads": 8,
+        "seed": 42,
+        "height": 576,
+        "width": 576,
+        "num_frames": 8,
+        "context_num_frames": 4,
+        "target_num_frames": 4,
+        "inference_num_steps": 50,
+        "use_non_maximum_suppression": true,
+        "operations": [
+          "turn_left(5)",
+          "turn_right(5)"
+        ],
+        "seconds_per_batch": 1800,
+        "rss_bytes": 48318382080
+      },
+      "same_scene_as_tum_candidates_proven": false,
+      "real_target_correspondence": "NOT_ESTABLISHED",
+      "payload_or_input_image_opened_this_audit": false
+    },
+    {
+      "stage": "C1",
+      "manifest": "work/S44_c1_confirmation_generation/freeze_attempt_01/manifest_core.json",
+      "input_image": {
+        "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/jesus.jpg",
+        "sha256": "d611976bb9d3e8d6e1740b86ead24028bfd7857944eba118458e09e7e645f3e1",
+        "size_bytes": 663677,
+        "original_size": [
+          1702,
+          1276
+        ],
+        "scope": "Predeclared C1 JPEG bytes; full bytes hashed before model construction, pixels not decoded by gate"
+      },
+      "controls": {
+        "device": "cpu",
+        "dtype": "float32",
+        "threads": 8,
+        "seed": 43,
+        "height": 576,
+        "width": 576,
+        "num_frames": 8,
+        "context_num_frames": 4,
+        "target_num_frames": 4,
+        "inference_num_steps": 50,
+        "use_non_maximum_suppression": true,
+        "operations": [
+          "turn_left(5)",
+          "turn_right(5)"
+        ],
+        "seconds_per_batch": 1800,
+        "rss_bytes": 48318382080
+      },
+      "same_scene_as_tum_candidates_proven": false,
+      "real_target_correspondence": "NOT_ESTABLISHED",
+      "payload_or_input_image_opened_this_audit": false
+    }
+  ],
+  "important_nonclaims": [
+    "No absence-of-record is treated as never-used evidence.",
+    "No TUM capture is a valid reference for the unrelated changi/jesus demo generations.",
+    "A future run can hold out an historically exposed RGB for a declared discovery diagnostic; it cannot turn it into a new independent confirmation scene.",
+    "One observed reference allows a paired observed loss only, not absolute memory utility or expected scene risk.",
+    "The original three-reference contract remains unsatisfied; this audit does not amend it."
+  ],
+  "text_sources_read_and_hashed": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/AGENTS.md": {
+      "sha256": "3e957d23cdaf28435843ac75919733463956538dbcceaad287276dcd1fd16b52",
+      "bytes": 1882,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458007+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_PRINCIPLES.md": {
+      "sha256": "789647dbfe4fe07bf3f4f71c90450e0dc3c1e5c0352ca6d1ef98e49eba7f7418",
+      "bytes": 19782,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458071+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S49_reference_data_feasibility/DECISION_AFTER_V4_REVIEW.md": {
+      "sha256": "9f7ab4da0096fc085e2da9839c3deaca80484faac9525cf14ddfa119cea51072",
+      "bytes": 4011,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458113+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S49_reference_data_feasibility/reference_time_feasibility.json": {
+      "sha256": "02dd1b304fc9e84bc4f99cd3b3ccfcf0fdee0685f7f14907edaa21959e07c8eb",
+      "bytes": 3447,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458148+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S15B_BONN_POSE_RESOLUTION.md": {
+      "sha256": "d280492b26a14730c20039f0228423fe0da3829b4407b7071e74b3d392ecea39",
+      "bytes": 11989,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458211+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S15B_PREFIX_PROTOCOL.md": {
+      "sha256": "2d87b042344ad9d6b55f097e707fe31d1850803cbd2257efbaefcfefb3f8721d",
+      "bytes": 6296,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458247+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S20_MINIMAL_VIDEO_PROTOCOL_DRAFT.md": {
+      "sha256": "02d95bcddd8401e3df397d58269f3dcf6ba479d9cdfc47b446bb556bd52d60ad",
+      "bytes": 17668,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458295+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/run_s8_replay.py": {
+      "sha256": "b101b598ed779ff882dad3e88cf48c78a1877a1c6d2dd1abaad0b3f84f77c505",
+      "bytes": 31296,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458335+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz/rgb.txt": {
+      "sha256": "532884d60bef0c9a05e14bf311998883baf59a2fa47009d1021f2c7937bd69a3",
+      "bytes": 35189,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458381+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz/depth.txt": {
+      "sha256": "d5abcc12d67cd2f5ae6f405ab1459a416ab2c1cdfb16d9bbd137d5f77d3285df",
+      "bytes": 36783,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458530+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/rgbd_dataset_freiburg1_xyz/groundtruth.txt": {
+      "sha256": "aac0319a6ef4e1cdf61e779d2152b95aa7e9f7b1749d6d18717b43ddabffede2",
+      "bytes": 201100,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.458771+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/rgb.txt": {
+      "sha256": "45ad9139fe05fa69c495fe43861fdc869d0e052afc37c88333d6aebd36bbec3f",
+      "bytes": 130538,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.464414+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/depth.txt": {
+      "sha256": "4444ab37248e508abd4cba427599615fc4c096dad2abd63712aa91a082066594",
+      "bytes": 136420,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.464940+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/groundtruth.txt": {
+      "sha256": "0d8e0119a4e9592b886c5ca954472c3270c01814dd2059fbe196d5c24c8f3d17",
+      "bytes": 1420075,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.466149+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb.txt": {
+      "sha256": "45ad9139fe05fa69c495fe43861fdc869d0e052afc37c88333d6aebd36bbec3f",
+      "bytes": 130538,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.492325+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/depth.txt": {
+      "sha256": "4444ab37248e508abd4cba427599615fc4c096dad2abd63712aa91a082066594",
+      "bytes": 136420,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.492962+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/groundtruth.txt": {
+      "sha256": "f19dc674dc43b6c4957038e1a22906122c19c60893e664dafb0e0abe537906ca",
+      "bytes": 1417998,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.494173+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/S8_fr2desk_inputs_v2/S8_inputs.json": {
+      "sha256": "873c9ef3deae7a8caaa816620d0b5e803ea7ef277e90e316486810f0f80b83f7",
+      "bytes": 50005,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.519245+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S8_cut3r_cpu_v2/block0/run_metadata.json": {
+      "sha256": "5dfc7e1ba4fdb842922c55865976557ab94b51d96a1c938d3ed833bd7b4fb417",
+      "bytes": 98010,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.519511+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_root_preparation_v2/later_cameras_and_samples.json": {
+      "sha256": "94c5a2c868ef00a97c0f5c4efa6b5a4889ac5926144ea8eaba22c5c67ffc87c2",
+      "bytes": 19600,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.519905+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_root_preparation_v2/prefix_cameras.json": {
+      "sha256": "31254e4814fa2de8752b04240cc76c7420991d59c95288e9c2a5a164bd27cc1a",
+      "bytes": 9404,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520007+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S14D_ray_only_probe/run_metadata.json": {
+      "sha256": "0630423296541a4585c9dd93566f7702e9d0ab27058b0a729bc6d7f91aa12315",
+      "bytes": 31312,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520083+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S14D_RAY_ONLY_EXECUTION_MANIFEST_V2.json": {
+      "sha256": "6aa1dd58f2c7651aacdc5382811412005500266ec338d55a5c351727cc1700cc",
+      "bytes": 35524,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520202+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S14E_known_camera_prepare/frozen_manifest.json": {
+      "sha256": "ecf06af25ec093a020b8820aedaac1c413bfd1ca3f0d4d4f945871778a63cbd3",
+      "bytes": 5211,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520299+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S14E_known_camera_queries/frozen_manifest.json": {
+      "sha256": "a5c040fed44603821bf65aa12fb2b6546be9f261dd427800397e99d49153da62",
+      "bytes": 25352,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520369+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S24_baseline_expansion/run_manifest.json": {
+      "sha256": "95b2c749fddefc432472b0aae56c1602fb3110940a86fedc5047b201049924b7",
+      "bytes": 317792,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.520604+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S24_baseline_expansion/independent_unmatched_rgb.json": {
+      "sha256": "7fdf1de619cea1fc0b2b5d98cfd6f042f33298205e113f866f9a5a2e8911a347",
+      "bytes": 1105,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.521293+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S24_baseline_expansion/cut3r/receipt.json": {
+      "sha256": "33dee3ed208d40962dea6ceaad2c59409e80b5bf45f08e2bdee90735b9873f8e",
+      "bytes": 118743,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.521376+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_samples_v2/samples.json": {
+      "sha256": "fdf03dc69ede6e46cf3b9f545c5b6932e8ea6270729bd9f413062b298ff64a6f",
+      "bytes": 13173,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.521659+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S15A_bonn_history/run_metadata.json": {
+      "sha256": "b336bc690b77a804ae2477f9fedcb4ced48eb4a76da97f653a43f06f8d707cd8",
+      "bytes": 111962,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.521763+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_metadata_fetch/members/rgbd_bonn_static_close_far/rgb.txt": {
+      "sha256": "d69f18908ed7cc3bb1b10c91f248958de88431a9a6e4b9db3fde2aa5377843f7",
+      "bytes": 73620,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.522025+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_metadata_fetch/members/rgbd_bonn_static_close_far/depth.txt": {
+      "sha256": "175953b6a06547fa966f7bde35f84b84eebecb21c1a0f48ab8d7935a09f73805",
+      "bytes": 77694,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.523116+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/inference_inputs.json": {
+      "sha256": "e56cdaa4051338364822e18f2040639eeac239cbc8dabc9b8456801747969da0",
+      "bytes": 1152,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.523444+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/S5_inputs.json": {
+      "sha256": "7ffa1467f5640bee2013a1ed1d30313be14da339ab28f7c364cfc2790f16f126",
+      "bytes": 37236,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.523495+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/S8_fr2desk_inputs_v2/sampling_metadata.json": {
+      "sha256": "94b1fff7c438a0f757b7747e8b90951572c121fc8ae5d8d405021c783b763acf",
+      "bytes": 95663,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.523664+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S15C_bonn_calibration/frozen_manifest.json": {
+      "sha256": "34f8f06bffe910f7062573a5e01b68db8f09b2ec31aa7c724af5da4cc12c5c5f",
+      "bytes": 20678,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.523972+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/bonn_s15a_history_combined/receipt.json": {
+      "sha256": "5bc3c5c07c16dacea0f5b3a57bf0b1b34e61001357988e773b715b87c28a3d85",
+      "bytes": 42219,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.524057+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/bonn_s15c_depth/receipt.json": {
+      "sha256": "7795b64d637175532c82e9fce2deecc603005ca8a01685554220d6cfcb85c04c",
+      "bytes": 56301,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.524209+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15B_bonn_resolution/public_matrix_analysis.json": {
+      "sha256": "c4fdb8f97f55bafe42e7d8841bf249c859aa140879a9a2573ddc741016d4640e",
+      "bytes": 1305,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.524356+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S14_bonn_metadata_access/member_inventory.json": {
+      "sha256": "1a2f6d1800050cd20e0845ab06fee3c1b0c7b0f91ae9c9c296e2e1193f4a7b74",
+      "bytes": 874519,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.524868+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S24_baseline_expansion/candidate_inputs.json": {
+      "sha256": "d91634e84a5366aeddb1f4e9bba32c8f2d010eb6b9f32acd4b1d80f4b19d6cf8",
+      "bytes": 216825,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.527387+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S24_baseline_expansion/filt3r/receipt.json": {
+      "sha256": "76cafcc34e8d0d8b04379f7ea30e270ed87a35da46160df83da8567b74f35498",
+      "bytes": 119390,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.528032+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S24_baseline_expansion/ttt3r/receipt.json": {
+      "sha256": "c109513d3b062138e480392ff5dfdaf43d448e419fd99e1ca3ae77161ae00347",
+      "bytes": 118743,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.528381+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/freeze_attempt_01/manifest_core.json": {
+      "sha256": "071b9c4a5a2b7e03cae6826e7e927e0649102ec5810f3bd4ddc8dd4315e28d57",
+      "bytes": 55396,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.570423+00:00"
+    },
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/freeze_attempt_01/manifest_core.json": {
+      "sha256": "b5bc1844c53785fa6cdd46cc846aa2f477f6daf7bfa520a9977e9bc1709e6be6",
+      "bytes": 55250,
+      "kind": "TEXT_BYTES_READ_AND_HASHED",
+      "observed_utc": "2026-09-08T11:43:47.570605+00:00"
+    }
+  }
+}

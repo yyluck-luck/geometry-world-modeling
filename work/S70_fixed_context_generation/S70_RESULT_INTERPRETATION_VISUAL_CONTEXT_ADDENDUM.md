@@ -1,0 +1,7 @@
+# Root visual-QA context addendum
+
+Recorded 2026-09-09T04:22:40.262594+00:00 by `/root/c2_v9_source_primary`, after the interpretation review was finalized. Preserve that report's original bytes/SHA. This adds no gate, experiment or metric.
+
+Root subsequently reports actually viewing the complete 16-image grid and native reference/A0/B target23. According to that report, the real target23 looks down toward a desk edge, globe and floor, while both predictions show a background wall, monitor and bear; B23 also has ghosted objects. Root reported no missing/black images. **I did not independently open these pixels.** These observations are attributed to root's visual QA, not inferred from MSE or independently verified here.
+
+The lower recorded B MSE therefore must not be presented as improved framing, geometry or perception. The reported framing mismatch makes the existing-output task-fidelity diagnostic concrete: separate saved conditions/camera conventions and preprocessing assumptions, the declared VAE/resource variant, and model/domain generalization before assigning a memory-selection cause. Previously verified ray algebra and exact A/A replay establish neither real optical calibration nor faithful rendered response. Keep all targets and the fixed score unchanged. No specific causal defect is yet identified; this note authorizes no additional model arm and names no innovation.

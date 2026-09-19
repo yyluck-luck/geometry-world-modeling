@@ -1,0 +1,98 @@
+{
+  "status": "GO_EXACT_SOURCE_ONLY_BOUNDED_TAR_INDEX",
+  "recorded_utc": "2026-09-11T01:21:51.267802+00:00",
+  "reviewer": "s77_science_closure, different author from root executor",
+  "source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/index_rtmv.py",
+    "bytes": 8429,
+    "sha256": "fd568ca4aced01e663bad129d71e16ae4eee7d9249bd5ec99faaa281871e8997"
+  },
+  "plan": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S89_matched_view_index/INDEX_PLAN.json",
+    "bytes": 1349,
+    "sha256": "d71131607884af528db294a94d82cd4d0c5255f33f11a3496a2a2b5d030f5917"
+  },
+  "source_bindings_locally_verified": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/rtmv_range_02/RECEIPT.json",
+      "bytes": 11802,
+      "sha256": "4582349f3e2283f4c9cc893d4dbc0ad6138d05c72a1b1232306b2da18eda3867"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/ROOT_METADATA_ACCEPTANCE.json",
+      "bytes": 982,
+      "sha256": "10def9a5bfea2cbe238393cfa3f0e3aefb59d760cae57418056a0e937c7700c5"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S88_independent_geometry_data/NEXT_MATCHED_VIEW_INDEX_PLAN.md",
+      "bytes": 1821,
+      "sha256": "6da830236287e945891f2c930a10c21e0521dec2f6ec92d13c62600ffc6a4257"
+    }
+  ],
+  "actual_scope": "Full original152-line source and full plan read; current bounded reorder/rejected_member repair reread; current hashes and source binding hashes verified. No execution of index_rtmv, no network, no RGB/EXR/depth/JSON payload read.",
+  "checks": [
+    {
+      "label": "Verified continuation and previous source identity",
+      "result": "PASS",
+      "detail": "All3 source binding SHAs match. Actual prior receipt same fixedURL/size; old7 local headers SHA/decode reused; start computed from final JSON header and padded size, exact11460608. No old network requests or old JSON body reads."
+    },
+    {
+      "label": "Scene stop and preserved boundary",
+      "result": "PASS",
+      "detail": "Each supported member path checked for absolute/..; normalized top component compared for every new member including ordinary files. First outside00000 member retained as boundary and excluded by anchored scene regex from matching. all_scene_members_enumerated=false; no full-scene completeness claim."
+    },
+    {
+      "label": "Old and new members form one complete prefix index",
+      "result": "PASS",
+      "detail": "Previous7 and all validated new entries combined. Exact five-digit basename plus json/depth.exr/seg.exr/exr alternatives; all entries held in lists, duplicate names stop and conflicting required roles are not complete. Boundary/rejected/unknown items cannot silently replace matching entries."
+    },
+    {
+      "label": "Out-of-archive member isolation",
+      "result": "PASS_AFTER_ROOT_REPAIR",
+      "detail": "Current source computes padded end and checks <=archive size before appending to new_members. Failing item stored in rejected_member; response/rawheader preserved. Rejected entry is excluded from MATCHED_VIEWS."
+    },
+    {
+      "label": "Bounded range transport",
+      "result": "PASS_STATIC",
+      "detail": "Maximum256 calls, each512B intendedRange, aligned nonnegativeoffset inside archive; cap8192, retry0, max5 redirects, per-call25s constrained by remaining cooperative600s. Exact transport rc0, HTTP206, Range start/end/total and body512 required before header parse."
+    },
+    {
+      "label": "Supported tar and failure handling",
+      "result": "PASS_STATIC",
+      "detail": "TarInfo header checksum parse, nonnegative size, only regular/emptydirectory; extension/sparse/unsafe paths fail. Source/HTTP/checksum/type/duplicate/out-of-archive errors preserve STOPPED and partial verified matches. Zero block, header budget, scene boundary and archive end remain distinct statuses."
+    },
+    {
+      "label": "Budget and offset arithmetic",
+      "result": "PASS_METADATA_ARITHMETIC",
+      "detail": "256*512=131072 accepted header bytes; 256*8192=2097152 response-body cap excluding HTTP/redirect overhead. Failed and boundary calls are counted because receipt append occurs before HTTP assertions. 600s is explicitly cooperative, actual elapsed saved; no hardOS claim."
+    },
+    {
+      "label": "Artifact and evidence boundary",
+      "result": "PASS_STATIC",
+      "detail": "index_01 create-only; signed queries scrubbed; all old/new rows and all view groups retained; selected ID is minimum unique complete basename in scanned prefix for format development. body_contents_verified=false, static_multiview_verified=false, fullarchive/hashfalse, zero intended JSON/RGB/depth payload and model runs."
+    }
+  ],
+  "finding_history": [
+    {
+      "id": "S89-R1",
+      "severity": "MAJOR_BEFORE_REPAIR",
+      "status": "CLOSED_AT_FINAL_SOURCE_SHA",
+      "original_root_declared_source_sha256": "c607c8bbaed9d5e7ee952d807fc60d3b7a777ecf4858a5c1ef2261ec0200026f",
+      "original_lines": "111-114 and130-141",
+      "issue": "Appended new member before validating archive extent could let rejected member enter verified matched manifest.",
+      "repair": "Rejected_member separate; append only after extent assertion. No change to selection or request scope."
+    }
+  ],
+  "scientific_limit": "Source GO only permits this bounded metadata attempt. It does not certify future transfer success, image/depth contents, static multiview geometry or method benefit. On STOPPED, partial selected IDs are metadata candidates only and require root result interpretation before any later payload task.",
+  "reviewer_actions": {
+    "network_requests": 0,
+    "index_runs": 0,
+    "new_payload_reads": 0,
+    "image_decodes": 0,
+    "models": 0,
+    "scores": 0,
+    "synthetic_model_runs": 0
+  },
+  "blocking_findings": [],
+  "root_actual_execution_separate": true
+}

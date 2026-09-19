@@ -1,0 +1,82 @@
+{
+  "schema": "S101_GPU_RUN_MANIFEST_v1",
+  "recorded_at_utc": "2026-09-14T18:30:30Z",
+  "ssh": {
+    "command_template": "ssh -i ~/.ssh/id_ed25519_superpod yliutz@superpod.ust.hk",
+    "host": "superpod.ust.hk",
+    "login_node": "slogin-02",
+    "user": "yliutz",
+    "identity_file": "~/.ssh/id_ed25519_superpod",
+    "host_key_fingerprint": "RECORDED_IN_LOCAL_KNOWN_HOSTS_NOT_YET_HASHED",
+    "forward_agent": false,
+    "batch_mode": true
+  },
+  "environment_readonly": {
+    "python": "3.10.12",
+    "slurm": "23.02.6",
+    "account": "mscitspod2026",
+    "partition": "normal",
+    "partition_gres_summary": "gpu:8(S:0-1)",
+    "home": "/home/yliutz",
+    "login_node_has_gpu": false
+  },
+  "smoke_jobs": [
+    {
+      "job_id": "583967",
+      "status": "FAILED_AFTER_GPU_PROBE",
+      "node": "dgx-09",
+      "gpu": "NVIDIA H800",
+      "gpu_memory_mib": 81559,
+      "driver": "570.158.01",
+      "elapsed": "00:00:01",
+      "failure": "shell quoting bug in optional torch availability print; GPU probe itself succeeded",
+      "output": "~/gwm_s101_smoke_583967.out"
+    },
+    {
+      "job_id": "583968",
+      "status": "FAILED_AFTER_GPU_PROBE",
+      "node": "dgx-09",
+      "gpu": "NVIDIA H800",
+      "gpu_memory_mib": 81559,
+      "driver": "570.158.01",
+      "elapsed": "00:00:01",
+      "failure": "same shell quoting bug in optional torch availability print; GPU probe itself succeeded",
+      "output": "~/gwm_s101_smoke2_583968.out"
+    },
+    {
+      "job_id": "584004",
+      "status": "COMPLETED_GPU_PROBE_TORCH_MISSING",
+      "node": "dgx-21",
+      "gpu": "NVIDIA H800",
+      "gpu_memory_mib": 81559,
+      "driver": "580.159.03",
+      "elapsed": "00:00:00",
+      "torch_available": false,
+      "output": "~/gwm_gpu_probe_584004.out"
+    },
+    {
+      "job_id": "584006",
+      "status": "COMPLETED_CUDA_TORCH_SMOKE",
+      "node": "dgx-21",
+      "gpu": "NVIDIA H800",
+      "gpu_memory_mib": 81559,
+      "driver": "580.159.03",
+      "python": "3.10.21",
+      "torch": "2.5.1+cu121",
+      "cuda_available": true,
+      "compute_capability": "9.0",
+      "matmul_check": "2x2 correct",
+      "peak_bytes": 33555456,
+      "elapsed": "00:00:07",
+      "output": "agent GPU probe receipt"
+    }
+  ],
+  "scientific_boundary": {
+    "gpu_verified": true,
+    "vmem_forward_verified": false,
+    "heldout_gate0": "NOT_PASSED",
+    "formal_grc_run_allowed": false,
+    "new_method_validated": false,
+    "novelty_authorization": "NONE"
+  }
+}

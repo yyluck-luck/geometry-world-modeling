@@ -1,0 +1,26 @@
+Visibility Computations for Global Illumination Algorithms
+Visibility Computations for Global Illumination Algorithms
+Seth Teller and
+Pat Hanrahan
+Abstract
+The most expensive geometric operation in image synthesis is visibility
+determination.  Classically this is solved with hidden surface removal
+algorithms that render only the parts of the scene visible from a point.
+Global illumination calculations, however, may require information between
+any two points in the scene.  This paper describes global visibility
+algorithms that preprocess polygon databases in order to accelerate
+visibility determination during illumination calculations.  These algorithms
+are sensitive to the output complexity in visibility space; that is, how many
+pairs of objects are mutually visible.  Furthermore, the algorithms are
+incremental so that they work well with progressive refinement
+and hierarchical methods of image synthesis.  The algorithms are
+conservative, but exact; that is, when tyhey return visibility predicates they
+can be proved true.  However sometimes they do not return either totally
+visible or totally invisible, but partially visible, even though in the same
+situation a better algorithm might return the exact answer.  In this paper
+we describe the algorithms and their implementation, and show that, in a scene
+with low average visual complexity, they can dramatically accelerate
+conventional radiosity programs.
+Additional information available:
+Compressed postscript version of the paper  (664k)
+Back up to papers index

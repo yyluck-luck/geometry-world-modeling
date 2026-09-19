@@ -1,0 +1,154 @@
+{
+  "status": "PASS_WITH_REPORT_SCOPE_CLARIFICATION",
+  "review_completed_utc": "2026-09-05T20:33:13.496263+00:00",
+  "review_first_observed_clock_utc": "2026-09-05T20:31:34+00:00",
+  "scope": "Independent static AST/source and saved JSON verification only; no rerun of original functions, audited script, model, rendering or reconstruction.",
+  "checks_passed": 94,
+  "artifacts": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/audit_s9_b_call_trace.py",
+      "bytes": 7225,
+      "sha256": "75de10b617e4b60168bab1e83a185c4633e11e85ede53ca60dca857aa6994210"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S9_B_call_trace/pre_run.json",
+      "bytes": 1368,
+      "sha256": "a4093009d63c4cc826adecfa3f493044645e34d57d67504af0d5c274a47fcdd7"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S9_B_call_trace/verification.json",
+      "bytes": 12213,
+      "sha256": "d42f12e314e8f7fef543c6401bbeac0af9d771ed693d0057b11b8f2fe4cd7db6"
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/pipeline.py",
+      "bytes": 62176,
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e"
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/utils/util.py",
+      "bytes": 45488,
+      "sha256": "0b71dcf6d4a43109d785f49d9c6def37b1256c4d189ab9438bfb185f3099f013"
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/configs/inference/inference.yaml",
+      "bytes": 879,
+      "sha256": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3"
+    }
+  ],
+  "functions": {
+    "loop_lines": [
+      1195,
+      1316
+    ],
+    "average_lines": [
+      601,
+      637
+    ],
+    "average_call_line": 635
+  },
+  "expected_cases": [
+    {
+      "initial_frames": 1,
+      "target_frames": 13,
+      "motions": [
+        "translation",
+        "stationary"
+      ],
+      "context_history": [
+        1,
+        8,
+        12
+      ],
+      "post_store_history": [
+        8,
+        12,
+        14
+      ],
+      "batch_target_lengths_with_padding": [
+        7,
+        4,
+        4
+      ],
+      "actual_appends": [
+        7,
+        4,
+        2
+      ],
+      "retrieval_declared": [
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "initial_frames": 9,
+      "target_frames": 12,
+      "motions": [
+        "translation",
+        "stationary"
+      ],
+      "context_history": [
+        9,
+        13,
+        17
+      ],
+      "post_store_history": [
+        13,
+        17,
+        21
+      ],
+      "batch_target_lengths_with_padding": [
+        4,
+        4,
+        4
+      ],
+      "actual_appends": [
+        4,
+        4,
+        4
+      ],
+      "retrieval_declared": [
+        true,
+        true,
+        true
+      ]
+    }
+  ],
+  "required_report_clarification": [
+    "List all substituted operations: get_context_info, get_translation_scaling_factor, get_cond, do_sample, tensor_to_pil, encode_image, construct_and_store_scene. The saved scope shorthand names only sampling/reconstruction. Preserve original records; disclose the full boundary in the applicability report.",
+    "query_pose is the averaged pose before get_transformed_c2ws. No renderer K, geometry, source voting, candidate expansion, sorting or NMS ran. retrieval_needed is a fixture branch label, not observed renderer execution.",
+    "Stationary equal poses are imposed by input construction; moving inequalities are properties of these fixtures. Neither measures real navigation frequency, cache eligibility/hit rate nor acceleration. Run wall-clock metadata is not real VMem latency."
+  ],
+  "static_findings": [
+    {
+      "lines": "950–955",
+      "fact": "get_transformed_c2ws deep-copies and flips columns 1/2; a fixed axis-convention transform, independent of map contents. Same raw average pose has same transformed pose."
+    },
+    {
+      "lines": "635–645, 995",
+      "fact": "Default context_num_frames=4 makes the exact slice select only the last padded target pose. target_K is the mean of accumulating surfel_Ks and render receives mean×0.65; identical camera pose alone does not freeze intrinsics."
+    },
+    {
+      "lines": "820–827",
+      "fact": "The active merge path appends a new source timestep on a matching existing surfel; unmatched surfels are returned. It does not assign an old surfel position, normal or radius."
+    },
+    {
+      "lines": "1026–1056, 1082",
+      "fact": "Construction converts initial/all or last target_num_frames point maps into surfels, merges memberships, assigns sources to unmatched births and extends the global surfel list. Ordinary writes need not preserve group/source/candidate identities even if an old position is unchanged."
+    },
+    {
+      "lines": "1337–1401",
+      "fact": "The separate undo branch removes frames, source memberships and surfels, then reindexes survivors. Not executed in this synthetic trace; another explicit invalidation case for any later cache."
+    },
+    {
+      "lines": "1195–1316",
+      "fact": "Every nonempty generation batch calls context once, appends generated frame state, then calls reconstruction once. This is the original AST body; its external operations were stubbed."
+    }
+  ],
+  "limitations": [
+    "Config assertions support the pinned default 4/4/8 only, not arbitrary configs.",
+    "The fixtures do not validate get_context_info results or real reconstruction state mutations.",
+    "Old positions are unchanged in the inspected merge/write path; do not call this an experiment testing coordinate-update caching."
+  ]
+}

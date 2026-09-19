@@ -1,0 +1,111 @@
+BoostMVSNeRFs
+window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'G-8ZERS5BVPS');
+BoostMVSNeRFs
+Boosting MVS-based NeRFs to Generalizable View Synthesis in Large-scale Scenes
+Chih-Hai Su
+1
+*
+Chih-Yao Hu
+2
+*
+Shr-Ruei Tsai
+1
+*
+Jie-Ying Lee
+1
+*
+Chin-Yang Lin
+1
+Yu-Lun Liu
+1
+1
+National Yang Ming Chiao Tung University,
+2
+National Taiwan University,   * equal contribution
+SIGGRAPH 2024
+arXiv
+Code
+Data
+Colab Demo
+Abstract
+While Neural Radiance Fields (NeRFs) have demonstrated exceptional quality, their protracted training duration remains a limitation. Generalizable and MVS-based NeRFs, although capable of mitigating training time, often incur tradeoffs in quality. This paper presents a novel approach called BoostMVSNeRFs to enhance the rendering quality of MVS-based NeRFs in large-scale scenes. We first identify limitations in MVS-based NeRF methods, such as restricted viewport coverage and artifacts due to limited input views. Then, we address these limitations by proposing a new method that selects and combines multiple cost volumes during volume rendering. Our method does not require training and can adapt to any MVS-based NeRF methods in a feed-forward fashion to improve rendering quality. Furthermore, our approach is also end-to-end trainable, allowing fine-tuning on specific scenes. We demonstrate the effectiveness of this method through experiments on large-scale datasets, showing significant improvements in rendering quality, particularly in large-scale scenes with free camera trajectories and unbounded outdoor scenarios.
+BoostMVSNeRFs
+Our BoostMVSNeRFs enhances the novel view synthesis quality of MVS-based NeRFs in large-scale scenes.
+MVS-based NeRF methods often suffer from (a) limited viewport coverage from novel views or (b) artifacts due to limited input views for constructing cost volumes. (c) These drawbacks cannot be resolved even by per-scene fine-tuning. Our approach selects those cost volumes that contribute the most to the novel view and combines multiple selected cost volumes with volume rendering. (d, e) Our method does not require any training and is compatible with existing MVS-based NeRFs in a feed-forward fashion to improve the rendering quality. (f) The scene can be further fine-tuned as our method supports end-to-end fine-tuning.
+Video
+BoostMVSNeRFs outperforms Generalizable and Per-scene Optimization NeRFs
+MVSNeRF
+ENeRF
+F2-NeRF
+Zip-NeRF
+activeMethodPill = document.querySelector('.method-pill.active-pill');
+                    activeScenePill = document.querySelector('.scene-pill.active-pill');
+                    activeModePill = document.querySelector('.mode-pill.active-pill');
+RGB
+Depth
+Baseline method (left) vs BoostMVSNeRFs (right).
+video0 = document.getElementById("compVideo0");
+                        video1 = document.getElementById("compVideo1");
+                        video0.addEventListener('loadedmetadata', function() {
+                            if (activeVidID == 0 && select){
+                                video0.play();
+                                // print video size
+                                console.log(video0.videoWidth, video0.videoHeight);
+                                video0.hidden = false;
+                                video1.hidden = true;
+                            }
+                        });
+                        video1.addEventListener('loadedmetadata', function() {
+                            if (activeVidID == 1 && select){
+                                video1.play();
+                                // print video size
+                                console.log(video1.videoWidth, video1.videoHeight);
+                                video0.hidden = true;
+                                video1.hidden = false;
+                            }
+                        });
+activeMethodPill = document.querySelector('.method-pill.active-pill');
+                        activeScenePill = document.querySelector('.scene-pill.active-pill');
+                        activeModePill = document.querySelector('.mode-pill.active-pill');
+Combined Rendering
+Using a single cost volume, as in traditional MVS-based NeRFs, often introduces padding artifacts or incorrect geometry, as indicated by the
+red
+dashed circles. Our method warps selected cost volumes to the novel view's frustum and applies 3D visibility scores
+m
+j
+as weights to blend multiple cost volumes during volume rendering. Combined rendering provides broader viewport coverage and combines information from multiple cost volumes, leading to improved image synthesis and alleviating artifacts.
+3D visibility scores and 2D visibility masks
+For a novel view, depth distribution is estimated from three input views, from which 3D points are sampled and projected onto each view to determine visibility. These projections yield 3D visibility scores
+m
+j
+, normalized across the views, and are subsequently volume rendered into a 2D visibility mask
+M
+2D
+. This mask highlights the contribution of each input view to the cost volume and guides the rendering process, aiding in the selection of input views that optimize rendering quality and field of view coverage.
+BoostMVSNeRFs gains higher rendering quality with more cost volumes
+BoostMVSNeRFs boosts MVS-based NeRFs by selecting and combining multiple cost volumes during volume rendering. With more cost volumes, the rendering quality is improved, demonstrating the effectiveness of our method in enhancing the rendering quality of MVS-based NeRFs.
+BoostMVSNeRFs is robust with sparse input views
+With more sparse input views, the performance drop of our method is less severe than ENeRF, demonstrating the robustness of our method against sparse input views by combining multiple cost volumes in rendering.
+Citation
+@inproceedings{su2024boostmvsnerfs,
+    title={BoostMVSNeRFs: Boosting MVS-based NeRFs to Generalizable View 
+            Synthesis in Large-scale Scenes},
+    author={Su, Chih-Hai and Hu, Chih-Yao and Tsai, Shr-Ruei and 
+            Lee, Jie-Ying and Lin, Chin-Yang and Liu, Yu-Lun},
+    booktitle={SIGGRAPH 2024 Conference Papers},
+    year={2024}
+    }
+Acknowledgements
+This research was funded by the National Science and Technology Council, Taiwan, under Grants NSTC 112-2222-E-A49-004-MY2.
+                  The authors are grateful to Google and NVIDIA for generous donations.
+                  Yu-Lun Liu acknowledges the Yushan Young Fellow Program by the MOE in Taiwan.
+                  The authors thank the anonymous reviewers for their valuable feedback.
+The website template was borrowed from
+Michaël Gharbi
+and
+Ref-NeRF
+.

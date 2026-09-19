@@ -1,0 +1,100 @@
+{
+  "created_utc": "2026-09-09T06:29:38.393746+00:00",
+  "stage": "S72_REAL_PHOTO_FIXED_REQUESTED_GEOMETRY",
+  "question": "Do all four real history19-to-real-target20-23 controls support a useful fixed-requested-geometry observer under the actual approximate input camera model?",
+  "scope": "already-seen static real fr2_desk photographs, exploratory observer qualification, no generated-image comparison yet, no new neural model",
+  "anchor": {
+    "history_id": 19,
+    "rgb_timestamp": 1311868171.663411,
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/rgb/1311868171.663411.png",
+    "sha256": "c7127660fd25468f35db330cc3200bf68451cec4e13adef640ee7b16c27f32ee",
+    "size_bytes": 530537,
+    "body_allowed": true
+  },
+  "camera_archive": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/execution_01/optical_cameras.npz",
+    "sha256": "599543102f5c799ca4005ead413b69ee10e42269ef36a7942410f9066556d325",
+    "fields": {
+      "ids": {
+        "shape": [
+          9
+        ],
+        "dtype": "int64",
+        "body_bytes": 72,
+        "body_sha256": "11a567f79c9913fc285a038e9c4f428cdaf7dae2d9978308b82e9e0cebabe925"
+      },
+      "c2ws": {
+        "shape": [
+          9,
+          4,
+          4
+        ],
+        "dtype": "float64",
+        "body_bytes": 1152,
+        "body_sha256": "e4a374c6b9f9253f8d3e80c6c5f174e7321e2bac03c3ee38314deacd7ad46830"
+      },
+      "rgb_timestamps_ns": {
+        "shape": [
+          9
+        ],
+        "dtype": "int64",
+        "body_bytes": 72,
+        "body_sha256": "965e7bd95f6cdfb17b6d12966a0a211b51ac13053f5f98d850c1acb5ce93e36f"
+      }
+    }
+  },
+  "anchor_K_cache": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S68_tum_vmem_cache_bridge/execution_01/history_19.npz",
+    "sha256": "61c8ddd761ffd4fddf955c161ee2cb6af494dbc481a4933f760a2339c964a8e9",
+    "field": "K_pixels_576"
+  },
+  "targets": {
+    "20": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_20.png",
+      "sha256": "6f77b08bc5c68f16b30e68933c006ad65deaa1920218ef83b90bcdbd9a960fa3"
+    },
+    "21": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_21.png",
+      "sha256": "5ec0c6a43b6be5fe459c972b1dc914fb59528e16dcc89c7124de934cef372745"
+    },
+    "22": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_22.png",
+      "sha256": "f28548b1ec2ad04b4f3abc887b42f18372367992e0416010f7146bcea220c25f"
+    },
+    "23": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_23.png",
+      "sha256": "7a9c995f70d99993c35b57928c331ad123cba395266d1185a21134c0f5e53f8c"
+    }
+  },
+  "source_metadata": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S69_tum_camera_conditioning/INPUTS.json": "9b66b2f7b4449e11f400c342068d069e95b96caae84e659dc497123cb5e5238f"
+  },
+  "preprocess": "anchor native640x480RGB cv2.resize to768x576 INTER_AREA then[:,96:672]; targets existing576x576RGB; grayscale RGB2GRAY; native SIFT coordinates with no added 0.5",
+  "geometry": "Optical c2w in meters only, no D or learned normalization. Rji=Rj.T@Ri; tji=Rj.T@(ci-cj); F=inv(Kj).T@skew(tji)@Rji@inv(Ki); divide F by Frobenius norm. Pixel Ks=Kt=cached K_pixels_576. No estimated F/H/pose or retuned calibration.",
+  "versions": {
+    "opencv-python-headless": "4.11.0.86",
+    "numpy": "1.26.4",
+    "pillow": "10.3.0"
+  },
+  "sift": {
+    "nfeatures": 1500,
+    "nOctaveLayers": 3,
+    "contrastThreshold": 0.04,
+    "edgeThreshold": 10,
+    "sigma": 1.6
+  },
+  "matching": "BF L2 knn2 both directions strict ratio<.75 and mutual identities; keep all sorted matches; no RANSAC or geometric filtering",
+  "residual": "a=abs(xj.T F xi); d_to_target=a/norm((Fxi)[:2]); d_to_source=a/norm((F.T xj)[:2]); mean_symmetric_px=(d_to_target+d_to_source)/2. Not squared Sampson.",
+  "report": "All per-match xy and residuals, q25/50/75/95, descriptive fractions <=2/5/10px, source/destination xy span and4x4 occupied cells. No matched subset selection or automatic camera-correct verdict. Few points weak even when residual finite.",
+  "baseline_insufficient_m": 1e-09,
+  "line_normal_epsilon": 1e-12,
+  "budget": {
+    "external_timeout_seconds": 60,
+    "opencv_threads": 1,
+    "model_calls": 0,
+    "weight_reads": 0
+  },
+  "independent_review": "Different-author source review before execution; independent scalar arithmetic/geometry from saved coordinates and accepted cameras after. Not independent correspondence truth.",
+  "limits": "Approximate ROS K/no undistortion, interpolated GT camera, real-image feature mismatches or dynamic objects can cause residual. Fixed F is necessary not sufficient; low error does not prove pose/depth correctness. fr1 discussion in S71 not applicable; actual sequence fr2_desk.",
+  "new_method_validated": false
+}

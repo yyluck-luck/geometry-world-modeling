@@ -1,0 +1,79 @@
+{
+  "schema": "s42-h1-instrumentation-feasibility-review-v1",
+  "completed_utc": "2026-09-07T06:14:57Z",
+  "agent": "/root/gemini_third_review_verifier",
+  "task": "Read-only feasibility design for the A0 factual baseline, A0R exact replay guard, and A1 zero-CLIP influence gate.",
+  "verdict": "READY_FOR_SOURCE_PREPARATION",
+  "verdict_scope": "Ready to prepare and independently review a CPU-FP32 direct-sampler replay implementation. Scientific execution remains blocked until a real S40 run and readback, a frozen natural-failure case, and source-bound replay artifacts exist.",
+  "artifacts": [
+    {
+      "path": "work/S42_h1_instrumentation_feasibility/REPORT.md",
+      "sha256": "82ec8b1b6625c1ddafae9c8aefa272d293d826a0fe3bfc4737bc1ab7bc270b30",
+      "bytes": 21645,
+      "lines": 234
+    }
+  ],
+  "audited_source_identities": {
+    "work/S20_environment/isolated_vmem_source/modeling/pipeline.py": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "work/S20_environment/isolated_vmem_source/modeling/modules/conditioner.py": "b79eb0cf4d94345a720a9a844c7daa6206b0a9234d714b7f9f23a9571c7c5fc1",
+    "work/S20_environment/isolated_vmem_source/modeling/network.py": "9ed21c2d804734d7ca2d81b1e596858835ca70a4a04abb9b5540b872515d4c9b",
+    "work/S20_environment/isolated_vmem_source/modeling/sampling.py": "dc07ca0ba571ba5fb48f9856515d2cb7dea25254008a6f8b315538817f352b24",
+    "work/S20_environment/isolated_vmem_source/utils/util.py": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+    "work/S35_generation_integration/launch_original.py": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+    "work/S35_generation_integration/runtime_factory.py": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0",
+    "work/S35_generation_integration/integrate_original.py": "adf819e1cda3de4f830d2c3e5776664591607a0109d50f59cdc1addeb684b0ec",
+    "work/S35_generation_integration/archive_outputs.py": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+    "src/s20_generation_trace.py": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57",
+    "work/S40_declared_variant_generation/launch_generation.py": "8ade694bc750f9693fc461257437af7b919b0c46755fc0eef2e21096d31e8860",
+    "work/S40_declared_variant_generation/runtime_adapter.py": "d26f7e8990fd218273361c04484c8c0ea499a693486fd7bb040e3b03306a79c4",
+    "work/S40_declared_variant_generation/PROTOCOL_DRAFT.md": "2c026b3dff79ca9155e5ad86a8c539b6597b6be7ed73b2c407b3d83ce75d7ced",
+    "work/S40_result_readback/readback.py": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "work/S41_gemini_adversarial_review/primary_retrieval_and_root_review.md": "fd07dfc743f9a0c3f350f5d719936b74d5d902f3f10910c1a0b30b8ecda4059a",
+    "work/S41_gemini_adversarial_review/root_review_incremental_v3.json": "71c45f94280be496e8ae4450ad4569bbf8c5788a072ee3054865465eddc1d198"
+  },
+  "arm_contract": {
+    "A0": "The pre-registered factual S40 batch and its saved mean-CLIP output after full S40 readback.",
+    "A0R": "One direct sampler replay using byte-identical saved sampler inputs and sampler-entry RNG, followed by the same VAE decode.",
+    "A1": "The same direct replay with only conditional c.crossattn replaced by zeros_like; the entire uc dictionary and every other input remain byte-identical to A0."
+  },
+  "key_source_findings": [
+    "S40 can preserve the actual pre-mutation noise, c and uc branches, c2w, K, input mask, scale, cache provenance, samples, samples_z, and sampler-entry and return CPU RNG states.",
+    "The sampler performs torch.randn_like draws at every Euler step, so restoring seed or initial noise alone is insufficient; the saved sampler-entry Torch CPU RNG state is required.",
+    "Direct replay must bypass do_sample because do_sample creates a new initial noise tensor, and it must bypass get_context_info and get_cond to avoid retrieval and condition reconstruction.",
+    "The released get_cond builds uc.crossattn as zeros_like(c.crossattn); therefore A1 specifies only the conditional c.crossattn delta and reuses uc byte-for-byte.",
+    "A0R uses zero-tolerance byte identity for sampler inputs, samples_z, decoded tensors, sampler-return RNG, and unchanged live cache/map state on the frozen CPU-FP32 stack."
+  ],
+  "required_source_preparation": [
+    "Immutable S40-batch replay-bundle freezer and type-preserving RNG deserializer.",
+    "Direct sampler runner with fresh per-arm tensor clones and forbidden-call guards.",
+    "Fresh-worker external supervisor and append-only partial-failure archive.",
+    "Exact replay verifier that blocks A1 on any A0-to-A0R mismatch.",
+    "Independent source review followed by an approval bound to the actual replay-bundle core."
+  ],
+  "execution_blockers": [
+    "No completed and independently read-back real S40 archive is currently available to supply factual arrays.",
+    "No natural failure case, return target, metric, camera-obedience gate, and seed have yet been frozen for H1.",
+    "The replay freezer, runner, supervisor, and exact verifier described by this review do not yet exist as production code.",
+    "MPS cannot serve as an exact replay backend for the CPU factual A0 and is explicitly outside this protocol."
+  ],
+  "compatibility": {
+    "cpu_fp32_8_threads": "READY_FOR_SOURCE_PREPARATION",
+    "mps": "BLOCKED_AND_OUT_OF_SCOPE_FOR_CPU_EXACT_REPLAY",
+    "cuda": "NOT_ASSESSED_FOR_THIS_LOCAL_CPU_PROTOCOL"
+  },
+  "evidence_boundary": {
+    "read_only_source_review": true,
+    "production_code_written": false,
+    "model_loaded": false,
+    "weights_read": false,
+    "model_forward_calls": 0,
+    "sampler_calls": 0,
+    "vae_decode_calls": 0,
+    "videos_generated": 0,
+    "generated_arrays_read": false,
+    "ground_truth_read": false,
+    "main_ledger_modified": false,
+    "scientific_claims_established": []
+  },
+  "next_action": "Prepare the five source components listed above without model execution; only bind and execute them after S40 real readback and Gate-0 case freezing succeed."
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "S85_INDEPENDENT_OUTPUT_REVIEW_CONTRACT_V1",
+  "created_utc": "2026-09-10T20:23:49.719274+00:00",
+  "status": "SOURCE_ONLY_PENDING_ROOT_READ_AND_EXPLICIT_EXECUTION",
+  "checker_sha256": "dce551f7fa34bf76748401a8bb0bf33be870f50f286fb1e2a3df80614db8775e",
+  "projection_runner_sha256": "344ad059365bc775af0c8336eeffdaf0b44c073626aca3a4c3a10e138c2d3019",
+  "projection_contract_sha256": "bcf4801ff1619ec74e5714e2ba90c556a6abb6c45f48b2f3185b2eb9925a333b",
+  "command_template": [
+    "/Users/rocket/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "-I",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S85_fixed_geometry_warp/check_saved_projection.py",
+    "--receipt-sha256",
+    "ROOT_SUPPLIED_EXACT_ACTUAL_RECEIPT_SHA256"
+  ],
+  "execution_policy": {
+    "attempts": 1,
+    "automatic_retry": false,
+    "run_only_after_root_review_and_authorization": true,
+    "output": "INDEPENDENT_OUTPUT_REVIEW.json",
+    "no_overwrite": true
+  },
+  "inputs": {
+    "original_archives": "The two precise original input paths, whole-byte SHA/size and selected field body identities frozen in projection CONTRACT.json. No other scientific input is permitted.",
+    "saved_archives": [
+      "execution_01/INPUT_GEOMETRY.npz",
+      "execution_01/TARGET_20.npz",
+      "execution_01/TARGET_21.npz",
+      "execution_01/TARGET_22.npz",
+      "execution_01/TARGET_23.npz"
+    ],
+    "metadata": "Current exact frozen source/contract, root-specified actual RECEIPT.json SHA, receipt-bound SUMMARY.json and five archive identities; no scientific arrays read at preparation.",
+    "read_count_when_complete": 7,
+    "archive_read_rule": "Each of2original and5saved NPZ archives read/hash once into memory, decode only required fields; originals may contain unused fields but they are not decoded."
+  },
+  "full_scope": [
+    "Verify original whole-file identity and consumed field shapes/dtypes/body bytes; verify four histories/order, target20..23 selection and fixed K.",
+    "Verify saved input copy is exactly the original consumed values, including bytes; never use that copy as the independent reference.",
+    "Recompute all16pairs and3145728source rows from original depth/K/P, same declared FP64 arithmetic ordering, independently coded status masks and footprint construction.",
+    "Verify all XYZ/UV/status/dense four slots/weights and all31target archive fields.",
+    "Candidate source-row/pixel/slot identities must be a complete unique permutation of all independently eligible footprints. Verify every adjacent target/Z/priority/pixel/slot tuple in strict increasing order; do not call author lexsort or any author function.",
+    "Derive rank, winner/second including equal-Z, source footprint winner, count/mask/hole semantics and exact original winner RGB independently.",
+    "Exact equality of all16pair and4target summary fields, fixed denominators and summary status; no statistical inference."
+  ],
+  "comparisons": {
+    "exact": [
+      "original and saved-input byte bodies",
+      "shapes/dtypes/keys",
+      "NaN and signed infinity locations",
+      "status classes and candidate eligibility",
+      "integer indices/identities/complete permutation/ordering",
+      "ranks/winners/second identities/holes/mask/count",
+      "RGB values",
+      "all summary counts and coverage"
+    ],
+    "floating_atol": 1e-10,
+    "floating_rtol": 1e-12,
+    "floating_rule": "abs(actual-reference)<=1e-10+1e-12*abs(reference), with full max absolute differences saved per field. Applies only to XYZ/UV/positive weights/candidate and winner depths, not eligibility, sorting or class decisions.",
+    "rationale": "Small FP64 representation tolerance for independent arithmetic re-expression; same multiplication/addition order is preserved to avoid artificial boundary differences. This is not a geometry quality threshold.",
+    "no_boundary_repair": "No epsilon, rounding/snap, tolerance-based filtering, reranking, or retry after mismatch."
+  },
+  "resources": {
+    "wall_seconds": 300,
+    "self_peak_rss_limit_bytes": 8589934592,
+    "threads": 1,
+    "output": "One compact review JSON only; no copied arrays or new scientific images.",
+    "limits_are": "SIGALRM plus per-target self peak RSS checks, not OS hard memory isolation."
+  },
+  "preparation_actual": {
+    "ast_parse": true,
+    "in_memory_compile": true,
+    "checker_executions": 0,
+    "projector_imports": 0,
+    "scientific_array_reads": 0,
+    "model_calls": 0,
+    "optimizer_calls": 0,
+    "image_decodes": 0
+  },
+  "interpretation": "PASS means original-input numerical/storage consistency for one fixed projection batch in one exposed scene. Coverage and collision counts are not accuracy, physical visibility, independent scenes, generation improvement or innovation."
+}

@@ -1,0 +1,266 @@
+{
+  "schema": "s14e-predictor-artificial-v1",
+  "started_utc": "2026-09-06T08:52:23.009384+00:00",
+  "status": "PASS",
+  "source_sha256": "891fbebd441f44beef4c22882eac4b67d5165f2ebd0467d5d7b0e04e4e91950e",
+  "real_npz_decodes": 0,
+  "real_model_calls": 0,
+  "checkpoint_reads": 0,
+  "checks": [
+    {
+      "name": "state exact",
+      "passed": true
+    },
+    {
+      "name": "state missing field",
+      "expected_rejection": true,
+      "error": "State fields",
+      "passed": true
+    },
+    {
+      "name": "state byte change state_feat",
+      "expected_rejection": true,
+      "error": "Restored state differs from S14D: state_feat",
+      "passed": true
+    },
+    {
+      "name": "state byte change state_pos",
+      "expected_rejection": true,
+      "error": "Restored state differs from S14D: state_pos",
+      "passed": true
+    },
+    {
+      "name": "state byte change init_state_feat",
+      "expected_rejection": true,
+      "error": "Restored state differs from S14D: init_state_feat",
+      "passed": true
+    },
+    {
+      "name": "state byte change mem",
+      "expected_rejection": true,
+      "error": "Restored state differs from S14D: mem",
+      "passed": true
+    },
+    {
+      "name": "state byte change init_mem",
+      "expected_rejection": true,
+      "error": "Restored state differs from S14D: init_mem",
+      "passed": true
+    },
+    {
+      "name": "six exact outputs",
+      "passed": true
+    },
+    {
+      "name": "parity changed pts3d_in_self_view",
+      "expected_rejection": true,
+      "error": "Exact parity failed: pts3d_in_self_view",
+      "passed": true
+    },
+    {
+      "name": "parity changed pts3d_in_other_view",
+      "expected_rejection": true,
+      "error": "Exact parity failed: pts3d_in_other_view",
+      "passed": true
+    },
+    {
+      "name": "parity changed conf_self",
+      "expected_rejection": true,
+      "error": "Exact parity failed: conf_self",
+      "passed": true
+    },
+    {
+      "name": "parity changed conf",
+      "expected_rejection": true,
+      "error": "Exact parity failed: conf",
+      "passed": true
+    },
+    {
+      "name": "parity changed camera_pose",
+      "expected_rejection": true,
+      "error": "Exact parity failed: camera_pose",
+      "passed": true
+    },
+    {
+      "name": "parity changed rgb",
+      "expected_rejection": true,
+      "error": "Exact parity failed: rgb",
+      "passed": true
+    },
+    {
+      "name": "parity dtype",
+      "expected_rejection": true,
+      "error": "Array schema: conf",
+      "passed": true
+    },
+    {
+      "name": "signed zero bytes differ",
+      "expected_rejection": true,
+      "error": "Exact parity failed: conf",
+      "passed": true
+    },
+    {
+      "name": "nonfinite nan",
+      "expected_rejection": true,
+      "error": "Array finite gate: rgb",
+      "passed": true
+    },
+    {
+      "name": "nonfinite inf",
+      "expected_rejection": true,
+      "error": "Array finite gate: rgb",
+      "passed": true
+    },
+    {
+      "name": "extra tensor",
+      "expected_rejection": true,
+      "error": "Exactly six output tensors required",
+      "passed": true
+    },
+    {
+      "name": "condition exact schema",
+      "passed": true
+    },
+    {
+      "name": "condition schema reject target_poses",
+      "expected_rejection": true,
+      "error": "Array schema: target_poses",
+      "passed": true
+    },
+    {
+      "name": "condition schema reject K",
+      "expected_rejection": true,
+      "error": "Array schema: K",
+      "passed": true
+    },
+    {
+      "name": "condition schema reject ray_maps",
+      "expected_rejection": true,
+      "error": "Array schema: ray_maps",
+      "passed": true
+    },
+    {
+      "name": "pose bottom row",
+      "expected_rejection": true,
+      "error": "c2w bottom row",
+      "passed": true
+    },
+    {
+      "name": "zero focal",
+      "expected_rejection": true,
+      "error": "Positive focal lengths",
+      "passed": true
+    },
+    {
+      "name": "fixed manifest contract",
+      "passed": true
+    },
+    {
+      "name": "contract reject target_count",
+      "expected_rejection": true,
+      "error": "Contract mismatch: target_count",
+      "passed": true
+    },
+    {
+      "name": "contract reject query_count",
+      "expected_rejection": true,
+      "error": "Contract mismatch: query_count",
+      "passed": true
+    },
+    {
+      "name": "contract reject cpu_threads",
+      "expected_rejection": true,
+      "error": "Contract mismatch: cpu_threads",
+      "passed": true
+    },
+    {
+      "name": "contract reject target_rgb_allowed",
+      "expected_rejection": true,
+      "error": "Data boundary contract",
+      "passed": true
+    },
+    {
+      "name": "contract reject target_depth_allowed",
+      "expected_rejection": true,
+      "error": "Data boundary contract",
+      "passed": true
+    },
+    {
+      "name": "contract reject dummy_values",
+      "expected_rejection": true,
+      "error": "Contract mismatch: dummy_values",
+      "passed": true
+    },
+    {
+      "name": "unpermitted hash fake.png",
+      "expected_rejection": true,
+      "error": "Image/depth array must not be hashed by predictor: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S14E_predictor_preparation/artificial_v1/fake.png",
+      "passed": true
+    },
+    {
+      "name": "unpermitted hash fake.npz",
+      "expected_rejection": true,
+      "error": "Unpermitted NPZ identity: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S14E_predictor_preparation/artificial_v1/fake.npz",
+      "passed": true
+    },
+    {
+      "name": "unpermitted hash groundtruth.txt",
+      "expected_rejection": true,
+      "error": "Raw dataset metadata forbidden: /Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S14E_predictor_preparation/artificial_v1/groundtruth.txt",
+      "passed": true
+    }
+  ],
+  "runtime_cases": [
+    {
+      "name": "success",
+      "passed": true,
+      "query_attempts": 5,
+      "query_returns": 5,
+      "output_npz_count": 5,
+      "error": null
+    },
+    {
+      "name": "parity_failure",
+      "passed": true,
+      "query_attempts": 1,
+      "query_returns": 1,
+      "output_npz_count": 1,
+      "error": "Exact parity failed: conf"
+    },
+    {
+      "name": "state_mutation",
+      "passed": true,
+      "query_attempts": 1,
+      "query_returns": 1,
+      "output_npz_count": 1,
+      "error": "Query modified the restored latent state"
+    },
+    {
+      "name": "encoder_violation",
+      "passed": true,
+      "query_attempts": 1,
+      "query_returns": 1,
+      "output_npz_count": 1,
+      "error": "Unexpected query encoder use"
+    },
+    {
+      "name": "nonfinite_output",
+      "passed": true,
+      "query_attempts": 1,
+      "query_returns": 1,
+      "output_npz_count": 1,
+      "error": "Array finite gate: conf"
+    },
+    {
+      "name": "model_exception",
+      "passed": true,
+      "query_attempts": 1,
+      "query_returns": 0,
+      "output_npz_count": 0,
+      "error": "artificial model failure"
+    }
+  ],
+  "completed_utc": "2026-09-06T08:52:23.155483+00:00",
+  "scalar_checks": 35,
+  "runtime_case_count": 6
+}

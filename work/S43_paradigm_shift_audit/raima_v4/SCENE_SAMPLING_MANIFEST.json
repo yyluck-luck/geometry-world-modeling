@@ -1,0 +1,121 @@
+{
+  "schema": "raima-v4-scene-sampling-manifest-v1",
+  "status": "SOURCE_ONLY_TEMPLATE_DATA_ROSTER_ABSENT",
+  "execution_authorization": "NONE",
+  "current_local_dataset_gate": {
+    "status": "BLOCKED_CURRENT_TUM_SINGLE_RGB_STREAMS_CANNOT_SUPPLY_THREE_SYNCHRONOUS_REFERENCES",
+    "external_metadata_report_path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/resumption_20260908/reference_time_feasibility.json",
+    "external_metadata_report_sha256": "02dd1b304fc9e84bc4f99cd3b3ccfcf0fdee0685f7f14907edaa21959e07c8eb",
+    "evidence_type": "REAL_DATA_METADATA_ANALYSIS_ONLY_ZERO_PIXEL_READS",
+    "observations": [
+      "fr1_xyz has 798 indexed RGB captures, minimum adjacent gap 27.457 ms, and at most one capture in any closed 20 ms window",
+      "fr2_desk has 2965 indexed RGB captures, minimum adjacent gap 23.974 ms, and at most one capture in any closed 20 ms window",
+      "fr2_desk original and guarded rgb.txt share SHA256 45ad9139fe05fa69c495fe43861fdc869d0e052afc37c88333d6aebd36bbec3f and are the same capture stream, not distinct views",
+      "no published-timestamp target in either checked stream has three other captures within +/-10 ms"
+    ],
+    "decision": "these local streams cannot populate STAGE_C_DATA_ROSTER.json under the current at-least-three-reference and +/-10 ms contract",
+    "forbidden_resolution": "do not relax the time or reference-count threshold after seeing this result and do not count duplicate metadata paths as new views",
+    "scope_boundary": "only the checked TUM single RGB streams and published timestamps; calibration, multiple synchronized sensors, unseen datasets and a separately preregistered static-scene reference contract remain untested"
+  },
+  "target_population": "previously unseen, static or state-locked physical scenes supporting two predefined return trajectories, stable source identity, ordinary source selection, numerical address evidence and at least three never-conditioned reference captures",
+  "exclusions_before_sampling": [
+    "any scene, room, outdoor zone or capture used for RAIMA/S48 protocol development",
+    "B0, C1, C2 and every Stage D scene",
+    "a physical-space or capture-session independence cluster already represented in the frame",
+    "dynamic state without a frozen state-synchronization contract",
+    "scene lacking a feasible short and long return route",
+    "scene whose references cannot be withheld from every model input, memory and conditioning path"
+  ],
+  "sampling_frame_contract": {
+    "future_required_file": "STAGE_C_DATA_ROSTER.json",
+    "future_required_review": "fresh non-author sampling and leakage review before any Stage C pixel generation",
+    "registry_freeze_time": "before model output, intervention effect or reference loss is inspected",
+    "selection_algorithm": "sort eligible registry records by SHA256(ASCII('RAIMA_V4_FRAME_SELECTION_440031|') || canonical_registry_record_sha256_bytes) and take the first 20",
+    "public_selection_seed": 440031,
+    "candidate_registry_minimum": 40,
+    "replacement_policy": "no replacement after selection; failure remains in flow and blocks evaluability",
+    "independence_rule": "all 20 independence_cluster_id values must be unique",
+    "independence_cluster_definition": "same physical room or overlapping outdoor zone, shared target/reference capture session, or reused generated-history state belongs to one cluster",
+    "representativeness_fields_recorded_not_used_for_outcome_selection": [
+      "indoor_or_outdoor",
+      "texture_repetition_level",
+      "occlusion_level",
+      "reflective_or_translucent_content",
+      "route_length",
+      "camera_rig",
+      "site_id"
+    ],
+    "assumption_boundary": "population-level binomial interpretation requires independent exchangeable scene draws; if the frozen frame cannot justify this, report only roster-specific rates"
+  },
+  "stage_plan": {
+    "stage_c1": {
+      "scene_slots": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"],
+      "scene_count": 10,
+      "decision": "stop for futility at <=2 positive scenes; otherwise continue; no efficacy success"
+    },
+    "stage_c2_additional": {
+      "scene_slots": ["C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20"],
+      "additional_scene_count": 10,
+      "maximum_total_scene_count": 20,
+      "decision": "evaluate the final composite gate on all 20 scenes"
+    }
+  },
+  "scene_slots": [
+    {"slot_id": "C01", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C02", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C03", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C04", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C05", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C06", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C07", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C08", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C09", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C10", "stage": "stage_c1_10", "actual_scene_id": null},
+    {"slot_id": "C11", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C12", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C13", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C14", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C15", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C16", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C17", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C18", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C19", "stage": "stage_c2_20", "actual_scene_id": null},
+    {"slot_id": "C20", "stage": "stage_c2_20", "actual_scene_id": null}
+  ],
+  "per_scene_contract": {
+    "trajectory_roster": ["return_short", "return_long"],
+    "trajectory_order": "short then long in acquisition; analysis reorders by registered ID",
+    "return_short": "depart from the registered anchor, traverse one occluding turn or view loss, then return to the registered anchor checkpoint",
+    "return_long": "depart from the same anchor, traverse at least twice the short-route path length and at least two distinct view losses, then return to the registered anchor checkpoint",
+    "path_freeze": "camera/action waypoints, anchor target checkpoint and tolerances are fixed before ordinary generation",
+    "seed_roster": [101, 211, 307, 401, 503],
+    "technical_repeat_rule": "five seeds are paired repeats and never independent scientific units",
+    "primary_units_per_trajectory": 1,
+    "primary_target": "the predeclared final anchor-return target checkpoint",
+    "primary_source_selector": "ordinary selector rank 1 at that checkpoint; tie break by registered selector rank then lexicographic stable source_id",
+    "selector_information_boundary": "only ordinary trace metadata may be read; generated pixels, reference pixels, endpoint values and losses remain blinded",
+    "source_failure_rule": "if rank-1 source lacks stable identity or complete Address evidence, record FAIL/MISSING and do not substitute rank 2",
+    "secondary_sources": "all additional selected sources remain in the flow but are descriptive and cannot enter the V4 primary endpoint"
+  },
+  "missingness_and_attrition": {
+    "required_flow_categories": [
+      "planned",
+      "access_pass",
+      "access_fail",
+      "access_missing",
+      "reference_ineligible",
+      "intervention_invalid_or_ood",
+      "technical_missing",
+      "endpoint_complete"
+    ],
+    "primary_rule": "every planned slot stays in flow; any non-complete primary unit makes its scene and cohort fail closed",
+    "forbidden": [
+      "scene replacement",
+      "trajectory replacement",
+      "seed deletion or retry-until-pass",
+      "source substitution",
+      "complete-case denominator shrinkage",
+      "using Stage D observations to alter the frame or thresholds"
+    ]
+  }
+}

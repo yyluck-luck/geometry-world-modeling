@@ -1,0 +1,578 @@
+REMODE: Probabilistic, Monocular Dense Reconstruction in Real Time
+                                   Matia Pizzoli, Christian Forster and Davide Scaramuzza1
+
+
+   Abstract— In this paper, we solve the problem of estimating
+dense and accurate depth maps from a single moving camera.
+A probabilistic depth measurement is carried out in real time
+on a per-pixel basis and the computed uncertainty is used to
+reject erroneous estimations and provide live feedback on the
+reconstruction progress. Our contribution is a novel approach
+to depth map computation that combines Bayesian estimation
+and recent development on convex optimization for image
+processing. We demonstrate that our method outperforms state-
+of-the-art techniques in terms of accuracy, while exhibiting
+high efficiency in memory usage and computing power. We
+call our approach REMODE (REgularized MOnocular Depth
+Estimation) and the CUDA-based implementation runs at 30Hz
+on a laptop computer.
+
+                        I. I NTRODUCTION
+   We present a method to compute an accurate, three-
+dimensional reconstruction of the scene observed by a mov-
+ing camera and provide, in real time, information about the
+progress and the reliability of the ongoing estimation process.
+This problem is highly relevant in robot perception, where                Fig. 1. In monocular dense reconstructions, the probabilistic approach
+                                                                          to depth estimation produces compact and efficient representations. Highly
+cameras are valuable and widespread sensors. From a single                parallelizable implementations are achieved by estimating the depth for
+moving camera, it is possible to collect appearance and range             every pixel independently. A smoothing step is nonetheless required to
+information about the observed three-dimensional scene. In                achieve robustness against noise and mitigate the effect of erroneous
+                                                                          measurements. Figures (a) and (b) show the result of Bayesian depth
+a multi-view stereo setting, the uncertainty on the depth                 estimation from multiple views; (c) and (d) show the same result after the
+measurement depends on the noise affecting image forma-                   de-noising step that we propose in this paper.
+tion, on the camera poses, and the scene structure. Knowing
+how these factors affect the measurement uncertainty, it is
+possible to achieve arbitrarily high levels of confidence by              A. Related Work
+collecting measurements from different vantage points. Such                  The problem of reconstructing the scene from images
+a capability is particularly valuable in robotics. For instance,          collected by a moving camera has been studied for more
+if the camera is mounted on a robotic arm, the available high             than two decades and is known as Structure from Motion
+level of mobility can be exploited to disambiguate scene                  in computer vision [1] and Monocular SLAM in robotics
+details and occlusions at a wide range of distances. The                  [2]. The growing interest for dense reconstructions has
+monocular setting is also an appealing sensing modality for               renewed the attention in multi-view stereo techniques [3],
+Micro Aerial Vehicles (MAVs), where strict limitations apply              [4], [5], [6], where the involved computational complexity
+on payload and power consumption. In this case, the high                  used to prevent applications in robot perception. In robotics,
+agility turns the platform into a formidable depth sensor, able           the use of RGBD cameras is favouring the development
+to deal with a wide depth range and capable of achieving                  of techniques for highly-detailed [7] and spatially-extended
+arbitrarily high confidence in the measurement. Inevitably,               reconstructions [8], their applicability being limited to short
+this high flexibility comes at a cost. The pose of the camera             range measurements and indoor environments. The literature
+must be known and its accuracy influences the reconstruction              in dense stereo is vast and we refer to [9] for a comparison.
+quality. For a camera, information resides in the changing                However, few relevant works have addressed real-time, dense
+of the intensity gradient and this modality naturally fails in            reconstruction from a single moving camera and they shed
+presence of low informative scenes that produce untextured                light on some important aspects. Figure 1 illustrates the
+images. It is therefore crucial to know how reliable each                 problem we address in this paper. If, on one hand, estimating
+measurement is.                                                           the depth independently for every pixel leads to efficient,
+   1 The authors are with the Robotics and Perception Group, University   parallel implementations, on the other hand the authors of
+of Zurich, Switzerland—http://rpg.ifi.uzh.ch. This research was           [10], [11], [12] argued that, similar to other computer vision
+supported by the CTI project number 14652.1, the Swiss National Science
+Foundation through project number 200021-143607 (“Swarm of Flying         problems, such as image de-noising [13] and optical flow
+Cameras”) and the National Centre of Competence in Research Robotics.     estimation [14], a smoothing step is required in order to
+deal with noise and spurious measurements. In [11], smooth-       Finally, in Section V, we summarize our contribution and
+ness priors were enforced over the reconstructed scene by         draw the conclusion.
+minimizing a regularized energy functional based on aggre-
+gating a photometric cost over different depth hypothesis                II. M ONOCULAR D ENSE R ECONSTRUCTION
+and penalizing non-smooth surfaces. The authors showed            A. Considerations
+that the integration of multiple images leads to significantly       The solution we propose to compute a dense reconstruc-
+higher robustness to noise. A similar argument is put forth       tion from a single moving camera is motivated by the
+in [12], where the advantage of photometric cost aggregation      following considerations.
+[15] over a large number of images taken from nearby                    a) A measure of uncertainty is needed in robotic per-
+viewpoints is demonstrated. Regularized energy functionals        ception: many reconstruction pipelines previously proposed
+also play an important role in recent methods for volumetric      in computer vision and graphics literature aim at providing
+reconstruction [16], [17], [18], where the three-dimensional      visually appealing maps. In contrast, we are interested in
+surface of a scene is generated by fusing several depth maps      accurately mapping the environment in order to allow robotic
+obtained from multi-view stereo. Depending on the scene           tasks, such as autonomous navigation and exploration, active
+appearance and the used stereo baselines, the computed depth      perception or situation awareness in the case of human-
+maps are potentially noisy and a robust fusion method helps       operated systems. As a passive sensing modality, measure-
+mitigate the effect of wrong depth estimations.                   ment uncertainty in monocular multi-view stereo is related
+   However, despite the ground-breaking results, these ap-        to the camera motion and the amount of visual information
+proaches present some limitations when addressing tasks           present in the scene (e.g. texture). A probabilistic depth
+in robot perception. Equally weighting measurements from          map handles measure uncertainty, thus, allowing efficient
+small and large baselines, in close and far scenes, causes the    updating, optimal sensor placement, and fusion with different
+aggregated cost to frequently present multiple or no minima.      sensors.
+Depending on the depth range and sampling, these failures               b) A dense reconstruction is needed to interact: sparse
+are not always recoverable by the subsequent optimization         visual maps based on image features have been successfully
+step. Furthermore, an inadequate number of images can lead        used in robotics, e.g. to solve the SLAM problem. However,
+to a poorly constrained initialization for the optimization and   feature definitions change between sensing modalities and
+erroneous measurements that are hard to detect. It is not         tasks; dense representations are, thus, required to actually
+clear how many images should be collected, depending on           solve the problem of registering data among largely different
+the motion of the camera and the scene structure. Finally,        vantage points based on the three-dimensional structure
+the number of depth hypotheses controls the computational         [18]. When the task involves physical interaction with the
+complexity, and the applicability is, thus, limited to scenes     environment—as in obstacle avoidance, path planning and
+bounded in depth.                                                 manipulation—the highest achievable level of detail is de-
+B. Contributions and Outline                                      sirable in order to estimate the surfaces involved in the
+                                                                  interaction.
+   The discussed limitations are overcome by probabilistic              c) Perception must be fast: differently from many state-
+approaches handling measurement uncertainty. A compact            of-the-art systems, in order to be useful in robot perception
+representation and a Bayesian depth estimation from multi-        our pipeline must run in real-time using the robot’s on-
+view stereo were proposed in [19]. We build on their results      board computing power. Depth estimation must be updated
+for per-pixel depth estimation and introduce an optimization      efficiently and the uncertainty in the estimation must improve
+step to enforce spatial regularity over the recovered depth       according to the information conveyed by the image and the
+map. We propose a regularization term based on the weighted       current camera pose.
+Huber norm but, differently from [12], we use the depth              In the designing of the monocular multi view stereo algo-
+uncertainty to drive the smoothing and exploit a convex           rithm, these considerations naturally bring to the formulation
+formulation for which a highly parallelizable solution scheme     of the following requirements: depth estimation must take
+has been recently introduced [20]. The contributions of this      into account the uncertainty arising from the scene and the
+paper are the following:                                          camera pose and the estimation must be carried out on-
+   • a probabilistic depth map, in which the Bayesian             line and updated sequentially. Bayesian estimation offers
+     scheme in [19] is integrated in a monocular SLAM             a natural way to deal with measure uncertainty, to handle
+     algorithm to estimate per-pixel depths based on the live     sequential measurement updates and to reject unreliable
+     camera stream;                                               estimations in an on-line fashion.
+   • a fast smoothing method that takes into account the
+     measurement uncertainty to provide spatial regularity        B. Depthmap from Multi View Stereo
+     and mitigates the effect of noisy camera localization.          We formulate the depth computation as a Bayesian es-
+The outline of the paper follows. In Section II we detail our     timation problem. Each observation provides a depth mea-
+method for depth estimation from monocular views and in           surement by triangulating from the reference view and the
+Section III we provide the implementation details. Section IV     last acquired view. The depth of a pixel is described by a
+is dedicated to the discussion on the experimental evaluation.    parametric model that is updated on the basis of the current
+observation. Finally, smoothness on the resulting depth map                2) Regularized Posterior: We now detail our solution to
+is enforced by minimizing a regularized energy functional.              the problem of smoothing the depth map D(u). For every
+   1) Bayesian Estimation: Let the rigid body transformation            pixel u ∈ Ω, the depth estimation and its confidence upon
+Tk,w ∈ SE(3) describe the pose of the camera acquiring the              the k-th observation are given, respectively, by µk and σk2
+k-th view, i.e., Tk,w transforms scene points w p ∈ R3 from             in (4). We formulate the problem of computing a de-noised
+the world frame to the frame of the k-th camera pose:                   depth map F (u) as the following minimization:
+                                                                                Z
+                                                                          min     {G(u) k∇F (u)k + λ kF (u) − D(u)k1 } du, (6)
+                        k p = Tk,w w p.                           (1)      F    Ω
+
+   We denote the intensity image collected from the k-th                where λ is a free parameter controlling the trade-off between
+camera pose as Ik : Ω ⊂ R2 7→ R, where Ω is the image                   the data term and the regularizer, and G(u) is a weighting
+domain. We denote by u ∈ Ω a point in image coordinates.                function related to the “G-Weighted Total Variation”, intro-
+   An observation is a pair {Ik , Tk,w }. A sequence of n               duced in [21] in the context of image segmentation. We pe-
+observations is identified by the sequence of time steps                nalize non-smooth surfaces by making use of a regularization
+k = r, . . . , r + n, in which the r-th observation is taken            term based on the Huber norm of the gradient, defined as:
+as reference. A depth hypothesis dk is generated from the                                  ||∇F (u)||22
+                                                                                         (
+                                                                                               2            if ||∇F (u)||2 ≤ ,
+observation {Ik , Tk,w } by triangulating u from the views r               k∇F (u)k =                   
+                                                                                                                                   (7)
+and k.                                                                                     ||∇F (u)||1 − 2 otherwise .
+   The sequence of dk for k = r, . . . , r + n denotes a set of         We chose the Huber norm because it allows smooth re-
+noisy depth measurements. We model the depth sensor as a                construction while preserving discontinuities at strong depth
+distribution that mixes a good measurement (normally dis-               gradient locations ([12]). The weighting function G(u) in-
+                                ˆ and an outlier measurement
+tributed around the true depth d)                                       fluences the strength of the regularization and we propose to
+(uniformly distributed in an interval [dmin , dmax ] which is           compute it on the basis of the measure confidence for u:
+known to contain the depth for the structure of interest):
+                                                                                                    σ 2 (u)
+       ˆ ρ) = ρN (dk |d,
+                      ˆ τ 2 ) + (1 − ρ)U(dk |dmin , dmax ), (2)                 G(u) = Eρ [q](u)      2
+                                                                                                            + {1 − Eρ [q](u)} ,      (8)
+ p(dk |d,                k                                                                          σmax
+
+where ρ and τk2 are the probability and the variance of                 where we have extended the notation for the expected value
+a good measurement, respectively. Assuming independent                  of the inlier ratio Eρ [q] and the variance σ 2 in (4) to account
+observations, the Bayesian estimation for dˆ on the basis of            for the specific pixel u. The weighting function (8) affects the
+the measurements dr+1 , . . . , dk is given by the posterior            strength of the regularization term: for measurements with
+                                                                        a high expected value for the inlier ratio ρ the weight is
+          ˆ ρ|dr+1 , . . . , dk ) ∝ p(d,
+                                      ˆ ρ)         ˆ ρ),                controlled by the measurement variance σ 2 ; measurements
+                                           Y
+       p(d,                                  p(dk |d,        (3)
+                                            k                           characterized by a small variance (i.e. reliable measurements)
+                                                                        will be less affected by the regularization; differently, the
+with p(d,ˆ ρ) being a prior on the true depth and the ratio
+                                                                        contribution of the regularization term will be heavier for
+of good measurements supporting it. A sequential update is              measurements characterized by a small expected value for
+implemented by using the estimation at time step k − 1 as a             the inlier ratio or higher measurement variance.
+prior to combine with the observation at time step k. To this              The solution to the minimization problem (6) is computed
+purpose, the authors of [19] show that the posterior in (3) can         iteratively based on the work in [20]. The algorithm exploits
+be approximated by the product of a Gaussian distribution               the primal dual formulation of (6),
+for the depth and a Beta distribution for the inlier ratio:
+                                                                                 min max hdiag(G)∇F, F ∗ i
+    ˆ ρ|ak , bk , µk , σ 2 ) = Beta(ρ|ak , bk )N ( ˆ
+  q(d,                                            d|µk , σk2 ),   (4)               F ∗ F
+                        k                                                                                              
+                                                                                       +λ||C − D||1 − δF ∗ (F ∗ ) − ||F ∗ ||22 ,    (9)
+where ak and bk are the parameters controlling the Beta                                                                2
+distribution. The choice is motivated by the fact that the              and proceeds by alternating gradient descent and ascent
+Beta×Gaussian is the approximating distribution minimiz-                steps in the primal and dual variables, namely F and F ∗ .
+ing the Kullback-Leibler divergence from the true posterior             The indicator function δF ∗ (F ∗ ) is such that, for each F ∗ ,
+(3). Upon the k-th observation, the update takes the form               δF ∗ (F ∗ ) = 0 if ||F ∗ ||1 ≤ 1, and otherwise ∞. Let t and t∗
+                                                                        be the time steps for the gradient descent-ascent with respect
+     ˆ ρ|dr+1 , . . . , dk ) ≈ q(d,
+   p(d,                          ˆ ρ|ak−1 , bk−1 , µk−1 , σ 2 )         to the primal and dual variable. The update steps in the case
+                                                           k−1
+                                     ˆ ρ) const
+                               p(dk |d,                         (5)     of the Weighted-Huber de-noising model (6) take the form
+
+and the authors of [19] approximated the true posterior (5)                                  Fn∗ + t∗ (diag(G)∇)F̄
+                                                                                                                  
+                                                                                ∗
+with a Beta × Gaussian distribution by matching the first                      Fn+1 = prox                           ,
+                                                                                                    1 + t∗ 
+and second order moments for dˆ and ρ. The updates formulas                                                       ∗ 
+for ak , bk , µk and σk2 are thus derived and we refer to the                  Fn+1 = shrink Fn − t ∇T diag(G) Fn+1    ,            (10)
+original work in [19] for the details on the derivation.                       F̄n+1 = 2Fn+1 − Fn ,
+                                                                          metre and a computing time of 3.3 milliseconds per acquired
+                        +
+                     rp                                                   image on the experimental platform detailed in Section IV.
+                                                                          The visual odometry algorithm is run by the CPU, and its
+                          γ                                               accuracy and efficiency support the simultaneous execution
+                   rp
+                                                                          of the monocular reconstruction pipeline.
+
+ Ir                                                                Ik     B. Measurement update
+                                 a                                           The parametric model in (4) is a compact representa-
+           f                                             1 pixel          tion, as it stores our confidence in the depth measurement
+                                                                          corresponding to a pixel in only four parameters: a, b, µ
+       u                                                                  and σ. When a reference frame is taken, the estimation for
+                                                    u0                    every pixel is initialized and updated with every subsequent
+           α
+                                                     β+       β           view. We set the initial parameters a0 = 10, b0 = 10,
+                        e            t        e0                          µ0 = 0.5(dmin + dmax ) and σ0 = σmax , where σmax is
+  Cr                                                               Ck
+                                                                          such that 99% of the probability mass lies in the interval
+                                                                          [dmin , dmax ]. Upon the acquisition of the k-th view, the
+                                 Tk,r
+                                                                          update introduced in [19] is performed for every pixel of
+                                                                          the reference view. We perform the update until the depth
+Fig. 2. Computation of the measurement uncertainty. The camera poses
+acquiring the views Ir and Ik are related by the transformation Tk,r .    estimation converges or diverges. At this point, we can either
+The camera centres Cr , Ck and the current estimation of the scene        consider the measurement reliable or discard it. We check
+point r p lie on the epipolar plane.The variance corresponding to one     the convergence and divergence conditions by looking at
+pixel along the epipolar line passing through e0 and u0 is computed as
+                         2
+τk2 = ||r p+ || − ||r p|| .                                               the variance of the depth posterior σk2 and the estimated
+                                                                          inlier ratio ρk . Let ηinlier and ηoutlier be thresholds on the
+                                                                          estimated inlier ratio and σthr be a threshold on the variance
+where the resolvent operators are                                         of the depth posterior. We have three cases:
+                                                                                                           2     2
+                                                                             • if Eρ [q] > ηinlier and σk < σthr , then the estimation
+                               f˜∗
+               prox(f˜∗ ) =               ,                        (11)         has converged;
+                           max(1, |f˜∗ |)                                    • else if Eρ [q] < ηoutlier , then the estimation has di-
+                             ˜              ˜
+                           
+                                                                                verged;
+                           f − tλ if f − d > tλ
+                           
+                      ˜      ˜              ˜                                • otherwise, the estimation continues.
+               shrink(f ) = f + tλ if f − d < −tλ                  (12)
+                                                                          The parameters ηinlier , ηoutlier and σthr control the estima-
+                                       if |f˜ − d| ≤ tλ
+                           
+                             d
+                           
+                                                                          tion convergence and can be set according to the accuracy
+and d is the noisy depth value corresponding to a specific                and robustness requirements for the application at hand.
+pixel.                                                                       In order to deal with higher depth ranges, we base our im-
+                                                                          plementation on the inverse depth [23] and use the currently
+                  III. I MPLEMENTATION D ETAILS                           estimated variance to limit the search for correspondence on
+  The monocular reconstruction pipeline is designed to run                the epipolar line.
+in real time on a commodity laptop, using a CPU and a
+                                                                          C. Measurement uncertainty
+GPU. The proposed probabilistic depth map and convex
+optimization lead to highly parallel algorithms and we based                 When triangulating matched points to estimate the depth
+our implementation on CUDA1 .                                             from multiple views, frames taken from nearby vantage
+                                                                          points are less affected by occlusions and allow high quality
+A. Camera pose estimation                                                 matches. On the other hand, a large baseline enables a more
+   At every time step k, the pose of the camera Tk,r in                   reliable depth estimation but with a higher chance to incur
+the depth map reference frame r is computed by a visual                   in occluded regions.
+odometry routine that is based on recent advancement on                      Referring to Figure 2, let r p be the current estimation of
+semi-direct methods for camera localization [22]. The algo-               the scene point corresponding to the pixel u in the image
+rithm operates directly on the image intensity, eliminating               Ir . The variance on the position of r p is obtained by back-
+the need for costly feature extraction and resulting in sub-              projecting a constant variance of one pixel in the image Ik .
+pixel accuracy at high frame-rates. Three-dimensional map                 Let t be the translation component of Tk,r and f = ||rr p  p|| ,
+points are estimated making use of the probabilistic method               then
+described in Section II-B, which proved at the same time
+                                                                                          a = rp − t                                 (13)
+highly robust, accurate and computationally efficient. Our                                                        
+                                                                                                           f ·t
+implementation is characterized by an average drift in pose                               α = arccos                                 (14)
+of 0.0038 metres per second for an average depth of 1                                                      ||t||
+                                                                                                                            
+                                                                                                                a·t
+  1 http://www.nvidia.com                                                                 β = arccos −                           .   (15)
+                                                                                                             ||a|| · ||t||
+                                                                                              100
+Let f be the camera focal length. The angle spanning one
+pixel can be added to β in order to compute γ and, thus, by
+applying the law of sines, recover the norm of r p+ :                                          80
+                                            
+                                              1
+                    β + = β + 2 tan−1                  (16)
+                                             2f
+                                                                                               60
+                      γ = π − α − β+                   (17)
+                                                                           Precision [%]
+                                       +
+                                 sin β
+               ||r p+ || = ||t||         .             (18)
+                                  sin γ                                                        40
+
+Therefore, the measurement uncertainty is computed as
+                                            2
+                  τk2 = ||r p+ || − ||r p|| .          (19)                                    20
+                                                                                                             Vogiatzis and Hernandez 2011 - exact pose
+                                                                                                             This paper - exact pose
+                                                                                                             Vogiatzis and Hernandez 2011 - noisy pose
+                                                                                                             This paper - noisy pose
+                IV. E XPERIMENTAL E VALUATION                                                  0
+                                                                                               0.00   0.02   0.04               0.06    0.08             0.10
+                                                                                                                    Error [m]
+
+                                                                                                                    (a)
+
+                                                                                              40
+
+
+                                                                                              35
+
+
+                                                                                              30
+
+
+                                                                                              25
+
+
+
+
+                                                                           Completeness [%]
+                                                                                              20
+
+
+                                                                                              15
+
+
+                                                                                              10
+                                                                                                             Vogiatzis and Hernandez 2011 - exact pose
+                                                                                                             This paper - exact pose
+                                                                                               5             Vogiatzis and Hernandez 2011 - noisy pose
+                                                                                                             This paper - noisy pose
+                                                                                              0
+                                                                                              0.00    0.02   0.04               0.06    0.08             0.10
+                                                                                                                    Error [m]
+
+                                                                                                                    (b)
+
+                                                                          Fig. 4. Quantitative evaluation on the over table sequence. In (a) the
+                                                                          precision is plotted, namely the percentage of converged estimations that
+                                                                          are within a certain error from the ground truth. In (b) the completeness
+                                                                          is plotted, namely the percentage of ground truth measurements that are
+                                                                          within a certain error from the converged estimations.
+
+
+Fig. 3.    The over table evaluation sequence. (a): the reference view.
+(b): ground truth depth map. (c): depth map based on [19]. (d): depth
+                                                                             We chose the dataset presented in [24] in order to quanti-
+map computed by the proposed method. (e): map of reliable measurement     tatively evaluate our approach. The dataset consists of views
+according to Section III-B. (f): error for the proposed method.           generated through ray-tracing from a three-dimensional syn-
+                                                                          thetic model. Along with each view, the related exact camera
+                          TABLE I                                         pose and depth maps are made available. Table I summarizes
+        DATASETS FOR COMPARISON AGAINST GROUND TRUTH .                    the details for the sequences used in the evaluation.
+                                                                             Over table identifies a sequence of views collected down-
+                  Frames      Range       Mean     Motion    Speed        looking on a desktop scenario. The sequence is characterized
+                               [m]        [m]       [m]      [m/s]        by a frame rate of 30 frames per second and smooth camera
+  Over table       200      0.827-2.84    1.531     4.576    0.686        motion. The sequence identified as fast motion is a collection
+  Fast motion      900     0.971-6.802    2.015      21.6     1.61        of views generated at 60 frames per second with large and
+                                                                          sudden changes of vantage point. The evaluation is based on
+   The platform we used for the experimental evaluation of                comparison with the ground truth depth map corresponding
+the proposed monocular reconstruction method is an Intel i7-              to the view taken as reference in the reconstruction process.
+3720QM based laptop, equipped with 15 GB of RAM, and                      Two depth maps are compared by computing the sum of
+an NVIDIA Quadro K2000M GPU with 384 CUDA cores.                          the per-pixel absolute difference. Since we are interested in
+                                                                                              100
+
+
+
+
+                                                                                               80
+
+
+
+
+                                                                                               60
+
+
+                                                                           Precision [%]
+                                                                                               40
+
+
+
+
+                                                                                               20
+
+                                                                                                                              Vogiatzis and Hernandez 2011
+                                                                                                                              This paper
+                                                                                                0
+                                                                                                0.0   0.1   0.2                 0.3          0.4             0.5
+                                                                                                                  Error [m]
+
+                                                                                                                  (a)
+
+                                                                                              60
+
+
+
+                                                                                              50
+
+
+
+                                                                                              40
+
+
+
+
+                                                                           Completeness [%]
+                                                                                              30
+Fig. 5.   The fast motion evaluation sequence. (a): the reference view.
+(b): ground truth depth map. (c): depth map based on [19]. (d): depth
+map computed by the proposed method. (e): map of reliable measurement                         20
+according to Section III-B. (f): error for the proposed method.
+
+                                                                                              10
+                                                                                                                              Vogiatzis and Hernandez 2011
+evaluating the depth measurements that have been identified                                                                   This paper
+                                                                                               0
+as reliable by our algorithm, we only take into account those                                  0.0    0.1   0.2                0.3           0.4             0.5
+                                                                                                                  Error [m]
+measurements that have converged according to Section III-
+B. We therefore use the converged measurements to create                                                          (b)
+the masks (e) in Figure 3 and Figure 5, which are used in
+                                                                          Fig. 6. Quantitative evaluation on the fast motion sequence. In (a) the
+the comparison. We define two evaluation metrics: precision,              precision is plotted, namely the percentage of converged estimations that
+namely the percentage of converged measurements that fall                 are within a certain error from the ground truth. In (b) the completeness
+below a certain error when compared to the relative ground                is plotted, namely the percentage of ground truth measurements that are
+                                                                          within a certain error from the converged estimations.
+truth, and completeness, namely the percentage of ground
+truth depths that have been estimated by the proposed method
+within a certain error. In order to show the effectiveness
+of our approach, we compare our results with depth maps                   we corrupted the camera position with Gaussian noise, with
+computed according to the state-of-the-art method introduced              zero mean and one centimetre standard deviation on each
+in [19]. This work is at the basis of our probabilistic                   coordinate. The results show that the completeness drops.
+treatment and, so far, its applicability has been demonstrated            This is inevitable due to the smaller number of converged
+only for reconstruction of small objects. For our comparison              estimations. However, the computation of the depth map
+using the ground truth sequences, the parameters defining                 takes advantage of the de-noising step. This trend is even
+reliable measures have been set at ηinlier = 0.6, ηoutlier =              more evident in the fast motion sequence, depicted in
+0.05 and σthr = σmax /103 . The parameters governing the                  Figure 5. Here, according to the results in Figure 6, the
+optimization were set at  = 10−4 and λ = 0.3, and 200                    advantage of our approach is clearly demonstrated in terms
+iterations of the primal-dual update in (10) were run.                    of both precision and completeness. Handling measurement
+   Figure 4 reports the result of the evaluation on the over              uncertainty, the probabilistic treatment of depth allows us to
+table sequence. Our approach is capable to recover a number               select the optimal trade-off between precision and accuracy
+of erroneous depth estimations, thus yielding a sensible                  by varying the σthr parameter. Figure 7 shows how, for a
+improvement in terms of accuracy and completeness. To                     given error tolerance, the completeness varies as a function of
+verify the robustness against noisy camera pose estimation,               the variance σ 2 that characterizes a reliable measurement. We
+                    70
+                                                                                                       by diverged measurements. The final result, in the form of a
+                                                                                                       coloured point cloud rendered from two different viewpoints,
+                    60
+                                                                                                       is depicted in Figure 9.
+                                                                                                          Finally, the proposed method is suitable for real time
+                    50
+                                                                                                       execution, as can be seen in Table II, where we have
+                                                                                                       reported the computing time for the evaluation sequences.
+
+ Completeness [%]
+                    40
+                                                                                                       The computational cost of the proposed method is dominated
+                                                                                                       by the search for correspondences on the epipolar line. When
+                    30
+                                                                                                       the motion of the camera is smooth, like in the cases of the
+                                                                                                       over table dataset and live acquisition, the region selected
+                    20
+                                              Vogiatzis and Hernandez 2011 - tol. 0.05 m
+                                                                                                       for the search is small; when the camera motion forms
+                                              This paper - tol. 0.05 m                                 large baselines, then the candidate search area is wider,
+                    10
+                                              Vogiatzis and Hernandez 2011 - tol. 0.15 m               affecting the computing time as in the case of the fast
+                                              This paper - tol. 0.15 m                                 motion dataset. The depth range characterizing the volume
+                     0
+                    0.0000       0.0002       0.0004
+                                                         σ2
+                                                                0.0006          0.0008        0.0010   of interest for the reconstruction also plays an important
+                                                                                                       role, as the measurement uncertainty is higher for distant
+Fig. 7. The percentage of ground truth measurements that are within an                                 points (cfr. Section III-C). This causes the depth estimation
+error of 5 and 15 centimetres is plotted as a function of the measurement                              to require a larger number of views to converge. Nonetheless,
+variance σ 2 .                                                                                         the estimation update runs in real time on the live 30 fps
+                                                                                                       camera stream, for a camera resolution of 752 × 480 pixels.
+can see, for instance, that using a threshold σthr = 6×10−4 ,                                          The computational cost of the optimization step depends
+which is approximately 2 × 103 times the initialization value                                          only on the image size and number of iterations, and is
+σmax , more than 60% of the depth measurements computed                                                thus constant among an evaluation sequence. Optimization
+by our method are affected by an error up to 15 centimetres,                                           was run several times during the live acquisition, triggered
+that is approximately 2.6% of the full depth range.                                                    by the instantiation of new reference frames, while for the
+                                                                                                       ground truth sequences the single optimization step that is
+                                             TABLE II                                                  performed motivates the 0 variance entries in Table II.
+                              C OMPUTING TIME FOR THE EVALUATION DATA                                     A video demonstrating the reconstruction of scenes ac-
+                                                                                                       quired by a hand-held camera and a flying robot, is available
+                                           Update time [s]           Optimization time [s]             at the website http://rpg.ifi.uzh.ch/research_
+                                          Mean         Variance          Mean      Variance            dense.html.
+                      Over table          0.0382       0.0025        0.1107            0                                       V. C ONCLUSION
+                      Fast motion         0.0499       0.0035        0.1149            0
+                      Live acquisition    0.0301       0.0011        0.1122         0.0044                In this paper we presented REMODE, a probabilistic
+                                                                                                       approach to monocular dense reconstruction for robot per-
+   In order to demonstrate the effectiveness of the proposed                                           ception. Our method computes depth maps by combining
+approach on real time reconstructions, we present our re-                                              Bayesian estimation and recent developments in convex
+sults on the City of Sights stage set [25]. We computed a                                              optimization for image processing. We showed how a prob-
+point cloud from different depth maps acquired by a single                                             abilistic update scheme can produce a compact and efficient
+hand-held camera. Our reconstruction pipeline was fed with                                             representation of a depth map and its related uncertainty.
+images and camera poses computed by the underlying visual                                              In order to achieve real time execution on a live camera
+odometry (cfr. Section III-A) at 30 frames per second.                                                 stream, we parallelized the computation of a depth map
+   Figure 8 depicts the process of a live depth map ac-                                                by considering each pixel independently. Afterwards, we
+quisition. During the reconstruction, the convergence and                                              introduced a fast smoothing step that takes into account
+divergence of estimations are displayed as a live feedback                                             the measurement uncertainty to enforce spatial regularity
+for the user (blue and red respectively in the figure), guid-                                          and mitigates the effect of noisy camera localization. We
+ing the motion of the camera to acquire portions of the                                                evaluated our method in terms of accuracy and completeness,
+scene for which the estimation has not yet converged or                                                showing a sensible improvement with respect to the current
+diverged. A qualitative evaluation of the results can be drawn                                         state-of-the-art. By handling measurement uncertainty, our
+from Figures 8 and 9. The minimization in (6) imposes                                                  method provides real time information about the progress
+a smoothness constraint on the resulting surface and acts                                              and the reliability of the ongoing reconstruction process. This
+as a prior when the estimation is uncertain. Wrong depth                                               information is highly valuable to drive the reconstruction,
+computations, caused by shadows or matching errors (see                                                that is, to determine what views are most informative for the
+Figure 8b), cause the respective estimations to diverge (red                                           task at hand.
+points in Figure 8d). The de-noising step propagates the                                                                          R EFERENCES
+depth value produced by converged measurements to those                                                 [1] R. I. Hartley and A. Zisserman, Multiple View Geometry in Computer
+neighbours yielding low confidence, which are characterized                                                 Vision. Cambridge University Press, 2004.
+                 (a)                                     (b)                                   (c)                                     (d)
+
+Fig. 8. Depth map computation for the City of Sights stage set [25]. Dark points are close, bright points are far. Blue and red identify converged and
+diverged estimations, respectively.
+
+
+
+                                                                                     costs on images with radiometric differences,” IEEE Trans. Pattern
+                                                                                     Anal. Machine Intell., vol. 31, no. 9, 2009.
+                                                                                [10] D. Gallup, J.-M. Frahm, P. Mordohai, Q. Yang, and M. Pollefeys,
+                                                                                     “Real-time plane-sweeping stereo with multiple sweeping directions,”
+                                                                                     in Proc. IEEE Conf. on Computer Vision and Pattern Recognition,
+                                                                                     2007.
+                                                                                [11] J. Stuehmer, S. Gumhold, and D. Cremers, “Real-time dense geometry
+                                                                                     from a handheld camera,” in DAGM Symposium on Pattern Recogni-
+                                                                                     tion, 2010, pp. 11–20.
+                                                                                [12] R. A. Newcombe, S. Lovegrove, and A. J. Davison, “DTAM: Dense
+                                                                                     tracking and mapping in real-time,” in Proc. IEEE Intl. Conf. on
+                                                                                     Computer Vision, 2011, pp. 2320–2327.
+                                                                                [13] L. I. Rudin, S. Osher, and E. Fatemi, “Nonlinear total variation based
+                                                                                     noise removal algorithms,” Physica D: Nonlinear Phenomena, vol. 60,
+                                                                                     no. 14, 1992.
+                                                                                [14] M. Werlberger, T. Pock, and H. Bischof, “Motion estimation with non-
+                                                                                     local total variation regularization,” in Proc. IEEE Conf. on Computer
+                                                                                     Vision and Pattern Recognition, 2010.
+                                                                                [15] R. Szeliski and D. Scharstein, “Sampling the disparity space image,”
+                                                                                     IEEE Trans. Pattern Anal. Machine Intell., vol. 26, no. 3, 2004.
+                                                                                [16] C. Zach, “Fast and high quality fusion of depth maps,” in Proc. of
+                                                                                     3DPVT, 2008.
+                                                                                [17] G. Graber, T. Pock, and H. Bischof, “Online 3d reconstruction using
+                                                                                     convex optimization,” in Proc. Workshops of IEEE Intl. Conf. on
+                                                                                     Computer Vision, 2011.
+                                                                                [18] C. Forster, M. Pizzoli, and D. Scaramuzza, “Air-ground localization
+                                                                                     and map augmentation using monocular dense reconstruction,” in
+                                                                                     Proc. Intl. Conf. on Intelligent Robots and Systems, 2013.
+                                                                                [19] G. Vogiatzis and C. Hernández, “Video-based, real-time multi-view
+                                                                                     stereo,” Image and Vision Computing, vol. 29, no. 7, 2011.
+                                                                                [20] A. Chambolle and T. Pock, “A first-order primal-dual algorithm for
+                                                                                     convex problems with applications to imaging,” Journal of Mathemat-
+                                                                                     ical Imaging and Vision, vol. 40, no. 1, 2011.
+Fig. 9.   Reconstructed point clouds for the City of Sights stage set [25].     [21] X. Bresson, S. Esedoglu, P. Vandergheynst, J.-P. Thiran, and S. Osher,
+                                                                                     “Fast global minimization of the active contour/snake model,” Journal
+                                                                                     of Mathematical Imaging and Vision, vol. 28, no. 2, 2007.
+                                                                                [22] C. Forster, M. Pizzoli, and D. Scaramuzza, “SVO: Fast Semi-Direct
+ [2] A. Davison, “Real-time simultaneous localisation and mapping with a             Monocular Visual Odometry,” in Proc. IEEE Intl. Conf. on Robotics
+     single camera,” in Proc. IEEE Intl. Conf. on Computer Vision, 2003.             and Automation, 2014.
+ [3] L. Matthies, R. Szeliski, and T. Kanade, “Incremental estimation of        [23] J. Civera, A. Davison, and J. Montiel, “Inverse depth parametrization
+     dense depth maps from image sequences,” in Proc. IEEE Conf. on                  for monocular slam,” IEEE Trans. on Robotics, vol. 24, no. 5, 2008.
+     Computer Vision and Pattern Recognition, 1988.                             [24] A. Handa, R. Newcombe, A. Angeli, and A. Davison, “Real-time
+ [4] S. B. Kang, R. Szeliski, and J. Chai, “Handling occlusions in dense             camera tracking: When is high frame-rate best?” in Proc. IEEE
+     multi-view stereo,” in Proc. IEEE Conf. on Computer Vision and                  European Conf. on Computer Vision, 2012.
+     Pattern Recognition, 2001.                                                 [25] L. Gruber, S. Gauglitz, J. Ventura, S. Zollmann, M. Huber,
+ [5] S. Seitz, B. Curless, J. Diebel, D. Scharstein, and R. Szeliski, “A com-        M. Schlegel, G. Klinker, D. Schmalstieg, and T. Höllerer, “The city of
+     parison and evaluation of multi-view stereo reconstruction algorithms,”         sights: Design, construction, and measurement of an augmented reality
+     in Proc. IEEE Conf. on Computer Vision and Pattern Recognition,                 stage set,” in Proc. IEEE Intl. Symposium on Mixed and Augmented
+     2006.                                                                           Reality (ISMAR), 2010.
+ [6] Y. Furukawa and J. Ponce, “Accurate, dense, and robust multiview
+     stereopsis,” IEEE Trans. Pattern Anal. Machine Intell., vol. 32, no. 8,
+     pp. 1362–1376, 2010.
+ [7] M. Meilland and A. Comport, “Super-resolution 3D Tracking and
+     Mapping,” in IEEE Intl. Conf. on Robotics and Automation, 2013.
+ [8] T. Whelan, H. Johannsson, M. Kaess, J. Leonard, and M. J.B., “Robust
+     real-time visual odometry for dense RGB-D mapping,” in IEEE Intl.
+     Conf. on Robotics and Automation (ICRA), 2013.
+ [9] H. Hirschmuller and D. Scharstein, “Evaluation of stereo matching
+

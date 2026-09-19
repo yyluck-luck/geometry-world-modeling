@@ -1,0 +1,91 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-supervised-frozen-source-set-v10",
+  "status": "FROZEN_SOURCE_ONLY_AWAITING_TWO_FRESH_V10_REVIEWS",
+  "version": "S45B-single-K-3x3-supervisor-validator-v10.0.0",
+  "created_utc": "2026-09-08T13:02:36.775020+00:00",
+  "author_role": "/root/c2_v5_lifecycle_review",
+  "source_identities": {
+    "camera_guard.py": "96d07f6f0c1c8c8bdfd1be57eb5725315b1dd340fbf25aec1c879066f7b9193b",
+    "supervise_camera_guard.py": "92793f1a250f24e1a275a2a7995a21929a3b63be7da23481eeddd81de897f306",
+    "PROTOCOL.md": "397e19d08d129cfbaf986ea5c5e9f8b96113652a93a7babed84d623fa5ad1126",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "1f6220af9889e2008168684435ef19306f0ed7ece88c3b2d1c8e6410a80c06bf",
+    "synthetic_selftest.py": "56c7fee2235e8c4180e9aa4bdc71889a914abd369e83b37fb15117f2180d7f48"
+  },
+  "preserved_v9_source_identities": {
+    "camera_guard.py": "a0653726f63b896c6c1b3185221c8dde2838833599b93010c9cd239a5427e836",
+    "supervise_camera_guard.py": "44ec57a8938e6d4e0cfa7322e987a07aabef6c60edfb2a7fc321208c685c17fc",
+    "PROTOCOL.md": "c365496de10e558fe7dc2ea89db5248adb69c95d35454edc1beea210efffb051",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "a3aec30d3c0636c93158b4fe88260e6da85b3959b61907c000e68a422f7c8f07",
+    "synthetic_selftest.py": "5e4014ce62f88930ae0d7c0b8935a29b2f8253cf5063aa36e90765afe8f039c1"
+  },
+  "preserved_actual_v9_failure": {
+    "diagnosis_sha256": "7ea7e614ec5731c087f96a5edca8717433b3b01d08bf26b36a33b48d28571949",
+    "report_sha256": "c064b8cde12d389c4a75502abb335c74612a03a69181c4ea86046c8ddd516797",
+    "worker_returncode": 0,
+    "supervisor_returncode": 2,
+    "worker_numeric_verdict": "PASS_C1_REQUESTED_CAMERA_INPUT_CONDITION_GUARD_ONLY",
+    "terminal_authority": false,
+    "camera_tensor_bodies_read_by_v9": 11,
+    "camera_tensor_body_bytes_read_by_v9": 1584,
+    "failure": "Camera tensor shape is outside c2w/K scope"
+  },
+  "functional_change": {
+    "file": "supervise_camera_guard.py",
+    "function": "validate_camera_tensor_identities",
+    "v9_predicate": "camera_shape = shape == [4, 4]",
+    "v10_predicate": "camera_shape = shape in ([3, 3], [4, 4])",
+    "reason": "The actual valid camera evidence contains one individual float32 K[3,3] descriptor; V9 already accepted batched K[...,3,3] but omitted the corresponding individual shape from its final metadata validator.",
+    "other_production_logic_change": "NONE_EXCEPT_V10_ADMINISTRATIVE_PATH_STATUS_SCHEMA_DOMAIN_AND_SOURCE_PIN_IDENTITIES",
+    "numeric_math_threshold_tolerance_or_anchor_change": "NONE",
+    "dtype_size_identity_or_same_fd_guard_change": "NONE",
+    "new_mechanism_or_security_matrix": 0
+  },
+  "actual_report_text_only_regression": {
+    "status": "PASS_ACTUAL_V9_REPORT_TEXT_ONLY_SHAPE_REGRESSION",
+    "v9_rejection_reproduced": true,
+    "v10_accepts_legitimate_single_K_3x3": true,
+    "v10_rejects_ordinary_bad_shape_2x2": true,
+    "actual_tensor_identity_count": 11,
+    "single_K_3x3_count": 1,
+    "camera_tensor_body_bytes_read_by_regression": 0,
+    "pixels_decoded": 0
+  },
+  "author_tests": {
+    "python_3_13_three_entrypoints_returncode_zero": true,
+    "python_3_12_three_entrypoints_returncode_zero": true,
+    "camera_guard_status": "PASS_SYNTHETIC_ONLY",
+    "supervisor_status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+    "suite_status": "PASS_V10_STATIC_SYNTHETIC_AND_READONLY_METADATA_INTEGRATION_ONLY",
+    "total_entrypoints": 6
+  },
+  "access_ledger": {
+    "formal_runner_calls": 0,
+    "binding_or_governance_calls": 0,
+    "real_v9_report_and_diagnosis_json_reads": 2,
+    "real_camera_tensor_body_bytes_read": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_renderer_generation_calls": 0,
+    "formal_paths_created": 0
+  },
+  "formal_state_at_freeze": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V10.json": false,
+    "BINDING_REVIEW_V10.json": false,
+    "GOVERNANCE_ATTESTATION_V10.json": false,
+    "SOURCE_REVIEW_PRIMARY_V10.json": false,
+    "SOURCE_REVIEW_ADVERSARIAL_V10.json": false
+  },
+  "planned_distinct_roles": {
+    "source_author": "/root/c2_v5_lifecycle_review",
+    "primary_source_reviewer": "/root/c2_generation_builder",
+    "adversarial_source_reviewer": "/root/c1_v8_binding_review",
+    "binding_author": "/root",
+    "binding_reviewer": "/root/c2_final_launch_readiness"
+  },
+  "executed": false,
+  "authorization_effect": "NONE_SOURCE_FREEZE_AND_AUTHOR_TESTS_ONLY",
+  "next_gate": "TWO_FRESH_PAIRWISE_DISTINCT_NONAUTHOR_V10_SOURCE_REVIEWS_BEFORE_ANY_BINDING"
+}

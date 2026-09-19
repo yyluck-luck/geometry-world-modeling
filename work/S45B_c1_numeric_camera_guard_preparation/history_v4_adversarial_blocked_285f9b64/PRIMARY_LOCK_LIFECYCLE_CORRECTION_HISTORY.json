@@ -1,0 +1,69 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-primary-lock-correction-history-v1",
+  "status": "PRIMARY_BLOCKERS_PRESERVED_AND_REVISED_SOURCE_CANDIDATE_PREPARED",
+  "recorded_utc": "2026-09-08T04:46:15Z",
+  "author_role": "/root/c1_blind_score_builder",
+  "blocked_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/SOURCE_REVIEW_PRIMARY_BLOCKED.json",
+    "sha256": "05cb17b6974c404568a1b45ba65422ea4ca15ce593b18682527a4e327a258d3b"
+  },
+  "withdrawn_source_set": {
+    "camera_guard.py": "23a3318e5cfb5b8c44f14a1bc2d3e4f72222ac78213eac2d9aedf35c1575f178",
+    "PROTOCOL.md": "5055ff532a6a91d6c46e517835b5921d90dec339867c66d95721db6b333c7712",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "1808f64275885ef4cd30f9119fb86f0a183dce150ae97bd334a447de46faa7c1",
+    "synthetic_selftest.py": "02f881c7d3bfb3c50728e6c0128ed1f282f4a74f437abd3252d78a1ff7e4aae0"
+  },
+  "preserved_withdrawn_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_preparation/history_v3_primary_blocked_23a3318e",
+  "revised_candidate_source_set": {
+    "camera_guard.py": "285f9b64f6ad53f14c21f725ff1884b632ef7766d63bf6e43af780b716160bb4",
+    "PROTOCOL.md": "514fb18d5b2446ac50393fbe6c5fda34dd7b771356c037ff789e20710f49abcb",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "a2d8aa4e686523db15044f28c1d7f39e1ff50f73f4485b303bd7b31247b2dc1a",
+    "synthetic_selftest.py": "2d3674998103073fc3e884b3432f7d385bf432d4bfc7b8d51c4477ebaefc81aa"
+  },
+  "corrections": {
+    "attempt_commit_boundary": {
+      "before": "Permanent lock was acquired before canonical source, review, binding, upstream and event preflight.",
+      "after": "Those gates run under a transient directory-wide cooperating-runner lease while the permanent lock, fixed staging name and execution directory must remain absent.",
+      "attempt_consumed_before_permanent_commit": false
+    },
+    "atomic_structured_failure_receipt": {
+      "design": "A complete fsynced JSON failure record is written to one O_EXCL/O_NOFOLLOW staging inode and atomically hard-linked to the permanent lock pathname; the successful link is the attempt commit point.",
+      "default_status": "FAIL_CLOSED_ATTEMPT_COMMITTED_NO_VALID_TERMINAL_RECEIPT",
+      "interruption_after_commit_remains_fail_closed": true,
+      "automatic_retries": 0
+    },
+    "lock_identity_revalidation": {
+      "properties": [
+        "held_fd_regular_file",
+        "pathname_regular_file",
+        "held_fd_device_and_inode",
+        "pathname_device_and_inode",
+        "held_fd_and_path_st_nlink_equal_one",
+        "exact_size",
+        "exact_sha256_and_eof_from_held_fd",
+        "parent_directory_lease"
+      ],
+      "boundaries": [
+        "attempt_commit",
+        "before_output_creation",
+        "after_output_creation_before_tensor_read",
+        "after_tensor_close_and_source_revalidation",
+        "before_report_write",
+        "after_report_write_before_terminal_receipt",
+        "at_terminal_receipt_write",
+        "after_terminal_receipt_before_close"
+      ],
+      "unlink_recreate_synthetic_case_rejected": true
+    }
+  },
+  "source_review_authorization": "NONE_PENDING_FRESH_PRIMARY_AND_ADVERSARIAL_REVIEWS_OF_REVISED_EXACT_HASHES",
+  "formal_execution": false,
+  "formal_runner_calls": 0,
+  "real_c1_manifest_receipt_archive_event_or_tensor_files_opened": 0,
+  "c1_tensor_bodies_read": 0,
+  "real_scientific_arrays_mapped": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "formal_paths_created": 0,
+  "scientific_claim_boundary": "Source-only engineering correction. It establishes no requested-camera PASS, C1 row validity, pixel score, rendered-camera obedience, method gain, causal result, novelty, or publication result."
+}

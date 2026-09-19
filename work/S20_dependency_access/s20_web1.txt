@@ -1,0 +1,829 @@
+README.md · stabilityai/stable-diffusion-2-1 at bf16 (https://huggingface.co/stabilityai/stable-diffusion-2-1/blob/bf16/README.md)
+citeturn320search0 [wordlim: 200] Crawled: 1.1 years ago; # Stable Diffusion v2-1 Model Card ...     `pip install --upgrade git+https://github.com/huggingface/diffusers.git transformers accelerate scipy
+
+# Stable Diffusion v2-1 Model Card
+
+This model card focuses on the model associated with the Stable Diffusion v2-1 model, codebase avaliable here.
+
+This `stable-diffusion-2-1` model is fine-tuned from stable-diffusion-2 (`768-v-ema.ckpt`) with an additional 55k steps on the same dataset (with `punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+
+  * Use it with the `stablediffusion` repository: download the `v2-1_768-ema-pruned.ckpt` here.
+  * Use it with 🧨 `diffusers`
+
+## Model Details
+
+  * Developed by: Robin Rombach, Patrick Esser
+
+  * Model type: Diffusion-based text-to-image generation model
+
+  * Language(s): English
+
+  * License: CreativeML Open RAIL++-M License
+
+  * Model Description: This is a model that can be used to generate and modify images based on text prompts. It is a Latent Diffusion Model that uses a fixed, pretrained text encoder (OpenCLIP-ViT/H).
+
+  * Resources for more information: GitHub Repository.
+
+  * Cite as:
+    
+    `@InProceedings{Rombach_2022_CVPR,
+        author    = {Rombach, Robin and Blattmann, Andreas and Lorenz, Dominik and Esser, Patrick and Ommer, Bj\"orn},
+        title     = {High-Resolution Image Synthesis With Latent Diffusion Models},
+        booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+        month     = {June},
+        year      = {2022},
+        pages     = {10684-10695}
+    }
+    `
+
+## Examples
+
+Using the 🤗's Diffusers library to run Stable Diffusion 2 in a simple and efficient manner.
+    
+    `pip install --upgrade git+https://github.com/huggingface/diffusers.git transformers accelerate scipy
+    `
+
+Running the pipeline (if you don't swap the scheduler it will run with the default DDIM, in this example we are swapping it to EulerDiscreteScheduler):
+    
+    `from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler
+    
+    model_id = "stabilityai/stable-diffusion-2"
+    
+    
+    scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16)
+    pipe = pipe.to("cuda")
+    
+    prompt = "a photo of an astronaut riding a horse on mars"
+    image = pipe(prompt, height=768, width=768).images[0]
+        
+    image.save("astronaut_rides_horse.png")
+    `
+
+Notes:
+
+  * Despite not being a dependency, we highly recommend you to install xformers for memory efficient attention (better performance)
+  * If you have low GPU RAM available, make sure to add a `pipe.enable_attention_slicing()` after sending it to `cuda` for less VRAM usage (to the cost of speed)
+
+Stable Diffusion v2 mirrors and exacerbates biases to such a degree that viewer discretion must be advised irrespective of the input or its intent.
+
+## Training
+
+Training Data The model developers used the following dataset for training the model:
+
+  * LAION-5B and subsets (details below). The training data is further filtered using LAION's NSFW detector, with a "p_unsafe" score of 0.1 (conservative). For more details, please refer to LAION-5B's NeurIPS 2022 paper and reviewer discussions on the topic.
+
+Training Procedure Stable Diffusion v2 is a latent diffusion model which combines an autoencoder with a diffusion model that is trained in the latent space of the autoencoder. During training,
+
+  * Images are encoded through an encoder, which turns images into latent representations. The autoencoder uses a relative downsampling factor of 8 and maps images of shape H x W x 3 to latents of shape H/f x W/f x 4
+  * Text prompts are encoded through the OpenCLIP-ViT/H text-encoder.
+  * The output of the text encoder is fed into the UNet backbone of the latent diffusion model via cross-attention.
+
+  * Hardware: 32 x 8 x A100 GPUs
+
+  * Optimizer: AdamW
+
+  * Gradient Accumulations: 1
+
+  * Batch: 32 x 8 x 2 x 4 = 2048
+
+  * Learning rate: warmup to 0.0001 for 10,000 steps and then kept constant
+
+## Evaluation Results
+
+Evaluations with different classifier-free guidance scales (1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0) and 50 steps DDIM sampling steps show the relative improvements of the checkpoints:
+
+Evaluated using 50 DDIM steps and 10000 random prompts from the COCO2017 validation set, evaluated at 512x512 resolution. Not optimized for FID scores.
+
+## Environmental Impact
+
+Stable Diffusion v1 Estimated Emissions Based on that information, we estimate the following CO2 emissions using the Machine Learning Impact calculator presented in Lacoste et al. (2019). The hardware, runtime, cloud provider, and compute region were utilized to estimate the carbon impact.
+
+  * Hardware Type: A100 PCIe 40GB
+  * Hours used: 200000
+  * Cloud Provider: AWS
+  * Compute Region: US-east
+  * Carbon Emitted (Power consumption x Time x Carbon produced based on location of power grid): 15000 kg CO2 eq.
+
+## Citation
+    
+    `@InProceedings{Rombach_2022_CVPR,
+        author    = {Rombach, Robin and Blattmann, Andreas and Lorenz, Dominik and Esser, Patrick and Ommer, Bj\"orn},
+        title     = {High-Resolution Image Synthesis With Latent Diffusion Models},
+        booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+        month     = {June},
+        year      = {2022},
+        pages     = {10684-10695}
+    }
+    `
+
+This model card was written by: Robin Rombach, Patrick Esser and David Ha and is based on the Stable Diffusion v1 and DALL-E Mini model card.--------------------------------------------------------------------------------
+sd2-community/stable-diffusion-2-1 · Hugging Face (https://huggingface.co/sd2-community/stable-diffusion-2-1)
+citeturn320search1 [wordlim: 200] Crawled: 3 days ago; ### ⚠️ This repository is a mirror of the now deprecated `stabilityai/stable-diffusion-2-1`, this repository and organization are not affiliated in any way with Stability AI.
+    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+    image = pipe(prompt).images[0]
+
+
+  * Stable Diffusion v2-1 Model Card
+    * Model Details
+    * Examples
+  * Uses
+    * Direct Use
+      * Misuse, Malicious Use, and Out-of-Scope Use
+    * Limitations and Bias
+      * Limitations
+      * Bias
+    * Training
+    * Evaluation Results
+    * Environmental Impact
+    * Citation
+
+# Stable Diffusion v2-1 Model Card
+
+### ⚠️ This repository is a mirror of the now deprecated `stabilityai/stable-diffusion-2-1`, this repository and organization are not affiliated in any way with Stability AI.
+
+This model card focuses on the model associated with the Stable Diffusion v2-1 model, codebase available here.
+
+This `stable-diffusion-2-1` model is fine-tuned from stable-diffusion-2 (`768-v-ema.ckpt`) with an additional 55k steps on the same dataset (with `punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+
+  * Use it with the `stablediffusion` repository: download the `v2-1_768-ema-pruned.ckpt` here.
+  * Use it with 🧨 `diffusers`
+
+
+Using the 🤗's Diffusers library to run Stable Diffusion 2 in a simple and efficient manner.
+    
+    `pip install diffusers transformers accelerate scipy safetensors
+    `
+
+Running the pipeline (if you don't swap the scheduler it will run with the default DDIM, in this example we are swapping it to DPMSolverMultistepScheduler):
+    
+    `import torch
+    from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+    
+    model_id = "stabilityai/stable-diffusion-2-1"
+    
+    # Use the DPMSolverMultistepScheduler (DPM-Solver++) scheduler here instead
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+    pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+    pipe = pipe.to("cuda")
+    
+    prompt = "a photo of an astronaut riding a horse on mars"
+    image = pipe(prompt).images[0]
+        
+    image.save("astronaut_rides_horse.png")
+    `
+
+## Direct Use
+
+The model is intended for research purposes only. --------------------------------------------------------------------------------
+ControlNetModel.from_single_file problem - #4 by John6666 - 🧨 Diffusers - Hugging Face Forums (https://discuss.huggingface.co/t/controlnetmodel-from-single-file-problem/171434/4)
+citeturn320search2 [wordlim: 200] Published: 8 months ago; Crawled: 8 months ago; `https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/config.json`
+
+# ControlNetModel.from_single_file problem
+
+John6666 December 12, 2025, 5:53am 4
+
+Strictly speaking, it’s not a hub bug, but a problem that occurred with the hub…?
+
+* * *
+
+This is not your local `.ckpt` “failing to read.” It is Diffusers trying to fetch extra configuration from the Hub while loading the checkpoint, and that fetch is failing because `stabilityai/stable-diffusion-2-1` is now not publicly reachable (removed, made private, or gated). Your traceback shows Diffusers (via `huggingface_hub`) requesting:
+
+`https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/config.json`
+
+and receiving `401 Unauthorized`.
+
+That pattern is common with Diffusers “single file” loaders: a `.ckpt`/`.safetensors` contains weights, not a complete, self-describing “Diffusers config,” so Diffusers sometimes looks up a base model repo to reconstruct the architecture. When that repo cannot be accessed, you get a network error even though your weights are local. This exact failure mode is discussed in Diffusers issue threads where `from_single_file()` tries to download `.../resolve/main/config.json` from a base SD repo and gets 404/401. (GitHub)
+
+* * *
+
+## Why Diffusers is contacting `stabilityai/stable-diffusion-2-1` at all
+
+### 1) A checkpoint file is “just parameters”
+
+A `.ckpt` is typically a PyTorch pickle-based checkpoint holding tensors (and sometimes other objects). It generally does not contain everything needed to rebuild the model class (layer counts, channel multipliers, attention dims, etc.). Diffusers therefore needs a config from somewhere. (Hugging Face)
+
+### 2) For SD2.x ControlNet, the config is meaningfully different
+
+Your repo `alfredplpl/ControlNetForSD2` includes a YAML config `control_picasso11_openpose.yaml` alongside the checkpoint. The YAML shows `context_dim: 1024` and an OpenCLIP text embedder, which is characteristic of SD2-style conditioning. (Hugging Face)
+
+So Diffusers’ loader heuristics decide “this looks like an SD2.x-derived ControlNet,” then it tries to anchor itself to the canonical SD2.1 base repo (in your case `stabilityai/stable-diffusion-2-1`) to find config. That remote anchor is what’s breaking.
+
+### 3) The base repo being “gone” is now a real-world issue
+
+Your linked HF forum thread (Nov 14, 2025) reports that `stabilityai/stable-diffusion-2`, `stabilityai/stable-diffusion-2-1-base`, and `stabilityai/stable-diffusion-2-1` return 404 for users, with discussion that it may be retracted or made private. (Hugging Face Forums)
+When a repo is private or gated, clients often see 401 (Unauthorized) unless properly authenticated, and sometimes platforms intentionally blur “not found vs not allowed.” HF staff have explained 401 commonly means “not authenticated” and the model is private or doesn’t exist. (Hugging Face Forums)
+
+* * *
+
+## Root causes (what can produce this exact 401)
+
+You have a few plausible causes. In your case it is likely a combination of (A) and (B):
+
+### A) The base repo is no longer publicly accessible
+
+If `stabilityai/stable-diffusion-2-1` was removed or made private, any attempt to fetch `config.json` from it will fail. Users reported exactly this disappearance in Nov 2025. (Hugging Face Forums)
+
+### B) You are not authenticated (or your script isn’t using your token)
+
+Even if a repo exists, gated/private repos require an access token. A very common pitfall: you are logged into the website in your browser, but your Python environment is not authenticated, so the hub download gets 401. HF forum guidance explicitly ties 401 to missing auth when the model is private or missing. (Hugging Face Forums)
+There are also cases where people believe they are logged in, but environment variables or cache locations make the CLI token invisible to the runtime. (GitHub)
+
+### C) `from_single_file()` is pulling config from the wrong place (known Diffusers behavior)
+(Hugging Face)
+
+After that:
+    
+    `from diffusers import ControlNetModel
+    controlnet = ControlNetModel.from_pretrained("C:/path/to/output/controlnet_diffusers")
+    `
+
+* * *
+
+### Solution 3: Authenticate, if the base model is merely gated (not actually removed)
+
+If `stabilityai/stable-diffusion-2-1` still exists but is gated, you need:
+
+  * access approved on the model page
+  * a token
+  * your Python environment actually using that token
+
+A quick diagnostic is to try downloading just the config with `huggingface_hub`. If this returns 401, your runtime is not authorized:
+    
+    `from huggingface_hub import hf_hub_download
+    
+    hf_hub_download("stabilityai/stable-diffusion-2-1", "config.json")
+    `
+
+Background: HF staff have repeatedly explained 401 is what you see when you are not authenticated and the model is private or missing. (Hugging Face Forums)
+And there are known cases where people “logged in” but their token is invalid/ignored due to environment/caching differences. (GitHub)
+
+That said, your forum link suggests SD2.x repos may be gone from the Hub for many users, so authentication may not fix it. (Hugging Face Forums)
+
+* * *
+
+### Solution 4: Use a different base SD2.x repo (local or community-hosted) for inference
+
+Important distinction:
+
+  * Converting/loading the ControlNet weights is one problem.
+  * Actually running generation requires a base SD2.x pipeline (UNet, VAE, text encoder).
+
+If the official SD2.1 repos are unavailable, you need an alternative base model source (local copy you already downloaded, or another host). The forum thread even lists unofficial mirrors, but you need to handle licensing and long-term availability yourself. (Hugging Face Forums)
+
+* * *
+
+--------------------------------------------------------------------------------
+unet/diffusion_pytorch_model.safetensors · stabilityai/stable-diffusion-2-1-base at main (https://huggingface.co/stabilityai/stable-diffusion-2-1-base/blob/main/unet/diffusion_pytorch_model.safetensors)
+citeturn320search3 [wordlim: 200] Crawled: 11 months ago; stable-diffusion-2-1-base
+[Input: Search models, datasets, users...]
+
+# 
+
+stabilityai
+
+/
+
+stable-diffusion-2-1-base
+
+like [Button: 691]
+
+Follow
+
+Image Stability AI [Button: 31.3k]
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+Model card Files xet Community 23
+
+Train
+
+Deploy
+
+Use this model
+
+main
+
+stable-diffusion-2-1-base / unet /diffusion_pytorch_model.safetensors
+
+Image: patrickvonplaten's picture
+
+patrickvonplaten
+
+Adding `safetensors` variant of this model (#4)
+
+e7cda18
+
+download
+
+Copy download link
+
+history blame contribute delete
+
+Safe
+
+3.46 GB
+
+This file is stored with Xet . It is too big to display, but you can still download it.
+
+### Large File Pointer Details
+
+( Raw pointer file )
+
+SHA256:
+    6dfae3e5f7d459b50f4b0850ead945972c75bb0e1897628933e169eb43974214
+
+Pointer size:
+    135 Bytes
+
+·
+
+Size of remote file:
+    3.46 GB
+
+·
+
+Xet backed hash:
+    ef38808922bff2b361543bcca9555228e0f6d1cf220e930e1c7544d51c89bf0a
+
+Xet efficiently stores Large Files inside Git, intelligently splitting files into unique chunks and accelerating uploads and downloads. More info.--------------------------------------------------------------------------------
+Charles-Elena/stable-diffusion-2-1 at main (https://huggingface.co/Charles-Elena/stable-diffusion-2-1/tree/main)
+citeturn320search4 [wordlim: 200] Crawled: last month; Duplicate from stabilityai/stable-diffusion-2-1
+
+Charles-Elena
+
+/
+
+stable-diffusion-2-1
+
+like [Button: 1]
+
+Follow
+
+Image Charles Elena [Button: 9]
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+
+### Instructions to use Charles-Elena/stable-diffusion-2-1 with libraries, inference providers, notebooks, and local apps. Follow these links to get started.
+
+  * Libraries
+  * Diffusers
+
+How to use Charles-Elena/stable-diffusion-2-1 with Diffusers:
+    
+    pip install -U diffusers transformers accelerate
+    
+    import torch
+    from diffusers import DiffusionPipeline
+    
+    # switch to "mps" for apple devices
+    pipe = DiffusionPipeline.from_pretrained("Charles-Elena/stable-diffusion-2-1", torch_dtype=torch.bfloat16, device_map="cuda")
+    
+    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+    image = pipe(prompt).images[0]
+
+
+main
+
+stable-diffusion-2-1
+
+36.3 GB
+
+2 contributors History: 1 commit
+
+Image: charleselena's picture
+
+charleselena
+
+Image: rromb's picture
+
+rromb
+
+Duplicate from stabilityai/stable-diffusion-2-1
+
+509435a verified
+
+  * feature_extractor
+
+  * scheduler
+
+  * text_encoder
+
+  * tokenizer
+
+  * unet
+
+  * vae
+
+  * .gitattributes
+
+Safe
+
+1.48 kB
+  * README.md
+
+Safe
+
+12.2 kB
+  * model_index.json
+
+Safe
+
+537 Bytes
+  * v2-1_768-ema-pruned.ckpt
+
+#### Detected Pickle imports (8)
+
+    * "collections.OrderedDict",
+    * "numpy.dtype",
+    * "torch.FloatStorage",
+    * "pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint",
+    * "_codecs.encode",
+    * "numpy.core.multiarray.scalar",
+    * "torch._utils._rebuild_tensor_v2",
+    * "torch.IntStorage"
+
+How to fix it?
+
+5.21 GB xet
+  * v2-1_768-ema-pruned.safetensors
+
+Safe
+
+5.21 GB xet
+  * v2-1_768-nonema-pruned.ckpt
+
+
+5.21 GB xet
+  * v2-1_768-nonema-pruned.safetensors
+
+Safe
+
+5.21 GB xet--------------------------------------------------------------------------------
+Initial Commit · sd2-community/stable-diffusion-2-1 at bb21548 (https://huggingface.co/sd2-community/stable-diffusion-2-1/commit/bb2154823665391b4fb29b0b9cf82a198964ee05)
+citeturn320search5 [wordlim: 200] Published: 9 months ago; Crawled: last month; 15  | + This `stable-diffusion-2-1` model is fine-tuned from [stable-diffusion-2](https://huggingface.co/stabilityai/stable-diffusion-2) (`768-v-ema.ckpt`) with an additional 55k steps on the same dataset (with `punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+1  | + ---
+2  | + license: openrail++
+3  | + tags:
+4  | + - stable-diffusion
+5  | + - text-to-image
+6  | + pinned: true
+7  | + ---
+8  | +
+9  | + # Stable Diffusion v2-1 Model Card
+10  | +
+11  | + ### ⚠️ This repository is a mirror of the now deprecated `stabilityai/stable-diffusion-2-1`, this repository and organization are not affiliated in any way with Stability AI.
+12  | +
+13  | + This model card focuses on the model associated with the Stable Diffusion v2-1 model, codebase available [here](https://github.com/Stability-AI/stablediffusion).
+14  | +
+15  | + This `stable-diffusion-2-1` model is fine-tuned from [stable-diffusion-2](https://huggingface.co/stabilityai/stable-diffusion-2) (`768-v-ema.ckpt`) with an additional 55k steps on the same dataset (with `punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+16  | +
+17  | + - Use it with the [`stablediffusion`](https://github.com/Stability-AI/stablediffusion) repository: download the `v2-1_768-ema-pruned.ckpt` [here](https://huggingface.co/stabilityai/stable-diffusion-2-1/blob/main/v2-1_768-ema-pruned.ckpt).
+18  | + - Use it with 🧨 [`diffusers`](#examples)
+19  | +
+20  | + ## Model Details
+21  | + - **Developed by:** Robin Rombach, Patrick Esser
+22  | + - **Model type:** Diffusion-based text-to-image generation model
+23  | + - **Language(s):** English
+24  | + - **License:** [CreativeML Open RAIL++-M License](https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL)
+25  | + - **Model Description:** This is a model that can be used to generate and modify images based on text prompts. It is a [Latent Diffusion Model](https://arxiv.org/abs/2112.10752) that uses a fixed, pretrained text encoder ([OpenCLIP-ViT/H](https://github.com/mlfoundations/open_clip)).
+26  | + - **Resources for more information:** [GitHub Repository](https://github.com/Stability-AI/).
+27  | + - **Cite as:**
+--------------------------------------------------------------------------------
+Error 404 https://huggingface.co/stabilityai/stable-diffusion-2 - Models - Hugging Face Forums (https://discuss.huggingface.co/t/error-404-https-huggingface-co-stabilityai-stable-diffusion-2/170425)
+citeturn320search6 [wordlim: 200] Published: 9 months ago; Crawled: 9 months ago;   * https://huggingface.co/Manojb/stable-diffusion-2-1-base
+
+geogeo28 November 14, 2025, 6:27am 1
+
+Hi Community!
+
+I was trying to use stable diffusion 2 to run the paper below.
+Unfortunately, the model is not available. Is it expected?
+https://huggingface.co/stabilityai/stable-diffusion-2
+
+Thanks for your help!
+
+github.com
+
+John6666 November 14, 2025, 6:56am 2
+
+Hmm… Same here for both stabilityai/stable-diffusion-2-1-base and stabilityai/stable-diffusion-2-1…
+
+John6666 November 14, 2025, 7:09am 3
+
+Seems same there…?
+
+### Some unofficial mirrors (maybe) on the Hub
+
+  * https://huggingface.co/Manojb/stable-diffusion-2-base
+  * https://huggingface.co/Manojb/stable-diffusion-2-1-base
+  * https://huggingface.co/RedbeardNZ/stable-diffusion-2-1-base
+  * https://huggingface.co/jyoung105/stable-diffusion-v2-1
+  * https://huggingface.co/lzyvegetable/stable-diffusion-2-1
+  * https://huggingface.co/Charles-Elena/stable-diffusion-2-1
+  * https://huggingface.co/alwold/stable-diffusion-2-inpainting
+
+amodas November 14, 2025, 10:26am 5
+
+Same goes for stabilityai/stable-diffusion-2-inpainting
+
+  * https://huggingface.co/stabilityai/stable-diffusion-2-inpainting
+
+Any idea what this 404 error means? Does it mean that the model has been retracted?
+
+John6666 November 14, 2025, 10:34am 6
+
+> Does it mean that the model has been retracted?
+
+Yeah. Or the model may have been made private, but from an external perspective, it makes no difference (just 404 not found). The reason is unclear, but since Stable Diffusion experienced the same disappearance issue with SD 1.5 before, this occurrence itself is not surprising.
+
+brelva November 14, 2025, 3:20pm 7
+
+Well this is hugely disappointing. I was in the middle of working on a project with this. --------------------------------------------------------------------------------
+stabilityai/stable-diffusion-2-1 at refs/pr/98 (https://huggingface.co/stabilityai/stable-diffusion-2-1/tree/refs%2Fpr%2F98/vae)
+citeturn320search7 [wordlim: 200] Crawled: last year; stable-diffusion-2-1
+
+stabilityai
+
+/
+
+stable-diffusion-2-1
+
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+Model card Files xet Community 104
+
+refs/pr/98
+
+stable-diffusion-2-1 / vae
+
+10 contributors History: 4 commits
+
+Image: ntaquan0125's picture
+
+ntaquan0125
+
+Adding `diffusers` weights of this model
+
+0b85cef verified
+
+  * config.json
+
+Safe
+
+606 Bytes
+  * diffusion_pytorch_model.bin
+
+Safe
+
+335 MB xet
+  * diffusion_pytorch_model.fp16.bin
+
+Safe
+
+167 MB xet
+  * diffusion_pytorch_model.fp16.safetensors
+
+Safe
+
+335 MB xet
+  * diffusion_pytorch_model.safetensors
+
+Safe
+
+335 MB xet--------------------------------------------------------------------------------
+README.md · sd2-community/stable-diffusion-2-1 at main (https://huggingface.co/sd2-community/stable-diffusion-2-1/blob/main/README.md)
+citeturn320search8 [wordlim: 200] Crawled: last week; ### ⚠️ This repository is a mirror of the now deprecated `stabilityai/stable-diffusion-2-1`, this repository and organization are not affiliated in any way with Stability AI.
+
+### Instructions to use sd2-community/stable-diffusion-2-1 with libraries, inference providers, notebooks, and local apps. Follow these links to get started.
+
+  * Libraries
+  * Diffusers
+
+How to use sd2-community/stable-diffusion-2-1 with Diffusers:
+    
+    pip install -U diffusers transformers accelerate
+    
+    import torch
+    from diffusers import DiffusionPipeline
+    
+    # switch to "mps" for apple devices
+    pipe = DiffusionPipeline.from_pretrained("sd2-community/stable-diffusion-2-1", dtype=torch.bfloat16, device_map="cuda")
+    
+    prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+    image = pipe(prompt).images[0]
+
+  * Notebooks
+
+# Stable Diffusion v2-1 Model Card
+
+### ⚠️ This repository is a mirror of the now deprecated `stabilityai/stable-diffusion-2-1`, this repository and organization are not affiliated in any way with Stability AI.
+
+This model card focuses on the model associated with the Stable Diffusion v2-1 model, codebase available here.
+--------------------------------------------------------------------------------
+Models – Hugging Face (https://huggingface.co/models?other=stabilityai%2Fstable-diffusion-2-1)
+citeturn320search9 [wordlim: 200] Crawled: today; stabilityai/stable-diffusion-2-1 text-generation-inference Eval Results (legacy) text-embeddings-inference custom_code 4-bit precision Merge 8-bit precision Mixture of Experts Carbon Emissions Eval Results
+[Input: Search models, datasets, users...]
+
+  * Models
+  * Datasets
+  * Spaces
+  * Buckets new
+  * Docs
+
+### Edit Models filters
+
+  * Main
+  * Tasks
+  * Libraries
+  * Languages
+  * Licenses
+  * Other 1
+
+Model Tree
+
+stabilityai/stable-diffusion-2-1 text-generation-inference Eval Results (legacy) text-embeddings-inference custom_code 4-bit precision Merge 8-bit precision Mixture of Experts Carbon Emissions Eval Results
+
+Apply filters
+
+# Models
+
+1
+
+[Input: Filter by name]
+
+Base only Inference Available
+
+Edit filters
+
+Sort:  Trending
+
+Active filters: stabilityai/stable-diffusion-2-1
+
+[Button: Clear all]
+
+xchuan/lora-stable-diffusion-2-1-fupo Text-to-Image • Updated Oct 23, 2024 • 18 • 1--------------------------------------------------------------------------------
+webui/stable-diffusion-2-1 at main (https://huggingface.co/webui/stable-diffusion-2-1/tree/main)
+citeturn320search10 [wordlim: 200] Crawled: last week; stable-diffusion-2-1
+
+# 
+
+webui
+
+/
+
+stable-diffusion-2-1
+
+like [Button: 48]
+
+Follow
+
+Image webui [Button: 146]
+
+Model card Files xet Community 8
+
+Copy to bucket new
+
+main
+
+stable-diffusion-2-1
+
+7.82 GB
+
+2 contributors History: 5 commits
+
+Image: ClashSAN's picture
+
+ClashSAN
+
+Upload 2 files
+
+a2b4ff9
+
+  * .gitattributes
+
+Safe
+
+1.48 kB
+  * v2-1_768-ema-pruned-fp16.safetensors
+
+Safe
+
+2.61 GB xet
+  * v2-1_768-ema-pruned-fp16.yaml
+
+1.82 kB
+  * v2-1_768-ema-pruned.safetensors
+
+Safe
+
+5.21 GB xet
+  * v2-1_768-ema-pruned.yaml
+
+1.82 kB Rename v2-inference-v.yaml to v2-1_768-ema-pruned.yaml--------------------------------------------------------------------------------
+v2-1_768-ema-pruned.ckpt · stabilityai/stable-diffusion-2-1 at refs/pr/63 (https://huggingface.co/stabilityai/stable-diffusion-2-1/blob/refs%2Fpr%2F63/v2-1_768-ema-pruned.ckpt)
+citeturn320search11 [wordlim: 200] Crawled: 11 months ago; stable-diffusion-2-1
+
+stabilityai
+
+/
+
+stable-diffusion-2-1
+
+like [Button: 4.03k]
+
+Follow
+
+Image Stability AI [Button: 31.4k]
+
+Text-to-Image Diffusers Safetensors StableDiffusionPipeline stable-diffusion
+
+arxiv: 2112.10752
+
+arxiv: 2202.00512
+
+arxiv: 1910.09700
+
+License: openrail++
+
+Model card Files xet Community 104
+
+Use this model
+
+refs/pr/63
+
+stable-diffusion-2-1 / v2-1_768-ema-pruned.ckpt
+
+Image: rromb's picture
+
+rromb
+
+add v2-1
+
+6050d83
+
+download
+
+Copy download link
+
+history blame
+
+5.21 GB
+
+This file is stored with Xet . It is too big to display, but you can still download it.
+
+### Large File Pointer Details
+
+( Raw pointer file )
+
+SHA256:
+    ad2a33c361c1f593c4a1fb32ea81afce2b5bb7d1983c6b94793a26a3b54b08a0
+
+Pointer size:
+    135 Bytes
+
+·
+
+Size of remote file:
+    5.21 GB
+
+·
+
+Xet backed hash:
+    6e2580efe6a6a157c8734b6b8ef4b880896ca443b04c68d03d6ea9b151db6a9e
+--------------------------------------------------------------------------------
+Internal Error ()
+citeturn320view0 [wordlim: 200] Source: open({"ref_id":"https://huggingface.co/stabilityai/stable-diffusion-2-1-base","lineno":null}); Total lines: 1
+--------------------------------------------------------------------------------
+Internal Error ()
+citeturn320view1 [wordlim: 200] Source: open({"ref_id":"https://huggingface.co/api/models/stabilityai/stable-diffusion-2-1-base","lineno":null}); Total lines: 1
+--------------------------------------------------------------------------------
+laion/CLIP-ViT-H-14-laion2B-s32B-b79K · Hugging Face (https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K)
+citeturn320view2 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K","lineno":null}); Total lines: 294
+

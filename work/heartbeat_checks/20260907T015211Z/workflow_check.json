@@ -1,0 +1,62 @@
+{
+  "schema": "research-workflow-check-v1",
+  "checked_utc": "2026-09-07T01:52:11.597180+00:00",
+  "checked_local": "2026-09-07T09:52:11.597180+08:00",
+  "previous_checked_utc": "2026-09-07T01:19:46.197866+00:00",
+  "interval_minutes": 32.4233219,
+  "trigger": "scheduled bounded external-condition check",
+  "trigger_utc": "2026-09-07T01:50:21.166000+00:00",
+  "checks": [
+    {
+      "item": "skills",
+      "status": "PASS",
+      "finding": "应用此前已读的Supervisor 2.2强基线优先及Claude科学批判的证据边界，遵循S36无变化停止条件；本轮没有新技能阅读或方法评价。",
+      "evidence": "docs/S36_RESOURCE_RECOVERY.md"
+    },
+    {
+      "item": "innovation",
+      "status": "PASS",
+      "finding": "没有新算法或实测结果，不将资源检查当创新进展；真实基线与新机制仍待完成。",
+      "evidence": "RESEARCH_MEMORY.md"
+    },
+    {
+      "item": "experiment",
+      "status": "PASS",
+      "finding": "未启动模型、实验、权重正文读取或成功测试重跑，原真实运行草稿未冻结。",
+      "evidence": "work/heartbeat_checks/20260907T015211Z/resource_delta.json"
+    },
+    {
+      "item": "local_tools",
+      "status": "PASS",
+      "finding": "本轮一次CUA确认锁屏；限定rg/stat/cache与进程名核验资源元数据未变。仅本轮清点Python与既有PID55105，无新科学进程由本轮启动。",
+      "evidence": "work/heartbeat_checks/20260907T015211Z/resource_delta.json"
+    },
+    {
+      "item": "retrieval",
+      "status": "NOT_APPLICABLE",
+      "finding": "没有新来源线索或访问条件变化，不重复S36已完成的搜索。",
+      "evidence": "docs/S36_RESOURCE_RECOVERY.md"
+    },
+    {
+      "item": "agents",
+      "status": "NOT_APPLICABLE",
+      "finding": "实际确认五agent completed；只有有限状态检查，无可独立并行的实质新任务。",
+      "evidence": "work/heartbeat_checks/20260907T015211Z/resource_delta.json"
+    },
+    {
+      "item": "records",
+      "status": "PASS",
+      "finding": "实际开始/完成分别记主账，七项状态和记忆同步；无科研变化不复制快照、不另造阶段；实际间隔超30分钟如实保留。",
+      "evidence": "work/heartbeat_checks/20260907T015211Z/resource_delta.json"
+    }
+  ],
+  "issues": [
+    "Actual interval 32.423322 minutes exceeds30; trigger was 34.968134 seconds after previous30-minute deadline. No punctuality claim.",
+    "Mac remains locked; original-model access unknown; bounded resource metadata unchanged."
+  ],
+  "corrections": [
+    "Stop this resumed run without repeated web searches/tests or claims of scientific progress."
+  ],
+  "new_method_validated": false,
+  "next_step": "等待电脑解锁或新增可核来源的原模型文件；当前无变化，结束本轮，不重复旧实验和来源检索。"
+}

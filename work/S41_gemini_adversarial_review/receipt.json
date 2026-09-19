@@ -1,0 +1,97 @@
+{
+  "schema": "gemini-visible-review-v1",
+  "stage": "S41",
+  "browser": "Codex in-app browser",
+  "conversation_title": "几何感知世界建模研究审查 - Google Gemini",
+  "model_visible_in_ui": "Pro Extended",
+  "user_authorization": "Previously explicit; user requested Gemini assistance and strongest available model",
+  "prompt_file": "work/S41_gemini_adversarial_review/prompt.md",
+  "response_file": "work/S41_gemini_adversarial_review/response_visible.md",
+  "capture_method": "Visible accessibility-tree text manually transcribed; tab content export unsupported",
+  "capture_complete": true,
+  "scientific_execution": false,
+  "model_generation_execution": false,
+  "citation_verification_status": "COMPLETE_FOR_RECORDED_THIRD_ROUND_WITH_CORRECTIONS; SEE independent_verification AND receipt_round4.json",
+  "method_adoption_status": "NO_GEMINI_METHOD_ADOPTED; ROUND4_ROOT_PROTOCOL_INDEPENDENTLY_PASSED_AFTER_REVISIONS",
+  "round4_receipt": "work/S41_gemini_adversarial_review/receipt_round4.json",
+  "private_account_details_saved": false,
+  "independent_verification": {
+    "schema": "s41-gemini-independent-verification-v1",
+    "status": "PASS_WITH_CORRECTIONS",
+    "recorded_utc": "2026-09-07T05:29:51.204797+00:00",
+    "report": "work/S41_gemini_adversarial_review/independent_verification.md",
+    "report_bytes": 10071,
+    "report_lines": 90,
+    "report_sha256": "be2815e65029053e1239691a8c2015f4bb0d5eab6f11094cb68a24941b15cc93",
+    "input_snapshot": {
+      "prompt_sha256": "90836fd11c6cbb1e0c4e77e241dcd4b3c8f2e5bfc68cd6f52969e3c99e9d59d2",
+      "response_visible_sha256": "4d055416df6863e4740e9c921293182dc570bc9e8cde7ffa9a66795bd52d6752"
+    },
+    "primary_paper_sources": [
+      {
+        "title": "StreamingT2V: Consistent, Dynamic, and Extendable Long Video Generation from Text",
+        "venue_status": "CVPR 2025 official proceedings",
+        "official_html": "https://openaccess.thecvf.com/content/CVPR2025/html/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.html",
+        "official_pdf": "https://openaccess.thecvf.com/content/CVPR2025/papers/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.pdf",
+        "arxiv": "https://arxiv.org/abs/2403.14773",
+        "local_main_pdf_sha256": "43a297f6b4be9d3b1c587e33841ec722bebfe03a1ee99890ef14d67c811d9e89",
+        "local_supplement_pdf_sha256": "27b5edaea1de6f380fc38b34a8fa957597b7125d47acaa4cff36c25c52e92051",
+        "source_acquisition_receipt": "work/S38_paper_learning/agent_a_video/fetch_receipt.json"
+      }
+    ],
+    "local_source_snapshots": [
+      {
+        "path": "work/S20_environment/isolated_vmem_source/modeling/modules/conditioner.py",
+        "sha256": "b79eb0cf4d94345a720a9a844c7daa6206b0a9234d714b7f9f23a9571c7c5fc1"
+      },
+      {
+        "path": "work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+        "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255"
+      },
+      {
+        "path": "work/S20_environment/isolated_vmem_source/modeling/modules/transformer.py",
+        "sha256": "5f0d152a2f6464076cb0ee5aca725b3445420a5f37ac571d3daa77e580e65764"
+      },
+      {
+        "path": "work/S20_environment/site-packages/open_clip/model.py",
+        "sha256": "684ca4cc6d30e65b541f338bdee9fed89c78c4aac542fd938ebdd7fd2ed70790"
+      },
+      {
+        "path": "work/S20_environment/site-packages/open_clip/transformer.py",
+        "sha256": "20d1a89d4a95bee4dac9bab9b50dec5685ded59936ed4363e59fbd468871f108"
+      },
+      {
+        "path": "work/S20_environment/site-packages/open_clip/model_configs/ViT-H-14.json",
+        "sha256": "8b5bd11e1775f0fd79227ba05c07f3339b1c4da2e0f21f5426631774a84a6058"
+      }
+    ],
+    "claim_results": {
+      "streamingt2v_cvpr2025_and_arxiv_2403_14773": "VERIFIED",
+      "streamingt2v_conditions_on_16_past_frames": "REJECTED_ACTUAL_F_COND_IS_8_WHILE_OUTPUT_F_IS_16",
+      "streamingt2v_static_first_chunk_anchor": "QUALIFIED_VERIFIED_ONE_FIXED_ANCHOR_AT_INFERENCE_RANDOM_FIRST16_ANCHOR_DURING_TRAINING",
+      "streamingt2v_parallel_attention_readout": "REJECTED_UNSUPPORTED_WORDING",
+      "vmem_clip_semantic_granularity": "ONE_UNNORMALIZED_GLOBAL_1024D_VECTOR_PER_VIEW",
+      "vmem_cross_attention_key_sequence_length": 1,
+      "existing_vmem_supports_surfel_to_clip_patch_mapping": false,
+      "geometry_guided_token_masking_current_adoption": "REJECTED_PENDING_REAL_FAILURE_INTERFACE_AND_NEIGHBOR_VERIFICATION"
+    },
+    "six_arm_fairness": {
+      "all_arms_zero_new_trainable_parameters": true,
+      "all_arms_same_information": false,
+      "all_arms_exact_same_compute": false,
+      "mean": "ACCEPT_ORIGINAL_BASELINE",
+      "highest_overlap_single": "ACCEPT_DIAGNOSTIC_ONLY_NOT_INFORMATION_MATCHED",
+      "farthest_or_oldest_single": "REJECT_AMBIGUOUS_UNTIL_ONE_RULE_IS_FROZEN",
+      "dimensionwise_max": "QUALIFIED_ACCEPT_ALL_INFORMATION_STRESS_BASELINE",
+      "zero": "ACCEPT_NEGATIVE_CONTROL_NOT_INFORMATION_MATCHED",
+      "random_per_denoising_timestep": "REJECT_FROM_PRIMARY_MATRIX_REQUIRES_DYNAMIC_SAMPLER_AND_EXTRA_RANDOMNESS"
+    },
+    "execution_boundary": {
+      "model_loaded": false,
+      "video_generated": false,
+      "experiment_run": false,
+      "main_ledger_modified": false,
+      "source_code_modified": false
+    }
+  }
+}

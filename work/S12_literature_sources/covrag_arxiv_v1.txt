@@ -1,0 +1,3080 @@
+Retrieve What’s Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation
+// Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+/* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1
+Introduction
+2
+Related Work
+3
+Preliminaries
+4
+Method
+4.1
+Target-view coverage maps as 3D memory evidence
+4.2
+Residual coverage gain for non-redundant retrieval
+4.3
+Scalable depth estimation via sliding-window caching
+5
+Experiments
+5.1
+Geometric consistency evaluation
+5.2
+Retrieval cost comparison
+5.3
+Analysis
+6
+Conclusion
+References
+A
+Experimental Details
+A.1
+Baseline Setup
+DFoT.
+WorldMem.
+VMem.
+A.2
+Model training details
+A.3
+Evaluation protocol
+RealEstate10K.
+DL3DV10K.
+A.4
+GT Pose Alignment for VGGT-based Geometry Estimation
+B
+Additional Results
+B.1
+Qualitative Results
+RealEstate10K.
+DL3DV10K.
+B.2
+Quantitative Results
+Scalability as video length increases.
+Robustness to inaccurate geometry.
+C
+Limitations
+D
+Future work
+E
+Broader impacts
+License: arXiv.org perpetual non-exclusive license
+arXiv:2606.02479v1 [cs.CV] 01 Jun 2026
+Retrieve What’s Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation
+Minseok Joo
+Affiliation:
+Korea University
+Email:
+wlgkcjf87@korea.ac.kr
+Dogyun Park
+Affiliation:
+Korea University
+Email:
+gg933@korea.ac.kr
+Taehoon Lee
+Affiliation:
+KAIST
+Email:
+dlxogns183@kaist.ac.kr
+Kyujin Lee
+Affiliation:
+KAIST
+Email:
+kyujinlee@kaist.ac.kr
+Hyunwoo J. Kim
+†
+†
+thanks:
+Corresponding author.
+Affiliation:
+KAIST
+Email:
+hyunwoojkim@kaist.ac.kr
+Abstract
+Maintaining
+long-term geometric consistency
+remains challenging for long-horizon autoregressive video generation.
+Memory-augmented generative models address this by retrieving historical frames, but their effectiveness depends on two key design choices: what 3D-geometric evidence should represent past observations, and how memory frames should be selected from this evidence.
+Existing methods often rely on camera poses or field-of-view overlap, which are lightweight but too coarse to reason about pixel-wise visibility, or use explicit 3D reconstruction, which provides fine-grained evidence but is costly to maintain over long rollouts.
+We propose
+Cov
+erage-Maximizing
+R
+etrieval-
+A
+ugmented
+G
+eneration
+(
+CovRAG
+), a depth-based memory retrieval framework that uses pretrained 3D priors to construct a
+target-view coverage map
+as lightweight 3D memory evidence.
+For frame selection,
+CovRAG
+maximizes
+residual coverage gain
+, iteratively retrieving frames that explain target-view regions not covered by the current context or previously selected memories.
+To improve scalability in long-video generation, we introduce sliding-window depth caching for efficient geometry estimation.
+Experiments on RealEstate10K and DL3DV10K show that
+CovRAG
+improves long-horizon geometric consistency while maintaining low latency compared to baselines.
+Figure 1:
+CovRAG
+improves consistency under occlusion and out-of-frame motion.
+CovRAG
+preserves reappearing content and achieves a better consistency–efficiency trade-off than FoV-based retrieval (WorldMem) and explicit 3D memory (VMem).
+1
+Introduction
+Simulating the visual world is a central goal of computer vision.
+Long-horizon video generation that behaves as a consistent 3D scene, rather than a sequence of locally plausible views, is essential for world models that support robotic simulation
+Wen et al. (2024)
+;
+Wolf et al. (2025)
+;
+Yu et al. (2025e)
+;
+Zhu et al. (2025)
+, 3D content creation
+Yu et al. (2024)
+;
+He et al. (2025)
+;
+Bai et al. (2025)
+;
+Gao et al. (2024)
+;
+Yu et al. (2025d)
+;
+Yu et al. (2025a)
+, and interactive game engines
+Feng et al. (2025)
+;
+Yu et al. (2025c)
+;
+Valevski et al. (2025)
+;
+Bruce et al. (2024)
+.
+Despite this progress, maintaining
+long-term geometric consistency
+remains challenging.
+Most autoregressive video diffusion models generate videos within a limited temporal context window and thus tend to lose structural and semantic details beyond it.
+When the camera revisits a previously observed region, the model may fail to reproduce geometry and appearance consistent with the earlier observation, leading to spatial drift, flickering, and inconsistent scene structure.
+A promising direction is
+memory-augmented video generation
+Xiao et al. (2025)
+;
+Yu et al. (2025b)
+;
+Li et al. (2025)
+;
+Chen et al. (2025)
+;
+Henschel et al. (2025)
+;
+Gao et al. (2026)
+, which stores historical frames or states and retrieves a subset of them to condition future generation.
+This approach is attractive because it sidesteps the cost of extending the generator’s context: scaling retrieval is far more tractable than scaling the model’s context length, and retrieval can be improved without retraining the generator.
+However, the effectiveness of memory-augmented generation depends critically on the retrieval mechanism.
+In particular, retrieval must answer two key questions:
+(i) What form of 3D-aware evidence best captures the geometric relevance of past observations?
+and
+(ii) How should frames be selected based on this evidence?
+Existing methods make undesirable trade-offs for the first question.
+Some approaches, such as WorldMem
+Xiao et al. (2025)
+, use camera poses or field-of-view (FoV) overlap as lightweight 3D-aware evidence.
+This is efficient and easy to scale, but it provides only a coarse view-level proxy for geometric relevance.
+FoV overlap does not reveal which target-view pixels are actually visible from a memory frame, cannot reason about occlusion, and cannot determine whether a past observation provides evidence about locally occluded or out of frame in the context frames. At the other extreme, methods such as VMem
+Li et al. (2025)
+construct explicit 3D scene representations and render memory evidence into the target view.
+Such explicit reconstruction provides fine-grained geometric information but incurs substantial computational and engineering costs, especially when the scene representation must be maintained over long autoregressive horizons.
+Thus, existing memory evidence is often either too coarse to support reliable visibility reasoning or too expensive to scale efficiently.
+On the second question, the standard strategy scores each candidate frame independently and retrieves the top-
+n
+n
+frames. This finds frames individually relevant to the target view, but offers no guarantee that the retrieved set is
+collectively
+informative. Multiple frames may redundantly explain the same region, while other regions remain unsupported. This redundancy is especially harmful under tight context-length constraints and compute budgets.
+Thus, we propose
+Coverage-Maximizing Retrieval
+(
+CovRAG
+), a depth-based retrieval framework, illustrated in Figure
+2
+, to address both limitations.
+For memory evidence,
+CovRAG
+uses depth and camera poses predicted by a pretrained 3D prior model
+Wang et al. (2025a)
+to construct a
+target-view coverage map
+.
+Concretely, each historical frame is warped to the target viewpoint using its predicted depth and camera pose, and the resulting target-view coverage map indicates which target-view pixels are geometrically supported by that frame.
+This depth-based evidence provides a practical middle ground between FoV overlap and explicit 3D reconstruction: it is sufficiently fine-grained to support pixel-wise visibility reasoning, yet lightweight enough to avoid maintaining a globally reconstructed scene.
+For frame selection,
+CovRAG
+retrieves frames to maximize
+residual coverage gain
+, the number of currently uncovered pixels each new frame would explain. This yields a compact, complementary memory set rather than a redundant top-
+n
+n
+selection. To keep this approach scalable over long rollouts, we introduce a
+sliding-window depth-caching strategy
+that confines inference to a fixed window and reuses cached depth maps thereafter, keeping inference cost nearly constant as the generated sequence grows.
+We evaluate
+CovRAG
+on top of DFoT
+Song et al. (2025)
+on RealEstate10K
+Zhou et al. (2018)
+and DL3DV10K
+Ling et al. (2024)
+, which together cover diverse 3D scenes with varied camera trajectories and substantial spatial extent.
+Compared with memory-retrieval baselines,
+CovRAG
+reduces the geometric consistency error measured by MEt3R by up to
+29%
+, while achieving up to
+5
+×
+\times
+lower latency than a 3D reconstruction-based method.
+These results indicate that
+CovRAG
+is an effective and efficient retrieval method for 3D-consistent video generation.
+Contributions.
+Our contributions are summarized as follows:
+•
+We propose
+Coverage-Maximizing Retrieval
+(
+CovRAG
+), a depth-based memory-retrieval framework to improve geometric consistency in long-horizon autoregressive video generation.
+•
+We introduce
+target-view coverage maps
+, a lightweight 3D-aware memory evidence representation that uses pretrained 3D priors to estimate which target-view pixels are geometrically supported by each historical frame, enabling pixel-level visibility reasoning without explicit 3D reconstruction.
+•
+We introduce
+residual coverage gain
+, an iterative frame-selection criterion that retrieves memory frames covering currently uncovered target-view regions, reducing redundancy among retrieved frames and encouraging complementary geometric evidence.
+•
+We enable scalable depth-based coverage retrieval with
+sliding-window depth caching
+, which estimates depth only within a fixed local rollout window and reuses cached depth maps for later coverage computation, keeping geometry inference cost nearly constant as the video grows.
+2
+Related Work
+Figure 2:
+Overview of diffusion video generation with
+CovRAG
+.
+During autoregressive video generation,
+CovRAG
+augments the diffusion model with retrieved historical frames that provide complementary geometric evidence for the target view. It identifies regions already supported by the temporal context and retrieves additional memories (denoted by red and blue regions) that cover the remaining target-view regions, enabling more consistent long-horizon generation.
+Long-horizon autoregressive video generation.
+Diffusion-based video generation has rapidly improved in visual fidelity and temporal coherence
+Ho et al. (2020)
+;
+Song et al. (2021)
+;
+Kong et al. (2024)
+;
+Yang et al. (2025)
+;
+Wan et al. (2025)
+. To extend generation beyond fixed length, two complementary strategies have emerged. Context-extension methods scale the temporal window directly through autoregressive or streaming mechanisms
+Song et al. (2025)
+;
+Chen et al. (2024)
+;
+Yin et al. (2025)
+;
+Huang et al. (2025)
+;
+Lin et al. (2025)
+, generating each frame conditioned on a short history. While effective for short- to medium-term horizons, the cost of attending to longer histories grows rapidly, and the effective context window remains too small to retain information across scene revisits. Memory-augmentation methods, discussed next, instead decouple temporal coverage from context length by retrieving informative past frames on demand. Our work follows this second strategy and focuses on improving the retrieval mechanism, which we identify as the primary determinant of long-horizon geometric consistency.
+Memory-augmented video generation.
+A growing body of work incorporates external memory into video diffusion models
+Xiao et al. (2025)
+;
+Yu et al. (2025b)
+;
+Li et al. (2025)
+;
+Gao et al. (2026)
+;
+Cai et al. (2026)
+;
+Liu et al. (2024)
+;
+Wang and Agapito (2025)
+;
+Ren et al. (2025)
+;
+Zhang et al. (2025)
+, conditioning generation on a small set of retrieved historical observations rather than the entire past. Existing methods can be organized along two axes: what evidence is used to assess relevance, and how observations are selected given that evidence. On the evidence axis, prior approaches occupy two extremes.
+View-level heuristics
+such as timestamp proximity or field-of-view (FoV) overlap estimated from camera poses
+Xiao et al. (2025)
+;
+Yu et al. (2025b)
+are efficient but coarse: they reason at the granularity of whole views rather than pixels, and therefore cannot determine which target-view regions a candidate memory frame can actually support, nor can they account for occlusion.
+Reconstruction-based memory
+, in contrast, maintains an explicit geometric representation of the scene — a global scene model rendered for novel-view guidance
+Liu et al. (2024)
+;
+Wang and Agapito (2025)
+;
+Ren et al. (2025)
+;
+Zhang et al. (2025)
+, or a surfel-indexed view memory anchoring past views to observed surface elements
+Li et al. (2025)
+. While such representations provide fine-grained geometric evidence, they require constructing, optimizing, and incrementally updating a persistent scene model, a cost that compounds over long autoregressive rollouts and introduces failure modes when reconstruction is imperfect. On the selection axis, prior methods predominantly score candidates independently and retrieve the top-
+n
+n
+. Because relevance is assessed per frame in isolation, the resulting set is prone to redundancy; multiple retrieved frames may cover the same target-view region, while other regions remain unsupported. Under tight retrieval budgets imposed by the model’s context limits, this redundancy directly reduces geometric coverage.
+3
+Preliminaries
+Notation.
+We use bold lowercase symbols (e.g.,
+𝐱
+{\mathbf{x}}
+) for video tensors, calligraphic symbols (e.g.,
+𝒞
+,
+ℳ
+,
+ℋ
+\mathcal{C},\mathcal{M},\mathcal{H}
+) for index sets, subscripts to indicate frame indices, and superscripts for diffusion noise level. Given an index set
+𝒮
+\mathcal{S}
+, we write
+𝐱
+S
+=
+{
+𝐱
+j
+}
+j
+∈
+S
+{\mathbf{x}}_{S}=\{{\mathbf{x}}_{j}\}_{j\in S}
+for the subset of frames indexed by
+𝒮
+\mathcal{S}
+.
+Autoregressive video diffusion.
+Let
+𝐱
+0
+=
+{
+𝐱
+f
+0
+}
+f
+=
+1
+F
+{\mathbf{x}}^{0}=\{{\mathbf{x}}_{f}^{0}\}_{f=1}^{F}
+denote a clean video with
+F
+F
+frames.
+Diffusion models generate
+𝐱
+0
+{\mathbf{x}}^{0}
+by starting from Gaussian noise and iteratively denoising through a learned reverse process parameterized by a network
+Ho et al. (2020)
+;
+Song et al. (2021)
+;
+Lipman et al. (2023)
+.
+Using a continuous noise level
+k
+∈
+[
+0
+,
+1
+]
+k\in[0,1]
+, where
+k
+=
+1
+k=1
+corresponds to pure noise and
+k
+=
+0
+k=0
+to the clean video, we write the noised sample as
+𝐱
+k
+=
+α
+⁡
+(
+k
+)
+​
+𝐱
+0
++
+σ
+⁡
+(
+k
+)
+​
+ϵ
+{\mathbf{x}}^{k}=\alpha(k)\,{\mathbf{x}}^{0}+\sigma(k)\,\epsilon
+with
+ϵ
+∼
+𝒩
+⁡
+(
+0
+,
+I
+)
+\epsilon\sim\mathcal{N}(0,\mathrm{I})
+, where
+α
+⁡
+(
+k
+)
+\alpha(k)
+and
+σ
+⁡
+(
+k
+)
+\sigma(k)
+are noise schedule functions satisfying
+α
+⁡
+(
+0
+)
+=
+1
+\alpha(0)=1
+,
+σ
+⁡
+(
+0
+)
+=
+0
+\sigma(0)=0
+and
+α
+⁡
+(
+1
+)
+=
+0
+\alpha(1)=0
+,
+σ
+⁡
+(
+1
+)
+=
+1
+\sigma(1)=1
+.
+A common training objective is to learn a noise predictor
+ϵ
+θ
+\epsilon_{\theta}
+(or score/velocity field) by minimizing
+ℒ
+θ
+=
+𝔼
+𝐱
+0
+,
+ϵ
+,
+k
+​
+[
+‖
+ϵ
+θ
+​
+(
+𝐱
+k
+,
+k
+)
+−
+ϵ
+‖
+2
+]
+.
+\mathcal{L}_{\theta}=\mathbb{E}_{{\mathbf{x}}^{0},\epsilon,k}\Big[\big\|\epsilon_{\theta}({\mathbf{x}}^{k},k)-\epsilon\big\|^{2}\Big].
+(1)
+Autoregressive video diffusion extends this framework to long-horizon generation by denoising frame
+𝐱
+t
+k
+{\mathbf{x}}_{t}^{k}
+conditioned on a temporal context window of previously generated clean frames
+𝐱
+𝒞
+t
+0
+{\mathbf{x}}_{\mathcal{C}_{t}}^{0}
+, where
+𝒞
+t
+=
+{
+t
+−
+1
+,
+…
+,
+t
+−
+δ
+}
+\mathcal{C}_{t}=\{t-1,\ldots,t-\delta\}
+is the index set of the most recent
+δ
+\delta
+frames.
+Diffusion Forcing (DF)
+Song et al. (2025)
+;
+Chen et al. (2024)
+generalizes this formulation by assigning an independent noise level to each frame, allowing the model to denoise the current frame while conditioning on context frames at arbitrary noise levels.
+Memory bank with retrieval.
+Let
+ℳ
+t
+\mathcal{M}_{t}
+denote the index set of the memory bank at generation frame
+t
+t
+, and similarly
+ℋ
+t
+\mathcal{H}_{t}
+for retrieved indices.
+Memory-augmented video generators
+Xiao et al. (2025)
+;
+Yu et al. (2025b)
+;
+Chen et al. (2025)
+maintain an external memory bank
+𝐱
+ℳ
+t
+{\mathbf{x}}_{\mathcal{M}_{t}}
+at current frame
+t
+t
+that stores previously generated frames and associated metadata such as camera poses.
+Before generating the next frame
+𝐱
+t
+0
+{\mathbf{x}}_{t}^{0}
+, the model retrieves a subset of memory frames
+𝐱
+ℋ
+t
+0
+⊆
+𝐱
+ℳ
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{H}_{t}}\subseteq{\mathbf{x}}_{\mathcal{M}_{t}}^{0}
+,
+and conditions the network on
+𝐱
+ℋ
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{H}_{t}}
+, i.e.,
+ϵ
+θ
+​
+(
+𝐱
+t
+k
+,
+𝐱
+𝒞
+t
+0
+,
+𝐱
+ℋ
+t
+0
+,
+k
+)
+.
+\epsilon_{\theta}({\mathbf{x}}^{k}_{t},\,{\mathbf{x}}^{0}_{\mathcal{C}_{t}},\,{\mathbf{x}}^{0}_{\mathcal{H}_{t}},\,k).
+4
+Method
+Our goal is to retrieve a compact set of historical frames
+𝐱
+ℋ
+t
+0
+⊆
+𝐱
+ℳ
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{H}_{t}}\subseteq{\mathbf{x}}^{0}_{\mathcal{M}_{t}}
+that provides useful geometric evidence for generating the target frame
+𝐱
+t
+0
+{\mathbf{x}}_{t}^{0}
+.
+The key idea is to identify which regions of the target view are already geometrically supported by the current context, and then retrieve frames that support the remaining uncovered regions.
+Our method consists of three main components.
+First, in Sec.
+4.1
+, we construct
+target-view coverage maps
+by warping context and memory frames into the target viewpoint using estimated depth and camera poses.
+A target-view coverage map indicates which target pixels are geometrically supported by a given source frame.
+Second, in Sec.
+4.2
+, we select memory frames according to
+residual coverage gain
+, which measures how much additional target-view coverage a candidate frame provides beyond the current context and the already-selected memory frames.
+This encourages retrieved frames to be complementary rather than redundant.
+Finally, we introduce
+sliding-window depth caching
+for scalable long-horizon geometry estimation in Sec.
+4.3
+.
+4.1
+Target-view coverage maps as 3D memory evidence
+CovRAG
+uses depth-based pixel-wise visibility as 3D-aware memory evidence.
+For each source frame
+i
+i
+and target frame
+t
+t
+, we construct a
+target-view coverage map
+𝐦
+i
+→
+t
+∈
+{
+0
+,
+1
+}
+H
+×
+W
+{\mathbf{m}}_{i\rightarrow t}\in\{0,1\}^{H\times W}
+,
+where
+H
+H
+and
+W
+W
+denote the frame height and width.
+The map
+𝐦
+i
+→
+t
+{\mathbf{m}}_{i\rightarrow t}
+indicates which pixels in the target frame
+t
+t
+are geometrically supported by the source frame
+i
+i
+.
+Let
+𝐝
+i
+{\mathbf{d}}_{i}
+be the depth map of source frame
+i
+i
+, and let
+𝐩
+i
+=
+[
+𝐑
+i
+∣
+𝐭
+i
+]
+{\mathbf{p}}_{i}=[\mathbf{R}_{i}\mid\mathbf{t}_{i}]
+and
+𝐩
+t
+=
+[
+𝐑
+t
+∣
+𝐭
+t
+]
+{\mathbf{p}}_{t}=[\mathbf{R}_{t}\mid\mathbf{t}_{t}]
+denote the camera poses of the source and target views, respectively.
+For each pixel
+𝐮
+\mathbf{u}
+in frame
+i
+i
+, we back-project it to 3D using its depth
+𝐝
+i
+​
+(
+𝐮
+)
+{\mathbf{d}}_{i}(\mathbf{u})
+, transform the resulting 3D point into the target camera coordinate system, and project it onto the target image plane.
+If the projected point lands on a valid target pixel
+𝐯
+\mathbf{v}
+, we mark that pixel as covered:
+𝐦
+i
+→
+t
+​
+(
+𝐯
+)
+=
+1
+.
+{\mathbf{m}}_{i\rightarrow t}(\mathbf{v})=1.
+(2)
+Specifically, we round each projected coordinate to its nearest target pixel v and mark
+𝐯
+{\mathbf{v}}
+as covered if
+𝐯
+∈
+[
+1
+,
+H
+]
+×
+[
+1
+,
+W
+]
+{\mathbf{v}}\in[1,H]\times[1,W]
+.
+Otherwise, the target pixel remains uncovered, i.e.,
+𝐦
+i
+→
+t
+​
+(
+𝐯
+)
+=
+0
+{\mathbf{m}}_{i\rightarrow t}(\mathbf{v})=0
+.
+In practice, multiple source pixels may project to the same target pixel; we mark a target pixel as covered if at least one source pixel lands on it.
+For the current context window
+𝒞
+t
+\mathcal{C}_{t}
+, we aggregate the coverage maps of all context frames into a single
+context coverage map
+:
+𝐦
+t
+ctx
+=
+⋁
+i
+∈
+𝒞
+t
+𝐦
+i
+→
+t
+,
+{\mathbf{m}}^{\mathrm{ctx}}_{t}=\bigvee_{i\in\mathcal{C}_{t}}{\mathbf{m}}_{i\rightarrow t},
+(3)
+where
+∨
+\vee
+denotes the element-wise logical OR operator.
+This map indicates which target-view pixels are already covered by the recent temporal context.
+The remaining uncovered pixels define the regions where additional historical memory evidence may be useful.
+The target-view coverage map provides a lightweight but spatially fine-grained form of memory evidence.
+Unlike FoV overlap, it distinguishes which pixels of the target view are supported by a source frame.
+Moreover, it requires neither a maintained global scene representation nor the per-step rendering required by explicit-reconstruction methods.
+Thus, depth-based coverage maps provide a practical middle ground: they are sufficiently detailed for target-view visibility reasoning while remaining lightweight enough.
+4.2
+Residual coverage gain for non-redundant retrieval
+Algorithm 1
+Coverage-Maximizing Retrieval
+1:
+Require:
+Temporal context
+𝐱
+𝒞
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{C}_{t}}
+, memory
+𝐱
+ℳ
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{M}_{t}}
+, target pose
+𝐩
+t
+{\mathbf{p}}_{t}
+, retrieval budget
+n
+n
+2:
+Compute
+𝐦
+t
+ctx
+{\mathbf{m}}^{\mathrm{ctx}}_{t}
+by Eq.
+3
+3:
+Initialize
+ℋ
+t
+=
+∅
+\mathcal{H}_{t}=\emptyset
+4:
+for
+ℓ
+=
+1
+\ell=1
+to
+n
+n
+do
+5:
+for all
+j
+∈
+ℳ
+t
+∖
+ℋ
+t
+j\in\mathcal{M}_{t}\setminus\mathcal{H}_{t}
+do
+6:
+Compute
+𝐦
+j
+→
+t
+{\mathbf{m}}_{{j}\rightarrow t}
+by Eq.
+2
+7:
+Compute
+g
+j
+g_{j}
+by Eq.
+4
+8:
+end
+for
+9:
+Retrieve frame
+j
+⋆
+j^{\star}
+by Eq.
+5
+10:
+Update
+ℋ
+t
+\mathcal{H}_{t}
+by
+ℋ
+t
+∪
+{
+j
+⋆
+}
+\mathcal{H}_{t}\cup\{j^{\star}\}
+11:
+Update
+𝐦
+t
+ctx
+{\mathbf{m}}^{\mathrm{ctx}}_{t}
+by Eq.
+6
+12:
+end
+for
+13:
+return
+Retrieved frames
+𝐱
+ℋ
+t
+0
+{\mathbf{x}}^{0}_{\mathcal{H}_{t}}
+Given target-view coverage maps, the next question is how to select memory frames.
+A natural strategy, adopted by methods such as WorldMem
+Xiao et al. (2025)
+, is to score each candidate frame independently by its total coverage of the target view and retrieve the top-
+n
+n
+frames.
+However, this can select redundant frames that cover the same target-view regions, leaving other target-view regions uncovered.
+Since the number of retrieved frames is limited by the conditioning budget and computational cost, retrieval should favor frames that provide complementary evidence.
+To this end,
+CovRAG
+selects frames according to
+residual coverage gain
+.
+Residual coverage gain.
+For each candidate memory frame
+j
+∈
+ℳ
+t
+j\in\mathcal{M}_{t}
+, we compute its residual coverage gain as
+g
+j
+=
+∑
+𝐯
+(
+1
+−
+𝐦
+t
+ctx
+​
+(
+𝐯
+)
+)
+​
+𝐦
+j
+→
+t
+​
+(
+𝐯
+)
+,
+g_{j}=\sum_{\mathbf{v}}\left(1-{\mathbf{m}}^{\mathrm{ctx}}_{t}(\mathbf{v})\right){\mathbf{m}}_{j\rightarrow t}(\mathbf{v}),
+(4)
+where
+𝐦
+t
+ctx
+{\mathbf{m}}^{\mathrm{ctx}}_{t}
+denotes the current context coverage map and
+𝐦
+j
+→
+t
+{\mathbf{m}}_{j\rightarrow t}
+denotes the target-view coverage map computed for candidate frame
+j
+j
+.
+Pixels already covered by the context, i.e.,
+𝐦
+t
+ctx
+​
+(
+𝐯
+)
+=
+1
+{\mathbf{m}}^{\mathrm{ctx}}_{t}(\mathbf{v})=1
+, do not contribute to the score.
+Thus,
+g
+j
+g_{j}
+counts the number of currently uncovered target-view pixels that would become covered if frame
+j
+j
+were retrieved.
+A higher
+g
+j
+g_{j}
+indicates that frame j contributes more new geometric coverage; a
+g
+j
+g_{j}
+of zero indicates
+complete redundancy with already covered regions.
+Retrieval by maximizing residual coverage gain.
+We iteratively select
+n
+n
+memory frames that maximize residual coverage gain.
+We initialize the retrieved set as
+ℋ
+t
+=
+∅
+\mathcal{H}_{t}=\emptyset
+and compute the initial context coverage map
+𝐦
+t
+ctx
+{\mathbf{m}}^{\mathrm{ctx}}_{t}
+from the current context window.
+At each iteration, we choose the candidate with the largest residual coverage gain:
+j
+⋆
+=
+arg
+⁡
+max
+j
+∈
+ℳ
+t
+∖
+ℋ
+t
+⁡
+g
+j
+,
+j^{\star}=\arg\max_{j\in\mathcal{M}_{t}\setminus\mathcal{H}_{t}}g_{j},
+(5)
+and add it to the retrieved set,
+ℋ
+t
+←
+ℋ
+t
+∪
+{
+j
+⋆
+}
+\mathcal{H}_{t}\leftarrow\mathcal{H}_{t}\cup\{j^{\star}\}
+.
+We then update the context coverage map by incorporating the newly selected frame:
+𝐦
+t
+ctx
+←
+𝐦
+t
+ctx
+∨
+𝐦
+j
+⋆
+→
+t
+.
+{\mathbf{m}}^{\mathrm{ctx}}_{t}\leftarrow{\mathbf{m}}^{\mathrm{ctx}}_{t}\vee{\mathbf{m}}_{j^{\star}\rightarrow t}.
+(6)
+After the update, we recompute
+g
+j
+g_{j}
+for the remaining candidates using the updated context coverage map
+𝐦
+t
+ctx
+{\mathbf{m}}^{\mathrm{ctx}}_{t}
+and repeat this process until
+|
+ℋ
+t
+|
+=
+n
+|\mathcal{H}_{t}|=n
+.
+By selecting frames according to residual coverage gain,
+CovRAG
+explicitly discourages redundancy among retrieved memories.
+Each selected frame is encouraged to cover target-view regions that are not already covered by the current context or by previously selected frames.
+The resulting set, therefore, provides a compact, complementary set of memory frames that collectively covers the target view.
+Algorithm
+1
+summarizes the procedure for retrieving
+n
+n
+historical frames for generating the target frame
+t
+t
+.
+4.3
+Scalable depth estimation via sliding-window caching
+We assume access to a per-frame depth map
+𝐝
+i
+\mathbf{d}_{i}
+for each source frame in Eq.
+2
+. We obtain these depths using a pretrained multi-view geometry model, VGGT
+Wang et al. (2025a)
+, which predicts per-frame depth and relative camera motion from a set of input views.
+However, applying VGGT to the entire generated history is impractical for long autoregressive rollouts, since the number of frames grows over time and VGGT is designed to process only a limited number of views.
+To make depth-based coverage estimation scalable, we introduce a
+sliding-window depth caching
+strategy.
+Let
+L
+L
+denote the window size.
+At generation step
+t
+t
+, we run VGGT only on the most recent window
+𝒲
+t
+=
+{
+𝐱
+t
+−
+L
++
+1
+0
+,
+…
+,
+𝐱
+t
+0
+}
+\mathcal{W}_{t}=\{{\mathbf{x}}^{0}_{t-L+1},\ldots,{\mathbf{x}}^{0}_{t}\}
+,
+and obtain depth maps
+{
+𝐝
+i
+}
+i
+∈
+𝒲
+t
+\{{\mathbf{d}}_{i}\}_{i\in\mathcal{W}_{t}}
+.
+Because consecutive windows overlap, previously generated frames are included together with newly generated frames, providing local multi-view context for depth estimation across adjacent steps.
+We then cache the depth maps of newly generated frames.
+When a frame
+j
+j
+enters the memory bank
+ℳ
+t
+\mathcal{M}_{t}
+, its depth map
+𝐝
+j
+{\mathbf{d}}_{j}
+is stored together with its RGB frame
+𝐱
+j
+0
+{\mathbf{x}}^{0}_{j}
+and camera pose
+𝐩
+j
+{\mathbf{p}}_{j}
+.
+Later, when computing the target-view coverage map
+𝐦
+j
+→
+t
+{\mathbf{m}}_{j\rightarrow t}
+for a candidate memory frame
+j
+j
+,
+CovRAG
+reuses the cached depth
+𝐝
+j
+{\mathbf{d}}_{j}
+and warps the frame into the target pose
+𝐩
+t
+{\mathbf{p}}_{t}
+.
+This strategy keeps geometry estimation efficient during long-horizon generation.
+VGGT is evaluated only on a fixed-size local window, so the per-step geometry estimation cost remains bounded by
+L
+L
+, rather than growing with the length of the generated video.
+At the same time, cached depths allow historical frames to be reused for target-view coverage computation throughout the autoregressive rollout, without repeatedly re-estimating geometry for the full memory bank.
+5
+Experiments
+Datasets.
+Figure 3:
+Qualitative comparison on DL3DV10K.
+We compare 100-frame autoregressive rollouts from WorldMem, VMem,
+CovRAG
+, and the ground-truth video on DL3DV10K trajectories.
+We evaluate
+CovRAG
+on RealEstate10K
+Zhou et al. (2018)
+and DL3DV10K
+Ling et al. (2024)
+.
+Following the DFoT
+Song et al. (2025)
+setup, we resize all frames to
+256
+×
+256
+256\times 256
+.
+For RealEstate10K, we construct a custom loop-closing evaluation protocol to explicitly test long-horizon revisitation consistency, where the camera trajectory returns to its initial pose after a long temporal gap.
+For DL3DV10K, we use the original trajectories, as the dataset already contains diverse scenes and camera motions that explore larger spatial extents over longer horizons.
+Details of dataset construction and trajectory visualizations are provided in the supplementary material.
+Implementation details.
+We build our method on top of the Diffusion Forcing Transformer (DFoT)
+Song et al. (2025)
+.
+For RealEstate10K
+Zhou et al. (2018)
+, we initialize from the DFoT checkpoint pretrained on RealEstate10K and attach a memory-attention module following WorldMem
+Xiao et al. (2025)
+.
+We freeze the DFoT backbone and train only the memory conditioning module for 50K steps on 8 H100 GPUs with a batch size of 64.
+For DL3DV10K
+Ling et al. (2024)
+, we first adapt the RealEstate10K pretrained DFoT by finetuning it on DL3DV10K for 80K steps on 8 GPUs with a batch size of 48.
+We then train the memory-augmented model on DL3DV10K with full finetuning for 80K steps with a batch size of 32.
+At inference time, we retrieve
+n
+=
+2
+n=2
+memory frames at each generation step. We use a temporal context window of
+δ
+=
+5
+\delta=5
+for RealEstate10K and
+δ
+=
+2
+\delta=2
+for DL3DV10K.
+Additional training and evaluation details are provided in the supplementary material.
+Baselines.
+We compare
+CovRAG
+against three baselines:
+(1)
+DFoT
+Song et al. (2025)
+, an autoregressive diffusion model that conditions generation on a fixed-length temporal context window; while strong over short horizons, it has no access to frames beyond the window and therefore often degrades when revisiting earlier views.
+(2)
+WorldMem
+Xiao et al. (2025)
+, which augments DFoT with a memory bank and retrieves additional historical frames based on field-of-view (FoV) overlap.
+(3)
+VMem
+Li et al. (2025)
+, which maintains an explicit surfel-based geometric memory by reconstructing and optimizing a 3D scene representation from past observations, and retrieves relevant views from this memory for conditioning to improve long-horizon scene consistency.
+All retrieval-augmented variants share the same DFoT video diffusion backbone and memory-conditioning architecture, differing only in the retrieval rule for selecting memory frames.
+Metrics.
+To quantify long-horizon consistency, we report LPIPS
+Zhang et al. (2018)
+, PSNR, and SSIM
+Wang et al. (2004)
+by comparing generated frames with the ground-truth frames from matching target views.
+To evaluate geometric consistency, we use MEt3R
+Asim et al. (2024)
+, which estimates pixel correspondences using DUSt3R
+Wang et al. (2024)
+and compares matched features from a pretrained image encoder such as DINO
+Caron et al. (2021)
+.
+In addition, we report FVD
+Unterthiner et al. (2018)
+and FID
+Heusel et al. (2017)
+to evaluate the visual quality of the generated videos.
+Together, these metrics provide a comprehensive evaluation of visual quality and long-horizon geometric consistency.
+5.1
+Geometric consistency evaluation
+Table 1:
+Consistency evaluation on RealEstate10K and DL3DV10K.
+We report long-horizon revisitation consistency.
+Lower is better for MEt3R, LPIPS, FVD, and FID, while higher is better for PSNR and SSIM.
+Dataset
+Method
+Consistency
+Quality
+MEt3R
+↓
+\downarrow
+LPIPS
+↓
+\downarrow
+PSNR
+↑
+\uparrow
+SSIM
+↑
+\uparrow
+FVD
+↓
+\downarrow
+FID
+↓
+\downarrow
+RealEstate10K
+(
+T
+=
+40
+)
+(T{=}40)
+DFoT (No memory-augmentation)
+0.415
+0.588
+11.7
+0.372
+265.03
+29.88
++ WorldMem
+0.144
+0.197
+18.2
+0.555
+242.36
+24.77
++ VMem
+0.120
+0.174
+18.6
+0.568
+231.77
+24.05
++
+CovRAG
+(Ours)
+0.102
+0.154
+18.9
+0.576
+226.40
+23.00
+DL3DV10K
+(
+T
+=
+100
+)
+(T{=}100)
+DFoT (No memory-augmentation)
+0.430
+0.529
+14.5
+0.394
+706.70
+88.01
++ WorldMem
+0.316
+0.401
+16.2
+0.436
+428.49
+58.24
++ VMem
+0.315
+0.380
+16.3
+0.447
+394.79
+57.61
++
+CovRAG
+(Ours)
+0.224
+0.308
+17.9
+0.504
+321.81
+46.92
+Table
+1
+reports long-horizon revisitation consistency and generation quality on RealEstate10K
+Zhou et al. (2018)
+and DL3DV10K
+Ling et al. (2024)
+.
+We evaluate consistency using MEt3R, LPIPS, PSNR, and SSIM, and generation quality using FVD and FID.
+RealEstate10K provides a controlled loop-closing setting in which we explicitly construct revisit trajectories to test whether the model can return to previously observed views after a long temporal gap.
+DL3DV10K provides a more challenging long-horizon setting with diverse scene contents, larger spatial extent, and varied camera trajectories.
+RealEstate10K.
+We construct a loop-closing trajectory by reordering the original camera trajectory so that the sequence approximately returns to the initial view.
+This setting directly tests whether the model can preserve geometric consistency when revisiting regions observed only at the beginning of the rollout.
+As shown in Table
+1
+, DFoT performs poorly in this revisitation setting, achieving 0.415 MEt3R and 0.588 LPIPS.
+This confirms that a fixed temporal context is insufficient for maintaining long-term geometric consistency.
+Memory-augmented methods substantially improve consistency, demonstrating the importance of accessing historical frames beyond the local context window.
+Among them,
+CovRAG
+achieves the best performance across all consistency and quality metrics.
+Compared with WorldMem
+Xiao et al. (2025)
+, which uses FoV-based retrieval,
+CovRAG
+reduces MEt3R by 29%
+(
+0.144
+→
+0.102
+)
+(0.144\rightarrow 0.102)
+and LPIPS by 22%
+(
+0.197
+→
+0.154
+)
+(0.197\rightarrow 0.154)
+, while also improving PSNR
+(
+18.2
+→
+18.9
+)
+(18.2\rightarrow 18.9)
+and SSIM
+(
+0.555
+→
+0.576
+)
+(0.555\rightarrow 0.576)
+.
+Compared with VMem
+Li et al. (2025)
+,
+CovRAG
+further improves MEt3R
+(
+0.120
+→
+0.102
+)
+(0.120\rightarrow 0.102)
+and LPIPS
+(
+0.174
+→
+0.154
+)
+(0.174\rightarrow 0.154)
+, despite not relying on explicit 3D scene reconstruction.
+In addition,
+CovRAG
+obtains the best generation quality, reducing FVD to 226.40 and FID to 23.00.
+These results indicate that target-view coverage provides more useful evidence for long-horizon revisitation than view-level overlap or explicit geometric memory construction.
+DL3DV10K.
+We further evaluate on DL3DV10K to test long-horizon generation in more diverse and spatially extended scenes.
+Unlike RealEstate10K, we do not construct artificial loop-closing trajectories.
+Instead, we use the original trajectories, which naturally contain diverse camera motions and explore larger spaces over longer horizons.
+The DL3DV10K results also show a substantial gap between
+CovRAG
+and prior retrieval-augmented baselines.
+Compared with WorldMem,
+CovRAG
+reduces MEt3R by 29%
+(
+0.316
+→
+0.224
+)
+(0.316\rightarrow 0.224)
+and LPIPS by 23%
+(
+0.401
+→
+0.308
+)
+(0.401\rightarrow 0.308)
+.
+It also substantially improves generation quality, reducing FVD by 25%
+(
+428.49
+→
+321.81
+)
+(428.49\rightarrow 321.81)
+and FID by 19%
+(
+58.24
+→
+46.92
+)
+(58.24\rightarrow 46.92)
+.
+Compared with VMem, which uses explicit geometric memory,
+CovRAG
+reduces MEt3R by 29%, LPIPS by 19%, FVD by 19%, and FID by 19%.
+These gains suggest that target-view coverage is also effective in diverse 3D scenes with camera trajectories that span larger spatial extents.
+Qualitative results.
+Figure
+3
+compares 100-frame autoregressive generations on DL3DV10K.
+Compared with WorldMem and VMem, our method better preserves scene geometry and spatial layout over long camera trajectories.
+In the outdoor park sequence, baselines exhibit drift and distortion around the bench, path, and trees, whereas our method maintains sharper object structure and more stable scene composition.
+In the covered walkway sequence, baselines progressively deform the roof, pillars, and railings, whereas our method preserves geometry that is more coherent with the ground truth.
+These results indicate that coverage-based retrieval provides more informative memory evidence for long-horizon generation in diverse 3D scenes.
+Additional RealEstate10K comparisons and DL3DV10K videos are provided in the supplementary material.
+Config
+Retrieval Algorithm
+Consistency
+Evidence
+Selection
+MEt3R
+↓
+\downarrow
+LPIPS
+↓
+\downarrow
+(a)
+FoV overlap
+Indep.
+0.141
+0.198
+(b)
+FoV overlap
+Res.
+0.130
+0.187
+(c)
+Target-view coverage
+Indep.
+0.149
+0.210
+(d)
+Target-view coverage
+Res.
+0.100
+0.156
+Table 2:
+Ablation of
+CovRAG
+.
+Indep.
+and
+Res.
+denote independent and residual gain, respectively.
+Figure 4:
+Retrieval latency comparison for autoregressive rollout.
+5.2
+Retrieval cost comparison
+Figure
+5.1
+compares the retrieval latency of different memory-augmented generation methods during autoregressive rollout.
+VMem incurs substantially higher average latency, which increases linearly as generation proceeds, since the explicit 3D memory becomes more expensive to update and query over longer rollouts.
+In contrast, WorldMem achieves the lowest latency by using lightweight pose-level FoV overlap for retrieval.
+However, this efficiency comes at the cost of relying on coarse view-level evidence, which limits long-term geometric consistency, as shown in Table
+1
+.
+CovRAG
+achieves a practical trade-off between these two extremes.
+Although
+CovRAG
+performs depth-based target-view coverage computation, including VGGT evaluation, warping historical frames into the target view, and selecting frames by residual coverage gain, its per-step latency remains nearly constant as the rollout grows.
+This is enabled by sliding-window depth caching: depth is estimated only within a fixed local window, and the resulting depth maps are reused for subsequent coverage computation.
+Consequently,
+CovRAG
+avoids the growing overhead of explicit 3D reconstruction while retaining pixel-wise 3D-aware evidence for retrieval. Moreover, in Figure
+1
+(b), we evaluate the end-to-end generation latency over a
+100
+100
+-frame generation.
+CovRAG
+achieves an average latency of
+8.70
+8.70
+s, which is comparable to WorldMem (
+8.43
+8.43
+s) and
+5.21
+×
+5.21\times
+faster than VMem (
+45.40
+45.40
+s).
+These results show that depth-based target-view coverage provides a practical middle ground between coarse but efficient FoV-based retrieval and fine-grained but costly explicit 3D memory.
+5.3
+Analysis
+Figure 5:
+Effect of retrieval budget on RealEstate10K.
+We vary the number of retrieved memory frames
+n
+n
+and compare
+CovRAG
+with WorldMem.
+CovRAG
+consistently achieves better consistency across budgets and saturates with only a few retrieved frames.
+Effect of retrieval budget.
+Figure
+5
+shows the effect of varying the number of retrieved memory frames
+n
+n
+.
+CovRAG
+consistently outperforms WorldMem across the plotted budgets and metrics, and achieves strong performance even with
+n
+=
+1
+n=1
+.
+This indicates that target-view coverage can identify informative memory frames even under a tight retrieval budget.
+Increasing
+n
+n
+from
+1
+1
+to
+2
+2
+improves consistency for both methods, but
+CovRAG
+quickly saturates, with only marginal gains from
+n
+=
+2
+n=2
+to
+n
+=
+3
+n=3
+.
+This suggests that residual coverage gain reduces redundancy among retrieved frames and captures the most useful target-view evidence with a small number of memories.
+Ablation study.
+We ablate two key design choices of
+CovRAG
+:
+what
+3D-aware evidence is used for retrieval and
+how
+frames are selected from that evidence.
+For evidence, we compare coarse field-of-view (FoV) overlap with our depth-based target-view coverage map.
+For selection, we compare independent gain, which ranks candidates independently, with residual gain, which iteratively selects frames that cover currently unsupported target-view regions.
+Table
+5.1
+shows that both components are necessary.
+With FoV evidence, replacing independent gain with residual gain improves MEt3R from
+0.141
+0.141
+to
+0.130
+0.130
+and LPIPS from
+0.198
+0.198
+to
+0.187
+0.187
+, indicating that redundancy-aware selection is useful even with coarse view-level evidence.
+However, the gains are limited because FoV overlap cannot localize which target pixels are geometrically supported.
+Conversely, using target-view coverage with independent selection performs poorly, yielding
+0.149
+0.149
+MEt3R and
+0.210
+0.210
+LPIPS, since fine-grained evidence is ineffective if the selected frames redundantly cover the same regions.
+Combining target-view coverage with residual gain achieves the best results, reducing MEt3R to
+0.100
+0.100
+and LPIPS to
+0.156
+0.156
+.
+These results support the central design principle of
+CovRAG
+.
+6
+Conclusion
+We presented
+Coverage-Maximizing Retrieval
+(
+CovRAG
+), a depth-based memory-retrieval framework to improve long-term geometric consistency in autoregressive video generation.
+CovRAG
+constructs target-view coverage maps as lightweight 3D-aware evidence and selects memory frames by residual coverage gain, encouraging retrieved frames to provide complementary support for uncovered target-view regions.
+With sliding-window depth caching,
+CovRAG
+enables pixel-wise visibility reasoning without maintaining an explicit global 3D reconstruction.
+Experiments on RealEstate10K and DL3DV10K show that target-view coverage is an effective retrieval objective for 3D-consistent long-horizon generation.
+References
+Asim
+et al.
+(2024)
+M. Asim, C. Wewer, T. Wimmer, B. Schiele, and J. E. Lenssen
+MEt3R: measuring multi-view consistency in generated images
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§5
+.
+Bai
+et al.
+(2025)
+J. Bai, M. Xia, X. Fu, X. Wang, L. Mu, J. Cao, Z. Liu, H. Hu, X. Bai, P. Wan,
+et al.
+ReCamMaster: camera-controlled generative rendering from a single video
+.
+In
+International Conference on Computer Vision, ICCV
+,
+Cited by:
+§1
+.
+Bruce
+et al.
+(2024)
+J. Bruce, M. D. Dennis, A. Edwards, J. Parker-Holder, Y. Shi, E. Hughes, M. Lai, A. Mavalankar, R. Steigerwald, C. Apps,
+et al.
+Genie: generative interactive environments
+.
+In
+International Conference on Machine Learning, ICML
+,
+Cited by:
+§1
+.
+Cai
+et al.
+(2026)
+S. Cai, C. Yang, L. Zhang, Y. Guo, J. Xiao, Z. Yang, Y. Xu, Z. Yang, A. Yuille, L. Guibas, M. Agrawala, L. Jiang, and G. Wetzstein
+Mixture of contexts for long video generation
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§2
+.
+Caron
+et al.
+(2021)
+M. Caron, H. Touvron, I. Misra, H. Jégou, J. Mairal, P. Bojanowski, and A. Joulin
+Emerging properties in self-supervised vision transformers
+.
+In
+International Conference on Computer Vision, ICCV
+,
+Cited by:
+§5
+.
+Chen
+et al.
+(2024)
+B. Chen, D. Martí Monsó, Y. Du, M. Simchowitz, R. Tedrake, and V. Sitzmann
+Diffusion forcing: next-token prediction meets full-sequence diffusion
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§2
+,
+§3
+.
+Chen
+et al.
+(2025)
+T. Chen, X. Hu, Z. Ding, and C. Jin
+Learning world models for interactive video generation
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§1
+,
+§3
+.
+Feng
+et al.
+(2025)
+R. Feng, H. Zhang, Z. Yang, J. Xiao, Z. Shu, Z. Liu, A. Zheng, Y. Huang, Y. Liu, and H. Zhang
+The matrix: infinite-horizon world generation with real-time moving control
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§1
+.
+Gao
+et al.
+(2024)
+R. Gao, A. Holynski, P. Henzler, A. Brussee, R. Martin-Brualla, P. Srinivasan, J. T. Barron, and B. Poole
+CAT3D: create anything in 3d with multi-view diffusion models
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§1
+.
+Gao
+et al.
+(2026)
+X. Gao, J. Guan, S. Luo, W. Li, G. Tan, and J. Wang
+MemCam: memory-augmented camera control for consistent video generation
+.
+arXiv preprint arXiv:2603.26193
+.
+Cited by:
+§1
+,
+§2
+.
+He
+et al.
+(2025)
+H. He, Y. Xu, Y. Guo, G. Wetzstein, B. Dai, H. Li, and C. Yang
+CameraCtrl: enabling camera control for video diffusion models
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§1
+.
+Henschel
+et al.
+(2025)
+R. Henschel, L. Khachatryan, H. Poghosyan, D. Hayrapetyan, V. Tadevosyan, Z. Wang, S. Navasardyan, and H. Shi
+StreamingT2V: consistent, dynamic, and extendable long video generation from text
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§1
+.
+Heusel
+et al.
+(2017)
+M. Heusel, H. Ramsauer, T. Unterthiner, B. Nessler, and S. Hochreiter
+GANs trained by a two time-scale update rule converge to a local nash equilibrium
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§5
+.
+Ho
+et al.
+(2020)
+J. Ho, A. Jain, and P. Abbeel
+Denoising diffusion probabilistic models
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§2
+,
+§3
+.
+Huang
+et al.
+(2025)
+X. Huang, Z. Li, G. He, M. Zhou, and E. Shechtman
+Self forcing: bridging the train-test gap in autoregressive video diffusion
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§2
+.
+Kong
+et al.
+(2024)
+W. Kong, Q. Tian, Z. Zhang, R. Min, Z. Dai, J. Zhou, J. Xiong, X. Li, B. Wu, J. Zhang,
+et al.
+Hunyuanvideo: a systematic framework for large video generative models
+.
+arXiv preprint arXiv:2412.03603
+.
+Cited by:
+§2
+.
+Li
+et al.
+(2025)
+R. Li, P. Torr, A. Vedaldi, and T. Jakab
+VMem: consistent interactive video scene generation with surfel-indexed view memory
+.
+In
+International Conference on Computer Vision, ICCV
+,
+Cited by:
+§A.1
+,
+§1
+,
+§1
+,
+§2
+,
+§5.1
+,
+§5
+.
+Lin
+et al.
+(2025)
+S. Lin, X. Xia, Y. Ren, C. Yang, X. Xiao, and L. Jiang
+Diffusion adversarial post-training for one-step video generation
+.
+In
+International Conference on Machine Learning, ICML
+,
+Cited by:
+§2
+.
+Ling
+et al.
+(2024)
+L. Ling, Y. Sheng, Z. Tu, W. Zhao, C. Xin, K. Wan, L. Yu, Q. Guo, Z. Yu, Y. Lu,
+et al.
+DL3DV-10k: a large-scale scene dataset for deep learning-based 3d vision
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§A.3
+,
+§1
+,
+§5.1
+,
+§5
+,
+§5
+.
+Lipman
+et al.
+(2023)
+Y. Lipman, R. T. Chen, H. Ben-Hamu, M. Nickel, and M. Le
+Flow matching for generative modeling
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§3
+.
+Liu
+et al.
+(2024)
+F. Liu, W. Sun, H. Wang, Y. Wang, H. Sun, J. Ye, J. Zhang, and Y. Duan
+Reconx: reconstruct any scene from sparse views with video diffusion model
+.
+arXiv preprint arXiv:2408.16767
+.
+Cited by:
+§2
+.
+Ren
+et al.
+(2025)
+X. Ren, T. Shen, J. Huang, H. Ling, Y. Lu, M. Nimier-David, T. Müller, A. Keller, S. Fidler, and J. Gao
+Gen3c: 3d-informed world-consistent video generation with precise camera control
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§2
+.
+Song
+et al.
+(2025)
+K. Song, B. Chen, M. Simchowitz, Y. Du, R. Tedrake, and V. Sitzmann
+History-guided video diffusion
+.
+In
+International Conference on Machine Learning, ICML
+,
+Cited by:
+§A.1
+,
+§A.1
+,
+§1
+,
+§2
+,
+§3
+,
+§5
+,
+§5
+,
+§5
+.
+Song
+et al.
+(2021)
+Y. Song, J. Sohl-Dickstein, D. P. Kingma, A. Kumar, S. Ermon, and B. Poole
+Score-based generative modeling through stochastic differential equations
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§2
+,
+§3
+.
+Unterthiner
+et al.
+(2018)
+T. Unterthiner, S. Van Steenkiste, K. Kurach, R. Marinier, M. Michalski, and S. Gelly
+Towards accurate generative models of video: a new metric & challenges
+.
+arXiv preprint arXiv:1812.01717
+.
+Cited by:
+§5
+.
+Valevski
+et al.
+(2025)
+D. Valevski, Y. Leviathan, M. Arar, and S. Fruchter
+Diffusion models are real-time game engines
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§1
+.
+Wan
+et al.
+(2025)
+T. Wan, A. Wang, B. Ai, B. Wen, C. Mao, C. Xie, D. Chen, F. Yu, H. Zhao, J. Yang,
+et al.
+Wan: open and advanced large-scale video generative models
+.
+arXiv preprint arXiv:2503.20314
+.
+Cited by:
+§2
+.
+Wang and Agapito (2025)
+H. Wang and L. Agapito
+3d reconstruction with spatial memory
+.
+In
+International Conference on 3D Vision, 3DV
+,
+Cited by:
+§2
+.
+Wang
+et al.
+(2025a)
+J. Wang, M. Chen, N. Karaev, A. Vedaldi, C. Rupprecht, and D. Novotny
+VGGT: visual geometry grounded transformer
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§A.4
+,
+§1
+,
+§4.3
+.
+Wang
+et al.
+(2025b)
+Q. Wang, Y. Zhang, A. Holynski, A. A. Efros, and A. Kanazawa
+Continuous 3d perception model with persistent state
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§A.1
+.
+Wang
+et al.
+(2024)
+S. Wang, V. Leroy, Y. Cabon, B. Chidlovskii, and J. Revaud
+DUSt3R: geometric 3d vision made easy
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§5
+.
+Wang
+et al.
+(2004)
+Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli
+Image quality assessment: from error visibility to structural similarity
+.
+IEEE Transactions on Image Processing
+.
+Cited by:
+§5
+.
+Wen
+et al.
+(2024)
+Y. Wen, J. Lin, Y. Zhu, J. Han, H. Xu, S. Zhao, and X. Liang
+VidMan: exploiting implicit dynamics from video diffusion model for effective robot manipulation
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§1
+.
+Wolf
+et al.
+(2025)
+R. Wolf, Y. Shi, S. Liu, and R. Rayyes
+Diffusion models for robotic manipulation: a survey
+.
+Frontiers in Robotics and AI
+.
+Cited by:
+§1
+.
+Xiao
+et al.
+(2025)
+Z. Xiao, Y. Lan, Y. Zhou, W. Ouyang, S. Yang, Y. Zeng, and X. Pan
+WorldMem: long-term consistent world simulation with memory
+.
+In
+Neural Information Processing Systems, NeurIPS
+,
+Cited by:
+§A.1
+,
+§A.2
+,
+§1
+,
+§1
+,
+§2
+,
+§3
+,
+§4.2
+,
+§5.1
+,
+§5
+,
+§5
+.
+Yang
+et al.
+(2025)
+Z. Yang, J. Teng, W. Zheng, M. Ding, S. Huang, J. Xu, Y. Yang, W. Hong, X. Zhang, G. Feng,
+et al.
+Cogvideox: text-to-video diffusion models with an expert transformer
+.
+In
+International Conference on Learning Representations, ICLR
+,
+Cited by:
+§2
+.
+Yin
+et al.
+(2025)
+T. Yin, Q. Zhang, R. Zhang, W. T. Freeman, F. Durand, E. Shechtman, and X. Huang
+From slow bidirectional to fast autoregressive video diffusion models
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§2
+.
+Yu
+et al.
+(2025a)
+H. Yu, H. Duan, C. Herrmann, W. T. Freeman, and J. Wu
+WonderWorld: interactive 3d scene generation from a single image
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§1
+.
+Yu
+et al.
+(2024)
+H. Yu, H. Duan, J. Hur, K. Sargent, M. Rubinstein, W. T. Freeman, F. Cole, D. Sun, N. Snavely, J. Wu,
+et al.
+Wonderjourney: going from anywhere to everywhere
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§1
+.
+Yu
+et al.
+(2025b)
+J. Yu, J. Bai, Y. Qin, Q. Liu, X. Wang, P. Wan, D. Zhang, and X. Liu
+Context as memory: scene-consistent interactive long video generation with memory retrieval
+.
+In
+Proceedings of the SIGGRAPH Asia 2025 Conference Papers
+,
+Cited by:
+§1
+,
+§2
+,
+§3
+.
+Yu
+et al.
+(2025c)
+J. Yu, Y. Qin, X. Wang, P. Wan, D. Zhang, and X. Liu
+Gamefactory: creating new games with generative interactive videos
+.
+In
+International Conference on Computer Vision, ICCV
+,
+Cited by:
+§1
+.
+Yu
+et al.
+(2025d)
+W. Yu, J. Xing, L. Yuan, W. Hu, X. Li, Z. Huang, X. Gao, T. Wong, Y. Shan, and Y. Tian
+ViewCrafter: taming video diffusion models for high-fidelity novel view synthesis
+.
+IEEE Transactions on Pattern Analysis and Machine Intelligence
+.
+Cited by:
+§1
+.
+Yu
+et al.
+(2025e)
+Z. Yu, W. Huang, and Y. Liu
+UniSim: a unified simulator for time-coarsened dynamics of biomolecules
+.
+In
+International Conference on Machine Learning, ICML
+,
+Cited by:
+§1
+.
+Zhang
+et al.
+(2025)
+Q. Zhang, S. Zhai, M. A. B. Martin, K. Miao, A. Toshev, J. Susskind, and J. Gu
+World-consistent video diffusion with explicit 3d modeling
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§2
+.
+Zhang
+et al.
+(2018)
+R. Zhang, P. Isola, A. A. Efros, E. Shechtman, and O. Wang
+The unreasonable effectiveness of deep features as a perceptual metric
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§5
+.
+Zhou
+et al.
+(2025)
+J. (. Zhou, H. Gao, V. Voleti, A. Vasishta, C. Yao, M. Boss, P. Torr, C. Rupprecht, and V. Jampani
+Stable virtual camera: generative view synthesis with diffusion models
+.
+arXiv preprint arXiv:2503.14489
+.
+Cited by:
+§A.1
+.
+Zhou
+et al.
+(2018)
+T. Zhou, R. Tucker, J. Flynn, G. Fyffe, and N. Snavely
+Stereo magnification: learning view synthesis using multiplane images
+.
+arXiv preprint arXiv:1805.09817
+.
+Cited by:
+§A.3
+,
+§1
+,
+§5.1
+,
+§5
+,
+§5
+.
+Zhu
+et al.
+(2025)
+F. Zhu, H. Wu, S. Guo, Y. Liu, C. Cheang, and T. Kong
+Irasim: a fine-grained world model for robot manipulation
+.
+In
+Computer Vision and Pattern Recognition, CVPR
+,
+Cited by:
+§1
+.
+Appendix A
+Experimental Details
+A.1
+Baseline Setup
+We provide additional details on the baseline configurations used in our experiments.
+All methods compared in this work share the same Diffusion Forcing Transformer (DFoT)
+Song et al. (2025)
+backbone with the same weights.
+The only difference among baselines lies in the retrieval strategy used to select frames for conditioning.
+DFoT.
+DFoT
+Song et al. (2025)
+does not employ any retrieval mechanism and conditions solely on a fixed-length temporal context window.
+We use a temporal context window of 7 frames for DFoT, which provides a comparable conditioning budget to retrieval-based methods without introducing external memory.
+For DL3DV10K, we use a temporal context of 4 frames and generate 3 frames at each autoregressive step.
+These settings provide a comparable conditioning budget to retrieval-based methods without introducing external memory.
+WorldMem.
+WorldMem
+Xiao et al. (2025)
+augments DFoT with an external memory bank and retrieves historical frames based on field-of-view (FoV) overlap computed from camera pose.
+For RealEstate10K, we use a temporal context window of 5 recent frames and retrieve 2 additional historical frames at each generation step.
+For DL3DV10K, we use 2 context frames, generate 4 target frames per autoregressive step, and retrieve 2 memory frames. Unless otherwise specified, we use the same context, target, and memory-frame settings for all retrieval-augmented models to ensure a fair comparison.
+The retrieval module and its hyperparameters follow the official implementation.
+VMem.
+VMem
+Li et al. (2025)
+was originally proposed as a geometry-aware retrieval framework that reconstructs a 3D scene using CUT3R
+Wang et al. (2025b)
+, builds a point-based surfel representation, and renders target views from the reconstructed scene.
+VMem is built on top of SEVA
+Zhou et al. (2025)
+, a diffusion-based novel view synthesis model.
+In our comparison, we reuse the retrieval module of VMem while keeping the same DFoT backbone and memory-attention module as other baselines.
+All retrieval hyperparameters follow the default settings provided in the official implementation.
+A.2
+Model training details
+For RealEstate10K, we initialize from the DFoT checkpoint pretrained on RealEstate10K.
+We freeze the DFoT backbone and train only the memory-attention conditioning module, since the pretrained backbone already provides a strong pose-conditioned generation prior on this dataset.
+For DL3DV10K, we first adapt the RealEstate10K pretrained DFoT backbone by fine-tuning it on DL3DV10K.
+We then train the memory-augmented model with full fine-tuning.
+This is because DL3DV10K contains more diverse scenes and wider camera trajectories, and the retrieved memory frames can have larger pose differences from the current context.
+In this setting, training only the memory-attention module did not reliably encourage the model to use the retrieved frames.
+During memory-augmented training, we sample memory frames using a pose-based proxy, following the retrieval setup of WorldMem
+Xiao et al. (2025)
+.
+We use a temporal buffer to avoid overly distant or irrelevant memories, and mix easy and hard memory samples based on their pose relation to the target view.
+We gradually increase the sampling range and context-frame stride during training.
+This exposes the model to memory frames with increasing pose differences while reducing disruption to the pretrained diffusion prior.
+A.3
+Evaluation protocol
+Figure 6:
+Example customized loop-closing camera trajectories for RealEstate10K evaluation.
+Starting from 41-frame RealEstate10K clips, we illustrate two example loop-closing variants obtained by reordering camera poses so that late frames revisit poses close to early frames. Here,
+P
+i
+P_{i}
+denotes the camera pose at frame
+i
+i
+. The constructed loops make the final poses approximately match the initial poses, e.g.,
+P
+0
+≈
+P
+40
+P_{0}\approx P_{40}
+and
+P
+1
+≈
+P
+39
+P_{1}\approx P_{39}
+. The long temporal gap between the initial observation and the revisited view provides a controlled benchmark for measuring long-term drift and revisitation consistency.
+Figure 7:
+Examples of DL3DV camera trajectories.
+We show two representative examples of the original camera paths in the DL3DV10K, with colors indicating temporal frame indices. These examples illustrate how DL3DV10K trajectories can naturally span broad viewpoint changes and partial scene observations, providing a complementary benchmark to the controlled RealEstate10K loop-closing setting.
+RealEstate10K.
+RealEstate10K
+Zhou et al. (2018)
+provides real-world video clips with ground-truth camera trajectories.
+To evaluate long-term consistency, we adopt a loop-closing evaluation on RealEstate10K.
+We intentionally customize the trajectories to force revisitation.
+All main quantitative results are reported on 400 test video clips, while analysis and ablation studies are conducted on 200 test video clips.
+Specifically, given a clip of 41 frames, we reorder the camera trajectory such that the camera first moves away from the initial viewpoint and then returns to a spatially similar pose after a long temporal gap, as illustrated in Figure
+6
+.
+This design enables a controlled assessment of long-term consistency: failures in retrieval at intermediate steps can lead the model to condition on diverging context, causing errors to accumulate over time.
+As a consequence, discrepancies between the initial frames and the final revisited frames directly reflect long-term drift induced by insufficient retrieval.
+Therefore, we evaluate how well each model preserves the original scene content by comparing the initial frames with the final revisited frames, using MEt3R, LPIPS, PSNR, and SSIM as measures of long-term consistency.
+DL3DV10K.
+We further evaluate on DL3DV10K
+Ling et al. (2024)
+, which contains more diverse scenes and camera trajectories than RealEstate10K.
+We report results on 100 videos sampled from DL3DV10K.
+Unlike the RealEstate10K evaluation, we do not construct an artificial loop-closing trajectory for DL3DV10K.
+Instead, we use the original trajectories, which naturally explore larger spatial extents and include more varied camera motion.
+Figure
+7
+visualizes representative DL3DV10K camera trajectories, showing that the views often cover a wider range of poses and partial observations.
+This setting complements the controlled RealEstate10K loop-closing benchmark.
+Since the original trajectories traverse larger and more complex 3D spaces, the current temporal context often covers only part of the target view.
+The model must therefore retrieve historical frames that provide complementary partial-view evidence.
+DL3DV10K thus provides a natural testbed for evaluating target-view coverage-based retrieval under diverse camera motion.
+A.4
+GT Pose Alignment for VGGT-based Geometry Estimation
+VGGT
+Wang et al. (2025a)
+predicts depth and camera motion in relative scale, whereas our diffusion model is driven by a camera trajectory with metric extrinsics.
+Directly using VGGT depth with unscaled metric poses can therefore introduce inconsistencies during 3D re-projection to the target frame.
+We resolve this by estimating a single scale factor that brings the metric trajectory into VGGT’s scale.
+Let
+𝐭
+i
+VGGT
+\mathbf{t}^{\text{VGGT}}_{i}
+be VGGT-predicted translations and
+𝐭
+i
+GT
+\mathbf{t}^{\text{GT}}_{i}
+be the metric translations for a VGGT input window of length
+N
+N
+.
+After normalizing both trajectories to start from the first frame, we compute
+s
+=
+1
+N
+−
+1
+​
+∑
+i
+=
+2
+N
+‖
+𝐭
+i
+VGGT
+−
+𝐭
+1
+VGGT
+‖
+2
+‖
+𝐭
+i
+GT
+−
+𝐭
+1
+GT
+‖
+2
+,
+s\;=\;\frac{1}{N-1}\sum_{i=2}^{N}\frac{\|\mathbf{t}^{\text{VGGT}}_{i}-\mathbf{t}^{\text{VGGT}}_{1}\|_{2}}{\|\mathbf{t}^{\text{GT}}_{i}-\mathbf{t}^{\text{GT}}_{1}\|_{2}},
+(7)
+and form the scale-aligned target pose as
+𝐩
+^
+t
+=
+[
+𝐑
+t
+∣
+s
+​
+𝐭
+t
+]
+\hat{{\mathbf{p}}}_{t}=[\,\mathbf{R}_{t}\mid s\,\mathbf{t}_{t}\,]
+,
+where
+(
+𝐑
+t
+,
+𝐭
+t
+)
+(\mathbf{R}_{t},\mathbf{t}_{t})
+are the rotation and translation components of the metric camera pose at time
+t
+t
+.
+This alignment ensures that depth-based reprojection and visibility computation are performed in a consistent coordinate system.
+Appendix B
+Additional Results
+B.1
+Qualitative Results
+RealEstate10K.
+Figure 8:
+Qualitative comparison on loop-closing trajectories.
+We visualize two RealEstate10K sequences generated along loop-closing camera paths, where the camera revisits earlier views after a long temporal gap.
+CovRAG
+(top row) better preserves scene geometry and appearance across revisitation (highlighted in
+green
+), yielding consistent reconstruction of previously observed regions.
+In contrast, WorldMem and VMem (bottom row) exhibit long-horizon inconsistencies such as spatial drift and missing or hallucinated structures (highlighted in
+red
+), despite using memory retrieval.
+Frame indices denote the generation order along the loop.
+Figure 9:
+Retrieval behavior and context coverage visualizations on RealEstate10K.
+For each RealEstate10K loop-closing example, the left panel shows generated frames along the trajectory, the middle panel shows the memory frames retrieved for the indicated target step, and the right panel shows the context coverage map
+m
+t
+ctx
+m_{t}^{\mathrm{ctx}}
+before adding retrieved memories. The coverage map visualizes which target-view regions are already supported by the recent temporal context.
+CovRAG
+retrieves memory frames that provide complementary evidence for regions not sufficiently covered by the context, illustrating how coverage-maximizing retrieval reduces redundant memory selection.
+We include a qualitative comparison with retrieval-based baselines on RealEstate10K in Figure
+8
+, which highlights how
+CovRAG
+more consistently preserves scene geometry and appearance when revisiting previously observed views.
+When the camera returns to a previously observed viewpoint, COVRAG reconstructs the revisited regions with substantially higher geometric and appearance consistency (green highlights), preserving scene layout and object structure across the long temporal gap. In contrast, WorldMem and VMem often fail to recover locally missing content at revisitation, exhibiting structural inconsistencies such as missing objects or hallucinated geometry (red highlights).
+We also present additional qualitative results that visualize the generated videos together with the coverage mask used for retrieval, as shown in Figure
+9
+.
+These results make explicit why certain frames are retrieved and illustrate how coverage-maximizing retrieval guides consistent generation.
+DL3DV10K.
+Figure 10:
+Additional qualitative rollouts on DL3DV10K.
+We visualize 100-frame autoregressive generations on diverse DL3DV10K scenes and camera trajectories. Frame indices mark temporal order. Across extended rollouts with substantial viewpoint changes,
+CovRAG
+maintains coherent scene layout and object structure over long horizons, illustrating the qualitative behavior of coverage-based retrieval beyond the controlled RealEstate10K loop-closing setting.
+We also provide additional qualitative results on DL3DV10K to visualize long-horizon generation under diverse scenes and camera trajectories.
+Figure
+10
+shows 100-frame autoregressive rollout results over extended trajectories.
+Table 3:
+Longer autoregressive rollout on RealEstate10K.
+We evaluate generation horizons from
+60
+60
+to
+120
+120
+frames.
+Lower is better for MEt3R, LPIPS, and FVD, while higher is better for PSNR.
+Frames
+Method
+PSNR
+↑
+\uparrow
+MEt3R
+↓
+\downarrow
+LPIPS
+↓
+\downarrow
+FVD
+↓
+\downarrow
+60
+60
+WorldMem
+17.24
+0.162
+0.233
+370.29
+CovRAG
+18.46
+0.102
+0.171
+352.64
+80
+80
+WorldMem
+17.60
+0.186
+0.249
+455.27
+CovRAG
+19.33
+0.121
+0.171
+444.81
+100
+100
+WorldMem
+16.57
+0.216
+0.288
+449.64
+CovRAG
+19.12
+0.137
+0.185
+424.42
+120
+120
+WorldMem
+15.72
+0.240
+0.353
+573.92
+CovRAG
+18.22
+0.169
+0.230
+494.36
+Table 4:
+Inference time and memory usage.
+We report retrieval latency per generation step, total inference time, peak GPU memory, and the incremental inference time per additional generated frame.
+Retrieval latency and memory remain nearly stable as the rollout length increases.
+Length
+Retrieval latency
+per step (s)
+Total inference
+time (s)
+Peak memory
+(GB)
+Incremental time
+per frame (s)
+40
+40
+0.984
+731.48
+12.84
+–
+80
+80
+1.122
+1579.05
+12.89
+21.21
+120
+120
+1.191
+2426.90
+12.98
+21.16
+Table 5:
+Robustness to inaccurate geometry.
+We evaluate
+CovRAG
+under controlled perturbations to the geometry estimation process.
+Clean
+denotes the original
+CovRAG
+without perturbation.
+Lower is better for MEt3R and LPIPS, while higher is better for PSNR.
+Setting
+Lvl.
+PSNR
+↑
+\uparrow
+MEt3R
+↓
+\downarrow
+LPIPS
+↓
+\downarrow
+WorldMem
+–
+18.0
+0.141
+0.198
+CovRAG
+(
+Clean
+)
+–
+18.6
+0.100
+0.158
+Image degradation
+1
+18.3
+0.115
+0.175
+2
+18.2
+0.119
+0.163
+3
+18.2
+0.122
+0.180
+4
+16.7
+0.154
+0.251
+Depth noise
+1
+18.3
+0.102
+0.174
+2
+18.2
+0.119
+0.176
+B.2
+Quantitative Results
+Scalability as video length increases.
+Specifically, starting from the first frame, we autoregressively generate
+T
+∈
+{
+60
+,
+80
+,
+100
+,
+120
+}
+T\in\{60,80,100,120\}
+frames one frame at a time, and compare
+CovRAG
+with WorldMem.
+Table
+3
+shows that
+CovRAG
+consistently outperforms WorldMem across all tested horizons.
+Both methods generally degrade as the number of generated frames increases, reflecting error accumulation in long autoregressive rollout.
+However,
+CovRAG
+remains better at every horizon.
+From
+60
+60
+to
+120
+120
+frames, FVD increases by
+55.0
+%
+55.0\%
+for WorldMem but by
+40.2
+%
+40.2\%
+for
+CovRAG
+, indicating smaller degradation over longer rollouts.
+We also report efficiency as video length increases.
+In Table
+4
+, Retrieval latency/step rises only from 0.98s to 1.19s, peak memory stays nearly flat, and incremental cost remains about 21.2s/frame, consistent with the sliding-window and caching design.
+Although our retrieval step is slower than WorldMem, the increase in total video inference time is modest, averaging only 7.3% from 40 to 120 frames, while yielding substantially better consistency, with 29.2% lower MEt3R and 21.8% lower LPIPS than WorldMem.
+Robustness to inaccurate geometry.
+COVRAG relies on estimated geometry to compute target-view coverage maps, so inaccurate depth estimates can affect retrieval decisions.
+However, geometry is used as a retrieval signal rather than as a rendered conditioning input to the generator.
+This makes the method less sensitive to moderate local errors, since the retrieval score depends on the overall spatial support provided by a memory frame.
+Table
+5
+evaluates the robustness of
+CovRAG
+under inaccurate geometry.
+Since
+CovRAG
+uses estimated geometry as a retrieval signal for target-view coverage, errors in image-based geometry estimation or depth maps can affect memory selection.
+Nevertheless,
+CovRAG
+remains relatively stable under moderate perturbations and outperforms WorldMem in most settings.
+Performance degrades noticeably only under stronger image degradation, where the geometry estimator receives substantially corrupted visual input.
+These results suggest that depth-based target-view coverage can tolerate moderate geometry errors while still providing more informative retrieval evidence than FoV-based retrieval.
+For the perturbations reported in the table, image degradation levels L1–L4 use blur kernels
+{
+5
+,
+11
+,
+21
+,
+31
+}
+\{5,11,21,31\}
+and Gaussian noise standard deviations
+{
+0.01
+,
+0.03
+,
+0.05
+,
+0.08
+}
+\{0.01,0.03,0.05,0.08\}
+.
+Depth noise levels L1–L2 use scale biases
+{
+0.05
+,
+0.10
+}
+\{0.05,0.10\}
+and additive noise ratios
+{
+0.01
+,
+0.03
+}
+\{0.01,0.03\}
+.
+Appendix C
+Limitations
+CovRAG
+depends on a pretrained geometry estimator to obtain depth maps for target-view coverage computation.
+While the method is reasonably robust to moderate perturbations, inaccurate depth estimates can still produce imperfect coverage maps and affect retrieval decisions.
+In addition,
+CovRAG
+uses locally estimated depth maps rather than a globally optimized 3D scene representation.
+This makes retrieval efficient during autoregressive rollout, but it does not guarantee globally consistent geometry.
+Finally,
+CovRAG
+improves memory selection, but it does not directly modify the generative prior of the base video model.
+If the base autoregressive generator produces severe artifacts or drifts substantially, the estimated geometry and retrieved memories may also become less reliable.
+Improving geometry estimation and integrating retrieval more tightly with the generator are promising directions for future work.
+Appendix D
+Future work
+As world models continue to scale in both data and model capacity, maintaining long-term consistency becomes increasingly critical.
+Our retrieval module is model-agnostic and can be integrated in a plug-and-play manner, making it well-suited for large pretrained long video diffusion models trained on diverse datasets.
+In particular, we expect geometry-aware coverage-based retrieval to generalize better as models are exposed to richer scene variations and more diverse camera motion.
+Evaluating our approach on large-scale models and datasets with broader viewpoint diversity may further highlight its benefits and shed light on the role of retrieval in scalable world modeling.
+Appendix E
+Broader impacts
+This work aims to improve long-term consistency in video generation models.
+The proposed retrieval framework can benefit applications such as 3D content creation, embodied simulation, and interactive world modeling, where maintaining a coherent scene over time is important.
+While the proposed method is primarily intended for advancing generative modeling, similar techniques could be misused for creating misleading visual content. We emphasize that responsible deployment and appropriate safeguards are necessary to mitigate such risks.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:
+Click the "Report Issue"
+(
+)
+button, located in the page header.
+Tip:
+You can select the relevant text first, to include it in your report.
+Our team has already identified
+the following issues
+. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a
+list of packages that need conversion
+, and welcome
+developer contributions
+.
+We gratefully acknowledge support from
+        our
+major funders
+,
+member institutions
+,
+,
+        and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status
+(opens in new tab)
+Major funding support from

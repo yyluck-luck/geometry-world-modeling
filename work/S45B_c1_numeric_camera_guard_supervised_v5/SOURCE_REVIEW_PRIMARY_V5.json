@@ -1,0 +1,74 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v2",
+  "review_kind": "primary",
+  "status": "PASS_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V5",
+  "verdict": "PASS_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T06:30:25Z",
+  "author_role": "/root/c1_blind_score_builder",
+  "reviewer_role": "/root",
+  "reviewed_identities": {
+    "camera_guard.py": "37951063262505ef18bb62e0544c31cfb5a460434e9a67b489f58fab9315dbdb",
+    "supervise_camera_guard.py": "98084f2a7806b4f88a52a6599edeba9633c066f3bb2b128c4fba2ba70577b3bd",
+    "PROTOCOL.md": "29915a117a561c73e32e30ae3f85d09d7466adb4a1a247fcda1b9da1f3366139",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "12045c57d99fbaa3275f2023bef04847bcbea5825a5dac67a1be7cfb4382bd52",
+    "synthetic_selftest.py": "c95331c14d2d17256da42efb94f86c636a468e33918d4db48a639c7129749593",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "review_scope": "Exact frozen v5 worker, independent supervisor, protocol, unbound template, self-test, and fixed source references. Source/static/synthetic review only.",
+  "checks": {
+    "worker_can_publish_only_nonterminal_pending_evidence": "PASS",
+    "only_supervisor_can_construct_terminal_truth": "PASS",
+    "harmless_preflight_precedes_permanent_attempt": "PASS",
+    "child_exit_process_group_stdio_time_cpu_memory_and_file_bounds": "PASS",
+    "held_fd_and_path_identity_revalidation": "PASS",
+    "two_link_invalid_seal_then_single_unlink_authority_commit": "PASS",
+    "late_close_fsync_signal_and_path_replacement_fail_closed": "PASS",
+    "numeric_yaw_K_and_raw_return_math_matches_reviewed_B0": "PASS",
+    "pixel_sized_tensor_rejected_before_body_open": "PASS",
+    "unbound_template_and_role_separation": "PASS",
+    "formal_paths_absent": "PASS"
+  },
+  "isolated_test_matrix": {
+    "python_3_13_worker": {
+      "status": "PASS_SYNTHETIC_ONLY",
+      "receipt_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+    },
+    "python_3_13_supervisor": {
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "receipt_sha256": "b3a635af3bb34f16b2b8923d5011ead3d2ab1e993d480cd03f7d3da039af0e9b"
+    },
+    "python_3_13_independent": {
+      "status": "PASS_V5_STATIC_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "receipt_sha256": "36bdfefbd5ea040010fb4baf10598525488d840d22a5836630034c318a250069"
+    },
+    "python_3_12_worker": {
+      "status": "PASS_SYNTHETIC_ONLY",
+      "receipt_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+    },
+    "python_3_12_supervisor": {
+      "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "receipt_sha256": "b3a635af3bb34f16b2b8923d5011ead3d2ab1e993d480cd03f7d3da039af0e9b"
+    },
+    "python_3_12_independent": {
+      "status": "PASS_V5_STATIC_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+      "receipt_sha256": "ef7273d6479ecc22b2a489590029e6a493c797530da121dc3be534362e41455a"
+    }
+  },
+  "blocking_findings": [],
+  "executed": false,
+  "formal_binding_created": false,
+  "formal_attempt_created": false,
+  "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,
+  "c1_tensor_bodies_read": 0,
+  "pixels_decoded": 0,
+  "images_viewed": 0,
+  "model_renderer_generation_calls": 0,
+  "authorization_effect": "PRIMARY_SOURCE_PASS_ONLY_ADVERSARIAL_REVIEW_AND_LATER_BINDING_GATES_STILL_REQUIRED",
+  "evidence_boundary": "This review validates source-level fail-closed structure and synthetic math only. It does not establish a C1 camera/K result, rendered-camera obedience, pixel score, quality, method gain, causal effect, novelty, or publication level."
+}

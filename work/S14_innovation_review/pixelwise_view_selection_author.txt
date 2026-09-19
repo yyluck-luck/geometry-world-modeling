@@ -1,0 +1,998 @@
+     Pixelwise View Selection for Unstructured
+                Multi-View Stereo
+
+                  Johannes L. Schönberger1 , Enliang Zheng2 ,
+                    Marc Pollefeys1,3 , Jan-Michael Frahm2
+                    1
+                    ETH Zürich, 2 UNC Chapel Hill, 3 Microsoft
+             {jsch,pomarc}@inf.ethz.ch, {ezheng,jmf}@cs.unc.edu
+
+
+
+      Abstract. This work presents a Multi-View Stereo system for robust
+      and efficient dense modeling from unstructured image collections. Our
+      core contributions are the joint estimation of depth and normal infor-
+      mation, pixelwise view selection using photometric and geometric pri-
+      ors, and a multi-view geometric consistency term for the simultaneous
+      refinement and image-based depth and normal fusion. Experiments on
+      benchmarks and large-scale Internet photo collections demonstrate state-
+      of-the-art performance in terms of accuracy, completeness, and efficiency.
+
+
+
+
+ Fig. 1. Reconstructions for Louvre, Todai-ji, Paris Opera, and Astronomical Clock.
+
+
+
+
+1   Introduction
+
+Large-scale 3D reconstruction from Internet photos has seen a tremendous evolu-
+tion in sparse modeling using Structure-from-Motion (SfM) [1,10,21,37,39,40,45,
+61] and in dense modeling using Multi-View Stereo (MVS) [2,12,13,15,42,43,59].
+Many applications benefit from a dense scene representation, e.g., classifica-
+tion [44], image-based rendering [8], localization [9], etc. Despite the widespread
+use of MVS, the efficient and robust estimation of accurate, complete, and aes-
+thetically pleasing dense models in uncontrolled environments remains a chal-
+lenging task. Dense pixelwise correspondence search is the core problem of stereo
+methods. Recovering correct correspondence is challenging even in controlled
+environments with known viewing geometry and illumination. In uncontrolled
+settings, e.g., where the input consists of crowd-sourced images, it is crucial to
+2      J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+account for various factors, such as heterogeneous resolution and illumination,
+scene variability, unstructured viewing geometry, and mis-registered views.
+    Our proposed approach improves the state of the art in dense reconstruc-
+tion for unstructured images. This work leverages the optimization framework
+by Zheng et al. [59] to propose the following core contributions: (1) Pixelwise
+normal estimation embedded into an improved PatchMatch sampling scheme.
+(2) Pixelwise view selection using triangulation angle, incident angle, and image
+resolution-based geometric priors. (3) Integration of a “temporal” view selection
+smoothness term. (4) Adaptive window support through bilateral photometric
+consistency for improved occlusion boundary behavior. (5) Introduction of a
+multi-view geometric consistency term for simultaneous depth/normal estima-
+tion and image-based fusion. (6) Reliable depth/normal filtering and fusion.
+Outlier-free and accurate depth/normal estimates further allow for direct mesh-
+ing of the resulting point cloud. We achieve state-of-the-art results on bench-
+marks (Middlebury [41], Strecha [48]). To demonstrate the advantages of our
+method in a more challenging setting, we process SfM models of a world-scale
+Internet dataset [21]. The entire algorithm is released to the public as an open-
+source implementation as part of [39] at https://github.com/colmap/colmap.
+
+
+2   Related Work
+
+Stereo methods have advanced in terms of accuracy, completeness, scalability,
+and benchmarking – from the minimal stereo setup with two views [25,28,36,38]
+to multi-view methods [7, 11–15, 26, 59]. Furthermore, the joint estimation of
+semantics [20], dynamic scene reconstruction [27,31,34,35,50], and benchmarking
+[38, 41, 42, 48]. Our method performs MVS with pixelwise view selection for
+depth/normal estimation and fusion. Here, we only review the most related
+approaches, within the large body of research in multi-view and two-view stereo.
+    MVS leverages multiple views to overcome the inherent occlusion problems
+of two-view approaches [49, 53, 62]. Accordingly, view selection plays a crucial
+role in the effectiveness of MVS. Kang et al. [29] heuristically select the best
+views with minimal cost (usually 50%) for computing the depth of each pixel.
+Strecha et al. [46, 47] probabilistically model scene visibility combined with a
+local depth smoothness assumption [46] in a Markov Random Field for pixel-
+wise view selection. Different from our approach, their method is prohibitive in
+memory usage and does neither include normal estimation nor photometric and
+geometric priors for view selection. Gallup et al. [16] select different views and
+resolutions on a per-pixel basis to achieve a constant depth error. In contrast,
+our method simultaneously considers a variety of photometric and geometric pri-
+ors improving upon the robustness and accuracy of the recently proposed depth
+estimation framework by Zheng et al. [59]. Their method is most closely related
+to our approach and is reviewed in more detail in Section 3.
+    MVS methods commonly use a fronto-parallel scene structure assumption.
+Gallup et al. [17] observed the distortion of the cost function caused by structure
+that deviates from this prior and combats it by using multiple sweeping directions
+                Pixelwise View Selection for Unstructured Multi-View Stereo        3
+
+deduced from the sparse reconstruction. Earlier approaches [3, 6, 55] similarly
+account for the surface normal in stereo matching. Recently, Bleyer et al. [5] use
+PatchMatch to estimate per-pixel normals to compensate for the distortion of the
+cost function. In contrast to these approaches, we propose to estimate normals
+not in isolation but also considering the photometric and geometric constraints
+guiding the matchabilty of surface texture and its accuracy. By probabilistically
+modeling the contribution of individual viewing rays towards reliable surface
+recovery, we achieve significantly improved depth and normal estimates.
+     Depth map fusion integrates multiple depth maps into a unified and aug-
+mented scene representation while mitigating any inconsistencies among indi-
+vidual estimates. Jancoseck et al. [26] fuses multiple depth estimates into a sur-
+face and, by evaluating visibility in 3D space, they also attempt to reconstruct
+parts that are not directly supported by depth measurements. In contrast, our
+method aims at directly maximizing the estimated surface support in the depth
+maps and achieves higher completeness and accuracy (see Section 5). Goesele
+et al. [19] propose a method that explicitly targets at the reconstruction from
+crowd-sourced images. They first select camera clusters for each surface and ad-
+just their resolution to the smallest common resolution. For depth estimation,
+they then use the four most suitable images for each pixel. As already noted in
+Zheng et al. [59], this early pre-selection of reduced camera clusters may lead to
+less complete results and is sensitive to noise. Our method avoids this restrictive
+selection scheme by allowing dataset-wide, pixelwise sampling for view selection.
+Zach et al. [56] proposed a variational depth map formulation that enabled par-
+allelized computation on the GPU. However, their volumetric approach imposes
+substantial memory requirements and is prohibitive for the large-scale scenes tar-
+geted by our method. Beyond these methods, there are several large-scale dense
+reconstruction and fusion methods for crowd-sourced images, e.g., Furukawa et
+al. [12] and Gallup et al. [18,60], who all perform heuristic pre-selection of views,
+which leads to reduced completeness and accuracy as compared to our method.
+
+
+3   Review of Joint View Selection and Depth Estimation
+This section reviews the framework by Zheng et al. [59] to introduce notation
+and context for our contributions. Since their method processes each row/column
+independently, we limit the description to a single image row with l as the column
+index. Their method estimates the depth θl for a pixel in the reference image
+X ref from a set of unstructured source images X src = {X m | m = 1 . . . M }. The
+estimate θl maximizes the color similarity between a patch Xlref in the reference
+image and homography-warped patches Xlm in non-occluded source images. The
+binary indicator variable Zlm ∈ {0, 1} defines the set of non-occluded source
+images as X̄lsrc = {X m | Zlm = 1}. To sample X̄lsrc , they infer the probability
+that the reference patch Xlref at depth θl is visible at the source patch Xlm using
+                                              (1−ρm       2
+                                 (                         
+                                    1             l (θl ))
+                                      exp   −       2         if Zlm = 1
+             P (Xlm |Zlm , θl ) = N A             2σρ
+                                                                                (1)
+                                   1
+                                   NU                         if Zlm = 0,
+4       J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+            R1               2
+where A = −1 exp{− (1−ρ) 2σρ2 }dρ and N is a constant canceling out in the infer-
+ence. In the case of occlusion, the color distributions of the two patches are unre-
+lated and follow the uniform distribution U in the range [−1, 1] with probability
+density 0.5. Otherwise, ρm l describes the color similarity between the reference
+and source patch based on normalized cross-correlation (NCC) using fronto-
+parallel homography warping. The variable σρ determines a soft threshold for
+ρm
+ l on the reference patch being visible in the source image. The state-transition
+matrix from the preceding pixel l − 1 to the current pixel l is P (Zlm |Zl−1 m
+                                                                                 ) =
+   γ 1−γ  
+  1−γ γ     and encourages spatially smooth occlusion indicators, where a larger
+γ enforces neighboring pixels to have more similar indicators. Given reference
+and source images X = {X ref , X src }, the inference problem then boils down to
+recover, for all L pixels in the reference image, the depths θ = {θl | l = 1 . . . L}
+and the occlusion indicators Z = {Zlm | l = 1 . . . L, m = 1 . . . M } from the
+posterior distribution P (Z, θ|X) with a uniform prior P (θ). To solve the com-
+putationally infeasible Bayesian approach of first computing the joint probability
+                                L Y
+                                Y M
+                P (X, Z, θ) =          [P (Zlm |Zl−1
+                                                 m
+                                                     )P (Xlm |Zlm , θl )]        (2)
+                                l=1 m=1
+
+and then normalizing over P (X), Zheng et al. use variational inference the-
+ory to develop a framework that is a variant of the generalized expectation-
+maximization (GEM) algorithm [33]. For the inference of Z in the hidden Markov-
+Chain, the forward-backward algorithm is used in the E step of GEM. PatchMatch-
+inspired [5] sampling serves as an efficient scheme for the inference of θ in the M
+step of GEM. Their method iteratively solves for Z with fixed θ and vice versa
+using interleaved row-/columnwise propagation. Full depth inference
+                                   XM
+                    θlopt = argmin          Pl (m)(1 − ρm   ∗
+                                                        l (θl ))                 (3)
+                                θl∗       m=1
+
+has high computational cost if M is large as PatchMatch requires the NCC to be
+                                              q(Zlm =1)
+computed many times. The value Pl (m) = PM q(Z       m =1) denotes the probability
+                                                m=1     l
+of the patch in source image m being similar to the reference patch, while q(Z)
+is an approximation of the real posterior P (Z). Source images with small Pl (m)
+are non-informative for the depth inference, hence Zheng et al. propose a Monte
+Carlo based approximation of θlopt for view selection
+                                      1 X
+                     θ̂lopt = argmin           (1 − ρm   ∗
+                                                     l (θl ))                 (4)
+                                θl∗  |S|   m∈S
+
+by sampling a subset of images S ⊂ {1 . . . M } from the distribution Pl (m) and
+hence only computing the NCC for the most similar source images.
+
+4   Algorithm
+In this section, we describe our novel algorithm that leverages the optimization
+framework reviewed in the previous section. We first present the individual terms
+                  Pixelwise View Selection for Unstructured Multi-View Stereo                 5
+
+of the proposed likelihood function, while Section 4.6 explains their integration
+into the overall optimization framework.
+
+4.1    Normal Estimation
+Zheng et al. [59] map between the reference and source images using fronto-
+parallel homographies leading to artifacts for oblique structures [17]. In contrast,
+we estimate per-pixel depth θl and normals nl ∈ R3 , knl k = 1. A patch at
+xl ∈ P2 in the reference image warps to a source patch at xm                   2
+                                                                          l ∈ P using
+  m                              m      m     −1 m T    −1             m
+xl = Hl xl with Hl = K (R − dl t nl )K . Here, R ∈ SO(3) and
+tm ∈ R3 define the relative transformation from the reference to the source
+camera frame. K and K m denote the calibration of the reference and source
+images, respectively, and dl = nTl pl is the orthogonal distance from the reference
+image to the plane at the point pl = θl K −1 xl .
+    Given no knowledge of the scene, we assume a uniform prior P (N ) in the
+inference of the normals N = {nl | l = 1 . . . L}. Estimating N requires to change
+the terms P (Xlm |Zlm , θl ) and Pl (m) from Eqs. (1) and (4) to also depend on N ,
+as the color similarity ρm    l is now based on slanted rather than fronto-parallel
+homographies. Consequently, the optimal depth and normal are chosen as
+                                            1 X
+                (θ̂lopt , n̂opt
+                            l ) = argmin             (1 − ρm   ∗    ∗
+                                                           l (θl , nl )).         (5)
+                                   θl∗ ,n∗
+                                         l
+                                           |S|   m∈S
+
+
+    To sample unbiased random normals in PatchMatch, we follow the approach
+by Galliani et al. [15]. With the additional two unknown normal parameters,
+the number of unknowns per pixel in the M step of GEM increases from one to
+three. While this in theory requires PatchMatch to generate many more samples,
+we propose an efficient propagation scheme that maintains the convergence rate
+of depth-only inference. Since depth θl and normal nl define a local planar
+                                          prp
+surface in 3D, we propagate the depth θl−1     of the intersection of the ray of the
+current pixel xl with the local surface of the previous pixel (θl−1 , nl−1 ). This
+exploits first-order smoothness of the surface (cf. [22]) and thereby drastically
+speeds up the optimization since correct depths propagate more quickly along the
+surface. Moreover, different from the typical iterative refinement of normals using
+bisection as an intermediate step between full sweeps of propagations (cf. [5,
+15]), we generate a small set of additional plane hypotheses at each propagation
+step. We observe that the current best depth and normal parameters can have
+the following states: neither of them, one of them, or both of them have the
+optimal solution or are close to it. By combining random and perturbed depths
+with current best normals and vice versa, we increase the chance of sampling
+the correct solution. More formally, at each step in PatchMatch, we choose the
+current best estimate for pixel l according to Eq. (4) from the set of hypotheses
+                 prp                                                    prt              prt
+  {(θl , nl ), (θl−1 , nl−1 ), (θlrnd , nl ), (θl , nrnd    rnd  rnd
+                                                     l ), (θl , nl ), (θl , nl ), (θl , nl )},
+                                                                                             (6)
+where θlrnd and nrnd   l  denote randomly generated samples. To refine the current
+parameters when they are close to the optimal solution, we perturb the current
+6       J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+                                          1                                                                  1                                                                    1
+
+
+
+
+                   Triangulation Prior
+               3
+
+
+
+
+                                                                                         Resolution Prior                                                       Incident Prior
+                                                                                                                                                                                                              σκ = 15◦
+                                                                                                                                                                                                              σκ = 30◦
+                                                                         ᾱ = 2◦
+                                                                                                                                                                                                              σκ = 45◦
+                                         0.5                             ᾱ = 5◦                            0.5                                                                  0.5
+                                                                         ᾱ = 10◦
+                                                                         ᾱ = 15◦
+                                          0                                                                  0                                                                    0
+1          2                                   0        5           10              15                            0       1       2       3        4        5                          0   50        100          150
+       R                                           Triangulation angle [deg]                                          Relative resolution b m with bl = 1                                  Incident angle [deg]
+                                                                                                                                            l
+
+
+
+
+Fig. 2. Left: Illustration of geometric priors for reference view (R) and three source
+views (1-3). View 1 has similar resolution (red), and good triangulation (green) and
+incident angle (blue), while view 2 is oblique and has lower resolution. View 3 cannot
+see the patch. Right: Geometric prior likelihood functions with different parameters.
+
+
+estimate as θlprt = (1 ± )θl and nprt
+                                   l   = R nl . The variable  describes a small
+depth perturbation, and the rotation matrix R ∈ SO(3) perturbs the normal
+direction by a small angle subject to pTl nprt
+                                           l   < 0. Normal estimation improves
+both the reconstruction completeness and accuracy, while the new sampling
+scheme leads to both fast convergence and more accurate estimates (Section 5).
+
+
+4.2   Geometric Priors for View Selection
+
+This section describes how to incorporate geometric priors in the pixelwise view
+selection for improved robustness in particular for unstructured imagery. On a
+high level, the proposed priors encourage the sampling of source images with
+sufficient baseline (Triangulation Prior ), similar resolution (Resolution Prior ),
+and non-oblique viewing direction (Incident Prior ). In contrast to prior work
+(e.g. [12, 18, 19]), which decouples inference and per-image geometric priors by
+pre-selecting source images, we integrate geometric priors on a per-pixel basis
+into the inference. The motivation for per-pixel geometric priors is similar to in-
+ferring per-pixel occlusion indicators Z. Since the pre-selection of source images
+is based on a sparse and therefore incomplete scene representation, the selected
+source views are often sub-optimal. Occlusion boundaries, triangulation angles,
+relative image resolution, and incident angle can vary significantly between a sin-
+gle pair of reference and source images (Fig. 2). Incorporating geometric priors in
+addition to the photometric occlusion indicators Z leads to a more comprehen-
+sive and robust pixelwise view selection. In the following, we detail the proposed
+priors and explain their integration into the optimization framework.
+    Triangulation Prior. Zheng et al. [59] sample source images purely based
+on color similarity. Consequently, the more similar the reference patch is to the
+source patch, the higher the selection probability in the view sampling. Nat-
+urally, image pairs with small viewpoint change, which coincides with small
+baseline, have high color similarity. However, image pairs with zero baseline
+do not carry information for depth inference, because reconstructed points can
+arbitrarily move along the viewing ray without changing the color similarity.
+Pure photometric view selection favors to sample these uninformative views.
+To eliminate this degenerate case, we calculate the triangulation angle αlm =
+               m T
+       (pl −c ) pl
+cos−1 kp     m
+         l −c kkpl k
+                     with cm = −(Rm )T tm and αlm ∈ [0, π) between two intersect-
+                Pixelwise View Selection for Unstructured Multi-View Stereo           7
+
+ing viewing rays as a measure of the stability of the reconstructed point pl . Em-
+                                                                      (min(ᾱ,αm
+                                                                               l )−ᾱ)
+                                                                                       2
+pirically, we choose the following likelihood function P (αlm ) = 1−         ᾱ2
+to describe how informative a source image is for reconstructing the correct point.
+Intuitively, this function assigns low likelihood to source images for which the
+triangulation angle is below an a priori threshold ᾱ. Otherwise, no additional
+view selection preference is imposed (see Fig. 2).
+    Resolution Prior. Unstructured datasets usually contain images captured
+by a multitude of camera types under diverse viewing geometry. As a conse-
+quence, images capture scene objects in a wide range of resolutions. To avoid
+under- and oversampling in computing ρm      l , the patches in the reference and
+source image should have similar size and shape [19]. Similar size is favorable as
+it avoids comparing images captured at vastly different resolutions, e.g., due to
+different zoom factors or distance to the object. Similar shape avoids significantly
+distorted source patches caused by different viewing directions. In the case of
+different shape, areas within the same source patch have different sampling rates.
+An approximate measure of the relative size and shape between the reference
+and source patch is βlm = bbml ∈ R+ , where bl and bm   l denote the areas covered
+                              l
+by the corresponding patches. In our implementation, the reference patch is al-
+ways square. If the size and shape of the patches is similar, βlm is close to the
+value 1. To quantify the similarity in resolution between two images, we propose
+the likelihood function P (βlm ) = min(βlm , (βlm )−1 ) and integrate it into Pl (m).
+Note that, at increased computational cost, undersampling could alternatively
+be handled by adaptive resampling of the source image patch.
+    Incident Prior. The inferred per-pixel normals provide geometric constraints
+on the solution space that we encode in the form of a prior. The estimated plane
+restricts the possible space of source camera locations and orientations. By con-
+struction, the camera location can only lie in the positive half-space defined by
+the plane (θl , nm
+                 l ), while the camera viewing direction must face towards the
+opposite normal direction. Otherwise, it is geometrically impossible for the cam-
+era to observe the surface. To satisfy this geometric visibility constraint, the
+                                                           m T m
+                                                  −1 (pl −c ) nl
+incident angle of the source camera κm    l = cos    kpl −cm kknm   with κml ∈ [0, π)
+                                                                l k
+                                 m      π
+must be in the interval 0 ≤ κl < 2 . In our method, the likelihood function
+                 κm 2
+P (κml ) = exp(− 2σκ
+                    l
+                      2 ) encodes the belief in whether this geometric constraint is
+                                                                                   π
+satisfied. This associates some belief with a view even in the case where κm   l ≥ 2.
+The reason for this is, that in the initial inference stage, the variables θl and nm
+                                                                                   l
+are unknown and hence the geometric constraints are likely not yet correct.
+    Integration. Fig. 2 visualizes the geometric priors, and Fig. 4 shows exam-
+ples of specific priors over all reference image pixels. We integrate the priors into
+the inference as additional terms in the Monte-Carlo view sampling distribution
+
+                             q(Z m = 1)q(αlm )q(βlm )q(κm
+                                                        l )
+                  Pl (m) = PM l                               ,                     (7)
+                                q(Z m = 1)q(αm )q(β m )q(κm )
+                            m=1     l          l      l     l
+
+where q(αlm ), q(βlm ), q(κm
+                           l ) are approximations during the variational inference,
+in the sense that they minimize the KL-divergence to the real posterior [4]. The
+8       J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+distributions need no normalization in the inference because we solely use them
+as modulators for the sampling distribution Pl (m). This formulation assumes
+statistical independence of the individual priors as a simplifying approximation,
+which makes the optimization feasible using relatively simple models for well-
+understood geometric relations. Intuitively, non-occluded images with sufficient
+baseline, similar resolution, and non-oblique viewing direction are favored in
+the view selection. Section 5 evaluates the priors in detail and shows how they
+improve the reconstruction robustness especially for unstructured datasets.
+
+4.3   View Selection Smoothness
+The graphical model associated with the likelihood function in Eq. (2) uses state-
+transition probabilities to model spatial view selection smoothness for neighbor-
+ing pixels in the propagation direction. Due to the interleaved inference using
+alternating propagation directions, Zlm suffers from oscillation, leading to strip-
+                                                                            m
+ing effects as shown in Figure 5. To reduce the oscillation effect of Zl,t    in itera-
+tion t, we insert an additional “temporal” smoothness factor into the graphical
+                                            m
+model. In this new model, the state of Zl,t   depends not only on the state of its
+neighboring pixel l − 1 but also on its own state in the previous iteration    t − 1.
+                                                   m    m            λt 1−λt
+The temporal state-transition is defined as P (Zl,t  |Zl,t−1 ) = 1−λ    t λ t
+                                                                               , where
+a larger λt enforces greater temporal smoothness during the optimization. In
+fact, as the optimization progresses from t = 1 . . . T , the value of the estimated
+  m
+Zl,t−1  should stabilize around the optimal solution. Therefore, we adaptively
+                                                     t                               m
+increase the state-transition probability as λt = 2T     + 0.5, i.e., the inferred Zl,t
+in iterations t = 1 and t = T − 1 have maximal and minimal influence on the
+              m
+final value Zl,T , respectively. The two state-transitions are jointly modeled as
+                   m     m        m             m     m          m     m
+               P (Zl,t |Zl−1,t , Zl,t−1 ) = P (Zl,t |Zl−1,t )P (Zl,t |Zl,t−1 ).    (8)
+                                m
+Fig. 5 shows the evolution of Zl,t during the optimization and demonstrates the
+reduced oscillation, which effectively also leads to less noisy view sampling.
+
+4.4   Photometric Consistency
+Zheng et al. [59] employ NCC to compute the color similarity ρm    l . NCC is sta-
+tistically optimal for Gaussian noise but is especially vulnerable to producing
+blurred depth discontinuities [23]. Inspired by [5,54], we diminish these artifacts
+by using a bilaterally weighted adaption of NCC. We compute ρm        l between a
+reference patch wl at xl with a corresponding source patch wlm at xm    l as
+
+                                        covw (wl , wlm )
+                       ρm
+                        l = p                                                      (9)
+                                  covw (wl , wl ) covw (wlm , wlm )
+
+               P= Ew (xP− Ew (x)) Ew (y − Ew (y)) is the weighted covariance
+where covw (x, y)
+and Ew (x) =      i wi xi / i wi is the weighted average. The per-pixel weight
+             ∆g 2   ∆x2
+wi = exp(− 2σ2i − 2σ2i ) indicates the likelihood that a pixel i in the local patch
+               g       x
+                  Pixelwise View Selection for Unstructured Multi-View Stereo                 9
+
+belongs to the same plane as its center pixel at l. It is a function of the grayscale
+color distance ∆gi = |gi − gl | and the spatial distance ∆xi = kxi − xl k, whose
+importance is relatively scaled by the Gaussian dispersion σg and σx . By integrat-
+ing the bilaterally weighted NCC into the term P (Xlm |Zlm , θl , nl ), our method
+achieves more accurate results at occlusion boundaries, as shown in Section 5.
+
+4.5    Geometric Consistency
+MVS typically suffers from gross outliers due to noise, ambiguities, occlusions,
+etc. In these cases, the photometric consistency for different hypotheses is am-
+biguous as large depth variations induce only small cost changes. Spatial smooth-
+ness constraints can often reduce but not fully eliminate the resulting artifacts. A
+popular approach to filter these outliers is to enforce multi-view depth coherence
+through left-right consistency checks as a post-processing step [5, 15].
+    In contrast to most approaches, we integrate multi-view geometric consis-
+tency constraints into the inference to increase both the completeness and the
+accuracy. Similar to Zhang et al. [58], we infer the best depth and normal based
+on both photometric and geometric consistency in multiple views. Since photo-
+metric ambiguities are usually unique to individual views (except textureless sur-
+faces), exploiting the information from multiple views can often help to pinpoint
+the right solution. We compute the geometric consistency between two views
+as the forward-backward reprojection error ψlm = kxl − Hlm Hl xl k, where Hlm
+denotes the projective backward transformation from the source to the reference
+image. It is composed from the source image estimates (θlm , nm              l ) interpolated at
+the forward projection xm      l  = H l x l . Intuitively, the  estimated      depths and nor-
+mals are consistent if the reprojection error ψlm is small. Due to computational
+constraints, we cannot consider the occlusion indicators in the source image for
+the backward projection. Hence, to handle occlusion in the source image, we em-
+ploy a robustified geometric cost in ξlm = 1−ρm                        m
+                                                       l +η min (ψl , ψmax ) using η = 0.5
+as a constant regularizer and ψmax = 3px as the maximum forward-backward
+reprojection error. Then, the optimal depth and normal is chosen as
+                                                 1 X
+                   (θ̂lopt , n̂opt
+                               l ) = argmin                  ξlm (θl∗ , n∗l ).              (10)
+                                       θl∗ ,n∗l
+                                                |S|     m∈S
+
+The geometric consistency term is modeled as P (θl , nl |θlm , nm
+                                                                l ) in the likelihood
+function, and Section 4.6 shows how to integrate its inference into the overall
+optimization framework. Experiments in Section 5 demonstrate how this formu-
+lation improves both the accuracy and the completeness of the results.
+
+4.6    Integration
+This section contextualizes the individual terms of the proposed algorithm by
+explaining their integration into the overall optimization framework [59]. The
+joint likelihood function P (X, Z, θ, N ) of our proposed algorithm is defined as
+         Y M
+         L Y
+                       m     m        m
+                  [P (Zl,t |Zl−1,t , Zl,t−1 )P (Xlm |Zlm , θl , nl )P (θl , nl |θlm , nm
+                                                                                       l )]
+         l=1 m=1
+10       J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+over the input images X, the occlusion indicators Z, the depths θ, the normals
+N , and is composed of several individual terms. First, the spatial and temporal
+                           m     m        m
+smoothness term P (Zl,t      |Zl−1,t , Zl,t−1  ) (Section 4.3) enforces spatially smooth oc-
+clusion maps with reduced temporal oscillation during the optimization. Second,
+the photometric consistency term P (Xlm |Zlm , θl , nl ) uses bilateral NCC (Section
+4.4) and a slanted plane-induced homography (Section 4.1) to compute the color
+similarity ρm  l between the reference and source images. Third, the geometric
+consistency term P (θl , nl |θlm , nm    l ) to enforce multi-view consistent depth and
+normal estimates. The photometric and geometric consistency terms are com-
+puted using Monte-Carlo view sampling from the distribution Pl (m) in Eq. (7).
+The distribution encourages the sampling of non-occluded source images with
+informative and non-degenerate viewing geometry (Section 4.2).
+    Analog to Zheng et al. [59], we factorize the real posterior P (Z, θ, N |X) in
+its approximation q(Z, θ, N ) = q(Z)q(θ, N ) [4]. Furthermore, for tractability,
+we constrain q(θ, N ) to the family of Kronecker delta functions q(θl , nl ) =
+δ(θl =θl∗ , nl =n∗l ). Variational inference then aims to infer the optimal member
+of the family of approximate posteriors to find the optimal Z, θ, N . The validity
+of using GEM for this type of problem has already been shown in [33, 59]. To
+            m
+infer q(Zl,t  ) in iteration t of the E step of GEM, we employ the forward-backward
+algorithm as
+                                               1→ m ←
+                                     m
+                                  q(Zl,t )= −             − m)
+                                                 m(Zl,t ) m(Z  l,t                          (11)
+                                              A
+with −→
+      m(Zl,t m
+                ) and ← − m ) being the recursive forward and backward messages
+                       m(Z  l,t
+
+  →
+  −                                              →
+                                                 −
+                                      X
+  m(Zlm ) = P (Xlm |Zlm , θl , nl )          m
+                                                      m
+                                                 m(Zl−1          m
+                                                          )P (Zl,t   m
+                                                                   |Zl−1,t    m
+                                                                           , Zl,t−1 )       (12)
+                                            Zl−1
+  ←− m) =                ←− m )P (X m |Z m , θ , n )P (Z m |Z m , Z m ) (13)
+                 X
+  m(Z  l              m
+                         m(Z    l+1        l+1 l+1 l+1        l+1      l,t l+1,t      l,t−1
+                  Zl+1
+
+using an uninformative prior −   →
+                                 m(Z0m ) = −→   m
+                                            m(ZL+1                          m
+                                                   ) = 0.5. The variable q(Zl,t ) to-
+                 m       m       m
+gether with q(αl ), q(βl ), q(κl ) determine the view sampling distribution Pl (m)
+used in the M step of GEM as defined in Eq. (7). The M step uses PatchMatch
+propagation and sampling (Section 4.1) for choosing the optimal depth and nor-
+mal parameters over q(θl , nl ). Since geometrically consistent depth and normal
+inference is not feasible for all images simultaneously due to memory constraints,
+we decompose the inference in two stages. In the first stage, we estimate initial
+depths and normals for each image in the input set X according to Eq. (5).
+In the second stage, we use coordinate descent optimization to infer geometri-
+cally consistent depths and normals according to Eq. (10) by keeping all images
+but the current reference image as constant. We interleave the E and M step
+in both stages using row- and column-wise propagation. Four propagations in
+all directions denote a sweep. In the second stage, a single sweep defines a co-
+ordinate descent step, i.e., we alternate between different reference images after
+propagating through the four directions. Typically, the first stage converges after
+I1 = 3 sweeps, while the second stage requires another I2 = 2 sweeps through
+the entire image collection to reach a stable state. We refer the reader to the
+supplementary material for an overview of the steps of our algorithm.
+                     Pixelwise View Selection for Unstructured Multi-View Stereo           11
+
+      Zheng et al.         Photometric   Photometric + Geometric   Filtered     Normals
+
+
+
+
+Fig. 3. Reconstruction results for South Building [20] and Fountain [48]. From left to
+right: Depth map by Zheng et al. [59], then ours only with the photometric term, with
+the photometric and geometric terms, and the final filtered depth and normal maps.
+
+
+4.7    Filtering and Fusion
+
+After describing the depth and normal inference, this section proposes a ro-
+bust method to filter any remaining outliers, e.g., in textureless sky regions.
+In addition to the benefits described previously, the photometric and geometric
+consistency terms provide us with measures to robustly detect outliers at negli-
+gible computational cost. An inlier observation should be both photometrically
+and geometrically stable with support from multiple views. The sets
+
+       Slpho = {xm      m
+                 l | q(Zl ) > q̄Z }                                                       (14)
+       Slgeo = {xm      m              m              m            m
+                 l | q(αl ) ≥ q̄α , q(βl ) ≥ q̄β , q(κl ) > q̄κ , ψl < ψmax }             (15)
+
+determine the photometric and geometric support of a reference image pixel xl .
+To satisfy both constraints, we define the effective support of an observation as
+                     pho         geo
+Sl = {xm       m
+         l | xl ∈ S l    , xm
+                            l ∈ Sl } and filter any observations with |Sl | < s. In
+all our experiments, we set s = 3, q̄Z = 0.5, q̄α = 1, q̄β = 0.5, and q̄κ = P (κ =
+90◦ ). Figs. 3 and 6 show examples of filtered depth and normal maps.
+    The collection of support sets S over the observations in all input images
+defines a directed graph of consistent pixels. In this graph, pixels with sufficient
+support are nodes, and directed edges point from a reference to a source image
+pixel. Nodes are associated with depth and normal estimates and, together with
+the intrinsic and extrinsic calibration, edges define a projective transformation
+from the reference to the source pixel. Our fusion finds clusters of consistent
+pixels in this graph by initializing a new cluster using the node with maxi-
+mum support |S| and recursively collecting connected nodes that satisfy three
+constraints. Towards this goal, we project the first node into 3D to obtain the
+location p0 and normal n0 . For the first constraint, the projected depth θ̃0 of the
+first node into the image of any other node in the cluster must be consistent with
+the estimated depth θi of the other node such that |θ̃0θ̃−θi | < θ (cf. [32]). Second,
+                                                                   0
+the normals of the two must be consistent such that 1 − nT0 ni < n . Third, the
+reprojection error ψi of p0 w.r.t. the other node must be smaller than ψ̄. Note
+12        J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+                                                     1   2                                  1   4
+                                                             1     1                                1     1
+
+
+                                                             0.9   0.9                              0.9   0.9
+
+
+                                                             0.8   0.8                              0.8   0.8
+
+
+
+
+                               Occlusion Prior                           Resolution Prior
+                                                             0.7   0.7                              0.7   0.7
+
+
+                                                             0.6   0.6                              0.6   0.6
+
+
+
+           5                                                 0.5   0.5                              0.5   0.5
+
+
+                                                             0.4   0.4                              0.4   0.4
+
+
+                                                             0.3   0.3                              0.3   0.3
+
+
+                                                             0.2   0.2                              0.2   0.2
+
+
+                                                             0.1   0.1                              0.1   0.1
+
+
+                                                             0     0                                0     0
+
+
+
+                                                     1   3   1     1
+                                                                                            1   5
+                                                                                                    1     1
+
+
+                                                             0.9   0.9                              0.9   0.9
+
+
+
+
+                               Triangulation Prior
+                                                             0.8   0.8                              0.8   0.8
+
+     4
+
+
+
+                                                                         Incident Prior
+                                                             0.7   0.7                              0.7   0.7
+
+
+                                                             0.6   0.6                              0.6   0.6
+
+
+                                                             0.5   0.5                              0.5   0.5
+
+
+
+
+                   R   1   2                                 0.4   0.4                              0.4   0.4
+
+
+                                                                                                          0.3
+
+               3
+                                                             0.3   0.3                              0.3
+
+
+                                                             0.2   0.2                              0.2   0.2
+
+
+                                                             0.1   0.1                              0.1   0.1
+
+
+                                                             0     0                                0     0
+
+
+
+
+Fig. 4. Photometric and geometric priors for South Building dataset [20] between ref-
+erence image (R) and each two selected source images (1-5).
+
+
+that the graph can have loops, and therefore we only collect nodes once. In ad-
+dition, multiple pixels in the same image can belong to the same cluster and, by
+choosing ψ̄, we can control the resolution of the fused point cloud. When there
+is no remaining node that satisfies the three constraints, we fuse the cluster’s
+elements, if it has at least three elements. The fused point has median location
+p̂j and mean normal nj over all cluster elements. The median location is used
+to avoid artifacts when averaging over multiple neighboring pixels at large depth
+discontinuities. Finally, we remove the fused nodes from the graph and initialize
+a new cluster with maximum support |S| until the graph is empty. The resulting
+point cloud can then be colored (e.g. [52]) for visualization purposes and, since
+the points already have normals, we can directly apply meshing algorithms (e.g.
+Poisson reconstruction [30]) as an optional step.
+
+
+5        Experiments
+This section first demonstrates the benefits of the proposed contributions in iso-
+lation. Following that, we compare to other methods and show state-of-the-art
+results on both low- and high-resolution benchmark datasets. Finally, we eval-
+uate the performance of our algorithm in the challenging setting of large-scale
+Internet photo collections. The algorithm lends itself for massive parallelization
+on the row- and column-wise propagation and the view level. In all our exper-
+iments, we use a CUDA implementation of our algorithm on a Nvidia Titan X
+GPU. We set γ = 0.999, leading to an average of one occlusion indicator state
+change per 1000 pixels. Empirically, we choose σρ = 0.6, ᾱ = 1◦ , and σk = 45◦ .
+    Components. This paragraph shows the benefits of the individual compo-
+nents in isolation based on the South Building dataset [20], which consists of 128
+unstructured images with a resolution of 7MP. We obtain sparse reconstructions
+using SfM [21]. For each reference view, we use all 127 images as source views
+with an average runtime of 50s per sweep. Normal Estimation: Fig. 3 shows depth
+maps using fronto-parallel homographies (1st column) and with normal estima-
+tion (2nd to 5th columns), which leads to increased completeness and accuracy
+for depth inference of oblique scene elements, such as the ground. In addition, our
+method estimates more accurate normals than standard PatchMatch (Fig. 5(b)).
+Due to the proposed PatchMatch sampling scheme, our algorithm requires the
+                               Pixelwise View Selection for Unstructured Multi-View Stereo   13
+
+
+Spatial
+
+
+
+
+Spatio-temporal
+
+                                 (a)                         (b)                     (c)
+
+
+
+Fig. 5. (a) Comparison of spatial smoothness term [59] with our proposed spatial and
+temporal smoothness term for the occlusion variables Z. Algorithm starts from the left
+with the first sweep and is followed by consecutive sweeps to the right. (b) Estimated
+depths and normals using standard PatchMatch propagation (cf. Fig. 3 for ours). (c)
+Reference image with filtered depths and normals for crowd-sourced images
+
+
+same number sweeps to converge and only ≈ 25% more runtime due to more
+hypotheses as compared to Zheng et al. [59], who only estimate per-pixel depths.
+Geometric Priors: Fig. 4 demonstrates the benefit of each geometric prior. We
+show the likelihood functions for the reference view against one representative
+source image. For all priors, we observe varying likelihood within the same source
+image, underlining the benefit of pixel-wise view selection. The priors correctly
+downweigh the influence of source images with small triangulation angle, low
+resolution, or occluded views. Selection Smoothness Fig. 5(a) shows that our
+temporal smoothness term effectively mitigates the oscillation of the pure spa-
+tial smoothness term. While the occlusion variables in the formulation by Zheng
+et al. [59] oscillate depending on the propagation direction, in our method they
+quickly converge in a stable state leading to more stable view sampling. Geomet-
+ric Consistency: Fig. 3 demonstrates improved completeness when incorporating
+the geometric consistency term, and it also allows to reliably detect outliers for
+practically outlier-free filtered results. To measure the quantitative impact of
+our contributions, we obtain benchmark results by omitting a single component
+or combinations of components from the formulation (Table 1). We observe that
+each component is important to achieve the overall accuracy and completeness
+of our method. For further evaluations and impressions of the benefits of our
+method, we strongly encourage the reader to view the supplementary material.
+    Benchmarks. The Middlebury benchmark [38] consists of the Dino and
+Temple models captured at 640x480 under varying settings (Full, Ring, Sparse).
+For each reference image, we use all views as source images at a runtime of ≈ 40s
+per view for the Full models with ≈ 300 images. We achieve excellent accuracy
+and completeness on both models1 . Specifically, using the standard settings, we
+rank 1st for Dino Full (tied) and Dino Sparse, while achieving competitive scores
+for the Temple (4th for Full, 8th for Ring). Note that our method performs best
+for higher resolutions, as normal estimation needs large patch sizes. Also, we
+use basic Poisson meshing [30], underlining the highly accurate and outlier-free
+depth/normal estimates produced by our method. The Strecha benchmark [48]
+consists of high-resolution images with ground-truth, and we follow the evalua-
+tion protocol of Hu and Mordohai [24]. Fig. 3 shows outputs for the Fountain
+        1
+                  Full results online at http://vision.middlebury.edu/mview/eval/.
+14       J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+Table 1. Strecha benchmark [48] with reported values from [24]. Ratio of pixels with er-
+ror less than 2cm and 10cm. Ours w/o normals (\N), geom. priors (\P), temp. smooth-
+ness (\S), geom. consistency (\G), bilateral NCC (\B), and with all components.
+
+                      [59]   [24]   [13]   [57]   [51]   [26]   [15]   \N   \P   \S   \B   \PSB   \G   Ours
+
+               2cm 0.769 0.754 0.731 0.712 0.732 0.824 0.693 0.799 0.824 0.825 0.826 0.817 0.804 0.827
+     Fountain
+              10cm 0.929 0.930 0.838 0.832 0.822 0.973 0.838 0.937 0.972 0.973 0.973 0.965 0.949 0.975
+
+                 2cm 0.650 0.649 0.646 0.220 0.658 0.739 0.283 0.673 0.686 0.688 0.690 0.688 0.679 0.691
+     Herzjesu
+                10cm 0.844 0.848 0.836 0.501 0.852 0.923 0.455 0.901 0.928 0.927 0.929 0.921 0.907 0.931
+
+
+
+
+Fig. 6. Reference image with filtered depths and normals for crowd-sourced images.
+
+
+dataset and, Table 1 lists the results quantifying both the accuracy and com-
+pleteness. To maintain comparability against Zheng et al. [59], we evaluate our
+raw depth maps against the ground-truth. We produce significantly more ac-
+curate and complete results than Zheng et al., and we outperform the other
+methods in 3 of 4 categories, even though the results of [24, 26, 51] are evaluated
+based on the projection of a 3D surface obtained through depth map fusion.
+    Internet Photos. We densely reconstruct models of 100M Internet photos
+released by Heinly et al. [21, 39] using a single machine with 4 Nvidia Titan X.
+We process the 41K images at a rate of 70s per view using 2 threads per GPU
+and finish after 4.2 days in addition to the 6 days needed for sparse modeling
+using SfM. Whenever we reach the GPU memory limits, we select the most con-
+nected source images ranked by the number of shared sparse points. Usually, this
+limit is reached for ≈ 200 images, while image sizes vary from 0.01MP to 9MP.
+The fusion and filtering steps consume negligible runtime. Fig. 1 shows fused
+point clouds, Figs. 6 and 5(c) show depth/normal maps, and the supplementary
+material provides more results and comparisons against [12, 13, 19].
+
+
+6    Conclusion
+This work proposes a novel algorithm for robust and efficient dense reconstruc-
+tion from unstructured image collections. Our method estimates accurate depth
+and normal information using photometric and geometric information for pixel-
+wise view selection and for image-based fusion and filtering. We achieve state-
+of-the-art results on benchmarks and crowd-sourced data.
+                Pixelwise View Selection for Unstructured Multi-View Stereo           15
+
+References
+
+ 1. Agarwal, S., Furukawa, Y., Snavely, N., Simon, I., Curless, B., Seitz, S., Szeliski,
+    R.: Building rome in a day. In: ICCV (2009)
+ 2. Bailer, C., Finckh, M., Lensch, H.P.: Scale robust multi view stereo. In: ECCV
+    (2012)
+ 3. Birchfield, S., Tomasi, C.: Multiway cut for stereo and motion with slanted surfaces.
+    In: ICCV (1999)
+ 4. Bishop, C.M.: Pattern Recognition and Machine Learning. Springer Verlag (2006)
+ 5. Bleyer, M., Rhemann, C., Rother, C.: Patchmatch stereo-stereo matching with
+    slanted support windows. In: BMVC (2011)
+ 6. Burt, P., Wixson, L., Salgian, G.: Electronically directed focal stereo. In: ICCV
+    (1995)
+ 7. Campbell, N., Vogiatzis, G., Hernández, C., Cipolla, R.: Using multiple hypotheses
+    to improve depth-maps for multi-view stereo. In: ECCV (2008)
+ 8. Chen, S.E., Williams, L.: View interpolation for image synthesis. In: Conference
+    on Computer graphics and interactive techniques (1993)
+ 9. Forster, C., Pizzoli, M., Scaramuzza, D.: Air-ground localization and map augmen-
+    tation using monocular dense reconstruction. In: IROS (2013)
+10. Frahm, J.M., Fite-Georgel, P., Gallup, D., Johnson, T., Raguram, R., Wu, C.,
+    Jen, Y.H., Dunn, E., Clipp, B., Lazebnik, S., Pollefeys, M.: Building Rome on a
+    Cloudless Day. In: ECCV (2010)
+11. Furukawa, Y., Curless, B., Seitz, S.M., Szeliski, R.: Reconstructing building inte-
+    riors from images. In: CVPR (2009)
+12. Furukawa, Y., Curless, B., Seitz, S.M., Szeliski, R.: Towards internet-scale multi-
+    view stereo. In: CVPR (2010)
+13. Furukawa, Y., Ponce, J.: Accurate, dense, and robust multiview stereopsis. In:
+    CVPR (2007)
+14. Furukawa, Y., Curless, B., Seitz, S.M., Szeliski, R.: Manhattan-world stereo. In:
+    CVPR (2009)
+15. Galliani, S., Lasinger, K., Schindler, K.: Massively parallel multiview stereopsis by
+    surface normal diffusion. In: ICCV (2015)
+16. Gallup, D., Frahm, J.M., Mordohai, P., Pollefeys, M.: Variable baseline/resolution
+    stereo. In: CVPR (2008)
+17. Gallup, D., Frahm, J.M., Mordohai, P., Yang, Q., Pollefeys, M.: Real-time plane-
+    sweeping stereo with multiple sweeping directions. In: CVPR (2007)
+18. Gallup, D., Pollefeys, M., Frahm, J.M.: 3d reconstruction using an n-layer
+    heightmap. In: Pattern Recognition (2010)
+19. Goesele, M., Snavely, N., Curless, B., Hoppe, H., Seitz, S.M.: Multi-view stereo for
+    community photo collections. In: CVPR (2007)
+20. Hane, C., Zach, C., Cohen, A., Angst, R., Pollefeys, M.: Joint 3d scene reconstruc-
+    tion and class segmentation. In: CVPR (2013)
+21. Heinly, J., Schönberger, J.L., Dunn, E., Frahm, J.M.: Reconstructing the World*
+    in Six Days *(As Captured by the Yahoo 100 Million Image Dataset). In: CVPR
+    (2015)
+22. Heise, P., Jensen, B., Klose, S., Knoll, A.: Variational patchmatch multiview re-
+    construction and refinement. In: CVPR (2015)
+23. Hirschmüller, H., Scharstein, D.: Evaluation of stereo matching costs on images
+    with radiometric differences. PAMI (2009)
+16      J.L. Schönberger, E. Zheng, M. Pollefeys, J.M. Frahm
+
+24. Hu, X., Mordohai, P.: Least commitment, viewpoint-based, multi-view stereo. In:
+    3DIMPVT (2012)
+25. Intille, S.S., Bobick, A.F.: Disparity-space images and large occlusion stereo (1994)
+26. Jancosek, M., Pajdla, T.: Multi-view reconstruction preserving weakly-supported
+    surfaces. In: CVPR (2011)
+27. Ji, D., Dunn, E., Frahm, J.M.: 3d reconstruction of dynamic textures in crowd
+    sourced data. In: ECCV (2014)
+28. Kanade, T., Okutomi, M.: A stereo matching algorithm with an adaptive window:
+    Theory and experiment. PAMI (1994)
+29. Kang, S.B., Szeliski, R., Chai, J.: Handling occlusions in dense multi-view stereo.
+    In: CVPR (2001)
+30. Kazhdan, M., Hoppe, H.: Screened poisson surface reconstruction. ACM Trans.
+    Graphics (2013)
+31. Martin-Brualla, R., Gallup, D., Seitz, S.M.: 3d time-lapse reconstruction from in-
+    ternet photos. In: ICCV (2015)
+32. Merrell, P., Akbarzadeh, A., Wang, L., Mordohai, P., Frahm, J.M., Yang, R.,
+    Nistér, D., Pollefeys, M.: Real-time visibility-based fusion of depth maps. In: CVPR
+    (2007)
+33. Neal, R.M., Hinton, G.E.: A view of the em algorithm that justifies incremental,
+    sparse, and other variants. In: Learning in graphical models (1998)
+34. Oswald, M., Cremers, D.: A convex relaxation approach to space time multi-view
+    3d reconstruction. In: ICCV Workshops (2013)
+35. Radenović, F., Schönberger, J.L., Ji, D., Frahm, J.M., Chum, O., Matas, J.: From
+    dusk till dawn: Modeling in the dark. In: CVPR (2016)
+36. Rhemann, C., Hosni, A., Bleyer, M., Rother, C., Gelautz, M.: Fast cost-volume
+    filtering for visual correspondence and beyond. In: CVPR (2011)
+37. Schaffalitzky, F., Zisserman, A.: Multi-view matching for unordered image sets, or
+    How do I organize my holiday snaps? In: ECCV (2002)
+38. Scharstein, D., Szeliski, R.: A taxonomy and evaluation of dense two-frame stereo
+    correspondence algorithms. In: IJCV (2002)
+39. Schönberger, J.L., Frahm, J.M.: Structure-from-motion revisited. In: CVPR (2016)
+40. Schönberger, J.L., Radenović, F., Chum, O., Frahm, J.M.: From single image query
+    to detailed 3d reconstruction. In: CVPR (2015)
+41. Seitz, S.M., Curless, B., Diebel, J., Scharstein, D., Szeliski, R.: A comparison and
+    evaluation of multi-view stereo reconstruction algorithms. In: CVPR (2006)
+42. Shan, Q., Adams, R., Curless, B., Furukawa, Y., Seitz, S.M.: The visual turing test
+    for scene reconstruction. In: 3DV (2013)
+43. Shan, Q., Curless, B., Furukawa, Y., Hernandez, C., Seitz, S.M.: Occluding con-
+    tours for multi-view stereo. In: CVPR (2014)
+44. Shotton, J., Sharp, T., Kipman, A., Fitzgibbon, A., Finocchio, M., Blake, A.,
+    Cook, M., Moore, R.: Real-time human pose recognition in parts from single depth
+    images. In: Comm. ACM (2013)
+45. Snavely, N., Seitz, S., Szeliski, R.: Photo tourism: exploring photo collections in
+    3d. ACM Trans. Graphics (2006)
+46. Strecha, C., Fransens, R., Van Gool, L.: Wide-baseline stereo from multiple views:
+    a probabilistic account. In: CVPR (2004)
+47. Strecha, C., Fransens, R., Van Gool, L.: Combined depth and outlier estimation in
+    multi-view stereo. In: CVPR (2006)
+48. Strecha, C., von Hansen, W., Gool, L.V., Fua, P., Thoennessen, U.: On bench-
+    marking camera calibration and multi-view stereo for high resolution imagery. In:
+    CVPR (2008)
+                Pixelwise View Selection for Unstructured Multi-View Stereo          17
+
+49. Sun, J., Li, Y., Kang, S.B., Shum, H.Y.: Symmetric stereo matching for occlusion
+    handling. In: CVPR (2005)
+50. Tung, T., Nobuhara, S., Matsuyama, T.: Complete multi-view reconstruction of
+    dynamic scenes from probabilistic fusion of narrow and wide baseline stereo. In:
+    ICCV (2009)
+51. Tylecek, R., Sara, R.: Refinement of surface mesh for accurate multi-view recon-
+    struction. IJVR (2010)
+52. Waechter, M., Moehrle, N., Goesele, M.: Let there be color! large-scale texturing
+    of 3d reconstructions. In: ECCV (2014)
+53. Yang, Q., Wang, L., Yang, R., Stewénius, H., Nistér, D.: Stereo matching with
+    color-weighted correlation, hierarchical belief propagation, and occlusion handling.
+    PAMI (2009)
+54. Yoon, K.J., Kweon, I.S.: Locally adaptive support-weight approach for visual cor-
+    respondence search. In: CVPR (2005)
+55. Zabulis, X., Daniilidis, K.: Multi-camera reconstruction based on surface normal
+    estimation and best viewpoint selection. In: 3DPVT (2004)
+56. Zach, C.: Fast and high quality fusion of depth maps. In: 3DPVT (2008)
+57. Zaharescu, A., Boyer, E., Horaud, R.: Topology-adaptive mesh deformation for
+    surface evolution, morphing, and multiview reconstruction. PAMI (2011)
+58. Zhang, G., Jia, J., Wong, T.T., Bao, H.: Recovering consistent video depth maps
+    via bundle optimization. In: CVPR (2008)
+59. Zheng, E., Dunn, E., Jojic, V., Frahm, J.M.: Patchmatch based joint view selection
+    and depthmap estimation. In: CVPR (2014)
+60. Zheng, E., Dunn, E., Raguram, R., Frahm, J.M.: Efficient and scalable depthmap
+    fusion. In: BMVC (2012)
+61. Zheng, E., Wu, C.: Structure from motion using structure-less resection. In: ICCV
+    (2015)
+62. Zitnick, C.L., Kanade, T.: A cooperative algorithm for stereo matching and occlu-
+    sion detection. PAMI (2000)
+

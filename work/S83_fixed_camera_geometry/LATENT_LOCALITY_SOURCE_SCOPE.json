@@ -1,0 +1,150 @@
+{
+  "recorded_utc": "2026-09-10T18:36:46.945670+00:00",
+  "first_clock_utc": "2026-09-10T18:32:21Z",
+  "last_clock_before_report_write_utc": "2026-09-10T18:35:47Z",
+  "scope": "source-only VAE decoder locality audit and one original LDM paper partial reading",
+  "source_files": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vae_official_ft_mse/config.json",
+      "bytes": 547,
+      "sha256": "92d3dfb746fca211a2c9e019e285f8597412211728dce3c5bcf4eda0f2d62e7e",
+      "read_scope": "full metadata, no tensors"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S75_vae_history_roundtrip/CONTRACT.json",
+      "bytes": 11357,
+      "sha256": "a39d5c33a561cae46702e7e90cb268059de86fd4b949f7bc0dea57fdb4b938fd",
+      "read_scope": "lines 100-185; component identity/runtime/tiling/slicing contract"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S75_vae_history_roundtrip/decode_history.py",
+      "bytes": 17569,
+      "sha256": "4e0777e1fa94879040b0fb51220d1c74b6bf29aae32ab4c03924c9abcb2a1d18",
+      "read_scope": "lines 128-183; exact ft-mse loading substitution and decoder settings; targeted processor override search had no hits"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/autoencoder.py",
+      "bytes": 1692,
+      "sha256": "ccb94f107fd07302fa34593f7b840b3066f73548fe800e647eccfd66da473807",
+      "read_scope": "full wrapper"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/autoencoders/autoencoder_kl.py",
+      "bytes": 25238,
+      "sha256": "ed47d3851678665a2cdce463052ff5e5767cb8e69b5e1f69c2126867bddd73db",
+      "read_scope": "lines 80-130,291-335; construction defaults and decode route"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/autoencoders/vae.py",
+      "bytes": 36858,
+      "sha256": "316d2971d1c9806ed9d95e191aa7a58cc054a3a8e89a5e0723fc5e6db6240a91",
+      "read_scope": "lines 222-361; Decoder"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/unets/unet_2d_blocks.py",
+      "bytes": 150574,
+      "sha256": "4a027b9487cc421417e439b564868c12ab78e23d14d3b8e6077cccd8e8f2e924",
+      "read_scope": "lines 620-768,2749-2828; mid block attention and decoder up blocks"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/attention_processor.py",
+      "bytes": 257602,
+      "sha256": "7e765c06fc16405d0bf0311c810ec8fa7f27adec64e80b998763078fd7894b72",
+      "read_scope": "lines 288-297,3215-3305; default processor and full spatial self-attention"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/resnet.py",
+      "bytes": 32241,
+      "sha256": "30bf44772a466278926b2fc4b32b30b939661a2ef8dbd589858a885bb5440684",
+      "read_scope": "lines 255-287,317-372; ResnetBlock2D conv/norm path"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv/lib/python3.12/site-packages/torch/nn/modules/normalization.py",
+      "bytes": 14957,
+      "sha256": "1a0514a93ed28c5fb3021aaaeea0eb88c9e83c694b8bd4e13792f06bb583fb65",
+      "read_scope": "lines 228-316; GroupNorm source doc and forward, not imported"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers-0.32.2.dist-info/METADATA",
+      "bytes": 18949,
+      "sha256": "26edddac42b0292dd6c99479cc4a357d0e2b4a2d6c363a8ad23108221e890950",
+      "read_scope": "Name/Version lines 2-3 only"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/latent_geometry_guidance.py",
+      "bytes": 2782,
+      "sha256": "11f9f53c3ce40d0d040deb8e08fa042f5fafe8c477dc43de166c94fc416d5c2f",
+      "read_scope": "full source; where support applies to current latent fusion output"
+    }
+  ],
+  "contract_binding_checks": [
+    {
+      "contract_entry": "components.vae_config",
+      "matches_contract_sha": true
+    },
+    {
+      "contract_entry": "sources.autoencoder",
+      "matches_contract_sha": true
+    },
+    {
+      "contract_entry": "sources.diffusers_autoencoder",
+      "matches_contract_sha": true
+    }
+  ],
+  "vae_identity": {
+    "repo": "stabilityai/sd-vae-ft-mse",
+    "declared_revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+    "basis": "prior S75 contract and source loader; no weights read this batch",
+    "config_saved_diffusers_version": "0.4.2",
+    "actual_bound_runtime_diffusers_version": "0.32.2",
+    "new_runtime_inspection": false
+  },
+  "paper": {
+    "title": "High-Resolution Image Synthesis with Latent Diffusion Models",
+    "venue": "CVPR 2022",
+    "version": "author arXiv v2, 2022-04-13; final CVF byte equivalence not asserted",
+    "read_url": "https://arxiv.org/html/2112.10752v2",
+    "version_metadata_url": "https://arxiv.org/abs/2112.10752",
+    "official_metadata_url": "https://openaccess.thecvf.com/content/CVPR2022/html/Rombach_High-Resolution_Image_Synthesis_With_Latent_Diffusion_Models_CVPR_2022_paper.html",
+    "deep_read_scope": [
+      "section 3.1, extracted lines 128-134",
+      "section 4.5, lines 241-266 including Table 6 and section 5 limitations",
+      "Appendix G, lines 634-646"
+    ],
+    "other_read_scope": [
+      "title/version metadata and abstract/introduction excerpts"
+    ],
+    "not_read": [
+      "full paper",
+      "full experiments or appendices",
+      "official paper code"
+    ],
+    "failed_accesses": [
+      {
+        "url": "https://openaccess.thecvf.com/content/CVPR2022/papers/Rombach_High-Resolution_Image_Synthesis_With_Latent_Diffusion_Models_CVPR_2022_paper.pdf",
+        "result": "403 Forbidden"
+      },
+      {
+        "url": "https://openaccess.thecvf.com/content/CVPR2022/papers/Rombach_High-Resolution_Image_Synthesis_With_Latent_Diffusion_Models_CVPR_2022_paper",
+        "result": "403 Forbidden"
+      }
+    ]
+  },
+  "english_query": "site:openaccess.thecvf.com High-Resolution Image Synthesis with Latent Diffusion Models 2022 autoencoder convolutional attention",
+  "scientific_evidence_boundary": {
+    "new_model_loads": 0,
+    "weights_read": 0,
+    "images_read": 0,
+    "new_heads_or_gt_arrays_read": 0,
+    "decodes_or_models_run": 0,
+    "author_source_files_modified": false,
+    "canonical_ledger_modified": false,
+    "novelty_status": "NO_METHOD_SELECTED",
+    "conclusion": "graph-level potential global spatial influence, not measured magnitude or per-input nonzero effect"
+  },
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/LATENT_MASK_LOCALITY_BOUNDARY.md",
+    "bytes": 4357,
+    "sha256": "e8b29d58c7387e1f9ab5245a99715fc509bb2d5ab5bb09235bb822acf829ce33"
+  }
+}

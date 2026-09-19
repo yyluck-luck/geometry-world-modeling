@@ -1,0 +1,43 @@
+{
+  "schema": "s40-readback-revision-v3-3-receipt-v1",
+  "status": "SOURCE_AND_PROTOCOL_REVISED_AWAITING_INDEPENDENT_REREVIEW",
+  "created_utc": "2026-09-07T13:03:01.218041+00:00",
+  "author_role": "/root",
+  "current_identities": {
+    "readback_sha256": "d4c22504569ad1fb1fcc74ea1da83b4f244f4de803f5d0fadc16e8da06777933",
+    "protocol_sha256": "257e1b7583b000e907cde8baf3e4e3fcefb9f2c81037ed98887d0f6367483163"
+  },
+  "new_blocking_reviews_preserved": {
+    "source_review_v3_2_sha256": "0de2fa685d1487690e0ff782c571bf51866810d6aa927512f7d056713ee7f4fd",
+    "source_review_v3_2_adversarial_sha256": "6d03a856e69fdb71b85eab789f8a7c5d495dc967cba2d4b550c005d029aaa6ce",
+    "both_verdicts": "REVISION_REQUIRED"
+  },
+  "resolved_findings": {
+    "raw_tensor_provenance": "A dedicated TensorDescriptor dict subclass is created only when Reader.metadata sees a raw archival kind=tensor node. Ordinary archival dict nodes remain exact built-in dict objects even if their decoded fields imitate a descriptor.",
+    "pil_pixel_provenance": "A raw kind=pil_image node explicitly decodes its nested pixels tensor through the same provenance-preserving path.",
+    "array_gate": "Reader.array requires type(d) is exactly TensorDescriptor and then requires the complete mapping to equal the descriptor previously verified for its canonical blob path.",
+    "error_message": "The first-map-before-second-context inequality message now states the same direction as the checked inequality.",
+    "scalar_scope": "The exact built-in str/int/bool/NoneType gate is intentionally scoped to the four scalar type labels actually present in the frozen S40 archive. It does not claim to accept every subclass that the generic writer might nominally archive."
+  },
+  "metadata_provenance_static_check": {
+    "python_ast_parse": "PASS",
+    "git_diff_check": "PASS",
+    "archive_event_json_only": true,
+    "first_context_decoded_type": "list",
+    "first_context_decoded_value": [0],
+    "second_context_decoded_type": "TensorDescriptor",
+    "second_context_kind": "tensor",
+    "pil_cache_pixel_descriptor_types": ["TensorDescriptor"],
+    "ordinary_archived_dict_with_descriptor_like_fields_decoded_type": "dict",
+    "tensor_blob_or_image_body_reads": 0
+  },
+  "unchanged_boundaries": {
+    "attempt01_failure_preserved": true,
+    "readback_runs": 0,
+    "model_ga_gate_scoring_or_generation_runs": 0,
+    "images_decoded_or_viewed": 0,
+    "scientific_arrays_mapped_or_compared": 0,
+    "quality_or_novelty_claims": 0
+  },
+  "next_gate": "Two different reviewers must bind this exact v3.3 source/protocol/receipt and return no blocking findings before the external supervisor can be rebased."
+}

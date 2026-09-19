@@ -1,0 +1,54 @@
+{
+  "saved_review": {
+    "path": "results/S10_renderer_edges_candidate_review/verification.json",
+    "bytes": 67260,
+    "sha256": "49150df7dc16b981b4ae491e899bc3e818ec16faf4377017a190783c77d12a60"
+  },
+  "status": "PASS",
+  "started_utc": "2026-09-05T21:10:23.931068+00:00",
+  "completed_utc": "2026-09-05T21:10:23.973060+00:00",
+  "checks_passed": 1046,
+  "scope": "Independent reread of saved synthetic NPZ arrays plus transformation-factory AST inspection; no rerun of renderer, real map, selector, model or timing.",
+  "candidate_gate_started_utc": "2026-09-05T21:09:17.868679+00:00",
+  "candidate_gate_completed_utc": "2026-09-05T21:09:17.988459+00:00",
+  "fixtures": 60,
+  "reference_npz": 60,
+  "candidate_npz": 60,
+  "exact_array_pairs": 180,
+  "nonempty_reference_fixtures": 42,
+  "negative_controls_detected": [
+    {
+      "mutation": "force_float64_depth",
+      "fixture": "round_up_identical_no_reoverwrite_np2",
+      "detected": true
+    },
+    {
+      "mutation": "non_strict_depth",
+      "fixture": "equal_depth_first_wins",
+      "detected": true
+    },
+    {
+      "mutation": "half_pixel_polygon",
+      "fixture": "diamond_integer_boundary",
+      "detected": true
+    },
+    {
+      "mutation": "zero_polygon_epsilon",
+      "fixture": "diamond_integer_boundary",
+      "detected": true
+    },
+    {
+      "mutation": "include_near_plane",
+      "fixture": "center_on_near_plane",
+      "detected": true
+    }
+  ],
+  "original_polygon_probe_groups": 6,
+  "all_other_original_ast_statements_unchanged": true,
+  "limits": [
+    "Finite fixtures are not an all-input proof.",
+    "Six extra polygon probes inspect the original scalar helper; candidate parity is checked by the60 full-render fixtures.",
+    "Warning behavior is outside the equality contract; observed warnings were zero for both implementations in these60 cases.",
+    "No real-map or performance result is established."
+  ]
+}

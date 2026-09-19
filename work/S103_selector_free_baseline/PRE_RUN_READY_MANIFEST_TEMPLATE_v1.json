@@ -1,0 +1,208 @@
+{
+  "schema": "gwm-selector-free-vmem-pre-run-manifest-v1",
+  "status": "TEMPLATE_ONLY_BLOCKED",
+  "readiness_scope": "selector_free_development_baseline",
+  "created_at_local": "2026-09-16T01:46:13+08:00",
+  "timestamp_source": "clock.curr_time 2026-09-15 17:46:13 UTC converted to Asia/Shanghai",
+  "scientific_claim": "none; this file grants no GPU submission and is not a result",
+  "run_identity": {
+    "run_id": "S103_SELECTOR_FREE_VMEM_DEV_BASELINE_{{UNIQUE_RUN_SUFFIX}}",
+    "protocol_status": "DRAFT_UNTIL_ALL_BINDINGS_FILLED",
+    "author": "root",
+    "independent_reviewer_required": true,
+    "novelty_authorization": "NONE",
+    "new_method_validated": false
+  },
+  "effective_vmem_config": {
+    "model.height": 576,
+    "model.width": 576,
+    "model.original_height": 288,
+    "model.original_width": 512,
+    "model.context_num_frames": 4,
+    "model.target_num_frames": 4,
+    "model.num_frames": 8,
+    "model.inference_num_steps": 50,
+    "model.vae_spatial_scale": 8,
+    "model.latent_channels": 4,
+    "model.camera_scale": 2.0,
+    "model.cfg": 2.0,
+    "model.cfg_min": 1.2,
+    "model.use_non_maximum_suppression": true,
+    "model.translation_distance_weight": 0.1,
+    "surfel.use_surfel": true,
+    "surfel.width": 512,
+    "surfel.height": 288,
+    "seed": 42,
+    "dtype": "float16_on_cuda",
+    "config_source": {
+      "remote_path": "/home/yliutz/gwm_source_transport_20260915/vmem/configs/inference/inference.yaml",
+      "bytes": 879,
+      "sha256": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3",
+      "verified_local_snapshot": "vendor/vmem_snapshot/configs/inference/inference.yaml"
+    }
+  },
+  "checkpoint_bindings": {
+    "vmem": {
+      "name": "vmem_weights.pth",
+      "remote_path": "/home/yliutz/gwm_weights_20260915/vmem_weights.pth",
+      "bytes": 5056346672,
+      "sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+    },
+    "cut3r": {
+      "name": "cut3r_512_dpt_4_64.pth",
+      "remote_path": "/home/yliutz/gwm_weights_20260915/cut3r_512_dpt_4_64.pth",
+      "bytes": 3173761006,
+      "sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103"
+    },
+    "clip": {
+      "name": "open_clip_model.safetensors",
+      "remote_path": "/home/yliutz/gwm_weights_20260915/open_clip_model.safetensors",
+      "bytes": 3944517836,
+      "sha256": "0084e75319a50ad85ef45377bad5bc38f2f58824459eb690048d51c9f8863be5"
+    },
+    "vae": {
+      "name": "diffusion_pytorch_model.safetensors",
+      "remote_path": "/home/yliutz/gwm_weights_20260915/diffusion_pytorch_model.safetensors",
+      "bytes": 334643276,
+      "sha256": "a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815",
+      "variant": "declared_substitute_or_original_verified_must_be_explicit"
+    }
+  },
+  "remote_runtime": {
+    "host": "superpod.ust.hk",
+    "ssh_command": "ssh -i ~/.ssh/id_ed25519_superpod yliutz@superpod.ust.hk",
+    "environment": "/home/yliutz/.conda/envs/gwm-cut3r-py311-20260915",
+    "python": "3.11.16",
+    "torch": "2.7.0+cu126",
+    "slurm_account": "mscitspod2026",
+    "partition": "normal",
+    "gpu_request": "--gpus=1",
+    "required_persistence": {
+      "launcher": "work/remote_tmux/launch_formal_slurm_in_tmux.sh",
+      "must_run_inside": "tmux_or_screen",
+      "receipt_requirements": ["tmux_session", "slurm_job_id", "stdout_log", "stderr_log", "sacct_exit_state"]
+    }
+  },
+  "input_allowlist": {
+    "purpose": "Enforced role separation for a selector-free predictor; paths are filled only after staged isolation is created.",
+    "predictor_may_read": [
+      {
+        "role": "history_rgb",
+        "path_pattern": "{{STAGED_ROOT}}/history/rgb/**",
+        "allowed": true,
+        "future_outcome": false
+      },
+      {
+        "role": "history_depth",
+        "path_pattern": "{{STAGED_ROOT}}/history/depth/**",
+        "allowed": true,
+        "future_outcome": false
+      },
+      {
+        "role": "history_pose",
+        "path_pattern": "{{STAGED_ROOT}}/history/pose/**",
+        "allowed": true,
+        "future_outcome": false
+      },
+      {
+        "role": "command_camera",
+        "path_pattern": "{{STAGED_ROOT}}/query/command_camera.json",
+        "allowed": true,
+        "future_outcome": false,
+        "definition": "Predeclared target camera command (pose/intrinsics) supplied before prediction; it is not a future RGB/depth/pose outcome."
+      }
+    ],
+    "predictor_must_not_read": [
+      {
+        "role": "future_rgb",
+        "path_pattern": "{{OUTCOME_ROOT}}/future/rgb/**",
+        "allowed": false
+      },
+      {
+        "role": "future_depth",
+        "path_pattern": "{{OUTCOME_ROOT}}/future/depth/**",
+        "allowed": false
+      },
+      {
+        "role": "future_pose",
+        "path_pattern": "{{OUTCOME_ROOT}}/future/pose/**",
+        "allowed": false
+      },
+      {
+        "role": "future_gt",
+        "path_pattern": "{{OUTCOME_ROOT}}/future/gt/**",
+        "allowed": false
+      },
+      {
+        "role": "whole_archive",
+        "path_pattern": "{{DATASET_ARCHIVE}}",
+        "allowed": false
+      }
+    ],
+    "scorer_only_inputs": ["future_rgb", "future_depth", "future_pose", "future_gt"],
+    "enforcement": {
+      "required_method": "container_mount_whitelist_or_linux_namespace_or_separate_user_acl",
+      "substring_guard_is_insufficient": true,
+      "required_probes": ["allowed_history_probe_passed", "denied_outcome_probe_passed", "full_archive_unavailable"],
+      "predictor_manifest_hash_required": true
+    }
+  },
+  "camera_and_window_roles": {
+    "target_camera_policy": "predeclared_command",
+    "camera_command_source": "query/command_camera.json; frozen before predictor starts",
+    "future_outcome_source": "scorer-only future RGB-D and pose/GT; opened only after prediction output hash is sealed",
+    "history_window": {
+      "dataset_id": "{{DATASET_ID}}",
+      "scene_id": "{{SCENE_ID}}",
+      "frame_ids": ["{{HISTORY_FRAME_1}}", "{{HISTORY_FRAME_2}}", "{{HISTORY_FRAME_3}}", "{{HISTORY_FRAME_4}}"],
+      "chronological": true
+    },
+    "future_query_window": {
+      "dataset_id": "{{DATASET_ID}}",
+      "scene_id": "{{SCENE_ID}}",
+      "frame_ids": ["{{FUTURE_FRAME_1}}", "{{FUTURE_FRAME_2}}", "{{FUTURE_FRAME_3}}", "{{FUTURE_FRAME_4}}"],
+      "chronological": true,
+      "opened_by_predictor": false
+    },
+    "calibration_window": {
+      "dataset_id": "{{CALIBRATION_DATASET_ID}}",
+      "scene_id": "{{CALIBRATION_SCENE_ID}}",
+      "frame_ids": ["{{CALIBRATION_FRAME_IDS}}"],
+      "used_for": "adapter_and_contract_only; no method selection"
+    }
+  },
+  "fixed_budget": {
+    "candidate_count": 4,
+    "selection_k": 4,
+    "context_length": 4,
+    "output_count": 4,
+    "sampling_steps": 50,
+    "resolution": [576, 576],
+    "dtype": "float16_on_cuda",
+    "seed": 42,
+    "rng_policy": "seed_all_declared_generators_and_save_rng_states",
+    "timeout_seconds": "{{FIXED_TIMEOUT_SECONDS}}",
+    "comparison_rule": "same candidate pool, k, context, outputs, steps, resolution, dtype, seed/RNG and timeout across selector-free controls"
+  },
+  "required_artifact_bindings_before_promotion": {
+    "source_manifest": "{{REMOTE_SOURCE_MANIFEST_PATH_AND_SHA256}}",
+    "runtime_binding": "{{REMOTE_RUNTIME_BINDING_PATH_AND_SHA256}}",
+    "predictor_inputs_manifest": "{{STAGED_PREDICTOR_MANIFEST_PATH_AND_SHA256}}",
+    "scorer_inputs_manifest": "{{SCORER_MANIFEST_PATH_AND_SHA256}}",
+    "isolation_receipt": "{{ISOLATION_RECEIPT_PATH_AND_SHA256}}",
+    "predictor_wrapper": "{{PREDICTOR_WRAPPER_PATH_AND_SHA256}}",
+    "scorer": "{{SCORER_PATH_AND_SHA256}}",
+    "independent_verifier": "{{VERIFIER_PATH_AND_SHA256}}",
+    "independent_pre_run_review": "{{REVIEW_PATH_AND_SHA256}}",
+    "dataset_camera_depth_pose_contract": "{{ADAPTER_CONTRACT_PATH_AND_SHA256}}",
+    "heldout_exposure_review": "{{HELDOUT_REVIEW_PATH_AND_SHA256_OR_NOT_APPLICABLE_FOR_DEVELOPMENT}}"
+  },
+  "promotion_rules": [
+    "Replace every {{...}} placeholder with an evidence-backed value and hash.",
+    "Create a new signed contract revision; preserve this template unchanged.",
+    "Run validate_gate0_v2.py --stage pre-run on the new contract and obtain PRE_RUN_READY.",
+    "A PRE_RUN_READY result permits only the declared selector-free development baseline; it does not validate GRC/SOCF or novelty.",
+    "Open future RGB/depth/pose/GT only in scorer after prediction outputs are sealed and independently hashed.",
+    "If any binding is unavailable, keep status TEMPLATE_ONLY_BLOCKED and do not submit a Slurm job."
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema": "gwm-compute-isolation-receipt-v1",
+  "date_local": "2026-09-16",
+  "recorded_at_local": "2026-09-16T12:49:05+08:00",
+  "scope": "synthetic GPU image + mount-isolation probe only",
+  "model_access": false,
+  "dataset_access": false,
+  "future_outcome_access": false,
+  "ground_truth_access": false,
+  "forward_completed": false,
+  "formal_gate0_eligibility": "NOT_GRANTED",
+  "new_method_validated": false,
+  "novelty_authorization": "NONE",
+
+  "image": {
+    "uri": "docker://nvidia/cuda@sha256:63a18dd805367dacfb077aeced8384ab2fb569598ec5f5f5220c3f90a5c23650",
+    "registry": "registry-1.docker.io",
+    "repository": "nvidia/cuda",
+    "tag_label_only": "12.6.3-runtime-ubuntu22.04",
+    "pinned_index_digest": "sha256:63a18dd805367dacfb077aeced8384ab2fb569598ec5f5f5220c3f90a5c23650",
+    "amd64_manifest_digest": "sha256:4cf7f8137bdeeb099b1f2de126e505aa1f01b6e4471d13faf93727a9bf83d539",
+    "compressed_layer_bytes": 1529918056,
+    "auth": "anonymous pull token; no ITSC or NGC credential used",
+    "sif_path_remote": "/home/yliutz/gwm-images/nvidia-cuda-12.6.3-runtime-ubuntu22.04.sif",
+    "sif_bytes": 1526910976,
+    "sif_sha256": "5a79221373914393c844cc92c32c89e722003591431f3545fc674c0739c59dd0",
+    "pull_wall_seconds": 153.001,
+    "pull_exit": 0,
+    "sif_location_boundary": "outside the project tree; must not be synced back by rsync"
+  },
+
+  "execution": {
+    "slurm_job_id": "589607",
+    "job_name": "gwm-img-isolation",
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "elapsed": "00:00:28",
+    "node": "dgx-21",
+    "launched_from": "login node slogin-02, persistent tmux session gwm-img-probe, via sbatch",
+    "apptainer_version": "1.1.9",
+    "command_boundary": "apptainer exec --nv --containall --no-home --cleanenv --bind ENV:ENV:ro --bind STAGE:/mnt/stage:ro IMG ENV/bin/python3.11 probe_inside.py",
+    "bound_interpreter": "/home/yliutz/.conda/envs/gwm-cut3r-py311-20260915/bin/python3.11"
+  },
+
+  "results": {
+    "allow_read": true,
+    "allow_content": "staged_history_marker_v1 host=slogin-02 utc=2026-09-16T04:46:09Z",
+    "deny_visible": false,
+    "project_root_visible": false,
+    "empty_home_dir_present": true,
+    "home_contents_note": "HOME=/home/yliutz exists inside the sandbox as an empty directory; the unbound sentinel under it is NOT visible",
+    "write_readonly_root": "OSError Errno 30 (read-only file system)",
+    "write_readonly_stage": "OSError Errno 30 (read-only file system)",
+    "write_tmp": true,
+    "cuda_available": true,
+    "torch": "2.7.0+cu126",
+    "python": "3.11.16",
+    "device_name": "NVIDIA H800",
+    "device_count": 1,
+    "matmul_shape": [1024, 1024],
+    "matmul_finite": true,
+    "peak_allocated_bytes": 53477376,
+    "nvidia_smi": "NVIDIA H800, 580.159.03, 81559 MiB",
+    "egress_informational": "HTTP 401 from registry-1.docker.io/v2/ (network reachable, unauthenticated)",
+    "mountinfo_bound_lines": 2
+  },
+
+  "verdict": "SYNTHETIC_PROBE_PASS",
+  "verdict_scope": "A digest-pinned executable GPU image executes the bound project interpreter on an H800 compute node, GPU access works, and the mount policy makes unbound paths and the project tree invisible while intended inputs stay read-only.",
+
+  "caveats": [
+    "squashfuse and fuse2fs are absent on the compute node, so apptainer converts the SIF to a temporary sandbox on every exec; startup cost must be measured before the formal job.",
+    "Mount-policy isolation is not a security boundary against malicious code; it constrains what the frozen predictor can read.",
+    "/tmp is writable inside the sandbox, which is expected and recorded.",
+    "The probe reads no model, checkpoint, dataset, future outcome or ground truth; it is not a Gate0 pass and not a scientific result.",
+    "The image tag is recorded as a label only; the pinned digest is the identity. A tag-based pull would not be the same artifact."
+  ],
+
+  "remaining_blockers_for_formal_s103": [
+    "effective v4 Gate0 contract (MISSING_REQUIRED)",
+    "scorer (MISSING_REQUIRED)",
+    "independent verifier (MISSING_REQUIRED)",
+    "full window manifests and command-camera provenance",
+    "validator PRE_RUN_READY plus formal launch guard receipt binding the sealed manifest"
+  ],
+
+  "evidence": {
+    "probe_inside_589607.json": {"bytes": 2134, "sha256": "2538be7a211cbac6358e0b3cbb8210741c542122a1adbf8cd4838c903b534a81"},
+    "probe_inside_589607.err": {"bytes": 371, "sha256": "e157c345e5d7345b9b582fedae870e8e58cf3e90a431861e548ce8322dcda3dc"},
+    "slurm-589607.out": {"bytes": 3003, "sha256": "cd03b788523009049b7d74f627c712ae646f024815667837f76babfa738c1510"},
+    "slurm-589607.err": {"bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+    "runner.log": {"bytes": 450, "sha256": "cdc4f4f2a2a95e2a71642b3cbe0917bb8824d3146c0512ffa62eaaeb41e6c08c"},
+    "run_probe.sh": {"bytes": 842, "sha256": "a6a4dfd86ab5d5d991b7f66bd1562d1ee429162c1fcf88ebd72580a661b12d21"},
+    "pull_20260916.log": {"bytes": 3782, "sha256": "40af9dda3fcb2c9428f24c944c19c21706cbe675825e987952d97eb206cb58ea"}
+  },
+  "protocol": {"path": "work/S103_selector_free_baseline/gpu_image_isolation_20260916/README.md"},
+  "receipt_directory": "work/S103_selector_free_baseline/gpu_image_isolation_20260916/remote_receipts_589607/"
+}

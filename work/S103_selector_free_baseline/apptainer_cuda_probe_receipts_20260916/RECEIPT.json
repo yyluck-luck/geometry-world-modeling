@@ -1,0 +1,23 @@
+{
+  "schema": "gwm-apptainer-cuda-probe-receipt-v1",
+  "date": "2026-09-16",
+  "jobs": [588659, 588660, 588661, 588662, 588664],
+  "host": "dgx-09",
+  "apptainer": "1.1.9",
+  "model_access": false,
+  "dataset_access": false,
+  "ground_truth_access": false,
+  "forward_completed": false,
+  "formal_gate0_eligibility": "NOT_GRANTED",
+  "status": "BLOCKED",
+  "findings": [
+    "588659: empty sandbox lacks /dev destination; Apptainer container creation failed",
+    "588661: minimal sandbox starts but bound /opt/gwm-env/python is absent",
+    "588662: binding environment at its absolute path still cannot execute python symlink",
+    "588664: direct python3.11 binary also cannot be executed from current sandbox binding"
+  ],
+  "decision": "Do not start formal VMem forward until a digest-pinned GPU-compatible image/rootfs and a synthetic forbidden-path isolation probe both pass.",
+  "novelty_authorization": "NONE",
+  "new_method_validated": false,
+  "evidence": ["slurm_outputs.txt", "remote_588659.txt", "remote_588660.txt", "remote_588661.txt", "remote_588662.txt", "remote_588664.txt"]
+}

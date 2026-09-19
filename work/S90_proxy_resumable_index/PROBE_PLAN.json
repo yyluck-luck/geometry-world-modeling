@@ -1,0 +1,34 @@
+{
+  "schema": "s90-proxy-range-probe-v1",
+  "created_utc": "2026-09-11T09:51:05.005552+00:00",
+  "purpose": "transport recovery and tar-header access only; not a scientific method test",
+  "source_plan": "../S89_matched_view_index/INDEX_PLAN.json",
+  "source_plan_sha256": "d71131607884af528db294a94d82cd4d0c5255f33f11a3496a2a2b5d030f5917",
+  "archive_commit": "855627f73a6fdd4db7fa150097a576f6e890c569",
+  "archive_name": "abc.tar",
+  "archive_bytes": 12064450560,
+  "offset": 11460608,
+  "length": 512,
+  "expected_http": 206,
+  "proxy": "http://127.0.0.1:7897",
+  "connect_timeout_seconds": 10,
+  "wall_timeout_seconds": 25,
+  "transport_body_cap_bytes": 8192,
+  "redirect_cap": 5,
+  "retry": 0,
+  "acceptance": [
+    "curl return code is 0",
+    "final HTTP status is 206",
+    "final Content-Range is bytes 11460608-11461119/12064450560",
+    "saved body is exactly 512 bytes",
+    "body parses as one safe regular/directory tar header"
+  ],
+  "forbidden": [
+    "disable TLS certificate verification",
+    "change system proxy or TUN settings",
+    "read or save proxy subscriptions, tokens, accounts, or API keys",
+    "automatic retry",
+    "request JSON, RGB, depth, segmentation, or model payloads",
+    "infer scientific success from transport success"
+  ]
+}

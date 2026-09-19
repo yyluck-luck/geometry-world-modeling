@@ -1,0 +1,300 @@
+{
+  "schema": "S84_ANCHOR19_REFERENCE_DEPTH_CHANGE_V1",
+  "created_utc": "2026-09-10T18:57:47.062370+00:00",
+  "status": "FROZEN_FOR_PRE_REVIEW_NOT_EXECUTED",
+  "evidence": "Exploratory saved-prediction vs previously exposed associated sensor depth; one anchor and scene.",
+  "question": "Does lower S83 proxy loss accompany lower unscaled sensor-reference camera-Z MAE at history19?",
+  "runner_sha256": "2bd6f28fb23cf4c2e4b938fbdf191ebe0f674973bd6c50609926ba28c9f20edb",
+  "output_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S84_anchor_depth_change/execution_01",
+  "inputs": [
+    {
+      "role": "initial",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/execution_01/INITIALIZED_STATE.npz",
+      "bytes": 18946336,
+      "sha256": "9469b0df462fef50005708ac6909bd2d2d9e44164e1f615db63666f65069450d",
+      "decode_fields": [
+        "depth",
+        "history_ids",
+        "K",
+        "c2w"
+      ],
+      "tensors": {
+        "depth": {
+          "shape": [
+            4,
+            384,
+            512
+          ],
+          "dtype": "float32",
+          "body_sha256": "6798d2c7f68959e42a92783fce0c0feacc2942a92ccd691eb120b679fab71c7f",
+          "finite": true
+        },
+        "history_ids": {
+          "shape": [
+            4
+          ],
+          "dtype": "int64",
+          "body_sha256": "69493fc8f20d521934b76f7fba0f769749af997fcf2300112b21b5a5c0bf51b7",
+          "finite": true
+        },
+        "K": {
+          "shape": [
+            4,
+            3,
+            3
+          ],
+          "dtype": "float32",
+          "body_sha256": "8843700ba92b73378c584775bc11a9296ef737072cd6396afdc23a043c5b4a21",
+          "finite": true
+        },
+        "c2w": {
+          "shape": [
+            4,
+            4,
+            4
+          ],
+          "dtype": "float32",
+          "body_sha256": "a55d30da4ffb001730d9725080153daeeac896c4a3210e8636b3ff9b565cb137",
+          "finite": true
+        }
+      }
+    },
+    {
+      "role": "final",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/execution_01/FINAL_BEFORE_CLEAN.npz",
+      "bytes": 18957328,
+      "sha256": "fd4e4c0c7c515b0dcf78387561d9674d287226824d3a6f0c94791f7adcf4fad2",
+      "decode_fields": [
+        "depth",
+        "history_ids",
+        "K",
+        "c2w"
+      ],
+      "tensors": {
+        "depth": {
+          "shape": [
+            4,
+            384,
+            512
+          ],
+          "dtype": "float32",
+          "body_sha256": "559a9a4a6e3a5da081ae0c59df2b3aac9745a215d1e7792c2b258316b525c88d",
+          "finite": true
+        },
+        "history_ids": {
+          "shape": [
+            4
+          ],
+          "dtype": "int64",
+          "body_sha256": "69493fc8f20d521934b76f7fba0f769749af997fcf2300112b21b5a5c0bf51b7",
+          "finite": true
+        },
+        "K": {
+          "shape": [
+            4,
+            3,
+            3
+          ],
+          "dtype": "float32",
+          "body_sha256": "8843700ba92b73378c584775bc11a9296ef737072cd6396afdc23a043c5b4a21",
+          "finite": true
+        },
+        "c2w": {
+          "shape": [
+            4,
+            4,
+            4
+          ],
+          "dtype": "float32",
+          "body_sha256": "a55d30da4ffb001730d9725080153daeeac896c4a3210e8636b3ff9b565cb137",
+          "finite": true
+        }
+      }
+    },
+    {
+      "role": "sensor_reference",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_timestamp_guard/rgbd_dataset_freiburg2_desk/depth/1311868171.680537.png",
+      "bytes": 134050,
+      "sha256": "a9ae4c42b38b5376ccdea41c5e68d14155944c8b26e185e57c7db39905fef4be"
+    }
+  ],
+  "history_ids": [
+    12,
+    13,
+    18,
+    19
+  ],
+  "scored_history_id": 19,
+  "scored_history_index": 3,
+  "K_512_nominal": [
+    [
+      420.0,
+      0.0,
+      255.6
+    ],
+    [
+      0.0,
+      420.0,
+      191.6
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "coordinates": {
+    "native_wh": [
+      640,
+      480
+    ],
+    "processed_wh": [
+      512,
+      384
+    ],
+    "N": 196608,
+    "native_to_512": [
+      [
+        0.8,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.8,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "native_to_512_expected_body_sha256": "1f69b63068b33f689ff3f857ac7a8c027e1f8fb02aecbb48aa16d23178a107ce",
+    "mapping_proof": "S82 builder writes the literal contract matrix; expected little-endian float64 body hash equals S83 frozen input metadata. No NPZ read in preparation.",
+    "inverse": "native_u=1.25*u; native_v=1.25*v; integer u=0..511,v=0..383",
+    "nearest": "floor(native+0.5), no np.rint, interpolation, half-pixel change, 576 crop, clipping or neighbor fallback",
+    "valid_domain": "continuous [0,639] x [0,479] and rounded integer inside 640x480"
+  },
+  "reference": {
+    "kind": "associated RGB-grid sensor camera-Z",
+    "unit": "m",
+    "raw_divisor": 5000,
+    "raw_zero": "missing",
+    "depth_minus_rgb_ns": 17126000,
+    "association": "S8 block0 frame19 unchanged",
+    "extra_1031_correction": false,
+    "time_compensation": false,
+    "undistortion": false,
+    "physical_truth_certified": false
+  },
+  "metric": {
+    "primary": "FP64 mean abs(predicted camera-Z - raw/5000) over the SAME sensor-only V, no fitting",
+    "V": "fixed domain AND raw>0, independent of predictions/confidence/errors",
+    "invalid_prediction": "nonfinite OR finite<=0, disjoint counts on V; if any stage has any invalid on V, its mae_m=null, mae_extended=+Infinity, entire comparison UNSCORABLE",
+    "empty_V": "both primary means null/undefined; UNSCORABLE",
+    "secondary": [
+      "mean AbsRel on V",
+      "median absolute error on V",
+      "decreased/equal/increased/unavailable pixel counts with denominator V"
+    ],
+    "sign_counts": "strict per-pixel <0, ==0, >0 descriptive counts; no significance claim",
+    "decision": "Only both complete: delta=final-initial; delta<-1e-9 decrease; delta>1e-9 increase; otherwise no resolvable change; UNSCORABLE if either incomplete",
+    "no_common_finite_subset_primary": true,
+    "no_confidence_filter": true,
+    "no_depth_range_filter": true,
+    "no_posthoc_scale_or_shift": true,
+    "no_sensor_feedback_to_optimizer": true
+  },
+  "numeric": {
+    "dtype": "float64",
+    "decision_tolerance_m": 1e-09,
+    "independent_scalar_atol_m": 1e-10,
+    "independent_scalar_rtol": 1e-12,
+    "K_atol_px": 0.001,
+    "tolerance_scope": "Numerical distinction/recomputation only; not sensor precision or physical meaningfulness."
+  },
+  "runtime": {
+    "python": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "platform": "darwin",
+    "versions": {
+      "numpy": "1.26.4",
+      "Pillow": "10.3.0"
+    }
+  },
+  "resources": {
+    "attempts": 1,
+    "retry": false,
+    "wall_seconds": 120,
+    "rss_bytes": 1073741824,
+    "limit_scope": "Internal SIGALRM and sampled self ru_maxrss; no new supervisor, no hard address-space guarantee"
+  },
+  "read_scope": {
+    "raw_bytes": "Whole two NPZ archives include bundled other histories/colors/world points; byte reading/hashing is not selective isolation.",
+    "decode": "Only depth/history_ids/K/c2w from each archive; depth field decodes all four maps, score only row3/history19. No colors/world_points/confidence/log-depth/raw heads decode. One grayscale PNG.",
+    "ordering": "Read/hash/validate both frozen prediction states before sensor PNG.",
+    "forbidden": "Other scientific inputs, model/optimizer/generation calls, network, writes to source inputs or canonical files."
+  },
+  "output_schema": {
+    "ALL_PIXELS_NPZ": "N=196608 C-order rows including missing/invalid; float64 NaN marks undefined reference/error, not zero.",
+    "ALL_PIXELS_CSV": "Same 196608 rows and columns, .17g floats; nan/inf literal strings preserve invalids; no removed rows.",
+    "SUMMARY": "JSON no nonfinite numbers: null and status/extended marker; complete denominator partitions and paired decision.",
+    "RECEIPT": "Actual input byte hashes, decode scope, times, rows, output hashes; any error retains traceback and partial files. Structural/input failure may prevent row construction and is recorded FAILED, never invented rows."
+  },
+  "proxy_receipt_context": {
+    "initial_loss": 1.7617251873016357,
+    "final_loss_after_100_updates": 0.02821868471801281,
+    "iterations_completed": 100
+  },
+  "proxy_boundary": "These are saved S83 receipt scalars, no rerun; independent S83 verification is separate. S84 only tests sensor-reference MAE association, not causal benefit.",
+  "provenance_texts": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S81_anchor_depth_reprojection/CONTRACT.json",
+      "bytes": 8033,
+      "sha256": "ae317145a909f12fe94cd0ad221fa54da1a032855f585b73bc996b3ec0cc57a4"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/FOUR_HISTORY_CONTRACT_V3.json",
+      "bytes": 40271,
+      "sha256": "2b08a75003468ced7b15ea92d4b8c01c00e7f532d0893dcde0958d4fd33d45f1"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/CONTRACT.json",
+      "bytes": 43486,
+      "sha256": "0ff3a1f1c4aeaadb455ec6a3e832217978148172ae0018a5bf97b53859a7be5a"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/execution_01/RECEIPT.json",
+      "bytes": 25423,
+      "sha256": "e0482a8fe7852ba5fa484e38b822eba34e5459ac85f73bdb3140f757a6f102e7"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/NEXT_DEPTH_DIAGNOSTIC_PLAN.md",
+      "bytes": 4746,
+      "sha256": "27235cbd8b74a3141c50e6b9883565a375370dd2b39112a4938800d5f7df5f66"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S83_fixed_camera_geometry/run_fixed_geometry.py",
+      "bytes": 16231,
+      "sha256": "76c5a6a4a67a391e97e6ebaa7c13cc0a520092be563a10f27a8cebad3f33afc3"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/gradient_preserving_optimizer.py",
+      "bytes": 1588,
+      "sha256": "912c277c12e06e6f896cfc6e433b74e1d831ea731cf9201599f2b36f24a18b56"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/build_four_history_geometry_v3.py",
+      "bytes": 20279,
+      "sha256": "e789370a0f7871238596a30ceae02c01567b25fadc38f0a6e9304ca69eb20eb3"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py",
+      "bytes": 12212,
+      "sha256": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11"
+    }
+  ],
+  "review": "Root and different-author source/contract review before any real input bytes; saved results require independent scalar recompute before scientific acceptance.",
+  "novelty_authorization": "NONE",
+  "new_method_validated": false
+}

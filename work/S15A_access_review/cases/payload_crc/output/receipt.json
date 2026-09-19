@@ -1,0 +1,50 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:46:55.537211+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:46:55.537462+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/142",
+        "Content-Length": "30",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:46:55.537483+00:00",
+      "bytes": 30,
+      "sha256": "db4bd0a64cc5b2483f2060fc031038912652ba21ea7d57b8846dde80b3866d67"
+    },
+    {
+      "started_utc": "2026-09-06T09:46:55.537546+00:00",
+      "requested_range": "bytes=30-63",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 30-63/142",
+        "Content-Length": "34",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      },
+      "ended_utc": "2026-09-06T09:46:55.537562+00:00",
+      "bytes": 34,
+      "sha256": "37dfec69175e2e78b29d0d1474c14a006d9f6759246356d16af3c5b36a49d378"
+    }
+  ],
+  "members": [],
+  "body_bytes": 64,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "a4e99e5da290b75028909932b3443fbd6e300551d8d3c1a575ceab9d5d2e3ef2",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases/payload_crc/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 142,
+  "error": "ValueError('CRC32 mismatch')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 116, in execute\n    data = unpack_member(header,rest,entry,c['max_member_uncompressed_bytes'])\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 64, in unpack_member\n    require(zlib.crc32(data) & 0xffffffff == entry['crc32'], 'CRC32 mismatch')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: CRC32 mismatch\n",
+  "ended_utc": "2026-09-06T09:46:55.537813+00:00"
+}

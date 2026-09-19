@@ -1,0 +1,59 @@
+{
+  "schema": "s39-bounded-vmem-curl-range-v1",
+  "frozen_utc": "2026-09-07T04:13:16.505759+00:00",
+  "source_sha256": "316d700283208c8e4b579c6fb3a6eb19068c48fa38b79c31d808647c120271fe",
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/transport/curl_range_01/probe.py",
+  "goal": "Distinguish official HF resolve-host transport from its authenticated signed CDN with one conditional 64KiB range request; not full download or scientific experiment",
+  "repo": "liguang0115/vmem",
+  "revision": "ac5921080a57f5a634f4b9acbbc8f3db67c9d113",
+  "expected_size": 5056346672,
+  "expected_sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4",
+  "legs": [
+    {
+      "method": "HEAD",
+      "destination": "Official SDK canonical fixed HF resolve URL",
+      "authentication": "Official SDK normal saved credential; bearer passed in curl stdin config only",
+      "acceptance": "curl0 + redirect status + exact expected x-repo-commit/x-linked-etag/x-linked-size + HTTPS official redirect host"
+    },
+    {
+      "method": "GET",
+      "destination": "HF-returned signed CDN URL in RAM only",
+      "range": "bytes=0-65535",
+      "bearer_sent": false,
+      "acceptance": "curl0 + HTTP206 + exact content-range + exactly65536 captured body bytes + ssl_verify_result0"
+    }
+  ],
+  "max_curl_attempts": 2,
+  "automatic_redirects": false,
+  "retries": 0,
+  "range_payload_limit_bytes": 65536,
+  "curl_max_filesize": 65536,
+  "stdout_capture_ceiling_bytes": 1048576,
+  "per_leg_curl_wall_limit_seconds": 15,
+  "per_leg_supervisor_wall_limit_seconds": 20,
+  "TLS_verification": "enabled; no insecure flag or custom bypass",
+  "proxy": "existing http://127.0.0.1:7897 supplied per process, no system change",
+  "client": "/usr/bin/curl8.7.1 SecureTransport/LibreSSL3.3.6",
+  "SDK": "isolated1.30.0 used with HF_HUB_OFFLINE=1 only to consume existing auth and build canonical URL",
+  "secret_retention": "No token, signed URL/query, raw headers, raw stderr or model body persisted",
+  "companion_processes": "Do not observe/modify/terminate CLIP or other downloads",
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/vmem_http_attempt2_receipt.json",
+      "sha256": "349c2bb99eeaf03e8a59e866df7b68b97e0b57b65c4ffc2b628b0d8fafb87469"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/vmem_http_attempt2_redacted.log",
+      "sha256": "02b7b55a9454efb1b150b5772fee755daecfb2fead4758cb0d9f6e099a03238e"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/xet_transport_interruption.json",
+      "sha256": "bf9577ed4fd42aeeb85ba50ae54365ebcd2bf65952c88a3e2774cc18b7f4010c"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/vmem_download_receipt.json",
+      "sha256": "53457c648272b07685b7cce29cb6441db1d613af9ca8459294b620aeb64bc654"
+    }
+  ],
+  "syntax_check": "ast.parse only, no model or network execution"
+}

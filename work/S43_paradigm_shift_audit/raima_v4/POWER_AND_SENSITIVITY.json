@@ -1,0 +1,93 @@
+{
+  "schema": "raima-v4-power-and-sensitivity-v1",
+  "status": "SOURCE_ONLY_EXACT_COUNT_DESIGN_COMPUTE_BLOCKED",
+  "probability_model": {
+    "random_variable": "scene_positive under the exact two-trajectory primary roster",
+    "null": "p_scene_positive <= 0.20",
+    "design_alternative": "p_scene_positive = 0.50",
+    "assumptions": [
+      "independent physical-scene clusters",
+      "exchangeable Bernoulli scene-positive indicators from the frozen target sampling frame",
+      "no scene replacement or informative deletion",
+      "all endpoint and reference evidence complete; otherwise the gate blocks",
+      "two registered trajectories and exactly one primary source-target unit per trajectory"
+    ],
+    "if_assumptions_fail": "no population p-value or prevalence claim; report roster-specific descriptive results only"
+  },
+  "v3_n8_audit": {
+    "rule": "success when at least 5 of 8 scenes are positive",
+    "type_one_at_p0_0_20": "0.010406400000000000",
+    "power_at_p1_0_50": "0.363281250000000000",
+    "power_at_p_0_60": "0.594086400000000000",
+    "power_at_p_0_70": "0.805895650000000000",
+    "verdict": "LOW_POWER_FOR_MODERATE_40_TO_60_PERCENT_PREVALENCE",
+    "interpretation": "fewer than 5 positives cannot establish absence; it can be a low-power no-go"
+  },
+  "v4_two_stage_design": {
+    "stage_1": {
+      "n": 10,
+      "futility_boundary": "stop if positive_scene_count <= 2",
+      "continuation_boundary": "continue if positive_scene_count >= 3",
+      "efficacy_boundary": null,
+      "reason_no_early_efficacy": "preserve a fixed N=20 confirmatory endpoint and avoid selective secondary inference"
+    },
+    "stage_2": {
+      "additional_n": 10,
+      "maximum_total_n": 20,
+      "count_boundary": "positive_scene_count >= 8",
+      "equal_scene_mean_boundary": ">= 0.20",
+      "minimum_leave_one_scene_out_mean_boundary": ">= 0.15",
+      "all_scenes_evaluable": true
+    },
+    "exact_count_operating_characteristics": {
+      "type_one_upper_bound_at_p0_0_20": {
+        "numerator": 2858999469617,
+        "denominator": 95367431640625,
+        "decimal": "0.029978782278531154"
+      },
+      "count_power_upper_bound_at_p1_0_50": {
+        "numerator": 445705,
+        "denominator": 524288,
+        "decimal": "0.850114822387695312"
+      },
+      "expected_n_at_p0_0_20": {
+        "numerator": 25824228,
+        "denominator": 1953125,
+        "decimal": "13.222004736000000000"
+      },
+      "expected_n_at_p1_0_50": {
+        "numerator": 1245,
+        "denominator": 64,
+        "decimal": "19.453125000000000000"
+      }
+    },
+    "error_control": "the final composite gate is a subset of the calibrated count gate, so its one-sided type-I error is no greater than 0.029978782278531154 under the stated model",
+    "power_boundary": "0.850114822387695312 is an upper bound until the joint scene-rate distribution is justified; under the exact V4 two-unit roster, positive rates are at least 0.5 and the mean/LOSO conditions follow from count>=8, making the bound exact",
+    "no_stage_d_adaptation": "Stage D may test hooks and estimate runtime only; it cannot change n, boundaries, endpoints, seed roster, source selector, reference rule or sampling frame"
+  },
+  "sensitivity_table": [
+    {"p_scene_positive": "0.20", "v3_n8_success_probability": "0.010406400000000000", "v4_two_stage_success_probability": "0.029978782278531154", "v4_expected_n": "13.222004736000000000"},
+    {"p_scene_positive": "0.30", "v3_n8_success_probability": "0.057967650000000000", "v4_two_stage_success_probability": "0.215346214053748002", "v4_expected_n": "16.172172136000000000"},
+    {"p_scene_positive": "0.40", "v3_n8_success_probability": "0.173670400000000000", "v4_two_stage_success_probability": "0.561721600578074706", "v4_expected_n": "18.327102464000000000"},
+    {"p_scene_positive": "0.50", "v3_n8_success_probability": "0.363281250000000000", "v4_two_stage_success_probability": "0.850114822387695312", "v4_expected_n": "19.453125000000000000"},
+    {"p_scene_positive": "0.60", "v3_n8_success_probability": "0.594086400000000000", "v4_two_stage_success_probability": "0.971630704599414866", "v4_expected_n": "19.877054464000000000"},
+    {"p_scene_positive": "0.70", "v3_n8_success_probability": "0.805895650000000000", "v4_two_stage_success_probability": "0.997400048859219082", "v4_expected_n": "19.984096136000000000"},
+    {"p_scene_positive": "0.80", "v3_n8_success_probability": "0.943718400000000000", "v4_two_stage_success_probability": "0.999909856651425874", "v4_expected_n": "19.999220736000000000"}
+  ],
+  "compound_gate_proof_for_exact_v4_roster": {
+    "scene_rate_domain": ["0", "1/2", "1"],
+    "scene_positive_threshold": "1/5, operationally at least one of two units",
+    "count_implication": "8 positive scenes imply total rate mass >= 8*(1/2)=4, hence mean >=4/20=1/5",
+    "loso_implication": "removing any one scene removes at most 1, leaving mass >=3 and LOSO mean >=3/19 >3/20",
+    "guard_against_future_drift": "the reference code still evaluates count, mean and LOSO separately; changing units per scene requires a new version and new power analysis"
+  },
+  "threshold_sensitivity_policy": {
+    "primary_scene_rate_threshold": "1/5",
+    "scientific_meaning_under_two_units": "one or both trajectories positive",
+    "prevalence_null": "1/5",
+    "descriptive_only_alternatives": ["1/10", "3/20", "1/4"],
+    "rule": "alternative thresholds may be reported as labelled sensitivity only and can never replace the primary boundary"
+  },
+  "reference_implementation": "primary_endpoint_reference.py",
+  "test_source": "test_primary_endpoint_reference.py"
+}

@@ -1,0 +1,17 @@
+{
+  "audit_id": "S95-contract-semantics-agent-math-v1",
+  "status": "PASS_WITH_REPAIRS_REQUIRED",
+  "scope": "S94 evaluation contract semantics; no model/data/network",
+  "checks": {
+    "finite_tail_ties": {"status": "FAIL_IF_UNSPECIFIED", "top5_mean": "14/5", "strict_exceedance_cvar": "10"},
+    "finite_tail_all_equal": {"status": "FAIL_IF_UNSPECIFIED", "strict_exceedance_cvar": null},
+    "five_trajectory_two_sided_sign_p": {"status": "LIMITATION", "p_value": "1/16"},
+    "five_trajectory_bootstrap_extreme": {"status": "LIMITATION", "percentile_ci": ["-1", "-1"]},
+    "candidate_count_for_k8": {"status": "BLOCKING_CONFIGURATION", "gate0_min": 6, "k_max": 8, "combinations": 0},
+    "marginal_vs_postselection": {"status": "LIMITATION", "marginal_error": "1/20", "selected_subgroup_error": "1"},
+    "risk_unit_invariance": {"status": "BLOCKING_DEFINITION", "metre_sum": "21/10", "millimetre_sum": "102"}
+  },
+  "evidence": ["audit_cases.py", "RESULTS.md", "CONTRACT_NUMBERED.txt", "CONTRACT_JSON_NUMBERED.txt"],
+  "execution": {"audit_cases": "S95_CONTRACT_SEMANTICS_AUDIT_PASS", "s94_validator": "S94_CONTRACT_OFFLINE_PASS"},
+  "claim_boundary": "protocol audit only; no GRC method or novelty validation"
+}

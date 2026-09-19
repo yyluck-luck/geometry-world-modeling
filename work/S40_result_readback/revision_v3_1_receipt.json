@@ -1,0 +1,40 @@
+{
+  "schema": "s40-readback-revision-v3-1-receipt-v1",
+  "status": "PROTOCOL_BOUNDARY_CORRECTED_AWAITING_INDEPENDENT_REREVIEW",
+  "created_utc": "2026-09-07T12:45:05.288446+00:00",
+  "author_role": "/root",
+  "source_unchanged_from_v3": {
+    "readback_sha256": "51f6751d87e369cc1a2fbb777f363cc5563a153299bdb05ab7a177cc306405e0",
+    "previous_readback_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6"
+  },
+  "protocol_revision": {
+    "blocked_protocol_sha256": "ad74e5a6bf41a7c2cd726359915b7e53899be511d034213bdec8277f2c442078",
+    "corrected_protocol_sha256": "be2cb8e12f68677deefbe3b5f5b8661eb394677c49cc861ea0e392f63fe571ca",
+    "blocking_review_path": "work/S40_result_readback/source_review_v3.json",
+    "blocking_review_sha256": "04441f30e8930089c0ca7d6c0d94be1b0863115a629895ff23bfb8561045b777",
+    "blocking_review_verdict": "REVISION_REQUIRED"
+  },
+  "attempt01_actual_read_boundary": {
+    "identity_records": 5916,
+    "identity_bytes": 244804717,
+    "archive_tensor_bin_files_stream_hashed": 1951,
+    "archive_tensor_bin_bytes_stream_hashed": 226619164,
+    "archive_png_files_stream_hashed": 9,
+    "archive_png_bytes_stream_hashed": 5698754,
+    "successful_numpy_array_mappings_or_comparisons": 0,
+    "images_decoded_or_viewed": 0,
+    "quality_scores": 0,
+    "models_ga_gates_or_generation_runs": 0,
+    "worker_receipt_sha256": "4b762c3061d395a6767f319a553e681dbea8fe4d90bd49e5ac8a563d36bf35c6",
+    "supervisor_receipt_sha256": "f269dc2486478e65176c38445ab97251f31a5a4ac6c9f50cbd344a73daefd5da"
+  },
+  "correction": "The prior protocol phrase 'before reading pixels' was too broad. Attempt01 had already streamed tensor and PNG file bodies for hashes, while it had not mapped arrays for comparison, decoded or viewed images, or computed quality scores.",
+  "revision_operations": {
+    "readback_source_modified": false,
+    "protocol_text_modified": true,
+    "readback_executed": false,
+    "additional_tensor_blob_or_image_bodies_read": 0,
+    "model_gate_generation_or_scoring_runs": 0
+  },
+  "next_gate": "Independent rereview must bind the unchanged v3 source, corrected protocol, this receipt and the retained REVISION_REQUIRED review before any supervisor rebind."
+}

@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "task": "S24 post-baseline natural failure definition review",
+  "reviewer": "research_novelty_routes",
+  "recorded_utc": "2026-09-06 14:37:22 UTC",
+  "note": "note.md",
+  "note_sha256": "89c5b84a510a9729cd2a65e88d30df021abbebdf3f60649fa689a2290eb97366",
+  "note_bytes": 5560,
+  "scope": {
+    "s24_prediction_arrays_read": false,
+    "s24_ground_truth_files_read": false,
+    "s24_score_files_read": false,
+    "s24_model_runs": 0,
+    "new_metric_computations": 0,
+    "main_ledger_modified": false,
+    "frozen_code_modified": false,
+    "claude_model_or_cli_used": false,
+    "experimental_pass_claimed": false,
+    "status": "proposed operational advice, not frozen protocol or executed test"
+  },
+  "provenance_caveat": "S24 frame count, runtime status and existing identity are provided by parent and current continuity documents. No S24 prediction, GT coordinate/depth file or score artifact was opened. Public methods papers include their own historical examples; those are not project S24 results.",
+  "papers": [
+    {
+      "title": "A Benchmark for the Evaluation of RGB-D SLAM Systems",
+      "authors": [
+        "Jürgen Sturm",
+        "Nikolas Engelhard",
+        "Felix Endres",
+        "Wolfram Burgard",
+        "Daniel Cremers"
+      ],
+      "year": 2012,
+      "venue": "IEEE/RSJ International Conference on Intelligent Robots and Systems",
+      "url": "https://cvg.cit.tum.de/_media/spezial/bib/sturm12iros.pdf",
+      "access": "web primary PDF text read,8pages",
+      "read_sections": [
+        "III testing/debugging xyz motion setting",
+        "VI calibration and synchronization targeted context",
+        "VII-A Relative pose error",
+        "VII-B Absolute trajectory error"
+      ],
+      "supported_claims": [
+        "RPE uses fixed relative intervals;30 frames at30Hz is a one-second example, not a failure threshold",
+        "trajectory quality need not equal map utility",
+        "xyz is separated-axis debugging motion",
+        "calibration and timing affect interpretation"
+      ],
+      "threshold_not_supported": [
+        "5-second diagnostic horizon",
+        "one-second aggregation bins",
+        "P90 and two-bin persistence",
+        "one-pixel failure threshold",
+        "earliest-qualifying-interval experiment selection"
+      ],
+      "limits": "Reported historical calibration accuracy is not a current framewise confidence bound. No source numerical performance result reused as S24 evidence."
+    },
+    {
+      "title": "A Tutorial on Quantitative Trajectory Evaluation for Visual(-Inertial) Odometry",
+      "authors": [
+        "Zichao Zhang",
+        "Davide Scaramuzza"
+      ],
+      "year": 2018,
+      "venue": "IEEE/RSJ International Conference on Intelligent Robots and Systems",
+      "url": "https://rpg.ifi.uzh.ch/docs/IROS18_Zhang.pdf",
+      "access": "web primary PDF text read,8pages",
+      "read_sections": [
+        "III-B/C trajectory ambiguity and alignment",
+        "IV-A/B ATE and relative error",
+        "VI-B number of states used for alignment"
+      ],
+      "supported_claims": [
+        "alignment depends on sensing ambiguity and fixed comparison choices",
+        "ATE depends on timing of errors and alignment subset",
+        "relative-error sets at different horizons provide complementary local/longer-horizon descriptions"
+      ],
+      "threshold_not_supported": [
+        "any memory-forgetting criterion",
+        "specific pixel or centimeter trigger",
+        "S/M causality"
+      ],
+      "limits": "Paper provides evaluation principles, not a diagnosis that current recurrent model has forgotten information."
+    }
+  ],
+  "search_queries": [
+    {
+      "q": "Sturm Engelhard Endres Burgard Cremers A Benchmark for the Evaluation of RGB-D SLAM Systems 2012 pdf",
+      "domains": [
+        "cvg.cit.tum.de",
+        "vision.in.tum.de"
+      ]
+    },
+    {
+      "q": "Zhang Scaramuzza A Tutorial on Quantitative Trajectory Evaluation for Visual Inertial Odometry IROS 2018 pdf",
+      "domains": [
+        "rpg.ifi.uzh.ch"
+      ]
+    }
+  ],
+  "retrieval_record": {
+    "start_clock_utc": "2026-09-06 14:31:25 UTC",
+    "last_primary_read_completed_before": "2026-09-06 14:35:36 UTC",
+    "query_batches": 1,
+    "primary_papers": 2,
+    "followup_types": [
+      "primary PDF open",
+      "find evaluation / relative error / alignment",
+      "targeted methods-page open"
+    ],
+    "not_found_find": "Literal Sim(3) did not match PDF extraction; similarity-transformation method was subsequently read directly.",
+    "archive": "No local PDF archive created; exact external PDF byte hashes are not claimed. URL, authors, year and read sections preserved.",
+    "scope": "Targeted two-paper evaluation-method check, not a field survey."
+  },
+  "suggested_analysis": {
+    "primary_result_unchanged": true,
+    "additional_diagnostic_only": true,
+    "time_horizons_seconds": [
+      1,
+      5
+    ],
+    "include_adjacent_frame_rpe": true,
+    "endpoint_rule": "First timestamp at or after start+h; log actual horizon; no extrapolation; missing/end-of-sequence cases retained.",
+    "aggregation": "Disjoint1second bins anchored at sequence start; median,P90,valid count,missing; final partial bin separately reported.",
+    "scale": "One fixed existing evaluation scale per method across all windows; intervention branches share the scale/alignment set before their divergence, no independent fit of branch outcomes.",
+    "first_event": "Chronologically earliest qualifying interval; preserve complete set and zero events; do not pick worst frame as causal anchor.",
+    "persistence_proposal": "For same-reference displacement on preregistered comparable visible-point domain, median per frame then median across each of two subsequent complete1second bins exceeds predeclared consumer tau. Undefined comparison or insufficient frozen coverage=>NA.",
+    "causal_timing": "Interval is only an exploratory candidate. At write step k the archived current output precedes S/M commit; evaluate commit effects from k+1. Complete state/no-intervention compatibility and full-frame skip control needed.",
+    "independence": "Overlapping windows, pixels and a single trajectory are not independent scene confirmations."
+  },
+  "thresholds": [
+    {
+      "name": "one-second RPE interval",
+      "status": "method example in TUM paper",
+      "meaning": "measurement horizon, not pass/fail threshold"
+    },
+    {
+      "name": "five-second interval / one-second bins / P90 / two-bin persistence / earliest interval",
+      "status": "reviewer's proposed choices",
+      "meaning": "must be fixed before reading new scores if used prospectively"
+    },
+    {
+      "name": "one actual consumer output pixel",
+      "status": "proposed initial engineering budget only",
+      "meaning": "must be justified against output resolution, common visibility, calibration and scoring uncertainty; no universal threshold claim"
+    },
+    {
+      "name": "actual merge/z-buffer/reference-selection boundaries",
+      "status": "local code interface properties",
+      "meaning": "measure consumer-relevant changes; a boundary crossing may be correct and is not itself quality degradation"
+    }
+  ],
+  "consumer_measures": {
+    "pose_sensitivity": "Small-angle near-axis pinhole estimates f*transverse_translation_error/Z and f*rotation_error_radians are illustrative; use exact K/projection for actual evaluation, not a universal upper bound.",
+    "depth_sensitivity": "For a translated view with baseline B, first-order depth-induced disparity change scales as f*B*deltaZ/Z^2 in the stated local geometry; pure rotation does not use this depth-parallax term.",
+    "visibility": "Use a predeclared comparable static visible domain, report invalid/occluded coverage rather than filtering only successful predictions.",
+    "actual_interface": "Evaluate geometry after the existing VMem alignment before claiming its consumer is affected. Actual selected sources/visibility or coverage shifts remain distinct from generated-image quality.",
+    "ground_truth_boundary": "GT-derived scoring and diagnosis are post-seal evaluation only, not legal online gate features."
+  },
+  "stop_rule": "After one complete unchanged-natural-sequence screen, absent meaningful persistent event, only recovered isolated spikes, uncertainty/invalidity, or already-solved strong-baseline condition means stop S/M mechanism experiments on this segment. A different natural condition may be selected under a new fixed rule; added noise remains a separate synthetic stress test, not a manufactured natural discovery.",
+  "skills_applied": {
+    "supervisor": "Baseline->natural failure->cause->mechanism from current principles/S23 decision and previously read handbook2.2; no new full-handbook read claimed.",
+    "claude": "Local scientific-critical-thinking: construct validity, confounding, time ordering, selection bias, measurement uncertainty, negative results and external confirmation; no clinical GRADE score.",
+    "visual_decision": "A one-page action note with a compact comparison table is sufficient; no generated schematic or image/model call."
+  },
+  "local_input_hash_snapshot_utc": "2026-09-06T14:36:24.203590+00:00",
+  "local_inputs": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/AGENTS.md",
+      "sha256": "3e957d23cdaf28435843ac75919733463956538dbcceaad287276dcd1fd16b52",
+      "bytes": 1882,
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_PRINCIPLES.md",
+      "sha256": "c24e7281c5c2761c4c43d69cc2e88acd44a2e57c7f2e7407262ceb023e177a2a",
+      "bytes": 9401,
+      "read_scope": "full v1.3"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md",
+      "sha256": "e3290cb441c9ab60a0c45fb39905033e3f433e0d6d891b78d23f877b11d312b2",
+      "bytes": 5573,
+      "read_scope": "current 70 lines; S24 status/identity only, no S24 numeric results"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md",
+      "sha256": "aa5a1d9514f66cdf61e9cf98367b80bb281137edffd704bf71f289e6f7dedafd",
+      "bytes": 206880,
+      "read_scope": "last42 lines"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S23_INNOVATION_ROUTES.md",
+      "sha256": "8066b01637ede7a530118e747bcc8571ba80923e1273a4e2bb9fc88cef7b88e2",
+      "bytes": 5966,
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_1_state/idea.md",
+      "sha256": "21de6a02c8016b21cafd22ee64ddd36b4022aff00056d33348c1ad9134f335fc",
+      "bytes": 18047,
+      "read_scope": "full"
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S23_RESULTS.md",
+      "sha256": "6d38f3ce08df8685549bba75b9bc6a9300798262b269950cf3b628a6c4e9cfd4",
+      "bytes": 6015,
+      "read_scope": "header and limitation excerpts; distance-tail, example-selection, scale, head-closure and execution sections; not a new numeric audit"
+    },
+    {
+      "path": "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md",
+      "sha256": "0db52bacb62ec0f73b51569bab142f484df06546ebb17a42a056376c09335791",
+      "bytes": 23705,
+      "read_scope": "first120 lines refreshed; prior full main-skill read reused"
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/modeling/pipeline.py",
+      "sha256": "90a45f452a4f734b3371fb526c566162026e5d900e0c8204709dd57f44ef1d7e",
+      "bytes": 62176,
+      "read_scope": "440-495 source votes,765-835 merge thresholds"
+    }
+  ],
+  "snapshot_warning": "Input hashes are this packaging snapshot, not automatic coverage of later root ledger edits. No experimental validation performed."
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "s44-c1-freeze-tool-source-review-v1",
+  "status": "BLOCKED_S44_C1_FREEZE_TOOL_SOURCE_REVIEW",
+  "reviewed_utc": "2026-09-07T17:00:07.166318+00:00",
+  "reviewer_role": "/root/c1_freeze_source_audit",
+  "supersedes": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S44_c1_confirmation_generation/FREEZE_TOOL_SOURCE_REVIEW.json",
+    "sha256": "1e868b63d293105c49ceb302eccb9c6a18079fc3d3b36dc997c01bd4022d276c",
+    "authorization_effect": "WITHDRAWN_DO_NOT_USE_TO_RUN_PREPARE_ATTACH_OR_GENERATION"
+  },
+  "reviewed_files": {
+    "generation_gate.py": "83fa268bd6a24ca1dd8da11ca36402ced068908635e74ad089d022f3f00b0d0a",
+    "runtime_adapter.py": "afedaadca7bff62616368541d980a28f24131e1256eafef7af81275aa09dfb4e",
+    "launch_generation.py": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b",
+    "PROTOCOL.md": "91ccc2151b3c8e1928291c0e7c47c880c2132f5d4709598f60a306248d94b586",
+    "FREEZE_PROTOCOL.md": "7328493a6947ece8af1ae03141760ac399829cdb025a9b9f98dc807e2d48f7e2",
+    "freeze_c1_manifest.py": "12a424ea42d56efa5067907da2dd63044a5bb9ce9f21a6c8f8949ed9dea7f94a",
+    "inference_seed43.yaml": "2fb88eb0a15c449b876386df5c9c0d2aad8da43c6be5aeccbd9b8d72be1908aa"
+  },
+  "blocking_findings": [
+    {
+      "id": "R1_FORMAL_MANIFEST_PUBLISHED_BEFORE_ATTACH_SUCCESS",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:221-239",
+        "generation_gate.py:378-464"
+      ],
+      "problem": "attach creates the formal review_attachment_01/manifest.json before metadata validation and final freshness succeed. On a later failure the formal manifest remains, while the execution gate does not require a successful attach receipt. Once a transient collision is removed, that manifest from a terminal failed attachment can be launched.",
+      "minimal_fix": "Validate identical manifest bytes through a non-authoritative candidate path, recheck freshness, and create the canonical manifest path only as the last authorization publication. Require the execution gate to accept only that exact canonical path. A failed attach must leave no file accepted as executable.",
+      "pass_condition": "Every failed attach leaves zero launchable manifest files."
+    },
+    {
+      "id": "R2_PREFLIGHT_AFTER_FORMAL_DIRECTORY_CREATION",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:243-290"
+      ],
+      "problem": "The sole accepted prepare or attach directory is created before pinned-gate validation and, for attach, before complete arguments are checked. A typo or static preflight failure irreversibly burns attempt_01/review_attachment_01, but the tool defines no next attempt path.",
+      "minimal_fix": "Complete all non-mutating command, source, parent, input, config and freshness preflight first; only then create the formal directory exclusively and repeat state-dependent checks. Otherwise define and bind retained monotonic retry directories.",
+      "pass_condition": "Preflight errors cannot consume the only protocol-compliant formal directory."
+    },
+    {
+      "id": "R3_BROKEN_SYMLINK_FRESHNESS_FALSE_PASS",
+      "severity": "BLOCKING",
+      "source_locations": [
+        "freeze_c1_manifest.py:103-105",
+        "freeze_c1_manifest.py:227"
+      ],
+      "problem": "Path.exists() returns false for a broken symlink, so a lexically occupied reserved result or execution path can be reported fresh and only fail later at mkdir, potentially before normal terminal evidence exists.",
+      "minimal_fix": "Use os.path.lexists or lstat, reject every file/directory/symlink including broken symlinks, and keep mkdir(exist_ok=False) as the final guard. Describe the earlier check as point-in-time because a later check-to-create race remains possible and is contained by exclusive mkdir.",
+      "pass_condition": "Every existing filesystem entry at a reserved path blocks readiness."
+    }
+  ],
+  "passed_static_checks": {
+    "all_seven_hashes_match": true,
+    "only_input_and_seed_scientific_delta": true,
+    "seed43_manifest_config_python_numpy_torch_and_guard": true,
+    "runtime_inverse_full_ast_equal": true,
+    "launcher_inverse_full_ast_equal": true,
+    "s39_loading_scope_separate_from_c1_input": true
+  },
+  "executed": false,
+  "prepare_calls": 0,
+  "attach_calls": 0,
+  "launcher_main_calls": 0,
+  "model_or_scientific_imports": 0,
+  "pixels_decoded": 0,
+  "generation_calls": 0,
+  "review_scope": "Static source correction. The superseded PASS has no authorization effect."
+}

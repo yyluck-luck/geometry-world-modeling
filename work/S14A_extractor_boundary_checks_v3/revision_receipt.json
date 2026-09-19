@@ -1,0 +1,17 @@
+{
+  "schema": "s14a-fp32-gap-correction-receipt-v1",
+  "recorded_utc": "2026-09-06T04:01:43.944248+00:00",
+  "status": "corrected_pending_independent_rereview",
+  "artifacts": {
+    "scripts/extract_s14_prediction_features.py": "cb550ce7a61ca4c40a9fd7a257a75aa9bc1b6445a905f4e648a96c1e979e8d0e",
+    "scripts/check_s14_feature_boundaries.py": "e6f1795c1ef83cffab1d7da2993cc74e710a36a64002be08e19a776d2f125101",
+    "docs/S14A_EXTRACTOR_PREPARATION.md": "4f842b5cfd801c0a5f3f85a3a587cae1a30b086e668ded21a4e321045b5d16d5",
+    "work/S14A_extractor_boundary_checks_v3/receipt.json": "cc29a25ccaa341c5a759b6f178a976842e8225400b28d7037a294edddd9897e8",
+    "work/S14A_extractor_before_fp32_gap_fix/snapshot_receipt.json": "99f8031af7141de2a905b18a21d8c34399f40ac9491f7d4e74c2450e779443ca"
+  },
+  "boundary_checks": 26,
+  "actual_real_extraction_runs": 0,
+  "reason": "Independent prereview found original NumPy FP32 subtraction was incorrectly compared with a Python FP64 difference",
+  "feature_semantics": "Reuse saved gap after exact IEEE binary32 nearest-even verification; no arbitrary tolerance",
+  "before_snapshot": "work/S14A_extractor_before_fp32_gap_fix"
+}

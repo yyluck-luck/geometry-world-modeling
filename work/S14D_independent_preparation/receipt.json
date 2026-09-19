@@ -1,0 +1,206 @@
+{
+  "schema": "s14d-independent-preparation-v1",
+  "completed_utc": "2026-09-06T08:01:46.547285+00:00",
+  "status": "READY_FOR_ROOT_FREEZE_REAL_PROBE_NOT_RUN",
+  "source_path": "scripts/verify_s14d_ray_only_independent.py",
+  "source_sha256": "34d56c25bbd49ab7fd349d57cae6c960a23c22bce056f3ed836ad5c26a1f5d5d",
+  "doc_sha256": "0c2b8dadb4750a59f6b52b26dbbb342ef7e9dc187b1978b0c5222fef69062753",
+  "previous_core_artificial_receipt": {
+    "schema": "s14d-independent-preparation-v1",
+    "recorded_utc": "2026-09-06T07:55:15.260306+00:00",
+    "source_sha256": "8731c9569d2b932d287adb29db7e09f9138d9e4c0ba0c084950945d30cb58ec1",
+    "status": "MATH_AND_NPZ_CORE_ARTIFICIAL_PASS_RUNTIME_SCHEMA_PENDING_FINAL_REVIEW",
+    "tests": [
+      {
+        "name": "quaternion Rodrigues versus hand 90-degree pose",
+        "status": "PASS"
+      },
+      {
+        "name": "median step .5",
+        "status": "PASS"
+      },
+      {
+        "name": "twenty history distances",
+        "status": "PASS"
+      },
+      {
+        "name": "translated center ray differs from pure optical direction",
+        "status": "PASS"
+      },
+      {
+        "name": "all pixels compare to literal 90-degree analytic formula",
+        "status": "PASS"
+      },
+      {
+        "name": "all NPZ core schema and five-call checks",
+        "status": "PASS"
+      },
+      {
+        "name": "positive shifts responsive while one unchanged shift retained",
+        "status": "PASS"
+      },
+      {
+        "name": "unchanged response is not technical failure",
+        "status": "PASS"
+      },
+      {
+        "name": "state mutation rejected",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "dummy optional dynamic output difference rejected",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "signed-zero byte difference preserved in exact state check",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "zero quaternion rejected",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "stationary history cannot invent offset",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "nonfinite saved NPZ array rejected",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "skewed intrinsics not silently accepted",
+        "status": "EXPECTED_REJECTION"
+      },
+      {
+        "name": "zero encoded direction rejected",
+        "status": "EXPECTED_REJECTION"
+      }
+    ],
+    "test_count": 16,
+    "meaningful_core_array_checks": 108,
+    "max_abs_difference": 6.022567333729967e-06,
+    "real_model_calls": 0,
+    "real_npz_arrays_decoded": 0,
+    "real_image_or_gt_reads": 0,
+    "production_ray_function_read_or_imported": false,
+    "read_scope": [
+      "current project AGENTS/RESEARCH_MEMORY/RESEARCH_LOG",
+      "S14D_GENERATION_INTERFACE_AUDIT.md",
+      "official camera.py quaternion decoder source",
+      "production CLI/output/metadata schema only; ray factory function not read"
+    ],
+    "pending": "Confirm final caller/manifest and metadata schema then freeze final code; no real execution by this agent."
+  },
+  "final_source_math_recheck": {
+    "status": "PASS",
+    "checks": [
+      {
+        "label": "final-source hand quaternion recheck",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          20,
+          4,
+          4
+        ],
+        "elements": 320,
+        "max_abs_difference": 2.220446049250313e-16
+      },
+      {
+        "label": "final-source local axes recheck",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          4,
+          4,
+          4
+        ],
+        "elements": 64,
+        "max_abs_difference": 0.0
+      },
+      {
+        "label": "final-source all-pixel analytic check target 0",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          224,
+          224,
+          6
+        ],
+        "elements": 301056,
+        "max_abs_difference": 2.9801491163716776e-08
+      },
+      {
+        "label": "final-source all-pixel analytic check target 1",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          224,
+          224,
+          6
+        ],
+        "elements": 301056,
+        "max_abs_difference": 2.9802050716121187e-08
+      },
+      {
+        "label": "final-source all-pixel analytic check target 2",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          224,
+          224,
+          6
+        ],
+        "elements": 301056,
+        "max_abs_difference": 2.9802050716121187e-08
+      },
+      {
+        "label": "final-source all-pixel analytic check target 3",
+        "status": "PASS",
+        "kind": "numeric",
+        "shape": [
+          224,
+          224,
+          6
+        ],
+        "elements": 301056,
+        "max_abs_difference": 2.9801885181868215e-08
+      }
+    ],
+    "ray_pixels_checked": 200704
+  },
+  "production_schema_static_review": "fixed13 outputs; nine NPZ; five complete per-call copies; per-call masks/shapes/dtypes/state hashes; caller exit/status/timing/RSS/manifest/argv",
+  "runtime_schema_source_reads": [
+    "scripts/run_s14d_ray_only_probe.py CLI/metadata/output sections only",
+    "scripts/run_s14d_controlled.py caller contract"
+  ],
+  "no_shared_ray_function": true,
+  "preparation_real_npz_decodes": 0,
+  "preparation_model_calls": 0,
+  "preparation_image_gt_reads": 0,
+  "preparation_source_boundary": "no real data, array or model execution; static source schema plus artificial arrays in memory",
+  "frozen_numeric_tolerance": {
+    "atol": 1e-06,
+    "rtol": 1e-05
+  },
+  "response_threshold": 1e-06,
+  "response_is_technical_pass_gate": false,
+  "next": "Root freezes source/schema/identities and executes probe once; independent post-run CLI only after successful probe and caller completion.",
+  "previous_source_sha256_before_monitor_check": "91ea9f1659655b3ba1ca552b37a8d9b730e30a478c36fd5278bb3b612f2e937c",
+  "artificial_runtime_interface_check": {
+    "status": "PASS",
+    "fixture": "work/S14D_independent_preparation/artificial_runtime_otj29n6o",
+    "actual_test_completed_utc": "2026-09-06T08:01:14.034241+00:00",
+    "source_sha256": "34d56c25bbd49ab7fd349d57cae6c960a23c22bce056f3ed836ad5c26a1f5d5d",
+    "production_model_executions": 0,
+    "real_data_reads": 0,
+    "note": "All model arrays/counters/caller events are artificial test literals; only independent verifier ran",
+    "artifact_payloads": 13,
+    "npz_files": 9,
+    "npz_arrays": 75,
+    "meaningful_checks": 398,
+    "max_abs_difference": 6.022567333729967e-06,
+    "verification_sha256": "4a72555fb859e5e9edcebc972f4b43eaafc2c9206e000b256dacc0b62f0a4a65"
+  },
+  "final_source_sha256": "34d56c25bbd49ab7fd349d57cae6c960a23c22bce056f3ed836ad5c26a1f5d5d"
+}

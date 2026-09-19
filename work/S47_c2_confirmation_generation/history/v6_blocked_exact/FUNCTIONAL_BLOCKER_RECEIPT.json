@@ -1,0 +1,55 @@
+{
+  "schema": "s47-c2-v6-functional-correctness-blocker-v1",
+  "reviewed_utc": "2026-09-08T11:17:21.791710+00:00",
+  "status": "BLOCKED_V6_PRODUCTION_WATCHDOG_PROCESS_API_NOT_INJECTED",
+  "reviewer_role": "/root/c2_generation_builder",
+  "scope": "source-only ordinary dependency-binding correctness; no security expansion and no production execution",
+  "exact_v6_source_sha256": {
+    "PROTOCOL.md": "809f78bbcc1a1f78c36227837104f62c693173c2e875dc10f8dd1919f60a3454",
+    "FREEZE_PROTOCOL.md": "7decb45ef030b4c6852899530c9fecf4d75766c66805c83c860e8d3b8c592832",
+    "generation_gate.py": "fc0365f93c57a70d6a73d614edaaee600a288617bb3ea2650f95fa7e87cb41ea",
+    "runtime_adapter.py": "5e6f2e89c724cfc3f5b4eb486eb2a9384fde9b23fb12010576f5c7f3f98e8d7f",
+    "launch_generation.py": "ee0c3f5a37758a778c2dfc9c687ef5805f7eb6a2f990311a9e64116b73bc281d",
+    "freeze_c2_manifest.py": "477a0bbb2317422028b8cf9750152bda1ebb0bb784ace026b10985c7fc525d5f",
+    "create_launch_authorization.py": "cdf4153d905f7e5226c0032e9ad0c2fcce86f5652412ae246f2c919336fe49d9",
+    "inference_seed44.yaml": "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+  },
+  "v6_static_selftest": {
+    "source_sha256": "2759903ba1e5dbde83f4050abbc9b65c46cd8fb86267b6dc5afb3c01a3da941b",
+    "receipt_sha256": "acafa9ab89ecb832c19bb355b4948696039e2e2be1748ad856f4bd6be29b219a",
+    "authority_after_this_finding": "NONE"
+  },
+  "independent_probe_bindings": {
+    "probe_source_sha256": "dc4875960f563f714408ce33b19938fdbf77992f4a5be8c6a1291eecd6856753",
+    "python_3_13_output_sha256": "296eb050c1cb8479a9070737332a24032d5bf99646b69b2ae2160498709d4116",
+    "python_3_12_output_sha256": "8956ea993562f7a63b622f2e638c7c0aef88af16eba172a975ee94b73e53656a",
+    "reported_status_both": "REPRODUCED_V6_PRODUCTION_WATCHDOG_PROCESS_API_NAMESPACE_BLOCKER"
+  },
+  "local_reproduction": {
+    "exact_derived_ast_reversible": true,
+    "inherited_parent_imports_psutil": true,
+    "inherited_parent_stores_psutil_as_fast_local": true,
+    "derived_module_namespace_contains_psutil": false,
+    "production_namespace_psutil_load_lines": [1453, 1461],
+    "production_namespace_psutil_store_lines": [],
+    "missing_key_exception_reproduced": "KeyError: psutil",
+    "result": "REPRODUCED_V6_LOCAL_PSUTIL_NAMESPACE_KEYERROR"
+  },
+  "finding": "The inherited S35 parent imports psutil inside parent(), so the derived bytecode stores it as a fast local. V6 spawn_worker instead asks the separate derived module namespace for namespace['psutil'] at both the normal watchdog call and its cleanup path. No write places that local into the module namespace. The watchdog therefore enters a KeyError path before its production monitor can run, and the cleanup lookup repeats the same failure.",
+  "minimum_required_fix": "The AST-derived subprocess.Popen replacement must pass the parent-local psutil value explicitly as a required process_api keyword to the private spawn_worker closure; normal watchdog monitoring and exceptional cleanup must use that same required binding. Add a disposable regression that traverses the actual derived parent to the private spawn and watchdog boundary.",
+  "execution_boundary": {
+    "formal_gate_calls": 0,
+    "prepare_calls": 0,
+    "attach_calls": 0,
+    "authorization_calls": 0,
+    "launcher_main_calls": 0,
+    "production_worker_calls": 0,
+    "model_or_scientific_imports": 0,
+    "input_image_body_bytes_read": 0,
+    "images_opened": 0,
+    "pixels_decoded": 0,
+    "generation_calls": 0,
+    "formal_or_result_paths_created": 0
+  },
+  "verdict": "V6_WITHDRAWN_NO_AUTHORITY; CREATE_MINIMAL_V7_SOURCE_ONLY_REVISION_AND_REQUIRE_FRESH_REVIEWS"
+}

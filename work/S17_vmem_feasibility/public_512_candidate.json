@@ -1,0 +1,63 @@
+{
+  "schema": "s17-public-512-candidate-not-executed",
+  "status": "DRAFT_REQUIRES_ROOT_FREEZE",
+  "created_utc": "2026-09-06T10:51:35.600466+00:00",
+  "reason": "Remove original VMem geometric checkpoint mismatch without replacing the 512 DPT checkpoint with already available 224 linear",
+  "source_repo": "liguang0115/cut3r",
+  "revision": "b14faf986da0df405cff1b41e60e2975c4da2745",
+  "filename": "cut3r_512_dpt_4_64.pth",
+  "download_url": "https://huggingface.co/liguang0115/cut3r/resolve/b14faf986da0df405cff1b41e60e2975c4da2745/cut3r_512_dpt_4_64.pth",
+  "publisher_lfs_sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103",
+  "expected_bytes": 3173761006,
+  "access": "anonymous public API and HEAD verified; no login/no contact form",
+  "candidate_output": "data/cut3r_512_dpt/cut3r_512_dpt_4_64.pth",
+  "download_suggestion": {
+    "maximum_parallel_requests": 4,
+    "chunk_bytes": 8388608,
+    "require_status_206_and_exact_content_range_each_chunk": true,
+    "refuse_fullbody_200_for_range": true,
+    "resume_with_immutable_revision_and_frozen_lfs_sha": true,
+    "preserve_partials_and_failed_receipts": true,
+    "verify_full_sha256_and_zip_crc_before_weight_deserialization": true
+  },
+  "real_forward_input_images": [
+    {
+      "index": 0,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/bonn_s15a_history/members/rgbd_bonn_static_close_far/rgb/1548340550.99864.png",
+      "sha256": "7caa6f1b9fd1ac5b6938812682c55e3d7926a1348c7554c23e1012b47759cc39"
+    },
+    {
+      "index": 1,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/bonn_s15a_history/members/rgbd_bonn_static_close_far/rgb/1548340551.40132.png",
+      "sha256": "77bebdb3ac737221ef05a4404a1124676bcff536dbffdbb6e197b59bcdf811ae"
+    }
+  ],
+  "input_status": "previously seen/public Bonn RGB, no held-out claim; metadata identities only read in this task",
+  "candidate_forward": {
+    "source_option": "new isolated wrapper around fixed CUT3R512-capable source, then separately validate VMem-embedded branch; old run_cut3r_local.py is hard-coded to 224 linear and must not be used unchanged",
+    "device": "cpu",
+    "dtype": "float32",
+    "threads": 8,
+    "seed": 0,
+    "frame_count": 2,
+    "loader_size": 512,
+    "expected_input_h_w": [
+      384,
+      512
+    ],
+    "expected_head_type": "dpt",
+    "expected_model_patch_image_size": [
+      512,
+      512
+    ],
+    "cpu_rss_ceiling_bytes": 34359738368,
+    "wall_seconds_ceiling": 600,
+    "no_model_training": true,
+    "sensor_gt_reads": 0,
+    "trajectory_reads": 0,
+    "expected_outputs": "save raw all-head pointmaps/pose/confidence/rgb with state, shape/finite/identity and actual metadata before quality claims",
+    "memory_status": "budget is a conservative proposed execution guard; not an established 512 memory prediction"
+  },
+  "full_video_acceptance": false,
+  "current_task_weight_payload_bytes": 0
+}

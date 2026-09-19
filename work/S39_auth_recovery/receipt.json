@@ -1,0 +1,179 @@
+{
+  "schema": "s39-hf-auth-channel-research-v1",
+  "recorded_utc": "2026-09-07T03:44:30.594Z",
+  "author": "/root/s14_feature_extractor",
+  "status": "SUPPORTED_DEVICE_ROUTE_DOCUMENTED_LOCAL_OLD_CLI_DISTINGUISHED",
+  "local_help": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/hf",
+    "version": "huggingface_hub 0.36.2",
+    "version_evidence": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/lib/python3.12/site-packages/huggingface_hub-0.36.2.dist-info/METADATA",
+    "command": "HF_HUB_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 PYTHONDONTWRITEBYTECODE=1 .venv-cut3r/bin/hf auth login --help",
+    "exit_code": 0,
+    "wall_time_seconds": 0.022276792,
+    "stdout": "usage: hf <command> [<args>] auth login [-h] [--token TOKEN]\n                                        [--add-to-git-credential]\n\noptions:\n  -h, --help            show this help message and exit\n  --token TOKEN         Token generated from\n                        https://huggingface.co/settings/tokens\n  --add-to-git-credential\n                        Optional: Save token to git credential helper.\n",
+    "observed_after_execution_utc": "2026-09-07T03:40:53.528Z",
+    "actual_supported_optional_args": [
+      "--token",
+      "--add-to-git-credential"
+    ],
+    "new_device_interface_demonstrated_locally": false
+  },
+  "sources": [
+    {
+      "url": "https://huggingface.co/docs/huggingface_hub/en/guides/cli",
+      "sections": "L220–267 auth login; L270–280 whoami; L435–442 saved-token download behavior",
+      "claims": [
+        "Current official CLI supports browser/device login and agent formatted flow",
+        "Current guide commands are not assumed available on installed 0.36.2"
+      ],
+      "source_type": "official HF CLI guide",
+      "minimum_device_version": "NOT_STATED_IN_INSPECTED_AUTH_SECTION"
+    },
+    {
+      "url": "https://huggingface.co/docs/hub/en/security-tokens",
+      "sections": "L104–120 token roles/creation; L145–154 app-specific and gated-model fine-grained example",
+      "claims": [
+        "Fine-grained token may target one specific model",
+        "Read-only gated-model token is a documented standard workflow"
+      ],
+      "source_type": "official HF Hub user token documentation"
+    },
+    {
+      "url": "https://huggingface.co/docs/hub/en/oauth",
+      "sections": "L115–121 public OAuth clients; L155–201 device flow and gated-repos/read-repos scopes",
+      "claims": [
+        "Device code OAuth is formally supported",
+        "gated-repos covers public gated repositories already granted, unlike private repos"
+      ],
+      "source_type": "official HF OAuth documentation"
+    }
+  ],
+  "web_calls": [
+    {
+      "started_utc": "2026-09-07T03:40:58.660Z",
+      "completed_utc": "2026-09-07T03:41:00.895Z",
+      "operations": [
+        {
+          "operation": "open",
+          "url": "https://huggingface.co/docs/huggingface_hub/en/guides/cli"
+        },
+        {
+          "operation": "open",
+          "url": "https://huggingface.co/docs/hub/en/security-tokens"
+        },
+        {
+          "operation": "open",
+          "url": "https://huggingface.co/docs/hub/en/oauth"
+        }
+      ]
+    },
+    {
+      "started_utc": "2026-09-07T03:41:19.437Z",
+      "completed_utc": "2026-09-07T03:41:21.519Z",
+      "operations": [
+        {
+          "operation": "open_existing_document",
+          "url": "https://huggingface.co/docs/hub/en/security-tokens",
+          "line": 75
+        },
+        {
+          "operation": "open_existing_document",
+          "url": "https://huggingface.co/docs/hub/en/oauth",
+          "line": 80
+        }
+      ]
+    }
+  ],
+  "retrieval_accounting": {
+    "unique_official_document_count": 3,
+    "max_unique_official_documents": 3,
+    "web_tool_calls": 2,
+    "open_operations": 5,
+    "new_documents_in_second_call": 0,
+    "raw_HTTP_status": "NOT_EXPOSED",
+    "transport_bytes": "NOT_EXPOSED"
+  },
+  "recommendations": {
+    "primary": "Root's separate up-to-date official CLI, validate actual auth login help, then official browser device flow using already granted account.",
+    "documented_new_cli_command": "hf auth login --format agent",
+    "not_to_send_to_old_cli": [
+      "--web",
+      "--device",
+      "--format agent",
+      "--force"
+    ],
+    "fallback": "Standard model-specific fine-grained read token for liguang0115/vmem, consumed by official CLI/SDK without printing or recording its value.",
+    "unsupported_assumptions": [
+      "Minimum supported device CLI version",
+      "OAuth token inherently model-specific",
+      "The current device flow has already succeeded",
+      "Browser permission itself proves current CLI authentication"
+    ],
+    "source_vs_execution": "Documentation/help evidence; root owns actual install/auth/download execution."
+  },
+  "authorization_boundary": {
+    "previous_no_whoami_scope_is_not_permanent_policy": true,
+    "normal_saved_credential_consumption_allowed_within_user_authorization": true,
+    "private_browser_session_extraction_not_required": true,
+    "current_subtask_stays_read_only": true
+  },
+  "readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/AGENTS.md",
+      "scope": "continuing already read S38 instructions",
+      "sha256_at_finalize": "3e957d23cdaf28435843ac75919733463956538dbcceaad287276dcd1fd16b52",
+      "bytes_at_finalize": 1882
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_PRINCIPLES.md",
+      "scope": "latest tail22 including v1.6; earlier full v1.5 read",
+      "sha256_at_finalize": "32c5e922f8acc12ab23585d256dda1e06e14899070ec956dc465c3e41e0d9f60",
+      "bytes_at_finalize": 11212
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_MEMORY.md",
+      "scope": "head45",
+      "sha256_at_finalize": "77f077fefc726f084eb21c1cf680a89188e09289dd64dde220fb6406f5bbe557",
+      "bytes_at_finalize": 21134
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/RESEARCH_LOG.md",
+      "scope": "latest38 lines",
+      "sha256_at_finalize": "0bcf8095f085a5b178e16c4d8384a3bcd8da146f65cee53dccd255b36ade980a",
+      "bytes_at_finalize": 299296
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/lib/python3.12/site-packages/huggingface_hub-0.36.2.dist-info/METADATA",
+      "scope": "Name/Version lines only",
+      "sha256_at_finalize": "4dc2b0a3fb27bcba8b091f98bccff4b94369d269c9768aeaecd0b99d970665d9",
+      "bytes_at_finalize": 15201
+    }
+  ],
+  "boundaries": {
+    "logins_executed": 0,
+    "account_queries_executed": 0,
+    "tokens_created": 0,
+    "credential_values_read_or_output": 0,
+    "cookies_read": 0,
+    "browser_private_config_reads": 0,
+    "OAuth_apps_registered": 0,
+    "OAuth_flow_requests_initiated": 0,
+    "model_downloads": 0,
+    "download_401_retries": 0,
+    "software_installs": 0,
+    "scientific_experiments": 0,
+    "canonical_ledger_changes": 0
+  },
+  "artifact_preparation_issue": {
+    "kind": "JavaScript SyntaxError in first artifact composition call",
+    "cause": "Unquoted JSON-like key beginning with 401",
+    "effect": "Parse failed before any file mutation; corrected composition",
+    "scientific_failure": false
+  },
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_auth_recovery/report.md",
+    "sha256": "3e7faab2aaf37c686461fa7afb0cbcb8809b7bacba878ab14e356168e96b3ef8"
+  },
+  "finalized_utc": "2026-09-07T03:44:48.385978+00:00",
+  "readset_hash_note": "Hashes identify documents at finalization; root-owned memory/log may advance after their orientation reads. Hashing does not imply full content review."
+}

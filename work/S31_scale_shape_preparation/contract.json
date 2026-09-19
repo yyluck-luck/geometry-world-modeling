@@ -1,0 +1,210 @@
+{
+  "schema": "s31-saved-global-logscale-diagnostic-v1",
+  "status": "FROZEN",
+  "prepared_utc": "2026-09-06T18:29:59.766477+00:00",
+  "runner": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/run_s31.py",
+  "protocol": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/protocol.md",
+  "output_root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S31_scale_shape_diagnostic",
+  "s30_contract": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/contract.json",
+  "s30_contract_sha256": "000fa5d5b19cc516a581b382e457dcf8e03494da50b220d8f32c0ad0b16224a3",
+  "s30_score_receipt": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/receipt.json",
+  "s30_independent_receipt": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_independent_numeric_review/receipt.json",
+  "s30_producer_receipts": {
+    "C2t": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/receipt.json",
+    "C2a": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/receipt.json"
+  },
+  "s30_metrics": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/metrics.json",
+  "original_scorer": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26b_consumer.py",
+  "arms": [
+    "C2t",
+    "C2a"
+  ],
+  "frame_count": 4,
+  "depth_shape": [
+    4,
+    384,
+    512
+  ],
+  "resource": {
+    "cpu_threads": 1,
+    "wall_seconds": 180,
+    "rss_bytes": 2147483648
+  },
+  "operation": {
+    "log_dtype": "float64",
+    "scale": "exp(-mean_all_pixels(log(D400)-log(D0)))",
+    "scales_per_arm": 1,
+    "per_frame_scale": false,
+    "shift": false,
+    "GT_fit": false,
+    "filter_pixels": false,
+    "output_dtype": "float64"
+  },
+  "sum_squares_tolerance": {
+    "abs_tol": 1e-09,
+    "rel_tol": 1e-12
+  },
+  "log_identity_tolerance": {
+    "atol": 1e-12,
+    "rtol": 1e-12
+  },
+  "scoring_policy": {
+    "prediction_shape_hw": [
+      384,
+      512
+    ],
+    "sensor_shape_hw": [
+      480,
+      640
+    ],
+    "sensor_depth_divisor": 5000,
+    "nearest_mapping": "floor((2*target_index+1)*source_size/(2*target_size))",
+    "gt_valid": "finite_and_positive_on_target_grid",
+    "prediction_invalid": "nonfinite_or_nonpositive",
+    "invalid_policy": "any_invalid_on_valid_gt_makes_frame_absrel_rmse_null;delta1_invalid_is_failure",
+    "aggregation": "equal_frame_mean_only_if_all_prespecified_frames_defined",
+    "gt_scale_fit": false,
+    "confidence_mask": false,
+    "far_depth_cut": false,
+    "delta1_threshold": 1.25,
+    "delta1_comparison": "strict_less_than"
+  },
+  "gt_depth_frames": [
+    {
+      "index": 0,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/depth/1311868164.373557.png",
+      "sha256": "ebab177c635b548e30e4f563b531497c6171a60589b3a80f118d7028f0967b9a",
+      "rgb_time": 1311868164.363181,
+      "depth_time": 1311868164.373557
+    },
+    {
+      "index": 1,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/depth/1311868164.407784.png",
+      "sha256": "a6a19e60dfc11646e685b352759ab4947b1405ac67ae4653d9870abc56199bd7",
+      "rgb_time": 1311868164.399026,
+      "depth_time": 1311868164.407784
+    },
+    {
+      "index": 2,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/depth/1311868164.437021.png",
+      "sha256": "397a1498ed4b5ecb550fe8bdffdd829e6079b089d58bb64a9f2c7d65ce9a533f",
+      "rgb_time": 1311868164.43094,
+      "depth_time": 1311868164.437021
+    },
+    {
+      "index": 3,
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/tum/fr2_desk_download/extracted/rgbd_dataset_freiburg2_desk/depth/1311868164.477039.png",
+      "sha256": "1ce5d1e335d6c6f34ee94639b8ffe3b4ca8f351b04c0e0b52b25ea661fd3de0e",
+      "rgb_time": 1311868164.463055,
+      "depth_time": 1311868164.477039
+    }
+  ],
+  "depth_inputs": {
+    "C2t": {
+      "initial": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/initial_decoded.npz",
+        "sha256": "5d3f5a7a621b3d5e568d95325c10b7fd3c1b385d8c1b83c5306a20429d865e36"
+      },
+      "final": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/output.npz",
+        "sha256": "49638afbc175f90080510786ce2613b72033d1d7d846e8b433860413bc608438"
+      }
+    },
+    "C2a": {
+      "initial": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/initial_decoded.npz",
+        "sha256": "3610f1360e1525063d2f98682a48eaba1da0fa4137aa4ee7ad4a8627de8fc567"
+      },
+      "final": {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/output.npz",
+        "sha256": "c3a29c9310aa1607860453a7c865cd663aab20b7f0703438091a2cf09616ce31"
+      }
+    }
+  },
+  "identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/run_s31.py": "94f7678f627d2d356c017253acfffb5f77944fa1ef4da68e1d8daddce1605b87",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/protocol.md": "6c0357247f1d9740d65b60b01f8be897c8cd5b91274441a87d2d21f76af8805c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/prepare_candidate.py": "81060ca6437a57002f83ac8524d2c93dfb105512ccaa55553aba11ac3fa1b569",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/synthetic_check.py": "2e30e772bced38dc342a3486f09dd2860a7974e3ec4ca40ecd6ea2b4c025372c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_scale_shape_preparation/synthetic_check_receipt.json": "770901a39bfa6c67ff1346b8844592b56402adf4b5ccba3fa901d8fbf69d5ab7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/contract.json": "000fa5d5b19cc516a581b382e457dcf8e03494da50b220d8f32c0ad0b16224a3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26b_consumer.py": "02317889281583ae0fd8a12a1148811c9e9a0afb7bcf75275aea9fd1a34f5cc7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/run_s30.py": "8b7d794536d62262c9c5b2c5df3c7e91841c50af13a89b7c0c4f51f998a46418",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/score_s30.py": "75b92de89c66a0a7039dd105908543b82f07c4d58069601a977a383393c9410e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/receipt.json": "d43ab22beb6559b4e098cc047499509cbc197ab3099559d9acdad7ce298af495",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_independent_numeric_review/receipt.json": "31bfe0cce2a71ec032caf3d7325970bb3d2582ec8a0c23e44a4b3ad5397de6a2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/receipt.json": "23f8bf9c41e2c8dd5c7b8f298d8313e6adb531bfbe59e55fec64b61ca5d1dac7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/receipt.json": "0bac1a4a732292bd13be1901f8a7932f8b7d9cc355612c509011a50c9711870e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/receipt.json": "ea17d7e973d23edde5c700d5aad999f4505e2e236bcd4acc73f8ee6e144e663f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/receipt.json": "ce7dd2e2311751545077169ad28e41b0bcb98bb78a9c2922c16c407f456f3787",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_independent_pre_review/final_pre_review.json": "616c4f896091df2c747aa2c23de2b9d97f0ed4633d1664aa104659c7651b8793",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_reference_static_review/review.json": "803e3f4d0e379dfcf9ce7a3e4127d8679d281d1a116f81c1558bf5217f1b085f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_root_numeric_review/recompute.py": "42e2314f010e6d04a880a15d8a05bf342b13a8f92b599e6bc97bcad270532365",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_root_numeric_review/protocol.md": "937d608e13cf809170b389ef7b7cd8b1540234221a99e51f25aaea4887bdd2f6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s26b_consumer_baseline.py": "61e00503829dad7e9d1260fb408b81e8b281198e3cbf4bcab8367a493f982834",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S31_root_pre_review/review.json": "d7d67f1e4870f97b51321f77bdd64ab583a00a1a2e5d836f2c990d47265cec30"
+  },
+  "saved_input_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/observer_checkpoint.json": "e64cd892d0703a6b6afdbd69b377cc486337c2cdfe956e77ca0a7a0fa5122f70",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/gradient_depth_trace.jsonl": "b543ba8dfc2519fd850ba1147002e42dcee3d765905f6ec6be9b7050ac25f4e0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/optimization_trace.jsonl": "19c11c3d4debf6e5fa031b394f6eadeb72667213db25abe54ea5d06579967978",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/preset_parameters.npz": "859f36c7ee864335ebe521c35d9628d1ae7caebc56db74b3c7918ae3e4a10cb7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/consumed_inputs.npz": "9a330938b437d74c82f2d04c0b5e026a0bb0e13ddc93bf7d4be791513816ed98",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/final_raw_metadata.json": "6d619698aabef968f35bab050fc90cbab2ed71dd3d192a81b36e6dc14e2829c4",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/final_raw_before_clean.npz": "5e10bf1125ade084c0daa831a8c10b56a8aac7213a5ffad822211f6f1df8a44b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/pairwise_state.npz": "2ae62634bc09e71a29d6c6a7e1c188819b7748493c98d31d3a2abce1be24056b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/s29_reference_gate.json": "c3d3900f7aa43d7126043846d3912335013a378f2b244caa940764a7fb415b9d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/controlled_alignment.npz": "cb365ff7efa5a375bc6d8ed7b8266e6221c2aa3e97a34a317b959f8cd0eecb0b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/initial_decoded.npz": "1c0826ff4def9463c52e5d64a33c4f0a6d4b5331e20d7d64c66eafd4992b0e24",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/output.npz": "49638afbc175f90080510786ce2613b72033d1d7d846e8b433860413bc608438",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/initial_raw_metadata.json": "add9ac41afe179cfa1680d0b5b579f24f0dad2883af9cb5ed8c909414f5124f9",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/observer_events.jsonl": "8e42affd1363a8a27d8f3f22cecd2ed4efbf2d19f0e606a5155cf0aeb2170add",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/preclean_conf.npz": "5dbcda6e2e8bfb9224e2d16ba1daa7e5ab238f920362d170b7a1ac1f23235d95",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/inputs_seal.json": "ddd4e1532e966e7b0434a72d90e78a1fc4fe2642781ca807011fa4ea2eff6439",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/independent_clean_visits.json": "31f0ca5db31894b330c9fcfcb78f03e7b2c5d45cf823353e3a552f5d47936f3d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/initial_raw.npz": "6bb9a9c32d939e1fa9939fa972574f4e2babfecb49a70114a346f930f504e378",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2t/input_colors.npz": "189d99845fe23aeff6642f625b41fd88785aedb7304003363e12a66fe1032b48",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/initial_raw.npz": "6bb9a9c32d939e1fa9939fa972574f4e2babfecb49a70114a346f930f504e378",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/initial_raw_metadata.json": "add9ac41afe179cfa1680d0b5b579f24f0dad2883af9cb5ed8c909414f5124f9",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/initial_decoded.npz": "5d3f5a7a621b3d5e568d95325c10b7fd3c1b385d8c1b83c5306a20429d865e36",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2t/alignment.npz": "211d837d67b0ba3d04b65b09d687133c2b889b41f0bdfe15ea079f44640b61dc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/observer_checkpoint.json": "87e1dcc77f286871b766e76ee82ddb97097c7ae5549477d8c94a3c169c7c9268",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/gradient_depth_trace.jsonl": "87c53d0e45bf03506b70f94663b629dd691b0a5be4b45e16b69ccd6af5f463c2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/optimization_trace.jsonl": "0b653f39e1ba182ee7573d67cce8550164ef3440297de6ae003f8738da51b3c5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/preset_parameters.npz": "859f36c7ee864335ebe521c35d9628d1ae7caebc56db74b3c7918ae3e4a10cb7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/consumed_inputs.npz": "9a330938b437d74c82f2d04c0b5e026a0bb0e13ddc93bf7d4be791513816ed98",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/final_raw_metadata.json": "3fd539295751ed4a11681782bc7b5229e00f8108bec3627a36575a9d6686f05e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/final_raw_before_clean.npz": "11993bddb19270333f57a67a3c4798c99bb55b284f7691bb3fbebbb56252a047",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/pairwise_state.npz": "a280b06771c424a48e041d3206b4626bd522b2c4dc35303e75d75ceaa1a9d695",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/s29_reference_gate.json": "5f3e11e32c1558326876c8bfb888e5633563885dc5f93b59f1e7f5b680d9caf0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/controlled_alignment.npz": "fa1610f213d65da7adcc54f0d138ab2b02ad933a39a9f674daef5d27917094c4",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/initial_decoded.npz": "b171d24f9c00a951e51f0ccc62faf05a9086e9844fa29e2bad56a4ad60d237c7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/output.npz": "c3a29c9310aa1607860453a7c865cd663aab20b7f0703438091a2cf09616ce31",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/initial_raw_metadata.json": "d933537dde41da52a8510ec018d00f18af3091dfb971aeb450265c9c08184950",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/observer_events.jsonl": "f59f55dd9087cf409b56bb63a70b10313b42cdb34c40ed6cce689056577bfd0e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/preclean_conf.npz": "5dbcda6e2e8bfb9224e2d16ba1daa7e5ab238f920362d170b7a1ac1f23235d95",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/inputs_seal.json": "f3d7e68a62866d92de2896b58924a5bc5342017f06d3f0c86b218dcef907d863",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/independent_clean_visits.json": "342e4876956d523c9c5b55834a4f3d5268c1b336e0ec8a53e9fc781bb8c004ea",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/initial_raw.npz": "a02c5219830c92a2f2883d128f3e793c0e101432fc33f32d0f87eeb2d36948e1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/C2a/input_colors.npz": "189d99845fe23aeff6642f625b41fd88785aedb7304003363e12a66fe1032b48",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/initial_raw.npz": "a02c5219830c92a2f2883d128f3e793c0e101432fc33f32d0f87eeb2d36948e1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/initial_raw_metadata.json": "d933537dde41da52a8510ec018d00f18af3091dfb971aeb450265c9c08184950",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/initial_decoded.npz": "3610f1360e1525063d2f98682a48eaba1da0fa4137aa4ee7ad4a8627de8fc567",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S29_scale_control/C2a/alignment.npz": "05f072f01d1bc083401c1bbf9049fdcd0e1816e110e063ccfd95b5edf3f714bd",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/metrics.json": "d7d500b52025c7eae418e9ff7700977775f15f5a9fe1df505619305bf1bb0cf9",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/pre_score_seal.json": "46987d5ef83ff74cb738314c6bc7a533f10ab10e2a4b314977ea8676a26eef18",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/output_schema.json": "43a33cb57e3f2e66832e7f69b78639815aa13ae7300b773d33d28f20fc2d2627",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/per_frame.csv": "f20bcd7af58c8c09d471d925bad0ace02d8af208af4fabb0fbfd1e608765ae40",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S30_scale_optimization/scoring/gt_receipt.json": "2de485c3c7c7335eb25eb14de1c886514dd2f4d5af114453bcf42233148f7305"
+  },
+  "expected_new_score_rows": 8,
+  "expected_new_mean_groups": 2,
+  "original_endpoint_rows_imported": 16,
+  "original_endpoint_scores_recomputed": 0,
+  "evidence_scope": "Post-hoc prediction-only global output normalization, seen common4; no optimizer/gauge intervention, physical shape destruction inference, or new method claim",
+  "root_freeze": {
+    "utc": "2026-09-06T18:39:38.331958+00:00",
+    "candidate_sha256": "26aea19b3dc2379af08de7987250a13416fe140c14722fd7e1568009f42a9b94",
+    "reviewed_before_real_execution": true
+  }
+}

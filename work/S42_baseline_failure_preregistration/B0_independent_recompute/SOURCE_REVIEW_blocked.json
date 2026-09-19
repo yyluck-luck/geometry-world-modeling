@@ -1,0 +1,100 @@
+{
+  "schema": "s42-b0-independent-recompute-source-review-v1",
+  "status": "REVISION_REQUIRED",
+  "verdict": "BLOCKED_STATIC_SOURCE_REVIEW_NOT_EXECUTED",
+  "completed_utc": "2026-09-07T16:06:23Z",
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/recompute_b0.py",
+  "source_sha256": "f8e1e400dc45a8ed4b0b9639be16f7404e8c7db8962fbdc60a91b355caf23783",
+  "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/PROTOCOL.md",
+  "protocol_sha256": "755131772d741164b9982c3b44cbdf7b54f0fd6629e6e39fd17ec89d97b4ad49",
+  "sealed_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/receipt.json",
+  "sealed_receipt_sha256": "93c90e24e404aa1f87e111ed3a7c79d51de9d9bf35babd060ac807af9d99f2ad",
+  "sealed_report_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/report.json",
+  "sealed_report_sha256": "13b190b126e925ae18f43728781c323d5cece8d9a591b73e6e9bf3a865aa8a8e",
+  "author_role": "/root/gemini_third_review_verifier",
+  "reviewer_role": "/root/readback_schema_audit",
+  "executed": false,
+  "payload_read": false,
+  "images_viewed": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "reviewed_inputs": "Static source, protocol, and sealed JSON/text metadata only.",
+  "checks_without_blocking_findings": {
+    "independent_implementation_does_not_import_primary_scorer": true,
+    "exact_source_protocol_receipt_report_sha_pins": true,
+    "nine_report_bound_ids_zero_through_eight": true,
+    "canonical_blob_path_and_descriptor_filename_binding": true,
+    "body_sha256_checked_from_same_fd_snapshot": true,
+    "same_fd_closing_rehash_and_path_inode_check": true,
+    "fixed_uint8_shape_576_576_3_and_exact_byte_count": true,
+    "float64_divide_255_before_square": true,
+    "m_outer4_regions_and_counts": true,
+    "primary_pair_id0_id8": true,
+    "fixed_pairs_1_7_2_6_3_5": true,
+    "strict_mse_greater_than_0_01_event": true,
+    "copy_guard_uses_snapshot_body_hashes": true,
+    "primary_region_pair_mse_hex_psnr_and_count_checks": true,
+    "source_and_frozen_json_closing_hash_checks": true,
+    "fixed_nonblocking_lock_and_single_staging_name": true,
+    "no_report_on_caught_operational_failure": true
+  },
+  "blocking_findings": [
+    {
+      "id": "B0_IR_SR_001_FULL_FRAME_REPORT_VALUE_NOT_RECOMPUTED",
+      "severity": "BLOCKING",
+      "source_lines": [
+        "recompute_b0.py:385-395",
+        "recompute_b0.py:404-449",
+        "recompute_b0.py:524-527"
+      ],
+      "evidence": "The sealed report contains score.full_frame_diagnostic with MSE, MSE hex, PSNR, pixel count, and RGB-scalar count. The candidate recomputes only M_outer4 primary, four regions, and three fixed pairs, compares only those records, and explicitly records full_frame_diagnostic as not recomputed. Therefore a different sealed full-frame value or hex could coexist with PASS_EXACT_B0_NUMERIC_RECOMPUTE.",
+      "protocol_conflict": "The requested review requires every reported numeric value and hexadecimal MSE representation to be checked; PASS_EXACT cannot omit a numeric record in the bound report.",
+      "minimal_required_fix": "Independently recompute the ID0-to-ID8 full-frame float64 /255 MSE with 331776 pixels and 995328 RGB scalars, build the same metric record, compare every value and MSE hex through the existing exact comparison path, include it in the recomputation output, and remove the stated exclusion. Rebind the revised source and protocol before a new review."
+    },
+    {
+      "id": "B0_IR_SR_002_OPERATIONAL_FAILURE_PROMOTED_TO_FINAL_EXECUTION",
+      "severity": "BLOCKING",
+      "source_lines": [
+        "recompute_b0.py:532-570",
+        "recompute_b0.py:587-592"
+      ],
+      "protocol_lines": [
+        "PROTOCOL.md:51-55"
+      ],
+      "evidence": "audit catches an input, identity, runtime, or closing-FD exception, writes a failure receipt, and returns status 2; main then unconditionally renames that staging directory to execution_01. The protocol describes atomic promotion for complete report-plus-receipt audit output and requires incomplete/failure staging evidence to remain fail-closed.",
+      "minimal_required_fix": "Promote only complete PASS_EXACT or MISMATCH outcomes containing both report and receipt. Preserve any operational-failure receipt in the hidden staging directory, with no report, so it blocks retry exactly as the protocol states."
+    },
+    {
+      "id": "B0_IR_SR_003_FINAL_DIRECTORY_LACKS_ATOMIC_NO_REPLACE",
+      "severity": "BLOCKING",
+      "source_lines": [
+        "recompute_b0.py:465-472",
+        "recompute_b0.py:587-592"
+      ],
+      "protocol_lines": [
+        "PROTOCOL.md:51-55"
+      ],
+      "evidence": "Path.exists() does not detect a pre-existing dangling symlink, and ordinary os.rename() may replace a symlink, file, or empty directory that appears at the destination. The advisory flock serializes cooperating invocations but does not itself give the final path atomic create-only/no-replace semantics.",
+      "minimal_required_fix": "Use lstat/lexists for fail-closed prechecks and an operating-system no-replace atomic publication primitive for the same-parent directory promotion. Treat any pre-existing destination entry, including a dangling symlink, as a terminal blocker."
+    },
+    {
+      "id": "B0_IR_SR_004_RECEIPT_OMITS_NUMERIC_ONLY_CLAIM_BOUNDARY",
+      "severity": "BLOCKING",
+      "source_lines": [
+        "recompute_b0.py:478-495",
+        "recompute_b0.py:529-544"
+      ],
+      "protocol_lines": [
+        "PROTOCOL.md:57"
+      ],
+      "evidence": "The receipt records zero viewed/emitted images and zero model/generation/renderer/readback calls, but the explicit numeric-only scientific claim boundary exists only in the success or mismatch report. A failure receipt has no report from which to recover that boundary.",
+      "minimal_required_fix": "Put an explicit numeric-recomputation-only claim boundary in the receipt at initial construction so PASS, MISMATCH, and every failure receipt all state that visual quality, rendered camera obedience, repeatability, cohort confirmation, causal attribution, method gain, and novelty are outside scope."
+    }
+  ],
+  "execution_boundary": {
+    "recomputer_imported_or_run": false,
+    "sealed_pixel_metrics_recomputed": false,
+    "tensor_or_image_payload_bodies_read": false,
+    "generated_images_or_montages_viewed": false,
+    "execution_01_created": false
+  }
+}

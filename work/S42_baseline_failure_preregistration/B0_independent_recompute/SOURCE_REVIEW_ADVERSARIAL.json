@@ -1,0 +1,90 @@
+{
+  "schema": "s42-b0-independent-recompute-adversarial-source-review-v1",
+  "status": "PASS_S42_B0_INDEPENDENT_RECOMPUTE_ADVERSARIAL_SOURCE_REVIEW",
+  "verdict": "PASS_STATIC_ADVERSARIAL_SOURCE_REVIEW_NOT_EXECUTED",
+  "completed_utc": "2026-09-07T16:18:24Z",
+  "review_scope": "Independent adversarial static review of the exact revised B0 attempt01 numeric recomputer and protocol. This review is not an execution or numeric result.",
+  "source_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/recompute_b0.py",
+  "source_sha256": "0b91de7f35eb5e128aad81128657861ae5218b37ccbba78e4f8c282b1a61c741",
+  "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_independent_recompute/PROTOCOL.md",
+  "protocol_sha256": "e3086d3ea373295b83f08dbba919d016a96243e31ebf15142bb609de0d68f0b7",
+  "sealed_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/receipt.json",
+  "sealed_receipt_sha256": "93c90e24e404aa1f87e111ed3a7c79d51de9d9bf35babd060ac807af9d99f2ad",
+  "sealed_report_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/B0_score_attempt_01/report.json",
+  "sealed_report_sha256": "13b190b126e925ae18f43728781c323d5cece8d9a591b73e6e9bf3a865aa8a8e",
+  "executed": false,
+  "source_imported": false,
+  "images_viewed": false,
+  "tensor_or_image_payload_bodies_read": false,
+  "model_generation_renderer_readback_or_gate_runs": 0,
+  "author_role": "/root",
+  "reviewer_role": "/root/readback_schema_audit/b0_result_crosscheck",
+  "blocking_findings": [],
+  "closed_prior_blockers": {
+    "full_frame_numeric_record": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:434-445 recomputes the ID0-ID8 full-frame float64 /255 diagnostic over 995328 RGB scalars; lines 467-472 compare its complete metric record; lines 505-513 retain it in the recomputation result."
+    },
+    "failure_staging_retention": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:600-638 emits a failure receipt without a report and returns 2; lines 655-664 retain that hidden staging directory and publish only completed exact-match or mismatch outcomes."
+    },
+    "atomic_no_replace_publication": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:132-166 detects all destination entries with lexists and uses macOS renamex_np with RENAME_EXCL, then verifies the published directory inode and disappearance of staging; lines 530-538 also reject broken-symlink destinations before staging creation."
+    },
+    "receipt_claim_boundary": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:50-54 freezes the numeric-only boundary; lines 544-563 place it in every receipt before any fallible audit work; lines 574-596 repeat it in completed numeric reports."
+    }
+  },
+  "checks": {
+    "frozen_identity_binding": {
+      "result": "PASS",
+      "evidence": "The source embeds the exact protocol, sealed receipt, and sealed report identities and rechecks source, protocol, review, receipt, and report before result sealing at recompute_b0.py:517-527."
+    },
+    "different_author_review_gate": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:187-217 requires a hash-bound SOURCE_REVIEW.json with exact schema/status, all four frozen identities, no execution/viewing/payload access, no blockers, and a reviewer role different from source author /root before any pixel body is opened."
+    },
+    "nine_authoritative_blobs": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:220-272 admits only the exact sealed receipt/report and exactly nine ordered IDs 0 through 8, each with four exact identity fields, lowercase SHA-256 values, and a canonical absolute tensor path named by descriptor SHA under the frozen tensor directory."
+    },
+    "shape_dtype_and_body_sha": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:275-329 requires each body to be a regular exact 995328-byte file, hashes the same FD bytes against the report-bound body SHA, and constructs a read-only little-endian uint8 array of shape 576x576x3 from immutable bytes."
+    },
+    "same_fd_close_verification": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:332-357 retains all descriptors through a closing fstat, same-FD reread and rehash, and path-inode check; lines 454-460 require exactly nine verified closures before comparison output can be returned."
+    },
+    "frozen_numeric_semantics": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:41-61 and 373-453 freeze M_outer4 regions, primary ID0-ID8, diagnostic pairs 1-7/2-6/3-5, float64 conversion and accumulation after division by 255, exact denominator counts, strict unrounded MSE > 0.01, and an equality boolean that is not treated as an event."
+    },
+    "copy_guard": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:426-430 applies both frozen degeneracy clauses to the same hashes computed from the immutable snapshots used by the numeric calculations; lines 462-466 make guard failure a mismatch."
+    },
+    "reported_values_and_hex": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:360-415 constructs finite metric records and compares MSE through exact float hexadecimal identity, validates each sealed MSE against its own hex, compares finite PSNR by float hex, preserves the zero convention, and checks counts; lines 466-504 apply this to every frozen record and event/status field."
+    },
+    "exception_report_boundary": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:564-638 clears the numeric report on any operational exception and stages a report only for completed PASS_EXACT or MISMATCH states; incomplete states require report absence."
+    },
+    "one_shot_failure_closed_output": {
+      "result": "PASS",
+      "evidence": "recompute_b0.py:530-538 blocks any prior final or staging entry; lines 641-665 hold one nonblocking fixed lock across staging, audit, fsync, outcome classification, and exclusive publication. Failure evidence remains hidden and blocks retry."
+    }
+  },
+  "limitations": [
+    "This was a static source and protocol review only; the recomputer, primary scorer, NumPy metric path, models, renderers, generators, readback workers, and gates were not imported or executed.",
+    "No tensor body, image payload, PNG, montage, array, or generated frame was opened, decoded, mapped, or viewed.",
+    "This PASS establishes only that the revised source implements the frozen independent numeric comparison and failure-closed publication contract. It does not establish a numeric match, visual quality, rendered camera obedience, repeatability, cohort confirmation, causal attribution, method gain, or novelty.",
+    "The runtime gate consumes SOURCE_REVIEW.json rather than this supplementary adversarial review artifact; execution still requires the separately hash-bound different-author SOURCE_REVIEW.json specified by the protocol."
+  ],
+  "next_gate": "Seal the required different-author SOURCE_REVIEW.json for these exact source, protocol, receipt, and report identities. Only afterward may a later turn execute the one-shot recomputation under the frozen protocol."
+}

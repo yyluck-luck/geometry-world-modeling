@@ -1,0 +1,73 @@
+{
+  "schema": "s42-causal-memory-gap-search-receipt-v1",
+  "completed_utc": "2026-09-07T06:01:21Z",
+  "agent": "/root/clip_mean_innovation_audit",
+  "task": "Independent novelty and causal-identification audit of the post-retrieval VMem memory consumer, with no model execution and no main-ledger mutation.",
+  "skills_applied": [
+    "deep-research",
+    "idea-evaluator",
+    "Supervisor-Skills handbook idea-generation rules carried through the frozen S41 boundary"
+  ],
+  "artifacts": [
+    {
+      "path": "work/S42_causal_memory_gap_search/REPORT.md",
+      "sha256": "8693ace94524cafb5b5e44cf72f4011e757266a70a8025bb6839b777efdaf6ea",
+      "bytes": 32739,
+      "lines": 458
+    },
+    {
+      "path": "work/S42_causal_memory_gap_search/sources.json",
+      "sha256": "82d3e85e0b13af1909080d109e82eff7d56c411e2de1af2df8f6b689e7c4dff9",
+      "bytes": 24327,
+      "lines": 422
+    }
+  ],
+  "scope_counts": {
+    "narrow_hypotheses": 3,
+    "primary_literature_records": 35,
+    "local_evidence_records": 7,
+    "maximum_intervention_arms_in_retained_h2_pilot": 6
+  },
+  "verdicts": {
+    "h1_clip_branch_bottleneck_active": "KEEP_AS_GATE",
+    "h2_source_to_region_causal_addressability": "KEEP_CONDITIONAL_HIGHEST_PRIORITY",
+    "h3_conflict_selective_subset_or_null": "METHOD_REJECT_BENCHMARK_CONDITIONAL",
+    "generic_attention_router_gate_threshold_topk_source_tag_geometry_mask_poe_weighted_mean": "REJECT_AS_NOVEL_METHOD"
+  },
+  "mathematical_findings": [
+    "The arithmetic mean is invariant to source assignment permutations and has a (K-1)d-dimensional linear nullspace for K>1.",
+    "The VMem CLIP context has key length one per camera; the softmax attention weight over that key is one for every query, so this branch has no query-dependent source or region address space.",
+    "These are branch-level capacity facts, not evidence of total-model failure because per-frame latents, masks and Plucker coordinates remain on parallel paths."
+  ],
+  "execution_boundary": {
+    "model_loaded": false,
+    "weights_loaded": false,
+    "model_forward_passes": 0,
+    "videos_generated": 0,
+    "scientific_experiments_run": 0,
+    "synthetic_diagnostics_run": 0,
+    "ground_truth_read_for_decision_rules": false,
+    "main_ledger_files_edited_by_this_agent": [],
+    "file_mutation_scope": [
+      "work/S42_causal_memory_gap_search/REPORT.md",
+      "work/S42_causal_memory_gap_search/sources.json",
+      "work/S42_causal_memory_gap_search/receipt.json"
+    ]
+  },
+  "checks": {
+    "sources_json_parse": "PASS",
+    "literature_ids_unique": "PASS_35_OF_35",
+    "hypothesis_count_at_most_three": "PASS_3",
+    "each_hypothesis_has_a_through_f": "PASS",
+    "h2_intervention_arm_count_at_most_six": "PASS_6",
+    "placeholder_scan": "PASS_NO_TODO_TBD_PLACEHOLDER",
+    "model_output_directory_absent": "PASS",
+    "claim_boundary": "PASS_SOURCE_FACT_MATHEMATICAL_INFERENCE_AND_UNRUN_EXPERIMENT_SEPARATED"
+  },
+  "next_gate": "After a SHA-verified and readback-verified real S40 baseline exists, run only A0 original mean, A0R exact replay and A1 zero-CLIP. Do not implement a new attention, router or conflict gate before this influence gate passes.",
+  "limitations": [
+    "The literature search was targeted rather than exhaustive.",
+    "No absence-of-prior-art claim was made.",
+    "No empirical conclusion about VMem output influence, harmful averaging, regional locality or selective abstention was produced."
+  ]
+}

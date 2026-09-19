@@ -1,0 +1,1303 @@
+open_clip/src/open_clip/pretrained.py at main · mlfoundations/open_clip · GitHub (https://github.com/mlfoundations/open_clip/blob/main/src/open_clip/pretrained.py)
+citeturn321search0 [wordlim: 200] Published: last year; Crawled: 3 months ago; import safetensors.torch ... url="https://github.com/mlfoundations/open_clip/releases/download/v0.2-weights/rn50-quickgelu-yfcc15m-455df137.pt", ... url="https://github.com/mlfoundations/open_clip/releases/download/v0.2-weights/rn50-quickgelu-cc12m-f000538c.pt",
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+13
+
+14
+
+15
+
+16
+
+17
+
+18
+
+19
+
+20
+
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+29
+
+30
+
+31
+
+32
+
+33
+
+34
+
+35
+
+36
+
+37
+
+38
+
+39
+
+40
+
+41
+
+42
+
+43
+
+44
+
+45
+
+46
+
+47
+
+48
+
+49
+
+50
+
+51
+
+52
+
+53
+
+54
+
+55
+
+56
+
+57
+
+58
+
+59
+
+60
+
+61
+
+62
+
+63
+
+64
+
+65
+
+66
+
+67
+
+68
+
+69
+
+70
+
+71
+
+72
+
+73
+
+74
+
+75
+
+76
+
+77
+
+78
+
+79
+
+80
+
+81
+
+82
+
+83
+
+84
+
+85
+
+86
+
+87
+
+88
+
+89
+
+90
+
+91
+
+92
+
+93
+
+94
+
+95
+
+96
+
+97
+
+98
+
+99
+
+100
+
+101
+
+102
+
+103
+
+104
+
+105
+
+106
+
+107
+
+108
+
+109
+
+110
+
+111
+
+112
+
+113
+
+114
+
+115
+
+116
+
+117
+
+118
+
+119
+
+120
+
+121
+
+122
+
+123
+
+124
+
+125
+
+126
+
+127
+
+128
+
+129
+
+130
+
+131
+
+132
+
+133
+
+134
+
+135
+
+136
+
+137
+
+875
+
+876
+
+877
+
+878
+
+879
+
+880
+
+881
+
+882
+
+883
+
+884
+
+885
+
+886
+
+887
+
+888
+
+889
+
+890
+
+891
+
+892
+
+893
+
+894
+
+895
+
+896
+
+897
+
+898
+
+899
+
+900
+
+901
+
+902
+
+903
+
+904
+
+905
+
+906
+
+907
+
+908
+
+909
+
+910
+
+911
+
+912
+
+913
+
+914
+
+915
+
+916
+
+917
+
+918
+
+919
+
+920
+
+921
+
+922
+
+923
+
+924
+
+925
+
+926
+
+927
+
+928
+
+929
+
+930
+
+931
+
+932
+
+933
+
+934
+
+935
+
+936
+
+937
+
+938
+
+939
+
+940
+
+941
+
+942
+
+943
+
+944
+
+945
+
+946
+
+947
+
+948
+
+import copy
+
+import hashlib
+
+import os
+
+import urllib
+
+import warnings
+
+from functools import partial
+
+from typing import Dict, Iterable, Optional, Union
+
+from tqdm import tqdm
+
+try:
+
+import safetensors.torch
+
+_has_safetensors = True
+
+except ImportError:
+
+_has_safetensors = False
+
+from .constants import (
+
+IMAGENET_MEAN,
+
+IMAGENET_STD,
+
+INCEPTION_MEAN,
+
+INCEPTION_STD,
+
+OPENAI_DATASET_MEAN,
+
+OPENAI_DATASET_STD,
+
+HF_WEIGHTS_NAME,
+
+HF_SAFE_WEIGHTS_NAME,
+
+)
+
+from .version import __version__
+
+try:
+
+from huggingface_hub import hf_hub_download
+
+hf_hub_download = partial(hf_hub_download, library_name="open_clip", library_version=__version__)
+
+_has_hf_hub = True
+
+except ImportError:
+
+hf_hub_download = None
+
+_has_hf_hub = False
+
+def _pcfg(url='', hf_hub='', **kwargs):
+
+# OpenAI / OpenCLIP defaults
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': OPENAI_DATASET_MEAN,
+
+'std': OPENAI_DATASET_STD,
+
+'interpolation': 'bicubic',
+
+'resize_mode': 'shortest',
+
+**kwargs,
+
+}
+
+def _slpcfg(url='', hf_hub='', **kwargs):
+
+# SiGLIP defaults
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': INCEPTION_MEAN,
+
+'std': INCEPTION_STD,
+
+'interpolation': 'bicubic',
+
+'resize_mode': 'squash',
+
+**kwargs,
+
+}
+
+def _apcfg(url='', hf_hub='', **kwargs):
+
+# CLIPA defaults
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': IMAGENET_MEAN,
+
+'std': IMAGENET_STD,
+
+'interpolation': 'bilinear',
+
+'resize_mode': 'squash',
+
+**kwargs,
+
+}
+
+def _mccfg(url='', hf_hub='', **kwargs):
+
+# MobileCLIP
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': (0., 0., 0.),
+
+'std': (1., 1., 1.),
+
+'interpolation': 'bilinear',
+
+'resize_mode': 'shortest',
+
+**kwargs,
+
+}
+
+def _clapcfg(url='', hf_hub='', **kwargs):
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+**kwargs,
+
+}
+
+def _mc2cfg(url='', hf_hub='', **kwargs):
+
+# MobileCLIP-2
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': OPENAI_DATASET_MEAN, # some are still 0
+
+'std': OPENAI_DATASET_STD, # some are still 1
+
+'interpolation': 'bilinear',
+
+'resize_mode': 'shortest',
+
+**kwargs,
+
+}
+
+def _pecfg(url='', hf_hub='', **kwargs):
+
+# PE
+
+return {
+
+'url': url,
+
+'hf_hub': hf_hub,
+
+'mean': (0.5, 0.5, 0.5),
+
+'std': (0.5, 0.5, 0.5),
+
+'interpolation': 'bilinear',
+
+'resize_mode': 'squash',
+
+**kwargs,
+
+}
+
+_RN50 = dict(
+
+openai=_pcfg(
+
+hf_hub="timm/resnet50_clip.openai/",
+
+quick_gelu=True,
+
+),
+
+yfcc15m=_pcfg(
+
+url="https://github.com/mlfoundations/open_clip/releases/download/v0.2-weights/rn50-quickgelu-yfcc15m-455df137.pt",
+
+hf_hub="timm/resnet50_clip.yfcc15m/",
+
+quick_gelu=True,
+
+),
+
+cc12m=_pcfg(
+
+url="https://github.com/mlfoundations/open_clip/releases/download/v0.2-weights/rn50-quickgelu-cc12m-f000538c.pt",
+
+if filename not in (HF_WEIGHTS_NAME,) and (filename.endswith(".bin") or filename.endswith(".pth")):
+
+yield filename[:-4] + ".safetensors"
+
+def download_pretrained_from_hf(
+
+model_id: str,
+
+filename: Optional[str] = None,
+
+revision: Optional[str] = None,
+
+cache_dir: Optional[str] = None,
+
+):
+
+has_hf_hub(True)
+
+filename = filename or HF_WEIGHTS_NAME
+
+# Look for .safetensors alternatives and load from it if it exists
+
+if _has_safetensors:
+
+for safe_filename in _get_safe_alternatives(filename):
+
+try:
+
+cached_file = hf_hub_download(
+
+repo_id=model_id,
+
+filename=safe_filename,
+
+revision=revision,
+
+cache_dir=cache_dir,
+
+)
+
+return cached_file
+
+except Exception:
+
+pass
+
+try:
+
+# Attempt to download the file
+
+cached_file = hf_hub_download(
+
+repo_id=model_id,
+
+filename=filename,
+
+revision=revision,
+
+cache_dir=cache_dir,
+
+)
+
+return cached_file # Return the path to the downloaded file if successful
+
+except Exception as e:
+
+raise FileNotFoundError(f"Failed to download file ({filename}) for {model_id}. Last error: {e}")
+
+def download_pretrained(
+
+cfg: Dict,
+
+prefer_hf_hub: bool = True,
+
+cache_dir: Optional[str] = None,
+
+):
+
+target = ''
+
+if not cfg:
+
+return target
+
+if 'file' in cfg:
+
+return cfg['file']
+
+has_hub = has_hf_hub()
+
+download_url = cfg.get('url', '')
+
+download_hf_hub = cfg.get('hf_hub', '')
+
+if has_hub and prefer_hf_hub and download_hf_hub:
+
+--------------------------------------------------------------------------------
+Stability AI - Developer Platform (https://platform.stability.ai/docs/release-notes)
+citeturn321search1 [wordlim: 200] Published: 3 months ago; Crawled: today; Stable Diffusion 2.1 model checkpoints are now available via our open source repositories on Hugging Face.
+
+As always, all of our APIs come with standard safety features for input filtering, NSFW filtering of input images and generated content, known CSAM content filtering through Thorn, and C2PA signing.
+
+* * *
+
+# API Deprecation Notice
+
+October 11, 2024
+
+As of October 11, 2024, we have deprecated a number of our older models and API's. Below we list the endpoints that are no longer supported and provide recommendations for alternatives.
+
+### Deprecated Models
+
+Text-to-image:
+
+  * stable-diffusion-512-v2-1
+  * stable-diffusion-xl-beta-v2-2-2
+  * stable-diffusion-xl-1024-v0-9
+
+Image Upscale:
+
+  * esrgan-v1-x2plus
+
+### Recommended Alternatives
+
+Alternative Text-to-Image Solutions:
+
+  * SDXL 1.0: Our legacy base model for straightforward image generation.
+  * Stable Image Ultra: Our flagship image service based on Stable Diffusion 3 Large, offering the highest quality and detail.
+  * Stable Diffusion 3 Model Suite: Latest base models, balancing speed and quality for media, entertainment, and retail.
+  * Stable Image Core: Optimized for fast and cost-effective image generation.
+
+Alternative Upscaling Solution:
+
+  * Fast Upscaler: Improved speed and quality.
+
+If you have any questions or need further assistance, please don’t hesitate to reach out to our support team.
+
+Thank you for your continued support.
+
+* * *
+
+    * Magic decoder ring no longer required.
+  * Fixed small bug causing `null` values to show up in the response when `Accept` header was set to `application/json`.
+  * Addressed some CORS-related issues
+
+For more information around the masking endpoint including working examples in Go, TypeScript, Python and cURL, check out the REST API documentation.
+
+* * *
+
+# Stable Diffusion 2.1 - API Release
+
+Dec. 7th 2022
+
+## Overview
+
+In this release of the Stability API, we are introducing Stable Diffusion 2.1 (512px + 768px), including multi-prompting with prompt weighting.
+
+## What's New
+
+New Models
+
+  * Stable Diffusion 2.1 - 512px
+  * Stable Diffusion 2.1 - 768px
+
+With the Stable Diffusion 2.1 release, we have updated our training strategy and reintroduced much of the artistic flair our users felt was lost in 2.0. Check out the official announcement on the Stability AI blog to learn more.
+
+Our existing documentation has been updated to reflect the addition of Stable Diffusion 2.1 as an optional model accessible via the API.
+
+Multi-prompting
+
+Multiple weighted prompts can now be passed to the API in this release.
+
+Multi-prompting allows users to combine concepts to create new and unique results. The model will also attempt to eliminate or avoid concepts in the resulting image when a negative value is assigned to an additional prompt, colloquially known as "negative prompting."
+
+For functional examples, please refer to our new documentation on multi-prompting.
+
+Open Source Releases
+
+Stable Diffusion 2.1 model checkpoints are now available via our open source repositories on Hugging Face.
+
+* * *
+
+# Stable Diffusion 2.0 - API Release
+
+Nov. 25th 2022
+
+## Overview
+
+In this release of the Stability API, we are introducing Stable Diffusion 2.0 (512px + 768px), including two new samplers, and an improved inpainting model (Stable Inpainting 2.0).
+
+## What's New
+
+New Models
+
+  * Stable Diffusion 2.0 - 512px
+  * Stable Diffusion 2.0 - 768px
+  * Stable Inpainting 2.0 - 512px
+
+Stable Diffusion 2.0 is all-new, trained from the ground up with safety in mind.
+--------------------------------------------------------------------------------
+GitHub - liuhanzuo/Sparse_GS · GitHub (https://github.com/liuhanzuo/Sparse_GS)
+citeturn321search2 [wordlim: 200] Published: 3 months ago; Crawled: last month; `blender_drums_n8_v10_sds_geo_x45k.yaml`  | PVD on + SDS on, `detach_geometry: false` for both — adversarial gradients actually move means/scales/quats (with 3 safety valves; see cfg comments) ...     python -c "from diffusers import StableDiffusionPipeline; StableDiffusionPipeline.from_pretrained('stabilityai/stable-diffusion-2-1-base')"
+
+cfg  | role
+--- | ---
+`blender_drums_n8_v10_sds_only_x45k.yaml`  | PVD off, SDS on — isolates the SDS contribution
+`blender_drums_n8_v10_sds_pvd_x45k.yaml`  | PVD on + SDS on — tests if the priors stack
+`blender_drums_n8_v10_sds_geo_x45k.yaml`  | PVD on + SDS on, `detach_geometry: false` for both — adversarial gradients actually move means/scales/quats (with 3 safety valves; see cfg comments)
+
+Decision ladder (vs. drums v9_dust3r_x45k = 18.91 dB):
+
+  * 🏆 PSNR ≥ 19.41 dB (+0.5 dB) → expand to ship / materials
+  * 🆗 PSNR ∈ [18.91, 19.41) → sweep `sds.weight`, `start_iter`, `t_range`; if no scene fires, retry with Stable-Zero123 backend
+  * ❌ PSNR < 18.91 → negative; fall back to plain depth-prior diffusion (Marigold) or geometric pseudo-view loss without diffusion
+
+To actually run (one-time SD weight cache + 3 runs, ~6h on RTX 5090):
+    
+    `pip install -r third_party/requirements_sds.txt
+    python -c "from diffusers import StableDiffusionPipeline; StableDiffusionPipeline.from_pretrained('stabilityai/stable-diffusion-2-1-base')"
+    python -m scripts.train --config configs/_w3_aggrprune/v10_sds/blender_drums_n8_v10_sds_only_x45k.yaml
+    python -m scripts.train --config configs/_w3_aggrprune/v10_sds/blender_drums_n8_v10_sds_pvd_x45k.yaml
+    python -m scripts.train --config configs/_w3_aggrprune/v10_sds/blender_drums_n8_v10_sds_geo_x45k.yaml
+    `
+
+* * *
+
+--------------------------------------------------------------------------------
+diffusers/examples/community/README.md at main · huggingface/diffusers · GitHub (https://github.com/huggingface/diffusers/blob/main/examples/community/README.md)
+citeturn321search3 [wordlim: 200] Published: 9 months ago; Crawled: 3 months ago;     pipe = DiffusionPipeline.from_pretrained('CompVis/stable-diffusion-v1-4', custom_pipeline='suvadityamuk/StableDiffusionComparison') ...         "stabilityai/stable-diffusion-2-1-base",
+    )
+    
+    
+    pipeline = StableDiffusionXLDifferentialImg2ImgPipeline.from_pretrained(
+        "SG161222/RealVisXL_V4.0", torch_dtype=torch.float16, variant="fp16"
+    ).to("cuda")
+    pipeline.scheduler = DPMSolverMultistepScheduler.from_config(pipeline.scheduler.config, use_karras_sigmas=True)
+    
+    
+    def preprocess_image(image):
+        image = image.convert("RGB")
+        image = transforms.CenterCrop((image.size[1] // 64 * 64, image.size[0] // 64 * 64))(image)
+        image = transforms.ToTensor()(image)
+        image = image * 2 - 1
+        image = image.unsqueeze(0).to("cuda")
+        return image
+    
+    
+    def preprocess_map(map):
+        map = map.convert("L")
+        map = transforms.CenterCrop((map.size[1] // 64 * 64, map.size[0] // 64 * 64))(map)
+        map = transforms.ToTensor()(map)
+        map = map.to("cuda")
+        return map
+    
+    
+    image = preprocess_image(
+        load_image(
+            "https://huggingface.co/datasets/OzzyGT/testing-resources/resolve/main/differential/20240329211129_4024911930.png?download=true"
+        )
+    )
+    
+    mask = preprocess_map(
+        load_image(
+            "https://huggingface.co/datasets/OzzyGT/testing-resources/resolve/main/differential/gradient_mask.png?download=true"
+        )
+    )
+    
+    prompt = "a green pear"
+    negative_prompt = "blurry"
+    
+    image = pipeline(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        guidance_scale=7.5,
+        num_inference_steps=25,
+        original_image=image,
+        image=image,
+        strength=1.0,
+        map=mask,
+    ).images[0]
+    
+    image.save("result.png")
+
+        guidance_scale=7.5,  # Scale of the classifier-free guidance
+        clip_guidance_scale=100,  # Scale of the CLIP guidance
+        num_images_per_prompt=1,  # Generate one image per prompt
+        eta=0.0,  # Noise scheduling parameter
+        num_cutouts=4,  # Number of cutouts for CLIP guidance
+        use_cutouts=False,  # Whether to use cutouts
+        output_type="pil",  # Output as PIL image
+    ).images[0]
+    
+    # Display the generated image
+    image.show()
+
+Init Image
+
+Output Image
+
+### TensorRT Text2Image Stable Diffusion Pipeline
+
+The TensorRT Pipeline can be used to accelerate the Text2Image Stable Diffusion Inference run.
+
+NOTE: The ONNX conversions and TensorRT engine build may take up to 30 minutes.
+    
+    import torch
+    from diffusers import DDIMScheduler
+    from diffusers.pipelines import DiffusionPipeline
+    
+    # Use the DDIMScheduler scheduler here instead
+    scheduler = DDIMScheduler.from_pretrained("stabilityai/stable-diffusion-2-1", subfolder="scheduler")
+    
+    pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1",
+        custom_pipeline="stable_diffusion_tensorrt_txt2img",
+        variant='fp16',
+        torch_dtype=torch.float16,
+        scheduler=scheduler,)
+    
+    # re-use cached folder to save ONNX models and TensorRT Engines
+    pipe.set_cached_folder("stabilityai/stable-diffusion-2-1", variant='fp16',)
+    
+    pipe = pipe.to("cuda")
+    
+    prompt = "a beautiful photograph of Mt. Fuji during cherry blossom"
+    image = pipe(prompt).images[0]
+    image.save('tensorrt_mt_fuji.png')
+
+### EDICT Image Editing Pipeline
+
+This pipeline implements the text-guided image editing approach from the paper EDICT: Exact Diffusion Inversion via Coupled Transformations. You have to pass:
+
+  * (`PIL`) `image` you want to edit.
+  * `base_prompt`: the text prompt describing the current image (before editing).
+  * `target_prompt`: the text prompt describing with the edits.
+    
+    from diffusers import DiffusionPipeline, DDIMScheduler
+    from transformers import CLIPTextModel
+    import torch, PIL, requests
+    scheduler = DDIMScheduler.from_pretrained("stabilityai/stable-diffusion-2-1",
+                                                subfolder="scheduler")
+    
+    pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1",
+                                                custom_pipeline="stable_diffusion_tensorrt_img2img",
+                                                variant='fp16',
+                                                torch_dtype=torch.float16,
+                                                scheduler=scheduler,)
+    
+    # re-use cached folder to save ONNX models and TensorRT Engines
+    pipe.set_cached_folder("stabilityai/stable-diffusion-2-1", variant='fp16',)
+    
+    pipe = pipe.to("cuda")
+    
+    url = "https://pajoca.com/wp-content/uploads/2022/09/tekito-yamakawa-1.png"
+    response = requests.get(url)
+    input_image = Image.open(BytesIO(response.content)).convert("RGB")
+    prompt = "photorealistic new zealand hills"
+    image = pipe(prompt, image=input_image, strength=0.75,).images[0]
+    image.save('tensorrt_img2img_new_zealand_hills.png')
+
+### Stable Diffusion BoxDiff
+
+BoxDiff is a training-free method for controlled generation with bounding box coordinates. It should work with any Stable Diffusion model. Below shows an example with `stable-diffusion-2-1-base`.
+    
+    import torch
+    from PIL import Image, ImageDraw
+    from copy import deepcopy
+    
+    from examples.community.pipeline_stable_diffusion_boxdiff import StableDiffusionBoxDiffPipeline
+    
+    def draw_box_with_text(img, boxes, names):
+        colors = ["red", "olive", "blue", "green", "orange", "brown", "cyan", "purple"]
+        img_new = deepcopy(img)
+        draw = ImageDraw.Draw(img_new)
+    
+        W, H = img.size
+        for bid, box in enumerate(boxes):
+            draw.rectangle([box[0] * W, box[1] * H, box[2] * W, box[3] * H], outline=colors[bid % len(colors)], width=4)
+            draw.text((box[0] * W, box[1] * H), names[bid], fill=colors[bid % len(colors)])
+        return img_new
+    
+    pipe = StableDiffusionBoxDiffPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-2-1-base",
+        torch_dtype=torch.float16,
+    )
+    pipe.to("cuda")
+    
+    # example 1
+    prompt = "as the aurora lights up the sky, a herd of reindeer leisurely wanders on the grassy meadow, admiring the breathtaking view, a serene lake quietly reflects the magnificent display, and in the distance, a snow-capped mountain stands majestically, fantasy, 8k, highly detailed"
+    phrases = [
+        "aurora",
+        "reindeer",
+        "meadow",
+        "lake",
+        "mountain"
+    ]
+    boxes = [[1,3,512,202], [75,344,421,495], [1,327,508,507], [2,217,507,341], [1,135,509,242]]
+    
+    # example 2
+    # prompt = "A rabbit wearing sunglasses looks very proud"
+    # phrases = ["rabbit", "sunglasses"]
+    # boxes = [[67,87,366,512], [66,130,364,262]]
+    
+    boxes = [[x / 512 for x in box] for box in boxes]
+    
+    images = pipe(
+        prompt,
+        boxdiff_phrases=phrases,
+        boxdiff_boxes=boxes,
+        boxdiff_kwargs={
+            "attention_res": 16,
+            "normalize_eot": True
+        },
+        num_inference_steps=50,
+        guidance_scale=7.5,
+        generator=torch.manual_seed(42),
+        safety_checker=None
+    ).images
+    
+    draw_box_with_text(images[0], boxes, phrases).save("output.png")
+
+### Stable Diffusion XL Reference
+
+This pipeline uses the Reference. Refer to the Stable Diffusion Reference section for more information.
+    
+    import torch
+    # from diffusers import DiffusionPipeline
+    from diffusers.utils import load_image
+    from diffusers.schedulers import UniPCMultistepScheduler
+    
+    from .stable_diffusion_xl_reference import StableDiffusionXLReferencePipeline
+    
+    input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/sdxl_reference_input_cat.jpg")
+    
+    # pipe = DiffusionPipeline.from_pretrained(
+    #     "stabilityai/stable-diffusion-xl-base-1.0",
+    #     custom_pipeline="stable_diffusion_xl_reference",
+    #     torch_dtype=torch.float16,
+    #     use_safetensors=True,
+    #     variant="fp16").to('cuda:0')
+    
+    pipe = StableDiffusionXLReferencePipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        torch_dtype=torch.float16,
+        use_safetensors=True,
+        variant="fp16").to('cuda:0')
+    import numpy as np
+    import torch
+    
+    import cv2
+    from PIL import Image
+    
+    from .stable_diffusion_xl_controlnet_reference import StableDiffusionXLControlNetReferencePipeline
+    
+    # download an image
+    canny_image = load_image(
+        "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/sdxl_reference_input_cat.jpg"
+    )
+    
+    ref_image = load_image(
+        "https://hf.co/datasets/hf-internal-testing/diffusers-images/resolve/main/sd_controlnet/hf-logo.png"
+    )
+    
+    # initialize the models and pipeline
+    controlnet_conditioning_scale = 0.5  # recommended for good generalization
+    controlnet = ControlNetModel.from_pretrained(
+        "diffusers/controlnet-canny-sdxl-1.0", torch_dtype=torch.float16
+    )
+    vae = AutoencoderKL.from_pretrained("madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
+    pipe = StableDiffusionXLControlNetReferencePipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-base-1.0", controlnet=controlnet, vae=vae, torch_dtype=torch.float16
+    ).images[0]
+    
+    image.save("horse_to_elephant.jpg")
+    
+    # let's try another example with feedback
+    url = "https://raw.githubusercontent.com/ChenWu98/cycle-diffusion/main/data/dalle2/A%20black%20colored%20car.png"
+    response = requests.get(url)
+    init_image = Image.open(BytesIO(response.content)).convert("RGB")
+    
+    prompt = "photo, A blue colored car, fish eye"
+    liked = [init_image]
+    ## same goes with disliked
+    
+    # call the pipeline
+    torch.manual_seed(0)
+    image = pipe(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        liked=liked,
+        num_inference_steps=20,
+    ).images[0]
+    
+    image.save("black_to_blue.png")
+
+With enough feedbacks you can create very similar high quality images.
+
+The original codebase can be found at sd-fabric/fabric, and available checkpoints are dreamlike-art/dreamlike-photoreal-2.0, stable-diffusion-v1-5/stable-diffusion-v1-5, and stabilityai/stable-diffusion-2-1 (may give unexpected results).
+--------------------------------------------------------------------------------
+GitHub - mingyuyng/DiffJSCC: Code for "Diffusion-Aided Joint Source Channel Coding For High Realism Wireless Image Transmission", IEEE TMLCN · GitHub (https://github.com/mingyuyng/DiffJSCC)
+citeturn321search4 [wordlim: 200] Crawled: last month;     wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt --no-check-certificate ... We have moved all the checkpoints to HuggingFace and modified the inference code accordingly.
+
+SwinJSCC
+    
+    python train.py --config ./configs/train_jscc_swin.yaml --name "jscc_swin_openimage" --refresh_rate 1
+
+Note that the data paths in `configs/dataset/JSCC_OpenImage_train.yaml` and `configs/dataset/JSCC_OpenImage_val.yaml` need to be modified
+
+### CelebA dataset
+
+ResNet structure
+    
+    python train.py --config ./configs/train_jscc_cnn_CelebA.yaml --name "jscc_cnn_CelebA" --refresh_rate 1
+
+SwinJSCC
+    
+    python train.py --config ./configs/train_jscc_swin_CelebA.yaml --name "jscc_swin_CelebA" --refresh_rate 1
+
+Note that the data paths in `configs/dataset/JSCC_CelebA_train.yaml` and `configs/dataset/JSCC_CelebA_val.yaml` need to be modified
+
+## Train the conditional diffusion model
+
+### Download the weights of Stable Diffusion
+    
+    wget https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.ckpt --no-check-certificate
+
+### Merge the Stable Diffusion weights with the JSCC encoder and decoder
+
+Here is an example of merging the weights of SD and ResNet-based JSCC
+--------------------------------------------------------------------------------
+ComfyUI-HiDiffusion/hidiffusion.py at main · florestefano1975/ComfyUI-HiDiffusion · GitHub (https://github.com/florestefano1975/ComfyUI-HiDiffusion/blob/main/hidiffusion.py)
+citeturn321search5 [wordlim: 200] Crawled: 3 weeks ago; 'runwayml/stable-diffusion-v1-5', 'stabilityai/stable-diffusion-2-1-base', ... >>> pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
+# supported official model. If you use non-official model based on the following models/pipelines, hidiffusion will automatically select the best strategy to fit it.
+
+surppoted_official_model = [
+
+'runwayml/stable-diffusion-v1-5', 'stabilityai/stable-diffusion-2-1-base',
+
+'stabilityai/stable-diffusion-xl-base-1.0', 'diffusers/stable-diffusion-xl-1.0-inpainting-0.1',
+
+'stabilityai/sdxl-turbo'
+
+]
+
+# T1_ratio: see T1 introduced in the main paper. T1 = number_inference_step * T1_ratio. A higher T1_ratio can better mitigate object duplication. We set T1_ratio=0.4 by default. You'd better adjust it to fit your prompt. Only active when apply_raunet=True.
+
+# T2_ratio: see T2 introduced in the appendix, used in extreme resolution image generation. T2 = number_inference_step * T2_ratio. A higher T2_ratio can better mitigate object duplication. Only active when apply_raunet=True
+
+switching_threshold_ratio_dict = {
+
+'sd15_1024': {'T1_ratio': 0.4, 'T2_ratio': 0.0},
+
+'sd15_2048': {'T1_ratio': 0.7, 'T2_ratio': 0.3},
+
+'sdxl_2048': {'T1_ratio': 0.4, 'T2_ratio': 0.0},
+--------------------------------------------------------------------------------
+Sewerslvt - Pretty Cvnt · GitHub (https://gist.github.com/HuemanInstrument/9421c7d81d7db1eb36654de3eb5c952f)
+citeturn321search6 [wordlim: 200] Published: 3.0 years ago; Crawled: last month;  | "clip_pretrain": "laion2b_s32b_b79k", ...  | "model_path": "T:\\Hueman\\NoSpaces\\models\\sdxlHK_v075.safetensors",
+ | "high_brightness_adjust_fix_amount": 2,
+ | "low_brightness_adjust_fix_amount": 2,
+ | "max_brightness_threshold": 254,
+ | "min_brightness_threshold": 1,
+ | "enable_adjust_brightness": false,
+ | "dynamic_thresh": 15.0,
+ | "warp_interp": 1,
+ | "fixed_code": false,
+ | "code_randomness": 0.1,
+ | "mask_result": false,
+ | "reverse_cc_order": true,
+ | "flow_lq": true,
+ | "use_predicted_noise": false,
+ | "clip_guidance_scale": 0,
+ | "clip_type": "ViT-H-14",
+ | "clip_pretrain": "laion2b_s32b_b79k",
+ | "missed_consistency_weight": 1.0,
+ | "overshoot_consistency_weight": 1.0,
+ | "edges_consistency_weight": 1.0,
+ | "style_strength_schedule": [
+ | 0.6
+ | ],
+ | "flow_blend_schedule": [
+ | 1
+ | ],
+ | "steps_schedule": {
+ | "0": 35
+ | },
+ | "init_scale_schedule": [
+ | 0,
+ | 8
+ | ],
+ | "latent_scale_schedule": [
+ | 0,
+ | 100
+ | ],
+ | "latent_scale_template": "",
+ | "init_scale_template": "",
+ | "steps_template": "",
+ | "style_strength_template": [
+ | 0.8,
+ | 0.8,
+ | 0.5,
+ | 5
+ | ],
+ | "flow_blend_template": [
+ | 1,
+ | 0.0,
+ | 0.5,
+ | 2
+ | ],
+ | "make_schedules": false,
+ | "normalize_latent": "off",
+ | "normalize_latent_offset": 0,
+ | "colormatch_frame": "color_video_offset",
+ | "use_karras_noise": false,
+ | "end_karras_ramp_early": false,
+ | "use_background_mask": false,
+ | "apply_mask_after_warp": true,
+ | "background": "init_video",
+ | "background_source": "red",
+ | "mask_source": "none",
+ | "extract_background_mask": false,
+ | "mask_video_path": "",
+ | "negative_prompts": {
+ | "0": [
+ | "negativeXL_D"
+ | ]
+ | },
+ | "invert_mask": false,
+ | "warp_strength": 1.0,
+--------------------------------------------------------------------------------
+GitHub - guillaumemeyer/watermarks-remover at apidog.com · GitHub (https://github.com/guillaumemeyer/watermarks-remover?ref=apidog.com)
+citeturn321search7 [wordlim: 200] Crawled: yesterday; The Stable Diffusion model (default `huanzi05/stable-diffusion-2-1-base`) downloads from Hugging Face on first run.
+It is blind regeneration (no ControlNet conditioning), so it drifts image content more than CtrlRegen — conservative intensity default (`0.3`), treated as a fallback/comparison, never a guarantee.
+  3. Local same-scheme detector for Tree-Ring-class marks, partially filling the "no local detector for StegaStamp/Tree-Ring/StableSignature" gap (it covers Tree-Ring/Ring-ID/Gaussian-Shading etc., not StegaStamp / StableSignature / SynthID-media).
+
+The backend is not bundled. `setup_markdiffusion.sh` creates a venv and installs `markdiffusion==1.0.2` from PyPI (pinned), with torch installed from the right platform index; `--checkout` installs an editable clone at a pinned commit instead. The Stable Diffusion model (default `huanzi05/stable-diffusion-2-1-base`) downloads from Hugging Face on first run.
+    
+    SCRIPTS=service/scripts
+    
+    # Bootstrap (PyPI pin default; creates ~/markdiffusion/.venv, installs deps).
+    "$SCRIPTS/setup_markdiffusion.sh"
+    
+    # 1. Generate a Tree-Ring watermarked image (+ unwatermarked control).
+--------------------------------------------------------------------------------
+Visual Studio Code Sync Settings GIST · GitHub (https://gist.github.com/lonlyli/f480eee7c7da594cffaada2ed8a6cc6b)
+citeturn321search8 [wordlim: 200] Published: 7.7 years ago; Crawled: last week;  | " this.base = '$1';", ...  | "$1.prototype.move = function(x, y) {", ...  | "$2.prototype = new $1();",
+--------------------------------------------------------------------------------
+open_clip/src/open_clip/pretrained.py at main · mlfoundations/open_clip · GitHub (https://github.com/mlfoundations/open_clip/blob/main/src/open_clip/pretrained.py)
+citeturn321view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://github.com/mlfoundations/open_clip/blob/main/src/open_clip/pretrained.py","lineno":null}); Total lines: 3705
+

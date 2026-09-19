@@ -1,0 +1,147 @@
+{
+  "schema": "pre-gate-cvar-dlv-pilots-v1",
+  "status": "PILOT_IMPLEMENTATION_CHECK_ONLY",
+  "data_access": {
+    "project_predictions_read": false,
+    "future_gt_read": false,
+    "held_out_manifest_read": false,
+    "synthetic_fixture_generated_in_runner": true
+  },
+  "cvar_pilot": {
+    "candidate_ids": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "budget_k": 3,
+    "alpha": 0.8,
+    "mean_selector": {
+      "objective": "mean",
+      "selected_ids": [
+        "C",
+        "A",
+        "D"
+      ],
+      "total_cost": 3,
+      "total_gain": 3.3499999999999996,
+      "mean_loss": 0.45999999999999996,
+      "cvar_loss_alpha_0.80": 1.9,
+      "worst_loss": 1.9,
+      "scenario_losses": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        1.9
+      ]
+    },
+    "cvar_selector": {
+      "objective": "cvar",
+      "selected_ids": [
+        "A",
+        "B",
+        "E"
+      ],
+      "total_cost": 3,
+      "total_gain": 2.75,
+      "mean_loss": 0.19,
+      "cvar_loss_alpha_0.80": 0.19,
+      "worst_loss": 0.19,
+      "scenario_losses": [
+        0.19,
+        0.19,
+        0.19,
+        0.19,
+        0.19
+      ]
+    },
+    "selected_sets_differ": true,
+    "tail_improves_cvar": true,
+    "fixture_is_heavy_tailed": true
+  },
+  "dlv_pilot": {
+    "threshold": 0.05,
+    "events": [
+      {
+        "event": "initial_consistent",
+        "observed_depth": 1.01,
+        "residual": 0.010000000000000009,
+        "consistent": true,
+        "state": "active",
+        "contradictory_streak": 0,
+        "consistent_streak": 2
+      },
+      {
+        "event": "contradiction_1",
+        "observed_depth": 1.2,
+        "residual": 0.19999999999999996,
+        "consistent": false,
+        "state": "active",
+        "contradictory_streak": 1,
+        "consistent_streak": 0
+      },
+      {
+        "event": "contradiction_2",
+        "observed_depth": 1.19,
+        "residual": 0.18999999999999995,
+        "consistent": false,
+        "state": "invalidated",
+        "contradictory_streak": 2,
+        "consistent_streak": 0
+      },
+      {
+        "event": "consistent_revisit_1",
+        "observed_depth": 1.02,
+        "residual": 0.020000000000000018,
+        "consistent": true,
+        "state": "invalidated",
+        "contradictory_streak": 0,
+        "consistent_streak": 1
+      },
+      {
+        "event": "noisy_revisit",
+        "observed_depth": 1.07,
+        "residual": 0.07000000000000006,
+        "consistent": false,
+        "state": "invalidated",
+        "contradictory_streak": 1,
+        "consistent_streak": 0
+      },
+      {
+        "event": "consistent_revisit_2",
+        "observed_depth": 0.99,
+        "residual": 0.010000000000000009,
+        "consistent": true,
+        "state": "invalidated",
+        "contradictory_streak": 0,
+        "consistent_streak": 1
+      },
+      {
+        "event": "consistent_revisit_3",
+        "observed_depth": 1.01,
+        "residual": 0.010000000000000009,
+        "consistent": true,
+        "state": "active",
+        "contradictory_streak": 0,
+        "consistent_streak": 2
+      }
+    ],
+    "invalidated_after_two_conflicts": true,
+    "not_invalidated_after_one_conflict": true,
+    "not_reactivated_after_one_consistent_revisit": true,
+    "reactivated_after_two_consistent_revisits": true,
+    "final_state": "active"
+  },
+  "kill_criteria": {
+    "cvar": "reject if tail selector fails to lower CVaR on this heavy-tail fixture",
+    "dlv": "reject if one conflict invalidates or one consistent revisit reactivates"
+  },
+  "limitations": [
+    "synthetic development fixture only",
+    "no VMem forward or RGB-D/pose data",
+    "no future answer scoring",
+    "no evidence of novelty or method effectiveness"
+  ]
+}

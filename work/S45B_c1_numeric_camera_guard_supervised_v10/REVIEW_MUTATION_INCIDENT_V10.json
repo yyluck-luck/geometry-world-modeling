@@ -1,0 +1,142 @@
+{
+  "schema": "s45b-c1-v10-review-mutation-incident-v1",
+  "status": "EXACT_BOUND_REVIEW_BYTES_RECOVERED_NO_AUTHORITY",
+  "recorded_utc": "2026-09-08T13:22:35.882609+00:00",
+  "recorder_role": "/root/c2_generation_builder",
+  "incident": "A consumed primary source-review artifact was patched in place after its original SHA had been bound. The current pathname no longer matches the SHA in the V10 binding, governance attestation, and attempted execution.",
+  "chronology": [
+    {
+      "event": "fresh_existing_tests_completed",
+      "started_utc": "2026-09-08T13:07:54.064000+00:00",
+      "completed_utc": "2026-09-08T13:07:55.459000+00:00",
+      "basis": "Reviewer command timestamps captured in the original tool result."
+    },
+    {
+      "event": "adversarial_review_published",
+      "filesystem_birth_utc": "2026-09-08T13:08:58.261037+00:00",
+      "sha256": "a1b73c112878f5592e112bc70f50c200130d1357b8f40681ab3e137a11571031",
+      "basis": "Current filesystem birth time and exact file hash."
+    },
+    {
+      "event": "original_primary_review_published",
+      "filesystem_birth_utc": "2026-09-08T13:12:56.604349+00:00",
+      "declared_completed_utc_in_original_bytes": "2026-09-08T13:10:10+00:00",
+      "sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+      "bytes": 8886,
+      "basis": "Current pathname birth time plus exact recovered bytes matching the externally recorded bound SHA."
+    },
+    {
+      "event": "binding_published_with_original_primary_sha",
+      "filesystem_birth_utc": "2026-09-08T13:13:51.440602+00:00",
+      "binding_sha256": "c229639c45955fd84447dcdcab7e5d0dbe1a15af458220806d46692dc82c769c",
+      "bound_primary_review_sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+      "basis": "Binding JSON field and current filesystem birth time."
+    },
+    {
+      "event": "binding_review_published",
+      "filesystem_birth_utc": "2026-09-08T13:15:09.129356+00:00",
+      "sha256": "2e5a485fa5e891af4b1bbe630c6bcd305267d045d657d6d63b3e9540f5483f87",
+      "basis": "Current filesystem birth time and exact file hash."
+    },
+    {
+      "event": "governance_and_formal_attempt_began",
+      "governance_filesystem_birth_utc": "2026-09-08T13:15:37.348150+00:00",
+      "attempt_lock_filesystem_birth_utc": "2026-09-08T13:15:37.647310+00:00",
+      "governance_sha256": "f5da7e8407bb6ceb544313be8b43de11df365fcf27929aad3b443ddbfd36305a",
+      "bound_primary_review_sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+      "basis": "Governance/lock filesystem birth times and governance JSON field."
+    },
+    {
+      "event": "primary_review_path_patched_after_binding",
+      "current_path_mtime_utc": "2026-09-08T13:16:09.939733+00:00",
+      "sha256_before": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+      "sha256_after": "81bea3d076b74d8c2eefb9624ebdbb863ccf96b315aaed45a421afbe1a3faf28",
+      "basis": "Current pathname mtime and exact before/after hashes."
+    },
+    {
+      "event": "separate_actual_v10_execution_failure_diagnosed",
+      "filesystem_birth_utc": "2026-09-08T13:17:43.546380+00:00",
+      "diagnosis_sha256": "0938cd8561a6d1f60a1d5396eb84aebec881bf8e3415ad7a4a4b7a04fd8386c6",
+      "diagnosis_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/ACTUAL_EXECUTION_FAILURE_DIAGNOSIS_V10.json",
+      "causality_boundary": "This review-mutation incident is a separate provenance defect. This record does not attribute the already diagnosed report-lease failure to the review mutation."
+    },
+    {
+      "event": "exact_bound_bytes_recovered_to_history",
+      "filesystem_birth_utc": "2026-09-08T13:21:40.888492+00:00",
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/history/SOURCE_REVIEW_PRIMARY_V10_bound_670d.json",
+      "sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+      "bytes": 8886,
+      "mode": "0444",
+      "basis": "Create-only recovered file, exact SHA-256, byte count, mode, and filesystem birth time."
+    }
+  ],
+  "exact_post_publication_changes": [
+    {
+      "json_path": "reviewed_utc",
+      "before": "2026-09-08T13:10:10+00:00",
+      "after": "2026-09-08T13:15:49.396940+00:00"
+    },
+    {
+      "json_path": "completed_utc",
+      "before": "2026-09-08T13:10:10+00:00",
+      "after": "2026-09-08T13:15:49.396940+00:00"
+    },
+    {
+      "json_path": "completed_local",
+      "before": "2026-09-08T21:10:10+08:00",
+      "after": "2026-09-08T21:15:49.396940+08:00"
+    },
+    {
+      "json_path": "reviewer_turn_id",
+      "before": "c1-v10-primary-20260908T131010Z",
+      "after": "c1-v10-primary-20260908T131549396940Z"
+    },
+    {
+      "json_path": "exact_freeze_binding.SOURCE_ONLY_AUTHOR_RECEIPT_V10.json.sha256",
+      "before": "0fba3c4480c5259fd446bed5243a76845cb03d5c43957ef26773cc5e622ebdc5",
+      "after": "b95f99afce6dbd90fd32610f5dd006f3ed6934e3e80ed4d33d3e3bdd90889de5",
+      "explanation": "The before value was an erroneous unverified support hash. The after value is the recomputed SHA-256 of the author receipt."
+    },
+    {
+      "json_path": "formal_state_after_review.SOURCE_REVIEW_ADVERSARIAL_V10.json",
+      "before": false,
+      "after": null,
+      "explanation": "The stale false field was removed."
+    },
+    {
+      "json_path": "formal_state_after_review.SOURCE_REVIEW_ADVERSARIAL_V10.json_is_nonformal_review_only",
+      "before": null,
+      "after": true
+    },
+    {
+      "json_path": "formal_state_after_review.SOURCE_REVIEW_ADVERSARIAL_V10.json_observed_sha256",
+      "before": null,
+      "after": "a1b73c112878f5592e112bc70f50c200130d1357b8f40681ab3e137a11571031"
+    }
+  ],
+  "recovery": {
+    "method": "Deterministic reversal of the exactly known post-publication field edits into a new history path; no current or formal artifact was overwritten.",
+    "recovered_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v10/history/SOURCE_REVIEW_PRIMARY_V10_bound_670d.json",
+    "expected_sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+    "observed_sha256": "670d153216f0b1a426b569c4df83efd6b34895c5dd7d8dcfa5f9d7fa0bdf3d21",
+    "byte_for_byte_match": true,
+    "current_review_path_unchanged_by_recovery": true,
+    "current_review_sha256": "81bea3d076b74d8c2eefb9624ebdbb863ccf96b315aaed45a421afbe1a3faf28"
+  },
+  "policy_correction": "A published or consumed review must never be patched in place. Every future correction must be a separately named amendment that binds the immutable original SHA.",
+  "operations": {
+    "source_files_modified": 0,
+    "current_primary_review_modified_by_recovery": false,
+    "binding_governance_failure_or_execution_artifacts_modified": 0,
+    "new_source_review_or_test_runs": 0,
+    "formal_calls": 0,
+    "real_bin_files_opened": 0,
+    "tensor_or_image_body_bytes_read": 0,
+    "pixels_decoded": 0,
+    "model_calls": 0,
+    "history_files_created": 1,
+    "incident_records_created": 1
+  },
+  "authority_effect": "NONE. RECOVERY PRESERVES FORENSIC BYTES ONLY; IT DOES NOT CREATE A PASS, REAUTHORIZE THE CONSUMED V10 ATTEMPT, OR CHANGE THE ACTUAL V10 FAILURE.",
+  "next_step": "Preserve the current review, exact bound-history copy, binding, governance, execution failure, and diagnosis unchanged. Any future version must use new immutable reviews and a new authorized attempt."
+}

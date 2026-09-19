@@ -1,0 +1,151 @@
+{
+  "schema": "s24-horizon-independent-static-pre-review-v1",
+  "recorded_utc": "2026-09-06T14:54:48.041664+00:00",
+  "recorded_asia_shanghai": "2026-09-06T22:54:48.041664+08:00",
+  "reviewer_agent": "/root/supervisor_full_readthrough",
+  "passed": true,
+  "status": "PASS_STATIC_REVIEW_ONLY",
+  "reviewed_identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s24_horizon_diagnostic.py": "ed99124d3ef5a6bb8b905ec585f17f9551fd02b724b443488f12e5f3c0e27d5f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S24_HORIZON_DIAGNOSTIC_PROTOCOL.md": "83ed42c159c7b12716a0f33711f1da87d16258f9e5245be46b2014dfcd0eb4aa",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S24_horizon_preparation/preparation_receipt.json": "7100bfb1a8c0b0d70fac10686a6a148652a8c019b98c76976da4553eeb826de1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s24_postprocess_chain.py": "426365d7abce17ecb3d4b74d3cd86713b080def63598df0f808ba06a3f926a59",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S24_horizon_preparation/artificial_checks_v1.json": "2742dea90f10df4859b46fbfbabc51ec6a94d59f2a918a213d57ad95418ae4fe",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s24_baseline.py": "b2f0479deb18dab5570918a2ac870c8de4ce02e1005387008651d8953eaea548",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s24_baseline_expansion.py": "e6855563fa5a67c71552817430bd62db5d21b16f1db3d6858990c8fbccd4acdf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/plot_s24_baseline.py": "f49683104d2665e6154e27b0b9b720f40f7287d365566c7fb74d6e2c455ce7d7"
+  },
+  "review_scope": {
+    "full_text_review": [
+      "scripts/s24_horizon_diagnostic.py",
+      "docs/S24_HORIZON_DIAGNOSTIC_PROTOCOL.md",
+      "work/S24_horizon_preparation/preparation_receipt.json",
+      "scripts/s24_postprocess_chain.py",
+      "scripts/plot_s24_baseline.py"
+    ],
+    "supporting_targeted_source_review": {
+      "scripts/score_s24_baseline.py": "matrix_metrics and aligned archive/metric/receipt output contract, plus targeted field searches",
+      "scripts/s24_baseline_expansion.py": "dispatch dependency completion and terminal receipt contract, plus targeted field searches"
+    },
+    "artificial_receipt_review": "Parsed metadata, source bindings, check count and passed flags; no independent execution of fixture code.",
+    "static_only": true,
+    "independent_of_diagnostic_author": true,
+    "prepare_executed_by_reviewer": false,
+    "run_executed_by_reviewer": false,
+    "self_test_executed_by_reviewer": false,
+    "models_imported_or_run_by_reviewer": false,
+    "real_predictions_read_by_reviewer": false,
+    "gt_coordinates_read_by_reviewer": false,
+    "real_score_artifacts_read_by_reviewer": false,
+    "parent_or_child_manifest_content_read_by_reviewer": false,
+    "main_ledger_modified_by_reviewer": false
+  },
+  "checks": [
+    {
+      "id": "pair_domain_and_decimal",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:55-59,76-125",
+      "finding": "Parent RGB numeric literals use Decimal. Strictly increasing times and contiguous indices are required. adjacent uses i+1; lag uses bisect_left at t+1 or t+5 with lo=i+1, hence first subsequent j at or beyond lag. Decimal determines pairing/floor; float only represents metadata for plots."
+    },
+    {
+      "id": "full_tail_and_empty_bins",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:101-125,244-267,367-395",
+      "finding": "Every start is retained for every horizon. Missing endpoints yield j=null, TAIL_NA_NO_ENDPOINT and null errors. All integer start-time bins through the final floor bin exist, including empty and incomplete terminal bins. No-endpoint summaries yield count=0 and null, while zero errors remain zero."
+    },
+    {
+      "id": "score_gate_before_aligned_read",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:165-192,309-351",
+      "finding": "Child source/protocol/parent hashes and rebuilt pair plan are checked first. Parent receipt PASS plus manifest identity precedes metrics read; metrics SHA and complete three-method counts/check flags are required before OUT creation or any aligned NPZ read."
+    },
+    {
+      "id": "new_snapshot_seal_semantics",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:337-349,401-425; docs/S24_HORIZON_DIAGNOSTIC_PROTOCOL.md:30-36",
+      "finding": "All three aligned NPZ byte hashes are captured after the score gate, written as a new input seal before np.load decoding, and checked again before diagnostic PASS. Parent receipt did not seal these NPZ files at producer time; code and protocol explicitly preserve that limitation. Scalar reconstruction is a consistency guard, not proof of historical immutability."
+    },
+    {
+      "id": "pose_validation_and_archive_consistency",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:195-205,358-376,399-406",
+      "finding": "Requires exact archive key set, float64 Nx4x4 finite poses, exact homogeneous row, SO(3) tolerance and identical GT arrays across methods. Whole-trajectory ATE/adjacent RPE scalars are reconstructed and compared with parent independent_matrix at the existing tolerances; no silent normalization, frame removal, or GT text reload."
+    },
+    {
+      "id": "rpe_formula_and_two_math_routes",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:208-241,479-522; scripts/score_s24_baseline.py:109-143",
+      "finding": "Primary error is inv(inv(Gi)Gj) times inv(Pi)Pj. Its translation norm and trace/acos angle match the protocol. Secondary artificial route derives relative transforms using rotation transpose and position differences and atan2(skew norm, trace); it avoids 4x4 inverse and acos. Noncommuting and known-angle fixtures are present. Secondary route is used for artificial self-tests only, not an independent real-data author audit."
+    },
+    {
+      "id": "no_window_refit_or_event_selection",
+      "status": "PASS",
+      "source_locations": "scripts/s24_horizon_diagnostic.py:324-425; docs/S24_HORIZON_DIAGNOSTIC_PROTOCOL.md:7,38-59",
+      "finding": "Diagnostic only reads parent aligned poses, performs no SVD/Sim3 fit and imports no model. It computes all prescribed pairs and descriptive summaries without failure thresholds, error-dependent exclusion, intervention or automatic event selection. Overlapping pairs are explicitly not independent trials."
+    },
+    {
+      "id": "preparation_receipt_binding",
+      "status": "PASS",
+      "source_locations": "work/S24_horizon_preparation/preparation_receipt.json; work/S24_horizon_preparation/artificial_checks_v1.json",
+      "finding": "Current diagnostic/protocol hashes match preparation controls and artificial receipt controls. Artificial receipt SHA matches preparation. It declares 38 checks and contains 38 passed entries. This reviewer checked receipt consistency and source logic only, and did not execute the artificial checks."
+    },
+    {
+      "id": "source_syntax_without_execution",
+      "status": "PASS",
+      "source_locations": "Reviewed Python source identities",
+      "finding": "AST parsing succeeds for the diagnostic, postprocess chain and supporting source files. AST parsing is static; no reviewed module was imported or executed."
+    },
+    {
+      "id": "postprocess_frozen_child_invocation",
+      "status": "PASS",
+      "source_locations": "scripts/s24_postprocess_chain.py:43-55,62-64,98-107",
+      "finding": "Root fixed the initial incorrect manifest filename to run_manifest.json and added --manifest-sha256 using that child file. Contract hashes source, child and parent identities, and rechecks them after waiting before sequential postprocessing. Diagnostic performs its stricter own gates."
+    },
+    {
+      "id": "postprocess_dependency_and_no_restart",
+      "status": "PASS",
+      "source_locations": "scripts/s24_postprocess_chain.py:34-56,60-132; scripts/s24_baseline_expansion.py:164-199",
+      "finding": "Prepare requires exactly one live dispatcher by command identity and stores PID/create_time. Run checks that process while waiting, handles transient incomplete JSON, stops on failed terminal status, missing process or timeout, and does not restart models. Dispatcher source writes dispatch_receipt only after all model phases and the scorer. The postprocess command list contains only diagnostic run and plotting."
+    },
+    {
+      "id": "visual_qa_boundary",
+      "status": "PASS",
+      "source_locations": "scripts/s24_postprocess_chain.py:133-139; scripts/plot_s24_baseline.py; scripts/s24_horizon_diagnostic.py:278-306",
+      "finding": "Chain completion remains COMPLETED_PENDING_VISUAL_REVIEW. Both horizon curves and main reporting figures require actual image inspection. Main plotting selects largest ATE plus neighboring real photos for post-score illustration and explicitly does not establish error cause; this is separate from scientific failure-event selection or intervention."
+    }
+  ],
+  "resolved_findings": [
+    {
+      "id": "POSTPROCESS_WRONG_CHILD_FILENAME",
+      "severity": "BLOCKING_FOR_EXECUTION",
+      "found_in_sha256": "5b42eb5271cd7935c07e9b84daabb9271bb93c0a3507df711cf091442b0c663b",
+      "finding": "Postprocess prepared manifest.json but diagnostic creates run_manifest.json.",
+      "resolution": "Root changed the identity path to run_manifest.json.",
+      "resolved_in_sha256": "426365d7abce17ecb3d4b74d3cd86713b080def63598df0f808ba06a3f926a59"
+    },
+    {
+      "id": "POSTPROCESS_MISSING_REQUIRED_CHILD_SHA",
+      "severity": "BLOCKING_FOR_EXECUTION",
+      "found_in_sha256": "5b42eb5271cd7935c07e9b84daabb9271bb93c0a3507df711cf091442b0c663b",
+      "finding": "Diagnostic run command omitted the required --manifest-sha256 value.",
+      "resolution": "Root binds the prepared child file SHA in the command arguments.",
+      "resolved_in_sha256": "426365d7abce17ecb3d4b74d3cd86713b080def63598df0f808ba06a3f926a59"
+    }
+  ],
+  "blocking_findings": [],
+  "limitations": [
+    "PASS means the reviewed static logic and interfaces are consistent. It is not a completed real diagnostic run, runtime gate test, independent recomputation of true metrics, new algorithm evidence or approval of scientific conclusions.",
+    "Parent aligned NPZ producer-time hashes are unavailable in the reviewed parent scoring contract. The diagnostic correctly makes a later new seal; scalar agreement cannot establish historical byte identity.",
+    "Artificial checks are author-produced fixtures. The reviewer verified their bound receipt and mathematical source logic without rerunning them.",
+    "Exact Decimal arithmetic here assumes the ordinary timestamp precision represented in the pinned dataset manifest. No arbitrary-precision stress test was run.",
+    "aligned_bytes_read_started_utc and aligned_array_decode_started_utc record attempts; booleans are set after a successful read/decode. A failed partial first read can leave a false completion flag together with a started timestamp. This is documented behavior, not proof that no I/O was attempted.",
+    "Actual plots, full trajectory artifacts and final score PASS remain uninspected by this reviewer. Main reporting photo selection is descriptive and cannot establish causal forgetting.",
+    "Postprocess is a bounded dependent job, not a recurring research scheduler. It relies on the current frozen command contract and the diagnostic downstream identity gate; no broad adversarial process-system audit was performed."
+  ],
+  "next_allowed_by_existing_user_authorization": "Root may execute the prepared workflow within the existing local research scope. Prepare creates a new child manifest; diagnostic run must wait for the original parent scoring PASS and retain all hash and completeness gates. No model rerun is introduced by this review.",
+  "required_after_execution": [
+    "Preserve actual run/failed receipts and the new input seal.",
+    "Inspect generated PNG/PDF figures before presenting them as visually verified.",
+    "Record descriptive evidence and unresolved scientific causality separately in the main research ledger."
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "s20-minimal-video-protocol-review-v2",
+  "status": "DRAFT_READY_NOT_EXECUTION_READY",
+  "completed_utc": "2026-09-06T12:48:08.362084+00:00",
+  "source_identity": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_protocol_review/source_hashes.json",
+    "sha256": "9b6ca7a2988df7458fbbc309604f92c447de10df87ba5a44a7c7bf08a4311a28"
+  },
+  "draft": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S20_MINIMAL_VIDEO_PROTOCOL_DRAFT.md",
+    "sha256": "02d95bcddd8401e3df397d58269f3dcf6ba479d9cdfc47b446bb556bd52d60ad"
+  },
+  "counts": {
+    "original_source_files_hashed": 16,
+    "model_calls": 0,
+    "imports_of_vmem_or_tensor_packages": 0,
+    "downloads": 0,
+    "RGB_bytes_read": 0,
+    "GT_bytes_read": 0,
+    "weight_bytes_read": 0,
+    "numeric_npz_reads": 0,
+    "old_successful_tests_rerun": 0
+  },
+  "proposed_contract": {
+    "retained_history_counts": [
+      1,
+      5,
+      9
+    ],
+    "model_T_per_batch": 8,
+    "sampling_steps_per_batch": 50,
+    "real_targets_per_request": 4,
+    "padding_per_batch": [
+      3,
+      0
+    ],
+    "device": "cpu",
+    "dtype": "float32",
+    "torch_threads": 8,
+    "seed": 42,
+    "actions": [
+      {
+        "function": "turn_left",
+        "degrees": 5
+      },
+      {
+        "function": "turn_right",
+        "degrees": 5
+      }
+    ],
+    "initial_image": "original test_samples/changi.jpg, not opened in this review",
+    "budget_suggestion": {
+      "per_batch_seconds": 1800,
+      "rss_bytes": 48318382080,
+      "final_execution_contract_pending": true
+    }
+  },
+  "source_findings": [
+    "10 degree UI button maps to five actual degrees",
+    "first request returns initial plus four; canonical pipeline cache IDs determine final nine",
+    "NMS len5 path fixed but four selected slots must be observed",
+    "first padding targets are decoded and CLIP encoded but not retained",
+    "sampler consumes new noise each step even s_churn zero",
+    "surfel_Ks extends five then nine hence length14",
+    "preset second depth freezes first five in nine-view alignment",
+    "headless no_grad preserves original alignment enable_grad",
+    "native CPU FLASH remains unchanged"
+  ],
+  "not_certified": [
+    "current complete environment import",
+    "current availability of main generator/VAE/CLIP weights",
+    "full-resolution model operators and runtime",
+    "generated video quality",
+    "research innovation"
+  ],
+  "canonical_ledger_modified": false,
+  "frozen_files_modified": false,
+  "prior_receipt_sha256": "7127165427140817058d4b3a18fc57ea2220d2b7cfbab160acc7f2a0aa1d26ae",
+  "revision": "One paragraph clarifies optional default device helper is inherited but not required by Navigator; original draft saved as protocol_draft_v1.md",
+  "environment_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_protocol_review/environment_completion_review.json",
+    "sha256": "286d97482901fa989d8804b0c11c2bb9a65edd068f0a71a065b2d3de16964df1",
+    "scope": "actual root v3 import receipt reviewed; no model or generation"
+  }
+}

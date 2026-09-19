@@ -1,0 +1,176 @@
+{
+  "schema": "s38-gemini-three-citations-v1",
+  "review_recorded_utc": "2026-09-07T03:29:47.559Z",
+  "author": "/root/s14_feature_extractor",
+  "scope": "Three parent-identified bibliography claims only; no full Gemini answer audit",
+  "status": "THREE_CORRECTIONS_SUPPORTED_WITH_DISTINCT_RETRIEVAL_PROVENANCE",
+  "direct_tool_operations": [
+    {
+      "kind": "search_query",
+      "q": "SceneScape Text-Driven Consistent Scene Generation NeurIPS 2023 site:proceedings.neurips.cc",
+      "result": "Primary NeurIPS entry returned title/authors/venue",
+      "http_status": null
+    },
+    {
+      "kind": "search_query",
+      "q": "StreamingT2V Consistent Dynamic Extendable Long Video Generation Text CVPR 2025 site:openaccess.thecvf.com",
+      "result": "Primary CVF entry returned title/authors/venue/BibTeX",
+      "http_status": null
+    },
+    {
+      "kind": "open",
+      "url": "https://arxiv.org/abs/2311.13384",
+      "result": "Full title and page metadata only returned to agent; authors and journal venue not visible in this returned text",
+      "http_status": null
+    },
+    {
+      "kind": "open",
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Liang_LucidDreamer_Towards_High-Fidelity_Text-to-3D_Generation_via_Interval_Score_Matching_CVPR_2024_paper.html",
+      "result": "Web tool Internal Error, no content",
+      "http_status": null
+    }
+  ],
+  "request_accounting": {
+    "direct_tool_operation_count": 4,
+    "search_query_count": 2,
+    "open_count": 2,
+    "retries": 0,
+    "maximum_allowed": 4,
+    "further_public_requests_after_error": 0,
+    "http_transport_bytes": "NOT_EXPOSED_BY_WEB_TOOL",
+    "exact_request_UTC": "NOT_INSTRUMENTED",
+    "timestamp_note": "Recorded UTC is actual review artifact recording time, not an invented per-request clock."
+  },
+  "findings": [
+    {
+      "id": "SceneScape",
+      "gemini_claim_reported_by_parent": "CVPR 2023",
+      "title": "SceneScape: Text-Driven Consistent Scene Generation",
+      "authors": [
+        "Rafail Fridman",
+        "Amit Abecasis",
+        "Yoni Kasten",
+        "Tali Dekel"
+      ],
+      "venue": "Advances in Neural Information Processing Systems 36 (NeurIPS 2023), Main Conference Track",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/7d62a85ebfed2f680eb5544beae93191-Abstract-Conference.html",
+      "evidence": "agent direct primary-entry content returned through search",
+      "verdict": "VENUE_ERROR"
+    },
+    {
+      "id": "StreamingT2V",
+      "gemini_claim_reported_by_parent": "CVPR 2024",
+      "title": "StreamingT2V: Consistent, Dynamic, and Extendable Long Video Generation from Text",
+      "authors": [
+        "Roberto Henschel",
+        "Levon Khachatryan",
+        "Hayk Poghosyan",
+        "Daniil Hayrapetyan",
+        "Vahram Tadevosyan",
+        "Zhangyang Wang",
+        "Shant Navasardyan",
+        "Humphrey Shi"
+      ],
+      "venue": "CVPR 2025",
+      "pages": "2568–2577",
+      "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Henschel_StreamingT2V_Consistent_Dynamic_and_Extendable_Long_Video_Generation_from_Text_CVPR_2025_paper.html",
+      "evidence": "agent direct primary-entry content through search plus agent A already-saved CVF HTML fields",
+      "verdict": "YEAR_ERROR"
+    },
+    {
+      "id": "LucidDreamer_domain_free",
+      "gemini_claim_reported_by_parent": "arxiv 2311.13384 described as CVPR 2024 / Interval Score Matching",
+      "title": "LucidDreamer: Domain-free Generation of 3D Gaussian Splatting Scenes",
+      "authors": [
+        "Jaeyoung Chung",
+        "Suyoung Lee",
+        "Hyeongjin Nam",
+        "Jaerin Lee",
+        "Kyoung Mu Lee"
+      ],
+      "venue": "IEEE Transactions on Visualization and Computer Graphics (TVCG), 2025",
+      "venue_provenance": "author project page as actually retrieved by root; IEEE journal record not queried in this bounded task",
+      "method_labels": [
+        "Dreaming",
+        "Alignment"
+      ],
+      "urls": [
+        "https://luciddreamer-cvlab.github.io/",
+        "https://arxiv.org/abs/2311.13384"
+      ],
+      "evidence": "agent direct arXiv title metadata plus review of primary author-page body relayed by root",
+      "verdict": "CONFLATED_WITH_DIFFERENT_PAPER"
+    },
+    {
+      "id": "LucidDreamer_ISM",
+      "title": "LucidDreamer: Towards High-Fidelity Text-to-3D Generation via Interval Score Matching",
+      "authors": [
+        "Yixun Liang",
+        "Xin Yang",
+        "Jiantao Lin",
+        "Haodong Li",
+        "Xiaogang Xu",
+        "Yingcong Chen"
+      ],
+      "venue": "CVPR 2024",
+      "pages": "6517–6526",
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Liang_LucidDreamer_Towards_High-Fidelity_Text-to-3D_Generation_via_Interval_Score_Matching_CVPR_2024_paper.html",
+      "evidence": "agent review of actual CVF page body relayed by root; own attempted open failed",
+      "verdict": "DISTINCT_PAPER_NOT_DOMAIN_FREE_2311_13384"
+    }
+  ],
+  "root_source_handoff": {
+    "source": "parent agent /root message received during current task, after own four operations",
+    "network_retriever": "/root",
+    "reviewer": "/root/s14_feature_extractor",
+    "root_exact_request_utc": "NOT_PROVIDED",
+    "domain_free": {
+      "url": "https://luciddreamer-cvlab.github.io/",
+      "reported_line_evidence": {
+        "L0": "LucidDreamer: Domain-free Generation of 3D Gaussian Splatting Scenes",
+        "L2": "IEEE Transactions on Visualization and Computer Graphics (TVCG), 2025",
+        "L5": "Jaeyoung Chung, Suyoung Lee, Hyeongjin Nam, Jaerin Lee, Kyoung Mu Lee",
+        "L20–21": "Dreaming and Alignment two steps",
+        "L59": "arxiv2311.13384"
+      }
+    },
+    "ism": {
+      "url": "https://openaccess.thecvf.com/content/CVPR2024/html/Liang_LucidDreamer_Towards_High-Fidelity_Text-to-3D_Generation_via_Interval_Score_Matching_CVPR_2024_paper.html",
+      "body_fields": "LucidDreamer: Towards High-Fidelity Text-to-3D Generation via Interval Score Matching; Yixun Liang, Xin Yang, Jiantao Lin, Haodong Li, Xiaogang Xu, Yingcong Chen; CVPR 2024 pp6517–6526; abstract ISM"
+    },
+    "not_independent_second_network_fetch": true
+  },
+  "local_readset": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/agent_a_video/materials/streamingt2v_venue.html",
+      "scope": "citation metadata, authors, venue line and BibTeX via targeted rg; no PDF read",
+      "sha256": "29aead44e4d0a9c238658b42754dffd242a061a4e47ceb6600b53c6b6c4d6e60",
+      "bytes": 6965
+    }
+  ],
+  "workflow": "Applied existing local scientific-critical-thinking evidence/source boundary; bibliography facts checked separately from scientific recommendations.",
+  "boundaries": {
+    "PDF_downloads_requested": 0,
+    "PDF_files_read": 0,
+    "weights_downloaded": 0,
+    "model_runs": 0,
+    "scientific_experiments": 0,
+    "new_scientific_data_reads": 0,
+    "changes_to_existing_Gemini_prompt_or_preparation": 0,
+    "changes_to_research_protocol_or_ledger": 0
+  },
+  "unreviewed": [
+    "Full original Gemini response",
+    "All other citations",
+    "Gemini ablations and causal explanations",
+    "IEEE Xplore publication record for Domain-free",
+    "Method detail beyond identity-disambiguating labels",
+    "Termination or baseline-switch recommendations"
+  ],
+  "report": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_paper_learning/gemini/independent_citation_check.md",
+    "sha256": "bb44061759e002327230c100fc43d2017e7b136a0ca3c36dd5417e01013f7ca4"
+  },
+  "raw_retrieval_note": "Nonrelevant search hits excluded. Parent raw Gemini answer retention remains root-owned.",
+  "finalized_utc": "2026-09-07T03:30:04.015974+00:00"
+}

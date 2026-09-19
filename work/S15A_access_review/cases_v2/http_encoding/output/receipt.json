@@ -1,0 +1,31 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:47:18.161117+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:47:18.161292+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/144",
+        "Content-Length": "30",
+        "Content-Encoding": "gzip",
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      }
+    }
+  ],
+  "members": [],
+  "body_bytes": 0,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "99f2e67bdaa80097eb34816567cec26b72e58423f7f8f69f442b923c88d8100c",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases_v2/http_encoding/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 144,
+  "error": "ValueError('encoded range')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 113, in execute\n    header = fetch(entry['local_header_offset'],30)\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 101, in fetch\n    require(response.headers.get('Content-Encoding') in (None,'identity'), 'encoded range')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: encoded range\n",
+  "ended_utc": "2026-09-06T09:47:18.161499+00:00"
+}

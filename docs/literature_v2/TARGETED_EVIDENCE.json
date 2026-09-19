@@ -1,0 +1,75 @@
+{
+  "recorded_utc": "2026-09-05T16:15:45.313402+00:00",
+  "time_basis": "Queries occurred before this recording in live tool history; not assigning invented per-query timestamps.",
+  "queries": [
+    "\"3D memory\" \"retrieval\" \"uncertainty\" world model",
+    "\"reference view selection\" robust uncertainty coverage video generation",
+    "\"surfel\" \"provenance\" \"view selection\"",
+    "\"memory\" \"decision stability\" \"world model\"",
+    "\"FreeScale: Scaling 3D Scenes via Certainty-Aware Free-View Generation\"",
+    "\"geometry\" \"memory retrieval\" uncertainty video world model",
+    "\"Pixelwise View Selection for Unstructured Multi-View Stereo\" Schönberger"
+  ],
+  "rounds": "Round1 broad mechanism terms; Round2 exact FreeScale title and view-selection closest works.",
+  "papers": [
+    {
+      "id": "FreeScale",
+      "title": "FreeScale: Scaling 3D Scenes via Certainty-Aware Free-View Generation",
+      "authors": [
+        "Chenhan Jiang",
+        "Yu Chen",
+        "Qingwen Zhang",
+        "Jifei Song",
+        "Songcen Xu",
+        "Dit-Yan Yeung",
+        "Jiankang Deng"
+      ],
+      "year": 2026,
+      "venue": "CVPR 2026",
+      "version": "arXiv 2604.10512v1, 2026-04-12",
+      "grade": "VERIFIED",
+      "sources": [
+        "https://openaccess.thecvf.com/content/CVPR2026/html/Jiang_FreeScale_Scaling_3D_Scenes_via_Certainty-Aware_Free-View_Generation_CVPR_2026_paper.html",
+        "https://arxiv.org/abs/2604.10512",
+        "https://arxiv.org/html/2604.10512v1",
+        "https://mvp-ai-lab.github.io/FreeScale/"
+      ],
+      "existence": "Full title search matched author list on CVF and arXiv.",
+      "claim_check": "Abstract + authors project method + full paper section 4.1.2: imperfect reconstructed scenes motivate certainty-aware view sampling; certainty-weighted view graph connects cameras by shared reliable visibility.",
+      "finding": "不确定性/置信程度引导几何视图选择已存在，不能仅添加置信度就宣称创新。",
+      "conditions": "目标是从重建场景扩充NVS训练数据及改进per-scene 3DGS；不是VMem历史因果surfel来源更新。",
+      "details_used": "Only qualitative mechanism; no new numerical claim drawn from source.",
+      "relations": "对泛称uncertainty-aware geometry retrieval的构想构成近邻；与AnchorWeave选择局部历史锚不同。"
+    },
+    {
+      "id": "MV-DUSt3R+",
+      "title": "MV-DUSt3R+: Single-Stage Scene Reconstruction from Sparse Views In 2 Seconds",
+      "authors": [
+        "Zhenggang Tang",
+        "Yuchen Fan",
+        "Dilin Wang",
+        "Hongyu Xu",
+        "Rakesh Ranjan",
+        "Alexander Schwing",
+        "Zhicheng Yan"
+      ],
+      "year": 2024,
+      "venue": "arXiv:2412.06974 (venue not checked in this supplement)",
+      "grade": "VERIFIED",
+      "sources": [
+        "https://arxiv.org/abs/2412.06974"
+      ],
+      "existence": "Full distinctive title returned with authors, direct arXiv opened.",
+      "claim_check": "Abstract confirms multi-view decoder and cross-reference-view fusion for robustness to reference choice.",
+      "finding": "参考视图选择依赖并非新问题，已有在模型内部跨参考坐标融合的路线。",
+      "conditions": "Feed-forward multi-view reconstruction / Gaussian heads, not causal history retrieval; restrict to abstract-level signature; no hardware or 2-second reproducibility claim.",
+      "relations": "方法对象是reconstruction reference，不是generation reference source。"
+    }
+  ],
+  "excluded": [
+    "Third-party mirrors/ResearchGate not used as factual evidence",
+    "Pixelwise View Selection exists but author preprint and venue metadata author order differ; unnecessary for current core corpus, not cite detailed bibliographic row without resolving",
+    "Ship navigation/LLM essays/logistics did not match RQs",
+    "Wonder/DeepVerse additional leads handed to mainstream scope; not assertions from snippets"
+  ]
+}

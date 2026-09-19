@@ -1,0 +1,241 @@
+  - heading "You said 请继续做一次不超过1400中文字的数学与研究方向审查，不添加强制门禁，也不保证创新。更新：第三组原运行完成第一批，第二批在几何检索空集时报错。已用实际保存几何重现：515个点的相机正深度都约10^-6…" [level=5]
+  - paragraph: 请继续做一次不超过1400中文字的数学与研究方向审查，不添加强制门禁，也不保证创新。更新：第三组原运行完成第一批，第二批在几何检索空集时报错。已用实际保存几何重现：515个点的相机正深度都约10^-6，固定near=0.1全部剔除。一个独立工程组件将全部点位置、半径和相机平移共同除以全部正相机深度的中位数m；旋转、内参、法线和来源ID保持，恢复可见点与原选帧缓存返回。深度变成z/m，票重从cos/(1+z)变为cos/(1+z/m)，所以只是声明的工程变体，不是新算法或完整系统尺度不变性。原成功/失败记录不合并；完整新生成尚在执行前准备。
+  - paragraph: 请只围绕一个可能值得深入的科学问题回答：当记忆随时间新增和重建时，各次估计坐标尺度不稳定，简单全局归一化是否会掩盖跨时刻几何不可观测性？1. 用不超过5行数学给出共同正尺度s下本次renderer变换的等变/不变关系，并准确列出证明不覆盖的部分。2. 用一个可手算反例说明为什么纯旋转/共线运动下“尺度稳定、检索不空”不等于真实几何正确；不要声称纯旋转能从RGB恢复绝对深度。3. 仅提出一个研究候选与一个最便宜、能明确否决它的实验。必须对比常见规范固定/Sim(3)对齐/简单置信度筛选，解释潜在新机制需要哪种超出这些基线的证据；可以裁决暂无合格方法。4. 给至多2篇实际可核的一手顶会论文（ICML/NeurIPS/ICLR/CVPR均可），只为上述数学或估计问题提供启发，写清真实阅读与不确定范围；不凭记忆编造链接，不把规范固定改名为创新。当前本机CPU，完整两批约45分钟。
+  - button "Expand":
+    - img: expand_more
+  - button "Copy prompt":
+    - img: copy
+  - button "Edit":
+    - img: edit
+  - heading "Gemini said" [level=6]
+  - paragraph: 这是一份针对“几何不可观测性与尺度归一化”的严格数学与研究审查。
+  - heading "1. 数学等变/不变关系（尺度 ）" [level=3]:
+    - text: 1. 数学等变/不变关系（尺度
+    - generic: s =
+    - generic: 1/m
+    - text: ）
+  - paragraph:
+    - text: 设正尺度
+    - generic: s >
+    - generic: "0"
+    - text: ，点云
+    - text: P
+    - generic: w
+    - generic: ′
+    - text: =
+    - text: s
+    - text: P
+    - generic: w
+    - text: ，相机平移
+    - text: t
+    - generic: ′
+    - text: =
+    - generic: st
+    - text: 。当前视角的相机坐标变换为：
+  - text: P
+  - generic: c
+  - generic: ′
+  - text: =
+  - text: R(s
+  - text: P
+  - generic: w
+  - text: ) +
+  - generic: st =
+  - text: s(R
+  - text: P
+  - generic: w
+  - text: +
+  - generic: t) =
+  - text: s
+  - text: P
+  - generic: c
+  - text: ⟹
+  - text: 深度
+  - text: z
+  - generic: ′
+  - text: =
+  - generic: sz
+  - paragraph:
+    - text: 像素投影
+    - text: p
+    - generic: ′
+    - text: =
+    - text: K(
+    - text: P
+    - generic: c
+    - generic: ′
+    - text: /
+    - text: z
+    - generic: ′
+    - text: ) =
+    - text: K(s
+    - text: P
+    - generic: c
+    - text: /sz) =
+    - text: K(
+    - text: P
+    - generic: c
+    - text: /z) =
+    - generic: p
+    - text: （像素坐标具备尺度不变性）。 检索权重
+    - text: w
+    - generic: ′
+    - text: =
+    - generic: cos θ/(1 +
+    - generic: sz)
+    - text: （随
+    - generic: s
+    - text: 发生非线性单调映射，具备非等变性/非不变性）。 该证明不覆盖： 1) 旋转、内参及表面法线的变换（它们与平移尺度无耦合）；2) 多帧序列中新增局部点云时，不同批次间中位数
+    - generic: m
+    - text: 波动导致的相对尺度漂移；3) 非刚性运动引起的局部深度残差。
+  - heading "2. 纯旋转/共线运动的反例（尺度稳定 几何正确）" [level=3]:
+    - text: 2. 纯旋转/共线运动的反例（尺度稳定
+    - generic: 
+    - text: =
+    - text: 几何正确）
+  - paragraph:
+    - text: 已知物理事实： 纯旋转运动（平移
+    - generic: t =
+    - generic: "0"
+    - text: ）下，图像间无视差，RGB绝对深度不可观测。 手算反例： 假设真实世界中点A深度
+    - text: z
+    - generic: A
+    - text: =
+    - generic: "1"
+    - text: ，点B深度
+    - text: z
+    - generic: B
+    - text: =
+    - generic: "100"
+    - text: 。在纯旋转序列中，无论估算算法输出
+    - text: z
+    - generic: A
+    - text: =
+    - text: "1"
+    - text: "0"
+    - generic: −6
+    - text: ","
+    - text: z
+    - generic: B
+    - text: =
+    - text: "1"
+    - text: "0"
+    - generic: −6
+    - text: 还是
+    - text: z
+    - generic: A
+    - text: =
+    - text: 1,
+    - text: z
+    - generic: B
+    - text: =
+    - generic: "1"
+    - text: ，其在历史帧的重投影误差（Reprojection Error）均为 0。 若重建输出了几乎坍缩的深度
+    - text: "1"
+    - text: "0"
+    - generic: −6
+    - text: ，此时触发你的工程组件，计算正深度中位数
+    - generic: m =
+    - text: "1"
+    - text: "0"
+    - generic: −6
+    - text: 进行归一化。归一化后深度变为
+    - text: z
+    - generic: A
+    - generic: ′
+    - text: =
+    - text: 1,
+    - text: z
+    - generic: B
+    - generic: ′
+    - text: =
+    - generic: "1"
+    - text: 。 结论： 归一化后的点云成功越过了
+    - code: near=0.1
+    - text: 的截断阈值，检索不再为空集，尺度实现了工程上的稳定；但
+    - generic: A, B
+    - text: 的真实相对距离比例从
+    - generic: "1 :"
+    - generic: "100"
+    - text: 被严重扭曲为
+    - generic: "1 :"
+    - generic: "1"
+    - text: 。所谓的“几何缓存”现在装满了拓扑错误的幻觉结构，如果以此作为后续新视角的Surfel条件，必定产生灾难性伪影。
+  - heading "3. 研究候选与最便宜的否决实验" [level=3]
+  - paragraph:
+    - text: 研究候选： “基于运动退化不确定性的跨模态条件降级”。 相比于“规范固定(Gauge fixing)”（假定相对结构已正确，只解Sim(3)全局对齐）或“简单置信度筛选”（低于阈值直接丢弃特征），新机制假设：在
+    - generic: t →
+    - generic: "0"
+    - text: 的退化时刻，几何条件
+    - generic: c
+    - text: 虽然尺度被强制归一化且通过了筛选，但其结构是拓扑失效的。此时网络必须显式计算运动基线长度/视差作为认知不确定性，并将生成权重从失效的几何通路
+    - generic: c
+    - text: 强制平滑切换至隐式 Latent 时序通路
+    - generic: L
+    - text: 。
+  - paragraph: 最便宜的否决实验（单机CPU，2批45分钟）： 无需修改网络。构造两组观测测试：
+  - list:
+    - paragraph:
+      - text: 组 1（强基线运动）： 提供包含有效平移历史的基线序列，具有正确的相对深度
+      - text: c
+      - generic: valid
+      - text: 和潜变量
+      - generic: L
+      - text: 。
+    - paragraph:
+      - text: 组 2（退化尺度幻觉）： 提供纯旋转历史序列，强制应用上述中位数缩放，得到错误的归一化深度
+      - text: c
+      - generic: fake
+      - text: 和同等潜变量
+      - generic: L
+      - text: 。 让模型分别基于组 1 和组 2 预测一个带有新平移的未来帧，观察输出
+      - generic: "Y"
+      - text: 。 否决条件： 如果
+      - text: "Y"
+      - generic: fake
+      - text: 的结果与
+      - text: "Y"
+      - generic: valid
+      - text: 质量相当，或者网络通过某种内置注意力机制自动忽略了
+      - text: c
+      - generic: fake
+      - text: 中的几何扭曲，这直接否决了该研究方向——它证明现有模型（或Latent通路）已经具备了隐式的抗退化鲁棒性，你不需要再外挂计算运动退化或修改机制，当前的问题仅仅是那个检索越界报错的工程Bug。
+  - heading "4. 启发性真实文献 (CVPR/NeurIPS)" [level=3]
+  - list:
+    - paragraph:
+      - text: "DUSt3R: Geometric 3D Vision Made Easy (CVPR 2024, URL:"
+      - code: "[https://arxiv.org/abs/2312.14132](https://arxiv.org/abs/2312.14132)"
+      - text: )
+    - list:
+      - paragraph: 启发点： 无需已知相机Pose和绝对尺度，直接在局部回归 Pointmap 并对齐。
+      - paragraph: 阅读范围： 重点看 Sec 3.1 和 Sec 3.2 中关于如何处理独立帧对的尺度歧义（Scale Ambiguity），并用纯相对置信度代替绝对尺度阈值。
+      - paragraph: 未核实细节： DUSt3R 的全局优化器能否直接且低成本地平替你当前工程里的 VMem 几何流尚不确定。
+    - paragraph:
+      - text: "DROID-SLAM: Deep Visual SLAM for Monocular, Stereo, and RGB-D Cameras (NeurIPS 2021, URL:"
+      - code: "[https://arxiv.org/abs/2108.10869](https://arxiv.org/abs/2108.10869)"
+      - text: )
+    - list:
+      - paragraph: 启发点： 如何在可微 BA (Bundle Adjustment) 中处理纯旋转/极小基线的深度不可观测性。
+      - paragraph: 阅读范围： 重点看 Sec 4 (Update Operator) 中基于 ConvGRU 的隐藏状态如何同时维护深度更新与置信度（Confidence weight），应对退化运动。
+      - paragraph: 未核实细节： 论文中的双向光流不确定性估计，能否在你的 CPU 单机算力下被简化为一个无需训练的闭式退化判定项。
+  - button "Good response":
+    - img: thumb_up
+  - button "Bad response":
+    - img: thumb_down
+  - button "Redo":
+    - img: refresh
+  - button "Share & export":
+    - img: share_1
+  - button "Copy" [active]:
+    - img: copy
+  - button "Show more options":
+    - img: more_horiz
+  - paragraph: Gemini is AI and can make mistakes.
+  - textbox "Enter a prompt for Gemini":
+    - text: Ask Gemini
+    - paragraph
+  - button "Upload & tools":
+    - img: plus
+  - button "Dictate (⌘⇧D)":
+    - img: mic
+- generic: Copy response

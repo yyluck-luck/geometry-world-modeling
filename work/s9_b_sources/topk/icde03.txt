@@ -1,0 +1,965 @@
+                       Efficient Maintenance of Materialized Top-k Views
+
+              Ke Yi, Hai Yu, Jun Yang                                  Gangqiang Xia, Yuguo Chen
+           Department of Computer Science                       Institute of Statistics and Decision Sciences
+                    Duke University                                            Duke University
+          {yike,fishhai,junyang}@cs.duke.edu                             {xia,yuguo}@stat.duke.edu
+
+
+                        Abstract                                    view itself does not contain enough information required for
+                                                                    maintenance.
+    We tackle the problem of maintaining materialized top-             For example, consider a materialized view containing 10
+k views in this paper. Top-k queries, including MIN and             stocks with the highest price/earning ratios currently on the
+MAX as important special cases, occur frequently in com-            market. Suppose one of these stocks plummets, and its
+mon database workloads. A top-k view can be materialized            price/earning ratio drops below the current top 10. After
+to improve query performance, but in general it is not self-        this update, the view still contains the top 9 stocks, but in
+maintainable unless it contains all tuples in the base table.       order to find the stock with the 10-th ranked price/earning
+Deletions and updates on the base table may cause tuples            ratio, we need to query the base table of all stocks. This
+to leave the top-k view, resulting in expensive queries over        query, which we call a refill query, can be expensive in gen-
+the base table to “refill” the view. In this paper, we pro-         eral for a number of reasons, e.g., the base table may be
+pose an algorithm that reduces the frequency of refills by          large, it may reside in a remote database, and the ranking
+maintaining a top-k 0 view instead of a top-k view, where           criterion may involve expensive user-defined functions.
+k 0 changes at runtime between k and some kmax ≥ k. We                 To avoid expensive refill queries over the base table, we
+show that in most practical cases, our algorithm can reduce         can make a top-k view self-maintainable by augmenting it
+the expected amortized cost of refill queries to O(1) while         with auxiliary data, a technique well studied in data ware-
+still keeping the view small. The optimal value of kmax de-         housing [22, 1]. For example, we may keep the (k + 1)-th
+pends on the update pattern and the costs of querying the           ranked tuple as auxiliary data to help maintain a top-k view,
+base table and updating the view. Compared with the sim-            in the event that a tuple drops out of the top k. However,
+ple approach of maintaining either the top-k view itself or a       since auxiliary data must be maintained as well, we need the
+copy of the base table, our algorithm can provide orders-of-        (k + 2)-th ranked tuple in order to maintain the (k + 1)-th,
+magnitude improvements in performance with appropriate              the (k + 3)-th to maintain the (k + 2)-th, etc. In general, to
+kmax values. We show how to choose kmax dynamically to              make a top-k view completely self-maintainable, we must
+adapt to the actual system workload and performance at              essentially keep a copy of the entire base table, or at least
+runtime, without requiring accurate prior knowledge.                an ordered index on the base table column used for ranking.
+                                                                       Now we are faced with a dilemma. One option is to
+                                                                    maintain the original top-k view, which may require fre-
+1. Introduction                                                     quent costly refill queries. The other option is to maintain
+                                                                    an ordered index on the entire base table, which has high
+   Top-k queries have received much attention from the              storage and maintenance overhead but avoids refill queries
+database community in recent years [5, 9, 10, 3, 6]. An             altogether. Neither option seems completely satisfactory.
+effective way of improving the performance of expen-                Previous work on making views self-maintainable has of-
+sive queries is to maintain their results as materialized           ten side-stepped the problem by not considering deletions
+views [13]. However, incremental maintenance of materi-             and updates for SQL aggregates MIN and MAX, which are
+alized top-k views has been a relatively unexplored prob-           special cases of top-k views with k = 1.
+lem in the view maintenance literature. The main dif-                  Fortunately, we have a middle-ground to explore be-
+ficulty of this problem is that a top-k view is not self-           tween the two extremes, without ruling out deletions and
+maintainable [12] with respect to deletions and updates             updates. This approach is based on two key observa-
+on the base table. That is, sometimes we must query the             tions. First, instead of requiring complete self-maintenance,
+base table in order to maintain the top-k view properly; the        we try to achieve runtime self-maintenance [16] with high
+
+                                                                1
+probability. That is, rather than devoting lots of additional        queries. They assume that ranked views are materialized in
+resources to ensure that we never query the base table for           their entirety. Nevertheless, it is possible to reduce storage
+view maintenance, we can devote much fewer additional                and maintenance costs by keeping top-k views instead of
+resources and ensure that we only query the base table ex-           whole ranked views. Therefore, their work is complemen-
+tremely rarely. The second observation is that a material-           tary to ours, and provides a good motivation for studying
+ized view can have a dynamic definition. Instead of main-            efficient maintenance of top-k views.
+taining a top-k view, we maintain a top-k 0 view, where k 0              Materialized view maintenance is a well-known and
+can change dynamically between k and some kmax ≥ k. We               well-studied problem, surveyed in [13]. The concept of self-
+start with k 0 = kmax , i.e., a top-kmax view with more than         maintenance is introduced in [2, 12], and the concept of run-
+the required number of tuples. We increase k 0 by one when           time self-maintenance is introduced in [16]. The technique
+an insertion or an update causes a tuple to enter the current        of using auxiliary data to make views self-maintainable is
+top k 0 (unless k 0 already equals kmax ), and we decrease k 0       pioneered by [22], and has been successfully applied in
+by one when a deletion or an update causes a tuple to leave          many settings [1, 23, 17]. To the best of our knowledge,
+the current top k 0 . We only query the base table when k 0          all prior work uses auxiliary data to achieve complete self-
+drops below k. By starting with kmax instead of k, we hope           maintenance; none has considered using auxiliary data to
+to lower the refill frequency and hence the amortized cost           increase the probability of runtime self-maintenance, which
+of view maintenance.                                                 is the one of the key observations in this paper.
+    Beyond this conceptually simple idea, several interest-              Until recently, most papers that deal with SQL MIN and
+ing and non-trivial questions remain to be answered. In-             MAX views (which are special cases of top-k views), e.g.,
+tuitively, as we increase kmax , refill frequency decreases;         [11, 21, 1, 17, 24], cannot efficiently handle deletions or up-
+on the other hand, the view takes more space, updating the           dates to the base table. Recent work by Palpanas et al. [18]
+view becomes more expensive, and more updates need to                proposes using work areas to maintain MIN and MAX views.
+be applied to the view. Given these trade-offs, how do we            Their approach has the same underlying idea as our algo-
+choose right values of kmax ? What are the factors affecting         rithm in Section 3, which we have developed independently.
+the optimal kmax value? Under what conditions can we ex-             Besides this basic idea, they do not consider how to choose
+pect to achieve low amortized view maintenance cost with             the size of the work area, while we make the following ad-
+reasonably small values of kmax ? How do we choose kmax              ditional contributions: (1) we develop a probabilistic model
+without accurate prior knowledge of the workload?                    for rigorous analysis of the algorithm; (2) we prove high-
+    This paper explores in detail the issues mentioned above.        probability results that establish the effectiveness of the al-
+Section 2 surveys related work. Section 3 describes our al-          gorithm; and (3) we provide a procedure for choosing kmax
+gorithm and cost model. Section 4 explores the relation-             (or size of the work area in their terminology) which adapts
+ship between kmax and the refill frequency using the ran-            to the actual system workload and performance at runtime,
+dom walk model as a tool. Most importantly, we show that             without requiring accurate prior knowledge.
+in most practical cases, we can reduce the expected amor-
+tized cost of refill queries to O(1) with reasonably small           3. The Algorithm
+kmax values. Section 5 considers several statistical mod-
+els of base table updates and shows how to apply our an-
+                                                                        Suppose we are interested in the top k tuples from a base
+alytical results in Section 4 to these cases. Section 6 ex-
+                                                                     table R of size N . We assume k is a constant much smaller
+perimentally obtains the parameters of our cost model, and
+                                                                     than N , since typical users are interested only in a small
+demonstrates the effectiveness of our algorithm in realis-
+                                                                     subset of R that is most “important,” e.g., the ten most pop-
+tic scenarios. Section 7 proposes a procedure for choosing
+                                                                     ular songs or the 100 most frequently accessed web sites.
+kmax which adapts to the actual system workload and per-
+                                                                     Suppose that tuples in R are identified by a column id and
+formance at runtime.
+                                                                     ranked according to the value of a column val. Tuples
+                                                                     with larger values are ranked higher. For simplicity, we as-
+2. Related Work                                                      sume all values are distinct; in practice, ties can be broken
+                                                                     arbitrarily using id values. The val column can be ei-
+   There is a large body of work on top-k queries [4, 5,             ther stored explicitly in R or computed on the fly by some
+9, 10, 3, 7, 6], most of which focuses on how to evaluate            user-defined function. We assume that there is no index on
+these queries efficiently in various contexts. Most related          R.val.
+to this paper is the work by Hristidis et al. [15], wherein             Our algorithm is conceptually very simple. We keep the
+they propose materializing ranked views to speed up more             top k 0 tuples (with id and val columns) in a materialized
+complex preference queries. Their work focuses on select-            view V , where k 0 can vary between k and some kmax ≥
+ing ranked views to materialize and using them to answer             k. Since k ≤ k 0 , we can answer top-k queries using the
+
+                                                                 2
+contents of V .                                                              The cost of updating the view in an update operation,
+   We need to maintain V given the changes to the base ta-                Cupdate , is O(log |V |), or O(log kmax ), since we can im-
+ble R. To keep our analysis clean, we only consider updates               plement V using any data structure that functions as a pri-
+to R; that is, we assume that the identities of the N tuples              ority queue, say, a heap or a balanced search tree, which
+in R remain fixed while their values change over time. It is              has an O(log |V |) lookup/insert/delete time. However, not
+straightforward to generalize our algorithm and analysis to               every base table update causes a view update. Suppose
+handle insertions and deletions on R as well.                             fignore is the fraction of base table updates that are ig-
+   Let vk0 be the value of the lowest ranked tuple currently              norable. The amortized cost of an update operation is
+in V . We assume that an update to R has the form hid , val i,            Cupdate × (1 − fignore ).
+where val is the new value of the tuple identified by id . For               The cost of a refill operation, Crefill , includes the follow-
+each update to R, we perform an update operation on V .                   ing three components:
+There are four cases to consider:                                           • The cost of processing the refill query over R. If
+   • The tuple identified by id is not in V , and val < vk0 .                 kmax − k + 1 is small enough, we can evaluate the
+      This update has no effect on V . We call this update an                 refill query by making one pass over R while keeping
+      ignorable update.                                                       in memory the top tuples (among those whose values
+   • The tuple identified by id is in V , and val > vk0 . We                  are less than vk−1 ) seen so far. In the worst case where
+      update the value of this tuple in V to val . We call this               kmax − k + 1 is too large for memory, we can perform
+      update a neutral update (“neutral” in the sense that it                 an external-memory sort of all R tuples with values
+      does not change the value of k 0 ).                                     less than vk−1 , and return the top kmax − k + 1 tu-
+   • The tuple identified by id is not in V , and val > vk0 .                 ples. In either case, we expect this cost to be O(N ) for
+      We insert hid , val i into V . We call this update a good               practical memory sizes.
+      update (“good” in the sense that it increases k 0 by one).
+                                                                            • The cost of retrieving the kmax − k + 1 result tuples
+      If k 0 exceeds kmax , we delete the lowest ranked tuple
+                                                                              of the refill query. Depending on the actual database
+      in V .
+                                                                              and application setup, this cost may involve the cost of
+   • The tuple identified by id is in V , and val < vk0 . We                  binding result tuples out from the database to the ap-
+      delete the updated tuple from V . We call this update a                 plication, or the cost of transmitting them to a remote
+      bad update (“bad” in the sense that it decreases k 0 by                 application over the network. We expect this cost to be
+      one). If k 0 drops below k, we perform a refill operation               O(kmax ).
+      as described below.
+   The refill operation queries the base table and restores                 • The cost of inserting the kmax − k + 1 result tuples
+the size of the view to kmax . This operation consists of the                 into V . These tuples are already sorted and will be ap-
+following two steps:                                                          pended to V . For the data structures used to implement
+                                                                              V (as discussed for the case of Cupdate ), the total cost
+   • Evaluate the refill query over R, which returns all tu-
+                                                                              of appending kmax − k + 1 tuples is O(kmax ).
+      ples ranked between k and kmax . Note that at the time
+      of refill, if k > 1, V still contains the (k − 1)-th ranked            It is reasonable to assume that Cupdate  Crefill . There-
+      tuple. We can use the value of this tuple, vk−1 , to re-            fore, to minimize C, we focus on reducing frefill , the fre-
+      fine the refill query as: “return the top kmax − k + 1              quency of refill operations. Since the cost of a refill query
+      tuples among those whose values are less than vk−1 .”               is O(N ), if we can reduce frefill to 1/N , we will have re-
+   • Insert the result of the refill query into V .                       duced the amortized cost of refill queries to O(1), an attrac-
+   Further optimization is possible. For example, instead of              tive goal. Intuitively, we can decrease frefill by increasing
+waiting until k 0 drops below k, we could refill the view more            kmax . However, a larger kmax also increases Cupdate and
+“eagerly,” i.e., when k 0 is close to but still larger than k. This       Crefill and decreases fignore , so the trade-off must be con-
+approach would allow us to keep serving top-k queries from                sidered carefully. In Section 4, we develop a theoretical
+the view while waiting for the refill query on the base table             model to study the effect of kmax on frefill , and in Sec-
+to complete. Our analysis, however, will be based on the                  tions 5 and 6, we conduct simulations and experiments to
+basic version of the algorithm.                                           see how kmax affects Cupdate , fignore , Crefill , and frefill in
+                                                                          practical scenarios.
+3.1. Cost Model                                                              This simple cost model of ours does not capture the inter-
+                                                                          action between concurrent queries and updates, nor the po-
+   The amortized cost of our algorithm per base table up-                 tential savings of overlapping local execution with remote
+date is given by                                                          execution and data transfer. Nevertheless, this model pro-
+                                                                          vides a good first-order estimate of the total cost of the al-
+    C = Cupdate × (1 − fignore ) + Crefill × frefill .         (1)        gorithm.
+
+                                                                      3
+4. Analysis
+                                                                         2 1−p            p0
+                                                                                                                                         3
+                                                                               0
+4.1. The Random Walk Model                                               66 q1        1 − p1 − q1          p1                            77
+                                                                          66              ..                                              77 ,
+                                                                           64                .                                             75
+     From the description of the algorithm in the last section,                          qn−2        1 − pn−2 − qn−2         pn−2
+we notice that the values of k 0 between two refill operations                                             qn−1        1 − pn−1 − qn−1
+can be modeled as a random walk on the one-dimensional
+                                                                         where all unspecified entries are zeros.
+points {k−1, k, . . . , kmax }, where kmax is the starting point
+                                                                            To simplify calculation, we consider the special case of
+and k − 1 is an absorbing point at which the random walk
+                                                                         p0 = p1 = · · · = pn−1 = p and q0 = q1 = · · · = qn−1 =
+ends and a refill is needed. In order to use the standard nota-
+                                                                         q, i.e., the probabilities of bad and good updates (p and q
+tion of Markov chains, we map the one-dimensional points
+                                                                         respectively) remain constant as |V | changes. In general,
+to {0, 1, . . . , n}, making 0 as the starting point and n the
+                                                                         this assumption does not hold. However, as we will discuss
+absorbing point, where n = kmax − k + 1. We need to an-
+                                                                         in Section 4.6, the results we derive for the case of constant
+alyze the probabilistic properties of the refill interval Z, or
+                                                                         p and q can be generalized to the case of varying p and q.
+the number of steps it takes for the random walk to go from
+                                                                         Therefore, we shall assume constant p and q in subsequent
+0 to n. The expected refill frequency used in (1) is given by
+                                                                         analysis until Section 4.6.
+frefill = E[1/Z].
+                                                                            Applying Gaussian Elimination to (2), we obtain the fol-
+     For the purpose of our analysis, we are mostly interested
+                                                                         lowing lemma (see [25] for detailed derivation).
+in good and bad updates since they are the only updates that
+change the size of the view. Suppose that the random walk                Lemma 1 (Expected refill interval) The expected hitting
+is currently at position i. With a bad update, the random                time of the random walk from i to n is given by
+walk moves to i+1; we assume that this move happens with                           ( (n+i+1)(n−i)
+probability pi . With a good update, the random walk moves
+                                                                                           2p       ,       p = q;
+to i − 1; we assume that this move happens with probability                 hi =      (n−i)(1−t)−ti+1 +tn
+                                                                                            p(1−t)2       , p 6= q and t = q/p,
+qi . Otherwise, the update is either ignorable or neutral, and
+the random walk stays at i with probability 1 − pi − qi .                for i = 0, . . . , n − 1.
+     In our random walk model, we assume that the choice at
+each step is independent of all previous choices. This as-               Please note that E[Z] = h0 . This lemma confirms our
+sumption may not hold for arbitrary update workloads. In                 intuition that the hitting time increases with bigger views.
+Section 4.6, we show how to generalize our analytical re-                          √ when p = q, it seems sufficient to choose
+                                                                         In particular,
+sults when this assumption is dropped, and in Section 5, we              n = Θ( N ) so that E[Z] = N , which means that we
+show how to apply our generalized results to update work-                perform a refill operation every N updates on average. In
+loads where the independence assumption does not hold.                   general, however, we cannot guarantee that E[1/Z], the ex-
+                                                                         pected refill frequency, is 1/N . It is conceivable that the
+4.2. Expected Refill Interval                                            actual distribution of Z is not centered at its mean value;
+                                                                         there may be a significant probability for Z to be much
+    The first step is to find the expectation of Z, E[Z], which          smaller than its mean, causing E[1/Z] to be much bigger
+is called the hitting time from 0 to n in the terminology of             than 1/E[Z].
+Markov chains. Denote the hitting time from i to n as hi .                  Unfortunately, E[1/Z] has no close formula. On the
+By the properties of Markov chains, we have                              other hand, given the transition matrix in (2), we can com-
+                                                                         pute E[1/Z] numerically. We present a numerical solver
+                                n−1
+                                X                                        for E[1/Z] in [25] and show that the computation con-
+                     hi = 1 +         pij hj ,                           verges with exponential speed. However, the numerical
+                                j=0                                      solver alone cannot provide any bound on E[1/Z] in gen-
+                                                                         eral. Next, we develop a series of high-probability results
+where pij is the transition probability from i to j. The equa-
+                                                                         which enable us to bound E[1/Z].
+tion also can be written in a matrix form: h = b + Ph, or
+
+                        (I − P)h = b,                         (2)        4.3. High-Probability Results When p = q
+
+where I is the n × n identity matrix, P = (pij ), h =                        We first concentrate on the most interesting case where
+(h0 , . . . , hn−1 )T , and b = (1, . . . , 1)T . Using the proba-       p = q, i.e., the view shrinks and grows with equal probabil-
+bilities of good and bad updates defined in Section 4.1, we              ity. We expect this case to be common: If the distribution
+can write P as follows:                                                  of the tuple values used for ranking is stationary, the rate
+
+                                                                     4
+    N        n      n/N      lower bound            upper bound       Theorem 2 When p < q, if n = c ln N , the refill interval
+                            on Pr[Z > N ]           on E[N/Z]         Z is greater than N with high probability, i.e.,
+   100      30       30%        0.9556                1.1037
+   1000     100      10%        0.9730                1.2426                            Pr[Z > N ] > 1 − o(1),
+    104     400       4%        0.9987                1.0322
+    105    1300      1.3%       0.9991                1.0650          for constant c big enough, depending only on p and q.
+    106    4500     0.45%       0.9998                1.0355
+                                                                      Please refer to the proof in Appendix B for the choice of
+   Table 1. Theoretical bounds on Pr[Z > N ] and                      constant c. The next corollary follows naturally.
+   E[N/Z] for practical values of N and n.
+                                                                      Corollary 2 When p < q, the expected amortized cost of
+                                                                      refill queries is O(1), if n = c ln N , for some constant c big
+                                                                      enough.
+at which tuples enter the top-k 0 view must be the same as
+that at which tuples leave the top-k 0 view. We would like to         4.5. When p > q
+provide a high-probability guarantee, i.e., Z = Ω(N ) holds
+with high probability. If so, the expected amortized cost of             When p > q, a base tuple update is more likely to shrink
+refill queries, O(N )/Z, will be O(1). Our main result is the         the view than to grow it. According to Lemma 1, E[Z] is
+following theorem (see Appendix A for the proof).                     on the order of n, meaning that we would need n = N to
+                                      1
+                                                                      bring the expected refill interval up to the order of N . Here,
+Theorem 1 When p = q, if n = N 2 + , the refill interval             increasing the size of the view still decreases the expected
+Z is greater than N with high probability; specifically,              refill frequency, but at a much slower rate than the cases of
+                                          2
+                                                                      p = q and p < q.
+                 Pr[Z > N ] ≥ 1 − 4e−N         /2
+                                                    .                    Nevertheless, we feel that the case of p > q is unusual in
+                                                                      practice, because when p > q, tuples are trying to “escape”
+With this theorem, the following corollary comes naturally.           from the top-k list. Typically, people are more interested in
+                                                                      scenarios where tuples are “competing” with each other to
+Corollary 1 When p = q, the expected amortized cost of                enter the top-k list. In such scenarios, we would have p = q
+                                                  1
+refill queries, O(N ) × E[1/Z], is O(1), if n = N 2 + , for          or p < q, where our algorithm is most effective.
+any positive constant .
+                                          1
+   Although the requirement of n = √    N 2 + is not as good         4.6. Generalizations
+as our first impression that n = Θ( N), it is still good
+enough to generate satisfying performance of our algorithm                So far, we have assumed that all pi and qi values in the
+in practice. Table 1 lists some practical values of N and             transition matrix are identical in order to keep our analysis
+n. For each pair of N and n, we show the lower bound on               clean. In general, p and q can vary with the size of the
+Pr[Z > N ] according to Theorem 1 and the upper bound                 view. Intuitively, for a smaller view, p and q may be smaller,
+on E[N/Z] according to Corollary 1. We see that our al-               because it is less likely for base table updates to affect the
+gorithm performs exponentially better as N goes up. For               view. In this subsection, we show how to generalize our
+example, for a base table with a million tuples, a view con-          earlier results to a model with different pi ’s and qi ’s.
+taining only the top 0.45% of all tuples is enough to provide             We first study how changes in individual pi and qi af-
+a refill interval longer than one million updates with prob-          fect the overall hitting time of the random walk. Consider
+ability 99.98%. Please note that the values of Pr[Z > N ]             a random walk W1 . Suppose that at a particular position i,
+and E[N/Z] shown in Table 1 are theoretical bounds; actual            W1 moves to i + 1 with probability pi and moves to i − 1
+performance should be even better.                                    with probability qi . Next, consider a second random walk
+                                                                      W2 , whose transition probabilities are identical to those of
+4.4. High-Probability Result When p < q                               W1 except at position i: W2 moves to i + 1 with probabil-
+                                                                      ity p0i and moves to i − 1 with probability qi0 . Furthermore,
+                                                                      p0i + qi0 ≥ pi + qi , and p0i /qi0 ≥ pi /qi . We introduce the
+   When p < q, a base table update is more likely to grow
+                                                                      following lemma, whose proof is given in [25].
+the view than to shrink it. Intuitively, we should expect a
+long refill interval even for small views. Indeed, according          Lemma 2 The hitting time of random walk W1 stochasti-
+to Lemma 1, h0 is large because of the tn term in the numer-          cally dominates that of W2 .
+ator, where t = q/p > 1. As the following theorem shows,
+we can use a logarithmic-size view to reduce the amortized              Using Lemma 2, we can generalize Theorem 1 and
+cost of refill queries to O(1) with high probability.                 Corollary 1 to a random walk model with different pi ’s
+
+                                                                  5
+and qi ’s. The condition of p = q becomes pi ≤ qi , for                    Case 2: Random Up-and-Downs Next, we consider a
+i = 1, . . . , n − 1. Notice that we do not need this condition            case where the values in the base table increase and de-
+for position 0. In fact, this condition can be dropped for any             crease equally likely. Suppose each item starts with some
+constant number of positions; we only need to change the                   initial value drawn from a symmetric unimodal distribution
+                   1
+value of n to N 2 + + c0 , where c0 is the number of positions            (e.g., normal distribution) with mean µ. In each time step
+where this condition does not hold. A similar generalization               t, an item is chosen uniformly at random to be modified by
+can be made to Theorem 2 and Corollary 2. In this case, the                Xt , where Xt follows some symmetric unimodal distribu-
+condition under which Theorem 2 and Corollary 2 are ap-                    tion with mean 0. We assume the choice of Xt is indepen-
+plicable is δ · pi < qi , for i = 1, . . . , n − 1, where δ > 1 is a       dent of the choices made in earlier time steps. Let St be the
+constant. Again, we can drop this condition for c0 positions               value of the chosen item at the end of time step t and St−1
+and change the value of n accordingly to c ln N + c0 .                     be the value of this item at the end of the previous time step;
+    Throughout our analysis, we have also assumed a memo-                  St = St−1 + Xt . It is easy to see that St−1 and St also have
+ryless random walk model in which the choice at each step                  symmetric unimodal distributions with mean µ. This model
+is independent of all previous choices. Dropping this as-                  can be used reasonably to describe many up-and-down pro-
+sumption requires replacing the conditions on p and q in                   cesses, e.g., stock prices, fortunes of gamblers, etc.
+Theorems 1 and 2 and Corollary 1 and 2 with more gen-                          Like in Case 1, the random walk that models how k 0
+eral ones. Consider a random walk W with memory on                         changes is not memoryless, because the probabilities for an
+{0, 1, . . . , n}. We say that W is origin-tending if, regard-             item to enter and leave the top-k 0 list in time step t depend
+less of the previous steps taken, the probability of W mov-                on the actual values of the items before t, which in turn
+ing from i to i − 1 is always no less than that of moving                  depend on the history of previous updates. Fortunately, as
+from i to i + 1, where i is the current position of W and                  discussed in Section 4.6, we still know that our algorithm
+0 < i < n. Theorem 1 and Corollary 1 are applicable un-                    is effective as long as we can show that the random walk is
+der the new condition “the random walk is origin-tending.”                 origin-tending.
+We say that W is strictly origin-tending if, regardless of the                 Suppose vk0 is the value of the lowest ranked item in the
+previous steps taken, the probability of W moving from i to                top-k 0 view at the beginning of time step t. Let qt denote
+i − 1 is always no less than δ times that of moving from i                 the probability of a good update at time t, and pt denote the
+to i + 1, where δ > 1 is a constant. Theorem 2 and Corol-                  probability of a bad update at time t. Suppose the probabil-
+lary 2 are applicable under the new condition “the random                  ity density functions of St−1 and Xt are fS (s) and fX (x),
+walk is strictly origin-tending.” We provide proofs of these               respectively. We have
+generalized theorems and corollaries in [25]. In Section 5,
+we will see some examples that require the application of                  qt   = Pr[St−1 < vk0 , St−1 + Xt ≥ vk0 ]
+                                                                                  Z ∞ Z vk0
+these generalized theorems and corollaries.                                     =           fS (s) fX (x) ds dx,
+                                                                                      0       vk0 −x
+
+5. Case Studies of Update Workloads                                        pt   = Pr[St−1 ≥ vk0 , St−1 + Xt < vk0 ]
+                                                                                  Z 0 Z vk0 −x
+   In Section 4, we have concluded that our algorithm is                        =              fS (s) fX (x) ds dx
+                                                                                      −∞      vk0
+most effective when the random walk is origin-tending. In                            Z ∞ Z vk0 +x
+this section, we study several statistical models of update                     =                      fS (s) fX (x) ds dx
+workloads. For most of the workloads we consider, the ran-                            0       vk0
+dom walk is origin-tending. We also perform simulations                              (since Xt is symmetrically distributed around 0).
+to measure the transition probabilities of the random walk
+model as well as the fraction of ignorable updates, which                     Because the distribution of St−1 is symmetric about µ,
+will be used in Section 6.4 in evaluating the effectiveness of             vk0 > µ when kmax is small. Furthermore, the distribu-
+our algorithm.                                                             tion must be decreasing after µ, because it is also unimodal.
+                                                                           Therefore, for any x > 0,
+                                                                                      Z vk0               Z vk0 +x
+Case 1: Cumulative Total Sales Suppose we are inter-
+ested in the top k all-time best-selling books in a bookstore.                               fS (s) ds >           fS (s) ds,
+                                                                                          vk0 −x               vk0
+The vast majority of the transactions are purchases that in-
+crease the cumulative total sales figures of the books pur-                which leads to pt < qt . Therefore, the random walk is
+                                                                                                                      1
+chased. Transactions that decrease the sales figures, e.g.,                origin-tending and we may choose kmax = N 2 + .
+returns or cancelled orders, are very rare. Under this work-
+load, the probability of a bad update is almost nil and is                 Case 3: Total Sales in a Moving Window Finally, we
+certainly smaller than the probability of a good update.                   consider a more complicated model involving a moving
+
+                                                                       6
+                                                                                       0.08
+                                                                                                                                                                                      1
+
+time window. Suppose we are interested in ranking books                                0.07
+                                                                                                      good updates
+                                                                                                      bad updates
+                                                                                                                                                                                     0.9
+                                                                                                                                                                                                                                          ignorable updates
+
+
+
+
+by their total sales during the last w time steps. For each                            0.06
+                                                                                                                                                                                     0.8
+
+
+
+
+book b, let Xtb be the number of copies of b sold during                               0.05
+                                                                                                                                                                                     0.7
+
+
+                                                                                                                                                                                     0.6
+
+
+time step t. At the end of the time step t, we update the                Probability                                                                                   Probability
+                                                                                       0.04                                                                                          0.5
+
+
+                      b                 b
+total sales to be (Xt−w+1    + · · · + Xt−1  + Xtb ). Suppose                          0.03
+                                                                                                                                                                                     0.4
+
+
+
+
+                        b
+                                                                                                                                                                                     0.3
+
+
+that for each b, all Xi ’s are independently and identically                           0.02
+                                                                                                                                                                                     0.2
+
+                                                                                       0.01
+
+distributed (i.i.d.). Let vk0 be the total sales of the lowest                                                                                                                       0.1
+
+
+
+
+ranked book in the top-k 0 view at the beginning of time step
+                                                                                         0                                                                                            0
+                                                                                              0        100     200    300   400   500   600   700   800   900   1000                       0   100   200   300   400   500   600   700   800     900      1000
+                                                                                                                                  |V|                                                                                  |V|
+
+
+
+
+t. We have
+                                                                                                       Figure 1. Results from the first simulation.
+qtb = Pr[Xt−w
+          b              b
+              + · · · + Xt−1          b
+                             < vk0 , Xt−w+1 + · · · + Xtb ≥ vk0 ],
+                                                                                       0.025                                                                                          1
+                                                                                                       good updates
+
+
+pbt = Pr[Xt−w
+          b              b            b
+                                            + · · · + Xtb < vk0 ],
+                                                                                                                                                                                                                                          ignorable updates
+
+              + · · · + Xt−1 ≥ vk0 , Xt−w+1
+                                                                                                       bad updates
+                                                                                                                                                                                     0.9
+
+
+                                                                                        0.02                                                                                         0.8
+
+
+                                                                                                                                                                                     0.7
+
+
+
+
+where qtb (pbt ) denotes the probability that the update on                            0.015                                                                                         0.6
+
+
+
+                                                                         Probability                                                                                   Probability
+                                                                                                                                                                                     0.5
+
+
+b at the end of time step t is good (bad). Let S =
+P                                                                                       0.01                                                                                         0.4
+
+
+  t−1           b         b
+  i=t−w+1 Xi . Since Xi ’s are i.i.d, we have
+                                                                                                                                                                                     0.3
+
+
+                                                                                       0.005                                                                                         0.2
+
+
+
+
+   qtb            b
+                      + S < vk0 , S + Xtb ≥ vk0 ]
+                                                                                                                                                                                     0.1
+
+
+         =   Pr[Xt−w                                                                          0
+                                                                                                  0    100      200   300   400   500
+                                                                                                                                  |V|
+                                                                                                                                        600   700   800   900   1000
+                                                                                                                                                                                      0
+                                                                                                                                                                                           0   100   200   300   400   500
+                                                                                                                                                                                                                       |V|
+                                                                                                                                                                                                                             600   700   800     900      1000
+
+
+
+
+         =   Pr[Xtb + S < vk0 , S + Xt−w
+                                     b
+                                          ≥ vk0 ]
+                 b                                                                                    Figure 2. Results from the second simulation.
+         =   Pr[Xt−w + S ≥ vk0 , S + Xtb < vk0 ] = pbt .
+Therefore, the random walk is origin-tending, and we may
+                     1                                                   may not be memoryless. Admittedly, the real world situa-
+choose kmax = N 2 + .
+    In addition to the theoretical analysis above, we conduct            tions are far more complicated to model accurately. How-
+two simulations of this update workload in order to mea-                 ever, from these simple case studies, we have reasonable
+sure the transition probabilities of the random walk model               confidence that an origin-tending random walk approxi-
+and the fraction of ignorable updates. The actual values of              mates many practical update workloads well, for which our
+these parameters will be used in Section 6.4 to evaluate the             algorithm provides good performance.
+effectiveness of our algorithm.
+    In the first simulation, the number of copies sold for each          6. Experiments
+book in each time step follows the same Poisson distribution
+with mean 50. In the second simulation, for each book, we
+                                                                            We have conducted three sets of experiments in order to
+use a Poisson distribution with a different mean; further-
+                                                                         validate our discussion on the cost model in Section 3 and to
+more, these mean values form a Zipf distribution. In both
+                                                                         obtain realistic values of the model parameters. The first set
+simulations, we use a base table of 1000 books and vary the
+                                                                         of experiments measures the performance of refill queries
+size of the view from 1 to 1000.
+                                                                         in a commercial database system; the second set of exper-
+    Results from the two simulations are shown in Figures 1
+                                                                         iments measures the performance of updating top-k views
+and 2 respectively. Both figures plot the probabilities of
+                                                                         managed by a commercial database system; the last set of
+good, bad, and ignorable updates observed under different
+                                                                         experiments measures the performance of updating top-k
+view sizes. We make the following observations from the
+                                                                         views managed directly by an application. At the end of
+simulation results: (1) the probabilities of good and bad up-
+                                                                         this section, we evaluate the effectiveness of our algorithm
+dates are equal and typically small; (2) they increase with
+                                                                         using realistic values of the model parameters.
+the size of the view initially, but once the view becomes
+large enough, they begin to decrease; (3) the probability of
+ignorable updates decreases from about 1 to 0 as the size                6.1. Refill Queries
+of the view increases from 1 to the size of the base table.
+The first observation confirms the fact that the random walk                We conduct our experiments on a Windows 2000 server
+is origin-tending. The last observation implies that increas-            with a 1.4GHz Pentium 4 processor and 1GB of RAM, run-
+ing the view size has the negative effect of increasing the              ning the latest version of a commercial database system
+number of base table updates to be processed.                            from a major vendor. We set the size of database buffer
+                                                                         pool at 500MB, and the size of the sort heap at 200MB.
+Summary For the cases considered in this section, the                       We create a base table R with integer id and val
+random walk is always origin-tending, although it may or                 columns, together with other columns of mixed data types,
+
+                                                                     7
+for a total size of roughly 160 bytes per tuple. To popu-
+                                                                                                              4
+                                                                                                          x 10
+                                                                                                     10
+
+
+late R, we generate id values sequentially in increment of                                            9
+
+
+1, and val values randomly from the interval [1, 230 ]. Our                                           8
+
+
+experiments do not cover situations where val is computed                                             7
+
+
+on the fly; we expect the costs of refill queries to be higher
+
+                                                                               running time (msec)
+                                                                                                      6
+
+
+in such cases. There is a primary B+ -tree index on R.id                                              5
+
+and no index on R.val.                                                                                4
+
+   The refill query is evaluated over R and returns the id                                            3
+
+and val values for tuples ranked between k and kmax . Sup-                                            2
+
+pose that the (k − 1)-th (lowest) ranked tuple in the view at                                         1
+
+the time of refill has value vk−1 . The refill query is shown                                         0
+                                                                                                          0       0.5   1   1.5         2   2.5   3      3.5
+below in extended SQL syntax:                                                                                                     |R|                    6
+                                                                                                                                                      x 10
+
+
+
+
+SELECT id, val FROM R WHERE val < vk−1                                                                            Figure 3. Refill queries.
+ORDER BY val DESC
+FETCH FIRST kmax − k + 1 ROWS ONLY                                     top-k view with k = N managed by the same database.
+OPTIMIZED FOR kmax − k + 1 ROWS;                                       Hence, the update performance results for a top-k view with
+                                                                       k = N (Section 6.2) still provide us with some information
+For simplicity, the above query does not consider ties, al-            to evaluate the trade-offs of using a secondary index; we
+though we do handle them in our experiments using a                    shall come back to this discussion in Section 6.4.
+slightly more complicated WHERE condition.
+   We vary the following parameters in our experiments:
+(1) N , or |R|, the size of the base table, from 105 to 3 × 106;       6.2. Database View Updates
+(2) k, which indirectly determines vk−1 , from 10 to 103 ;
+and (3) kmax , from 10 to 104 . The choice of parameter                   For the following experiments, we assume that the mate-
+values are constrained by k ≤ kmax ≤ N . We measure the                rialized view V is managed by a commercial database sys-
+total elapsed time of running the refill query, including the          tem (possibly remote and not necessarily the same as the
+time to write the kmax − k + 1 output rows to a log file.              one managing the base table). We use the same setup as
+   A total of 600 result data points are shown in Figure 3.            in Section 6.1. We vary |V |, the size of the view, from 2
+For each value of |R|, we plot all running times collected             to 106 . There are a primary B+ -tree index on V .id and a
+for different k and kmax values, as well as the average, min-          secondary B+ -tree index on V .val. The second index does
+imum, and maximum running times. We find that the cost                 increase the update cost, but we feel that it is more realistic
+of refill query is roughly linear in the size of the base ta-          to have this index for allowing fast accesses to the sorted
+ble, confirming the O(N ) bound in Section 3.1. For this               top-k list.
+particular setup, this cost is roughly 29.5 × |R| µsec.                   For each V , we generate 40 random update streams.
+   The cost of refill queries may depend on kmax −k+1, the             Each update stream includes a mix of 1000 deletions and
+size of the output. Indeed, from the output of the database            1000 insertions. Each deletion removes a random tuple
+optimizer, we find that the optimized execution plan in-               from V by id; each insertion adds a tuple to V with ran-
+cludes a special sort operator that produces only the top              domly generated id and val values. Deletions and inser-
+kmax − k + 1 tuples. However, from Figure 3, we see that               tions alternate in the update stream, keeping |V | constant
+the effects of k and kmax are negligible compared with that            during an experiment. For each update stream, we measure
+of N .                                                                 the average running time of a pair of deletion and insertion
+   We also have considered the case of a secondary B+ -                and take it to be the view update cost. The results are shown
+tree index on R.val, which is applicable so long as val                in Figure 4. For each value of |V |, we plot all view update
+is not computed on the fly. The downside of this index is              costs measured from 40 random update streams, as well as
+the additional overhead in processing base table updates.              the average, minimum, and maximum costs.
+However, since this index effectively orders all R tuples, we             Because of the B+ -tree indexes on V , we expect the up-
+would expect the refill queries to run significantly faster, at        date cost to be logarithmic in |V |. Interestingly, the update
+least for small values of kmax −k+1 (large values may result           cost turns out to be a step function according to Figure 4.
+in excessive random disk I/O’s if id values are not stored             Several factors may have contributed to this phenomenon,
+directly in the index). Unfortunately, we are unsuccessful             including poor locality in the randomly generated update
+at “hinting” our database optimizer to pick the index plan             streams and a large branching factor of database B+ -trees.
+(even when k = kmax ). On the other hand, a secondary                  Because of poor locality, lower-level pages of the B + -tree
+B+ -tree index on R.val is in essence a self-maintainable              tend not to stay in the database buffer pool; thus, the up-
+
+                                                                   8
+                      5500                                                                                           5                                                                              4
+                                                                                                                                                                                                   10
+                                                                                                                                                                                                             scenario 1: local db view
+                      5000                                                                                                                                                                                   scenario 2: remote db view
+                                                                                                                    4.5                                                                                      scenario 3: local app view
+                                                                                                                                                                                                             scenario 4: remote app view
+                      4500                                                                                                                                                                          3
+                                                                                                                                                                                                   10
+                                                                                                                     4
+                      4000
+
+
+
+
+running time (µsec)                                                                           running time (µsec)
+                      3500                                                                                          3.5                                                                             2
+                                                                                                                                                                                                   10
+
+                      3000
+                                                                                                                     3
+
+
+
+                                                                                                                                                                                        C (µsec)
+                      2500                                                                                                                                                                          1
+                                                                                                                                                                                                   10
+                                                                                                                    2.5
+                      2000
+
+
+
+                      1500                                                                                           2                                                                              0
+                         10−1   10 0   10 1   10 2   10 3 | V |   10 4   10 5   10 6   10 7                          100    101   102   103   |V|   104   105   106   107                          10
+
+
+
+
+                                                                                                                                                                                                    −1
+                                                                                                                                                                                                   10
+                             Figure 4. Database                                                                            Figure 5. Applica-
+                             view updates.                                                                                 tion view updates.                                                       −2
+                                                                                                                                                                                                   10
+                                                                                                                                                                                                         2                    3              4     5    6
+                                                                                                                                                                                                        10                  10             10     10   10
+                                                                                                                                                                                                                                           kmax
+
+
+date cost roughly corresponds to the number of levels in the
+B+ -tree. Because of the large branching factor, the num-                                                                                                                              Figure 6. Expected maintenance cost.
+ber of levels in the B+ -tree increases extremely slowly with
+|V | and stays constant over wide ranges of |V |. Given that                                                                                                                    heap update to a constant [8, 20]. When |V | is small, most
+the range of |V | is small in practice, we observe only two                                                                                                                     accesses result in cache hits. Once |V | grows beyond a cer-
+“steps” in Figure 4.                                                                                                                                                            tain point, most accesses result in cache misses, because of
+                                                                                                                                                                                the lack of locality in randomly generated update streams.
+6.3. Application View Updates
+                                                                                                                                                                                6.4. Effectiveness of the Algorithm
+   For the following set of experiments, we assume that V
+is maintained in memory by an application program that                                                                                                                             In this subsection, we evaluate the effectiveness of our
+specializes in serving requests for top-k tuples. We believe                                                                                                                    algorithm in several scenarios, using the values of model
+this scenario is common in practice because: (1) V is typ-                                                                                                                      parameters measured in previous subsections. We assume
+ically small enough to fit in application memory; (2) the                                                                                                                       that |R| = 106 and k = 100, i.e., we are interested in
+operations on V are simple and frequent, so the applica-                                                                                                                        maintaining a top-100 view from a base table of one mil-
+tion can implement them without the overhead of using a                                                                                                                         lion tuples. In Figure 6, we show the expected amortized
+database system; and (3) we are not worried about losing                                                                                                                        maintenance cost as a function of kmax , the size of the view
+the data in V in case of failures, since V always can be re-                                                                                                                    that our algorithm starts with. Four curves are shown for
+computed from R.                                                                                                                                                                the four scenarios we consider: (1) the view is maintained
+   We conduct our experiments on a Sun Blade 100 work-                                                                                                                          by the same database as the base table; (2) the view is main-
+station with a 500MHz UltraSPARC-IIe processor, 256KB                                                                                                                           tained by a remote database; (3) the view is maintained by a
+of level-2 cache, and 512MB of RAM. The application is                                                                                                                          local application on the database server with the base table;
+written in C and compiled with gcc using -O3 option. We                                                                                                                         (4) the view is maintained by a remote application. For sce-
+implement V using two memory-resident data structures.                                                                                                                          narios (2) and (4), we assume that the network bandwidth
+An implicit binary heap (implemented as an array) stores                                                                                                                        is 500K bits/sec and the latency is masked. Costs of refill
+the (id, val) pairs in V , with val being the search key. A                                                                                                                     queries and view updates are taken from Figures 3, 4, and 5.
+hash table supports efficient lookup of a binary heap node                                                                                                                      The update workload is the one used by the first simulation
+by id. Both the binary heap and the hash table have size                                                                                                                        of Case 3 in Section 5; probabilities of good, bad, and ig-
+on the order of |V |. Alternatives to the binary heap would                                                                                                                     norable updates are extrapolated from Figure 1.
+be balanced search trees such as the red-black tree, but they                                                                                                                      From Figure 6, we see that all four curves exhibit similar
+may be less efficient than the binary heap because there is                                                                                                                     trends. When kmax = k, the expected maintenance cost is
+no need to maintain a complete ordering of all |V | tuples.                                                                                                                     very high. Intuitively, since we simply maintain the origi-
+   For each V , we generate 10 random update streams, each                                                                                                                      nal top-100 view, every bad update results in an expensive
+consisting of 107 deletions and 107 insertions mixing to-                                                                                                                       refill query. Initially, as kmax increases, the expected main-
+gether. In Figure 5, we plot, for each value of |V |, all update                                                                                                                tenance cost drops rapidly, because a bigger kmax dramati-
+costs measured from 10 random update streams, as well as                                                                                                                        cally reduces the expected refill frequency. However, once
+the average, minimum, and maximum costs. Again, the up-                                                                                                                         the refill frequency is low enough, the cost of updating the
+date cost turns out to be step function. We attribute this                                                                                                                      view begins to dominate; increasing kmax at this point not
+phenomenon to the uniform random distribution of gener-                                                                                                                         only drives up the cost of an update operation, but also re-
+ated updates and the effect of caching. Because updates are                                                                                                                     quires more updates to be propagated and applied because
+generated uniformly, a large portion of them access rela-                                                                                                                       fewer updates are ignorable. In the extreme case where
+tively few heap nodes, bringing down the expected cost of a                                                                                                                     kmax = |R|, the view becomes a copy of the base table
+
+
+                                                                                                                                                                            9
+with id and val columns. In this case, the refill frequency                 • Tunable parameters:
+is 0 because the copy is self-maintainable, but the overhead                     ◦ α = 2 specifies the acceptable distance from the “op-
+of maintaining the copy and the high memory requirement                              timal” hitting time.
+make this approach unattractive. Since a secondary index                         ◦ β = 0.5 limits how much kmax can increase at a time.
+on R.val is essentially a view with all |R| tuples, Figure 6
+                                                                                 ◦ γ = 0.5 limits how much kmax can decrease at a time.
+also shows that it might not be a good idea to create this
+                                                                            • At initialization time:
+index for the sole purpose of computing top-k queries or
+maintaining top-k views if k is small. In summary, Fig-                          ◦ kmax ← N 0.6 , an initial guess based on Theorem 1.
+ure 6 clearly illustrates the importance of choosing appro-                      ◦ kmin ← kmax ; kmin tracks the smallest |V | value
+priate k√max . Proper choice of kmax (in this case, on the or-                       since the last refill operation.
+der of N ) can bring orders of magnitude of performance                          ◦ Initialize V with the top-kmax tuples; use the running
+                                                                                                                      ∗
+improvement over the simple approaches of choosing kmax                              time as an initial estimate of Crefill .
+to be k or N .                                                                   ◦ T ← 0; T records the number of base table updates
+    Comparing the four curves in Figure 6, we see that man-                          since the last refill operation.
+aging the top-k 0 view in the application is faster than man-               • At runtime, for each base table update:
+aging it in a database. Also, managing the view locally                          ◦ Process the update; use the running time to update
+                                                                                       ∗
+is faster than managing it remotely across the network (al-                          Cupdate .
+though the difference is minuscule on the logarithmic scale                      ◦ T ← T + 1; kmin ← min{kmin , |V |}.
+                                                                                               ∗       ∗
+for a database view). In general, other conditions being                         ◦ Z0 ← Crefill    /Cupdate  .
+equal, we should choose a bigger kmax if the costs of trans-                     ◦ If refill is needed for this update, then:
+mitting and applying updates are lower.                                                − If T < Z0 /α, increase kmax : kmax ←
+                                                                                          min{ Z0T/α × kmax , (1 + β) × kmax }.
+7. Choosing kmax Adaptively                                                            − Refill V to kmax tuples; use the running time to
+                                                                                                     ∗
+                                                                                          update Crefill  .
+                                                                                       − T ← 0; kmin ← kmax .
+    So far, much of our analysis requires knowing the rela-
+tionship between the probabilities of good and bad updates.                      ◦ If T > αZ0 , then:
+In many practical situations, however, the update pattern is                           − Decrease kmax : kmax ← kmax − γ(kmin − k).
+not known in advance and may change at runtime; exact val-                             − Reduce V to kmax tuples, i.e., delete tuples
+ues of the transition probabilities for different view sizes are                          ranked (kmax + 1)-th or lower.
+difficult to measure. In this section, we propose an adaptive                          − kmin ← kmin − γ(kmin − k).
+algorithm that does not require any prior knowledge of the                             − T ← (1 − γ) × αZ0 .
+transition probabilities; instead, kmax is chosen at runtime
+and adjusted dynamically for changing workloads.
+   The basic idea behind this algorithm is to try to con-                          Figure 7. Choosing kmax adaptively.
+trol the refill interval Z around some target value of Z0 =
+  ∗        ∗                 ∗                                            the adaptive algorithm chooses kmax over time for two sim-
+Crefill /Cupdate  , where Crefill is the observed cost of a refill
+               ∗                                                          ulations. For the first simulation, the random walk is origin-
+query, and Cupdate    is the observed cost of processing a base
+table update. Intuitively, with an expect refill frequency of             tending (p = q = 0.4); for the second simulation, the ran-
+1/Z0 , neither the refill operation nor the update operation is           dom walk is strictly origin-tending (p = 0.3 and q = 0.4).
+a bottleneck. Typically, Z0 is on the order of Θ(N ), which               The adaptive algorithm starts with the same kmax for both
+means that the amortized cost of refill queries is down to                simulations, but over time, kmax takes on different values
+O(1). The algorithm maintains statistics of the observed                  that are appropriate for respective workloads. From Fig-
+         ∗           ∗                                                    ure 8, we see that kmax quickly converges to a fairly small
+costs Crefill and Cupdate   , and counts the number of base ta-
+ble updates since the last refill operation. If this number is            range of values for each simulation. However, there are still
+less than Z0 /α, kmax is increased; if it is greater than αZ0 ,           small fluctuations in kmax over time. We attribute this phe-
+kmax is decreased. Here, α is a constant parameter used                   nomenon to the variance in hitting time. Occasionally, a
+to fine-tune the algorithm; we have chosen α = 2, which                   very short (or long) run may cause kmax to go down (or up).
+works well in practice. The details are shown in Figure 7.                Thus, in addition to α, our algorithm provides two tunable
+   We have conducted some simulations for N = 10000                       parameters β and γ, which guard against large increases and
+and k = 10, using the cost parameters measured in Sec-                    decreases in kmax , respectively. In effect, kmax stays within
+tion 6. In order to keep the running time of our simulations              a small range in which the expected performance of view
+manageable, we use relatively high values for p and q, the                maintenance is equally good, so small fluctuations in kmax
+probabilities of bad and good updates. Figure 8 shows how                 do not matter in practice.
+
+
+                                                                     10
+           1000
+                                                                           p = 0.4, q = 0.4
+                                                                           p = 0.3, q = 0.4
+                                                                                                         [4] M. J. Carey and D. Kossmann. On saying “enough already!”
+               900
+                                                                                                             in SQL. In Proc. of the 1997 ACM SIGMOD Intl. Conf. on
+               800
+                                                                                                             Management of Data, Tucson, Arizona, 1997.
+               700
+                                                                                                         [5] M. J. Carey and D. Kossmann. Reducing the braking dis-
+               600                                                                                           tance of an SQL query engine. In Proc. of the 1998 Intl.
+        kmax   500                                                                                           Conf. on Very Large Data Bases, pages 158–169, New York
+               400
+                                                                                                             City, New York, Aug. 1998.
+               300
+                                                                                                         [6] K. C.-C. Chang and S.-W. Hwang. Minimal probing: Sup-
+               200
+                                                                                                             porting expensive predicates for top-k queries. In Proc. of
+                                                                                                             the 2002 ACM SIGMOD Intl. Conf. on Management of Data,
+               100
+                                                                                                             2002.
+                 0
+                     0   1   2   3      4        5         6
+                                     number of base table upates
+                                                                   7   8          9
+                                                                                        x 10
+                                                                                              10
+                                                                                              4
+                                                                                                         [7] C.-M. Chen and Y. Ling. A sampling-based estimator for
+                                                                                                             top-k query. In Proc. of the 2002 Intl. Conf. on Data Engi-
+   Figure 8. Behavior of the adaptive algorithm.                                                             neering, 2002.
+                                                                                                         [8] E.-E. Doberkat. Inserting a new element into a heap. BIT,
+8. Conclusion and Future Work                                                                                21(3):255–269, 1981.
+                                                                                                         [9] D. Donjerkovic and R. Ramakrishnan. Probabilistic opti-
+                                                                                                             mization of top n queries. In Proc. of the 1999 Intl. Conf. on
+   In this paper, we propose a probabilistic approach to                                                     Very Large Data Bases, pages 411–422, Edinburgh, Scot-
+tackle the problem of maintaining materialized top-k views.                                                  land, Sept. 1999.
+Rather than trying to achieve complete self-maintenance,                                                [10] R. Fagin, A. Lotem, and M. Naor. Optimal aggregation al-
+we try to achieve runtime self-maintenance with high prob-                                                   gorithms for middleware. In Proc. of the 2001 ACM Symp.
+ability by maintaining a dynamic top-k 0 view where k 0 ≥ k.                                                 on Principles of Database Systems, 2001.
+For cases where p = q or p < q, we show that even a little                                              [11] A. Gupta, V. Harinarayan, and D. Quass. Aggregate-query
+extra investment in k 0 can dramatically reduce the amor-                                                    processing in data warehousing environments. In Proc. of
+tized maintenance cost per update with high probability.                                                     the 1995 Intl. Conf. on Very Large Data Bases, 1995.
+   One of the remaining open problems is whether there                                                  [12] A. Gupta, H. V. Jagadish, and I. S. Mumick. Data integra-
+exists a “good” algorithm for maintaining the top-k view                                                     tion using self-maintainable views. In Proc. of the 1996 Intl.
+                                                                                                             Conf. on Extending Database Technology, Mar. 1996.
+when p > q. Here, we define a “good” algorithm to be one
+                                                                                                        [13] A. Gupta and I. S. Mumick, editors. Materialized Views:
+that requires only sub-linear space in order to provide an
+                                                                                                             Techniques, Implementations and Applications. MIT Press,
+expected refill frequency of 1/N or better. We suspect that
+                                                                                                             June 1999.
+no such algorithm exists if p > q.
+                                                                                                        [14] W. Hoeffding. Probability inequalities for sums of bounded
+   In this paper, we have only experimented with simulated                                                   random variables. Journal of the American Statistical Asso-
+update workloads; we plan to conduct more experiments                                                        ciation, 58(301):13–30, Mar. 1963.
+with real data in the near future. Another direction that                                               [15] V. Hristidis, N. Koudas, and Y. Papakonstantinou. PREFER:
+we are currently pursuing is generalizing the technique of                                                   A system for the efficient execution of multi-parametric
+achieving high-probability runtime self-maintenance with                                                     ranked queries. In Proc. of the 2001 ACM SIGMOD Intl.
+auxiliary data to other types of views such as joins.                                                        Conf. on Management of Data, 2001.
+   Finally, we would like to thank Jeff Vitter, John Reif, and                                          [16] N. Huyn. Multiple-view self-maintenance in data warehous-
+Zhihui Wang for their careful readings of our earlier drafts                                                 ing environments. In Proc. of the 1997 Intl. Conf. on Very
+and helpful discussions.                                                                                     Large Data Bases, pages 26–35, Athens, Greece, 1997.
+                                                                                                        [17] M. K. Mohania and Y. Kambayashi. Making aggregate
+                                                                                                             views self-maintainable. Data Knowledge Engineering,
+References                                                                                                   32(1):87–109, 2000.
+                                                                                                        [18] T. Palpanas, R. Sidle, R. Cochrane, and H. Pirahesh. In-
+ [1] M. O. Akinde, O. G. Jensen, and M. H. Böhlen. Minimizing                                               cremental maintenance for non-distributive aggregate func-
+     detail data in data warehouses. In Proc. of the 1998 Intl.                                              tions. In Proc. of the 2002 Intl. Conf. on Very Large Data
+     Conf. on Extending Database Technology, 1998.                                                           Bases, Aug. 2002.
+ [2] J. A. Blakeley, N. Coburn, and P.-Å. Larson. Updating                                             [19] V. V. Petrov. Sums of Independent Random Variables.
+     derived relations: Detecting irrelevant and autonomously                                                Springer-Verlag, 1975.
+     computable updates. ACM Trans. on Database Systems,                                                [20] T. Porter and I. Simon. Random insertion into a priority
+     14(3):369–400, Sept. 1989.                                                                              queue structure. IEEE Trans. on Software Engineering, SE-
+ [3] N. Bruno, L. Gravano, and S. Chaudhuri. Top-k selection                                                 1, 3:292–298, 1975.
+     queries over relational databases: Mapping strategies and                                          [21] D. Quass. Maintenance expressions for views with aggrega-
+     performance evaluation. ACM Trans. on Database Systems,                                                 tion. In Proc. of the 1996 ACM Workshop on Materialized
+     2002.                                                                                                   Views: Techniques and Applications, June 1996.
+
+
+                                                                                                   11
+[22] D. Quass, A. Gupta, I. S. Mumick, and J. Widom. Making                              B. Proof of Theorem 2
+     views self-maintainable for data warehousing. In Proc. of
+     the 1996 Intl. Conf. on Parallel and Distributed Information                            We will only consider the case when p+q = 1. If p+q < 1, we
+     Systems, pages 158–169, Dec. 1996.                                                  can normalize p and q so that p + q = 1; by Lemma 2, the hitting
+[23] J. Yang and J. Widom. Temporal view self-maintenance in a                           time of the normalized random walk is stochastically dominated
+     warehousing environment. In Proc. of the 2000 Intl. Conf. on                        by that of the original.
+     Extending Database Technology, pages 395–412, Konstanz,                                 We now bound the probability of Z ≤ N . For any instance
+     Germany, Mar. 2000.                                                                 of this random walk, the last phase of the walk must be one that
+[24] J. Yang and J. Widom. Incremental computation and main-                             moves from 0 to n with no stays (at 0). Let X be the length of this
+     tenance of temporal aggregates. In Proc. of the 2001 Intl.
+                                                                                         P
+                                                                                         phase. Clearly, X ≥ n. We have Pr[Z ≤ N ] ≤ Pr[X ≤ N ] =
+                                                                                            N
+                                                                                            i=n Pr[X = i].
+     Conf. on Data Engineering, Heidelberg, Germany, 2001.
+[25] K. Yi, H. Yu, J. Yang, G. Xia, and Y. Chen. Efficient main-                             If the last phase of the random walk takes i steps to move from
+     tenance of materialized top-k views. Technical report, De-                          0 to n with no stays, there must be (i + n)/2 steps moving right
+     partment of Computer Science, Duke University, June 2002.                           (“+1”) and (i − n)/2 steps moving left (“−1”). (If (i + n)/2 is
+     http://www.cs.duke.edu/˜junyang/papers/                                             not an integer, Pr[X = i] = 0.) This condition is necessary for
+     yyyxc-topk.ps.                                                                      X = i. By Chernoff’s bound,
+                                                                                                                                             i−n
+A. Proof of Theorem 1                                                                         Pr[X = i]      ≤     Pr[number of “−1” steps =     ]
+                                                                                                                                              2
+                                                                                                                                             i−n
+                                                                                                             ≤     Pr[number of “−1” steps ≤     ]
+                                                                                                                                              2
+Lemma 3 (Hoeffding, 1963 [14]) If X1 , X2 , . . . are indepen-                                                                                !2 !
+           P asX ahave
+dent and bounded
+sums Sn = n
+                    i ≤ Xi ≤ bi , then for any t > 0, the partial
+                        the following probability inequality:                                                ≤     exp −
+                                                                                                                         qi        qi − i−n
+                                                                                                                                          2
+              i=1 i                                                                                                      2             qi
+
+                                    2n t
+                                                           2 2
+                                                                       
+                                                                                                                         qi
+                                                                                                                                    1
+                                                                                                                                                    2 !
+                                                                                                                                           n
+        Pr[Sn − nµ ≥ nt] ≤ exp − Pn                                        ,                                 =     exp −          1−    +
+                                     (b − a )2              i      i                                                     2           2q   2qi
+                                                                                                                                        2 !
+                                                      i=1
+                                                                                                                              
+where µ = E[Xi ].                                                                                                        q         1
+                                                                                                             <     exp −        1−            i .
+                                                                                                                         2         2q
+Lemma 4 (Petrov, 1975 [19]) If X1 , X2 , . . . are symmetrically
+                                                                                         Let c1 = q2 (1 − 2q
+                                                                                                           1 2
+                                                                                                             ) . Since q > 12 , c1 is a positive constant. Then
+distributed and independent, then
+                                                                                                                                               P
+                                                                                       Pr[X = i] < e−c1 n = e−c1 c ln N = N −c1 c and N         i=n Pr[X =
+              Pr       max |Sk | ≥ x ≤ 2Pr[|Sn | ≥ x].                                   i] < N · N −c1 c = N 1−c1 c . Thus, as long as we choose c such
+                    1≤k≤n
+                                                                                         that c > 1/c1 = 1/( q2 (1 − 2q
+                                                                                                                      1 2
+                                                                                                                        ) ), the refill interval is greater than
+                                                                                         N with probability 1 − o(1).
+    At position 0, the random walk moves to 1 with probability p
+and stays at 0 with probability 1 − p. We first modify the random
+walk by changing these two probabilities at position 0 to 2p and
+1 − 2p respectively. We call this modified random walk W 0 . Ac-
+cording to Lemma 2, the hitting time of W 0 is stochastically dom-
+inated by Z. We can further extend W 0 to a random walk W 00 on
+{. . . , −n, . . . , −1, 0, 1, . . . , n, . . . }, where 0 is the starting point,
+and all transition probabilities are p. It is easy to see that W 00 sim-
+ply “mirrors” W 0 , so the hitting times of W 0 and W 00 should be
+identically distributed. We will bound the probability that Z 00 , the
+hitting time from 0 to either −n or n of W 00 , is greater than N .
+    Let X1 , X2 , . . . be the steps taken by W 00 , which can be −1,
+0 or 1. These random variables are independent. Then
+
+       Pr[Z 00 ≤ N ]       =     Pr[ max |Sk | ≥ n]
+                                      1≤k≤N
+
+                           ≤     2Pr[|SN | ≥ n]                 (Lemma 4)
+                           =     4Pr[SN ≥ n]
+                                               2n2
+                           ≤     4 exp(−             )          (Lemma 3)
+                                              N · 22
+                                        2
+                           =     4e−N        /2
+                                                  .
+
+Since Pr[Z 00 ≤ N ] ≥ Pr[Z ≤ N ], the theorem follows.
+
+
+                                                                                    12
+

@@ -1,0 +1,108 @@
+{
+  "schema": "S41_VMEM_RECOVERY_DIAGNOSIS_V1",
+  "status": "PASS_DIAGNOSIS_NO_EXECUTION",
+  "completed_utc": "2026-09-07T05:25:39+00:00",
+  "completed_asia_shanghai": "2026-09-07T13:25:39+08:00",
+  "reviewer": "/root/vmem_recovery_diagnosis",
+  "failure_layer": {
+    "proven": "CDN connection establishment before any HTTP response or response body",
+    "not_proven_sub_layer": [
+      "DNS",
+      "proxy CONNECT",
+      "TCP",
+      "TLS"
+    ],
+    "metadata_identity_verified": true,
+    "range_http_status_observed": false,
+    "range_bytes_received": 0,
+    "error_type": "ConnectError"
+  },
+  "retained_files": [
+    {
+      "path": "data/vmem_recovery/attempt3_live_partial.link",
+      "bytes": 3479430365,
+      "inode": 261890270,
+      "nlink": 2,
+      "sha256_read_only_recomputed": "211f3b5dc27d1ce9d38567a3d9da46269e7e62471ec26f4e40be6bff9f077e0b",
+      "authoritative_prefix_verified": false,
+      "valid_model": false
+    },
+    {
+      "path": "data/vmem_recovery/http_recovery_01/candidate.unverified.part",
+      "bytes": 3479430365,
+      "inode": 261895836,
+      "nlink": 1,
+      "sha256_read_only_recomputed": "211f3b5dc27d1ce9d38567a3d9da46269e7e62471ec26f4e40be6bff9f077e0b",
+      "range_bytes_appended": 0,
+      "valid_model": false
+    }
+  ],
+  "canonical_target_present": false,
+  "visible_xet_chunk_cache": {
+    "present": false,
+    "observation": "isolated HF_HOME contains logs and an empty staging directory; total observed size about 44 KiB",
+    "reuse_may_be_claimed": false
+  },
+  "same_http_range_retry": {
+    "recommended_now": false,
+    "reasons": [
+      "current attempt failed before HTTP status with zero bytes",
+      "prior independent HTTP/curl paths also failed at connection or TLS stage",
+      "the apparent Xet prefix has no authoritative prefix checksum or sequential-write proof"
+    ]
+  },
+  "next_minimal_different_path": {
+    "transport": "official huggingface_hub 1.30.0 plus hf_xet 1.6.0",
+    "fresh_unique_output": true,
+    "fixed_repo": "liguang0115/vmem",
+    "fixed_revision": "ac5921080a57f5a634f4b9acbbc8f3db67c9d113",
+    "expected_bytes": 5056346672,
+    "expected_sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4",
+    "concurrency": 1,
+    "minimum_outer_deadline_seconds": 3600,
+    "recommended_outer_deadline_seconds": 5400,
+    "partial_or_cache_reuse_assumed": false,
+    "publication_gate": "exact size plus complete SHA-256 only"
+  },
+  "evidence_files": [
+    {
+      "path": "data/vmem_recovery/http_recovery_01/receipt.json",
+      "sha256": "94e18db2a44d8009c3eec895708b65d8f777631f2b8ecb11187767c2c4241719"
+    },
+    {
+      "path": "work/S39_auth_recovery/vmem_low_concurrency_attempt3/receipt.json",
+      "sha256": "412989014901a3c05dcb9cd76e28adc3555d950649e14053f03f42d3d7d49c9a"
+    },
+    {
+      "path": "work/S39_auth_recovery/partial_preservation.json",
+      "sha256": "92373813349c12e4c7d498672ee240bce33b2820266ce9982f37715bb5cc8872"
+    },
+    {
+      "path": "work/S39_auth_recovery/partial_recovery/recover_partial.py",
+      "sha256": "65b72714d0b186a090ab92a86d158018043951a1f0dbbdfc62e58040a110d02e"
+    },
+    {
+      "path": "work/S39_auth_recovery/partial_recovery/source_review_v2.json",
+      "sha256": "e32dad048a820fe260f36cca4d0d607c5d896b43ed9159c02b5a69d1f303039f"
+    },
+    {
+      "path": "work/S39_auth_recovery/xet_transport_interruption.json"
+    },
+    {
+      "path": "work/S39_auth_recovery/vmem_http_attempt2_receipt.json"
+    },
+    {
+      "path": "work/S39_auth_recovery/transport/curl_range_01/receipt.json"
+    }
+  ],
+  "boundaries": {
+    "network_requests": 0,
+    "downloads_started": 0,
+    "model_runs": 0,
+    "credential_files_read": 0,
+    "canonical_ledger_changed": false,
+    "existing_evidence_files_changed": false,
+    "large_local_files_read_for_sha_only": 2
+  },
+  "report": "work/S41_vmem_recovery_diagnosis/REVIEW.md"
+}

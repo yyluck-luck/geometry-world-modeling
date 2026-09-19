@@ -1,0 +1,789 @@
+CUT3R · GitHub (https://github.com/CUT3R)
+citeturn329search0 [wordlim: 200] Crawled: last month; Official implementation of Continuous 3D Perception Model with Persistent State ... CUT3R.github.io CUT3R.github.io Public
+
+Image: @CUT3R
+
+# CUT3R
+
+  *   * Overview
+
+## Popular repositories Loading
+
+  1. CUT3R CUT3R Public
+
+Official implementation of Continuous 3D Perception Model with Persistent State
+
+Python 1.5k 86
+
+  2. CUT3R.github.io CUT3R.github.io Public
+
+HTML 1
+
+### Repositories
+
+  * CUT3R Public
+
+Official implementation of Continuous 3D Perception Model with Persistent State
+
+Uh oh!
+
+There was an error while loading. Please reload this page.
+
+CUT3R/CUT3R's past year of commit activity
+
+Python 1,470 86 62 2 Updated Aug 27, 2025
+
+  * CUT3R.github.io Public
+
+Uh oh!
+
+There was an error while loading. Please reload this page.
+
+CUT3R/CUT3R.github.io's past year of commit activity
+
+HTML 1 0 0 0 Updated Apr 10, 2025
+
+People
+
+This organization has no public members. You must be a member to see who’s a part of this organization.--------------------------------------------------------------------------------
+GitHub - Inception3D/TTT3R: [ICLR 2026] A simple state update rule to enhance length generalization for CUT3R · GitHub (https://github.com/Inception3D/TTT3R)
+citeturn329search1 [wordlim: 200] Crawled: 3 months ago; TL;DR: A simple state update rule to enhance length generalization for CUT3R. ...     git clone https://github.com/Inception3D/TTT3R.git ...         title={TTT3R: 3D Reconstruction as Test-Time Training},
+
+Inception3D / TTT3R Public
+
+  * Notifications You must be signed in to change notification settings
+  * Fork 31
+  * Star
+
+  * Code
+  * Issues 16
+  * Pull requests 1
+  * Actions
+  * Projects
+  * Security and quality 0
+  * Insights
+
+Additional navigation options
+
+## Latest commit
+
+ 
+
+## History
+
+5 Commits
+datasets_preprocess  | datasets_preprocess  |    |  
+eval  | eval  |    |  
+examples  | examples  |    |  
+src  | src  |    |  
+.gitignore  | .gitignore  |    |  
+LICENSE  | LICENSE  |    |  
+README.md  | README.md  |    |  
+add_ckpt_path.py  | add_ckpt_path.py  |    |  
+demo.py  | demo.py  |    |  
+requirements.txt  | requirements.txt  |    |  
+viser_utils.py  | viser_utils.py  |    |  
+[Button: View all files]
+
+## TTT3R: 3D Reconstruction as Test-Time Training
+
+##### 
+
+Xingyu Chen, Yue Chen, Yuliang Xiu, Andreas Geiger, Anpei Chen
+
+TL;DR: A simple state update rule to enhance length generalization for CUT3R.
+
+ttt3r.mp4
+
+## Getting Started
+
+### Installation
+
+  1. Clone TTT3R.
+    
+    git clone https://github.com/Inception3D/TTT3R.git
+    cd TTT3R
+
+  2. Create the environment.
+    
+    conda create -n ttt3r python=3.11 cmake=3.14.0
+    conda activate ttt3r
+    conda install pytorch torchvision pytorch-cuda=12.1 -c pytorch -c nvidia  # use the correct version of cuda for your system
+    pip install -r requirements.txt
+    # issues with pytorch dataloader, see https://github.com/pytorch/pytorch/issues/99625
+    conda install 'llvm-openmp<16'
+    # for evaluation
+    pip install evo
+    pip install open3d
+
+  3. Compile the cuda kernels for RoPE (as in CroCo v2).
+    
+    cd src/croco/models/curope/
+    python setup.py build_ext --inplace
+    cd ../../../../
+
+### Download Checkpoints
+
+CUT3R provide checkpoints trained on 4-64 views: `cut3r_512_dpt_4_64.pth`.
+
+To download the weights, run the following commands:
+    
+    cd src
+    gdown --fuzzy https://drive.google.com/file/d/1Asz-ZB3FfpzZYwunhQvNPZEUA8XUNAYD/view?usp=drive_link
+    cd ..
+
+### Inference Demo
+
+To run the inference demo, you can use the following command:
+    
+    # input can be a folder or a video
+    # the following script will run inference with TTT3R and visualize the output with viser on port 8080
+    CUDA_VISIBLE_DEVICES=6 python demo.py --model_path MODEL_PATH --size 512 \
+        --seq_path SEQ_PATH --output_dir OUT_DIR --port 8080 \
+        --model_update_type ttt3r --frame_interval 1 --reset_interval 100 \
+        --downsample_factor 1000 --vis_threshold 5.0
+    
+    # Example:
+    CUDA_VISIBLE_DEVICES=6 python demo.py --model_path src/cut3r_512_dpt_4_64.pth --size 512 \
+        --seq_path examples/westlake.mp4 --output_dir tmp/taylor --port 8080 \
+        --model_update_type ttt3r --frame_interval 1 --reset_interval 100 \
+        --downsample_factor 100 --vis_threshold 6.0
+    
+    CUDA_VISIBLE_DEVICES=6 python demo.py --model_path src/cut3r_512_dpt_4_64.pth --size 512 \
+        --seq_path examples/taylor.mp4 --output_dir tmp/taylor --port 8080 \
+        --model_update_type ttt3r --frame_interval 1 --reset_interval 50 \
+        --downsample_factor 100 --vis_threshold 10.0 
+
+Output results will be saved to `output_dir`.
+
+### Evaluation
+
+Please refer to the eval.md for more details.
+
+## Acknowledgements
+
+Our code is based on the following awesome repositories:
+
+  * CUT3R
+  * Easi3R
+  * DUSt3R
+  * MonST3R
+  * Spann3R
+  * Viser
+
+We thank the authors for releasing their code!
+
+## Citation
+
+If you find our work useful, please cite:
+    
+    @article{chen2025ttt3r,
+        title={TTT3R: 3D Reconstruction as Test-Time Training},
+        author={Chen, Xingyu and Chen, Yue and Xiu, Yuliang and Geiger, Andreas and Chen, Anpei},
+        journal={arXiv preprint arXiv:2509.26645},
+        year={2025}
+        }
+
+## About
+
+[ICLR 2026] A simple state update rule to enhance length generalization for CUT3R
+
+rover-xingyu.github.io/TTT3R/
+
+### Topics
+
+slam 3d-reconstruction rnn-model
+
+### Resources
+
+Readme--------------------------------------------------------------------------------
+CUT3R/docs/train.md at main · CUT3R/CUT3R · GitHub (https://github.com/CUT3R/CUT3R/blob/main/docs/train.md)
+citeturn329search2 [wordlim: 200] Crawled: 3 weeks ago;     NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name stage3 ... Note that these configs correspond to the final stage of training, where the goal is to train the model to handle long sequences.
+
+# train.md
+
+
+# Training
+
+Please note that this is an academic project, and due to resource constraints, we trained our model iteratively while exploring different configurations. As a result, releasing the complete training procedure is challenging. However, if you wish to train the model from scratch, we provide a set of configurations below that we believe are representative. For fine-tuning, we recommend starting with the scripts available here. There are many design choices to consider, particularly under varying computational constraints, and we look forward to seeing the community explore these possibilities further.
+
+## Training Configurations
+
+You could refer to the following commands as a starting point if you would like to train from scratch.
+    
+    `# Remember to replace the dataset path to your own path
+    # the script has been tested on a 8xA100(80G) machine
+    
+    cd src/
+    
+    # stage 1, train 224+linear model on static datasets
+    NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name stage1
+    
+    # stage 2, finetune 224+linear model on all datasets
+    NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name stage2
+    
+    # stage 3, train 512+dpt model on all datasets
+    NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name stage3
+    
+    # stage 4, train 512+dpt model on long sequences (32 views)
+    NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name stage4
+    
+    # Finally, finetune 512+dpt model on 4-64 views
+    NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name dpt_512_vary_4_64
+    
+    `
+
+## Fine-tuning
+
+To fine-tune the released checkpoints, you can use the two provided config files as a starting point. Note that these configs correspond to the final stage of training, where the goal is to train the model to handle long sequences. Therefore, in these configs, the encoders are frozen, and single-view datasets are removed. You may adjust the configurations as needed to suit your requirements.
+    
+    `# Remember to replace the dataset path to your own path
+    # the script has been tested on a 8xA100(80G) machine
+    
+    cd src/
+    
+    # finetune 512 checkpoint
+    CUDA_LAUNCH_BLOCKING=1 NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name dpt_512_vary_4_64
+    
+    # finetune 224 checkpoint
+    CUDA_LAUNCH_BLOCKING=1 NCCL_DEBUG=TRACE TORCH_DISTRIBUTED_DEBUG=DETAIL HYDRA_FULL_ERROR=1 accelerate launch --multi_gpu train.py  --config-name linear_224_fixed_16
+    `
+--------------------------------------------------------------------------------
+GitHub - Brack-Wang/raymap3r: This is the official implementation of RayMap3R. (ECCV 2026) · GitHub (https://github.com/Brack-Wang/raymap3r)
+citeturn329search3 [wordlim: 200] Crawled: last month; # RayMap3R: Inference-Time RayMap for Dynamic 3D ReconstructionThis is the official implementation of RayMap3R. ...   * Dual-Branch Inference — Contrasts image-based and RayMap-only predictions to derive per-pixel staticness weights that gate memory updates ...     git clone https://github.com/Brack-Wang/raymap3r.git
+
+Brack-Wang / raymap3r Public
+
+  * Notifications You must be signed in to change notification settings
+  * Fork 1
+  * Star
+
+  * Code
+  * Issues 1
+  * Pull requests 0
+  * Actions
+  * Projects
+  * Security and quality 0
+  * Insights
+
+Additional navigation options
+
+## Folders and files
+
+Name  | Name  | Last commit message  | Last commit date
+--- | --- | --- | ---
+
+## Latest commit
+
+ 
+
+## History
+
+7 Commits
+asset  | asset  |    |  
+src  | src  |    |  
+.gitignore  | .gitignore  |    |  
+LICENSE  | LICENSE  |    |  
+README.md  | README.md  |    |  
+infer.py  | infer.py  |    |  
+requirements.txt  | requirements.txt  |    |  
+
+# RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction
+
+This is the official implementation of RayMap3R.
+
+### 🎉 Accepted by ECCV 2026 🎉
+
+Streaming 3D Reconstruction for Dynamic Scenes. Existing streaming methods such as CUT3R and TTT3R can suffer from camera drift caused by moving objects. RayMap3R identifies and suppresses dynamic regions at inference time without additional training or external models.
+
+If you find this repository useful, please give it a star🌟 and consider citing our paper!
+
+* * *
+
+## Overview
+
+Streaming feed-forward 3D reconstruction enables real-time joint estimation of scene geometry and camera poses from RGB images. However, without explicit dynamic reasoning, streaming models can be affected by moving objects, causing artifacts and drift.
+
+RayMap3R is a training-free streaming framework that addresses this by exploiting a key observation: RayMap predictions exhibit a static-scene bias. When only camera rays are provided without the actual image, the model reconstructs only the static background and ignores dynamic objects. We leverage this bias to identify and suppress dynamic regions at inference time.
+
+### Key Features
+
+  * Static-Scene Bias Discovery — RayMap-only predictions inherently ignore dynamic objects, providing a built-in signal for dynamic identification without external models
+  * Dual-Branch Inference — Contrasts image-based and RayMap-only predictions to derive per-pixel staticness weights that gate memory updates
+  * Reset Metric Alignment — Aligns point clouds before and after memory resets via Sim(3) estimation for globally consistent geometry
+  * State-Aware Smoothing — Adaptively smooths trajectories using acceleration and state change magnitude as an uncertainty signal
+  * Real-time & Constant Memory — Processes video streams with constant memory usage and real-time efficiency
+
+* * *
+
+## Static-Scene Bias
+
+The RayMap branch reconstructs primarily static structure, while the main branch captures the full scene including dynamic objects. Their per-pixel depth discrepancy aligns well with the ground-truth dynamic mask.
+
+Left: Dual-branch contrast reveals dynamic regions. Right: Dynamic mask IoU vs. ground-truth dynamic ratio across 108 sequences (Spearman ρ = 0.77).
+
+* * *
+
+## Method
+
+Pipeline Overview. At each timestep, the main branch predicts depth and pose from image + RayMap features, while the RayMap branch queries the same frozen state using only camera-ray tokens. The depth discrepancy is projected onto state tokens via cross-attention to form staticness weights, which gate memory updates.
+
+* * *
+
+## Results
+
+### Qualitative Comparison
+
+Comparison with CUT3R and TTT3R on dynamic DAVIS sequences. RayMap3R produces more coherent point clouds with fewer ghosting artifacts and reduced camera drift.
+
+* * *
+
+## Getting Started
+
+### Installation
+    
+    git clone https://github.com/Brack-Wang/raymap3r.git
+    cd raymap3r
+    
+    # create an environment (Python 3.10, CUDA 12.1 tested)
+    conda create -n raymap3r python=3.10 -y
+    conda activate raymap3r
+    
+    # install PyTorch matching your CUDA, then the rest
+    pip install torch==2.1.1 torchvision==0.16.1 --index-url https://download.pytorch.org/whl/cu121
+    pip install -r requirements.txt
+    
+    # build the CroCo v2 RoPE CUDA extension (one time)
+    cd src/croco/models/curope && python setup.py build_ext --inplace && cd -
+
+### Weights
+
+RayMap3R is training-free and reuses the public CUT3R checkpoint. Download `cut3r_512_dpt_4_64.pth` from CUT3R and place it under `weights/`:
+    
+    `weights/cut3r_512_dpt_4_64.pth
+    `
+
+### Run inference
+    
+    python infer.py \
+        --frames_dir /path/to/frames \
+        --weights weights/cut3r_512_dpt_4_64.pth \
+        --output_dir ./output \
+        --size 512
+
+Pass a directory of RGB frames (sorted lexicographically) to `--frames_dir`, or a video file to `--video`. Outputs (per-frame depth / confidence / color, camera intrinsics & poses, the camera trajectory, and a fused world point cloud `.ply`) are written to `--output_dir`. The run is headless (no viewer required).
+
+RayMap3R is fully automatic: during a short warm-up it measures camera rotation per sequence and selects the per-frame update rule and state-aware smoothing accordingly, then applies the dual-branch staticness gate (Sec. 3). No flags are needed.
+
+* * *
+
+## Citation
+
+If you find this work useful, please consider citing:
+    
+    @article{wang2026raymap3r,
+      title={RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction},
+      author={Wang, Feiran and Shang, Zezhou and Liu, Gaowen and Yan, Yan},
+      journal={arXiv preprint arXiv:2603.20588},
+      year={2026}
+    }
+
+* * *
+
+## Acknowledgements
+
+We thank the authors of CUT3R, TTT3R and DUST3R for their excellent work.
+
+## License
+
+This project is released under the MIT License.
+
+## About
+
+This is the official implementation of RayMap3R. (ECCV 2026)
+
+raymap3r.github.io/
+
+### Resources
+
+Readme
+
+License
+
+Activity
+
+### Stars
+
+15 stars
+
+### Watchers
+
+1 watching
+
+### Forks
+
+1 fork--------------------------------------------------------------------------------
+raymap3r/infer.py at main · Brack-Wang/raymap3r · GitHub (https://github.com/Brack-Wang/raymap3r/blob/main/infer.py)
+citeturn329search4 [wordlim: 200] Crawled: 2 weeks ago; p = argparse.ArgumentParser(description="RayMap3R self-contained streaming inference.") ... help="cut3r = no gating baseline; xattn = attention gate + RayMap3R alpha gate.") ... help="Memory reset period in frames (paper default = 50; reset metric " ... outputs, _state = inference_recurrent_lighter(views, model, device)
+# Resolve imports regardless of cwd. The package mixes conventions:
+
+# - most files use `from dust3r...` / `from croco...` (needs <root>/src on path)
+
+# - some files use `from src.dust3r...` (needs <root> on path)
+
+# Put both on sys.path up front so import order never matters (the original demo
+
+# only worked because model.py self-appends src/ as a side effect on import).
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+for _p in (PROJECT_ROOT, os.path.join(PROJECT_ROOT, "src")):
+
+if _p not in sys.path:
+
+sys.path.insert(0, _p)
+
+IMG_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp"}
+
+def parse_args():
+
+p = argparse.ArgumentParser(description="RayMap3R self-contained streaming inference.")
+
+src = p.add_mutually_exclusive_group(required=True)
+
+src.add_argument("--frames_dir", type=str, default=None,
+
+help="Directory of image frames (sorted lexicographically).")
+
+src.add_argument("--video", type=str, default=None,
+
+help="Video file; frames are extracted with cv2.")
+
+p.add_argument("--weights", type=str, default="weights/cut3r_512_dpt_4_64.pth",
+
+help="Path to the model checkpoint.")
+
+p.add_argument("--output_dir", type=str, required=True,
+
+help="Where to write results.")
+
+p.add_argument("--size", type=int, default=512,
+
+help="Long-side resize for inputs (512 for the dpt model).")
+
+p.add_argument("--num_frames", type=int, default=30,
+
+help="Cap on the number of frames to run (0 = all).")
+
+p.add_argument("--frame_interval", type=int, default=1,
+
+help="Take every k-th frame.")
+
+p.add_argument("--model_update_type", type=str, default="cut3r",
+
+choices=["cut3r", "xattn"],
+
+help="cut3r = no gating baseline; xattn = attention gate + RayMap3R alpha gate.")
+
+p.add_argument("--reset_interval", type=int, default=50,
+
+help="Memory reset period in frames (paper default = 50; reset metric "
+
+"alignment is applied at each boundary). Set huge to disable.")
+
+p.add_argument("--device", type=str, default="cuda")
+
+p.add_argument("--conf_thr", type=float, default=3.0,
+
+help="Confidence threshold for points written to the fused .ply.")
+
+p.add_argument("--max_ply_points", type=int, default=2_000_000,
+
+help="Random-subsample the fused point cloud to at most this many points.")
+
+return p.parse_args()
+
+def collect_frames(args):
+
+"""Return a sorted list of image paths, extracting from video if needed."""
+
+if args.frames_dir:
+
+paths = sorted(p for p in glob.glob(os.path.join(args.frames_dir, "*"))
+
+if os.path.splitext(p.lower())[1] in IMG_EXTS)
+
+if not paths:
+
+raise SystemExit(f"No images found in {args.frames_dir}")
+
+if args.frame_interval > 1:
+
+paths = paths[::args.frame_interval]
+
+if args.num_frames > 0:
+
+paths = paths[:args.num_frames]
+
+return paths, None
+
+# Video path: extract frames into a temp dir under output_dir/_frames.
+
+import cv2
+
+out_frames = os.path.join(args.output_dir, "_frames")
+
+os.makedirs(out_frames, exist_ok=True)
+
+cap = cv2.VideoCapture(args.video)
+
+if not cap.isOpened():
+
+raise SystemExit(f"Cannot open video {args.video}")
+
+total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+idxs = list(range(0, total, args.frame_interval))
+
+if args.num_frames > 0:
+
+idxs = idxs[:args.num_frames]
+
+paths = []
+
+for j, i in enumerate(idxs):
+
+cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+
+ok, frame = cap.read()
+
+if not ok:
+
+break
+
+fp = os.path.join(out_frames, f"{j:06d}.png")
+
+cv2.imwrite(fp, frame)
+
+paths.append(fp)
+
+cap.release()
+
+if not paths:
+
+raise SystemExit(f"No frames extracted from {args.video}")
+
+return paths, out_frames
+
+def build_views(img_paths, size, reset_interval):
+
+"""Image-only view dicts for the recurrent rollout (mirrors demo.prepare_input)."""
+
+from src.dust3r.utils.image import load_images
+
+images = load_images(img_paths, size=size)
+
+views = []
+
+for i in range(len(images)):
+
+("r", "u1"), ("g", "u1"), ("b", "u1")])
+
+buf["x"], buf["y"], buf["z"] = pts[:, 0], pts[:, 1], pts[:, 2]
+
+buf["r"], buf["g"], buf["b"] = cols[:, 0], cols[:, 1], cols[:, 2]
+
+f.write(buf.tobytes())
+
+def main():
+
+args = parse_args()
+
+os.makedirs(args.output_dir, exist_ok=True)
+
+device = args.device
+
+import torch as _t
+
+if device == "cuda" and not _t.cuda.is_available():
+
+print("[warn] CUDA unavailable, falling back to CPU")
+
+device = "cpu"
+
+from src.dust3r.inference import inference_recurrent_lighter
+
+from src.dust3r.model import ARCroco3DStereo
+
+img_paths, _tmp = collect_frames(args)
+
+print(f"[info] {len(img_paths)} frames | size={args.size} | update={args.model_update_type}")
+
+views = build_views(img_paths, args.size, args.reset_interval)
+
+print(f"[info] loading model from {args.weights}")
+
+model = ARCroco3DStereo.from_pretrained(args.weights).to(device)
+
+model.config.model_update_type = args.model_update_type
+
+model.eval()
+
+t0 = time.time()
+
+with torch.no_grad():
+
+outputs, _state = inference_recurrent_lighter(views, model, device)
+
+dt = time.time() - t0
+
+fps = len(views) / dt if dt > 0 else float("nan")
+
+print(f"[info] inference done: {dt:.2f}s, {fps:.2f} FPS")
+
+summary = save_results(outputs, args.output_dir, args.conf_thr, args.max_ply_points)
+
+summary.update({
+
+"frames": len(img_paths), "seconds": round(dt, 2), "fps": round(fps, 2),
+
+"model_update_type": args.model_update_type,
+
+"weights": os.path.abspath(args.weights),
+
+"source": args.frames_dir or args.video,
+
+})
+
+with open(os.path.join(args.output_dir, "summary.json"), "w") as f:
+
+json.dump(summary, f, indent=2)
+
+print("[info] results ->", args.output_dir)
+
+print(json.dumps(summary, indent=2))
+
+if __name__ == "__main__":
+
+main()--------------------------------------------------------------------------------
+FILT3R (https://jinotter3.github.io/FILT3R/)
+citeturn329search5 [wordlim: 200] Crawled: last week; Image: FILT3R method overview ... GitHub repository.
+# FILT3R
+
+## Latent State Adaptive Kalman Filter for Streaming 3D Reconstruction
+
+Seonghyun Jin^{1} Jong Chul Ye^{1}
+
+^{1}KAIST AI
+
+ECCV 2026
+
+arXiv Paper + Supplement Code Videos BibTeX
+
+## FILT3R improves long-horizon streaming 3D reconstruction while keeping a compact recurrent state.
+
+## Abstract
+
+Streaming 3D reconstruction maintains a persistent latent state that is updated online from incoming frames, enabling constant-memory inference. A key failure mode is the state update rule: aggressive overwrites forget useful history, while conservative updates fail to track new evidence, and both behaviors become unstable beyond the training horizon.
+
+FILT3R addresses this by casting recurrent latent updates as stochastic state estimation in token space. It maintains a per-token variance, computes a Kalman-style gain, and estimates process noise online from EMA-normalized temporal drift of candidate tokens. 
+## Representative Results
+
+Benchmark  | Metric  | Baseline  | FILT3R  | Observation
+--- | --- | --- | --- | ---
+TUM-800  | ATE orig  | TTT3R: 0.214  | 0.107  | Long-horizon pose drift is roughly halved.
+Bonn-500  | Abs Rel  | TTT3R: 0.100  | 0.089  | Metric depth remains stable beyond the training horizon.
+Bonn-500  | delta < 1.25  | TTT3R: 92.1  | 94.4  | More pixels stay within the correct metric depth band.
+7-Scenes-1000  | Accuracy  | TTT3R: 0.145  | 0.054  | Reconstruction gains compound with rollout length.
+
+## Videos
+
+Reconstruction highlight 1.
+
+Reconstruction highlight 2.
+
+Taylor update diagnostic.
+
+TUM-800 update diagnostic.
+
+## Additional Figures
+
+Image: Error-growth slope summary
+
+Error-growth slope summary.
+
+Image: Gain-floor diagnostic
+
+Gain-floor diagnostic.
+
+Image: Qualitative reconstruction comparison
+
+Qualitative reconstruction comparison over long rollouts.
+
+## Resources
+
+### arXiv
+
+arXiv page.
+
+### Paper + Supplement
+
+Combined PDF.
+
+### Code
+
+GitHub repository.
+
+## BibTeX
+    
+    `@inproceedings{jin2026filt3r,
+      title     = {FILT3R: Latent State Adaptive Kalman Filter for Streaming 3D Reconstruction},
+      author    = {Jin, Seonghyun and Ye, Jong Chul},
+      booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
+      year      = {2026},
+      eprint    = {2603.18493},
+      archivePrefix = {arXiv}
+    }`
+--------------------------------------------------------------------------------
+FILT3R: Latent State Adaptive Kalman Filter for Streaming 3D Reconstruction (https://arxiv.org/abs/2603.18493)
+citeturn329academia12 [wordlim: 200] Published: 5 months ago; Code will be released at https://github.com/jinotter3/FILT3R.
+--------------------------------------------------------------------------------
+Paper-Notes-en/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md at main · zhaoyang97/Paper-Notes-en · GitHub (https://github.com/zhaoyang97/Paper-Notes-en/blob/main/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md)
+citeturn329search6 [wordlim: 200] Published: 4 months ago; Crawled: last month; title  | [Paper Note] TTT3R: 3D Reconstruction as Test-Time Trainingdescription  | [ICLR 2026][3D Vision][Online 3D reconstruction] The state update of the recurrent 3D reconstruction model CUT3R is reformulated as a test-time online learning problem.
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training (https://arxiv.org/abs/2509.26645)
+citeturn329academia13 [wordlim: 200] Published: 11 months ago; Title: TTT3R: 3D Reconstruction as Test-Time Training ... Code available in https://rover-xingyu.github.io/TTT3R
+--------------------------------------------------------------------------------
+Published as a conference paper at ICLR 2026 (https://openreview.net/pdf?id=aMs6FtNaY5)
+citeturn329search14 [wordlim: 200] Published: 6 months ago; The left panel is labeled as CUT3R behavior with a small schematic showing input Xₜ, state Sₜ, output Yₜ, and a CUT3R box; the right panel is labeled “Test-Time Training” and shows an update equation Sₜ = Sₜ₋₁ − βₜ ∇ₜ above a CUT3R box, illustrating online state updates. ... Code is available in rover-xingyu.github.io/TTT3R.
+--------------------------------------------------------------------------------
+SpatialBench (https://ropedia.github.io/SpatialBench/)
+citeturn329search7 [wordlim: 200] Crawled: 3 months ago; TTT3R  | Test-Time Training  | 0.247  | 0.202  | 0.469  | 0.179  | 0.493  | 2.343  | 0.294  | 0.222  | 0.321  | 21.070  | 0.173  | 0.201  | 0.428  | 11.700  | 0.233CUT3R  | Online  | 0.247  | 0.196  | 0.519  | 0.189  | 0.469  | 2.676  | 0.286  | 0.260  | 0.165  | 25.540  | 0.109  | 0.215  | 0.384  | 14.110  | 0.198
+--------------------------------------------------------------------------------
+Test3R: Learning to Reconstruct 3D at Test Time (https://arxiv.org/abs/2506.13750)
+citeturn329academia15 [wordlim: 200] Published: 1.2 years ago; Title: Test3R: Learning to Reconstruct 3D at Test Time ... Code is available at https://github.com/nopQAQ/Test3R.
+--------------------------------------------------------------------------------
+RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction (https://shoepaly.app/?_=%2Fpdf%2F2603.20588%23hKr38k1yZITo%2FkpxGBdjJos%3D)
+citeturn329search16 [wordlim: 200] Published: 2 months ago; RayMap3R ... Inference Speed and Memory Usage.
+--------------------------------------------------------------------------------
+Test3R: Learning to Reconstruct 3D at Test Time (https://papers.nips.cc/paper_files/paper/2025/file/911dd89c81efc624c4e1c39381179505-Paper-Conference.pdf)
+citeturn329search17 [wordlim: 200] Published: 10 months ago; • We introduce Test3R, a novel yet simple solution to learn the reconstruction at test time. ... Recently, Test-time training(TTT) [45]
+--------------------------------------------------------------------------------
+RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction (https://arxiv.org/abs/2603.20588)
+citeturn329academia18 [wordlim: 200] Published: 5 months ago; Title: RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction ... Based on this observation, we construct a dual-branch inference scheme that identifies dynamic regions by contrasting RayMap and image predictions, suppressing their interference during memory updates.
+--------------------------------------------------------------------------------
+Test3R: Learning to Reconstruct 3D at Test Time | ML Anthology (https://mlanthology.org/neurips/2025/yuan2025neurips-test3r/)
+citeturn329search8 [wordlim: 200] Crawled: 3 months ago; Moreover, it is universally applicable and nearly cost-free, making it easily applied to other models and implemented with minimal test-time training overhead and parameter footprint.Code is available at https://github.com/nopQAQ/Test3R. ...       title     = {{Test3R: Learning to Reconstruct 3D at Test Time}},
+--------------------------------------------------------------------------------
+TTT3R: Tái tạo 3D bằng Test-Time Training - Hướng dẫn GitHub (https://ngoctraimkt.com/ttt3r-tai-tao-3d-test-time-training/)
+citeturn329search9 [wordlim: 200] Published: 2 months ago; Crawled: 2 days ago; # TTT3R: Tái tạo 3D bằng Test-Time Training – Hướng dẫn GitHub ... > TTT3R (Test-Time Training for 3D Reconstruction) mở rộng CUT3R để xử lý video dài không giới hạn thông qua cập nhật trạng thái nội bộ.
+--------------------------------------------------------------------------------
+Discovering projects on GitHub - GitHub Docs (https://docs.github.com/en/get-started/exploring-projects-on-github/discovering-projects-on-github)
+citeturn329search10 [wordlim: 200] Crawled: today;   * Finding ways to contribute to open source on GitHub
+--------------------------------------------------------------------------------
+ViT$^3$: Unlocking Test-Time Training in Vision (https://openaccess.thecvf.com/content/CVPR2026/papers/Han_ViT3_Unlocking_Test-Time_Training_in_Vision_CVPR_2026_paper.pdf)
+citeturn329search19 [wordlim: 200] Published: 3 months ago; Test-Time Training (TTT) model ... TTT3R [5]
+--------------------------------------------------------------------------------
+FILT3R Studios | LinkedIn (https://www.linkedin.com/company/cblrs-studios)
+citeturn329search11 [wordlim: 200] Crawled: 3 months ago; Image: FILT3R Studios’ cover photo
+

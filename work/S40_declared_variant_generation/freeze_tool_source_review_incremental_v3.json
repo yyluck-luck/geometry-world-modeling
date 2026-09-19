@@ -1,0 +1,107 @@
+{
+  "schema": "s40-freeze-tool-source-review-incremental-v3",
+  "status": "PASS_S40_FREEZE_TOOL_SOURCE_REVIEW",
+  "passed": true,
+  "reviewer": "/root/gemini_third_review_verifier",
+  "completed_utc": "2026-09-07T06:56:33.333909+00:00",
+  "completed_asia_shanghai": "2026-09-07T14:56:33.333909+08:00",
+  "reviewed_identities": {
+    "freeze_s40_manifest.py": "752830d25cb9e11e943aff583fd72a6db44eb9f7114871b16c0a833148779aa9",
+    "FREEZE_PROTOCOL.md": "77c84b89b284f5c87535b164e4f29479759265adb3919f5f7e8038bf57da2d58",
+    "manifest_candidate.json": "d3515e5ff2da0843da6bbfcdb4e13105c513e10202653561259485f65d547543",
+    "generation_gate.py": "ca16d8be631898e0200b14fcd0a19fd2d8bc6b91f32da4f5ada6038103ba7b14"
+  },
+  "preserved_prior_reviews": {
+    "work/S40_declared_variant_generation/freeze_tool_source_review.json": "1338179c9475cd46f14755b9f1f19b37670e61e327116878490d0b229cacf302",
+    "work/S40_declared_variant_generation/freeze_tool_source_review_incremental_v2.json": "f8ef9ccee6a11d846f4f3a2c1df85952197e2e13a22044339e7988eba3e9ae89"
+  },
+  "regression_verdicts": {
+    "R1_RESERVED_OUTPUT_ALIAS_CAN_FALSE_PASS_ATTACH_METADATA": {
+      "status": "FIXED",
+      "evidence": [
+        "Before any attach output directory is created, main calls require_attach_core_uses_reserved_generation_root.",
+        "That preflight resolves the external core path, verifies its actual file SHA against --core-sha256, parses that exact core, and requires its output_root to resolve to the candidate's single reserved generation root.",
+        "Only after the external-core check does main enforce disjointness and absence for both reserved roots and call output.mkdir(exist_ok=False).",
+        "attach_reviews re-verifies the same actual core file SHA and the exact output_root binding before accepting preparation or reviews.",
+        "Freshness and path isolation are repeated before final-manifest publication and after the metadata gate, before the success status is recorded.",
+        "An alternate absolute output_root in an externally supplied core now fails before attach can create any output directory."
+      ],
+      "source_locations": [
+        "work/S40_declared_variant_generation/freeze_s40_manifest.py:91-99",
+        "work/S40_declared_variant_generation/freeze_s40_manifest.py:201-217",
+        "work/S40_declared_variant_generation/freeze_s40_manifest.py:260-275",
+        "work/S40_declared_variant_generation/freeze_s40_manifest.py:306-310"
+      ]
+    },
+    "R2_ATTACH_DOES_NOT_REBIND_FREEZE_PREPARATION_TO_ACTIVE_S39_RECORDS": {
+      "status": "FIXED_AND_RETAINED",
+      "evidence": [
+        "attach reconstructs active S39 manifest, four-evidence, and loading-review records from the core top level.",
+        "attach reconstructs the complete expected freeze_preparation dictionary and requires exact equality, including candidate, tool identities, zero-execution fields, and purpose.",
+        "loading_chain then validates those same active S39 records and the independent S39 loading evidence review."
+      ],
+      "source_locations": [
+        "work/S40_declared_variant_generation/freeze_s40_manifest.py:218-239"
+      ]
+    }
+  },
+  "full_review_checks": {
+    "all_four_requested_sha256_values_match_current_files": true,
+    "candidate_and_generation_gate_remain_unchanged": true,
+    "freeze_source_ast_parses": true,
+    "freeze_source_has_standard_library_imports_only": true,
+    "freeze_source_contains_no_model_worker_subprocess_or_generation_call": true,
+    "prepare_uses_only_hash_verified_actual_s39_manifest_for_components_config_and_input": true,
+    "prepare_self_hashes_all_s39_manifest_evidence_and_loading_review_records": true,
+    "s39_metadata_manifest_review_chain_is_required": true,
+    "four_s39_loading_records_are_cross_bound": true,
+    "independent_s39_loading_review_binds_manifest_core_and_four_evidence_hashes": true,
+    "no_five_component_body_is_read_by_prepare_or_attach": true,
+    "small_input_bytes_may_be_hashed_but_pixels_are_not_decoded": true,
+    "core_file_sha_is_used_for_external_core_bytes": true,
+    "canonical_core_sha_excludes_review_receipts_and_is_used_for_both_s40_reviews": true,
+    "source_and_runtime_review_roles_have_distinct_required_statuses": true,
+    "final_manifest_metadata_gate_is_required_after_review_attachment": true,
+    "freeze_and_attachment_outputs_are_created_exclusively": true,
+    "errors_after_output_creation_produce_a_terminal_failure_receipt": true,
+    "partial_or_failed_directories_are_never_overwritten": true,
+    "execution_authorized_remains_false_in_freeze_and_attach_receipts": true,
+    "unreviewed_core_cannot_pass_the_generation_gate": true,
+    "no_new_blocking_finding": true
+  },
+  "current_observation": {
+    "observed_utc": "2026-09-07T06:56:33.333909+00:00",
+    "reserved_generation_output_root_absent": true,
+    "reserved_execution_01_root_absent": true,
+    "observation_is_not_a_runtime_authorization": true
+  },
+  "execution_boundary": {
+    "review_type": "read_only_static_incremental_source_review",
+    "prepare_calls": 0,
+    "attach_calls": 0,
+    "generation_gate_calls": 0,
+    "component_weight_body_bytes_read": 0,
+    "input_image_bytes_read": 0,
+    "pixels_decoded": 0,
+    "scientific_imports": 0,
+    "model_constructors": 0,
+    "model_forwards": 0,
+    "generation_calls": 0,
+    "network_requests": 0,
+    "source_or_protocol_files_modified": false,
+    "canonical_ledger_modified": false,
+    "only_new_file": "work/S40_declared_variant_generation/freeze_tool_source_review_incremental_v3.json"
+  },
+  "nonblocking_boundaries": [
+    "Human reviewer independence remains an external orchestration property rather than authenticated JSON identity.",
+    "Filesystem race resistance is the trusted-local-workspace level; the later launcher independently rechecks fresh output and execution roots before scientific import.",
+    "This PASS approves only the frozen tool/protocol source identities. It is not an S40 actual-core review, runtime-freeze review, generation authorization, model result, quality result, exact-original claim, or innovation result."
+  ],
+  "authorization": {
+    "safe_to_attempt_s40_core_prepare_under_this_exact_source_and_protocol": true,
+    "attach_requires_an_actual_core_and_two_separately_authored_core_bound_reviews": true,
+    "generation_authorized_by_this_review": false,
+    "model_execution_performed_by_this_review": false
+  },
+  "verdict": "PASS_S40_FREEZE_TOOL_SOURCE_REVIEW: the remaining external-core output_root boundary is closed, R2 remains fixed, and no new blocking source issue was found."
+}

@@ -1,0 +1,69 @@
+{
+  "schema": "vmem-h800-baseline-preflight-v1",
+  "created_utc": "2026-09-15T03:30:00Z",
+  "experiment_name": "H800 VMem declared-VAE baseline on ICL-NUIM synthetic controlled split",
+  "status": "PREP_ONLY_VMEM_TRANSFER_RESUMED",
+  "purpose": "reproduce the declared VMem pipeline before any GRC selector is introduced",
+  "source_dataset": "ICL-NUIM living_room_traj0_frei_png",
+  "split_manifest": "work/S102_gate0/ICL_SPLIT_AND_GT_ISOLATION_MANIFEST_20260915.json",
+  "data_scope": "synthetic single-scene; no real-world or cross-scene claim",
+  "history_ids": [
+    1,
+    31,
+    61,
+    91
+  ],
+  "calibration_target_ids": [
+    121,
+    151,
+    181,
+    211
+  ],
+  "heldout_target_ids": "sealed 1056..1508; open only after prediction artifacts are sealed",
+  "budget": {
+    "context_frames": 4,
+    "target_frames": 4,
+    "inference_steps": 50,
+    "seed": 42,
+    "resolution": [
+      576,
+      576
+    ],
+    "dtype": "float16 on CUDA"
+  },
+  "weights": [
+    {
+      "name": "vmem_weights.pth",
+      "local": "data/vmem_recovery/xet_attempt4_01/vmem_weights.pth",
+      "remote": "/home/yliutz/gwm_weights_20260915/vmem_weights.pth",
+      "sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+    },
+    {
+      "name": "cut3r_512_dpt_4_64.pth",
+      "local": "data/cut3r/cut3r_512_dpt_4_64.pth",
+      "remote": "/home/yliutz/gwm_weights_20260915/cut3r_512_dpt_4_64.pth",
+      "sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103"
+    },
+    {
+      "name": "open_clip_model.safetensors",
+      "local": "data/clip_original/open_clip_model.safetensors",
+      "remote": "/home/yliutz/gwm_weights_20260915/open_clip_model.safetensors",
+      "sha256": "0084e75319a50ad85ef45377bad5bc38f2f58824459eb690048d51c9f8863be5"
+    },
+    {
+      "name": "diffusion_pytorch_model.safetensors",
+      "local": "data/vae_official_ft_mse/diffusion_pytorch_model.safetensors",
+      "remote": "/home/yliutz/gwm_weights_20260915/diffusion_pytorch_model.safetensors",
+      "sha256": "a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+    }
+  ],
+  "gates_before_scoring": [
+    "verify all remote weight hashes",
+    "verify model config identity",
+    "verify no future GT opened by selector",
+    "run calibration/development only",
+    "independent readback"
+  ],
+  "claim_boundary": "This baseline can establish reproducible VMem behavior on the frozen synthetic split; it cannot establish GRC benefit, real-world generalization, or novelty.",
+  "transfer_status": "work/S101_env_bootstrap/WEIGHT_TRANSFER_STATUS_20260915.json"
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "s11-source-only-independent-pre-run-review-v1",
+  "status": "PASS",
+  "reviewed_utc": "2026-09-05T22:07:15.530241+00:00",
+  "reviewer": "independent survey_evaluation agent",
+  "scope": "30 source-only controlled conditions; separate from 168-map-variant regression",
+  "major_issues": [],
+  "minor_issues": [],
+  "source_sha256": {
+    "scripts/run_s11_source_regression.py": "b2aa29f3c3486a062bbb2f1a388318e0be8ae72d5d9ce84d0f0926b5b69ed176",
+    "docs/S11_SOURCE_REGRESSION_PROTOCOL.md": "f6b029b958f5b04905d98a3b6866523e6c97136030677461a541de0a340beb38",
+    "docs/S11_SOURCE_EDIT_DESIGN.md": "230fa036ee5abc824fd48a63d872279b656e4bf256f2cd46f2f762638da28a9f",
+    "docs/S11_SOURCE_EDIT_DESIGN.json": "ae2b53172b70caeae58d19b1862de1785e2f03b79de1c793ff3f3a460d0b565e",
+    "src/vmem_retrieval_kernel.py": "35825a3989f368906cba08808616f0c6922ff08d0a92c7205fddb4822652e2b3",
+    "src/vmem_memory_kernel.py": "c1bd1a0bb52df48e73f2766ab564e6cec5b9ec665fcf7972a3cbbeb8070210a6",
+    "src/s7_event_replay.py": "3f4028366d1cf1fdcca8744a0cb14690075b9b146bd71af88360afa74bc5e20d",
+    "src/s6_memory_bridge.py": "aceaa7828e794289aa580c63605bd3988216ca6832cba45be40d28756b8993cd",
+    "src/rgbd_retrieval.py": "6f5188f7f72b66e93af27ab5a368cd09fcea2166715f1bf4cd0545a686ec3cd6",
+    "src/s10_vectorized_renderer.py": "3e079d0bbbaed962b24bce599a5cf7198b6bbc2891ac3c91761f4ea5c4f0e521",
+    "scripts/profile_s9_components.py": "f46c11b46d39353b25b31e830941dc8c6490c29ca8aa57ab62772a945719a16e",
+    "scripts/run_s10_renderer_comparison.py": "00dbae5db3c7a09dca78a428951db2074103b54d8f2c23a4daea17b7e6a96554",
+    "work/S11_pre_run_review/source_dependency_static.json": "80575b5da56225f4ef7e8842bf86262d52d1b1bf6fa713c595a9ad318027629b",
+    "work/S11_pre_run_review/source_pure_precheck_v1.json": "c7377ce547e69dbbc9b04e35ad8f2954b4a6618001c6afb429c93ff2ab3c3439",
+    "work/S11_pre_run_review/source_pure_precheck_final.json": "92299f4463ad409feab0beaca1270858159372b4ed0fe9f21ff2126a88774f53"
+  },
+  "report_sha256": "77d02c15ae13d3d91eee0d15c92b8c8a8e37a23c7d8cbfeae24b0af2ffb3f702",
+  "closed_findings": [
+    {
+      "id": "low_source_recorder_hard_four",
+      "resolution": "Only two terminal validation constants adapted to maximum; full restored AST identical and selected tied to actual return"
+    },
+    {
+      "id": "integer_cast_signature_collision",
+      "resolution": "Built-in int types required before signature normalization; float/bool/string probes rejected"
+    },
+    {
+      "id": "negative_control_persistence",
+      "resolution": "Actual one-field signature differences checked; rejection reason/differences written after every control"
+    },
+    {
+      "id": "empty_review_evidence",
+      "resolution": "Nonempty dict required before execution"
+    }
+  ],
+  "pure_preparation_checks": {
+    "final_edit_adapter_and_guards": 29,
+    "renderer_dependency_AST": 3,
+    "passed": 32,
+    "are_experimental_samples": false
+  },
+  "actual_execution_in_this_review": {
+    "numerical_library_imports": 0,
+    "NPZ_decodes": 0,
+    "candidate_factory_calls": 0,
+    "reference_or_candidate_selector_calls": 0,
+    "renderer_calls": 0,
+    "compiled_NMS_trace_body_calls": 0,
+    "model_calls": 0,
+    "performance_measurements": 0
+  },
+  "planned_domain": {
+    "controlled_conditions": 30,
+    "source_edits": 18,
+    "low_source_boundaries": 12,
+    "base_map_queries": 6,
+    "reference_replays": 36,
+    "candidate_true_renders": 30,
+    "original_renderer_calls": 0,
+    "full_selector_calls": 66,
+    "guard_negative_controls": 18,
+    "stale_trace_minimum_rejections_among18": 1
+  },
+  "reference_classification": "Unchanged original full selector with guarded sealed historical rendering buffer; actual votes/quota/distance/sort/NMS recomputed, renderer not rerun",
+  "limitations": [
+    "Only current plain Surfel class/frozen environment/constructed argument types",
+    "No actual source-condition result or all-input equivalence proof",
+    "Counterfactual association edits leave original counts/history fixed; not real observations/merge",
+    "Low-source counts are not low-history branches; no empty/NMS-off/one- or five-history coverage",
+    "Fixed CPU dummy contexts; no model compatibility, video quality or performance inference",
+    "Archive member CRC/SHA reopen is not performed by source runner and not claimed by this review",
+    "Python I/O and resource limits are soft",
+    "Different-author static review only; future runtime and saved-artifact audit remain separate"
+  ],
+  "execution_freeze_created_or_approved": false,
+  "research_ledger_modified": false
+}

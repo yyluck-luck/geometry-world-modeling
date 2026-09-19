@@ -1,0 +1,306 @@
+{
+  "schema": "s14c-pre-run-review-v1",
+  "status": "PASS_FOR_FROZEN_EXPLORATORY_EXECUTION",
+  "completed_utc": "2026-09-06T06:51:23.269777+00:00",
+  "reviewer": "/root/s14c_operational_design",
+  "reviewer_also_design_author": true,
+  "different_from_production_author": true,
+  "different_from_independent_verifier_author": true,
+  "production_source_sha256": "faa60040127ef380b381b94cc95d40209bd75a75cee145fd7a086dea49d3848b",
+  "independent_verifier_sha256": "8d85209dd85e913e0e02e6d555fc043ec62e72c8a0bdf87967b378ac49345634",
+  "design_sha256": "8ebf5bf18bb914d646dac8ee99f0b0e7ecfcac23c9ad0e567bf7ca373f255cec",
+  "group_contract": {
+    "scene_groups": [
+      "S7",
+      "S8"
+    ],
+    "block_groups": [
+      [
+        "S7",
+        0
+      ],
+      [
+        "S7",
+        1
+      ],
+      [
+        "S7",
+        2
+      ],
+      [
+        "S8",
+        0
+      ],
+      [
+        "S8",
+        1
+      ],
+      [
+        "S8",
+        2
+      ]
+    ],
+    "metrics": [
+      "disagreement_g_minus_p",
+      "source_count_p_minus_g",
+      "camera_pair_p_minus_g",
+      "query_distance_g_minus_p"
+    ],
+    "pooled": "rows_and_counts_only_no_rho",
+    "minimum_valid_rows": 3,
+    "tie_rule": "exact_sealed_float_equality_average_ranks",
+    "valid_domain": "all_four_metrics_finite"
+  },
+  "execution_order": [
+    "measure",
+    "root verifies measure seal identity success",
+    "associate",
+    "independent full verification, with its own prediction reconstruction before its own label read"
+  ],
+  "tolerances": {
+    "atol": 1e-12,
+    "rtol": 1e-10,
+    "identities_ids_saved_labels_and_distances": "exact",
+    "rho_input": "independently numerically validated sealed float scalar values, exact ties, independent ranking"
+  },
+  "corrections_closed": [
+    "Label candidate IDs and source allocation correspondence added",
+    "Empty common domain explicit status added",
+    "Point/pair visit counters added",
+    "Author partial CSV/JSON decode counters updated before real execution; prior source kept",
+    "Only8groups rho and no pooled rho explicitly resolved before real decode",
+    "Preparation wording aligned with actual measure-seal-associate-independent ordering; old document retained",
+    "Independent output interpretation key mismatch corrected and final artificial integration passed"
+  ],
+  "open_blockers": [],
+  "artificial_evidence": {
+    "production_author_checks": 39,
+    "reviewer_independent_scalar_checks": 26,
+    "independent_verifier_author_core_checks": 46,
+    "independent_artificial_integration_exact_checks": 30585,
+    "independent_artificial_integration_float_checks": 1080,
+    "independent_artificial_integration_max_difference": 8.881784197001252e-16
+  },
+  "preparation_scope_deviation": {
+    "owner": "independent verifier author integration_v1 external CLI",
+    "real_prediction_byte_hash_reads": 1,
+    "real_prediction_path": "results/S12_matched_budget/selections/S7_block0_query20.json",
+    "real_csv_json_decodes": 0,
+    "real_score_reads": 0,
+    "real_numeric_measurement_rows": 0,
+    "cause": "omitted explicit artificial --root; first SHA mismatch stopped before decode",
+    "actual_start_utc": "2026-09-06T06:47:57.736490+00:00",
+    "actual_end_utc": "2026-09-06T06:47:57.749156+00:00",
+    "preserved": "work/S14C_independent_preparation/integration_v1/scope_correction.json",
+    "closed_by": "explicit artificial root in preserved v2/v3, v3 PASS; root ledger disclosure"
+  },
+  "reviewer_access": {
+    "real_input_files_read": 0,
+    "real_csv_rows_decoded": 0,
+    "real_score_reads": 0,
+    "real_npz_payloads_decoded": 0,
+    "real_production_or_verifier_entrypoint_runs": 0,
+    "artificial_pure_function_script_runs": 1,
+    "independent_numerical_function_bodies_read": false
+  },
+  "identity_binding_checks": [
+    {
+      "path": "scripts/measure_s14c_selection_disagreement.py",
+      "kind": "production_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "scripts/check_s14c_artificial.py",
+      "kind": "production_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "docs/S14C_IMPLEMENTATION_PREPARATION.md",
+      "kind": "production_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "docs/S14C_EXPLORATORY_DESIGN_DRAFT.md",
+      "kind": "production_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_implementation/artificial_v2/receipt.json",
+      "kind": "production_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/artificial_checks_final_source.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/artificial_checks.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/preparation_failure_v1.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v1/scope_correction.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v2/integration_receipt.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/integration_receipt.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/identity_receipt.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/verification/verification.json",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/run_artificial_checks.py",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    },
+    {
+      "path": "work/S14C_independent_preparation/run_artificial_integration.py",
+      "kind": "independent_preparation_binding",
+      "passed": true
+    }
+  ],
+  "evidence": [
+    {
+      "path": "docs/S14C_EXPLORATORY_DESIGN_DRAFT.md",
+      "sha256": "8ebf5bf18bb914d646dac8ee99f0b0e7ecfcac23c9ad0e567bf7ca373f255cec",
+      "bytes": 15864,
+      "review_scope": "design authored earlier, retained SHA"
+    },
+    {
+      "path": "work/S14C_design/receipt.json",
+      "sha256": "2e034a3557509200ca799db41fdd516e7b7e765c31d3921b534f77e2c17ecb25",
+      "bytes": 13950,
+      "review_scope": "prior skill/original-source search and design scope"
+    },
+    {
+      "path": "scripts/measure_s14c_selection_disagreement.py",
+      "sha256": "faa60040127ef380b381b94cc95d40209bd75a75cee145fd7a086dea49d3848b",
+      "bytes": 29266,
+      "review_scope": "full production source read, final changes reinspected"
+    },
+    {
+      "path": "scripts/check_s14c_artificial.py",
+      "sha256": "a9dbd2c8292580f3c4c698842298841a99a253bfe6e997925ed02a0236dcc864",
+      "bytes": 13710,
+      "review_scope": "full artificial checker source read; not rerun by reviewer"
+    },
+    {
+      "path": "docs/S14C_IMPLEMENTATION_PREPARATION.md",
+      "sha256": "216e31bc4567fe6f8253e200ea429300381308b044b273b35aa2be3a51defc11",
+      "bytes": 5216,
+      "review_scope": "full initial preparation and final gate wording correction"
+    },
+    {
+      "path": "work/S14C_implementation/receipt.json",
+      "sha256": "aa3774ea87c0c19a8ff7856c83ba0a3c1add3578bafea9f400bde7bd84c66c1f",
+      "bytes": 2017,
+      "review_scope": "final preparation bindings verified"
+    },
+    {
+      "path": "work/S14C_implementation/artificial_v2/receipt.json",
+      "sha256": "321e3682bec792e85bdbbc56e512749c4a37c9d5c6806cab565bcb8e565f6b29",
+      "bytes": 3837,
+      "review_scope": "39 artificial checks under final production SHA"
+    },
+    {
+      "path": "work/S14C_pre_run_review/check_scalar_contract.py",
+      "sha256": "3e4df2353d6cc094f379381b580b23db42274a5d5965fe9e553fc4cbbbf9430f",
+      "bytes": 4787,
+      "review_scope": "authored and executed pure artificial scalar checks"
+    },
+    {
+      "path": "work/S14C_pre_run_review/scalar_check_receipt.json",
+      "sha256": "1a12fc625c40b966348d9c9f8a12ca8a89c1bb68774f0361b5a1d2acb53be310",
+      "bytes": 3936,
+      "review_scope": "26 checks under final production SHA"
+    },
+    {
+      "path": "scripts/verify_s14c_selection_disagreement_independent.py",
+      "sha256": "8d85209dd85e913e0e02e6d555fc043ec62e72c8a0bdf87967b378ac49345634",
+      "bytes": 38094,
+      "review_scope": "imports/constants/CLI/run/seal/identity/comparator interfaces only; numerical dispersion/query/load_actions bodies not inspected"
+    },
+    {
+      "path": "docs/S14C_INDEPENDENT_PREPARATION.md",
+      "sha256": "89fb1a89449cde46b2094bbff330bf0e7fce08aff35a8bb7011f02843f4246ed",
+      "bytes": 7067,
+      "review_scope": "full preparation and corrected byte-read disclosure"
+    },
+    {
+      "path": "work/S14C_independent_preparation/preparation_receipt.json",
+      "sha256": "1110cb29ba82f7ab17ecc39193df2274905b8f375a5f443c22bcabadbcb87406",
+      "bytes": 3016,
+      "review_scope": "final bindings and disclosed scope verified"
+    },
+    {
+      "path": "work/S14C_independent_preparation/artificial_checks.json",
+      "sha256": "1a52c582a3b00afa8d949de81b1215c7db9e475153affde6f6730279e4ac994d",
+      "bytes": 4502,
+      "review_scope": "historical46 check outcomes read"
+    },
+    {
+      "path": "work/S14C_independent_preparation/artificial_checks_final_source.json",
+      "sha256": "33474982ec2db916e1ed4d7384360678020d4cf11c1a5e65febe22d07af200c9",
+      "bytes": 4502,
+      "review_scope": "final46 outcome/source identity read"
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v1/scope_correction.json",
+      "sha256": "88cf4c4e91e56b475aca1f69ab1e305119c94caa925428c96226d8dea0a84633",
+      "bytes": 766,
+      "review_scope": "actual one real byte-hash accidental read disclosed, numerical decode0"
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/integration_receipt.json",
+      "sha256": "3ffb0c10ec6c0a4f21151f293b43154571b8a22b7f0f197299fd9d9b432a74b7",
+      "bytes": 505,
+      "review_scope": "full final artificial integration outcome"
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/identity_receipt.json",
+      "sha256": "602074bffebf3272915142a11489108b7ee661ed5bfc9a591b53aefbbe98c29c",
+      "bytes": 10158,
+      "review_scope": "artificial root and identity fields read; hashes independently checked"
+    },
+    {
+      "path": "work/S14C_independent_preparation/integration_v3/verification/verification.json",
+      "sha256": "47d7093200fc384581aaec9a9998a80e31e87889329a020d77adeecb3910c2a7",
+      "bytes": 12091,
+      "review_scope": "outcome/time/source/count fields only; no actual experiment data"
+    },
+    {
+      "path": "docs/S14C_PRE_RUN_REVIEW.md",
+      "sha256": "2f56b16949af4534450aa2fbf91bc5d6b36c5c87eb958f701fe4bc8b055cf823",
+      "bytes": 9229,
+      "review_scope": "created final review"
+    }
+  ],
+  "not_proven": [
+    "Real S14C relationship or algorithm efficacy",
+    "Novelty or conditional added information",
+    "Independent scene generalization or risk calibration",
+    "Target-view occlusion conflict or full VMem video"
+  ],
+  "next": "Root freeze exact33 inputs/control identities and execute authorized local diagnostic; preserve any failure and produce complete independent verification and report."
+}

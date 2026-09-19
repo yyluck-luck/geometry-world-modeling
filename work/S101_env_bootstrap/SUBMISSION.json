@@ -1,0 +1,82 @@
+{
+  "job_id": "584449",
+  "status_at_last_check": "PENDING_PRIORITY",
+  "account": "mscitspod2026",
+  "partition": "cpu",
+  "requested_gpu_count": 0,
+  "time_limit_minutes": 15,
+  "environment": "/home/yliutz/.conda/envs/gwm-cut3r-py311-20260915",
+  "remote_run_directory": "/home/yliutz/gwm_env_bootstrap_20260915",
+  "action": "create isolated Python 3.11 environment then native pip resolver dry-run for requirements-cut3r.txt",
+  "package_installation_scope": "Python and pip environment only; scientific packages resolver dry-run",
+  "project_import_executed": false,
+  "model_executed": false,
+  "data_accessed": false,
+  "resolver_status": "COMPLETED_EXIT0",
+  "resolver_receipts": ["/home/yliutz/gwm_env_bootstrap_20260915/requirements_resolver.json", "/home/yliutz/gwm_env_bootstrap_20260915/conda_base_explicit.txt"],
+  "install_job_id": "584494",
+  "install_job_status_at_submission": "COMPLETED_EXIT0",
+  "imageio_fix_job_id": "584548",
+  "imageio_fix_job_status": "COMPLETED_EXIT0",
+  "imageio_fix_receipts": [
+    "remote:/home/yliutz/gwm_env_bootstrap_20260915/fix_imageio_584548.log",
+    "remote:/home/yliutz/gwm_env_bootstrap_20260915/pip_freeze_584548.txt",
+    "work/S101_env_bootstrap/remote_receipts_584548/fix_imageio_584548.log",
+    "work/S101_env_bootstrap/remote_receipts_584548/pip_freeze_584548.txt"
+  ],
+  "nine_package_import_probe": "PASS",
+  "nine_package_import_scope": "environment packages only; no project import, no model, no data, no GT",
+  "source_bundle_remote": {
+    "path": "/home/yliutz/gwm_source_transport_20260915/vmem_source_only.tar.gz",
+    "sha256": "de001a234e97fdf82f16c2ccdba2caad00c5e8ccda6a637e906c33b47ea3da7b",
+    "tar_entries": 196,
+    "remote_sha_and_entry_check": "PASS"
+  },
+  "remote_project_import_probe": {
+    "python": "3.11.16",
+    "scope": "no data, GT, weights, or model execution",
+    "autoencoder": "IMPORT_OK",
+    "pipeline_and_conditioner": "BLOCKED_MISSING_KORNIA",
+    "receipt": "work/S101_env_bootstrap/remote_receipts_584548/remote_project_import_probe_20260915.json"
+  },
+  "direct_runtime_install_job_id": "585714",
+  "direct_runtime_install_status_at_last_check": "COMPLETED_EXIT0",
+  "direct_runtime_install_script": "work/S101_env_bootstrap/install_vmem_direct.sh",
+  "direct_runtime_install_receipts": [
+    "work/S101_env_bootstrap/remote_receipts_585714/install_direct_585714.log",
+    "work/S101_env_bootstrap/remote_receipts_585714/pip_freeze_direct_585714.txt"
+  ],
+  "remote_project_import_after_direct_install": {
+    "status": "PASS_IMPORT_ONLY",
+    "receipt": "work/S101_env_bootstrap/remote_receipts_585714/remote_project_import_probe_after_direct_20260915.json",
+    "data_access": false,
+    "weight_access": false,
+    "model_execution": false
+  },
+  "gpu_env_smoke_attempts": [
+    {
+      "job_id": "585900",
+      "status": "COMPLETED_EXIT0",
+      "node": "dgx-05",
+      "scope": "H800/CUDA/matmul; project imports invalid because PYTHONPATH omitted",
+      "receipt": "work/S101_env_bootstrap/remote_receipts_585900/gpu_env_smoke_585900.log"
+    },
+    {
+      "job_id": "585928",
+      "status": "COMPLETED_EXIT0",
+      "node": "dgx-14",
+      "scope": "H800/CUDA/matmul; CUT3R sibling path missing",
+      "receipt": "work/S101_env_bootstrap/remote_receipts_585928/gpu_env_smoke_585928.log"
+    },
+    {
+      "job_id": "585971",
+      "status": "COMPLETED_EXIT0",
+      "node": "dgx-09",
+      "scope": "H800/CUDA/matmul and VMem project imports; no data/GT/weights/model",
+      "receipt": "work/S101_env_bootstrap/remote_receipts_585971/gpu_env_smoke_585971.log",
+      "result": "PASS_ENV_AND_IMPORT_ONLY"
+    }
+  ],
+  "install_script": "work/S101_env_bootstrap/install_cut3r_env.sh",
+  "next_action": "inspect Slurm job 584494 and its pip freeze/import receipts; do not run project code until environment receipt is complete"
+}

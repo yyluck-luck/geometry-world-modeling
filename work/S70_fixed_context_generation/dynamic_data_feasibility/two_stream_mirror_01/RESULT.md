@@ -1,0 +1,20 @@
+# Same-camera public mirror transfer and timing result
+
+Recorded UTC: **2026-09-09T03:53:01.218494+00:00**. Status: **PASS_TWO_MIRROR_STREAMS_IDENTITY_AND_CONTAINER_TIMING_ONLY**. This is real public media acquisition and container-timing inspection, not a model/novel-method result. The earlier zero-body GitHub TLS failures remain unchanged in `../two_stream_metadata_01`.
+
+The new externally bounded run was **2026-09-09T03:49:42.096237–03:51:02.925423Z**, return0, **80.828967 seconds /600 seconds**, one connection at a time. Exactly **130,909,089 HTTP body bytes (124.84463596 MiB) /150 MiB** were downloaded. Two revision-pinned anonymous curl HEADs followed one redirect each with0 body; two direct curl GETs used exact per-file `--max-filesize`, no redirect and no retry, HTTP200 and TLS verification result0. Full argv, actual times, counters, headers, stderr and return codes are preserved. Local checksum/probe reads are additional local file reads, not new network bodies.
+
+| File | Actual bytes | Actual CRC32 = original ZIP CRC | Actual SHA256 = mirror declaration |
+|---|---:|---|---|
+| cam00.mp4 | 66,440,149 | `8eadec32` | `09cc8b695b78ef13d7e02a3a8a1e7e4f5a9f915730c4515c7cc9bcd06c843ad9` |
+| cam06.mp4 | 64,468,940 | `ca4382d1` | `3a5cb2acd5266d23c83d7dbd16c10b69da10eac73b689011e275b0da33695f0d` |
+
+Transport repository: [Spatial1ntelligence/Preprocessed_Neu3D](https://huggingface.co/datasets/Spatial1ntelligence/Preprocessed_Neu3D/tree/cb729cfe56b76fa811ceff1716910a6002db8327/coffee_martini), revision **cb729cfe56b76fa811ceff1716910a6002db8327**. This is a third-party mirror; matching original published ZIP lengths/CRC and the mirror's SHA is transport-consistency evidence. An original-author cryptographic MP4 hash was not available, and CRC alone is not cryptographic authenticity. Keep the original [Neural3D CC-BY-NC4.0 license](https://github.com/facebookresearch/Neural_3D_Video/blob/main/LICENSE); the mirror's MIT label was not adopted. No mirror transforms, images, point clouds, or other video files were fetched.
+
+**Both actual streams** have one H.264/AVC High video track, pixel formatyuv420p, **2704×2028**, declared/observed**300 frames**, **30/1 fps**, duration**10 seconds**, time base**1/15360**. Format identifier is `mov,mp4,m4a,3gp,3g2,mj2` for both. There are **no audio streams**. Video-only ffprobe frame traversal used `-threads1`; codec decoding may occur internally, but only metadata was saved. No audio decoding, RGB image export/view, or visual/event selection took place.
+
+All300 frame PTS are present and unique, strictly increasing from0 to153088 with299 differences of512 ticks. Exact times are **i/30 seconds for i=0…299**. The two ordered sequences and sets match exactly; both set differences are empty and maximum corresponding-time difference is0 seconds. Full frame metadata are `cam00.frames.json` and `cam06.frames.json`; summaries and `TIMELINE_COMPARISON.json` retain counts and exact fractions. This confirms released presentation-timeline agreement, not physical exposure synchronization, rolling-shutter timing, per-pixel visibility or a causal future-prediction contract. The official synchronization statement remains a separate source claim.
+
+The original accepted pose-row mapping remains: cam00→row0, cam06→row5 in the sorted18 existing stream names; dimensions agree with saved H/W. No new calibration was fitted. The previously accepted nearest-center choice remains unchanged.
+
+**Next input boundary:** root may separately consume these now-frozen media after final handoff under `../PAST_PREFIX_INSPECTION_PLAN.md` (SHA e26ba65b78ace9aec61ea4d26d8b3eac2e7797771cfa07fca8cd8750d0385fab): cam06 only at0,.5,…4.5 seconds, corresponding to exact frame indices0,15,…135. That visual plan remains unexecuted here. cam00 RGB and time≥5s RGB were not exported/viewed or used for conditioning; their encoded bytes were acquired and video frames may have been internally decoded solely for PTS enumeration. No S70 array, reference image, weight or executing source was accessed or changed.

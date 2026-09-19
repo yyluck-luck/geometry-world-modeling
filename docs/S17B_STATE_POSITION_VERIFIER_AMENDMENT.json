@@ -1,0 +1,56 @@
+{
+  "schema": "s17b-state-position-verifier-amendment-v1",
+  "recorded_utc": "2026-09-06T11:32:03.821955+00:00",
+  "scope": "Supplemental saved-output recheck after a known verifier source-reading error; no model rerun and no change to historical manifest, output seal, v1 checker or failed report.",
+  "original_verifier": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/verify_s17b_dpt_history.py",
+    "sha256": "a55d092c91ec70d0ab5b46a8a31d4b4c42582b273c2a6e50ae75aaff09b23376"
+  },
+  "corrected_verifier": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/verify_s17b_dpt_history_v2.py",
+    "sha256": "a03907beb5f222f0ef03a2d618c452eae4c4d8225f83e65a9a868d367474da94"
+  },
+  "original_manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_EXECUTION_MANIFEST.json",
+    "sha256": "f9fe025e2a389e2a679ebc3dbfbd4257bd9611c73d29b94b3f68a302565ff298"
+  },
+  "original_output_seal": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S17B_OUTPUT_SEAL.json",
+    "sha256": "8cbd9496e9f04740eed60a9a723ae16f659ab0f8b9e9db7563b13f9d5d94748f"
+  },
+  "original_failed_verification": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S17B_dpt_independent/verification.json",
+    "sha256": "e73d772542f2a26339b2e8481d113b8ec7672d5f1bc0447f743b22628f9faa26"
+  },
+  "checkpoint_load": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S17B_dpt_two_frames/checkpoint_load.txt",
+    "sha256": "b05183c123e4190551b4809368359be6ff8b593082b26185beeff2f629b32d5f"
+  },
+  "official_model_source": {
+    "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/cut3r-local/src/dust3r/model.py",
+    "sha256": "31ed5633c5a01015026fc350a370a6e4f8735f9c8179258a2b17ed70edbc5b62"
+  },
+  "state_configuration": {
+    "state_size": 768,
+    "state_pe": "2d"
+  },
+  "expected_grid_width": 28,
+  "independent_integer_rule": "width = math.isqrt(state_size); width += width % 2; positions[i] = [i // width, i % width]",
+  "original_error": "Reviewer omitted official odd-width increment; floor sqrt 768 is 27, official even width is 28.",
+  "retained_failed_result": {
+    "status": "FAIL",
+    "started_utc": "2026-09-06T11:27:09.335236+00:00",
+    "completed_utc": "2026-09-06T11:27:10.639002+00:00",
+    "array_decodes": 19,
+    "error": "ValueError('state 2d positions from floor sqrt(768) independently constructed')"
+  },
+  "artificial_check": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17B_verifier_correction/artificial_receipt.json",
+    "sha256": "befce57b0580fe06fa695a1ba79b3dfee42be474b41b4279e4a00645f8a5d271"
+  },
+  "new_model_calls": 0,
+  "new_rgb_decodes": 0,
+  "new_gt_reads": 0,
+  "historical_files_unchanged": true,
+  "actual_recheck_status": "NOT_RUN_AWAITING_ROOT_REVIEW"
+}

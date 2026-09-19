@@ -1,0 +1,31 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:46:55.517488+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:46:55.517797+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-30/144",
+        "Content-Length": "30",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      }
+    }
+  ],
+  "members": [],
+  "body_bytes": 0,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "51f74dc4199ab17fcd8255089dfe6aff9b6b82ada3ff342c6e6440092c95dbce",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases/http_range/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 144,
+  "error": "ValueError('Content-Range mismatch')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 113, in execute\n    header = fetch(entry['local_header_offset'],30)\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 99, in fetch\n    require(response.headers.get('Content-Range') == f\"bytes {start}-{end}/{c['archive_total_bytes']}\", 'Content-Range mismatch')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: Content-Range mismatch\n",
+  "ended_utc": "2026-09-06T09:46:55.518128+00:00"
+}

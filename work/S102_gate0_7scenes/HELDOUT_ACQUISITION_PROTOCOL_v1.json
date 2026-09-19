@@ -1,0 +1,16 @@
+{
+  "schema": "gwm-heldout-acquisition-protocol-v1",
+  "created_at_local": "2026-09-16T01:40:00+08:00",
+  "purpose": "Acquire an independent RGB-D scene for Gate0 without opening frame, depth, pose, or GT bytes before acquisition freeze.",
+  "dataset": "Microsoft 7-Scenes",
+  "official_page": "https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/",
+  "selected_scene": "chess",
+  "selection_rule": "Predeclared scene name; no size/content based selection after download.",
+  "archive_url": "http://download.microsoft.com/download/2/8/5/28564B23-0828-408F-8631-23B1EFF1DAC8/chess.zip",
+  "remote_archive_path": "/home/yliutz/datasets/heldout_7scenes_chess/chess.zip",
+  "pre_freeze_access_boundary": "Only official landing-page documentation and archive URL are allowed before hash freeze; do not list archive contents, extract, decode, or read frame/depth/pose/GT bytes before SHA-256 is recorded.",
+  "post_hash_steps": ["record archive SHA-256", "extract into isolated directory", "hash manifest", "audit RGB/depth/pose dimensions and units", "freeze history/calibration/future windows", "seal future scorer before any formal baseline"],
+  "gate0_role": "independent held-out candidate; formal role remains BLOCKED until contract revision binds hashes and all sections PASS",
+  "license_note": "Microsoft page states non-commercial use; retain page and license evidence before reporting results.",
+  "status": "FROZEN_ACQUISITION_PENDING_REMOTE_HASH"
+}

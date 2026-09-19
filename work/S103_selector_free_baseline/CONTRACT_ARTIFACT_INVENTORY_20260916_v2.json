@@ -1,0 +1,78 @@
+{
+  "schema": "gwm-s103-contract-artifact-inventory-v2",
+  "checked_at_local": "2026-09-16T13:35:19+08:00",
+  "scope": "implementation and evidence inventory only; no formal forward or future scoring",
+  "status": "BLOCKED_REQUIRED_CONTRACT_AND_WINDOW_ARTIFACTS",
+  "present": {
+    "predictor_wrapper": {
+      "path": "work/S103_selector_free_baseline/predictor_s103.py",
+      "bytes": 9644,
+      "sha256": "57477b7ef416fb8e37e03df4a9a76b0f8870139600e3ad46e6e86761c863efa2"
+    },
+    "validator": {
+      "path": "work/S102_gate0_tum/validate_gate0_v2.py",
+      "bytes": 27995,
+      "sha256": "e782fc551983fe39f4d365f51f4a3b03749a5d03a524b64fbe463e2c85466586"
+    },
+    "scorer": {
+      "path": "work/S103_selector_free_baseline/scorer_s103.py",
+      "bytes": 10943,
+      "sha256": "e8907bb4b44b8630efc4686ef380ee23b75b677ba7b4f4f175ade498d6b54aab"
+    },
+    "independent_verifier_implementation": {
+      "path": "work/S103_selector_free_baseline/verify_s103_scores.py",
+      "bytes": 8379,
+      "sha256": "bb1668fefb312cc151ad9db3a05274bd86c5aa0096251fd550e192cc442178b8"
+    },
+    "metric_definition": {
+      "path": "work/S103_selector_free_baseline/METRIC_DEFINITION_v1.json",
+      "bytes": 1413,
+      "sha256": "4f267658ec63c29977458fdf5be75a1f876cd9fc56b6c0cc51bb82cb6161af92"
+    },
+    "scoring_software_receipt": {
+      "path": "work/S103_selector_free_baseline/SCORING_SOFTWARE_RECEIPT_20260916.json",
+      "status": "PASS_SOFTWARE_ONLY"
+    },
+    "predictor_contract_fix_receipt": {
+      "path": "work/S103_selector_free_baseline/PREDICTOR_CONTRACT_FIX_RECEIPT_20260916.json",
+      "status": "PASS_SOFTWARE_ONLY"
+    },
+    "adapter": {
+      "path": "work/S102_gate0_3dmatch/adapter_v1/rgbd_scenes_v2.py",
+      "bytes": 13373,
+      "sha256": "8be9af8716bb5452963e06e67bcd31704611d13c75b5d7c96e5cdf1bfcdd8d24"
+    },
+    "source_manifest_candidate": {
+      "path": "work/S102_gate0_3dmatch/adapter_v1/sources/VMEM_SOURCE_MANIFEST.json",
+      "bytes": 1125,
+      "sha256": "3551f1070a310b3f4d594894270d9cce3d81a547e0e06f2375bb6c93061fed88"
+    },
+    "effective_config_candidate": {
+      "path": "work/S102_gate0_3dmatch/adapter_v1/sources/vmem_inference.yaml",
+      "bytes": 879,
+      "sha256": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3"
+    },
+    "synthetic_compute_isolation": {
+      "path": "work/S103_selector_free_baseline/gpu_image_isolation_20260916/COMPUTE_ISOLATION_RECEIPT_20260916.json",
+      "bytes": 5290,
+      "sha256": "adb4108d5fe19b068d2f94da10a3c6fb5ca316b1df1da8b06fbfe61be51313eb",
+      "status": "SYNTHETIC_PROBE_PASS",
+      "formal_predictor_binding": false
+    }
+  },
+  "remaining_required": {
+    "full_development_window_manifest": "MISSING",
+    "predictor_inputs_manifest": "MISSING",
+    "scorer_inputs_manifest": "MISSING",
+    "command_camera_provenance": "MISSING",
+    "adapter_independent_review": "MISSING",
+    "runtime_binding_for_exact_predictor": "MISSING",
+    "formal_isolation_receipt_bound_to_runtime_and_manifests": "MISSING",
+    "effective_v4_contract": "MISSING",
+    "different_author_pre_run_review": "MISSING",
+    "validator_pre_run_ready_receipt": "MISSING",
+    "formal_launch_guard_receipt": "MISSING"
+  },
+  "decision": "Do not dispatch S103-VMemBase. The scorer/verifier implementation gap is reduced, but software PASS and synthetic isolation are not formal Gate0 evidence.",
+  "next_step": "Construct and audit one scene13 development window plus staged history/command-camera and scorer-only manifests without executing the model or opening the target pixels in the predictor path."
+}

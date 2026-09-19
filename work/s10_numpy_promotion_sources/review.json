@@ -1,0 +1,51 @@
+{
+  "reviewed_utc": "2026-09-05T21:07:44.431013+00:00",
+  "status": "PRIMARY_SOURCE_REVIEW_COMPLETE",
+  "scope": "Official documentation only; no local numeric probes, real map, pixels, model or renderer execution",
+  "source_manifest": "sources.json",
+  "source_manifest_sha256": "33c6af485aca60e2c2384b2b478c73f0485fd4448a4dda94bfd28026b9ea1696",
+  "review_sha256": "23b5ca1787f48c473ecc30f9e3adf67cb2523a6da0f528146f1bf9f62b116cb7",
+  "version_boundary": {
+    "legacy": "NumPy 1.26 normal legacy behavior; optional weak preview since 1.24 means version alone is insufficient",
+    "weak": "NEP 50 behavior documented as changed since NumPy 2.0 and restated by 2.3 manual"
+  },
+  "claims": [
+    {
+      "id": "scalar_vs_scalar",
+      "legacy_input_precision": "float64",
+      "weak_input_precision": "float32",
+      "operands": [
+        "Python float",
+        "numpy.float32 scalar"
+      ],
+      "verification": "NEP50 Abstract applicability to comparisons; 1.26 result_type Notes; 2.0 migration promotion section"
+    },
+    {
+      "id": "python_scalar_vs_nd_array",
+      "legacy_input_precision": "normally float32 for finite values within float32 range; value-dependent promotion otherwise",
+      "weak_input_precision": "float32",
+      "operands": [
+        "Python float",
+        "float32 N-D array where N>0"
+      ],
+      "verification": "1.26 result_type Notes; NEP50 old implementation; NumPy2.3 Python scalar section"
+    },
+    {
+      "id": "numpy_scalar_vs_nd_array",
+      "legacy_input_precision": "normally float32 for scalar values within float32 range; value-dependent promotion otherwise",
+      "weak_input_precision": "float64",
+      "operands": [
+        "numpy.float64 scalar",
+        "float32 N-D array where N>0"
+      ],
+      "verification": "NEP50 changed behavior table; 2.0 migration promotion section"
+    }
+  ],
+  "renderer_inference": "Keep original float(np.mean(...)) conversion. Under weak rules an explicitly retained np.float64 scalar can change strict depth comparison against FP32 zbuffer. This is a documented-rule inference, not a measured renderer result.",
+  "unverified": [
+    "Actual local promotion mode",
+    "Any exact machine behavior",
+    "Cross-version renderer parity",
+    "Real-map renderer parity"
+  ]
+}

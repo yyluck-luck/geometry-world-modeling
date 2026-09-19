@@ -1,0 +1,97 @@
+{
+  "schema": "s40-readback-supervisor-source-review-v1",
+  "status": "PASS_S40_READBACK_SUPERVISOR_SOURCE_REVIEW",
+  "reviewed_utc": "2026-09-07T12:04:37Z",
+  "author_role": "/root/clip_mean_innovation_audit",
+  "reviewer_role": "/root/gemini_third_review_verifier",
+  "review_scope": "Independent static line-by-line review of the frozen S40 readback supervisor and protocol against the already reviewed readback worker, S40 launcher receipt schema, current terminal generation metadata, and the requested resource, identity, cleanup, and evidence boundaries.",
+  "supervisor_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/supervise_readback.py",
+  "supervisor_sha256": "c86c3f96e5c7b4b6827037c358780479aeb3c1dea10ea9b2cd9a4c2ca6ff8cad",
+  "protocol_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_result_readback/SUPERVISOR_PROTOCOL.md",
+  "protocol_sha256": "bb11b68280268e1a63c4dc6f06561937e112db1bf795a2e4b19ba3393bdd7aaf",
+  "reviewed_line_counts": {
+    "supervise_readback.py": 904,
+    "SUPERVISOR_PROTOCOL.md": 132
+  },
+  "bound_existing_identities": {
+    "readback.py": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "PROTOCOL_DRAFT.md": "b4887316240bc511cfde2d4fec5d31989ffa1a854be4da56a973e28cca0d7b2c",
+    "source_review_v2.json": "ea599804589dc4c10b2ca65c972bbf1ae8a1c3c04c327f7605c5a45e2f08ec19",
+    "../S40_declared_variant_generation/launch_generation.py": "8ade694bc750f9693fc461257437af7b919b0c46755fc0eef2e21096d31e8860"
+  },
+  "actual_s40_runtime_metadata_observed_read_only": {
+    "manifest_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+    "manifest_sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe",
+    "external_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/execution_01/receipt.json",
+    "external_receipt_sha256": "4c771df1e46f96e218b92f01339b55ebd056ef002fdc28e0083a5bb0907300d4",
+    "external_receipt_status": "DECLARED_VARIANT_EXTERNAL_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW",
+    "external_returncode": 0,
+    "worker_receipt_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/execution_01/worker_receipt.json",
+    "worker_receipt_sha256": "a564a67e63036b3195390b5059476c1729c99e74bb0a8fe0ef26e0c1211b4911",
+    "worker_receipt_status": "DECLARED_VARIANT_RUN_RETURNED_PENDING_INDEPENDENT_REVIEW",
+    "closed_trace_batches": 2,
+    "source_unchanged_at_close": true,
+    "scope": "Small terminal metadata only; no archive tensor, model, renderer, gate, or quality result was read or executed by this review. The actual SHA values must still be supplied to and rechecked by the supervisor at launch."
+  },
+  "checks": [
+    {
+      "id": "R1_REVIEWED_SOURCE_BINDING",
+      "verdict": "PASS",
+      "evidence": "The caller must supply both the reviewed supervisor SHA and this fixed review-file SHA. The supervisor rehashes itself, the protocol, this review, readback.py, its protocol/review, and the S40 launcher before spawn and at close; the review schema, exact source/protocol pair, no-execution flag, empty blockers, and distinct author/reviewer roles are enforced."
+    },
+    {
+      "id": "R2_FIXED_CHILD_COMMAND_NO_INJECTION",
+      "verdict": "PASS",
+      "evidence": "There is one subprocess.Popen site. Its argv is constructed internally from the fixed venv Python, fixed readback.py, the validated manifest and generation-receipt bindings, a fresh output path, and literal --seconds 300. No command, shell, extra-args, eval, exec, os.system, fallback, or retry input exists; Popen receives a list and does not enable a shell."
+    },
+    {
+      "id": "R3_GENERATION_TERMINAL_GATE",
+      "verdict": "PASS",
+      "evidence": "Preflight requires the exact S40 manifest schema/status and launcher identity, then validates the external receipt schema/status, manifest path/SHA, return code zero, source unchanged, no limit/survivor fields, two closed 1-to-5-to-9 trace completions, and the SHA-bound successful worker receipt."
+    },
+    {
+      "id": "R4_FRESH_PATH_ISOLATION",
+      "verdict": "PASS",
+      "evidence": "Supervisor evidence and readback output must be absent absolute direct children of work/S40_result_readback. They must not overlap each other, the generation execution directory, or the generation output root. Only the supervisor evidence directory is created by the supervisor; readback.py exclusively creates its own fresh output."
+    },
+    {
+      "id": "R5_CPU1_300S_2GIB_TREE_BOUNDARY",
+      "verdict": "PASS_WITH_EXPLICIT_SAMPLING_BOUNDARY",
+      "evidence": "The five numerical-library thread variables are fixed to 1; the child starts in a new session; total time is sealed at 300 seconds from supervisor entry through final source/input/evidence checks; sampled process-tree RSS is capped at 2147483648 bytes; free disk is checked against 10737418240 bytes. The protocol and receipt correctly distinguish thread limits from CPU affinity and sampled RSS from a continuous kernel maximum."
+    },
+    {
+      "id": "R6_INTERRUPT_AND_PROCESS_TREE_CLEANUP",
+      "verdict": "PASS",
+      "evidence": "SIGINT/SIGTERM handlers are installed before creation of the supervisor directory and only set a flag. A signal inside Popen cannot escape through the assignment window; the flag is checked after the PID is recorded and during monitoring. Stop paths signal the process group with TERM then KILL and also signal PID-plus-create-time tracked descendants, wait, and record actions, group state, return code, and survivors."
+    },
+    {
+      "id": "R7_WORKER_RESULT_AND_INPUT_SEAL",
+      "verdict": "PASS",
+      "evidence": "External success requires the narrow readback PASS, return code zero, exact report/receipt inventory and hashes, manifest and generation-receipt identities, and the exact report scope. The outer layer validates every worker identity record and rechecks its stat seal plus the worker receipt before final success; source, metadata inputs, and supervision evidence are sealed again."
+    },
+    {
+      "id": "R8_FAILURE_PRESERVATION_AND_CLAIM_SCOPE",
+      "verdict": "PASS",
+      "evidence": "After a writable supervisor directory exists, failures enter the terminal-receipt boundary, retain created evidence and any partial child output, and never retry, delete, expand budgets, or fall back. The protocol accurately excludes malformed/uncreatable invocation, host loss, and final-write failure from guarantees and keeps every success pending an independent result review without quality, model-math, equivalence, or novelty claims."
+    }
+  ],
+  "blocking_findings": [],
+  "nonblocking_boundaries": [
+    "RSS and descendant discovery are userspace samples every 0.5 seconds; a between-sample spike or a process that changes session and reparents before observation is outside the recorded maximum.",
+    "CPU1 means the five numerical-library thread variables are one; it is not operating-system CPU affinity.",
+    "Terminal receipt serialization and its own fsync occur after the final pre-receipt 300-second measurement.",
+    "This is source authorization only. The supervised readback and its independent result review remain separate future actions."
+  ],
+  "executed": false,
+  "operations": {
+    "supervisor_imports_or_runs": 0,
+    "readback_imports_or_runs": 0,
+    "generation_or_gate_runs": 0,
+    "model_ga_renderer_calls": 0,
+    "archive_tensor_or_prediction_array_reads": 0,
+    "weights_photo_or_gt_reads": 0,
+    "network_requests": 0,
+    "author_source_modified_by_reviewer": false,
+    "canonical_ledger_modified": false
+  }
+}

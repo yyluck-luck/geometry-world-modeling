@@ -1,0 +1,68 @@
+{
+  "schema": "s46-c1-blind-scoring-preparation-receipt-v1",
+  "status": "PASS_PREPARATION_ONLY_NON_EXECUTABLE_IDENTITY_UNBOUND",
+  "recorded_utc": "2026-09-08T02:13:24Z",
+  "author_role": "/root/c1_blind_score_builder",
+  "row": "C1",
+  "source_identities": {
+    "score_c1_blind_candidate.py": "ada2ba80eceebe83a514fd929c6cc82b69669e6525e261ff4729064f2bac3f1a",
+    "recompute_c1_independent_candidate.py": "9373fd035b18ccc81dc848e18612f906a7d32a44cd1c7d2903eb67b7627e9b8f",
+    "bind_identity_only.py": "32f80b585ab8e511a64df08c8bb230e1a03835cf6ec33f98c6e8d2a80175ee60",
+    "synthetic_crosscheck.py": "7e6c4549dd052ac935bee026249c868a6981e1dac6029cc08a82ff3db0bc43e3"
+  },
+  "template_identities": {
+    "C1_SCORING_CONTRACT_TEMPLATE.json": "79299749250c22dd9719d93964b9c179a8884f01c530bf07a45625c59395ab7b",
+    "C1_BLINDNESS_ATTESTATION_TEMPLATE.json": "6a8659ae686c637ed3da017715ca38d71998a8cd045891781ffc37ce82d06fb5",
+    "C1_INDEPENDENT_RECOMPUTE_BINDING_TEMPLATE.json": "dda75a1d6cf590972ea2b33d547e9a94efb6b68dacfa85917f86f8ece20fd0aa"
+  },
+  "report_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S46_c1_blind_scoring_preparation/PREPARATION_REPORT.md",
+  "report_sha256": "daecc73b623c6988a8efb8b1f1cad7ff6c54c7e05bd9c8405e1fe9f3ea1ae924",
+  "root_static_audit_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S46_c1_blind_scoring_preparation/ROOT_STATIC_PREPARATION_AUDIT.json",
+  "root_static_audit_sha256": "b97aa3286c3be55589947a5ce7ceb8775a60acca5404ab48a42771e6407549c8",
+  "frozen_math_sha256": "9bee0abe9392e04e061adb7cf8b39297d7730e7045ed856486f1e03ee8d82812",
+  "checks": {
+    "python_ast_parse": "PASS_4_FILES",
+    "json_parse": "PASS_4_FILES_BEFORE_THIS_RECEIPT",
+    "primary_synthetic": "PASS_SYNTHETIC_PRIMARY_MATH_ONLY",
+    "independent_synthetic": "PASS_SYNTHETIC_INDEPENDENT_MATH_ONLY",
+    "cross_implementation": "PASS_SYNTHETIC_CROSS_IMPLEMENTATION_EXACT_AGREEMENT",
+    "checked_cross_fields": [
+      "primary",
+      "per_region_diagnostic",
+      "full_frame_diagnostic",
+      "generated_only_pair_diagnostic_no_GT",
+      "event_MSE_gt_0_01",
+      "equality_is_not_event",
+      "row_status"
+    ],
+    "fail_closed_without_synthetic_flag": true,
+    "formal_output_path_absent_after_checks": true
+  },
+  "preserved_correction": {
+    "initial_crosscheck_status": "FAILED_SYNTHETIC_R4_LAST_BIT_DISAGREEMENT",
+    "cause": "Independent candidate multiplied by reciprocal 1/255 while the frozen primary semantics divide by 255.0.",
+    "fix": "Independent candidate now performs explicit float64 division by 255.0 before subtraction.",
+    "post_fix_status": "PASS_ALL_CHECKED_FIELDS_EXACT"
+  },
+  "operations": {
+    "c1_output_directories_enumerated": 0,
+    "c1_payload_bytes_read": 0,
+    "c1_pixels_decoded": 0,
+    "c1_images_or_montages_viewed": 0,
+    "c1_metrics_read": 0,
+    "model_calls": 0,
+    "readback_calls": 0,
+    "formal_score_calls": 0,
+    "formal_recompute_calls": 0,
+    "formal_attempt_directories_created": 0,
+    "synthetic_array_runs": 3
+  },
+  "authorization": "NONE",
+  "required_next_reviews": [
+    "PASS_S46_C1_BLIND_SCORER_SOURCE_REVIEW by a non-root reviewer distinct from the author",
+    "PASS_S46_C1_BLIND_SCORER_ADVERSARIAL_SOURCE_REVIEW by a second reviewer distinct from both"
+  ],
+  "next_execution_gate": "Wait for terminal generation and independently reviewed readback identities; bind identities without results; add and hash the thin I/O wrapper; obtain both exact source reviews; create the later blindness attestation; only then run the first sequential formal score attempt.",
+  "independent_recompute_gate": "After a sealed primary C1 receipt/report, bind their identities and obtain a different-author review of the exact recompute source and binding before reading any pixel body.",
+  "claim_boundary": "Preparation and synthetic arithmetic only. No C1 score, result, visual QA, camera-obedience conclusion, cohort conclusion, causality, method gain, or novelty. C2 remains mandatory."
+}

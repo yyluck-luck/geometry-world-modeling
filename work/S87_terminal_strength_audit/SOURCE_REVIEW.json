@@ -1,0 +1,34 @@
+{
+  "status": "GO_FOR_ONE_BOUNDED_EXECUTION",
+  "reviewed_utc": "2026-09-10T23:33:17Z",
+  "reviewer": "beginner_report_writer; different author from generation and supervision",
+  "runner_sha256": "fea09f959f9ecfe86407fabc57408f95eb7a6fa7652322f06f172c24e8eca5d6",
+  "generation_contract_sha256": "337982b200182b50ade46aee4625c5c7ff3d87f5acce01bd48343451015c2538",
+  "supervisor_sha256": "35efdf242b8375c6631569564da42d341102bc887521833bd7b510036503ce57",
+  "author_synthetic_source_sha256": "86d9055d886a6ba8484f6bf164b345c9c5829c80253da47063d33d756f3bff63",
+  "author_synthetic_receipt_sha256": "d6aa2e852723cdbd547db86af0a2eb4a9c412d6943bcfcd51bf4113d897ccaa2",
+  "author_synthetic_scope": "38 named checks, 24 synthetic wrapper chunks, zero real VAE/decoder/scientific-array/weight calls. Reviewed source and receipt without rerunning.",
+  "blockers": [],
+  "closed_preparation_issues": [
+    "Per-arm receipt descriptors moved to top arm_receipts, so per-arm JSON equals the top arms body without a self-reference field.",
+    "Root scoring source updated to read the actual nested counts schema; separate final scoring source review still required."
+  ],
+  "reviewed": [
+    "Full generation source and contract, final changes, original append_dims/to_d and VAE wrapper, existing replay/fusion source",
+    "All six fixed strategy identities, target/history order, S86 source/body bindings and ft-mse identity",
+    "Original FP32 fusion/real final Euler, separate Torch RGB clamp/where and NumPy quantizer paths",
+    "Single local VAE load, full8 chunk1 decode three times, no denoiser/encoder/reference path",
+    "Full after-load/end Python/NumPy/Torch CPU RNG states, fixed model state identity/version metadata",
+    "Finite/schema guards, full raw/uint8/terminal saves, exact protected clean/latent bytes and failure preservation",
+    "Root bound supervisor, unresolved venv interpreter, process group, 600s/120s/16GiB checks and actual signals"
+  ],
+  "nonblocking_limits": [
+    "Supervisor samples every 2 seconds; limit termination includes up to 10 seconds graceful shutdown before SIGKILL. These are sampled limits with explicit signals, not instantaneous resource maxima.",
+    "Source review and synthetic wrapper checks do not establish a successful real VAE load or decode. Actual run and independent saved-data review remain pending.",
+    "RNG evidence compares after-load/end full CPU states, not every operation's RNG history. Model initialization is outside the derived-phase no-draw claim.",
+    "This is a finite posthoc ordinary-control refutation in one already seen scene, with no novelty authorization."
+  ],
+  "reviewer_real_array_or_weight_reads": 0,
+  "reviewer_real_model_or_decoder_calls": 0,
+  "actual_generation_authorized_by_this_review": "Root may freeze and launch exactly the reviewed bounded execution. This review itself does not launch or retry anything."
+}

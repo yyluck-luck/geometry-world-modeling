@@ -1,0 +1,138 @@
+{
+  "status": "PASS",
+  "started_utc": "2026-09-05T22:10:28.505785+00:00",
+  "completed_utc": "2026-09-05T22:10:30.063167+00:00",
+  "checks_passed": 894296,
+  "checks_by_category": {
+    "metadata": 83,
+    "integrity": 793,
+    "archive": 156,
+    "adapter_AST": 6,
+    "coverage": 806,
+    "mapping": 711214,
+    "state": 115566,
+    "votes": 12660,
+    "guard": 444,
+    "baseline": 6192,
+    "NMS": 14379,
+    "guard_negative": 661,
+    "render_arrays": 3060,
+    "context_arrays": 5100,
+    "pair": 22478,
+    "pair_context_arrays": 630,
+    "summary": 68
+  },
+  "conditions": 30,
+  "actual_render_npz": 60,
+  "actual_context_npz": 60,
+  "original_buffers": 6,
+  "render_arrays_checked": 180,
+  "context_arrays_against_rebuilt_expected": 300,
+  "pair_context_arrays_compared": 150,
+  "full_trace_pairs": 30,
+  "baselines_against_old_trace": 6,
+  "vote_reconstructions_and_recorded_distance_NMS_replays": 66,
+  "guard_negatives": 18,
+  "stale18_rejected": 12,
+  "groups": {
+    "append_min_missing": {
+      "conditions": 6,
+      "exact_pass": 6,
+      "stale_trace_rejected": 6,
+      "selected_order_changed": 3
+    },
+    "drop_last": {
+      "conditions": 6,
+      "exact_pass": 6,
+      "stale_trace_rejected": 6,
+      "selected_order_changed": 6
+    },
+    "reverse": {
+      "conditions": 6,
+      "exact_pass": 6,
+      "stale_trace_rejected": 0,
+      "selected_order_changed": 0
+    },
+    "only_0": {
+      "conditions": 6,
+      "exact_pass": 6,
+      "stale_trace_rejected": 6,
+      "selected_order_changed": 6
+    },
+    "only_0_1_2": {
+      "conditions": 6,
+      "exact_pass": 6,
+      "stale_trace_rejected": 6,
+      "selected_order_changed": 6
+    }
+  },
+  "adapter_constants_changed": 2,
+  "full_states_reconstructed": 60,
+  "before_after_identities_checked": 120,
+  "output_payload_files": 290,
+  "source_sha256": {
+    "scripts/profile_s9_components.py": "f46c11b46d39353b25b31e830941dc8c6490c29ca8aa57ab62772a945719a16e",
+    "src/s6_memory_bridge.py": "aceaa7828e794289aa580c63605bd3988216ca6832cba45be40d28756b8993cd",
+    "src/s7_event_replay.py": "3f4028366d1cf1fdcca8744a0cb14690075b9b146bd71af88360afa74bc5e20d",
+    "src/rgbd_memory.py": "f7f2ee5632182ea4c1204150d2076040a20922f2624e880c0a3ca6339e12152b",
+    "src/rgbd_retrieval.py": "6f5188f7f72b66e93af27ab5a368cd09fcea2166715f1bf4cd0545a686ec3cd6",
+    "src/retrieval_diagnostic.py": "92e14687abc2854fa68e11b62ec1c3544609e95e9334a09e7cbebd3cc080700e",
+    "src/vmem_memory_kernel.py": "c1bd1a0bb52df48e73f2766ab564e6cec5b9ec665fcf7972a3cbbeb8070210a6",
+    "src/vmem_retrieval_kernel.py": "35825a3989f368906cba08808616f0c6922ff08d0a92c7205fddb4822652e2b3",
+    "vendor/provenance.json": "04b8396239321c3c7021d4140cab61cdbbc2756f1001c99b250836a451e8e0b9",
+    "vendor/VMEM_LICENSE": "24c0212c56a711741f2a1109e8b32118312da00949c3ee3b347cff432d9d0c37",
+    "scripts/run_s10_renderer_comparison.py": "00dbae5db3c7a09dca78a428951db2074103b54d8f2c23a4daea17b7e6a96554",
+    "src/s10_vectorized_renderer.py": "3e079d0bbbaed962b24bce599a5cf7198b6bbc2891ac3c91761f4ea5c4f0e521",
+    "scripts/run_s11_source_regression.py": "b2aa29f3c3486a062bbb2f1a388318e0be8ae72d5d9ce84d0f0926b5b69ed176"
+  },
+  "freeze_sha256": "4623e6d3bd4932499ac6efaa3c503a9920113216691e1139efa75dabdf23d590",
+  "run_metadata_sha256": "c8aeae827912f07fb18173d9bf9632e5dfc1f932e4615c4564ececb2144008e1",
+  "limitations": [
+    "No renderer or actual get_context_info/production verifier invoked. Votes independently folded from original buffer and edited mapping; NMS replays recorded distances, not geometric recomputation.",
+    "Baseline replay has saved trace/array identities but no separate baseline NPZ; 60 render/context NPZ apply only to paired30conditions.",
+    "Recorded guard expectations and mutations reconstructed; actual per-call render argument tensors/signatures are not separately archived. Guard execution is supported by frozen source and recorded completion.",
+    "States are identity summaries, not full runtime tensors independently observed.",
+    "Artificial source controls on six seen map/query bases, not actual update trajectories, cache hit rates, timing, video or novelty."
+  ],
+  "schema": "s11-source-regression-independent-audit-v1",
+  "written_utc": "2026-09-05T22:12:02.778052+00:00",
+  "reviewer": "Different author from source runner; standalone audit with no project-module imports",
+  "attempts": 2,
+  "retained_failure": {
+    "path": "results/S11_source_regression_independent_audit/verification.json",
+    "checks_passed": 4919,
+    "cause": "Audit-only recursion label concatenated integer mapping key to string; changed label to str(k), no comparison-rule change."
+  },
+  "run_started_utc": "2026-09-05T22:09:25.679556+00:00",
+  "run_completed_utc": "2026-09-05T22:09:35.609286+00:00",
+  "run_total_budget_seconds": 9.929737707978347,
+  "run_peak_rss_bytes": 268025856,
+  "audit_versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "torch": "2.7.0",
+    "scipy": "1.16.2"
+  },
+  "archive_inventory": {
+    "sources.zip": {
+      "members": 16,
+      "sha256": "eab3dff895946c5e26860905eb3bc31f71955067e909568ff2b4fbe8461dc5c9"
+    },
+    "inputs.zip": {
+      "members": 52,
+      "sha256": "6165125ec36fe9e2951ab5098f7d01151424d748688c0e8c6d91424d1f264cbf"
+    },
+    "review_evidence.zip": {
+      "members": 7,
+      "sha256": "ca0c84595ed19b8a0eba069efae196a0e39977a29481bcfbad79dbc25bcaca54"
+    }
+  },
+  "archive_members_verified": 75,
+  "report_sha256": "d4a8bfc56a9d7e604cd157d320d4d5dbd1fa0bef7053323a6141276fe9f92a70",
+  "artifact_sha256": {
+    "results/S11_source_regression_independent_audit_v2/independent_conditions.json": "e4982ed7e52b9ce14edf4bd7ebd871a73c8fd6b90ffe9fdf6166dfba6eb379b3",
+    "results/S11_source_regression_independent_audit_v2/post_audit_identity.json": "b610e3615edf432e2f31cc7ed7f03763a581844a74aab94bf8ca085680dfffc0",
+    "results/S11_source_regression_independent_audit_v2/reviewer_snapshot.py": "92cf1dcc136ee198588e36286c906710ffd689f36eeb4e1fcd98bcebcfdd99da",
+    "results/S11_source_regression_independent_audit_v2/verification.json": "d5cd11f5d31a1a605930e9959e1235b65996858f175f23a00f6a7560f6a63922"
+  }
+}

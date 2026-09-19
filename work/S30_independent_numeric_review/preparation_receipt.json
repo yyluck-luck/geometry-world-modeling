@@ -1,0 +1,72 @@
+{
+  "status": "PASS_PREPARATION_STATIC_ONLY_NOT_NUMERIC_REVIEW",
+  "static_check_started_utc": "2026-09-06T18:12:31.923219+00:00",
+  "completed_utc": "2026-09-06T18:12:31.939996+00:00",
+  "source_file_created_utc": "2026-09-06T18:11:12.917804+00:00",
+  "author_role": "Different author from S30 producer and scorer; reuse existing S28 independent reference without pretending it is a new formula implementation",
+  "commands_executed": [
+    "Read selected Python/Markdown and JSON metadata only",
+    "ast.parse + compile(source, path, exec), not exec or import of review module",
+    "Static helper call signatures and source-line seal ordering",
+    "SHA of source/protocol/candidate/metadata only"
+  ],
+  "checks": {
+    "AST_parse_compile": "PASS_STATIC_ONLY",
+    "helper_matches_executed_S28_receipt": true,
+    "helper_function_call_signatures": true,
+    "helper_main_not_called": true,
+    "model_GA_scorer_imports_absent": true,
+    "seal_before_numeric_import_and_archive_decode_by_source_line": true,
+    "seal_line": 161,
+    "numpy_import_line": 165,
+    "first_archive_decode_line": 179,
+    "helper_calls": [
+      "digest",
+      "independent_frame",
+      "load_archive",
+      "metric_match",
+      "trace_review",
+      "validate_raw"
+    ],
+    "imports": [
+      "from __future__ import annotations",
+      "import argparse",
+      "import csv",
+      "import hashlib",
+      "import importlib.util",
+      "import json",
+      "import math",
+      "import time",
+      "from datetime import datetime, timezone",
+      "from pathlib import Path",
+      "import numpy as np",
+      "import cv2"
+    ]
+  },
+  "source_identities_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_independent_numeric_review/recompute.py": "72a9520def7df0ea9bdfd6055a83fe4c0f802a9dd8e3f52f0fb95a8597546787",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_independent_numeric_review/protocol.md": "5bf765f497f6823a5fc5f31add37694ac4826bccb6572ad2fe1fd26efc53d8a3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S28_independent_numeric_review/recompute.py": "2bef151226649a87b5c8cc29e6bd5173b2ece63900837f100dbf4338006d40f2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/contract_candidate.json": "d5e7326875cffaf314fadd48e7b5f43e4fd63d7afda3f7d3a63498bd8e04c86f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/run_s30.py": "8b7d794536d62262c9c5b2c5df3c7e91841c50af13a89b7c0c4f51f998a46418",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/score_s30.py": "75b92de89c66a0a7039dd105908543b82f07c4d58069601a977a383393c9410e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S30_scale_optimization_preparation/PLAN_CANDIDATE.md": "1d9e7b8f3ef0fb343cb0c0cbb303cc22a3c94f9373a833fbac2f1a3077494156",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S29_scale_control_preparation/run_s29.py": "5293c691dae0377d1e271a0021f98e15f61268e4e54ddde8684c6281aedca81f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26b_consumer.py": "02317889281583ae0fd8a12a1148811c9e9a0afb7bcf75275aea9fd1a34f5cc7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S28_independent_numeric_review/receipt.json": "e4af736ad730927064c883d8bea3ab4abd51c96d47950fe6b8e1b900b6739601"
+  },
+  "candidate_sha256": "a2bf1c004f07417d07edfda5c1e328d3db7cf96ff688502b5369da3a6f33b126",
+  "real_arrays_decoded": 0,
+  "sensor_GT_bytes_read": 0,
+  "new_models": 0,
+  "new_GA": 0,
+  "new_MST": 0,
+  "new_backward": 0,
+  "synthetic_numeric_runs": 0,
+  "limitations": [
+    "No execution of main or helper numerical functions; static pass is not data validation",
+    "Final S30 contract SHA pending",
+    "S29 alignment values are only sealed, not recomputed by this planned review",
+    "Recorded gradient norm integrity is checked; gradients are not independently recalculated"
+  ]
+}

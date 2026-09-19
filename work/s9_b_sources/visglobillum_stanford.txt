@@ -1,0 +1,606 @@
+                                                                                   Computer Graphics (Proceedings SIGGRAPH ’94) pp. 443--450
+
+
+                                         Global Visibility Algorithms for
+                                           Illumination Computations
+                                            Seth Teller                                 Pat Hanrahan
+                                   Institute of Computer Science               Department of Computer Science
+                                  Hebrew University of Jerusalem                    Princeton University
+
+Abstract                                                                         Visibility preprocessing. To compute what is visible from all
+                                                                             points on the surfaces of the objects being shaded, we preprocess
+The most expensive geometric operation in image synthesis is                 the scene to speed future visibility tests. For the purposes of
+visibility determination. Classically this is solved with hidden             global illumination we need only consider all pairwise interactions
+surface removal algorithms that render only the parts of the scene           between objects. Preprocessing removes totally invisible pairs
+visible from a point. Global illumination calculations, however,             from consideration, and accelerates later queries regarding visibility
+may require information between any two points in the scene.                 between points on partially visible pairs.
+This paper describes global visibility algorithms that preprocess
+polygon databases in order to accelerate visibility determination                Incremental visibility maintenance. The most efficient global
+during illumination calculations. These algorithms are sensitive to          illumination algorithms operate iteratively based on error criteria.
+the output complexity in visibility space; that is, how many pairs           Examples are hierarchical radiosity, where surfaces are subdivided
+of objects are mutually visible. Furthermore, the algorithms are             with respect to each other according to potential light transfers
+incremental so that they work well with progressive refinement               between them [11], and progressive refinement methods where
+and hierarchical methods of image synthesis. The algorithms                  light is transferred among surfaces in order of brightness [5]. Thus,
+are conservative, but exact; that is, when they return visibility            the visibility algorithms should be lazy and sensitive to required
+predicates they can be proved true. However sometimes they do not            precision. They should also allow refinement so that more precise
+return either totally visible or totally invisible, but partially visible,   determinations can be made as needed.
+even though in the same situation a better algorithm might return                Conservative triage. Both the preprocessing and maintenance
+the exact answer. In this paper we describe the algorithms and               methods use conservative triage to avoid the combinatorial com-
+their implementation, and show that, in a scene with low average             plexity of exact visibility determination. We classify visibility into
+visual complexity, they can dramatically accelerate conventional             three categories: totally invisible, totally visible, and par-
+radiosity programs.                                                          tial (partially visible). The classification is conservative in that
+CR Categories and Subject Descriptors: I.3.5 [Computa-                       all interactions classified as invisible or visible are correct;
+tional Geometry and Object Modeling]: Geometric Algorithms,                  however, it is acceptable for the classification to return partial
+Languages, and Systems; I.3.7 [Computer Graphics]: Three-                    when the correct result is either visible or invisible. This
+Dimensional Graphics and Realism              Radiosity; J.2 [Physical       allows us to forego complex analysis or ‘‘punt’’ if such analysis
+Sciences and Engineering]: Engineering.                                      will take too long to determine the exact answer. Of course, for
+                                                                             this to work we need either another visibility algorithm to complete
+Additional Key Words: Hidden surface removal, visibility space,              the analysis, or we must expect the situation to simplify eventually
+radiosity, global illumination, algorithmic triage.                          (e.g., through subdivision).
+1 Introduction                                                                   The visibility algorithms presented here generalize previous
+                                                                             work on preprocessing environments for interactive walkthroughs.
+In the early days of image synthesis a central geometric problem
+was hidden surface removal. With the advent of z -buffering,
+                                                                             In [24], an algorithm was given to preprocess a 2D environment
+                                                                             of axial line segments, such as floorplans. This was extended to
+modern workstations can display pictures of 3D scenes containing             3D axial rectangles in [22]. This paper treats the case of convex
+millions of polygons in real-time. However, such workstations have           polygons in general position.
+limited shading capabilities because they make the assumption that
+all light sources illuminate every object. One major thrust of                   The global visibility algorithms described here have been imple-
+current research in image synthesis is to remove this restriction            mented with a global illumination system that computes radiosity
+so that the shading correctly accounts for the illumination incident         values for polygonal scenes [11]. The algorithm maintains a hierar-
+on every object. To do this every surface element must assess                chy of interactions between subdivided polygons at different levels
+                                                                             of detail. A key feature of the algorithm is that only O(k2 + n)
+                                                                             interactions are ever examined (with k the number of input poly-
+what light sources, or more generally, what surfaces reflecting light
+                                                                             gons, and n the number of elements created by subdividing those
+towards it, are visible to it. This type of illumination calculation is
+termed global, in contrast to local, because the entire scene must
+be analyzed to determine if there are any occluders interfering              polygons). The hierarchical radiosity algorithm, as originally de-
+with the transfer of light between objects. Collating such visibility        signed, used pairwise visibility information between polygons. In
+information is more difficult than determining merely what is                the original implementation, however, this visibility information
+visible from a single vantage point, as is done in hidden surface            was inexact. Visibility status was determined by shooting a constant
+removal. For example, the fastest algorithm currently known for              number of rays between two polygons. If all of the rays reached
+computing a complete description of the interocclusion due to a              from one polygon to the other, the polygons were considered totally
+polyhedral object of n vertices can take O(n6 lg n) time [9].                visible, whereas if none of the rays reached, the polygons were
+                                                                             considered totally invisible. The conservative algorithms described
+   This paper describes global visibility algorithms that analyze the        in this paper, in contrast, are provably more precise.
+entire visibility space, and are applicable to a range of illumination
+problems. Here, we apply them to a hierarchical radiosity algorithm.         2 Overview
+We have implemented several practical algorithms, and show that
+they allow efficient global visibility calculations for scenes of low        We present novel algorithms that subdivide space, construct a
+visual complexity. The algorithms are based on three simple ideas:           conservative visibility graph over the polygons in a geometric
+                                                                             model, then maintain the correctness of the graph under recursive
+Permission to copy without fee all or part of this material is granted
+provided that the copies are not made or distributed for direct              subdivision of the polygons. In the context of the hierarchical
+commercial advantage, the ACM copyright notice and the title of the          radiosity computation, this conservative visibility graph guarantees
+publication and its date appear, and notice is given that copying is by      that throughout the computation, all polygons that potentially
+permission of the Association for Computing Machinery. To copy               interact (e.g., exchange energy) will be known. The construction
+otherwise, or to republish, requres a fee and/or specific permission.        and maintenance of the graph occurs in four stages.
+    1. Spatial Subdivision. The geometric model is first spatially        for any spatial subdivision satisfying a few geometric criteria [22].
+subdivided into convex polyhedral cells, linked across shared
+boundaries only when some portal, or transparent region, exists
+on the boundary. For a large class of models, and particularly
+for architectural models, the subdivision proves a natural way of
+hierarchically capturing the geometric and occlusive characteristics
+of the model.
+    2. Visibility Propagation. Each cell of the spatial subdivision
+encloses some portion of the geometric model. Clearly, only
+when two cells are mutually visible can their contents (i.e., model
+polygons) interact. Consequently, we hierarchically enumerate all
+visibility between portions of the model by first establishing inter-
+cell visibility, then establishing inter-polygon visibility only where
+cells are mutually visible. This is accomplished by propagating
+incremental visibility information through the cells of the spatial
+subdivision; as each cell ‘‘sees’’ into increasingly distant cells, the
+visibility graph is augmented to record any previously unknown
+interactions. (Portal enumeration is simply the first and crudest
+record of visibility propagation.)
+    Visibility propagation provably discovers all partially or totally          Figure 1: A geometric model comprised of polygons.
+visible cell (polygon) pairs, at the cost of occasionally misclassi-
+fying an invisible cell (polygon) pair as visible. The alternative,          First, a polyhedral root volume is constructed as the convex hull
+misclassification of some mutually visible interaction as invisible,      of P . While polygons of sufficient size are present, a polygon is
+is plainly unacceptable, since it may omit from consideration an          chosen whose support plane is to partition the remainder of the
+interaction later to prove important.                                     set. The choice is made using a simple heuristic that determines
+    3. Blocker Detection. In an exacting illumination computation         the polygon whose cross-section in the current cell is largest, when
+such as global illumination, it is not sufficient to determine simply     expressed as a fraction of the cell’s areal intersection with the
+that two polygons are partially visible; some estimation must be          polygon’s support plane; if any polygons separate the cell into
+made of the extent to which they are visible, as well as how              mutually invisible parts, one such polygon is chosen. This heuristic
+much error might be incurred by the estimation. Therefore, once           tends to yield effective splitting trees in practice.
+potential visibility between a pair of polygons is established, a
+set of interfering polygons or blockers is determined that may
+occlude part of one polygon as seen from some point on the
+other. This interference computation is again conservative; a non-
+interfering polygon may occasionally be classified as a blocker,
+but a blocker will never be classified as non-interfering. In
+the visibility graph, blocker lists augment existing links between
+mutually visible polygons; total visibility is established whenever
+the blocker list is empty. Perhaps surprisingly, we show that these
+conservative overestimated blocker lists are generally smaller than
+those maintained by existing algorithms.
+    4. Blocker Maintenance. In a hierarchical radiosity algorithm,
+polygons (patches, in radiosity parlance) are allowed to exchange
+radiant energy only when the interaction satisfies some specified
+global error bound [11]. Otherwise, the patches are subdivided, and
+interaction is recommenced among the child patches. It is natural to
+consider how the conservative visibility graph among the patches
+can be incrementally maintained under subdivision. Each child
+patch may be partially or totally visible, or completely invisible, to        Figure 2: Subdivision of the model into cells and portals.
+its child counterparts on the other polygon. We show how, given the
+parent interaction, conservative blocker lists for the children can be       Next, the portals, or transparent portions, of each cell boundary
+determined incrementally. We present a novel blocker maintenance          are explicitly constructed. Since cell boundaries are induced on the
+technique involving linespace, a five-dimensional representation          support planes of polygons, these boundaries are typically partially
+of 3D lines (i.e., light rays).                                           or completely obscured. Each boundary stores a list of coaffine and
+    The algorithms we present are of interest in several ways.            incident polygons. The portals on each boundary comprise a convex
+First, they comprise a practical treatment of visibility issues for       decomposition of the set difference of the cell boundary with the
+unrestricted (i.e., non-axial) three-dimensional environments, in         union of these polygons. Each portal stores identifiers for the cells
+contrast to previous work [1, 8, 24]. Second, the conservative            which it connects. The spatial subdivision therefore comprises an
+visibility description we compute identification of all mutually          adjacency graph over the cells, since two cells are adjacent in this
+visible pairs, and the blocker set for each pair          is a natural,   graph iff they share a boundary that is not completely opaque.
+output-sensitive way of characterizing visibility among polygons          4 Visibility Propagation
+or more general objects, for any algorithms that require information
+about occlusion and/or illumination. Finally, we show that the            Once a conforming spatial subdivision is built, visibility propa-
+use of these algorithms dramatically improves the time and space          gation commences. The propagation algorithm operates in object
+efficiency of an existing radiosity computation [11].                     space, and performs a constrained traversal of the adjacency graph
+                                                                          outward from each source cell. Whenever a cell is reached by this
+                                                                          traversal, its associated polygons are examined pairwise with those
+3 Spatial Subdivision                                                     in the source for mutual visibility; unreached entities are definitely
+The geometric model is specified as a set P of convex polygons            invisible from the source.
+(Figure 1). The space embedding the geometric model is subdivided             A given cell can see into its neighbors only through portals, and
+into convex polyhedral cells, typically separated by polygons             into more distant cells only through portal sequences; i.e., ordered
+(Figure 2). The construction is based on BSP trees [7], but the           lists of portals such that each consecutive pair of portals lead into
+visibility algorithms we subsequently present are provably correct        and out of the same cell. The cell adjacency graph is searched by
+determining cells between which an unobstructed sightline exists.          models. Consequently, we have developed a simpler algorithm
+A sightline must be disjoint from any occluders and thus must              that computes a polyhedral volume guaranteed to enclose the exact
+intersect, or stab, a portal in order to pass from one cell to the next.   visible region. The algorithm is a straightforward construction
+To establish inter-cell visibility, it is sufficient to find a stabbing    that, using separating tangent planes, performs a kind of internal
+line through a particular portal sequence; since if some point in          pivoting over the edges and vertices occurring along the portal
+the interior of one cell can see a point in the interior of another, a     sequence. We treat the algorithm briefly here; details can be found
+sightline must exist between the boundaries of the source cell and         in [22].
+the reached cell.
+   Thus, the problem of finding sightlines between cell interiors
+reduces to finding sightlines through portal sequences of increasing
+length. Consequently, the primitive visibility operation in a con-
+forming spatial subdivision is the determination of a stabbing line,                                        e
+given a portal sequence, or the determination that no such stabbing
+line exists. The portal sequences are generated incrementally by a                                                      R2
+depth-first search (DFS) emanating from a particular cell boundary;
+when a sequence no longer admits a sightline, the active branch of                       pivot step
+the DFS terminates.                                                                                                          v1
+                                                                                                       R1
+4.1 Inter-Cell Visibility                                                                                                         vS
+                                                                                                                 S
+Sightline determination is an existence predicate, in that it merely
+establishes visibility between two points on different cells. Suppose
+two cells are mutually visible through a portal sequence. In general,             Figure 5: A pivoting step on edge e, from v1 to vS .
+only a portion of each cell is visible to the other, due to occlusion by
+opaque material abutting the edges of intervening portals (Figures
+3, 4). Whenever inter-cell visibility is established, mutually visible        The algorithm exploits the fact that for each portal edge, at most
+volumes are constructed for the cell pair; these volumes and the           two separating planes can contribute a face to polyhedral bounds
+reaching portal sequence are then used to determine inter-polygon          on the illuminated volume (Figure 5), since at most one vertex
+visibility among the cells’ associated polygons.                           from each halfspace of the associated portal can span a relevant
+                                                                           plane with the edge. Consider some edge e on a portal R2 , and
+                                                                           the portals occurring before R2 . Each of these portals has at most
+                                                                           one extremal vertex that spans a separating plane with e (in the
+                                                                           figure, R1 has extremal vertex v1 and S has extremal vertex vS ).
+                                                                           Together with e, only one of these (at most n3 ) extremal vertices
+                                                                           can span a plane that contains all the other extremal vertices in the
+                                                                           same halfspace as the portal R2 . This single plane is the only one
+                                                                           of the n candidate planes that can contribute faces to the boundary
+                                                                           of the illuminated volume. Therefore, for any n portal edges there
+                                                                           are at most 2n boundary planes, each of which can be identified in
+                                                                           O(n) time by pivoting over the vertices of the other portals. The
+                                                                           total time to identify the 2n relevant planes is therefore O(n2 ).
+                                                                           Moreover, the set of O(n) planes can be updated incrementally
+                                                                           whenever a new portal is encountered, simply by updating the
+                                                                           existing halfspaces with respect to the new portal vertices, and
+                                                                           introducing planes tight on the new portal edges. The O(n) positive
+                                                                           halfspaces of the planes are inspected for an intersection with the
+                                                                           c BSP halfspaces bounding the reached cell in time O(n + c) with
+      Figure 3: Visibility propagation from a source cell S1 .             a linear programming algorithm [15, 19]. If no such intersection
+                                                                           exists then the reached cell can not be visible to the source through
+                                                                           the active portal sequence.
+
+                                                                           4.2 Inter-Polygon Visibility
+                                                                           Whenever a cell is reached by the graph propagation, an active set
+                                                                           of halfspaces bounds the volume in the reached cell visible to the
+                                                                           source. The orientations of each of these halfspaces are reversed
+                                                                           to bound the volume illuminated by the reached cell in the source.
+                                                                           Only polygons in these respective volumes can be mutually visible.
+                                                                           Each incident source polygon is prefixed to the front of the active
+                                                                           portal sequence (Figure 6). The visible volume in the reached
+                                                                           cell due to the augmented sequence is then tested for incidence
+                                                                           with the appropriate subset of polygons stored in the reached cell.
+                                                                           (The notion of conservative inter-polygon visibility can be simply
+                                                                           extended to treat visibility between general objects [22].)
+                                                                              Figure 6 depicts this mechanism for an analogous 2D situation,
+                                                                           in which ‘‘polygons’’ and ‘‘portals’’ are line segments. A source
+                                                                           cell S (Figure 6-i) establishes inter-cell visibility to a cell R via
+                                                                           some portal sequence. The polygon B in S can have no interaction
+      Figure 4: Visibility propagation from a source cell S2 .             with R’s interior, and it is not considered further. Polygon C is
+                                                                           incident on the inter-cell visibility volume, and therefore potentially
+   The volume visible to a polygon in the presence of polygonal            visible from some point in S . However, when the portal sequence
+occluders is, in general, bounded by quadratic surfaces [18]. An           is augmented with the constraints due to A (Figure 6-ii), polygon
+algorithm for computing this volume was implemented and de-                C is found to be invisible from A. Finally, D is found to intersect
+scribed in [21], but is not yet sufficiently robust for use on complex     A’s visible region in R, and A and D are established to be mutually
+                                                                            5 Blocker Detection
+                                                                            When a pair (S; R) of polygons is found to be mutually visible,
+               B
+                               intervening
+
+                                                                            we record a visibility interaction I (S; R), and proceed to identify
+                                  portals
+                                                           C
+
+                                                                            the blocker list B (S; R) of the pair. One could simply compute
+        A
+
+                                                                            the set of blockers as those polygons incident on a convex volume
+                                                                            containing S and R (as in [10]). However, the visibility graph
+               source                                reached
+               cell S                                  cell R
+                                                                            and reaching portal sequence generally yield a better (i.e., smaller)
+                                                       D                    blocker list. Denote the convex hull of all vertices of S and
+                   (i)                                                      R as conv(S; R). Clearly any blocker B must be incident on
+                                                                            conv(S; R) to contribute to B (S; R). Moreover, observe that only
+                                                                            polygons visible to S along a sequence reaching R, or to R along
+               B
+
+                                                           C
+                                                                            a sequence reaching S need be considered as blockers of S and R.
+                                                                            For, if some polygon C is not visible to S , then every ray leaving
+        A
+
+                                                                            S (including those rays to any point on R) must stab some polygon
+                                                                            other than C before stabbing C .
+                                                                                The polygons S and R do not generally see the same set of
+                   ( ii )                             D
+                                                                            blockers (Figures 7 and 8). Therefore, B (S; R) is augmented
+                                                                            whenever a search from S (R) to R (S ) discovers a previously
+  Figure 6: Establishing visibility of 2D ‘‘polygons’’ A and D.             unknown blocker. Figure 9 depicts the result of the blocker
+                                                                            computation, where all polygons except S , R, and B (S; R) have
+                                                                            been removed. Note that, of the polygons from the large central
+visible.                                                                    room, neither the large blue interior wall panels nor the thin blue
+   The convexity of spatial subdivision cells allows an important           doorjambs (cf. Figure 1) are classified as blockers. Thus the
+optimization. Any two polygons entirely incident on the boundaries          purely spatial (shaft) cull produces a blocker list of size 12 or more,
+of the same cell can have blockers only in the relative interior of         whereas the blocker detection algorithm presented here computes
+that cell. When the cell interior is empty (as it typically will be), the   a list of 6 blockers.
+polygons can be immediately classified as entirely mutually visible.
+Thus, the spatial subdivision quickly identifies many instances of
+complete mutual visibility between nearby polygons.
+   Figures 7 and 8 depict the output of the inter-polygon visibility
+computation in three dimensions, for two polygons incident on
+different source cells. Display of the spatial subdivision has been
+suppressed for clarity.
+
+
+
+
+                                                                                       Figure 9: The final blocker list of S and R.
+
+                                                                               Finally, the blocker criterion presented above is conservative,
+                                                                            since B (S; R) may include polygons that are visible to S or to R
+                                                                            but do not affect occlusion between them. The exact determination
+                                                                            of the blocker list is computationally involved; a polygon B is a
+                                                                            blocker of S and R only if some ray from S to R exists whose only
+   Figure 7: Visibility propagation from a polygon in cell S1 .             front-facing polygon intersection, aside from that with R, is with
+                                                                            B . (The asymmetry of the definition arises from the fact that, in a
+                                                                            manifold polyhedral environment of oriented polygons, only front
+                                                                            faces can be visible to front faces.)
+                                                                            6 Blocker Maintenance
+                                                                            Given a set of polygons P , the visibility preprocessing scheme
+                                                                                                            2
+                                                                            produces, for every polygon S P , a set of visible polygons V (S ).
+                                                                                                2
+                                                                            For each polygon R V (S ), the blocker list B (S; R) enumerates
+                                                                            all polygons B    2 nf          g
+                                                                                                   P S; R that potentially impede visibility
+                                                                            between S and R. B (S; R) points only to top-level patches; this
+                                                                            makes sense, since blockers should be as large as possible to cause
+                                                                            maximal occlusion. For each interaction I (S; R), we store a tube
+                                                                            data structure, which associates an interacting patch pair, a blocker
+                                                                            list, the visibility status V (S; R) of the interaction (i.e., visible
+                                                                            or partial), and some additional geometric information used for
+                                                                            incremental visibility tests.
+                                                                                In the hierarchical radiosity algorithm, when the energetic in-
+                                                                            teraction between two patches can not be characterized to within
+   Figure 8: Visibility propagation from a polygon in cell S2 .
+                                                                            the global error bound, one of the patches of the interaction is
+                                                                            symmetrically subdivided, and its children are allowed to interact
+                                                                            with the other patch [11]. Clearly, interactions between either
+patch and the children of its counterpart are highly coherent. The       a collection of four support lines from S and R, since four 5D
+tube data structure exploits this coherence to perform efficient and     hyperplanes must intersect with the Plucker quadric to generate
+accurate visibility reclassification after subdivision.                  each such vertex. These vertices must correspond to stabbing lines
+                                                                         tight on four edges of S and R in 3D; i.e., lines through a vertex of
+                                                                         S and a vertex of R (note that these lines necessarily have real 3D
+   Each child interaction’s blocker list is necessarily a subset of
+the parent’s blocker list; we wish to efficiently, and incrementally,
+determine the child tube’s blockers. We say that a blocker B             coefficients). In our implementation, there are at most sixteen such
+impinges on I (S; R) if it occludes S from R, and that B is              lines, since all patches are quadrilaterals.
+disjoint from I (S; R) if B can not cause occlusion. Whenever a             There are several advantages to performing blocker analysis in
+blocker list is discovered to be empty (i.e., to contain no impinging    linespace. The data structure for a single blocker is constant size,
+blockers), complete visibility between the interacting patches will      and for a single patch interaction is linear in the number of blockers.
+be established, and no further visibility computations need be           The linespace analysis obviates complicated 3D topological and
+done for any children of this interaction. Conversely, whenever the      numerical computations. The only operations required by the
+blocker list is discovered to be completely occluding, there can be no   linespace representation are mapping from 3D lines to 5D points
+energy transport between S and R, and the interaction is discarded       and hyperplanes, and computing inner products between points and
+(alternatively, the culprit blocker(s) can be retained as ‘‘proof’’      hyperplanes.
+that the patches cannot interact). Finally, when neither complete
+visibility nor complete occlusion can be quickly determined, the         6.2 Incremental Blocker Maintenance
+status of the child interaction remains partially visible.
+                                                                         The tube data structure, and incremental visibility maintenance,
+                                                                         can now be fully described. Suppose patch R is subdivided against
+6.1 Linespace
+                                                                                                                
+                                                                         patch S into child elements C (R) R. The tube for S and each
+The tube structure efficiently encodes the set of all lines between          2
+                                                                         CR C (R) stores S , CR , and a constant number of linespace
+S and R, using a five-dimensional line representation known as           points (S; R) whose convex hull conv ((S; R)) includes the
+Plucker coordinates [20], or simply linespace. Lines in three            set of all lines through S and CR . Finally, each blocker in B (S; R)
+dimensions correspond to hyperplanes and points in linespace. Any        is reclassified with respect to the child tube to produce B (S; CR ),
+two 3D rays a and b can be oriented by considering their linespace       and the visibility status V (S; CR ) of each interaction I (S; CR )
+counterparts a , a 5D hyperplane, and b, a 5D point (details of        is determined. As before, many instances of total invisibility,
+the mapping can be found in [21]).                                       partial visibility, and total visibility are discovered quickly. Other
+                                                                Πb       situations are considered too complex to analyze completely, and
+                                                                         we ‘‘punt’’ and classify the interaction as partially visible (perhaps
+                                 Πb                                      causing further subdivision [11]).
+                      Λa              Λa
+              Πb                                                  Λa
+
+         5D
+                                                                                                                                     SR
+                                                                                                       SR
+         3D                                                                         B
+                                                                                                   B                  B              B
+                                                                               SR
+
+                                                                                                  SR                                       SR
+         b                   b                     b                                                                 SR
+
+                                                                             INVISIBLE           PARTIAL            VISIBLE         PUNT
+              a                  a                          a
+
+          side (a, b) < 0   side (a, b) = 0            side (a, b) > 0              Figure 10: Performing 3D triage in 5D linespace.
+   The signed distance of b from a determines the sense in
+which the lines ‘‘go around’’ each other in 3D; if b lies on a            Consider an interaction (S; R) and a single potential blocker B
+the lines a and b are coplanar. This ‘‘sidedness’’ property can be       (Figure 10). We wish to determine, without extensive analysis,
+used to represent the set of lines through a collection of convex        whether all, none, or some of the lines through S and R stab the
+polygons. In practice, there is one caveat to using the linespace        blocker B . Respectively, this is equivalent to determining whether
+representation [23]. The only portion of linespace corresponding         conv((S;R)) lies entirely inside, is disjoint from, or has some
+to 3D lines with real coefficients are those linespace points lying      intersection with \k k (B ), the set of lines through the blocker
+on a 4D manifold known as the Plucker quadric [20]; all other            (Figure 11). We exploit the fact that, in linespace, both sets of lines
+linespace points correspond to 3D lines with complex coefficients.       are convex.
+Fortunately, the algorithms used in this paper need never consider          The points in (S; R) are first classified with respect to the
+the Plucker quadric, since they manipulate only lines known a            blocker hyperplanes k (B ). If all of the points lie inside the
+priori to have real coefficients.                                                                           
+                                                                         k (B ), then conv ((S; R)) \k k (B ), by convexity. B is
+   Consider two convex polygons S and R, comprised of sets of            therefore completely occluding and V (S; R) is invisible. If
+oriented edges Sk and Rk , respectively. For there to exist some line    some of the points lie inside the k (B ), and some lie outside, some
+L that stabs the interiors of S and R, L must lie in the appropriate    lines through S and R stab B , and V (S; R) is partial. If all
+signed halfspaces hk of the hyperplanes S and R .                      of the points lie outside some single k (B ), V (S; R) is visible.
+                                                   k                 k   Finally, the complex case occurs when all of the points lie outside
+                                                                         all of the k (B ). This does not guarantee total visibility, since
+                                                                         conv ((S; R)) may still have some intersection with \k k (B )
+         Sk                                                     Rk
+                                              rk
+                       sk
+                                                                         (this case is labeled punt in Figures 10 and 11); accordingly,
+                                                                         V (S; R) is classified as partial.
+                                                                     L
+
+
+                                                                            The logic for multiple blockers is straightforward; any single
+                                                        R                blocker can cause V (S; R) to be invisible, but all blockers must
+                                                                         be disjoint in order for V (S; R) to be visible. Otherwise, any
+                  S
+
+
+                                                                         impinging blocker causes V (S; R) to become partial.
+
+   Thus, the set of all lines through S and R corresponds to the
+                                                                         6.3 Evolution
+interior of a five-dimensional convex polytope \k hk [21]. Rather        Figure 12 depicts an example of blocker list evolution and incre-
+than attempt to compute this polytope directly, we can manipulate        mental reclassification of child interactions. White lines connecting
+the vertices of its intersection with the Plucker quadric, which are     quadrilateral centroids represent visible interactions; green lines
+comparatively easy to generate. Each such vertex corresponds to          represent partial interactions, and red lines represent the tube
+                                                                         inter-polygon visibility in the presence of multiple blockers is an
+                                                                         active area of research [17, 21, 25]. An exact algorithm was
+                                                                         presented in [21], but is not yet sufficiently robust for application
+                                                                         here.
+                                                                            The work and storage expended for the incremental visibility
+                                                                         maintenance also serves to accelerate the sampling done to establish
+                                                                         inter-patch energy transfer (i.e., to estimate form factors). The
+                                                                         ray/blocker machinery is simply applied to random sample rays (as
+                                                                         used in [11]). The cost of each ray/blocker test is four 5D inner
+                                                                         products.
+           invisible                           partial
+                                                                         7 Results
+                                                                         7.1 Spatial Subdivision
+                                                                         We implemented the spatial subdivision, propagation, interference,
+                                                                         and maintenance algorithms described, and instrumented their
+                                                                         execution for the data set shown in Figure 1. All execution was on
+                                                                         a lightly loaded 50-MIP Silicon Graphics VGX. The input model
+                                                                         comprised 403 patches. Constructing the BSP tree required about
+                                                                         thirty CPU seconds; the resulting tree contained 220 leaf cells. Each
+                                                                         cell had 5.99 boundary faces, and 5.87 patches coaffine with some
+            visible                               punt                   boundary face, on average (thus the spatial subdivision heuristics
+                                                                         produced fairly local partitioning behavior). Another seven CPU
+Figure 11: The four possible outcomes of a blocker classification.       seconds were absorbed by cell neighbor-finding and enumeration
+                                                                         of the 525 portals between leaf cells of the subdivision.
+between two interacting polygons. (invisible interactions are
+not shown.) In Figure 12-i, two red polygons interact via a blocker      7.2 Visibility Propagation
+list containing the orange polygon. In Figure 12-ii, the large red       Computing inter-cell and inter-patch visibility for the model ab-
+polygon is subdivided into quadrants, and its child interactions
+with the small red polygon are shown. One of these interactions
+                                                                         sorbed five CPU minutes. Of the 81003 = (403 402)=2 patch                      
+                                                                         pairs in the model, 4,391, or 5.4%, were classified as mutually
+is invisible. The other three are partial; the tube for one              visible. (Thus preprocessing obviated nearly 95% of the potential
+of them is shown. Finally, in Figure 12-iii, the child polygon is        patch-patch interactions). Of these 4,391 patch pairs, 2,814 (64.1%)
+subdivided; three of its children become visible to the polygon          were partially visible, and 1,577 (35.9%) were totally visible. Each
+at right, but one (shown) remains partial.                               patch saw, on average, 22 other patches.
+                                                                            The inter-cell traversals performed 10,128 stabbing tests of
+                                                                         portal sequences, or about 46 tests per cell. The inter-polygon
+                                                                         traversals performed 16,055 further incremental stabbing tests, one
+                                                                         for each successfully reached cell and potentially visible patch pair.
+                                                                         Thus, about 40 tests per patch were required to establish inter-patch
+                                                                         visibility for all patches. The average length of a tested inter-cell
+                                                                         portal sequence was just over 5 portals. This is consistent with our
+                                                                         experience using a ten-thousand polygon, five-thousand cell axial
+                                                                         model, in which the average portal sequence length was less than
+                                                                         ten [8, 22]. A histogram of observed portal sequence lengths and
+       (i) Parent interaction.        (ii) partial interaction.          stabbing percentages is shown in Figure 13.
+
+
+                                                                             1500
+
+                                                                                                      749
+                                                                                                            870
+                                                                                                320
+                                                                                                                                                 # failed
+                                                                             1000                                  779
+                                                                                                                                                 # stabbed
+                                                                                                                         584
+
+
+                                                                              500               961                            448
+                                                                                          840         893
+                                                                                                            741
+                                                                                                                   586               295
+                     (iii) visible interaction.                                     518                                  439
+                                                                                                                               274         171
+                                                                                                                                     144           74
+                                                                                0
+Figure 12: Reclassification of child interactions after subdivision.                1     2     3     4     5      6     7     8     9     10     11    12   13   14
+                                                                                                                  portal sequence length
+
+   The linespace algorithms guarantee conservative visibility, in
+that blockers are only discarded from interactions if they are defi-      Figure 13: Stabbing successes and failures, by sequence length.
+nitely known to be disjoint. Existing algorithms use point-sampling
+[2, 6, 11, 16] or point-to-area visibility [3, 4] techniques and            The inter-cell visibility determination uses a depth-first-search
+therefore do not guarantee correct inter-area visibility determina-      through the cell adjacency graph, applying an incremental stabbing
+tion. In contrast, we establish exact visibility information where       predicate and visible volume computation at each step. The
+possible, and adaptively subdivide until the uncertainty of visibility   incremental operation expends linear time in the number of portals
+estimation in the remaining cases is so small as to be unimportant.      currently in the sequence, assuming a constant number of edges per
+   The linespace blocker maintenance algorithms are simple and           portal, and so requires O(n2 ) time to stab a sequence of n portals.
+fast, although they sometimes overestimate occlusion by classifying      In practice, this seems not to prohibit use of the algorithms on
+disjoint blockers as impinging, and may not identify invisible           real data sets, since most portal sequences are short (less than ten
+interactions as early as might a more sophisticated algorithm.           portals), and the algorithmic constants are therefore more important
+Establishment of improved algorithms for the determination of            than the asymptotic complexity measure.
+                      Input patches.                           Input visible links.                             Input partial links.
+
+
+
+
+                    Initial refinement.                      Resulting visible links.                        Resulting partial links.
+
+
+
+
+                   Second refinement.                        Resulting visible links.                        Resulting partial links.
+
+                   Figure 14: Refinement of the input patches (left), visible links (middle), and partial links (right).
+7.3 Blocker Detection                                                       interactions. About 90% of the refined interactions were visible,
+                                                                            thus requiring no sampling for form-factor estimation. Table 1
+There were 5 blockers between partially visible patches, on average,        charts the evolution of each link type, the number of elements, and
+reached through portal sequences of average length five. The                the number of interactions at each refine.
+subdivision heuristic was effective; the BSP tree did not suffer from
+excessive ‘‘free-space’’ splitting, or regions in which subdivision           Input Links             Refine          Links            Refine            Links
+planes were induced due to far away polygons.                               V 1,577 (35.9%)       170,440 (87.6%)   V 176,474      218,420 (87.6%)    V 225,763
+    The visibility analysis communicated its results to the radiosity                            V 6,034 ( 3.1%)                 V 7,343 ( 2.9%)
+                                                                            P 2,814 (64.1%)      P 16,889 ( 8.7%)  P 16,889 P 22,157 ( 8.9%)          P 22,157
+computation via an ascii file. Each file line recorded an interaction
+I (S; R) between two polygons, the length of the associated blocker                              I 1,096 ( 0.6%)                 I   1,339 ( 0.5%)
+
+list B (S; R), and the blockers themselves. A zero-length blocker list
+                                                                               4,391             194,459              193,363      249,259              247,920
+
+implied total visibility between S and R, i.e., V (S; R) =visible;
+                                                                            403 patches                           15,039 patches                 17,347 patches
+                                                                            4,391 interactions                  145,846 interactions        186,703 interactions
+otherwise the visibility status was partial.
+                                                                            Table 1: Link evolution by type, with patch and interaction counts.
+7.4 Blocker Maintenance
+The model input to the radiosity computation is shown at the                   Since the time complexity of the radiosity algorithm is propor-
+upper left of Figure 14. The input patches form the radiosity               tional to the number of interactions, the visibility preprocessing
+program’s initial mesh. The 4,391 initial visible and partial               significantly decreased the computation done by the radiosity al-
+links are shown, respectively, in white (middle column) and green           gorithm. Moreover, the modified radiosity algorithm was more
+(right column). Two iterations of patch-patch refinement were               accurate, since no partially visible interactions were missed due to
+performed. The resulting model mesh, partial and visible                    sampling errors (as in [11]).
+interactions are displayed in the second and third rows of Figure 14.
+The number of visible links drastically increases after the first           7.5 Blocker Visualization
+iteration. Their increased density naturally indicates unoccluded           All of the algorithms described in this paper were implemented
+regions of the model. Similarly, the green partial links indicate           using visualization tools that allowed interactive inspection of
+occlusion. invisible links are not shown, as they were discarded            complex data structures. Figures 15 through 17 depict the use of this
+by the radiosity program upon detection.                                    tool to investigate some interesting partial interactions. Again,
+   Using the results of the visibility preprocessing, the initial refine    the white and green line segments represent visible and partial
+took only 11 seconds, performing 145,846 interactions. The second           interactions, respectively; for a particular partial interaction in each
+refinement stage required 50 seconds, and performed 186,703                 figure, the tube is shown (in red), and the blockers for the interaction
+Figure 15: The tube data structure (red, or-         Figure 16: Spatially incident polygons that      Figure 17: A partial interaction that
+ange) for an ordinary partial interaction.           have not been classified as blockers.            could be classified as invisible.
+
+are highlighted in orange. Figure 15 depicts an ordinary partial              [5] Cohen, M. F., Chen, S. E., Wallace, J. R., and Green-
+interaction. Figure 16 depicts spatially incident polygons that                   berg, D. P. A Progressive Refinement Approach to Fast Radiosity
+(correctly) have not been classified as blockers. Figure 17 depicts               Image Generation. Computer Graphics (Proc. SIGGRAPH ’88) 22, 4
+a partial interaction for which no single blocker occludes the                    (1988), 75 84.
+source and receiver; a more sophisticated algorithm could classify            [6] Cohen, M. F., and Greenberg, D. P. The Hemi-Cube: A
+this interaction as invisible.                                                    Radiosity Solution for Complex Environments. Computer Graphics
+                                                                                  (Proc. SIGGRAPH ’85) 19, 3 (1985), 31 40.
+8 Summary and Conclusion                                                      [7] Fuchs, H., Kedem, Z., and Naylor, B. On visible surface
+We have presented several novel algorithms that represent an                      generation by a priori tree structures. Computer Graphics (Proc. SIG-
+effective application of global visibility analysis to radiosity com-             GRAPH ’80) 14, 3 (1980), 124 133.
+putations, an important problem in image synthesis. Given the                 [8] Funkhouser, T. A., S        equin, C. H., and Teller, S. Man-
+complexity of both the visibility and radiosity approaches used,                  agement of Large Amounts of Data in Interactive Building Walk-
+                                                                                  throughs. In Proc. 1992 Workshop on Interactive 3D Graphics
+it was surprisingly easy to couple the two processes. We did so                   (1992), pp. 11 20.
+using an abstraction in which interactions between polygons were              [9] Gigus, Z., Canny, J., and Seidel, R. Efficiently Computing
+maintained along with all potentially blocking polygons. We argue                 and Representing Aspect Graphs of Polyhedral Objects. IEEE Trans-
+that, for an interesting class of large models, inter-polygon visibil-            actions on Pattern Analysis and Machine Intelligence 13, 6 (1991),
+ity has roughly constant complexity throughout the interior of the                542 551.
+model. After construction of a spatial subdivision for the model, the        [10] Haines, E. A., and Wallace, J. R. Shaft Culling for Efficient
+visibility algorithms we present are output sensitive; they expend                Ray-Traced Radiosity. In Proc. 2nd Eurographics Workshop on
+work proportional to the amount of inter-polygon visibility present.              Rendering (May 1991).
+   None of the visibility algorithms attempt to compute exact vis-           [11] Hanrahan, P., Salzman, D., and Aupperle, L. A Rapid
+ibility information. However, they achieve precision in a different               Hierarchical Radiosity Algorithm. Computer Graphics (Proc. SIG-
+sense, by reporting all visibilities conservatively; potentially visible          GRAPH ’91) 25, 4 (1991), 197 206.
+interactions are always reported.                                            [12] Heckbert, P. S. Simulating Global Illumination Using Adaptive
+   Only blockers can occlude a specified source from a specified                  Meshing. PhD thesis, Computer Sciences Department, UC Berkeley,
+                                                                                  June 1991.
+emitter. Thus, the blocker list formulation is applicable to the
+problem of discontinuity meshing in the presence of area light               [13] Lischinski, D., Tampieri, F., and Greenberg, D. P.
+                                                                                  Discontinuity Meshing for Accurate Radiosity. IEEE Computer
+sources [12, 13, 14, 21], as well as to the construction of an ‘‘oracle’’         Graphics and Applications 12, 6 (1992), 25 39.
+to decide which, if any, among a collection of discontinuities should        [14] Lischinski, D., Tampieri, F., and Greenberg, D. P.
+be meshed upon earliest.                                                          Combining Hierarchical Radiosity and Discontinuity Meshing. Com-
+   We showed that the visibility analysis significantly accelerated               puter Graphics (Proc. SIGGRAPH ’93) 27 (1993).
+a radiosity computation in a polygonal environment. Finally, we              [15] Megiddo, N. Linear programming in linear time when the dimen-
+demonstrated the successful application of some elegant concepts                  sion is fixed. Journal of the ACM 31 (1984), 114 127.
+such as linespace and algorithmic triage to the concrete problem of          [16] Nishita, T., and Nakamae, E. Half-Tone Representation of
+construction and incremental maintenance of blocker lists.                        3-D Objects Illuminated by Area Sources or Polyhedron Sources. In
+                                                                                  Proc. IEEE COMPSAC, 1983 (1983), pp. 237 242.
+Acknowledgments                                                              [17] Plantinga, H. An algorithm for finding the weakly visible faces
+The authors are grateful to David Laur for his assistance with the geo-           from a polygon in 3D. Tech. Rep. 92 11, U of Pittsburgh, 1992.
+metric model and the color plates, and to Dani Lischinski for his valuable   [18] Plantinga, W., and Dyer, C. An algorithm for constructing
+                                                                                  the aspect graph. In Proc. 27th Annual IEEE Symposium on
+comments. This work was begun during a visit to the nsf Science and
+Technology Center for the Visualization of Geometric Structures, in Min-
+neapolis, and partially supported by Apple, Silicon Graphics Computer             Foundations of Computer Science (1986), pp. 123 131.
+Systems, and the National Science Foundation (ccr 9207966).                  [19] Seidel, R. Small-dimensional linear programming and convex hulls
+                                                                                  made easy. Discrete and Computational Geometry (1991), 423 434.
+References                                                                   [20] Sommerville, D. Analytical Geometry of Three Dimensions.
+                                                                                  Cambridge University Press, 1959.
+ [1] Airey, J. M. Increasing Update Rates in the Building Walkthrough
+     System with Automatic Model-Space Subdivision and Potentially           [21] Teller, S. Computing the Antipenumbra Cast by an Area Light
+     Visible Set Calculations. PhD thesis, UNC Chapel Hill, 1990.                 Source. Computer Graphics (Proc. SIGGRAPH ’92) 26, 2 (1992),
+ [2] Baum, D. R., Mann, S., Smith, K. P., and Winget,
+                                                                                  139 148.
+     J. M. Making Radiosity Usable: Automatic Preprocessing and              [22] Teller, S. Visibility Computations in Densely Occluded Polyhe-
+     Meshing Techniques for the Generation of Accurate Radiosity So-              dral Environments. PhD thesis, CS Dept., UC Berkeley, 1992.
+     lutions. Computer Graphics (Proc. SIGGRAPH ’91) 25, 4 (1991),           [23] Teller, S., and Hohmeyer, M. E. Computing the Lines
+     51 60.                                                                       Piercing Four Lines. Tech. Rep. UCB/CSD 91/665, Computer Science
+ [3] Campbell III, A., and Fussell, D. S. An Analytic Approach                    Department, UC Berkeley, 1991.
+     to Illumination with Area Light Sources. Tech. Rep. TR-91-25,           [24] Teller, S., and S       equin, C. H. Visibility Preprocessing for
+     Department of Computer Sciences, UT Austin, 1991.                            Interactive Walkthroughs. Computer Graphics (Proc. SIGGRAPH
+ [4] Chin, N., and Feiner, S. Fast Object-Precision Shadow Gen-                   ’91) 25, 4 (1991), 61 69.
+     eration for Area Light Sources Using BSP Trees. In Proc. 1992           [25] Zhao, J., and Dobkin, D. Personal communication, 1992.
+     Symposium on Interactive 3D Graphics (1992), pp. 21 30.
+

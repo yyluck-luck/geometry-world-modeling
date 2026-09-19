@@ -1,0 +1,19 @@
+# S77 independent verifier — source only
+
+Frozen standard-library implementation, no NumPy/Torch/OpenCV/PIL or author-code import. Run once only after root reads this final source and supplies actual worker/external receipt hashes. No S77 result or scientific coordinates have been read during preparation, even though root has reported that the main invocation completed.
+
+```
+R/.venv-cut3r/bin/python -B D77/independent_result_01/verify.py --worker-sha ACTUAL --external ABSOLUTE_ACTUAL_OUTER_RECEIPT --external-sha ACTUAL
+```
+
+Keep the venv path lexical. Run under a real external 60-second process-group timeout, create-only independent_result_01/external_01 for actual stdout/stderr/started/terminal receipts. The verifier uses create-only independent_result_01/execution_01, 50-second inner checks and sampled self peak 1GiB; sampled RSS is not an instantaneous OS memory guarantee. Any discrepancy/error is retained, no retry or tolerance relaxation.
+
+Read scope: exact S77 source/contract/actual worker/outer/separation JSON; eight S73/S74/S72 acceptance/contract/result/separation JSONs in the fixed S77 input contract; the accepted S72 original-camera/K JSON and earlier S72 independent receipt that already compared those values to the original NPZ. This reuses an accepted camera-body identity binding rather than re-decoding original NPZ or K-cache containers. No image/depth/latent/weight body, model, renderer or feature extraction. All actual paths, file hashes, byte totals and timings are recorded on execution.
+
+Independent formula: reconstruct each requested F from source19 and target optical camera rotations, translation baseline and K using scalar inverse and world-ray triple products, following our earlier independently verified S72/S74 geometric derivation. No author residual function is imported. Recompute both correct/wrong distances via a nine-term bilinear numerator and square-root line norms; compare every raw value/null. Quantiles use stdlib statistics.quantiles(method=inclusive,n=20), with explicit empty and singleton cases, rather than the author's manual index interpolation. Compare complete means/quantiles/min/max/signs/2–5–10px counts and match/valid/anchor fractions. Preserve each arm's exact xy/ID/order, domain counts, source/target coverage, invalid indices/union/common support, all raw deltas and coordinates identity hash.
+
+Reconstruct original S73 three-arm intersections and original correct-valid IDs; compare the original object unchanged. Independently derive the six-valid subset and each arm's exclusions/statistics for both secondary families. All primary and both secondary events are computed per real/A0/B with all four targets and None-first semantics. Real wrong arrays are checked against both original S74 byte values and independently rederived geometry, but remain reused real evidence. All12 rows mandatory, primary8 newly evaluated rows distinct.
+
+Prospective numerical tolerance: residuals/statistics absolute1e-8 plus relative1e-10, same previously used independent S72/S74 tolerance; F/separation absolute1e-12 plus relative1e-10. No new fit, permutation, resampling, effect threshold or significance test. Null masks, IDs/counts, raw preserved objects and sign/event boundaries are exact. Epsilon remains1e-12; any validity disagreement is a discrepancy, not silently reconciled.
+
+Source validation: one stdlib compile only returned0. This is the reviewer's newly authored verifier; root's separate source acceptance remains required by the existing task before execution. It is not an additional scientific gate. Successful arithmetic would establish saved-coordinate consistency on already-seen selected matches, not matching truth, calibration, causal pose/memory attribution or method validation. No actual result has been preapproved.

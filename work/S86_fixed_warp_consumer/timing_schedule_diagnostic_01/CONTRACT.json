@@ -1,0 +1,67 @@
+{
+  "schema": "S86_PURE_DDPM50_TIMING_BUDGET_V1",
+  "created_utc": "2026-09-10T21:34:03.048820+00:00",
+  "single_schedule_call": true,
+  "script_sha256": "5a3688e6864baf781b6cf4100df24bcd61038559b2e5c48caf6e3200129e6456",
+  "source": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/sampling.py",
+    "sha256": "dc07ca0ba571ba5fb48f9856515d2cb7dea25254008a6f8b315538817f352b24"
+  },
+  "definition_names": [
+    "append_zero",
+    "make_betas",
+    "generate_roughly_equally_spaced_steps",
+    "DDPMDiscretization"
+  ],
+  "execution": "One AST-extracted original default DDPMDiscretization(50) call, append zero, CPU FP32 sigma; original sigma_hat assignment only, gamma0; no sampler, denoiser, guider or model instance",
+  "dependencies": "stdlib plus torch and numpy required by unchanged DDPM definitions; no import of full sampling module",
+  "defaults": {
+    "linear_start": 5e-06,
+    "linear_end": 0.012,
+    "num_timesteps": 1000,
+    "log_snr_shift": 2.4
+  },
+  "time_index": "k=0..49; eta=1-next_sigma/sigma_hat; sigma_hat uses original FP32 arithmetic +1e-6",
+  "uniform_lambda": 0.25,
+  "late_schedule": "0 on k0..24; c=.25*sum(eta0..48)/sum(eta25..48) on k25..48; .25 at k49; no clipping if infeasible",
+  "precision": "Fraction on exact original FP32 sigma/sigma_hat values; separately FP64 display and actual rounded FP32 c; no claim of entire sampler arithmetic equivalence",
+  "fp64_budget_atol": 1e-12,
+  "checks": [
+    "50 CSV rows",
+    "51 descending finite sigmas ending0",
+    "all eta in(0,1],eta49=1",
+    "c interval test",
+    "exact rational B equality",
+    "FP64 B difference at most fixed tolerance",
+    "rounded c residual at most half-ULP coefficient bound",
+    "report lambda sums and nonzero counts",
+    "Fraction T/F/Q outputs and errors exactly match paper calculation"
+  ],
+  "counterexample": {
+    "x": "0",
+    "T": "x/2+1/2",
+    "F": "2*x",
+    "Q": "3*x/4+1/4",
+    "expected": [
+      "1",
+      "1/2",
+      "1",
+      "5/8"
+    ],
+    "references": [
+      "1",
+      "0"
+    ]
+  },
+  "read_scope": "this contract, own script, frozen sampling source and imported library definitions only; no scientific arrays/reference/output/weights",
+  "wall_seconds": 90,
+  "threads": 1,
+  "failure": "exclusive STARTED marker; keep stdout/stderr/result on failure; no retry",
+  "not_authorized": [
+    "change S86 CONTRACT",
+    "generation",
+    "read current S86 output or reference",
+    "adopt future schedule without new decision"
+  ],
+  "result_scope": "Pure schedule arithmetic and artificial scalar counterexample; not a real denoising trajectory or scientific benefit"
+}

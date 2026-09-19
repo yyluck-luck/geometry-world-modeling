@@ -1,0 +1,9 @@
+# 模型训练重合应怎样记录
+
+为新场景资格定点核读已保存的VMem正式论文第7物理页§4.1（CVF页码25696）。论文说明其4参考＋4目标版本在RealEstate10K训练划分上LoRA微调；本文事实只限定该阶段，不能据此认定SEVA及其它预训练组件从未见过某个外部场景。
+
+所以下一候选即使来自RTMV/TinyNeRF，也应分别记录：是否参与本项目规则选择，是否与现有TUM场景独立，整个模型预训练链是否含该资产/场景。前两项可据项目/数据身份审查，第三项当前UNKNOWN，不伪称模型绝对未见。未知不禁止范围清楚的接口与小场景探索；本页不把接口成功升格跨场景有效性。
+
+原PDF是既有本地材料，本批未重新下载权重或论文；仅提取正文并读对应训练段落。新一次英文检索发现相同正式CVF地址，但web工具对main/supp两URL均403，失败保留，不将搜索片段当已读补充材料。未通读supplement或SEVA训练来源。
+
+来源：https://openaccess.thecvf.com/content/ICCV2025/papers/Li_VMem_Consistent_Interactive_Video_Scene_Generation_with_Surfel-Indexed_View_Memory_ICCV_2025_paper.pdf 。本地文件SHA和实际核读时间见TRAINING_SCOPE_SOURCE.json。

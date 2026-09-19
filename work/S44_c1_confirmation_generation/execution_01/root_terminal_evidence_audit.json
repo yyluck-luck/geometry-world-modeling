@@ -1,0 +1,114 @@
+{
+  "schema": "s44-c1-root-terminal-evidence-audit-v1",
+  "status": "BLOCKED_ROOT_TERMINAL_EVIDENCE_AUDIT",
+  "reviewed_utc": "2026-09-08T02:04:36.639548+00:00",
+  "reviewer_role": "/root",
+  "independent_author": false,
+  "authorization": "NONE",
+  "scope": "Small receipts, JSON/JSONL metadata, all 218 small source bodies, and archive file stats only. No archive tensor, blob, or image payload body was opened; no image was decoded or viewed.",
+  "evidence_sha256": {
+    "parent_receipt": "44753718ca666d134ac9500ffcd6ada6b0e7e4e6ce6cbfc3bfa9f50de85dcb18",
+    "worker_receipt": "5deea6956876f03d7b36ed6ab57f608f9613da79e133921d3ead0865196b18f0",
+    "full_resource_gate": "273df7deabf8bac5585fe8d8efffb5a2fa8cab32c7f2aaecc44b76c7cf2212c2",
+    "launch_ticket": "3da6e39958e365d926132263ef9029f0459c4243e51d411cc4ad9f07b319110f",
+    "metadata_gate": "b3cac99776784108bc52d905a343b962b06c8086a51d7116c2d9b990f26c0bfe",
+    "monitor": "26e7a2acb54888393596f67d50f2c056acf1c3d3aa5ee3f1b70753cfac7a841a",
+    "worker_stdout": "ed63fb6dbc8079bf1f0bcf380bfc16daa09d45051c534532c63950ab8ea22bae",
+    "worker_stderr": "ceb19af07d709e89dd13722fc2336fd04536e9c806783ec6937131de59c34ab4",
+    "runtime_loading": "6e34d1c332da3962cdc6811c2460dbefc580a995ee532387781dd46cc423d03b",
+    "observation_summary": "06fe7ac55c9d05d8700f160e29250b9899782934c396c45ac474963365cf76b1",
+    "trace_events": "6651fac3672a6a83d74ffe34a1b973a47d99dd8e9a6e492fa2e6f2732d7d5cdb",
+    "archive_manifest": "9eb187c525db06b87d1203734298b772339b57c734f7aad6414f1be89f0c82ad",
+    "archive_events": "bc23310bff3f1df6aa7c5a29cf2b16246103976670f6554295c773a00da9dcd3",
+    "manifest": "1e86e8279c608995a03d6675a8636c354d6d4d046b7c8faea9611d6e6a9fd93b",
+    "launch_source": "c94a982b0c0cb3fa895323ca9d7aa4e2b91eb7146eece35bdb0aedd1c157a74b"
+  },
+  "checks": {
+    "terminal_returncode_zero": true,
+    "worker_receipt_bound": true,
+    "source_identity_files_rehashed": 218,
+    "source_identity_total_bytes_rehashed": 2092020,
+    "source_identity_mismatches": [],
+    "monitor_rows": 5192,
+    "maximum_poll_gap_seconds": 0.762550417042803,
+    "sampled_peak_process_tree_rss_bytes": 24187961344,
+    "minimum_observed_disk_free_bytes": 1328668700672,
+    "trace_rows": 327,
+    "trace_event_counts": {
+      "session": 1,
+      "observation": 209,
+      "batch_begin": 2,
+      "sample_call": 2,
+      "sampler_enter": 2,
+      "denoiser_call": 100,
+      "sampler_return": 2,
+      "sample_return": 2,
+      "cache_commit": 2,
+      "map_commit": 2,
+      "batch_complete": 2,
+      "session_end": 1
+    },
+    "trace_last_sha256": "0b9d53bf075e6170677fe8ae34d462ae859f42ecc31df8beab01784324cfdba4",
+    "history_before_lengths": [
+      1,
+      5
+    ],
+    "selected_context_ids": [
+      [
+        0
+      ],
+      [
+        0,
+        2,
+        4,
+        1
+      ]
+    ],
+    "retained_frame_ids": [
+      [
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        5,
+        6,
+        7,
+        8
+      ]
+    ],
+    "archive_event_rows": 102,
+    "archive_files_stat_checked": 4766,
+    "archive_declared_file_bytes": 238344045,
+    "archive_tensor_descriptors": 2378,
+    "archive_payload_bodies_opened": 0,
+    "fatal_log_signatures": []
+  },
+  "blocking_findings": [
+    "gate components differ",
+    "trace: previous hash mismatch at 0",
+    "archive: previous hash mismatch at 0"
+  ],
+  "claim_boundary": {
+    "established_by_this_internal_audit": [
+      "The unique C1 parent and worker returned with code zero under their external limits.",
+      "The small terminal metadata chain closes two batches and binds history lengths 1 then 5, selected IDs [0] then [0,2,4,1], and retained IDs 1 through 8.",
+      "All 218 small source identities still match and all archive inventory paths have their declared byte sizes."
+    ],
+    "not_established": [
+      "Protocol-required different-author independent terminal review.",
+      "Archive tensor, blob, or image body correctness or saved-quantity consumption.",
+      "Image quality, camera compliance, blind metric, severe failure, causal effect, method gain, novelty, PhD-level contribution, or CCF-A readiness."
+    ]
+  },
+  "operations": {
+    "model_or_pipeline_runs": 0,
+    "readback_runs": 0,
+    "scoring_runs": 0,
+    "image_decodes_or_views": 0,
+    "archive_payload_body_reads": 0,
+    "network_requests": 0
+  },
+  "next_gate": "Obtain two valid different-author terminal evidence reviews before constructing S45 terminal_binding_01 or executing readback."
+}

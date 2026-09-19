@@ -1,0 +1,31 @@
+{
+  "schema": "s15-range-member-receipt-v1",
+  "started_utc": "2026-09-06T09:47:18.162022+00:00",
+  "status": "FAIL",
+  "requests": [
+    {
+      "started_utc": "2026-09-06T09:47:18.162190+00:00",
+      "requested_range": "bytes=0-29",
+      "status": 206,
+      "final_url": "https://example.invalid/artificial.zip",
+      "headers": {
+        "Content-Range": "bytes 0-29/144",
+        "Content-Length": "31",
+        "Content-Encoding": null,
+        "ETag": "\"artificial\"",
+        "Last-Modified": "Wed, 01 Jan 2025 00:00:00 GMT"
+      }
+    }
+  ],
+  "members": [],
+  "body_bytes": 0,
+  "image_array_decodes": 0,
+  "model_calls": 0,
+  "contract_sha256": "22193ce5cd95434d041d8f64c72a2e8ee0b2ca39e75085741aa94444eeddb5a9",
+  "contract_path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S15A_access_review/cases_v2/http_content_length/contract.json",
+  "url": "https://example.invalid/artificial.zip",
+  "archive_total_bytes": 144,
+  "error": "ValueError('Content-Length mismatch')",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 113, in execute\n    header = fetch(entry['local_header_offset'],30)\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 102, in fetch\n    require(response.headers.get('Content-Length') in (None,str(length)), 'Content-Length mismatch')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/fetch_s15_zip_members.py\", line 31, in require\n    raise ValueError(message)\nValueError: Content-Length mismatch\n",
+  "ended_utc": "2026-09-06T09:47:18.162400+00:00"
+}

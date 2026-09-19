@@ -1,0 +1,55 @@
+{
+  "schema": "ICL_NUIM_GATE0_DECISION_v1",
+  "recorded_at": "2026-09-15",
+  "candidate": "living_room_traj0_frei_png.tar.gz",
+  "archive_sha256": "4eca8c2e9f77c1bd7436c746d22ea6144b8c01fe9bc29a84e734186823f1f1ad",
+  "source_type": "synthetic_rgbd",
+  "license_claim": "CC BY 3.0 on official dataset page",
+  "raw_archive_acquired_after_freeze": true,
+  "metadata_exposed_before_freeze": true,
+  "pixel_decode": true,
+  "full_archive_pixel_decode": false,
+  "sample_decode_job": "586074",
+  "sample_decode_scope": "RGB/depth ids 1,2,3,750,1508 only; qualification only",
+  "sample_decode_receipt": "work/S102_gate0/ICL_SAMPLE_DECODE_RECEIPT_20260915.json",
+  "sample_decode_finding": "all sampled RGB are 640x480 RGB PNG; all sampled depth are 640x480 I;16 PNG with nonzero uint16 values and no zeros",
+  "model_execution": false,
+  "structural_counts": {
+    "rgb_png": 1509,
+    "depth_png": 1509,
+    "association_rows": 1509,
+    "pose_rows": 1508
+  },
+  "pose_audit": {
+    "http_status": 200,
+    "pose_sha256": "658bfae1e3118c9f97ad7c99721649e3de65b16e209c1f5271dbc2a84cb67d61",
+    "bytes": 108786,
+    "fields_per_row": 8,
+    "first_column": "continuous_1_to_1508_non_timestamp"
+  },
+  "association_pose_mapping": {
+    "association_sha256": "622cd848e5b3d19175b15aabfdd2dd13793e8ecad0055a402dddd93ed0da655d",
+    "association_ids": "0..1508",
+    "pose_ids": "1..1508",
+    "intersection_count": 1508,
+    "explicit_rule": "drop association id 0; retain ids 1..1508",
+    "pairing_subgate": "PASS"
+  },
+  "timestamp_semantics": "frame_index_only_with_official_30Hz_rule",
+  "status": "PASS_CONDITIONAL_SYNTHETIC_CONTROLLED_DATA_ACCESS_HELDOUT",
+  "formal_grc_allowed": true,
+  "blocking_reasons": [],
+  "next_action": "complete implementation/pre-run audit, freeze model checkpoint/config/seed/budget, run baseline on calibration/development then sealed held-out test; keep synthetic scope label",
+  "camera_contract": "PASS_OFFICIAL_ICL_K_AND_TUM_PIXEL_CONTRACT",
+  "depth_contract": "PASS_OFFICIAL_TUM_FACTOR5000_SAMPLE_VERIFIED",
+  "split_manifest": "work/S102_gate0/ICL_SPLIT_AND_GT_ISOLATION_MANIFEST_20260915.json",
+  "gt_isolation_manifest": "work/S102_gate0/ICL_SPLIT_AND_GT_ISOLATION_MANIFEST_20260915.json",
+  "synthetic_scope_doc": "work/S102_gate0/ICL_SYNTHETIC_SCOPE_AND_GENERALIZATION_20260915.md",
+  "formal_grc_scope": "synthetic ICL controlled evaluation only; no real-world or cross-scene claim",
+  "remaining_limitations": [
+    "official metadata and portion of pose text were read before acquisition freeze; not zero-metadata blind",
+    "single living-room trajectory; no scene-level independence and no real sensor generalization",
+    "hardware timestamps unavailable; frame-index/30Hz relative time rule is the frozen contract",
+    "must complete pre-run implementation audit and baseline configuration freeze before scoring held-out future geometry"
+  ]
+}

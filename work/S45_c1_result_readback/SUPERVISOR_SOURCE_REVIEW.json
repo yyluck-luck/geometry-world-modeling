@@ -1,0 +1,115 @@
+{
+  "schema": "s45-c1-readback-supervisor-source-review-v1",
+  "status": "PASS_S45_C1_READBACK_SUPERVISOR_SOURCE_REVIEW",
+  "verdict": "PASS_SUPERVISOR_NOT_EXECUTED",
+  "reviewed_utc": "2026-09-08T02:36:40.940652+00:00",
+  "reviewer_role": "/root/s45_supervisor_reviewer",
+  "author_role": "/root",
+  "reviewed_identities": {
+    "supervise_readback.py": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "SUPERVISOR_PROTOCOL.md": "fa67883c439187b6e6ad74c41f499d205efad6279fb607195676e5fad56f0b46",
+    "s40_v3_3_supervisor_parent": "f04b9bcd4a0e2908d2bc3ead9a732e16d4f4ef651a60541a87f37a7b37f2b238",
+    "readback.py": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "PROTOCOL.md": "d845559198b58f5dddbd6276dda2fbc109c19254cd182eb29bb183686f877e14",
+    "preparation_receipt.json": "74309bfeef36c80990912fcb2367cf634bbd2b481d8301f94f18e3ad05bb0bf2",
+    "SOURCE_REVIEW_PRIMARY.json": "b3ddecadd03251d90f6df5390664b0bdf8191efb75baa4dfb5064de90ab016be",
+    "SOURCE_REVIEW_ADVERSARIAL.json": "edaeb905e978efcda3644a00170bef290bbdecc49aad8b162d360272afe1d852"
+  },
+  "review_scope": "Independent source-only review of the final S45 C1 external supervisor, protocol, exact reviewed S40 v3.3 parent, readback source/protocol, amended preparation receipt, and both different-role worker source reviews. Review used raw source hashing, JSON/text inspection, and independently implemented standard-library AST analysis only. The supervisor, readback worker, model, renderer, generation path, and scoring path were not executed. No C1 result payload, archive tensor/blob/descriptor body, image body, or pixel was opened, decoded, or mapped.",
+  "checks": [
+    {
+      "id": "S01_EXACT_EIGHT_IDENTITY_SET",
+      "verdict": "PASS",
+      "evidence": "All eight required SHA-256 identities were independently recomputed and exactly match reviewed_identities. The preparation receipt binds the same final worker, protocols, supervisor, and two S40 v3.3 parent identities."
+    },
+    {
+      "id": "S02_REVERSIBLE_SUPERVISOR_DERIVATION",
+      "verdict": "PASS",
+      "evidence": "The exact S40 v3.3 supervisor parent hash matches. Independent AST analysis found the declared parent-label counts exactly equal the candidate's expected counts; all replacement values are unique; independently applying and reversing the label map restores full parent AST equality. Both candidate and derived-parent ASTs compile without executing either code object."
+    },
+    {
+      "id": "S03_THREE_ROLE_SOURCE_GATE",
+      "verdict": "PASS",
+      "evidence": "The supervisor requires exact primary and adversarial worker-review hashes plus this supervisor-review hash. It checks exact schemas, kinds, statuses, verdicts, four worker identities, eight supervisor identities, zero-execution fields, and empty blockers. The three reviewer roles must be distinct and all are excluded from both actual source-author roles /root/c1_readback_builder and /root."
+    },
+    {
+      "id": "S04_PARSED_TERMINAL_TIME_ORDER",
+      "verdict": "PASS",
+      "evidence": "The supervisor parses timezone-aware ISO-8601 UTC content for external_receipt.completed_utc, both terminal-review reviewed_utc values, and terminal_binding.created_utc. It enforces the strict order external completion < each review <= binding creation and separately requires external completion < binding creation; created_after_terminal=true alone is insufficient."
+    },
+    {
+      "id": "S05_EXACT_TERMINAL_AND_REFERENCE_BINDING",
+      "verdict": "PASS",
+      "evidence": "The fixed terminal_binding_01.json path and caller-supplied SHA are checked. The binding must use the canonical C1 manifest, external/worker receipts, full resource gate, runtime-loading record, observation summary, archive manifest, trace chain, and exact formal readback paths. Every referenced path and SHA is re-read under an identity/stat seal. Both terminal reviews must carry the same exact five-SHA evidence map, distinct non-root roles, narrow PASS statuses, zero execution, empty blockers, and no quality or novelty claim."
+    },
+    {
+      "id": "S06_FRESH_PATH_AND_PREFLIGHT_BOUNDARY",
+      "verdict": "PASS",
+      "evidence": "Both supervision_01 and executed_01 must be absolute direct children with fixed basenames and absent under os.path.lexists, so files, directories, live symlinks, and broken symlinks are rejected. All source, review, terminal, overlap, disk, and interpreter checks finish before exclusive creation of the formal supervisor directory. A preflight failure writes only a unique non-authoritative receipt and does not consume the formal attempt."
+    },
+    {
+      "id": "S07_FIXED_BOUNDED_CHILD",
+      "verdict": "PASS",
+      "evidence": "The derived reviewed parent constructs the only child command from the fixed local Python, fixed readback source, terminal-bound manifest/receipt, and fixed output path; there is no arbitrary child-command argument. It retains the single 300-second wall limit, sampled 2 GiB process-tree RSS limit, 10 GiB free-disk floor, one-thread environment, offline environment, process-group monitoring/termination, no retry, and preserved partial evidence."
+    },
+    {
+      "id": "S08_START_AND_CLOSE_IDENTITY_SEALS",
+      "verdict": "PASS",
+      "evidence": "The final source/review set and terminal evidence set are hashed and stat-sealed before launch, included in the inherited supervision record, and checked again at close. The worker's complete reported identity set receives a separate close stat check. Any changed bound source, terminal input, or readback input changes the outer status to failure."
+    },
+    {
+      "id": "S09_READBACK_AND_CLAIM_SEPARATION",
+      "verdict": "PASS",
+      "evidence": "The exact worker remains a reversible C1 route/label derivation of the reviewed S40 v3.3 reader. Independent static analysis reconfirmed one S40 assignment, one PINS assignment, all 16 declared label counts exactly one, exact C1 source pins, and successful derived-AST compilation without execution. The strongest outer status remains pending independent result review and does not certify visual quality, camera compliance, blind score, method gain, exact-original equivalence, cohort completion, or novelty."
+    }
+  ],
+  "static_analysis": {
+    "supervisor_ast_parsed": true,
+    "supervisor_candidate_ast_compiled_without_execution": true,
+    "derived_parent_ast_compiled_without_execution": true,
+    "supervisor_parent_sha256_exact": true,
+    "supervisor_declared_label_counts_exact": true,
+    "supervisor_full_ast_reverse_equal": true,
+    "worker_parent_sha256_exact": true,
+    "worker_s40_assignment_count": 1,
+    "worker_pins_assignment_count": 1,
+    "worker_declared_label_count": 16,
+    "worker_all_declared_parent_label_counts_exactly_one": true,
+    "worker_derived_ast_compiled_without_execution": true,
+    "source_review_roles": [
+      "/root/c1_blind_score_builder",
+      "/root/c2_generation_builder",
+      "/root/s45_supervisor_reviewer"
+    ],
+    "source_author_roles_excluded": [
+      "/root/c1_readback_builder",
+      "/root"
+    ],
+    "model_renderer_generation_or_scoring_imports_or_calls": 0
+  },
+  "known_external_gate_state": {
+    "preserved_original_archive_review_sha256": "64140bd6e1c1ee91489b63f83efa279f61acb84e31f6c68f844af7c35c72764b",
+    "compatible_with_review_predicate": false,
+    "reason": "It lacks the required top-level bindings, executed=false, quality_status=NOT_EVALUATED, and method_or_novelty_status=NOT_EVALUATED fields.",
+    "effect": "The reviewed supervisor correctly fails closed on that original report. A separately issued compatible review and later timestamped terminal binding are still required; this source PASS does not authorize execution."
+  },
+  "execution_boundary": {
+    "candidate_module_imported": false,
+    "candidate_main_invoked": false,
+    "derived_namespace_executed": false,
+    "formal_readback_runs": 0,
+    "model_renderer_generation_runs": 0,
+    "scoring_runs": 0,
+    "c1_result_files_opened": 0,
+    "c1_archive_payload_bodies_opened": 0,
+    "c1_images_viewed": 0,
+    "terminal_review_metadata_files_inspected": 2
+  },
+  "executed": false,
+  "c1_payload_bytes_read": 0,
+  "pixels_decoded": 0,
+  "scientific_arrays_mapped": 0,
+  "claim_boundary": "This is an independent source-only review of the exact S45 supervisor chain. It authorizes no readback by itself, does not bind a terminal C1 attempt, and establishes no saved-output result, decoded image content, metric outcome, image quality, camera compliance, method gain, cohort completion, or novelty.",
+  "next_gate": "Use a compatible different-author archive/trace terminal review, then create the one post-review terminal binding with a later parsed UTC timestamp. Only the exact five reviewed source artifacts plus that exact terminal binding may reach the fixed supervised readback path.",
+  "blocking_findings": []
+}

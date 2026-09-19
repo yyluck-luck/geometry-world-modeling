@@ -1,0 +1,235 @@
+{
+  "schema": "s45b-c1-numeric-camera-guard-source-review-v3",
+  "review_kind": "primary",
+  "status": "BLOCKED_S45B_C1_NUMERIC_CAMERA_GUARD_SUPERVISED_SOURCE_REVIEW_V6",
+  "verdict": "BLOCKED_SUPERVISED_SOURCE_NOT_EXECUTED",
+  "completed_utc": "2026-09-08T09:17:04Z",
+  "time_basis": "UTC was captured immediately before this review artifact was written; no historical work duration is inferred.",
+  "author_role": "/root/c1_blind_score_builder",
+  "reviewer_role": "/root/s48_v5_adversarial_review",
+  "reviewer_task_id": "/root/s48_v5_adversarial_review",
+  "reviewer_turn_id": "s45b-c1-v6-primary-2026-09-08T09:17:04Z",
+  "reviewer_independence": {
+    "different_from_author": true,
+    "fresh_v6_source_review_performed": true,
+    "v5_primary_conclusion_inherited": false
+  },
+  "reviewed_identities": {
+    "camera_guard.py": "5a4c327f52800da456cb7f6292ed9c2864e2d4c44f0988e38cadfc7972248d0c",
+    "supervise_camera_guard.py": "bf6a9d79b2ae4015b2452af3fc711964418921ce0f3bfcd31f5a11e28947db92",
+    "PROTOCOL.md": "8ba86240ba1fe8352230dd8b1739604e7392bb32fe5bbfcdfe088b0cde678977",
+    "C1_CAMERA_GUARD_BINDING_TEMPLATE.json": "f3be3fb84b4f5c07b82d7d2266ee8517852f9b41301220f4e90a7b6b1af092e8",
+    "synthetic_selftest.py": "0b616d626ee170efcbff2b4fcaf24ab53e8f1d3dfea8d59e034f38084385b413",
+    "s42_baseline_protocol": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f",
+    "b0_camera_reference": "f36be25001f5138bd985ca186d49c6d44e66b5b9c599b8c0dfc6e8691a4719de",
+    "b0_primary_source_review": "befb1af9c498a1423320cbd59011c56bdd4218ac56b4bb63667f4696b31184b0",
+    "b0_adversarial_source_review": "a2874380d0cd62c68a1c9e5749d55bc6af37d47efde5726315db80c8d3b0abeb",
+    "s45_readback_source": "0ec8eda2e89553a201ec274144038ec79f9c3cbb751ebe30ec1d619c8145a2ab",
+    "s45_supervisor_source": "825396fc5ac69ac210a6fc6021171543c830c6906bf2f9d0cf6e44ef75c23d78",
+    "s45_result_review_expected": "2b5e4bc3dcf28f60b320ae4d3af2b4949b60a526cacc62b2deacd87ac6ddad4c"
+  },
+  "reviewed_control_documents": {
+    "FROZEN_SOURCE_SET.json": "4156b62c26e57c0717914859901053fbf4967779337b4cd6d3401bd6be53d26d",
+    "FINAL_SYNTHETIC_SELFTEST_RECEIPT.json": "58e4b4a7431a5969be7b34f374f10c51939ac8e726f61b7721d99203d64938d0",
+    "v5_adversarial_blocked_review": "92950952b3fe260f441fe555d94a18dee589a036749035204c926ea8fe14b640"
+  },
+  "frozen_source_gate": {
+    "expected_frozen_source_set_sha256": "4156b62c26e57c0717914859901053fbf4967779337b4cd6d3401bd6be53d26d",
+    "observed_frozen_source_set_sha256": "4156b62c26e57c0717914859901053fbf4967779337b4cd6d3401bd6be53d26d",
+    "all_five_recomputed_source_sha256_values_match": true,
+    "candidate_files_modified": false
+  },
+  "review_scope": {
+    "question": "Can the exact frozen five-file V6 source set proceed beyond source review without admitting a false terminal C1 requested-camera numeric PASS?",
+    "method": "Fresh line-by-line source/protocol review, exact identity rehash, two-interpreter built-in and independent synthetic suites, standard-library numeric fuzzing, AST control-flow inspection, and a disposable pre-lease substitution witness.",
+    "source_static_synthetic_only": true,
+    "real_c1_manifest_receipt_event_tensor_or_image_content_opened": false,
+    "model_or_scientific_package_imported_or_run": false,
+    "formal_binding_lock_or_execution_created": false
+  },
+  "dual_interpreter_reproduction": {
+    "python_3_13_0": {
+      "launcher": "/opt/homebrew/bin/python3.13",
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 6380,
+        "stdout_sha256": "5e1f5cbf873fc7cc9b00205e382753a4177d20af22a1b2a99ae73c8f194df20e"
+      },
+      "independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V6_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
+        "stdout_bytes": 4795,
+        "stdout_sha256": "d4150f45ab3b48db45ab3bd33fe69bbc8b200c3ac04972383af04d6894acbe7a"
+      }
+    },
+    "python_3_12_14": {
+      "launcher": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+      "worker_builtin": {
+        "returncode": 0,
+        "status": "PASS_SYNTHETIC_ONLY",
+        "stdout_bytes": 512,
+        "stdout_sha256": "fe98b58fda07996ecc88ef28e90f3e65678e50cafba831536f24e3cab34dd034"
+      },
+      "supervisor_builtin": {
+        "returncode": 0,
+        "status": "PASS_SUPERVISOR_SYNTHETIC_AND_FAULT_INJECTION_ONLY",
+        "stdout_bytes": 6331,
+        "stdout_sha256": "67f02d0b84c300fc1f2a86093a3863b43f6862d432254abaa404f23d99a27a51"
+      },
+      "independent_suite": {
+        "returncode": 0,
+        "status": "PASS_V6_STATIC_SYNTHETIC_AND_ATTACK_TESTS_ONLY",
+        "stdout_bytes": 4777,
+        "stdout_sha256": "4268e684675edc417278bb1174acd8f4d7a12eae188fffac3be3f82631b4cbc7"
+      }
+    },
+    "interpretation": "All six canonical source/synthetic commands pass. This is not a source-review PASS because their attack matrix begins after the vulnerable worker-artifact lease-acquisition boundary and does not execute the audited worker from a retained source FD."
+  },
+  "additional_synthetic_checks": {
+    "numeric_fuzz": {
+      "seed": 20260908,
+      "above_tolerance_cross_consistent_pose_cases_rejected": 1000,
+      "below_tolerance_batch_cache_cases_accepted": 1000,
+      "result": "PASS_SYNTHETIC_MATH_ONLY"
+    },
+    "pre_lease_substitution_witness": {
+      "interpreter": "CPython 3.13.0 -I -B -S",
+      "exact_formal_subset_accepts_forged_pair": true,
+      "report_inode_changed_before_first_lease": true,
+      "receipt_inode_changed_before_first_lease": true,
+      "forged_report_omitted_planned_sequence": true,
+      "forged_report_omitted_camera_tensor_identities": true,
+      "formal_paths_created": 0,
+      "real_c1_files_opened": 0
+    },
+    "worker_launch_ast_witness": {
+      "audited_worker_fd_closed_before_load_worker_same_fd_returns": true,
+      "formal_command_reopens_WORKER_by_path": true,
+      "passed_fds": [
+        "parent_fd",
+        "lock_fd",
+        "output_fd",
+        "capability_read"
+      ],
+      "audited_worker_source_fd_passed_to_child": false
+    }
+  },
+  "v5_blocker_reassessment": {
+    "B1_MACOS_RLIMIT_AS_PREEXEC_ABORTS_THE_ONLY_FORMAL_WORKER": "CLOSED_IN_V6_SOURCE_AND_REPRODUCED_ON_BOTH_INTERPRETERS: RLIMIT_AS/RSS/DATA are absent, and the exact sandbox/preexec/libproc/wait4 capability probe passes before attempt commit.",
+    "B2_FINAL_SEAL_CAN_BE_REPLACED_AT_THE_SOLE_AUTHORITY_TRANSITION": "CLOSED_FOR_THE_TESTED_HELD_CANDIDATE_TRANSITION: the canonical file is pending-only, final/stage and evidence FDs remain held through unlink and validation, and PASS moves to exact stdout plus exit zero. This does not close the newly identified pre-lease worker-evidence substitution window.",
+    "B3_SETSID_DESCENDANT_ESCAPES_THE_NO_SURVIVOR_GATE": "CONDITIONALLY_CLOSED_FOR_THE_EXACT_REVIEWED_WORKER: sandbox-exec denies fork and posix_spawn under both interpreters and the worker AST contains no direct creation call. The exact-worker premise is nevertheless undermined by the separate pathname re-open finding below."
+  },
+  "checks": {
+    "frozen_receipt_and_five_source_hashes": "PASS",
+    "source_compilation_and_no_scientific_image_or_model_import": "PASS",
+    "B0_function_segment_and_independent_yaw_math": "PASS",
+    "camera_tensor_shape_size_provenance_and_pixel_preopen_boundary": "PASS_SOURCE_ONLY",
+    "positive_negative_boundary_and_random_numeric_math": "PASS_SYNTHETIC_ONLY",
+    "V5_RLIMIT_AS_replacement_and_exact_Darwin_capability_probe": "PASS",
+    "V5_held_final_candidate_transition": "PASS_WITHIN_TESTED_BOUNDARY",
+    "V5_fork_setsid_and_posix_spawn_escape": "PASS_IF_EXACT_AUDITED_WORKER_IS_EXECUTED",
+    "worker_report_and_receipt_pre_lease_identity_binding": "FAIL_CRITICAL",
+    "exact_worker_source_execution_binding": "FAIL_CRITICAL",
+    "complete_numeric_report_validation_before_terminal_truth": "FAIL_MAJOR",
+    "attack_suite_covers_pre_lease_artifact_and_source_exec_windows": "FAIL_MAJOR",
+    "formal_paths_absent_after_review": "PASS"
+  },
+  "blocking_findings": [
+    {
+      "id": "B1_WORKER_REPORT_AND_RECEIPT_CAN_BE_SUBSTITUTED_BEFORE_FIRST_SUPERVISOR_LEASE",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "PROTOCOL.md:17-25",
+        "camera_guard.py:1676-1728",
+        "supervise_camera_guard.py:1288-1306",
+        "supervise_camera_guard.py:1307-1338",
+        "supervise_camera_guard.py:1964-2008"
+      ],
+      "finding": "The worker creates, closes, and publishes report.json and worker_receipt.json, then exits. Only after wait4, source revalidation, and several pathname checks does the supervisor first open those two names, with expected_sha256=None. No parent-held FD, precommitted inode, expected digest, authenticated child channel, or capability-bound content identity connects the accepted files to the exited worker. A same-user process can unlink or rename/recreate both files after worker exit and before lines 1301-1304. The supervisor then leases the replacement inodes as if they were original worker evidence.",
+      "reproduction": "A disposable standard-library witness created an honest pair, replaced both names before their first open_regular_lease call, and supplied a self-consistent forged pair. The exact boolean predicate transcribed from lines 1307-1338 returned true; both inodes differed from the honest pair and no C1 or formal path was touched.",
+      "impact": "The supervisor can construct the pending candidate and final passed=true stdout seal from artifacts that the exact worker never wrote. This can turn absent or failed camera evidence into an authoritative-looking numeric PASS and directly contradicts the protocol's same-user report/receipt replacement threat claim.",
+      "why_existing_tests_miss_it": "synthetic_setup opens all evidence leases at lines 1567-1570. The advertised 16 artifact attacks at lines 1964-2008 occur only after those held FDs exist, so they prove post-acquisition stability while never attacking the acquisition gap.",
+      "required_fix": "Bind report and worker-receipt identity before the worker can write, for example by having the supervisor create and retain the exact output FDs and pass duplicates to the worker, or by using a separately authenticated parent-child evidence channel that commits exact hashes/inodes before worker exit. Then verify the retained inodes, exact bytes, full schema, and canonical path after wait4. Add deterministic substitutions immediately before each first supervisor lease and freeze new hashes for two fresh reviews."
+    },
+    {
+      "id": "B2_AUDITED_WORKER_AND_TOOLCHAIN_ARE_REOPENED_BY_MUTABLE_PATH_AT_EXEC",
+      "severity": "CRITICAL",
+      "source_locations": [
+        "PROTOCOL.md:30-37",
+        "PROTOCOL.md:170-175",
+        "supervise_camera_guard.py:254-289",
+        "supervise_camera_guard.py:904-937",
+        "supervise_camera_guard.py:1223-1238"
+      ],
+      "finding": "load_worker_same_fd audits and compiles one held camera_guard.py FD but closes that FD before returning. worker_command later names str(WORKER), and spawn_contained passes only parent, lock, output, and capability FDs. The child interpreter therefore reopens camera_guard.py by pathname. The sandbox and Python executable snapshots are likewise closed before Popen executes their paths. A same-user path swap between the last snapshot/revalidation and exec can run bytes other than the reviewed worker or interpreter, then restore the frozen paths before the honest in-process supervisor rehashes them.",
+      "impact": "The sandbox still blocks fork, but substituted same-process code can read allowed files and write a forged report/receipt through inherited output FDs. It can claim the expected hashes because those hashes and schemas are public and are passed on the command line. Thus the premise 'exact reviewed no-process-creation worker' is not cryptographically or inode-bound to the process that actually ran, reopening both scientific forgery and containment claims.",
+      "required_fix": "Execute the reviewed worker bytes from a retained immutable FD or another verifiable sealed artifact, and bind the actual interpreter/launcher execution identity with an OS-enforced immutable or trusted-code mechanism rather than a close-then-path-reopen snapshot. Alternatively narrow the threat model explicitly to exclude hostile same-user source/toolchain replacement and remove the current exact-execution claim. Add worker-source and interpreter pathname swaps at the final pre-spawn boundary."
+    },
+    {
+      "id": "M1_TERMINAL_SUPERVISOR_ACCEPTS_AN_INCOMPLETE_NUMERIC_REPORT",
+      "severity": "MAJOR",
+      "source_locations": [
+        "camera_guard.py:1646-1675",
+        "supervise_camera_guard.py:1305-1338"
+      ],
+      "finding": "The terminal supervisor checks selected labels and cross-hashes but does not require the complete worker-report key set or validate tolerance, planned_yaw_degrees, cache_commit_continuity, batch_target_to_cache, planned_sequence, id8_to_id0, camera_tensor_identities, tensor-body counts, close-verification counts, event-chain identity, or the explicit not-evaluated sentinels. The disposable witness omitted planned_sequence and camera_tensor_identities entirely and still satisfied the exact terminal predicate.",
+      "impact": "Even aside from the substitution race, terminal authority is not conditioned on the complete scientific evidence document the protocol says it observes. In combination with B1 or B2, a tiny label-only JSON is sufficient to obtain the terminal path.",
+      "required_fix": "Define and enforce an exact report schema, reject extra or missing keys, verify every numeric result and tensor/provenance count needed by the protocol, and bind the worker receipt to the complete exact report. Add field deletion, field mutation, and minimal-document tests."
+    },
+    {
+      "id": "M2_CANONICAL_SYNTHETIC_SUITE_SELF_CERTIFIES_ONLY_AFTER_VULNERABLE_BOUNDARIES",
+      "severity": "MAJOR",
+      "source_locations": [
+        "synthetic_selftest.py:294-375",
+        "supervise_camera_guard.py:1536-1570",
+        "supervise_camera_guard.py:1714-2076"
+      ],
+      "finding": "The independent AST suite checks for token presence and ordering but never proves that executed source is the audited FD or that report/receipt identity exists before the worker exits. The supervisor attack suite acquires all artifact leases during synthetic_setup and only then performs replacement attacks. Consequently all official suites pass while the two critical pre-acquisition/pre-exec windows remain untested.",
+      "impact": "The published dual-interpreter PASS receipt cannot support the protocol's complete same-user replacement or exact-worker claims; passing tests must not be used to authorize binding or execution.",
+      "required_fix": "Add formal-flow mirrors with injectable hooks immediately before worker exec and immediately before the first report/receipt opens. The tests must demonstrate rejection of different-inode identical-byte and self-consistent different-byte replacements at those exact boundaries, then be independently rerun under both required interpreters."
+    }
+  ],
+  "nonblocking_observations": [
+    {
+      "id": "N1_DECLARED_PLATFORM_LIMITS",
+      "severity": "NOTE",
+      "observation": "The macOS sandbox-exec/libproc dependency, non-reservation memory monitor, external governance issuer, and exact stdout-plus-exit capture remain explicitly declared trust boundaries. This review does not upgrade those stated limits into additional blockers."
+    },
+    {
+      "id": "N2_SCIENTIFIC_SCOPE_REMAINS_NARROW",
+      "severity": "NOTE",
+      "observation": "The math checks archived requested c2w/K inputs only. It cannot establish rendered-pixel camera obedience, visual quality, method gain, causality, novelty, or publication level."
+    }
+  ],
+  "formal_state_after_review": {
+    "execution_01": false,
+    ".c1_numeric_camera_guard.lock": false,
+    ".c1_numeric_camera_guard.lock.staging": false,
+    "C1_CAMERA_GUARD_BINDING_V6.json": false,
+    "BINDING_REVIEW_V6.json": false,
+    "GOVERNANCE_ATTESTATION_V6.json": false,
+    "SOURCE_REVIEW_ADVERSARIAL_V6.json": false
+  },
+  "access_ledger": {
+    "formal_runner_calls": 0,
+    "formal_binding_created": false,
+    "formal_attempt_created": false,
+    "real_c1_manifest_receipt_event_tensor_or_image_files_opened": 0,
+    "c1_tensor_bodies_read": 0,
+    "real_scientific_arrays_mapped": 0,
+    "pixels_decoded": 0,
+    "images_viewed": 0,
+    "model_renderer_generation_calls": 0,
+    "temporary_synthetic_directories_only": true
+  },
+  "executed": false,
+  "authorization_effect": "NONE_BLOCKED_DO_NOT_CREATE_BINDING_GOVERNANCE_ATTESTATION_LOCK_EXECUTION_OR_TERMINAL_RESULT; FIX_SOURCE_FREEZE_NEW_HASHES_AND_REPEAT_TWO_FRESH_REVIEWS",
+  "evidence_boundary": "Source, static analysis, synthetic camera math, exact built-in suites, and disposable same-user path/FD witnesses only. No real C1 tensor, image, pixel, model, generation, camera-obedience, quality, method-gain, causal, novelty, or publication-level evidence."
+}

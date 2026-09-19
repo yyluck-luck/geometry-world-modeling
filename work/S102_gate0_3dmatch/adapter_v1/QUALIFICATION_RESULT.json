@@ -1,0 +1,107 @@
+{
+  "schema": "gwm-3dmatch-scene13-adapter-qualification-v1",
+  "status": "PASS_QUALIFICATION_ONLY",
+  "scope": "only scene13 seq-01 frame-000000 plus camera-intrinsics.txt; no future/outcome/model",
+  "dataset_id": "rgbd-scenes-v2",
+  "scene_id": "rgbd-scenes-v2-scene_13",
+  "frame_id": 0,
+  "source_contract": {
+    "rgb": "24-bit RGB PNG, 640x480",
+    "depth": "16-bit greyscale PNG, raw millimetres; invalid raw==0; z_m=raw/1000",
+    "pose": "4x4 camera-to-world, metres; RGB-D Mapping estimate",
+    "K": [
+      [
+        540.021232,
+        0.0,
+        320.0
+      ],
+      [
+        0.0,
+        540.021232,
+        240.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "pixel_center": 0.5,
+    "distortion": "none documented in converted scene source; no undistortion applied"
+  },
+  "observed_frame0": {
+    "rgb_sha256": "aaa566d748ee6776c1c5c59455e2264a4c2bf98149a59ea98113b0bf9ca8e86a",
+    "depth_sha256": "fcb5564d7c149e9f6b95ed1144715d0f27e7a3a1268709f984ed6c125146a539",
+    "pose_sha256": "d905ae49a2cdeba14cb299e501864ebdc02773a6405253d3a645a80e5f8da7f0",
+    "depth_zero_count": 61908,
+    "depth_positive_count": 245292,
+    "depth_raw_min_positive": 507,
+    "depth_raw_max": 2767,
+    "pose_translation_m": [
+      -0.0,
+      -0.0,
+      -0.0
+    ]
+  },
+  "preprocessing": {
+    "source_hw": [
+      480,
+      640
+    ],
+    "resized_hw": [
+      576,
+      768
+    ],
+    "output_hw": [
+      576,
+      576
+    ],
+    "scale_xy": [
+      1.2,
+      1.2
+    ],
+    "crop_left_top": [
+      96,
+      0
+    ],
+    "pixel_center_offset": 0.5,
+    "rgb_resampling": "torch_area",
+    "K576": [
+      [
+        648.0254784,
+        0.0,
+        288.0
+      ],
+      [
+        0.0,
+        648.0254784,
+        288.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "normalization": "rgb/255 then 2*x-1"
+  },
+  "checks": {
+    "native_shapes_and_dtypes": true,
+    "depth_unit_and_invalid_rule": true,
+    "projection_round_trip_max_abs_px": 1.1368683772161603e-13,
+    "K576_scale_crop": true,
+    "vmem_pose_conversion": true,
+    "denied_future_role": true,
+    "denied_path_traversal": true
+  },
+  "limitations": [
+    "scene13 frame000000 is previously exposed qualification evidence only",
+    "frame order is not a hardware timestamp",
+    "pose is an RGB-D Mapping estimate, not motion-capture ground truth",
+    "half-pixel convention is a declared development compatibility choice",
+    "this does not qualify the full scene, held-out windows, VMem inference, or any method"
+  ],
+  "formal_experiment_eligibility": "NOT_GRANTED",
+  "new_method_validated": false,
+  "novelty_authorization": "NONE"
+}

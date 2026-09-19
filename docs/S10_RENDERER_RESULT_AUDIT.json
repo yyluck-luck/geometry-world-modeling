@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-09-05T21:25:29.808411+00:00",
+  "audit_started_utc": "2026-09-05T21:24:41.707738+00:00",
+  "audit_completed_utc": "2026-09-05T21:24:42.487010+00:00",
+  "same_author_as_runner": true,
+  "methodology": "Different-script recomputation and per-call archived-evidence comparison, not independent authorship.",
+  "checks_count": 224547,
+  "checks_by_kind": {
+    "metadata": 829,
+    "integrity": 9630,
+    "source_order": 6,
+    "recomputed": 214082
+  },
+  "checked_actual_calls": 336,
+  "C_byte_array_comparisons": 1008,
+  "original_summary_sha256": "ccb5c9bccc50c9184a17c5dee48c3fcc688a479ab318e7d613316c63f3106ce4",
+  "recomputed_summary_sha256": "ccb5c9bccc50c9184a17c5dee48c3fcc688a479ab318e7d613316c63f3106ce4",
+  "all_summary_fields_exact": true,
+  "primary": {
+    "pairs": 120,
+    "distinct_queries": 24,
+    "original": {
+      "total_ns": 160297341076,
+      "mean_ms": 1335.8111756333335,
+      "median_ms": 1355.0618955,
+      "min_ms": 859.17,
+      "max_ms": 1741.132084
+    },
+    "candidate": {
+      "total_ns": 20612083586,
+      "mean_ms": 171.76736321666667,
+      "median_ms": 169.2696665,
+      "min_ms": 118.637875,
+      "max_ms": 226.994583
+    },
+    "ratio_of_total_times": 7.77686255769291,
+    "median_paired_ratio": 7.649342277110341,
+    "AB_pairs": 60,
+    "BA_pairs": 60
+  },
+  "prior_failure": {
+    "path": "results/S10_renderer_comparison_audit",
+    "started_utc": "2026-09-05T21:24:23.877280+00:00",
+    "completed_utc": "2026-09-05T21:24:23.910663+00:00",
+    "checks_before_stop": 427,
+    "cause": "Auditor compared class-indented docstring AST directly with the dedented captured method. Fixed only the auditor to dedent the source method consistently. No production files, numeric comparisons, or tolerances changed."
+  },
+  "source_and_evidence_sha256": {
+    "scripts/verify_s10_renderer_comparison.py": "4f422c968974a25c4d44f10ea6daea4ee84e13a4f62fbb2f8c07ff4bdf0ca9fe",
+    "docs/S10_RENDERER_AUDIT_DESIGN.md": "36e43d926d401b7e6561a49d91d63a2220cb992cb74b23f40c83e22db9fff41d",
+    "results/S10_renderer_comparison_audit/verification.json": "e01d4012168160ac01e8471e39c1c57a49b2794030aa27976df8dd7166734201",
+    "results/S10_renderer_comparison_audit/auditor_source.py": "fe7b9c0a77db6d9b40ff75468a457973f62f8ec1cc299a46742b14ee891829c6",
+    "results/S10_renderer_comparison_audit_v2/verification.json": "ef84102aa0b148f6f8c90dd50d1b6d47a7d31ddcd8847000fae4d32389436775",
+    "results/S10_renderer_comparison_audit_v2/recomputed_summary.json": "ccb5c9bccc50c9184a17c5dee48c3fcc688a479ab318e7d613316c63f3106ce4",
+    "results/S10_renderer_comparison_audit_v2/authenticated_input_files.json": "ca47e64580561f211612301187edc1fff4381740091e5ecca152b1f8a15056aa",
+    "results/S10_renderer_comparison_audit_v2/auditor_source.py": "4f422c968974a25c4d44f10ea6daea4ee84e13a4f62fbb2f8c07ff4bdf0ca9fe"
+  },
+  "limitations": [
+    "Same agent authored the comparison runner. A different script and arithmetic route are used; root cross-review remains separate.",
+    "No renderer, model, experiment CLI, runner summarize or validate_output is imported/executed.",
+    "All 336 actual buffers are compared as dtype/shape/C bytes, including signed zero, to frozen baseline buffers.",
+    "Votes are independently rebuilt on 24 distinct buffers; byte identity transfers this to every repeated invocation.",
+    "Full NMS numeric traces are compared to frozen previously audited traces; branch logic is replayed from recorded distances, not new camera-distance computation.",
+    "Historical timing order/input immutability use records plus fixed source and current hashes, not a recovered OS access trace or new latency measurement.",
+    "Candidate AST restoration verifies scope outside the inner loop, not universal all-input equivalence of that replacement.",
+    "No full model/GT/renderer replay, unseen-scene evidence, novelty claim or independent-sample speed significance is established."
+  ],
+  "report_sha256": "c5e9f05ca3f86ea9ac3deef4584982ff3aacfbaa1142af24cc9aa9b57e7a9f44"
+}

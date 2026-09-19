@@ -1,0 +1,108 @@
+{
+  "schema": "s40-readback-source-review-v3-2",
+  "status": "REVISION_REQUIRED",
+  "verdict": "REVISION_REQUIRED",
+  "reviewed_utc": "2026-09-07T12:57:29Z",
+  "reviewer": "/root/readback_schema_audit",
+  "review_mode": "independent_read_only_incremental_and_adversarial_source_review",
+  "identities_relative_to_review_directory": {
+    "readback.py": "b40f44bea0dbde25479bc7c7f4fd89c3224a5bf71f54c7518da33b1f510d4d9f",
+    "PROTOCOL_DRAFT.md": "b468e7500be1c61ab39f343c6692cb2dc349ea0495f01e71141139a3f1534428",
+    "revision_v3_2_receipt.json": "68a8ee68abb842b6b6e6fe648e8b4300c2da369262633b0ed0384a4a8befbed1"
+  },
+  "preserved_blocking_reviews": {
+    "source_review_v3.json": {
+      "sha256": "04441f30e8930089c0ca7d6c0d94be1b0863115a629895ff23bfb8561045b777",
+      "status": "REVISION_REQUIRED",
+      "finding": "Attempt01 archive tensor and PNG bodies had already been stream-hashed before the context-ID exception."
+    },
+    "source_review_v3_adversarial.json": {
+      "sha256": "e7dac1824c9387834045f7b86cd81a85326e54fc7b6dc2a3a01b847a63fc3dcc",
+      "status": "REVISION_REQUIRED",
+      "finding": "List/tuple provenance, scalar label/value typing, and tensor-origin/complete-descriptor binding required strengthening."
+    }
+  },
+  "executed": false,
+  "incremental_audit": {
+    "reconstructed_v2_sha256": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "reconstruction_matches_preserved_v2_review": true,
+    "delta_hunks": [
+      "Reader.metadata now preserves list versus tuple and checks scalar labels against exact Python JSON value types.",
+      "Reader.array now compares the complete supplied descriptor with the descriptor registered for the resolved blob path.",
+      "The two-batch context_time_indices branch remains the exact-list versus tensor dispatch introduced after attempt01."
+    ],
+    "unrelated_tensor_hash_chain_bitwise_or_claim_checks_changed": false,
+    "python_ast_parse": "PASS"
+  },
+  "resolved_findings": {
+    "R1_protocol_attempt01_read_boundary": {
+      "verdict": "RESOLVED",
+      "evidence": "PROTOCOL_DRAFT.md line 3 now records 5,916 files and 244,804,717 bytes stream-hashed before failure, including 1,951 archive tensor bodies and 9 archive PNG bodies, while separately stating that NumPy mapping/comparison, image decoding/viewing, and quality scoring did not occur."
+    },
+    "R2_list_tuple_type_erasure": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py lines 108-109 decode archive list to list and archive tuple to tuple. The first-batch check at lines 279-282 requires exact built-in list [0], so a tuple cannot pass."
+    },
+    "R3_scalar_label_and_value_type": {
+      "verdict": "RESOLVED",
+      "evidence": "readback.py lines 110-114 admit only str/int/bool/NoneType labels and require the decoded JSON value to have exactly the corresponding Python type. Together with the first-batch exact-list check, bool false and non-built-in integer representations cannot satisfy the batch-1 requirement."
+    },
+    "R4_complete_tensor_descriptor_equality": {
+      "verdict": "RESOLVED_PARTIALLY",
+      "evidence": "readback.py line 118 now requires the complete descriptor supplied to Reader.array to equal the descriptor previously body-verified and registered for the resolved blob path. Dtype, shape, nbytes, codec, body SHA and canonical SHA checks remain unchanged."
+    }
+  },
+  "blocking_findings": [
+    {
+      "id": "R5_SECOND_BATCH_RAW_TENSOR_ORIGIN_STILL_ERASED",
+      "severity": "BLOCKING",
+      "source": "Unresolved tensor-origin portion of source_review_v3_adversarial.json R2",
+      "evidence": [
+        "Reader.metadata at lines 105-107 converts an archived ordinary Python dict to a plain dict, while a true tensor node falls through line 116 and is also returned as a plain dict.",
+        "The second-batch check at lines 283-288 therefore sees only the decoded dictionary and cannot distinguish a raw archive tensor node from an ordinary archived dict that decodes to the same descriptor fields.",
+        "Reader.array line 118 enforces complete descriptor equality, but tensor_files has already been populated from every archive-manifest tensor at lines 227-229. An ordinary archived dict that decodes exactly to one of those registered descriptors can therefore satisfy the equality check.",
+        "The fixed S40 archive itself is SHA-pinned and its observed event-68 node is a real tensor; this finding concerns the verifier's claimed representation proof, not the integrity of the existing generation evidence."
+      ],
+      "impact": "The code still does not independently establish the protocol statement that the original second-batch context_time_indices node was encoded as a tensor. This was an explicit blocking requirement in the preserved adversarial review.",
+      "required_fix": "Preserve raw tensor provenance through metadata decoding, or inspect the raw context_time_indices node before decoding. The second-batch gate must require that provenance marker in addition to the current complete-descriptor equality and existing one-dimensional integer-array checks."
+    }
+  ],
+  "new_blocking_source_findings": [],
+  "nonblocking_findings": [
+    {
+      "id": "A2_REVERSED_ERROR_TEXT_REMAINS",
+      "path": "work/S40_result_readback/readback.py",
+      "line": 345,
+      "finding": "The inequality correctly requires the first map commit to precede the second context capture, but the error text states the reverse temporal relation. The preserved adversarial review already classified this as nonblocking."
+    }
+  ],
+  "preserved_checks": {
+    "tensor_codec_dtype_shape_nbytes_body_and_canonical_sha": true,
+    "archive_and_trace_hash_chains": true,
+    "selected_id_nonempty_unique_range_and_order_bindings": true,
+    "history_1_5_9_and_map_counts": true,
+    "sampler_samples_cache_and_encoder_bridges": true,
+    "context_translation_condition_and_sampler_bridges": true,
+    "cross_batch_latent_embedding_camera_K_and_pixel_bitwise_checks": true,
+    "limited_camera_K_FP64_to_FP32_cast_only": true,
+    "source_and_input_stat_seals": true,
+    "quality_or_novelty_claim_added": false
+  },
+  "authorization": {
+    "update_outer_supervisor_pins": false,
+    "run_supervision_02_or_executed_02": false,
+    "reason": "One explicit prior blocking requirement, raw tensor-node provenance for the second-batch context IDs, remains unresolved."
+  },
+  "operations": {
+    "readback_runs": 0,
+    "readback_source_imports": 0,
+    "tensor_blob_or_image_body_reads": 0,
+    "images_decoded_or_viewed": 0,
+    "scientific_arrays_mapped_or_compared": 0,
+    "models_ga_gates_scoring_or_generation_runs": 0,
+    "network_requests": 0,
+    "source_or_protocol_modified_by_reviewer": false,
+    "canonical_ledger_modified": false
+  },
+  "next_gate": "Add a raw-origin discriminator for true tensor nodes while retaining complete descriptor equality, issue new source/protocol/revision hashes, and obtain a fresh independent review before rebasing the external supervisor."
+}

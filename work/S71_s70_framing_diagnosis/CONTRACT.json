@@ -1,0 +1,68 @@
+{
+  "created_utc": "2026-09-09T05:03:23.356208+00:00",
+  "stage": "S71_SAVED_IMAGE_FRAMING_EXPLORATION",
+  "question": "Do mutually matched image features in all four S70 reference/generated pairs show substantial pixel displacement consistent with the already-seen framing mismatch?",
+  "scope": "exploratory saved-image analysis after S70 results and all images were viewed; not preregistered discovery, camera estimation, new generation, corrected score or method benefit",
+  "targets": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "pairs": [
+    "reference_A0",
+    "reference_B",
+    "A0_A1_repeat_control"
+  ],
+  "versions": {
+    "opencv-python-headless": "4.11.0.86",
+    "numpy": "1.26.4",
+    "pillow": "10.3.0"
+  },
+  "source_images": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_20.png": "6f77b08bc5c68f16b30e68933c006ad65deaa1920218ef83b90bcdbd9a960fa3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A0_target_20.png": "6bb5e502af8bfc897d8439a76df72e235ced14a34d41b05c392dce0779125fcc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A1_target_20.png": "6bb5e502af8bfc897d8439a76df72e235ced14a34d41b05c392dce0779125fcc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/B_target_20.png": "e5825d7b15943f079cd2347edbacf3e9b1c0958c010c13b9b9eb9a9c16674d5e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_21.png": "5ec0c6a43b6be5fe459c972b1dc914fb59528e16dcc89c7124de934cef372745",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A0_target_21.png": "308e86fb8d4c75357490cb907720608c6b4166f85067ddc9044b51cd2b9950c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A1_target_21.png": "308e86fb8d4c75357490cb907720608c6b4166f85067ddc9044b51cd2b9950c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/B_target_21.png": "f8e3b1de43898b311bdcb158ed69c7a3b1e0dbdc552e66e89837e42489d7de5a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_22.png": "f28548b1ec2ad04b4f3abc887b42f18372367992e0416010f7146bcea220c25f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A0_target_22.png": "5ccb44bf45e4ec56c011efc68ab5fc0fdd4b25e7892f428f842bbacea18d2996",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A1_target_22.png": "5ccb44bf45e4ec56c011efc68ab5fc0fdd4b25e7892f428f842bbacea18d2996",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/B_target_22.png": "8f14696679f1ff206b017d86a017af2f4c2bfbc551633f1c0daeab134c1fc498",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/reference_target_23.png": "7a9c995f70d99993c35b57928c331ad123cba395266d1185a21134c0f5e53f8c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A0_target_23.png": "5c69253f3abef9e26fecd5c7a60f2dedfce18fba69e4783b94578dd1c900c2e2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/A1_target_23.png": "5c69253f3abef9e26fecd5c7a60f2dedfce18fba69e4783b94578dd1c900c2e2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S70_fixed_context_generation/visuals_01/B_target_23.png": "fbd0beb696af0565253ed9b960a523b5533ad96dcfb0aa180d2017152cff8e4a"
+  },
+  "preprocess": "native576x576RGB to OpenCV RGB2GRAY; no resize, crop, intensity fitting or warp",
+  "sift": {
+    "nfeatures": 1500,
+    "nOctaveLayers": 3,
+    "contrastThreshold": 0.04,
+    "edgeThreshold": 10,
+    "sigma": 1.6
+  },
+  "matching": "L2 BFMatcher knn2 both directions; ratio<0.75 in each direction and mutual identity; keep all such matches",
+  "homography": {
+    "min_matches": 8,
+    "method": "RANSAC",
+    "reprojection_threshold_px": 3.0,
+    "maxIters": 2000,
+    "confidence": 0.995,
+    "opencv_seed_per_fit": 71
+  },
+  "summary": "all-mutual Euclidean displacement median/p25/p75/p95; homography consensus count and residual, inlier displacement and normalized x/y span on both images. No arbitrary success cutoff or camera/geometry error claim. Insufficient fits kept.",
+  "controls": "All4 A0/A1 repeats should produce zero accepted-coordinate displacement; a feature-control failure triggers diagnosis, not silent parameter retuning.",
+  "budget": {
+    "external_timeout_seconds": 60,
+    "opencv_threads": 1,
+    "new_model_calls": 0,
+    "weight_reads": 0
+  },
+  "interpretation": "Perspective parallax, repeated patterns, object hallucination and sparse/spatially concentrated correspondences confound homography. A low inlier reprojection residual does not prove camera obedience, a planar scene or true 3D. No warped MSE will replace S70.",
+  "independent_review": "Different author source review before execution, then direct numerical recomputation of saved coordinates and fitted H. Does not independently establish feature correspondence truth or regenerate features.",
+  "new_method_validated": false
+}

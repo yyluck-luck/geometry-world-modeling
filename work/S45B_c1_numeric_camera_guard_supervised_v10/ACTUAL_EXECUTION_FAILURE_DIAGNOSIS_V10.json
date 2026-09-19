@@ -1,0 +1,35 @@
+{
+  "schema": "s45b-c1-v10-actual-execution-failure-diagnosis-v1",
+  "status": "BLOCKED_V10_PREBOUND_REGULAR_RECORD_DOMAIN_MISMATCH",
+  "recorded_utc": "2026-09-08T13:17:43.545928+00:00",
+  "diagnoser_role": "/root",
+  "external_returncode": 2,
+  "worker_returncode": 0,
+  "failed_phase": "WORKER_EVIDENCE_AND_SOURCE_REVALIDATION",
+  "reproduced_error": "Held artifact lease changed: report.json",
+  "comparison_differences": {
+    "extra_prebound_keys": [
+      "prebound_identity",
+      "read_channel"
+    ],
+    "shared_fields_equal": true,
+    "json_body_bytes_equal": true,
+    "actual_sha256_equal": true
+  },
+  "formal_attempts_this_diagnosis": 0,
+  "real_C1_camera_body_reads_this_diagnosis": 0,
+  "pixel_reads": 0,
+  "images_viewed": 0,
+  "new_model_runs": 0,
+  "prior_actual_V10_camera_bodies_read": 11,
+  "prior_actual_V10_camera_bytes_read": 1584,
+  "terminal_authority": false,
+  "evidence_sha256": {
+    "supervise_camera_guard.py": "92793f1a250f24e1a275a2a7995a21929a3b63be7da23481eeddd81de897f306",
+    "supervisor_receipt.json": "52dd935b28d4ecf4462457bd7f4d902cdc23f22ebb49848958ac0002cf599305",
+    "report.json": "8766fba74df4ec05964afb65d8e7ac02745f3fc2accb50268ec123839ccf04ab",
+    "worker_receipt.json": "6e559e80209d52017c2167fc35189ec746b6548d986c41c43e29bd71fa1018a3",
+    "C1_V10_FORMAL_ORCHESTRATION.json": "47947d84ee01e3ab4a567529864b9a475a0010f0bb2248bfdb1ce93215e736e8"
+  },
+  "next_step": "Preserve consumed V10 failure. Plan only compatible prebound-record revalidation using its existing held-FD reader; verify the complete actual producer-consumer-success path in a disposable fixture before any new formal version. Do not merely add another isolated predicate self-test or claim numerical PASS."
+}

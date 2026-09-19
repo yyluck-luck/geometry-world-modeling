@@ -1,0 +1,382 @@
+{
+  "schema": "research-interruption-resumption-observation-v1",
+  "observed_utc": "2026-09-08T14:07:38.156882+00:00",
+  "observer_task": "/root/execution_resumption_audit",
+  "scope": "Read-only interruption recovery of execution/control/trace text and C1 candidate sources; not a formal independent scientific-result review. New observation and ledger event only.",
+  "status": "C2_V8_INTERRUPTED_DURING_FIRST_BATCH_NO_COMPLETED_GENERATION",
+  "current_process_observation": {
+    "command": [
+      "ps",
+      "-p",
+      "42813,42817",
+      "-o",
+      "pid=,ppid=,state=,etime=,command="
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "",
+    "interpretation": "No live launcher/worker found for the recorded PIDs at this observation. Separate scoped process listing also found no C2 launcher or VMem command."
+  },
+  "c2": {
+    "actual_component_loading_record": {
+      "status": "PASS_S47_C2_DECLARED_VARIANT_COMPONENT_LOADING_ONLY",
+      "completed_utc": "2026-09-08T13:35:51.406200+00:00",
+      "scope": "Loading-only receipt followed by actual first-batch model-call trace, not full generation."
+    },
+    "execution_receipt_status": "FAILED_LAUNCH_OR_MONITOR",
+    "execution_error_type": "KeyboardInterrupt",
+    "execution_error": "Launcher/worker received signal 15",
+    "receipt_completed_utc": "2026-09-08T14:01:04.198344+00:00",
+    "worker_pid": 42817,
+    "sampled_peak_process_tree_rss_bytes": 21364801536,
+    "completed_batches_observed": 0,
+    "trace_event_counts": {
+      "session": 1,
+      "observation": 51,
+      "batch_begin": 1,
+      "sample_call": 1,
+      "sampler_enter": 1,
+      "denoiser_call": 24
+    },
+    "trace_last_event": {
+      "batch_id": "batch_1",
+      "event": "observation",
+      "evidence_kind": "recorded_execution",
+      "payload": {
+        "name": "actual_call",
+        "values": {
+          "batch_id": "batch_1",
+          "inputs": [
+            [
+              {
+                "dtype": "torch.float32",
+                "shape": [
+                  16,
+                  4,
+                  72,
+                  72
+                ]
+              },
+              {
+                "dtype": "torch.int64",
+                "shape": [
+                  16
+                ]
+              },
+              {
+                "concat": {
+                  "dtype": "torch.float32",
+                  "shape": [
+                    16,
+                    7,
+                    72,
+                    72
+                  ]
+                },
+                "crossattn": {
+                  "dtype": "torch.float32",
+                  "shape": [
+                    16,
+                    1,
+                    1024
+                  ]
+                },
+                "dense_vector": {
+                  "dtype": "torch.float32",
+                  "shape": [
+                    16,
+                    6,
+                    72,
+                    72
+                  ]
+                },
+                "replace": {
+                  "dtype": "torch.float32",
+                  "shape": [
+                    16,
+                    5,
+                    72,
+                    72
+                  ]
+                }
+              }
+            ],
+            {
+              "num_frames": 8
+            }
+          ],
+          "label": "main_model_forward",
+          "operation_index": 1,
+          "operation_name": "turn_left",
+          "ordinal": 24
+        }
+      },
+      "previous_sha256": "8de2348d5582fa79e755cea6e1f01d7633bb36171d862b2cb2ab83918cc9192f",
+      "schema": "s20-generation-trace-v1",
+      "seq": 78,
+      "sha256": "d02bd0ecc5bda45816cf91ee96f37ca410167f5e9663b9f7a393f00f8c691745",
+      "utc": "2026-09-08T14:00:53.843258+00:00"
+    },
+    "stderr_sampling_last_completed_step": 23,
+    "stderr_sampling_required_steps_per_batch": 50,
+    "main_model_forward_last_entry_ordinal": 24,
+    "distinction": "Trace records entry into forward ordinal 24; it does not certify completion of that call. stderr showed 23 of 50 sampling steps in batch 1. No completed batch, batch 2, sampler output, session close, archive close, or complete generated-video evidence.",
+    "archive_event_counts": {
+      "archive_start": 1,
+      "capture_begin": 17,
+      "capture_complete": 17
+    },
+    "archive_capture_complete_counts": {
+      "navigator_begin": 2,
+      "initial_input": 1,
+      "encode_vae_image_input": 1,
+      "encode_vae_image_output": 1,
+      "encode_image_input": 1,
+      "encode_image_output": 1,
+      "initial_output": 1,
+      "navigator_return": 1,
+      "context_input": 1,
+      "context_output": 1,
+      "batch_input": 1,
+      "translation_input": 1,
+      "translation_output": 1,
+      "condition_input": 1,
+      "condition_output": 1,
+      "sampler_input": 1
+    },
+    "missing_terminal_artifacts": {
+      "work/resumption_20260908/C2_V8_EXTERNAL_LAUNCH/receipt.json": true,
+      "work/S47B_c2_confirmation_generation_v8/execution_01/worker_receipt.json": true,
+      "work/S47B_c2_confirmation_generation_v8/execution_01/supervisor_terminal.json": true
+    },
+    "provisional_terminal_status": "PENDING_NOT_A_SUCCESS_RECORD",
+    "external_exit_code_observed": null,
+    "signal_sender_observed": null,
+    "generation_completed": false,
+    "quality_evaluated": false,
+    "scientific_status": "NOT_EVALUATED",
+    "interpretation_cn": "第三组基线确实进入真实模型推理，但第一批尚未完成时收到SIGTERM并停止。失败记录已落盘，外部最终退出码/完整监督终态缺失；不能说该组已经生成完成，也不能把中断当算法质量失败。",
+    "cannot_confirm": [
+      "Who sent SIGTERM, or its original cause.",
+      "The original external launch wrapper exit code and a complete terminal cleanup record.",
+      "Whether machine suspend or a wall-clock correction explains clock divergence; no OS power history was read.",
+      "A completed batch, generated result, C2 blind score, or research-method benefit."
+    ],
+    "retry_authority": "NONE_GRANTED_BY_THIS_OBSERVATION; preserve the consumed one-attempt authorization, output and all failures. Do not rerun original authorization or launch in this task."
+  },
+  "clock_observation": {
+    "source_uses": "S35 parent monitoring inherited by C2 uses time.monotonic() for elapsed/phase limits; utc() for the calendar timestamps.",
+    "monitor_first": {
+      "budget_phase": 1,
+      "completed_batches": 0,
+      "disk_free_bytes": 1326251741184,
+      "elapsed_seconds": 0.022229541034903377,
+      "phase_elapsed_seconds": 0.022229541034903377,
+      "process_tree_rss_bytes": 15106048,
+      "trace_sequence_count": 0,
+      "utc": "2026-09-08T13:35:10.793165+00:00"
+    },
+    "monitor_last": {
+      "budget_phase": 1,
+      "completed_batches": 0,
+      "disk_free_bytes": 1326159863808,
+      "elapsed_seconds": 764.1413876250153,
+      "phase_elapsed_seconds": 764.1413876250153,
+      "process_tree_rss_bytes": 18544508928,
+      "trace_sequence_count": 79,
+      "utc": "2026-09-08T14:01:03.722356+00:00"
+    },
+    "utc_span_seconds": 1552.929191,
+    "recorded_monotonic_span_seconds": 764.1191580839804,
+    "large_utc_vs_monotonic_gaps": [
+      {
+        "before_utc": "2026-09-08T13:40:53.814403+00:00",
+        "after_utc": "2026-09-08T13:43:09.655188+00:00",
+        "utc_delta_seconds": 135.840785,
+        "recorded_monotonic_delta_seconds": 0.5412507080473006,
+        "excess_utc_seconds": 135.2995342919527
+      },
+      {
+        "before_utc": "2026-09-08T13:43:56.009702+00:00",
+        "after_utc": "2026-09-08T13:47:27.074343+00:00",
+        "utc_delta_seconds": 211.064641,
+        "recorded_monotonic_delta_seconds": 0.6106162919895723,
+        "excess_utc_seconds": 210.45402470801042
+      },
+      {
+        "before_utc": "2026-09-08T13:48:13.651156+00:00",
+        "after_utc": "2026-09-08T13:52:01.852436+00:00",
+        "utc_delta_seconds": 228.20128,
+        "recorded_monotonic_delta_seconds": 0.523621833010111,
+        "excess_utc_seconds": 227.6776581669899
+      },
+      {
+        "before_utc": "2026-09-08T13:52:48.106865+00:00",
+        "after_utc": "2026-09-08T13:56:24.063328+00:00",
+        "utc_delta_seconds": 215.956463,
+        "recorded_monotonic_delta_seconds": 0.5776437080348842,
+        "excess_utc_seconds": 215.37881929196513
+      }
+    ],
+    "interpretation_cn": "监测UTC跨度约1552.929秒，但monotonic累计约764.119秒；四处UTC跳过数分钟而记录的monotonic只前进约0.5–0.6秒。两者必须分别报告，不能把764秒写成完整现实经过时间，也不能仅由此确定系统休眠或时钟调整。"
+  },
+  "c1_v11": {
+    "status": "UNFROZEN_SOURCE_CANDIDATE_WITH_UNVERIFIED_TEST_EXECUTION",
+    "candidate_directory_files": [
+      {
+        "path": "work/S45B_c1_numeric_camera_guard_supervised_v11/C1_CAMERA_GUARD_BINDING_TEMPLATE.json",
+        "sha256": "a55d4a62ecc1fd151167b2ed76289a660255bbefae6cd3a5f313e7d05eb3e593",
+        "bytes": 9286,
+        "mtime_ns": 1788874606160592749,
+        "mode": "0o644"
+      },
+      {
+        "path": "work/S45B_c1_numeric_camera_guard_supervised_v11/PROTOCOL.md",
+        "sha256": "7b369639c4558535fa9fbe239d23a153347776201c75ef18b2704e4b450a7c06",
+        "bytes": 23008,
+        "mtime_ns": 1788874582496322541,
+        "mode": "0o644"
+      },
+      {
+        "path": "work/S45B_c1_numeric_camera_guard_supervised_v11/camera_guard.py",
+        "sha256": "45a157cfb7a7598bdc5439e769d2ce238842f660eb88fb7ce22fe80c3fb89438",
+        "bytes": 90476,
+        "mtime_ns": 1788874670993923208,
+        "mode": "0o644"
+      },
+      {
+        "path": "work/S45B_c1_numeric_camera_guard_supervised_v11/supervise_camera_guard.py",
+        "sha256": "4d0c746dd03ae5bca8b858026623f18abf9788c33e2bc79a0f8c41ceddfbb16a",
+        "bytes": 154166,
+        "mtime_ns": 1788874384698594124,
+        "mode": "0o644"
+      },
+      {
+        "path": "work/S45B_c1_numeric_camera_guard_supervised_v11/synthetic_selftest.py",
+        "sha256": "d65a6ed11dba59237d8d82e70e6bbb6e6ef914e5ed918bd7af775a36cbdf02b4",
+        "bytes": 39774,
+        "mtime_ns": 1788874530076566499,
+        "mode": "0o644"
+      }
+    ],
+    "required_artifact_presence": {
+      "FROZEN_SOURCE_SET.json": false,
+      "SOURCE_ONLY_AUTHOR_RECEIPT_V11.json": false,
+      "SOURCE_REVIEW_PRIMARY_V11.json": false,
+      "SOURCE_REVIEW_ADVERSARIAL_V11.json": false,
+      "C1_CAMERA_GUARD_BINDING_V11.json": false,
+      "BINDING_REVIEW_V11.json": false,
+      "GOVERNANCE_ATTESTATION_V11.json": false,
+      "execution_01": false
+    },
+    "source_full_positive_function_name": "synthetic_prebound_full_success_path",
+    "source_full_positive_function_line": 2434,
+    "full_positive_chain_written_in_source": true,
+    "full_positive_chain_executed_and_passed_evidence_found": false,
+    "saved_test_results_in_candidate_directory": [],
+    "final_freeze_present": false,
+    "explicit_author_final_handoff_evidence_found_in_canonical_ledger": false,
+    "interpretation_cn": "V11的5个候选文件与完整正向链测试函数已经写入；候选目录尚无冻结清单、作者最终回执或测试结果。主账仅记开始。现有证据只能称源码准备中，不能称完整测试已通过或可正式执行。",
+    "remaining": [
+      "The next code author must explicitly declare taking over the unfinished V11 candidate.",
+      "Complete and save the finite dual-Python ordinary full-success regression before freezing.",
+      "Publish final source identities and author receipt with explicit final handoff; then follow existing source/binding/result review sequence without inheriting V10 votes."
+    ],
+    "changes_by_this_observer": []
+  },
+  "read_boundaries": {
+    "image_or_tensor_payload_files_opened": 0,
+    "pixels_decoded": 0,
+    "arrays_mapped": 0,
+    "model_calls": 0,
+    "authorization_or_launch_calls": 0,
+    "signals_sent": 0,
+    "tests_executed": 0
+  },
+  "evidence_files": [
+    {
+      "path": "work/resumption_20260908/C2_V8_EXTERNAL_LAUNCH/started.json",
+      "sha256": "bc0a224789fe84f9df7eae743ef28598c5fd5f0b5ec69f3d9e40175c13cdff4b",
+      "bytes": 833,
+      "mtime_ns": 1788874510648851333,
+      "mode": "0o644"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/execution_01/receipt.json",
+      "sha256": "1367e40645a0ac938f9a541e12094fcc4494e470a406a634c58d511c8596874f",
+      "bytes": 2734,
+      "mtime_ns": 1788876064198929791,
+      "mode": "0o444"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/execution_01/supervisor_terminal_provisional.json",
+      "sha256": "90fdf71db1675cca90821511e320f46a6c729ee83a2791f30cfce5ec232dd9cc",
+      "bytes": 735,
+      "mtime_ns": 1788874510700216833,
+      "mode": "0o444"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/execution_01/monitor.jsonl",
+      "sha256": "35639f26334ef5caa960842eb784d7917b33d2e4028aa8a354a1f54b5501b926",
+      "bytes": 380654,
+      "mtime_ns": 1788876063722429333,
+      "mode": "0o644"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/execution_01/worker.stdout.txt",
+      "sha256": "b3a7ab99e2bee4d1ad41e06c38eedfb70242d660d8842efe882673fb6a1778d3",
+      "bytes": 706,
+      "mtime_ns": 1788874553763950833,
+      "mode": "0o644"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/execution_01/worker.stderr.txt",
+      "sha256": "fa8b685ba2a82896e52c7d1fc8e09bd74aa1b0dcd8a672d86c531e56759e85a7",
+      "bytes": 3179,
+      "mtime_ns": 1788876064194789458,
+      "mode": "0o644"
+    },
+    {
+      "path": "results/S47B_C2_confirmation_generation_v8/runtime_loading.json",
+      "sha256": "072278d478adead3e6772af9ddd893765697a3f5706743bb3f6c32f2d6d63fb9",
+      "bytes": 2787,
+      "mtime_ns": 1788874551601033374,
+      "mode": "0o444"
+    },
+    {
+      "path": "results/S47B_C2_confirmation_generation_v8/trace/events.jsonl",
+      "sha256": "96ecc7021db1e708a7c36cd83f7913fd57fe74ff11e299b731f94c019b70c9a3",
+      "bytes": 177002,
+      "mtime_ns": 1788876053843325499,
+      "mode": "0o600"
+    },
+    {
+      "path": "results/S47B_C2_confirmation_generation_v8/archive/events.jsonl",
+      "sha256": "d1c510365321c4edc4337c9d1a2b9b7c95ab2fdc521a5a9cf7de491a32a774aa",
+      "bytes": 139475,
+      "mtime_ns": 1788874553716217708,
+      "mode": "0o600"
+    },
+    {
+      "path": "work/S47B_c2_confirmation_generation_v8/launch_generation.py",
+      "sha256": "b2a4fd97908f6302a6bcf812ca41733687f7f4418b3d31b1ca165e1150dbc1da",
+      "bytes": 77433,
+      "mtime_ns": 1788870858688548666,
+      "mode": "0o444"
+    },
+    {
+      "path": "work/S35_generation_integration/launch_original.py",
+      "sha256": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+      "bytes": 24835,
+      "mtime_ns": 1788735764825172374,
+      "mode": "0o644"
+    },
+    {
+      "path": "work/resumption_20260908/launch_c2_v8_observed.py",
+      "sha256": "4419a2dfe316932867c3ce17a1a8ba5615f2c1451d73cd7f9fd2e800f85a8c6e",
+      "bytes": 3277,
+      "mtime_ns": 1788873874251414124,
+      "mode": "0o644"
+    }
+  ]
+}

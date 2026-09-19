@@ -1,0 +1,169 @@
+{
+  "schema": "s90.grc_math_sanity.v1",
+  "status": "PASS",
+  "classification": "synthetic_math_and_pinned_source_execution_not_scientific_validation",
+  "started_utc": "2026-09-11T10:20:48.956300+00:00",
+  "completed_utc": "2026-09-11T10:20:49.175092+00:00",
+  "elapsed_seconds": 0.218792,
+  "source": {
+    "script": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S90_proxy_resumable_index/innovation_agent/grc_math_sanity.py",
+    "script_sha256_before_result_write": "f46b38d0eb9dacfcd9f5030233cf0e1bd098480e5392b880725b6aeaecfe69dc",
+    "official_crc_file": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S90_proxy_resumable_index/innovation_agent/sources/conformal-risk/core/get_lhat.py",
+    "official_crc_file_sha256": "ddf93c30cc703aa782c1d4f0201ca1360616b510000662cfbd0a506e91cc7546",
+    "official_crc_commit": "3eff946390a8f188b1e5ab700fce21a66a215e7c",
+    "official_crc_expected_commit": "3eff946390a8f188b1e5ab700fce21a66a215e7c",
+    "official_crc_remote": "https://github.com/aangelopoulos/conformal-risk.git",
+    "official_crc_expected_remote": "https://github.com/aangelopoulos/conformal-risk.git"
+  },
+  "runtime": {
+    "python": "3.13.0 (main, Oct  7 2024, 05:02:14) [Clang 16.0.0 (clang-1600.0.26.3)]",
+    "platform": "macOS-26.7-arm64-arm-64bit-Mach-O",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1"
+  },
+  "test_count": 7,
+  "tests": {
+    "official_crc_global_parameter": {
+      "status": "PASS",
+      "purpose": "Execute the pinned official helper and show that it returns one global policy parameter.",
+      "loss_table_shape": [
+        4,
+        5
+      ],
+      "alpha": 0.5,
+      "B": 1.0,
+      "corrected_empirical_risk": [
+        0.24000000000000002,
+        0.31000000000000005,
+        0.39,
+        0.5800000000000001,
+        0.8300000000000001
+      ],
+      "selected_lambda": 0.2,
+      "interpretation_limit": "This execution checks code semantics only. It does not establish a guarantee for GRC, a per-memory risk bound, or a probability guarantee."
+    },
+    "selection_induced_shift": {
+      "status": "PASS",
+      "purpose": "Construct a selection-induced distribution shift counterexample.",
+      "queries": 100,
+      "candidates_per_query": 10,
+      "pooled_candidate_q90": 0.13500000000001933,
+      "post_selection_q90": 0.9,
+      "post_selection_exceedance_of_pooled_q90": 1.0,
+      "interpretation": "A threshold calibrated over all candidates can fail after a utility policy systematically selects the risky subgroup. The deployed policy itself must be represented in calibration."
+    },
+    "vector_scalarization_ambiguity": {
+      "status": "PASS",
+      "purpose": "Show that a three-component residual vector has no unique scalar quantile or ranking.",
+      "residual_order": [
+        "reprojection",
+        "depth",
+        "visibility"
+      ],
+      "residuals": {
+        "A": [
+          0.9,
+          0.1,
+          0.1
+        ],
+        "B": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "mean_scalarization": {
+        "A": 0.3666666666666667,
+        "B": 0.5
+      },
+      "max_scalarization": {
+        "A": 0.9,
+        "B": 0.5
+      },
+      "safer_by_mean": "A",
+      "safer_by_max": "B",
+      "interpretation": "The proposal must freeze units, normalization, and a scalar nonconformity or joint set loss before taking a quantile."
+    },
+    "non_submodularity_and_greedy_failure": {
+      "status": "PASS",
+      "purpose": "Give a monotone but non-submodular utility where greedy misses a synergistic memory pair.",
+      "budget": 2,
+      "greedy_set": [
+        "D",
+        "C"
+      ],
+      "greedy_value": 2.0,
+      "exact_set": [
+        "A",
+        "B"
+      ],
+      "exact_value": 4.0,
+      "greedy_over_exact": 0.5,
+      "one_minus_one_over_e": 0.6321205588285577,
+      "marginal_B_from_empty": 0.1,
+      "marginal_B_after_A": 3.9,
+      "exhaustive_monotonicity_checks": 32,
+      "interpretation": "A 1-1/e claim is unavailable unless the actual learned set objective is proven monotone submodular under the deployed constraints. Small budgets should use exact enumeration as a reference."
+    },
+    "non_additive_set_risk": {
+      "status": "PASS",
+      "purpose": "Show that summing item risks is not a generally valid set-risk model.",
+      "synergistic_failure_case": {
+        "risk_A": 0.1,
+        "risk_B": 0.1,
+        "sum": 0.2,
+        "joint": 0.8
+      },
+      "redundant_failure_case": {
+        "risk_A": 0.4,
+        "risk_B": 0.4,
+        "sum": 0.8,
+        "joint": 0.45
+      },
+      "interpretation": "Memory interactions can make a sum either optimistic or pessimistic; a set-level loss/predictor or a proven structural assumption is required."
+    },
+    "counterfactual_sensitivity_sign": {
+      "status": "PASS",
+      "purpose": "Refute output-distance sensitivity as a signed measure of memory usefulness.",
+      "ground_truth": 0.0,
+      "cases": {
+        "helpful_memory": {
+          "without": -2.0,
+          "with": 0.0,
+          "output_distance_sensitivity": 2.0,
+          "loss_without": 4.0,
+          "loss_with": 0.0,
+          "ground_truth_loss_reduction": 4.0
+        },
+        "harmful_memory": {
+          "without": 0.0,
+          "with": 2.0,
+          "output_distance_sensitivity": 2.0,
+          "loss_without": 0.0,
+          "loss_with": 4.0,
+          "ground_truth_loss_reduction": -4.0
+        }
+      },
+      "correct_effect_definition": "tau_i(S)=E_xi[L_geo(Yhat(S\\{i},xi),Y_true)-L_geo(Yhat(S,xi),Y_true)]; positive means removal hurts.",
+      "interpretation": "Matched-seed output change measures sensitivity only. A usefulness claim needs held-out ground truth loss, fixed target/query, fixed other memories, and fixed random seed."
+    },
+    "future_target_leakage": {
+      "status": "PASS",
+      "purpose": "Expose target leakage when selection directly evaluates the realized future.",
+      "identical_past_only_scores": [
+        0.5,
+        0.5
+      ],
+      "history_predictions": [
+        0.0,
+        1.0
+      ],
+      "oracle_selected_history_by_unseen_future": {
+        "0.0": 0,
+        "1.0": 1
+      },
+      "interpretation": "A deployable selector may use a predictor trained on past training targets, but at test time it cannot query the realized Y_future to score candidates."
+    }
+  },
+  "claim_boundary": "These seven deterministic checks falsify several mathematical shortcuts in the draft. They do not show that the corrected GRC method improves any real video, geometry metric, scene, or world model."
+}

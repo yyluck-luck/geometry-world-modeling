@@ -1,0 +1,52 @@
+{
+  "schema": "s103-vmem-preflight-metadata-patch-v1",
+  "recorded_at_local": "2026-09-16T00:59:50+08:00",
+  "base_manifest": "work/S103_H800_VMEM_BASELINE_PREFLIGHT_20260915.json",
+  "base_manifest_sha256": "e815ecc2b88384c2e43c695e8198526d8d652b8c922a928976db4010cfd0e6ba",
+  "patch_scope": "metadata_and_reproducibility_only",
+  "scientific_decision_unchanged": "BLOCKED_FORMAL_BASELINE_PENDING_CONTRACT_FREEZE",
+  "verified_artifacts": {
+    "weights": [
+      {"name":"vmem_weights.pth","remote":"/home/yliutz/gwm_weights_20260915/vmem_weights.pth","bytes":5056346672,"sha256":"675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4","evidence":"work/S103_h800_model_load_smoke/remote_receipts_588459/RECEIPT.json"},
+      {"name":"cut3r_512_dpt_4_64.pth","remote":"/home/yliutz/gwm_weights_20260915/cut3r_512_dpt_4_64.pth","bytes":3173761006,"sha256":"45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103","evidence":"work/S104_h800_cut3r_calibration/remote_receipts_586719/RECEIPT.json"},
+      {"name":"open_clip_model.safetensors","remote":"/home/yliutz/gwm_weights_20260915/open_clip_model.safetensors","bytes":3944517836,"sha256":"0084e75319a50ad85ef45377bad5bc38f2f58824459eb690048d51c9f8863be5","evidence":"work/S103_H800_VMEM_BASELINE_PREFLIGHT_20260915.json"},
+      {"name":"diffusion_pytorch_model.safetensors","remote":"/home/yliutz/gwm_weights_20260915/diffusion_pytorch_model.safetensors","bytes":334643276,"sha256":"a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815","evidence":"work/S103_H800_VMEM_BASELINE_PREFLIGHT_20260915.json"}
+    ],
+    "source_bundle": {"remote":"/home/yliutz/gwm_source_transport_20260915/vmem_source_only.tar.gz","bytes":357741,"sha256":"de001a234e97fdf82f16c2ccdba2caad00c5e8ccda6a637e906c33b47ea3da7b","entries":196,"evidence":"work/S101_env_bootstrap/source_transport_v1/MANIFEST.json"},
+    "inference_config": {"path":"vendor/vmem_snapshot/configs/inference/inference.yaml","bytes":879,"sha256":"8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3"}
+  },
+  "reproducibility_metadata": {
+    "remote_host":"superpod.ust.hk",
+    "ssh_identity":"~/.ssh/id_ed25519_superpod",
+    "slurm_account":"mscitspod2026",
+    "partition":"normal",
+    "gpu_request":"--gpus=1",
+    "environment":"/home/yliutz/.conda/envs/gwm-cut3r-py311-20260915",
+    "python":"3.11.16",
+    "torch":"2.7.0+cu126",
+    "cuda":"12.6",
+    "seed":42,
+    "determinism":"not_yet_declared; record torch deterministic setting and RNG states in formal receipt",
+    "code_hashes": {
+      "model_load_smoke":"a934febf255aedfd0e6cac08d8d57fcc72d6586c68342ff9d368033e86bc6f1a",
+      "model_load_slurm":"5f98fa03eea0ec1404a11d2d0d0f2cad70ddfb7c3f2891e5d85cca488e6c2453",
+      "tum_gate0_metadata":"04478b0ca2eb96ea36c35761c02b955e136396636ab35cae24db467bde21ba2e",
+      "tum_gate0_slurm":"5268daeb22fe37a7b59353f6fc0f1b8cee4ed26a57034fbb9e1a30dd5f7cdd06"
+    }
+  },
+  "formal_output_contract_to_add_before_s103": {
+    "required_files":["RUN_MANIFEST.json","PREDICTIONS.npz or equivalent","METRICS.json","SEAL.json","stdout/stderr log"],
+    "seal_inputs":["base_manifest_sha256","patch_sha256","all_input_hashes","prediction_hash","metrics_hash"],
+    "future_gt_access":"scorer-only after prediction hash is sealed",
+    "independent_readback":"recompute hashes, row counts, metric inputs and seal in a separate process"
+  },
+  "unresolved_scientific_blockers": [
+    "camera intrinsics/distortion/pixel convention and pose transform direction not frozen",
+    "depth invalid value, scale and optical-axis equation not frozen",
+    "one-to-one RGB-D pairing duplicate/drop counts not recorded",
+    "future query window and selector visibility isolation not frozen",
+    "independent held-out scene not acquired and blind identity not established",
+    "candidate pool, budget, output count, resolution and runtime budget need signed freeze"
+  ],
+  "interpretation": "This sidecar repairs stale/missing reproducibility metadata only. It does not qualify data, open held-out GT, start VMem forward, or validate GRC/SOCF."
+}

@@ -1,0 +1,282 @@
+TTT3R: 3D Reconstruction as Test-Time Training (https://arxiv.org/abs/2509.26645)
+citeturn313academia12 [wordlim: 200] Published: 11 months ago; Title: TTT3R: 3D Reconstruction as Test-Time Training
+Title: TTT3R: 3D Reconstruction as Test-Time Training
+Authors: Xingyu Chen, Yue Chen, Yuliang Xiu, Andreas Geiger, Anpei Chen
+Date: Tue Sep 30 17:59:51 2025
+
+Modern Recurrent Neural Networks have become a competitive architecture for 3D reconstruction due to their linear-time complexity. However, their performance degrades significantly when applied beyond the training context length, revealing limited length generalization. In this work, we revisit the 3D reconstruction foundation models from a Test-Time Training perspective, framing their designs as an online learning problem. Building on this perspective, we leverage the alignment confidence between the memory state and incoming observations to derive a closed-form learning rate for memory updates, to balance between retaining historical information and adapting to new observations. This training-free intervention, termed TTT3R, substantially improves length generalization, achieving a $2\times$ improvement in global pose estimation over baselines, while operating at 20 FPS with just 6 GB of GPU memory to process thousands of images. Code available in https://rover-xingyu.github.io/TTT3R--------------------------------------------------------------------------------
+Memory Forcing: Spatio-Temporal Memory for Consistent Scene Generation on Minecraft (https://arxiv.org/abs/2510.03198)
+citeturn313academia13 [wordlim: 200] Published: 11 months ago; Autoregressive video diffusion models have proved effective for world modeling and interactive scene generation, with Minecraft gameplay as a representative application. ... Under limited computation budgets, it must compress and exploit historical cues within a finite context window, which exposes a trade-off: Temporal-only memory lacks long-term spatial consistency, whereas adding spatial memory strengthens consistency but may degrade new scene generation quality when the model over-relies on insufficient spatial context. ... Extensive experiments demonstrate that Memory Forcing achieves superior long-term spatial consistency and generative quality across diverse environments, while maintaining computational efficiency for extended sequences.
+Title: Memory Forcing: Spatio-Temporal Memory for Consistent Scene Generation on Minecraft
+Authors: Junchao Huang, Xinting Hu, Boyao Han, Shaoshuai Shi, Zhuotao Tian, Tianyu He, Li Jiang
+Date: Fri Oct  3 17:35:16 2025
+
+Autoregressive video diffusion models have proved effective for world modeling and interactive scene generation, with Minecraft gameplay as a representative application. To faithfully simulate play, a model must generate natural content while exploring new scenes and preserve spatial consistency when revisiting explored areas. Under limited computation budgets, it must compress and exploit historical cues within a finite context window, which exposes a trade-off: Temporal-only memory lacks long-term spatial consistency, whereas adding spatial memory strengthens consistency but may degrade new scene generation quality when the model over-relies on insufficient spatial context. We present Memory Forcing, a learning framework that pairs training protocols with a geometry-indexed spatial memory. Hybrid Training exposes distinct gameplay regimes, guiding the model to rely on temporal memory during exploration and incorporate spatial memory for revisits. Chained Forward Training extends autoregressive training with model rollouts, where chained predictions create larger pose variations and encourage reliance on spatial memory for maintaining consistency. Point-to-Frame Retrieval efficiently retrieves history by mapping currently visible points to their source frames, while Incremental 3D Reconstruction maintains and updates an explicit 3D cache. Extensive experiments demonstrate that Memory Forcing achieves superior long-term spatial consistency and generative quality across diverse environments, while maintaining computational efficiency for extended sequences.--------------------------------------------------------------------------------
+Long-Horizon Audio-Visual Generation for Persistent Stories and Interactive Worlds (https://arxiv.org/abs/2608.23383)
+citeturn313academia14 [wordlim: 200] Published: last week; The long-video variant introduces composable cross-shot memory that aggregates visual evidence across multiple prior shots and speaker cues derived from speech-filtered full-shot audio, enabling persistent character appearance and voice identity across flexible combinations of text, image, and memory conditioning.The world-model variant converts heterogeneous navigation inputs into calibrated metric 6-DoF camera trajectories and injects them through a geometry-aware conditioning pathway, enabling controller-agnostic interaction across flexible viewpoints.To support efficient long-horizon generation, we transform a bidirectional audio-visual backbone into a causal few-step generator using progressive teacher forcing and short- and long-horizon Self-Gradient Forcing on self-generated rollouts.
+Title: Long-Horizon Audio-Visual Generation for Persistent Stories and Interactive Worlds
+Authors: Nan Duan, Haoyang Huang, Weiyang Jin, Haoran Li, Yaowei Li, Yuming Li, Yijun Liu, Xin Lu, Xiaoxiao Ma, Yanwen Ma, Yaofeng Su, Yilang Sun, Haoyu Wang, Zeyue Xue, Songchun Zhang, Junhao Zhuang
+Date: Mon Aug 24 15:31:12 2026
+
+Video generation is progressing beyond isolated clips toward long-form narratives and interactive worlds, requiring models to preserve identities, follow user controls, and remain stable over extended rollouts. We present JoyAI-Echo-1.5, a unified audio-visual generation system with two purpose-built variants. The long-video variant introduces composable cross-shot memory that aggregates visual evidence across multiple prior shots and speaker cues derived from speech-filtered full-shot audio, enabling persistent character appearance and voice identity across flexible combinations of text, image, and memory conditioning. The world-model variant converts heterogeneous navigation inputs into calibrated metric 6-DoF camera trajectories and injects them through a geometry-aware conditioning pathway, enabling controller-agnostic interaction across flexible viewpoints. To support efficient long-horizon generation, we transform a bidirectional audio-visual backbone into a causal few-step generator using progressive teacher forcing and short- and long-horizon Self-Gradient Forcing on self-generated rollouts. Experiments demonstrate strong performance in both settings. JoyAI-Echo-1.5 achieves improvements over existing long-video baselines in cross-shot consistency, visual quality, text alignment, and speech fidelity. Its world-model variant ranks first on WBench, with an average score of 81.7, and achieves leading visual quality and long-horizon persistence on SANA-WM-Bench. Together, these results indicate that memory, geometric control, and rollout-aware training provide a practical foundation for generating coherent stories and continuously evolving interactive worlds. Project page: https://echo-team-joy-future-academy-jd.github.io/Echo-1.5-Page/.--------------------------------------------------------------------------------
+WALL-SS: Scaling Long-horizon World Models via Next-Scale Autoregression (https://arxiv.org/abs/2608.26239)
+citeturn313academia15 [wordlim: 200] Published: last week; We introduce WALL-SS, a world model that generates visual futures through Scale-wise autoregressive Scaling, enabling action-controllable and long-horizon robotic simulation. ... Scale-compressed long-horizon memory retains recent interactions at fine resolution while compressing distant observations and actions, with scale-wise dream forcing enhancing robustness to self-generated context.
+Title: WALL-SS: Scaling Long-horizon World Models via Next-Scale Autoregression
+Authors: Maeve Zhang, Rain Sun, Xiang Wang, Cyril Zhang, Shalfun Li, Meng Cao, Howard Lu, Ethan Chen, Harry Jhou, KZ Zheng, Lights Shi, Regis Cheng, Lorenzin, Robert Wang, Victor Yao, Gody Li, Elise Mon, Yohann Tang, Ryan Yu, PS Zhang, Vincent Chen, Hang Su, Roy Gan, Hao Wang, Qian Wang
+Date: Wed Aug 26 17:57:12 2026
+
+Generative world models provide robots with predictive models of how the world evolves under interaction, with growing potential for simulation, planning, policy evaluation, and robot learning. Beyond clip-level future prediction, a unified generative formulation should relate actions to consequences, support flexible horizons and continuous interaction, and enable reward-driven optimization. We introduce WALL-SS, a world model that generates visual futures through Scale-wise autoregressive Scaling, enabling action-controllable and long-horizon robotic simulation. WALL-SS represents embodied trajectories as causal sequences of temporally interleaved observations and actions, making action-dependent state transitions explicit while naturally supporting variable-length generation, streaming extension through reusable causal states, and direct optimization through sequence probabilities. To make this formulation effective over long horizons, we generate each future observation in a coarse-to-fine manner and develop three complementary components within the same hierarchy. Action-conditioned next-scale prediction injects scale-aligned action representations to improve action-future coupling and model both successful and failed behaviors. Scale-compressed long-horizon memory retains recent interactions at fine resolution while compressing distant observations and actions, with scale-wise dream forcing enhancing robustness to self-generated context. Finally, on-policy alignment optimizes autoregressive visual dynamics with action-following and long-term consistency rewards while preserving the pretrained visual distribution. Experiments show that WALL-SS improves action following and trajectory accuracy, supports coherent minute-long streaming rollout under bounded memory, and consistently benefits from on-policy alignment in reducing action drift and long-horizon inconsistency.--------------------------------------------------------------------------------
+Published as a conference paper at ICLR 2026 (https://openreview.net/pdf/bd4b1b563a51fc004a598036128f26b9e587d328.pdf)
+citeturn313search16 [wordlim: 200] Published: 6 months ago; TTT3R: 3D Reconstruction as Test-Time Training
+Published as a conference paper at ICLR 2026
+
+TTT3R: 3D Reconstruction as Test-Time Training
+
+Xingyu Chen¹,²   Yue Chen¹,²   Yuliang Xiu²   Andreas Geiger³   Anpei Chen²  
+¹Zhejiang University   ²Westlake University   ³Uni of Tübingen, Tübingen AI Center
+
+<visual_element id="e1">
+A figure showing a sequence of indoor RGB image thumbnails across the top with the label “6,000 images,” and below it two side-by-side 3D reconstruction visualizations with green trajectory lines over gray point-cloud-like scene reconstructions. The left panel is labeled as CUT3R with a small schematic showing input X_t, state S_t, and output Y_t. The right panel is labeled “Test-Time Training” with a schematic showing state update S_t = S_{t-1} - β_t ∇_t and CUT3R, indicating online state updates and confidence-aware learning rate.
+</visual_element>
+
+Figure 1: Left: CUT3R [89] encodes observations into a state (memory) S_{t−1}, then interacts with new observation X_t and retrieves 3D information by reading out the output token Y_t. --------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training | Article Information | J-GLOBAL (https://jglobal.jst.go.jp/en/detail?JGLOBAL_ID=202502205320928599)
+citeturn313search0 [wordlim: 200] Published: 6 months ago; Crawled: last week; # TTT3R: 3D Reconstruction as Test-Time Training ... arXiv
+
+Preprint
+
+J-GLOBAL ID：202502205320928599   Reference number：25P0260954
+
+# TTT3R: 3D Reconstruction as Test-Time Training
+
+TTT3R:テスト時間訓練としての3D再構成〖JST機械翻訳〗
+
+  * Publisher site Copy service
+  * Access JDreamⅢ for advanced search and analysis.
+
+This is a preprint. See "About preprints" page for more details.
+
+Author (5)：
+
+Chen Xingyu
+
+About Chen Xingyu
+
+  * Search "202550001087381914"
+  * Search "Chen Xingyu"
+
+, 
+
+Chen Yue
+
+About Chen Yue
+
+  * Search "202550001087411570"
+  * Search "Chen Yue"
+
+, 
+
+Xiu Yuliang
+
+About Xiu Yuliang
+
+  * Search "202550001096330915"
+  * Search "Xiu Yuliang"
+
+, 
+
+Geiger Andreas
+
+About Geiger Andreas
+
+  * Search "202550001213238715"
+  * Search "Geiger Andreas"
+
+, 
+
+Chen Anpei
+
+About Chen Anpei
+
+  * Search "201950000476327395"
+  * Search "Chen Anpei"
+
+Material：
+
+arXiv
+
+About arXiv
+
+  * Search "O7000B"
+
+Publication year： Mar. 03, 2026  update date on preprint server： Mar. 04, 2026
+JST Material Number： O7000B  Document type： Preprint
+--------------------------------------------------------------------------------
+[2509.26645] TTT3R: 3D Reconstruction as Test-Time Training (https://owu.terracat.net/abs/2509.26645?__owu_origin_v1=aHR0cHM6Ly9hcnhpdi5vcmc)
+citeturn313search1 [wordlim: 200] Published: 6 months ago; Crawled: last week; View a PDF of the paper titled TTT3R: 3D Reconstruction as Test-Time Training, by Xingyu Chen and 4 other authors ... View a PDF of the paper titled TTT3R: 3D Reconstruction as Test-Time Training, by Xingyu Chen and 4 other authors
+
+# Computer Science > Computer Vision and Pattern Recognition
+
+[Submitted on 30 Sep 2025 (v1), last revised 3 Mar 2026 (this version, v4)]
+
+# Title:TTT3R: 3D Reconstruction as Test-Time Training
+
+Authors:Xingyu Chen, Yue Chen, Yuliang Xiu, Andreas Geiger, Anpei Chen
+
+View a PDF of the paper titled TTT3R: 3D Reconstruction as Test-Time Training, by Xingyu Chen and 4 other authors
+
+View PDF HTML (experimental)
+
+> Abstract:Modern Recurrent Neural Networks have become a competitive architecture for 3D reconstruction due to their linear-time complexity. However, their performance degrades significantly when applied beyond the training context length, revealing limited length generalization. In this work, we revisit the 3D reconstruction foundation models from a Test-Time Training perspective, framing their designs as an online learning problem. Building on this perspective, we leverage the alignment confidence between the memory state and incoming observations to derive a closed-form learning rate for memory updates, to balance between retaining historical information and adapting to new observations. This training-free intervention, termed TTT3R, substantially improves length generalization, achieving a $2\times$ improvement in global pose estimation over baselines, while operating at 20 FPS with just 6 GB of GPU memory to process thousands of images. Code is available in this https URL
+
+Comments:  | Page: this https URL Code: this https URL
+Subjects:  | Computer Vision and Pattern Recognition (cs.CV)
+Cite as:  | arXiv:2509.26645 [cs.CV]
+   | (or arXiv:2509.26645v4 [cs.CV] for this version)
+   | https://doi.org/10.48550/arXiv.2509.26645 arXiv-issued DOI via DataCite
+Journal reference:  | International Conference on Learning Representations (ICLR), 2026
+
+## Submission history
+
+From: Yue Chen [view email]
+[v1] Tue, 30 Sep 2025 17:59:51 UTC (10,880 KB)
+[v2] Tue, 14 Oct 2025 15:57:11 UTC (13,605 KB)
+[v3] Thu, 16 Oct 2025 11:37:35 UTC (14,983 KB)
+[v4] Tue, 3 Mar 2026 12:58:09 UTC (15,035 KB)
+
+Full-text links:
+
+## Access Paper:
+
+View a PDF of the paper titled TTT3R: 3D Reconstruction as Test-Time Training, by Xingyu Chen and 4 other authors
+
+  * View PDF
+  * HTML (experimental)
+  * TeX Source
+--------------------------------------------------------------------------------
+Paper-Notes-en/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md at main · zhaoyang97/Paper-Notes-en · GitHub (https://github.com/zhaoyang97/Paper-Notes-en/blob/main/docs/ICLR2026/3d_vision/ttt3r_3d_reconstruction_as_test-time_training.md)
+citeturn313search2 [wordlim: 200] Published: 4 months ago; Crawled: last month; title  | [Paper Note] TTT3R: 3D Reconstruction as Test-Time Training ... # TTT3R: 3D Reconstruction as Test-Time Training
+
+title  | [Paper Note] TTT3R: 3D Reconstruction as Test-Time Training
+description  | [ICLR 2026][3D Vision][Online 3D reconstruction] The state update of the recurrent 3D reconstruction model CUT3R is reformulated as a test-time online learning problem. By deriving a closed-form, per-token adaptive learning rate based on the alignment confidence between memory states and new observations to gate state updates, this method significantly mitigates long-sequence forgetting without retraining or adding parameters. It improves global pose accuracy by 2× over the b…
+tags  | 
+ICLR 2026 3D Vision Online 3D reconstruction test-time training recurrent neural networks length generalization adaptive learning rate
+date  | 2026-05-08
+content_hash  | be715a729e83a605
+
+# TTT3R: 3D Reconstruction as Test-Time Training
+
+Conference: ICLR 2026
+OpenReview: https://openreview.net/forum?id=aMs6FtNaY5
+Code: https://rover-xingyu.github.io/TTT3R
+Area: 3D Vision
+Keywords: Online 3D reconstruction, test-time training, recurrent neural networks, length generalization, adaptive learning rate
+
+## TL;DR
+
+The state update of the recurrent 3D reconstruction model CUT3R is reformulated as a test-time online learning problem. By deriving a closed-form, per-token adaptive learning rate based on the alignment confidence between memory states and new observations to gate state updates, this method significantly mitigates long-sequence forgetting without retraining or adding parameters. It improves global pose accuracy by 2× over the baseline while remaining efficient (20 FPS, 6 GB VRAM) for sequences of thousands of images.
+
+## Background & Motivation
+
+Background: 3D reconstruction foundation models aim to simultaneously predict camera poses and scene geometry (pixel-aligned pointmaps) from a set of RGB images. Transformer-based full-attention methods (e.g., DUSt3R, VGGT, Fast3R) achieve SOTA performance via global all-to-all attention; however, their computation and memory consumption grow quadratically with sequence length, making them inherently offline—requiring all images to be reprocessed each time a new frame arrives. For each state token, the attention scores across all observation keys are averaged and passed through a sigmoid function to compute its learning rate:
+
+$$\beta_t = \sigma!\left(\textstyle{\sum_m} \bQ_{\bS_{t-1}}\bK_{\bX_t}^\top\right),\qquad \textstyle\sum_m \equiv \tfrac{1}{m}\textstyle\sum_{i=1}^m$$
+
+The complete closed-form update rule becomes $\bS_t = \bS_{t-1} - \beta_t\big(-\texttt{softmax}(\bQ_{\bS_{t-1}}\bK_{\bX_t}^\top)\bV_{\bX_t}\big)$. High alignment confidence indicates low uncertainty, leading to a larger update step; low confidence (e.g., textureless regions) suppresses the update. This plug-and-play intervention uses existing attention statistics without new parameters or fine-tuning, mitigating forgetting sufficiently to enable online loop closure.
+
+3. Optional State Reset: Bypassing the "Unexplored State Distribution" Problem
+
+Confidence gating mitigates but does not fully solve forgetting over very long sequences, where recurrence might push the state into distributions never seen during training ("unexplored state" hypothesis). The authors provide an optional TTT3R + State Reset variant: periodically resetting the state to its initial value to prevent overfitting to OOD regions. The resulting chunks are aligned using global metric poses without additional heavy optimization, maintaining CUT3R's speed and memory efficiency.
+
+### Loss & Training
+
+The hallmark of this work is that it is entirely training-free. TTT3R is an inference-time intervention on a pre-trained CUT3R model. All changes occur in the forward pass; no weights are fine-tuned, and no learnable parameters are added. The learning rate $\beta_t$ is computed directly from existing attention logits.
+
+--------------------------------------------------------------------------------
+SpatialBench (https://ropedia.github.io/SpatialBench/)
+citeturn313search3 [wordlim: 200] Crawled: 3 months ago; TTT3R  | Test-Time Training  | 0.247  | 0.202  | 0.469  | 0.179  | 0.493  | 2.343  | 0.294  | 0.222  | 0.321  | 21.070  | 0.173  | 0.201  | 0.428  | 11.700  | 0.233
+TTT3R  | Test-Time Training  | 0.247  | 0.202  | 0.469  | 0.179  | 0.493  | 2.343  | 0.294  | 0.222  | 0.321  | 21.070  | 0.173  | 0.201  | 0.428  | 11.700  | 0.233
+CUT3R  | Online  | 0.247  | 0.196  | 0.519  | 0.189  | 0.469  | 2.676  | 0.286  | 0.260  | 0.165  | 25.540  | 0.109  | 0.215  | 0.384  | 14.110  | 0.198
+Wint3R  | Online  | 0.619  | 0.157  | 0.499  | 0.144  | 0.444  | 3.944  | 0.401  | 0.234  | 0.202  | 27.800  | 0.114  | 0.178  | 0.382  | 15.870  | 0.258
+LongStream-S  | Online  | 0.523  | 0.151  | 0.543  | 0.166  | 0.385  | 1.188  | 0.126  | 0.279  | 0.218  | 10.080  | 0.083  | 0.199  | 0.382  | 5.632  | 0.105
+Fast3R  | End-to-End Feed-Forward  | 0.350  | 0.260  | 0.392  | 0.255  | 0.386  | 6.582  | 0.300  | 0.331  | 0.232  | 13.680  | 0.224  | 0.282  | 0.337  | 10.130  | 0.262
+Spann3r-224  | Online  | 0.370  | 0.274  | 0.329  | 0.252  | 0.361  | 4.312  | 0.254  | 0.315  | 0.246  | 26.480  | 0.159  | 0.280  | 0.312  | 15.390  | 0.207
+--------------------------------------------------------------------------------
+TTT3R: recurrent state, test-time gating, and code map — Hai Pham (https://haiphamcse.github.io/blog/ttt3r.html)
+citeturn313search4 [wordlim: 200] Published: 4 months ago; Crawled: last month; The test-time behavior is not a second backward pass or optimizer step at inference; it reuses the same recurrent decoder as CUT3R to propose a next state `new_state_feat`, then rescales how much of that proposal is written into the persistent state using attention-derived gates—this is the code-side reading of “test-time training” for this project. ... Flag `cut3r` vs `ttt3r`  | `src/dust3r/model.py` — `ARCroco3DStereoConfig` (`model_update_type`)
+    
+          # Reading is the same
+          `
+
+### Important code chunks
+
+The reference implementation lives in the TTT3R repository (e.g. local clone at `MVA/INRIA/TTT3R` or Inception3D/TTT3R). The test-time behavior is not a second backward pass or optimizer step at inference; it reuses the same recurrent decoder as CUT3R to propose a next state `new_state_feat`, then rescales how much of that proposal is written into the persistent state using attention-derived gates—this is the code-side reading of “test-time training” for this project.
+
+Where to look
+
+What  | File (under repo root)
+--- | ---
+Flag `cut3r` vs `ttt3r`  | `src/dust3r/model.py` — `ARCroco3DStereoConfig` (`model_update_type`)
+State proposal + attention maps  | `src/dust3r/model.py` — `_recurrent_rollout` → `_decoder` with `return_attn=True`
+TTT3R gating + state write  | `src/dust3r/model.py` — `_forward_impl` and the streaming forward path (two nearly identical blocks after each rollout)
+CLI / eval  | `demo.py`, `eval/*/launch.py` — `--model_update_type {cut3r,ttt3r}` sets `model.config.model_update_type`
+
+--------------------------------------------------------------------------------
+ViT$^3$: Unlocking Test-Time Training in Vision (https://openaccess.thecvf.com/content/CVPR2026/papers/Han_ViT3_Unlocking_Test-Time_Training_in_Vision_CVPR_2026_paper.pdf)
+citeturn313search17 [wordlim: 200] Published: 3 months ago; Test-Time Training (TTT) model ... TTT3R [5]
+ily of approaches, linear attention methods [17, 30, 69, 70],
+redesign the attention paradigm to achieve global model-
+ing with linear complexity O(N). With growing demand
+to process longer visual sequences, these linear-complexity
+models [18, 33, 42, 67] have attracted increasing interest. In
+this paper, we complement these lines of work by exploring
+TTT–based linear-complexity design.
+Test-Time Training (TTT) model
+[54] is a recently
+emerged approach for efficient sequence modeling, which
+reformulates attention operation as an online learning prob-
+lem. This paradigm increases the flexibility of sequence
+models and has enabled scalable, linear-complexity designs
+across multiple domains [1, 8, 76]. For instance, LaCT [76]
+attains effective linear-time language modeling by applying
+large chunk test-time training. TTT layers allow pretrained
+diffusion Transformers that could only generate 3-second
+clips to produce coherent one-minute videos [8]. TTT3R [5]
+views 3D reconstruction as a test-time training process,
+--------------------------------------------------------------------------------
+Video World Models with Long-term Spatial Memory (https://proceedings.neurips.cc/paper_files/paper/2025/file/467655d26fcc207bca08915dc91964c6-Paper-Conference.pdf)
+citeturn313search18 [wordlim: 200] Published: 7 months ago; A latent video generation model, implemented by a diffusion ... a point cloud representation (left) is autoregressively generated along with the video frames. ... long-term spatial memory contains the static parts of the world. ... model improves upon this architecture with additional control signals for enabling long-term memory. ... captures high-confidence, temporally consistent 3D structures.
+--------------------------------------------------------------------------------
+world-models/README.md at main · natemurthy/world-models · GitHub (https://github.com/natemurthy/world-models/blob/main/README.md)
+citeturn313search5 [wordlim: 200] Published: 2 weeks ago; Crawled: 5 days ago; Its lineage continued with Puppeteer, a hierarchical world model controlling a 56-DoF simulated humanoid from pixels (ICLR 2025) [73], and Newt (ICLR 2026), a language-conditioned multitask world model pretrained on demonstrations and finetuned with online RL across a 200-task benchmark [74]. ... Rather than flattening visual data into 1D/2D pixel- or token-sequences the way video diffusion models do, these architectures generate persistent, explicitly 3D (and 4D — space plus time) environments with volume, geometry, and structure. ... This question is posed directly by generative image/video models, for instance OpenAI claims Sora is a "video generation models as world simulators" claim [140] has been empirically tested twice: (1) ByteDance's ICML 2025 study trained diffusion video models on videos governed by known classical mechanics and found that scaling yields memorization and interpolation, not physical laws — combinatorial and out-of-distribution generalization fail [93]; and the Physics-IQ benchmark (INSAIT/DeepMind, WACV 2026) found physical understanding "severely limited" across Sora, Runway, Pika, Lumiere and others, concluding that visual realism does not imply physical understanding [127].
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training | alphaXiv (https://www.alphaxiv.org/abs/2509.26645v2)
+citeturn313search6 [wordlim: 200] Published: 10 months ago; Crawled: 3 days ago; TTT3R represents a significant advancement in online 3D reconstruction by providing a practical, training-free solution to the length generalization problem. ... Learning to (learn at test time): Rnns with expressive hidden states. arXiv preprint arXiv:2407.04620, 2024. ... This paper is cited as a key inspiration for the core mechanism of TTT3R, which interprets the recurrent state as a 'fast weight' learned at test time.
+--------------------------------------------------------------------------------
+TTT3R: Test-Time Training for 3D Reconstruction (https://www.emergentmind.com/papers/2509.26645)
+citeturn313search7 [wordlim: 200] Published: 11 months ago; Crawled: 6 months ago; TTT3R demonstrates that test-time training principles, particularly confidence-guided fast weight updates, can be effectively leveraged to address the length generalization and forgetting problems in recurrent 3D reconstruction models. ...     * What: Use TTT3R to study fast/slow weights, adaptive learning rates, and forgetting in long-context RNNs; benchmark improvements in 3D reconstruction tasks. ...   * Test-Time Training (TTT): Updating fast weights or model components during inference to adapt to the current context.
+--------------------------------------------------------------------------------
+Paper page - Memory Forcing: Spatio-Temporal Memory for Consistent Scene Generation on Minecraft (https://huggingface.co/papers/2510.03198)
+citeturn313search8 [wordlim: 200] Published: 11 months ago; Crawled: last week; arxiv:2510.03198 ... Memory Forcing framework enhances video diffusion models with spatial memory and hybrid training to improve long-term consistency and generative quality in interactive environments. ... Autoregressive video diffusion models have proved effective for world modeling and interactive scene generation, with Minecraft gameplay as a representative application. ... Under limited computation budgets, it must compress and exploit historical cues within a finite context window, which exposes a trade-off: Temporal-only memory lacks long-term spatial consistency, whereas adding spatial memory strengthens consistency but may degrade new scene generation quality when the model over-relies on insufficient spatial context.
+--------------------------------------------------------------------------------
+TTT3R: 3D Reconstruction as Test-Time Training | alphaXiv (https://www.alphaxiv.org/abs/2509.26645v1)
+citeturn313search9 [wordlim: 200] Published: 11 months ago; Crawled: 3 days ago;   * Real-time performance: 20 FPS processing speed ... By preventing catastrophic forgetting through adaptive state updates, TTT3R enables robust processing of sequences far longer than the training distribution without performance degradation.
+--------------------------------------------------------------------------------
+(PDF) Geometry-Consistent Video World Models: A Comprehensive Guide (https://www.researchgate.net/publication/410634546_Geometry-Consistent_Video_World_Models_A_Comprehensive_Guide)
+citeturn313search10 [wordlim: 200] Published: last month; Crawled: 2 weeks ago; over long generation horizons. ... Once incorrect geometry is written ... Conﬁdence-aware memory writes, where ge-
+--------------------------------------------------------------------------------
+Paper page - Self-Evolving World Models for LLM Agent Planning (https://huggingface.co/papers/2606.30639)
+citeturn313search11 [wordlim: 200] Crawled: yesterday; arxiv:2606.30639 ... WorldEvolver is a self-evolving world model framework that improves long-horizon LLM agent performance through memory-based revision of deployment-time context while maintaining frozen model parameters.Generated by Qwen/Qwen2.5-Coder-32B-Instruct ... WorldEvolver integrates three modules: (i) Episodic Memory, which exploits real action transitions through retrieval-based simulation; (ii) Semantic Memory, which extracts persistent heuristic rules from prediction-observation mismatches; and (iii) Selective Foresight, which filters low-confidence predictions before integrating them into agent reasoning context.
+--------------------------------------------------------------------------------
+Under review as a conference paper at ICLR 2026 (https://openreview.net/pdf/b78c1e2fe506a105a4c2233ca057ff547432304a.pdf)
+citeturn313search19 [wordlim: 200] Published: 10 months ago; Under review as a conference paper at ICLR 2026 ... states with low prediction confidence (Yamauchi, 1997). ... accuracy of those achieved using procedurally generated memory banks (n = 1000). ... algorithm can outperform an RL agent, but that a world model learned from such sparse, disjoint
+--------------------------------------------------------------------------------
+Dynamic Worlds, Dynamic Humans: Generating Virtual (https://www.znakschoola.ru/?_=%2Fpdf%2F2601.19484%23UE7DkG0PaBHZOakR54g1Wl8%3D)
+citeturn313search20 [wordlim: 200] Published: 6 months ago; :  Generated Motion ... Confidence ... It consists of three components: (1) dynamic scene-aware navigation, (2) hierarchical experience memory, and (3) HSI diffusion model. ... quently, research in the Dreamer series [17,18] further demonstrated ... MineWorld [15] introduced a real-time interactive world model based ... that takes paired game scenes and actions as input to generate subse- ... man–scene interaction generation.
+--------------------------------------------------------------------------------
+RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction (https://arxiv.org/html/2603.20588v1)
+citeturn313view0 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://arxiv.org/html/2603.20588v1","lineno":null}); Total lines: 378
+--------------------------------------------------------------------------------
+PERSIST: World Models with Persistent 3D State (https://francelico.github.io/persist.github.io/)
+citeturn313view1 [wordlim: 200] Crawled: today; Content type: text/html; Source: open({"ref_id":"https://francelico.github.io/persist.github.io/","lineno":null}); Total lines: 158
+

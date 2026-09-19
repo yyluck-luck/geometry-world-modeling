@@ -1,0 +1,82 @@
+{
+  "schema": "S40_READBACK_INDEPENDENT_SOURCE_REVIEW_V2",
+  "reviewed_utc": "2026-09-07T05:09:58.188647+00:00",
+  "reviewer": "/root/s14_feature_extractor",
+  "verdict": "PASS_SOURCE_DELTA_REVIEW_NOT_EXECUTED",
+  "review_scope": "v1 full source review plus complete v2 source/protocol delta, author preparation/revision bindings; no runtime execution",
+  "source_lines": 382,
+  "identities_relative_to_review_directory": {
+    "readback.py": "4c7a4208c4a67b003bae7b5574b48ce44d6034797bf2e9c5ab021e4d04e4cbf6",
+    "PROTOCOL_DRAFT.md": "b4887316240bc511cfde2d4fec5d31989ffa1a854be4da56a973e28cca0d7b2c",
+    "preparation_receipt.json": "bc9f36492ec8bdeebbe4295658b00c5590041fabc94610aac072b8f2b15ac40f",
+    "revision_v2_receipt.json": "fff4ca87eb3a39b4267f0eda004e2d81764c1c5905fcd10adae525107fb5208e",
+    "readback.py.v2.diff": "62dc50394681744f3caa5af04224999ec8089c5910ab8755d95f20166b4b4f77",
+    "PROTOCOL_DRAFT.md.v2.diff": "58d95086108ed917f681230d62b579aae671fa74d01e2240468738b95ada72b1",
+    "source_review_v1.json": "84cf390761b65251e8852b3c60ddea781d20dbbe1db38c3e2e4ae917a3caace0",
+    "history_v1_before_bridge_review/readback.py": "3e3d1b6a9e41aa4be6268088501ed555520282e8d652466d92d8cd5a8424f3ef"
+  },
+  "source_binding_consistency": "PASS",
+  "resolved_findings": {
+    "R1": {
+      "verdict": "RESOLVED_STATICALLY",
+      "evidence": "trace_states enforces one opening session, two distinct nonoverlapping batches, full sample/sampler/cache/map transition sequence, callbacks only inside active sampler with consecutive indices and matching returned count, final single session_end with no trailing events. It also binds ordered trace batch IDs and archive metadata.batch_id for each batch-local operation."
+    },
+    "R2": {
+      "verdict": "RESOLVED_STATICALLY",
+      "evidence": "New checks bridge each actual sampler output to all saved samples_z; select encode_image input/output by real batch ID, enforce within-batch order, compare all target sample rows including padding to encoder input and encoder output to all commit embeddings. Complete target camera/K suffixes and translation scalar are compared against actual get_cond path."
+    },
+    "resource_boundary": {
+      "verdict": "DOCUMENTED_ACCURATELY",
+      "evidence": "Protocol now requires a real external CPU1/300s/2GiB process-tree supervisor before execution. Worker command is labelled incomplete supervision; tick is explicitly cooperative and JSON/memmap peak memory remains unmeasured."
+    }
+  },
+  "additional_source_check": {
+    "purpose": "Ensure new sampler_output→samples_z and scalar bridges do not require a false identity across a known in-place transformation",
+    "findings": [
+      "Original translation scaler returns the same scalar passed to get_cond; same_scalar distinguishes Python scalar bits from single-element tensor dtype/shape/bits.",
+      "Original AutoEncoder decode computes z/scale_factor as a separate tensor, so its wrapper does not intentionally rescale samples_z in-place; this is source reasoning, not runtime proof.",
+      "Original target samples are selected after the sample return, and the observed encoder captures actual input/output in the same active batch."
+    ],
+    "readset": [
+      {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py",
+        "sha256": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+        "scope": "targeted source sections; autoencoder.py full short source"
+      },
+      {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py",
+        "sha256": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+        "scope": "targeted source sections; autoencoder.py full short source"
+      },
+      {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/autoencoder.py",
+        "sha256": "ccb94f107fd07302fa34593f7b840b3066f73548fe800e647eccfd66da473807",
+        "scope": "targeted source sections; autoencoder.py full short source"
+      },
+      {
+        "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/runtime_adapter.py",
+        "sha256": "d26f7e8990fd218273361c04484c8c0ea499a693486fd7bb040e3b03306a79c4",
+        "scope": "targeted source sections; autoencoder.py full short source"
+      }
+    ]
+  },
+  "remaining_execution_preconditions": [
+    "Real completed S40 frozen manifest and external/worker receipts with exact SHA anchors",
+    "External supervisor actually enforces and records CPU thread setting, 300-second wall time and 2GiB process-tree RSS",
+    "Run only then on complete real saved arrays; retain any failure without budget expansion",
+    "No actual array consumption, quality, model mathematics or innovation conclusion is certified here"
+  ],
+  "operations": {
+    "readback_import_or_run": 0,
+    "new_or_old_test_cases": 0,
+    "real_prediction_arrays_read": 0,
+    "weights_photos_gt_read": 0,
+    "models_ga_or_renderers": 0,
+    "network_requests": 0,
+    "author_source_modified": false,
+    "canonical_ledger_modified": false
+  },
+  "new_blocking_source_findings": [],
+  "actual_result_pass_signed": false,
+  "review_markdown_sha256": "2eb1ee193deb531a694f89ca038c1ecb067c78db0a3561c3cb460ce331e49510"
+}

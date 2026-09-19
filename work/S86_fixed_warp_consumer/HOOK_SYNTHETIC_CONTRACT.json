@@ -1,0 +1,81 @@
+{
+  "schema": "S86_HOOK_AUTHOR_SYNTHETIC_V1",
+  "created_utc": "2026-09-10T21:16:13.404648+00:00",
+  "checker_sha256": "32cb9b3be881cb375f688d3e96353c5ec67764a97f3d8c4738b57b942a857942",
+  "sources": {
+    "sampling": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/sampling.py",
+      "sha256": "dc07ca0ba571ba5fb48f9856515d2cb7dea25254008a6f8b315538817f352b24"
+    },
+    "hooks": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/sampler_hooks.py",
+      "sha256": "2521dac2e07d0809eaecf23c37e6f41a5d157435ef7e5d010eec8ce840933ae4"
+    },
+    "fusion": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S82_history_geometry_guidance/latent_geometry_guidance.py",
+      "sha256": "11f9f53c3ce40d0d040deb8e08fa042f5fafe8c477dc43de166c94fc416d5c2f"
+    }
+  },
+  "torch_version": "2.7.0",
+  "argv": [
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "-I",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/check_hooks_synthetic.py"
+  ],
+  "output_directory": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S86_fixed_warp_consumer/synthetic_hooks_01",
+  "planned_batch": "Once: original3 + hookedG0_3 + hookedGguide3 + intentional_callback_failure_at_step1; 10 deterministic stub calls total. This is one author test process, no repeated real model or real arrays.",
+  "fixtures": {
+    "shape": [
+      8,
+      2,
+      2,
+      3
+    ],
+    "seed": 86,
+    "steps": 3,
+    "sampler": "unchanged original EulerEDMSampler + MultiviewCFG, CPU FP32, cfg2/cfg_min1.2/churn0/noise1",
+    "guidance_strengths": [
+      0.0,
+      0.25,
+      0.25
+    ],
+    "strength_scope": "Artificial tensor checks only, not a new real-experiment parameter selection",
+    "history_slots": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "mask": "ones except pixel0,0 allslots zero",
+    "stub": "x*0.2 + cond crossattn; no learned network or VAE"
+  },
+  "required_checks": [
+    "G0 final and per-step raw bytes equal original",
+    "G0 initial noise and all step RNG hashes equal original",
+    "G0 raw_clean is used_clean in callback",
+    "zero-fusion original-order final replay exactly equals original returned bytes",
+    "replay no RNG",
+    "history/zero-mask clean values exactly preserved",
+    "Gguide callback count and zero strength object identity",
+    "Gguide actual RNG stream matches original",
+    "callback exception propagates and failed step keeps counter/error"
+  ],
+  "limits": {
+    "wall_seconds": 90,
+    "sampled_self_peak_rss_bytes": 1073741824,
+    "threads": 1
+  },
+  "no_reads": [
+    "real scientific arrays",
+    "RGB",
+    "depth",
+    "weights",
+    "credentials"
+  ],
+  "failure_policy": "Retain failed receipt/output; no automatic rerun; intentional callback exception is expected test evidence, not hidden failure.",
+  "claim_boundary": "Author artificial integration check, not independent acceptance, a real model forward or scientific method validation."
+}

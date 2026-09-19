@@ -1,0 +1,120 @@
+{
+  "schema": "S83-independent-source-review-v1",
+  "reviewed_utc": "2026-09-10T18:42:23.664637+00:00",
+  "verdict": "PASS_FOR_ONE_ROOT_SUPERVISED_BOUNDED_EXECUTION",
+  "runner_sha256": "76c5a6a4a67a391e97e6ebaa7c13cc0a520092be563a10f27a8cebad3f33afc3",
+  "contract_sha256": "0ff3a1f1c4aeaadb455ec6a3e832217978148172ae0018a5bf97b53859a7be5a",
+  "supervisor_sha256": "f774db934cae3985289c15678eb3b47093c5ee8f7ca6f0c64b1311a57a060932",
+  "author_precheck_sha256": "c573df587f4da9424fe82aa1f8afba559f218eeee0c2f3717276f69cf3eb64ec",
+  "synthetic_review_sha256": "7de2ffed947774948d2adf1f5b5cc9fd818e32d31c30758f8827262cd1cef935",
+  "synthetic_reviewer_sha256": "9e6862cc53fef4c11e438538321a73fd73c4eed7156b322a77f75aba9929e82f",
+  "supervisor_review_sha256": "1c69e26b79a95e8fd8edc7b81f79baefba296b2aaeac5772701b7c71db03a49b",
+  "execution_directory_exists_at_review": false,
+  "blockers": [],
+  "checks": [
+    {
+      "name": "original_import_and_adapter",
+      "status": "PASS",
+      "evidence": "Actual original PointCloudOptimizer imported through S17C overlay; setup verified source/distribution identities. Local adapter preserves registered log-depth leaf gradient. No original-source replacement, model or image load."
+    },
+    {
+      "name": "preset_order_and_fixed_P_K",
+      "status": "PASS",
+      "evidence": "optimize_pp=True before preset_pose, preset_focal, preset_principal_point. All four camera/focal/PP and pair adaptors frozen. Nonidentity rotation/off-centre principal point artificial case passes. _set_pose/_set_focal respect requires_grad during original MST; encoded values checked exact after MST, every step and clean."
+    },
+    {
+      "name": "three_star_prediction_identity",
+      "status": "PASS",
+      "evidence": "S82 execution_geometry_03 and root acceptance bound; history [12,13,18,19], edges [(0,1),(0,2),(0,3)]. pred_i=self_view of head0 repeated; pred_j=other_view of heads1..3; weights log(conf_self0)/log(conf_j), independently artificial-checked. Actual preprocessed image is colour source. S69 nine-row archive transparently read, only four selected camera rows consumed; no invented GT leak."
+    },
+    {
+      "name": "original_MST_and_100_steps",
+      "status": "PASS_SOURCE_ONLY_FOR_MST",
+      "evidence": "Original MST once, niter_PnP=10; known_poses initializer correctly excluded for directed star. Four registered log-depth maps and 3x8 pair transforms trainable, not depth-only. Original global_alignment_iter n=0..99 and one Adam; 100 pre-step losses + separate post-step100 loss. No convergence/physical-truth claim."
+    },
+    {
+      "name": "gradient_and_full_output_evidence",
+      "status": "PASS",
+      "evidence": "400 gradient and 400 delta summaries include None/finite/shape/dtype/nonzero/norm/full-byte SHA and registered leaf identity. Initial/final full states retained; no best-iteration selection. Per-step full tensors not retained, so independent output review can verify summary consistency but cannot recompute those gradients."
+    },
+    {
+      "name": "cleanup_and_failure_retention",
+      "status": "PASS",
+      "evidence": "Original clean once after100steps tol=.001,bad_conf=0; depth exactly unchanged and P/K fixed; both pre/post clean arrays kept. Save finite guards retain invalid archives; nonfinite losses/statistics log safely. Existing execution directory refused; no retry. No model, render, generation or real sensor-depth reads."
+    },
+    {
+      "name": "external_supervisor",
+      "status": "PASS",
+      "evidence": "Independent SUPERVISOR_SOURCE_REVIEW.json: frozen runner/contract CLI SHA, 300s/8GiB tree supervisor with0.1s sampling; separate supervision_01 and actual sent-signals list; no scientific receipt overwrite."
+    }
+  ],
+  "performed": {
+    "final_source_compile": true,
+    "real_scientific_array_reads": 0,
+    "real_model_loads": 0,
+    "real_optimizer_runs": 0,
+    "artificial_original_optimizer_steps": 1,
+    "artificial_dimensions": [
+      4,
+      3,
+      4
+    ],
+    "MST_executions": 0,
+    "clean_executions": 0
+  },
+  "synthetic_result": {
+    "started_utc": "2026-09-10T18:41:24.235413+00:00",
+    "runner_sha256": "76c5a6a4a67a391e97e6ebaa7c13cc0a520092be563a10f27a8cebad3f33afc3",
+    "contract_sha256": "0ff3a1f1c4aeaadb455ec6a3e832217978148172ae0018a5bf97b53859a7be5a",
+    "reviewer_sha256": "9e6862cc53fef4c11e438538321a73fd73c4eed7156b322a77f75aba9929e82f",
+    "real_array_reads": 0,
+    "real_model_loads": 0,
+    "real_optimizer_calls": 0,
+    "mst_calls": 0,
+    "clean_calls": 0,
+    "preset_readback": {
+      "P_max_abs": 1.1920928955078125e-07,
+      "K_max_abs_px": 0.0,
+      "encoded_frozen_exact": true
+    },
+    "status": "PASS_SYNTHETIC_INTERFACE_ONLY",
+    "synthetic_image_shape": [
+      4,
+      3,
+      3,
+      4
+    ],
+    "artificial_original_adam_steps": 1,
+    "depth_gradient_finite": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "depth_parameters_changed": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "self0_crossj_and_log_confidence_mapping": true,
+    "exp_derivative_to_registered_leaf": true,
+    "nonidentity_rotation_and_offcenter_principal_point": true,
+    "after_step_readback": {
+      "P_max_abs": 1.1920928955078125e-07,
+      "K_max_abs_px": 0.0,
+      "encoded_frozen_exact": true
+    },
+    "loss_before_artificial_step": 20.037452697753906,
+    "learning_rate": 0.01,
+    "elapsed_seconds": 2.184201624993875,
+    "completed_utc": "2026-09-10T18:41:26.419615+00:00",
+    "scope": "Artificial 4x3x4 only; actual original class and one original iteration. No MST/clean/real data or 100-step claim."
+  },
+  "limitations": [
+    "Source review plus tiny artificial interface does not establish that real MST/100-step execution will complete.",
+    "Float32 preset readback tolerances are implementation tolerances, not scientific quality thresholds.",
+    "S82 raw cumulative attempts remain three (two pre-forward technical failures after load, one successful forward); S83 is a distinct one-optimizer attempt.",
+    "Known approximate P/K constrain this observer fit; no depth truth, generation benefit, strong-baseline convergence or novel method has been established."
+  ]
+}

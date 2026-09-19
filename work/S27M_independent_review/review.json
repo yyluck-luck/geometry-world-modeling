@@ -1,0 +1,72 @@
+{
+  "status": "NEEDS_DEPENDENCY_IDENTITY_GATE_BEFORE_EXECUTION",
+  "recorded_utc": "2026-09-06T16:41:27.919404+00:00",
+  "reviewer": "research_novelty_routes, different from s27m script author",
+  "bound_source_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s27m_mst_gradient_diagnostic.py": "20429ffcb6774baeb1d69e2f32f73850870eda135d1c938a13eecb82c920c5cc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27M_preparation/protocol.md": "3d4bc7a75827463ea345679da19f326813ea6154b7759d878f1b63e0ff524456",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S27M_preparation/contract_candidate.json": "c23cd7f430196490fd2e885c2b11d0ecf24c6063a73df5043fdce540c90dae05",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/s26b_consumer_baseline.py": "61e00503829dad7e9d1260fb408b81e8b281198e3cbf4bcab8367a493f982834",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S26_consumer_baseline_preparation/saved_heads_adapter.py": "5990db49b83d5a97e732b7067586243c5bf042565f6638788831fec20bf3593a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S26B_preparation/run_manifest.json": "147357aa1b24caeb813c01fd822cb96f754c2573437d0db6ac8a05b7cbd4d90c"
+  },
+  "actual_review": "Read source/protocol/contract plus original initialization/loop/helper source and parent metadata; parsed source AST only. No execute/import of diagnostic or real NPZ/RGB/camera/sensor reads.",
+  "activity": {
+    "main_calls": 0,
+    "actual_MST_PnP": 0,
+    "objective_forwards": 0,
+    "backwards": 0,
+    "optimizer_steps": 0,
+    "real_payload_bytes_read": 0,
+    "sensor_GT_bytes_read": 0,
+    "new_subagents": 0
+  },
+  "confirmed_static": [
+    {
+      "item": "Input and seed path",
+      "evidence": "Reuses exact original_context including 8 PIL views, original4 head identity and common optical camera; final numeric_setup reset follows imports and patch setup, matching baseline seed0 CPU8 numerical versions. Parent identity map contains no sensor-depth PNG paths."
+    },
+    {
+      "item": "MST and sentinel ordering",
+      "evidence": "Original prepare_output creates/presets scene and original MST function completes before wrapped global_alignment_loop; wrapper performs original scene forward and one backward, then DiagnosticComplete exits original prepare_output before optimizer loop/clean. Adam.step and clean are also guarded."
+    },
+    {
+      "item": "Gradient observations",
+      "evidence": "Exact original ParameterStack return merely retained; full registered and temporary leaves report None/finite/norm and candidate membership. Neither depth-None nor comparison equality is forced as success condition."
+    },
+    {
+      "item": "Historical distinction",
+      "evidence": "New MST and gradient files persisted before old depth decode; old NPZ bytes are hashed in initial seal, not used as depth prior. Comparison is explicitly replay versus old final, not reconstructed historical snapshot."
+    },
+    {
+      "item": "Scope",
+      "evidence": "No model loader or sensor-depth call; one new backward is explicit; frozen baseline code unchanged; output exists refuses reuse; exceptions preserve failure and patches restore."
+    }
+  ],
+  "required_fix": [
+    {
+      "id": "D1",
+      "severity": "MAJOR",
+      "finding": "Original parent has5523 dependency_identities, all absent from its611 identities. Parent manifest and adapter checks do not validate overlay dependency SHA. New diagnostic final loop validates only loaded geometry modules, omitting original ga_worker loaded-overlay dependency loop.",
+      "fix": "Inherit loaded-overlay module identity checks against parent dependency_identities and persist loaded_overlay_modules; do not rely only on numerical version strings."
+    }
+  ],
+  "recommended_small_closure": [
+    {
+      "id": "P1",
+      "finding": "Parameter no-change check traverses post-forward registry but does not explicitly compare before/after name sets and object identities.",
+      "fix": "Preserve original named-parameter mapping at post-MST; require identical key set and identical parameter objects, then torch.equal each saved value."
+    },
+    {
+      "id": "I1",
+      "finding": "Final identity loop checks diagnostic contract items; source reached through AST wrapper/adapter is not necessarily covered by loaded-geometry inventory.",
+      "fix": "Rehash inherited bound source/control identities actually relied on, particularly original AST wrapper and adapter, before marking success; full parent identity recheck is an uncomplicated option."
+    }
+  ],
+  "execution_conditions": [
+    "Root freezes exact reviewed candidate contents and SHA; change only declared frozen status/timestamp fields.",
+    "Run in fresh project Python with original overlay setup and external CPU8/120s/8GiB budget; not executed in this review.",
+    "A diagnostic PASS means gates/execution complete, not that original-depth gradients must beNone or original-final depth must equal replay.",
+    "Loaded-module and parameter checks must not change gradient math or add optimizer steps."
+  ]
+}

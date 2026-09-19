@@ -1,0 +1,7 @@
+# Source-only next-step recommendation
+
+Recommend one saved-data control before a memory-consumer intervention: apply the already fixed S74 wrong-camera-label swap (20↔23, 21↔22) to S73's saved generated-image correspondences. Reuse its original matches and full denominators; compute correct-label versus swapped-label absolute-geometry residuals, retaining all four targets, insufficient support and nulls. Reuse the completed real-photo S74 sensitivity control rather than rerunning it. No model, rematching, camera fitting, angle tuning or best-permutation search is needed.
+
+This asks whether existing generated correspondences distinguish the requested absolute camera labels. It is not calibration: an alternative label looking better could indicate indexing, ambiguous matches or rendering failure, so it cannot alone identify the cause. The severe fourth-target error/limited support remains a finding, not a reason to drop that target.
+
+Do not merely permute S76's local-yaw homographies: with common intrinsics and orthogonal rotations, H=K Ry(-5°) K^-1 is independent of target orientation, so that permutation has little or no diagnostic power. S76's strong first-three relative response establishes a narrower response property; it does not settle absolute geometry or show historical-memory use. Dynamic-memory innovation needs a later real dynamic failure and a controlled memory intervention, which the present static relative-yaw result cannot supply.

@@ -1,0 +1,42 @@
+{
+  "schema": "s14a-extractor-pre-run-review-v1",
+  "status": "BLOCKED_SOURCE_PRECISION_GUARD",
+  "started_utc": "2026-09-06T03:55:58+00:00",
+  "completed_utc": "2026-09-06T03:59:41.101593+00:00",
+  "reviewer": "research_novelty_routes",
+  "different_from_extractor_author": true,
+  "extractor_sha256": "188061a33c107043f7396c401affb10b5112fcd71db941159c9cde9dbedf12f3",
+  "real_inputs_opened": 0,
+  "real_feature_rows": 0,
+  "extractor_calls": 0,
+  "model_gt_scoring_reads": 0,
+  "artificial_scalar_demonstrations": 1,
+  "same_author_tests_reviewed_not_rerun": 19,
+  "manifest_execution_authorized": false,
+  "findings": [
+    {
+      "id": "precision_guard",
+      "severity": "MAJOR",
+      "status": "open",
+      "description": "Saved legacy FP32 weight-gap subtraction is compared exactly to promoted Python float subtraction; legal FP32 values can differ. No actual real-input failure asserted."
+    },
+    {
+      "id": "translation_wording",
+      "severity": "MINOR",
+      "status": "reported_to_parent",
+      "description": "Preparation prose says normalized translation though geodesic_distance directly uses norm(t1-t2)."
+    }
+  ],
+  "inputs_and_report_sha256": {
+    "scripts/extract_s14_prediction_features.py": "188061a33c107043f7396c401affb10b5112fcd71db941159c9cde9dbedf12f3",
+    "scripts/check_s14_feature_boundaries.py": "ce4977be088e30e51574c2342da3fba2bac708d4d252c279b478b63f0fb5b5eb",
+    "docs/S14A_EXTRACTOR_PREPARATION.md": "4c131539bf96b6a7e95eefce5f898e3f21ea83aaffec6684a6b9a258373e602f",
+    "work/S14A_extractor_boundary_checks_v2/receipt.json": "f43b987049cb0324f2f7ce415b7787433dbcdd3f7af3b5f5a54bd68a97be006a",
+    "src/s7_event_replay.py": "3f4028366d1cf1fdcca8744a0cb14690075b9b146bd71af88360afa74bc5e20d",
+    "src/vmem_retrieval_kernel.py": "35825a3989f368906cba08808616f0c6922ff08d0a92c7205fddb4822652e2b3",
+    "src/rgbd_retrieval.py": "6f5188f7f72b66e93af27ab5a368cd09fcea2166715f1bf4cd0545a686ec3cd6",
+    "scripts/run_s12_matched_budget.py": "ccc36d5a7a0efcce82c7354818b878e91464e3822b680259e6dd03d504e7f6d5",
+    "docs/S14A_EXTRACTOR_PRE_RUN_REVIEW.md": "9a2941c0e0fd432965d8df169e924471be4318037026edf3858950cd7a8fdb61"
+  },
+  "scope": "Code/artificial-record review only. No evidence that true 30-file extraction succeeds; researcher outcome knowledge unchanged."
+}

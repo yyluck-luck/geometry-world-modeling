@@ -1,0 +1,477 @@
+{
+  "schema": "s47-c2-confirmation-two-batch-v1",
+  "status": "FROZEN_C2_BASELINE_CONFIRMATION_TWO_BATCH_EXECUTION",
+  "evidence_kind": "recorded_execution",
+  "row": "C2_UNIT_REPAIRED_S64",
+  "retrieval_variant": {
+    "id": "s64_positive_camera_depth_median_units_v1",
+    "scope": "renderer_boundary_instance_hook",
+    "length_unit_rule": "median_of_all_strictly_positive_camera_z",
+    "scaled_fields": [
+      "surfel.position",
+      "surfel.radius",
+      "pose.translation"
+    ],
+    "preserved_fields": [
+      "rotation",
+      "focal",
+      "normal",
+      "source_ID",
+      "cache"
+    ],
+    "depth_unit": "dimensionless_camera_depth_in_positive_median_units",
+    "retrieval_weight": "original_cos_over_1_plus_dimensionless_depth",
+    "physical_length_unit": "UNKNOWN",
+    "hook": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/unit_renderer_hook.py",
+      "sha256": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d"
+    },
+    "adapter": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py",
+      "sha256": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+    },
+    "designed_after_C2_failure": true,
+    "eligible_for_original_cohort": false,
+    "new_method_validated": false
+  },
+  "variant": {
+    "name": "VMem + stabilityai/sd-vae-ft-mse (declared VAE component variant)",
+    "repo": "stabilityai/sd-vae-ft-mse",
+    "revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+    "subfolder": "",
+    "original_sd21_vae_identity": "UNKNOWN",
+    "exact_original_baseline": false
+  },
+  "created_utc": "2026-09-08T21:21:57.200396+00:00",
+  "controls": {
+    "device": "cpu",
+    "dtype": "float32",
+    "threads": 8,
+    "seed": 44,
+    "height": 576,
+    "width": 576,
+    "num_frames": 8,
+    "context_num_frames": 4,
+    "target_num_frames": 4,
+    "inference_num_steps": 50,
+    "use_non_maximum_suppression": true,
+    "operations": [
+      "turn_left(5)",
+      "turn_right(5)"
+    ],
+    "seconds_per_batch": 1800,
+    "rss_bytes": 48318382080
+  },
+  "runtime": {
+    "python_executable": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python",
+    "pythonpath": [
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages",
+      "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_environment/site-packages"
+    ]
+  },
+  "generation_limits": {
+    "seconds_per_batch": 1800,
+    "total_seconds": 3600,
+    "rss_bytes": 48318382080,
+    "minimum_free_bytes": 10737418240,
+    "threads": 8,
+    "poll_seconds": 0.5
+  },
+  "output_root": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S64_unit_repaired_generation",
+  "components": {
+    "clip": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/clip_original/open_clip_model.safetensors",
+      "size": 3944517836,
+      "sha256": "0084e75319a50ad85ef45377bad5bc38f2f58824459eb690048d51c9f8863be5"
+    },
+    "cut3r": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/cut3r_512_dpt_4_64.pth",
+      "size": 3173761006,
+      "sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103"
+    },
+    "vae_config": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vae_official_ft_mse/config.json",
+      "size": 547,
+      "sha256": "92d3dfb746fca211a2c9e019e285f8597412211728dce3c5bcf4eda0f2d62e7e"
+    },
+    "vae_weight": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vae_official_ft_mse/diffusion_pytorch_model.safetensors",
+      "size": 334643276,
+      "sha256": "a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+    },
+    "vmem": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/vmem_recovery/xet_attempt4_01/vmem_weights.pth",
+      "size": 5056346672,
+      "sha256": "675dc486a02ea06ecf8b6ab0cf4ef88c92298751b2daacf9f65c59871fcb7fe4"
+    }
+  },
+  "config": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/inference_seed44.yaml",
+    "sha256": "90871e1df4d0569f52a8baa7919f66000ec2f1a4f9a9275a2e4fbe384a6a07b9"
+  },
+  "input_image": {
+    "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/vmem/test_samples/living_room.jpg",
+    "sha256": "e9d718849d2ddbe5dda7ed3fa80df7d93e99f2d509b07a46019818c2e188d278",
+    "size_bytes": 536341,
+    "original_size": [
+      1588,
+      958
+    ],
+    "scope": "Predeclared C2 JPEG bytes; full bytes hashed before model construction, pixels not decoded by gate"
+  },
+  "source_identities": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/LICENSE": "24c0212c56a711741f2a1109e8b32118312da00949c3ee3b347cff432d9d0c37",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/README.md": "43024fe529340c4c0ff938c38cc99027b82eb0b56653f2baa0406092231850ba",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/app.py": "02144b511a89c5619a380b0d08e2f62ce0946d7185046d4fd035d9caad28cc31",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/configs/inference/inference.yaml": "8d849588016935573a22ef6aaee567f71125ca4d3bdf18f51e3552a64be9fea3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/LICENSE": "53d192987577d0e455a15ea2562195d0fce05b29fa0e4a7a347b1c2b4dc4cd52",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/README.md": "6187bed3427560508af4cb5909149da9b0ef0728f1a8d98e0e667ecdba0e34dc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/add_ckpt_path.py": "40c45aec68241a855e4a09e6a7c95aeadb4ff6fc5fa40568ee98b586b5dc6d5a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/base_opt.py": "24fab15094c0fff9ff1527d7b74911543c28926bccaa1867afb91246aa255719",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/commons.py": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/__init__.py": "8230021ec2368b3fcb6d7441d4e2c98f562d1c5696496f162919119d5c714b6f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/base_opt.py": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/commons.py": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/init_im_poses.py": "b3f59fbf32fd9690e63551ac14dc957edef9145bb3d5544fcb53a6eb3758bb21",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/dust3r_opt/optimizer.py": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/init_all.py": "32a46d46987671c20907e53af5277b4a7598989d56eb9b41f2c60578d478904f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/cloud_opt/utils.py": "56f622ab8b78c99a62c83dc0e2ebac3ee7202df826889f433856c2df26d12cf7",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/dpt_512_vary_4_64.yaml": "becfd7b9f78212fb03f914a586230b59655618dbe24af6b58400b72f499aa360",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/linear_224_fixed_16.yaml": "fef27402b726bf272f89d9e5b50b82622cc0942e58d80931a88f46663ceee7f5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/stage1.yaml": "1a2e3485b5b951ed809b7d31278d8b6480eca9ecd150b47a22c28841c0abe066",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/stage2.yaml": "3e823fbb67785e1822b9acf273bf67a7969588b8b4dfac7360d6d8839b739d82",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/stage3.yaml": "ea9b4aa3f3a8347912bc4eb75995457d091ee6b1658a0ecaddf26cf0081cf468",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/config/stage4.yaml": "559184be945d1dfd09034d3a9e8b0d703ec6539ff4fd7249b7b83cee2c37e5e0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/custom_convert2TUM.py": "fe09eb729dee08dedb8072f03ffc750feb89842bde57d49c4f39efe71bf88b0c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/flow_IO.py": "f02be0ed65cdb0a4cf7febeab09c369c4ae2dab70f49b4b3b84467150ee42dc3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/generate_set_arkitscenes.py": "457342eaf7aceeac99315bb04f8c5d2139ca1f09fb9e673f68a393595f44ce87",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/generate_set_scannet.py": "ef2cf8887cfd8d59b2e92606c78005e1de248911da550e4329ce7bc15119e3b2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/generate_set_scannetpp.py": "1a83317326d8a6ea3a13dc0c79061be7aeefdaf52c98152734a27e29cfa4750a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/merge_dl3dv.py": "b02619f948e12ade5c7bc45addc993af1bb168ec6b6b1af9a28db319e5b2023e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/path_to_root.py": "cb216d17088f7e0d28b9703eee6236d937b36939fb990c0de46b0909175a4866",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_3dkb.py": "05d000c8c80adc13390ef486e981d1311548542c429932902854c0faed78848a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_arkitscenes.py": "adc5196672879c5e20cb2d5c73422eaa51b862a84ba3235990057d73916f76ac",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_arkitscenes_highres.py": "d57384b55439417ae7df1b1ca4d16d6e51a9c43509d18e2530b5a9acb70c1909",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_bedlam.py": "48f08cb5cd2869e94ab3f2e9298aec1b23ceeb44545e88548fccce316ec2166b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_blendedmvs.py": "9c38374af15594a3043a87e825da8b201de189c242c8628ff236a1730440a306",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_co3d.py": "e09b6790eb6238a56ed9f56590d462453bc99e570b8f3b6ecfaf54f2a2b56acc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_cop3d.py": "8903c74462078c2472aa18cf9efc5960cf4fcbdd7f30828501a937e4acb29ebc",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_dl3dv.py": "b9d8544208cff23ae2c06b768ded354706f7112d54015c4739f076d832b05371",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_dynamic_replica.py": "cf4070adebe12b91309be93e615c354cecd36ab3dfdf33144444892156d4f56d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_eden.py": "89d3760f8bb0363a4760af8e521928ca22ec13b76b8647540ffeead917c8a970",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_hoi4d.py": "8eec0d20ababb9037e37b25feeee831b058d297b9ca2353cafd5647d5b25e7dd",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_hypersim.py": "781710f37d859cbe6aa71d8581170f286106747b8fc6e747991ed97b2bea4e14",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_irs.py": "c7c0a0c2faca242ceebc5130469bb12f9009eefbabfc16e498f460097a5efe01",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_mapfree.py": "a1020be3aab912d97e0d68d771214d72c86d813b61eff5cc8586928c4c28dab0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_mapfree2.py": "50e77d0a0230246363aa252d4a68e1f19f9147c93080bf5d0e487f87489fa1f1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_megadepth.py": "a2f793737b425de587e4c78dd7e83695487168151c8b29fa578334b91f83c007",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_mp3d.py": "03904e5a51d0ec9724e938e74a393f4a04d07af6420085669c2d98856763019a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_mvimgnet.py": "8b13507a7ca4b35556980ebf9d5fbd9e943d35406c9db993cd2744fcde8b6cca",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_mvs_synth.py": "dae4c1f514b24ad6d45924982b1f69b479bdcd253b82ad16b30e4b63ad550be8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_omniobject3d.py": "c2b9974ac5fc946ce78cac6c33b69485a3a4a7952834efdfd00250e6a83986b3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_point_odyssey.py": "3aeb90d15477e2477e323f036d94c50f88b1473b28093840156c9ae91d67496f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_re10k.py": "ea86a3d92a070e98ee344fb915715992d98ace0f8865067a5c00363089f6ae4a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_scannet.py": "c33aa8b8f23428bf436e615da3b809659f5c2e2b50f969d5926f208c4ae44206",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_scannetpp.py": "c56451d8442a789b56789f5ab9bc55e9ef0ca8857871aac5954b5afa1a80468a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_smartportraits.py": "e971840aa5c9a76e87882003b3437248d299c499fe4a9a1ab592615ff213d01f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_spring.py": "548f6331f824c3022964823010f34f5a9d73f22399382d7fa476a921c899f9bf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_synscapes.py": "4858479412f57a2829bc2beac1a0262645118ea7cd9b997a52168b34a6b93650",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_tartanair.py": "405cf2d85fcad895e3cc73603a60646e68e0b9a352a00eb830797b11b97e3d17",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_uasol.py": "aadf12f36c7ef09a704b755caad6ba223ff27ee7158459c72456d60edd60e7c6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_unreal4k.py": "b2cabae2c6545f3f2b725f8920c167191b164c94079efd8c62982b22d196f97b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_urbansyn.py": "0a47257191622c8ef2a353abf99977918db070a2f42d6a8e36493337299cb1bf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_waymo.py": "a346718ccb6466c10c7dbd32b646bdac634c726f78b1284a8ccb02f2435afe98",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/preprocess_wildrgbd.py": "4fb05b192f957a24465f9a9779458f01728a0aae51292c529c8fac3272cf835a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/read_write_model.py": "c6fc769acd4340a84089d8f1f08b17e0b416e5c05a76298d2f6091892ab70600",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/utils/cropping.py": "d0fa01449d91f2517f6c056b04f550620aca1c56c0b0c44467f30eebb5c6e72a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/datasets_preprocess/utils/parallel.py": "13f6c083c4810e09a8307b640fd92f24bdd56bf1c3283da8f6ac0870120adcc8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/demo.py": "6ceac42b7f6155fdd956ee86e73d51cc70cae4c6a6b93ee88e224e6097c1bfe6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/demo_ga.py": "0298568a5e44f8697a0db2fc4c9e4bf421c60010a0994a42ddd5f2380cac6c89",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/base.py": "a5d99e4c8659458b75172b6448d20aa7f4ec1dc7a03272d9ec660a76a9d30e24",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/criterion.py": "cd2968323426d2de0a11dc40cc2e9995afec51191a3e84a5c7b81e62f2720db5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/data.py": "8db14fce5a79644173402cddc98a27517b5c1e8df5db25918785a9d829e6448a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/dataset_utils/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/dataset_utils/corr.py": "13c76ab33851a37a9374146e3ba1b0a3bf1099e6e45ca6cc9c872249b8d98698",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/dataset_utils/cropping.py": "cab9e419db61139360ebe496f1f30af1f79b9a74898586f4bcfc06d8176a7617",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/dataset_utils/transforms.py": "cd0b470f85e2fd16d06c404c2766072a0956bbd06fae8111739aafe98d889fc3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/launch.py": "734cc4d87358d5a6bd1e8fada71d63998f931e41e494fc0c11755b12735c9eac",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/run.sh": "500efcf203888ec753415615a4f348bbc40c8550c04b58e9ee93d6e9da1a5cdd",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/mv_recon/utils.py": "19c832dce471873b0f9abbf6dbd33c43b6d025edbd35e16a635e98a326b8217f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/relpose/evo_utils.py": "62d5d9694501760c3d4f4a474ee7130848c921f580253f93d11478c064a262b0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/relpose/launch.py": "01292f2bac5f1a04d37f093217ff8c4bb237e2748ef15fad463c6d6109e2a6e1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/relpose/metadata.py": "bacdc417700ec78bf299ef68271e801cbdab631e9b1f2cd6cdcdc8aef03186b8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/relpose/run.sh": "74f7685ff5547c8f2e1b87d56fb2a5c58055f2a42c5dfe29c201c837671d267e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/eval/relpose/utils.py": "f58d9558865899bb3fbaeb167358e5f119ff3a029bf29cddb7f9094b6a8071c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/requirements.txt": "7456c2518ba753143403792ee9b9c08bb3fe1f49b1716af5ae51862e887b1368",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/crops/extract_crops_from_images.py": "40d0deaa505957e33e29b690825ad05305136b4769615911ad01756c49e028cf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/generate_from_metadata.py": "e1f03764fc02c17b46a0194c5751d5d582ebdb1f4e00c8e89c6e84d55ffb27c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/generate_from_metadata_files.py": "256b884779bccbbf23b8f17af2003a93da03cbf4288ab8361399ec3e0b0cb944",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/generate_multiview_images.py": "f1f29c975905b469f700a147e5acbd9462535dcf6798a041df74d8f91d6498ea",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/multiview_habitat_sim_generator.py": "e3ac040aa682c5b0181b2820551b018e7e8dbe1b992d511a2a597461ccf782aa",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/pack_metadata_files.py": "229db302fb8332cbe6635e5f2f05976fe5610332b4d27e24898290f4b5f85c33",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/habitat_sim/paths.py": "2c46a5b329717acf7032810cc9ed6a556007a2ba566ff7374849e5614a3ff37a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/pairs_dataset.py": "e7deac836d7e51024a28ea5ed1f3559fd3ae243f447fa1f364ab22bc7c8854d0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/datasets/transforms.py": "e2ead70dbd3cb762930ea459b1ab3bab397a9f0ca3cb395f42400745532fc1d2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/blocks.py": "1ad00f2be14dcc38c6322011e134a9cba30ad445e0fe5ceb50fbb65b9febd807",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/criterion.py": "19d837dec5326843d0e4c03ffae6cab0f9274f0c3354894e7fcd9762c97ef47c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/croco.py": "ecdfa14cceba7c99007a2548a804f2c3ecac85c29f12c9228a92838ac38aabfa",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/croco_downstream.py": "5c85337ca98a97940c6c4600c624ae2eec9af8435ce6b7ad5275e837bf27f160",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/curope/__init__.py": "d30b867f4f8b45f019c2b9a24ef38146867e09fc0d86c55232cc56e5b1d4938e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/curope/curope.cpp": "d715f5275600bc4f3f3fdc9aabec529a5954a9e6d161446346f580c68561927a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/curope/curope2d.py": "dc49348fc210445a9b12252e1faf2ec678346e3ae3ef9735867eb39556739377",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/curope/kernels.cu": "0ae1a9517eba744fd619f98b3761766d384ab090d35df4314d8946db72c5ca51",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/curope/setup.py": "7b85998c132be2ece2eef307d088355e73c39b326c874518862b34f1fd209057",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/dpt_block.py": "42d7fe6afaff9c6ca6acf1b808eddb6e6d480722b95d04c08da8ce27cd17d476",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/head_downstream.py": "b02fdbfeb55dd3ffa53c2442a566df2f33f43bda7ffb84237665ef78f615dad8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/masking.py": "541cf1fac15d432d40fd89502e820103309d59aa1bb8e54d1088aea1fe72a460",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/pos_embed.py": "ad1870ae29ad7e55358f0b5ebb4bdd47342d91474f4de472dca781b0dd248d70",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/models/rope_cpu.py": "732f6b4f44147ac05f710f633451e26b59d5ee691dd31cdda6a252ed8461e8a9",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/pretrain.py": "d9ab7f1f3c1d4175e5eb4be181de5b2941ddb31fe6a9904212936beaa0d4ca1a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/augmentor.py": "728502a9a6732b3970367a266e8f9f8bad2421273f4a528df0e4a2012777ba59",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/criterion.py": "29d8fc10728d56a1c64269372fbba477fb01f405e9ff1fe1fdb0df00c7c13337",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/datasets_flow.py": "94b8a487e1d90cc3495840ffe1385c20ebcec9a3d53918dcba9cf200bbcc1917",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/datasets_stereo.py": "5229e5eb7a4605a55cd0194c229be69974f1b1cc820c00638c155ad484da4912",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/download_model.sh": "570b40f6adfbc1bf091ac9f4b892850594154921dfe55d60a4da966bafb49f00",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/engine.py": "0c98d5eca3d81cd24092f37d1a04a1f0d94716098c6112af566ec203bfdf90b8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/test.py": "9b2037c221595588a9c1684ecf9bedc5786069a7378f136984998d469c1ea252",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/stereoflow/train.py": "504e0fbf6bf43cfb177a5b689add022db755bc954edd509fef0acb4b2b9693ad",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/croco/utils/misc.py": "26e81b62e015e8bb9bda7b58c6705db5d51421df000efbb0d64a3ed481673572",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/blocks.py": "a2c2f7fe3f941007456f832a708d14227503d03a5d17beb1aef55345bf94b089",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/__init__.py": "44d163045a71f2c769262f07efada2266648f7232f40ca7d20129297c127d83a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/arkitscenes.py": "531f7082312bd3306e1b6eacb31572642d56f7b0a6e3a472e5ee12f3e656565c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/arkitscenes_highres.py": "f79e8f322b84b677ad3ac4f2c2a30de694db17110ad601a2da641bfd1592b14c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/base/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/base/base_multiview_dataset.py": "d6de79a1c030d9ac6e8085e8751497075e9f9664e36c21eb8a75ba79425c82f9",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/base/batched_sampler.py": "b07c99a09618e5af7e0ffe664007fd9194cf5b6a8f6dc247a5d20e812078230c",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/base/easy_dataset.py": "720d42133416b83d793dde830283ae8c1267e8d1eaca884bf4c6af0d77626d64",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/bedlam.py": "1f7e1834b3c2d964a38196583c10ed62122a4421289fc44afa66fe620ed63c67",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/blendedmvs.py": "c3e62991f5aae1bd1b7134ff000e3e6bce266305f7d894e2a396f1e84f289cd1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/co3d.py": "9eaf54792831c38cdae571e0cd7f73c7b46140c1747de84f76e7b86acb5db33e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/cop3d.py": "011da64ae58ff38ab993c38860a465a5eef35ad83c08cdd3f079b6540acd485d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/dl3dv.py": "a6df42342e9cf8ec382750f73d79bb007161e1bf5a7dbd4845f22291feafb2e1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/dynamic_replica.py": "c2fa93cf842e3af15ccbc843f14fe72e4be88741e1200ec637cc18bddcc974a3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/eden.py": "67146a2ea020d46842392a85258e5848bc14f0821b47a7b6b5ba083db06cb4ff",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/hoi4d.py": "471296779fbd64093c0aee3d7f279d1e02e1366abb07afef990621489b72e3f5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/hypersim.py": "43d4851eab94fb053c0d919adca3d534f7ac04532b35396ddb3adbf974cfda74",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/irs.py": "f6ffc7162a1dde1510b8500150f045f8244bdf033b105f8395f093c74818169d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/mapfree.py": "fbc4d12bb9f2e06915a7065115ac3a623c5368febabaa61ba1a6ff704625e137",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/megadepth.py": "ef2736d369ccf3fb3b75739934b58297c64fe33eaf4a725060217482e63fc336",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/mp3d.py": "3e20428e776f42c93423aa2aabfdbd174febbe6a92c9470d83afd3688050258b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/mvimgnet.py": "a75252d8106f05fe95cf409028aba31d93c3a7b1dce68b0b3d4bbdd6c0833c95",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/mvs_synth.py": "c87b10ff5331934399cb4c883a051b6432c67c316edab551daee3998ab8d36f3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/omniobject3d.py": "0f11e6da03b9fe41e86f40fe1281e1ad5e89ec050643e731f0176236c6089282",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/pointodyssey.py": "5ead728f8a1a89568d38f8a7ca8c1423c9cb41194ebbf01a5271ddfa9854dd9d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/realestate10k.py": "d56877dac5303ffef371832f370bdc4e24c13d8fe45cec26c645e7707d470747",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/scannet.py": "89f549daf57cbe821d15f7050b7c9fba0ebc4e813aa4ca436245edda8a6f8a9b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/scannetpp.py": "88b2400c9d9fe0e4d50364112194362c6bb1cda3decdaabc24ab12e74943c2c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/smartportraits.py": "6acc2076c1e4b6866dfada9c3fb9848333e2f83012c98fd955253d8dac19092b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/spring.py": "98f3c2bb4565d2eff0cf26b79f50759cfe2e138117b4dae20ff675297ef4a088",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/synscapes.py": "2c2e047055922150a529b6b5b8b41ad47bd66810fbd6d7806051aa3e05b0f03b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/tartanair.py": "351cf02bfb408b6fe9c9aa1481dcdfb0f31c260bfe11dd796c8d028cb42ad56e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/threedkb.py": "5e16195ffff7cf350365c24fb986de0c2f6c73050243f3a5c131ae9c27b4b0eb",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/uasol.py": "f729162f30ae3c3895e0f11af5cbd767d7a2236a5554455d31fd914706a1b17d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/unreal4k.py": "1b5528a7239f01051125b7378898ff95fc0b7b7813894d237c9124e38e69f0ce",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/urbansyn.py": "1f5f40b60354c47212c541c812dd9e041a5c442d92bd1c61fd85262a60702b22",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/utils/__init__.py": "b75338cd2bc70ca0d9dac551d4727a0e11a8098d15a85487691a538d0284c473",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/utils/corr.py": "6195285c9dc0c477a03c0d7624a068d0b3dd52386da09aa9a74e1c4c466bdef8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/utils/cropping.py": "33344ee7ae0a5dfdd0330fb76a0f3a256755c318b01c56d1434d08be57c8124b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/utils/transforms.py": "10308410a74d5b9ce263b77f0b94418bad3deaa7f1a3e0c330216538ba07d0d6",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/vkitti2.py": "1a1d9ca9ee4628332411dadbb333eb4b6f131d681ade6f4aa15100a8e2b58706",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/waymo.py": "c4b92fdb09e48cd8a65e7d20cd6e3f68686f262d74b443dc37823999c18f67c3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/datasets/wildrgbd.py": "0ab18544678679ec0be20bbe08a43abcd20e2f7cd6cdd712fd50f45ed1fed206",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/heads/__init__.py": "2c8dc02560652e95a1be26122871b36ee170146a1add538a3ae8bd7bb7cee339",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/heads/dpt_head.py": "7368f698a66711f5ac3ce8e6c4a51c9b0fbda12f9ebda1499cd45595ec600310",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/heads/linear_head.py": "c52a465d11c1b8ee9145a379e8801682fe1db5ac9f076e5a55de364ec9efa424",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/heads/postprocess.py": "1053c35f0962f91ad8b985a702dd5c2cff4fd94ff92d96340ff7a8dbabe81384",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/inference.py": "989349373427a234aeba0bd9460346008b8cdd236aed6c019c38e5ba0dd1f161",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/losses.py": "57168959c3ecfdc881460b10c186048dfc6240e582f8251cd31de456bc2ab3cb",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/model.py": "43b82c734f264a2e0e0a242dbd2d42855fe4e794cc25c0d433d6ef1b0dc54150",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/patch_embed.py": "c0dae36e876d2124f0e31403a3a306db7e6d5bd69d8e9c6f16bbfb81c82eef3d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/post_process.py": "e2ef308ee09ae547f64c3e8e5314cc6dd60a5ff37b2e548812af53f8f1ad1f37",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/camera.py": "f18a3ecc54492ae2878f285ad756fb1d26dbc0c4146bcf76d3f7ed2665c35d73",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/device.py": "19cf83aff5ec5581e2a5b3b5776937e9f238f384ba6d4c4173607ba5136f8eaf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/geometry.py": "441319cc7965bb4f76b47a86bed54347883f21e01424f8538eed90461987d04d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/image.py": "a2738085cdf0f713289a3a42dbd49a1f39325eb3ad590af65970fe4609209d96",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/misc.py": "35fba8576962fb7d17b3a335ff63de93989fbfa9c24afcfdc436322da240cd97",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/parallel.py": "8af1ba7e2e52a7daf1af51a955b98f7b5de3e24e70e66ab5dd3555c8df48aefb",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/path_to_croco.py": "3d8c68320432fd7e3527f6bb94390f2a44195957ee5460539c1d807faf35367e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/utils/render.py": "c0b286d8725ac4d5fe98f148848c100b7bc137193a98f4a6107ff5a79016449f",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/dust3r/viz.py": "ef736c54ff88a04474b10becf0da754a6deab94a803d5d338aeba91722ea8915",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/src/train.py": "3c8e2ba204ac9a000ead3ad903687b7071c2f53d487044d96e6b001b04359e93",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/surfel_inference.py": "8a348645cd387147c35635f0a6b432d85bcf844e3839bd5a000d8147a85b17d5",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/extern/CUT3R/viser_utils.py": "e476b28c9fec525d2311d554d06d504cd38667e354ea9f4cd346be4773d86f13",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/__init__.py": "90835cd71d5439078b981bdb89fc1f07e7b85b7361fa9f9425767af2ecb9660d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/metrics.py": "c4fbd6dc65d527b685473e1f562bac042343bc6e594af7d37d6a3c8f6224ea49",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/autoencoder.py": "ccb94f107fd07302fa34593f7b840b3066f73548fe800e647eccfd66da473807",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/conditioner.py": "b79eb0cf4d94345a720a9a844c7daa6206b0a9234d714b7f9f23a9571c7c5fc1",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/layers.py": "98f481aa59f8289e430018dbdbe928d8732b08fb977b14c22f6d7cb28bae5c38",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/preprocessor.py": "7e0c7a2ae13a681f6731d5b3f383b9000869b8a02dac751725719665ded40a2e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/modules/transformer.py": "5f0d152a2f6464076cb0ee5aca725b3445420a5f37ac571d3daa77e580e65764",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/network.py": "9ed21c2d804734d7ca2d81b1e596858835ca70a4a04abb9b5540b872515d4c9b",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/pipeline.py": "680da1c14db8a6780a37fca3a8bac5bb59f0aa7d395db96d4360b352eb7f2255",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/modeling/sampling.py": "dc07ca0ba571ba5fb48f9856515d2cb7dea25254008a6f8b315538817f352b24",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/navigation.py": "6d267365d5dcccf9f7cd6d535f19f80521f60a9634dffb35b9af398407389fcf",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/requirements.txt": "b06d9516e9305bbd46ce2d194b98312e32ae864a2bcdae33d802c6a3ec78844a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/__init__.py": "e20d1aa48f3eddd8b27dd05a04eb7a54a6345865d32bc169c9b6cd4cc1cd476a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/isolated_vmem_source/utils/util.py": "30a97451f7a895e99ab881e97249f564e6b97eca2b5ea4d8f83953c26c4cf65e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/source_manifest.json": "66f913d7a7be7890447ea01e766c4bef10e2818fcafd7a8141d2e01d7bdbe841",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/src/s20_generation_trace.py": "daf841dbcb635417865ba8287ad305bbdf6105181fd39e169be2e666e1bfbc57",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/resource_gate.py": "c949f85573b8fa23db59c8782354608cb6ca1334ea782712fcd9c334337df759",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/runtime_factory.py": "a7f812717c053b401433bac423ba0a63028a9dc1874b1cba3c4fbca6c276e3d0",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/integrate_original.py": "adf819e1cda3de4f830d2c3e5776664591607a0109d50f59cdc1addeb684b0ec",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/archive_outputs.py": "eaee634f055d39a68fcad352de2b6365ce5b529b5b2e62789aa7a56204497486",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S35_generation_integration/launch_original.py": "8744cb8959cded2394c1471c660dd84f929b5ae24ac97e81379304aed0be702e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/s39_variant_gate.py": "cf667bdc0bc43f902d0dca3041c4dbf33a53d908ee4e5d13ebfba2f853a78f4e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/load_components.py": "7b554276d5f00e6f14283a0c3a3d06bccda73b3c9dd2b6a9ef2514287732738e",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/PROTOCOL_DRAFT.md": "263f1f58b50291f567fb3dce706c1b58bd931fcb26c444aece16c3645f245cea",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S38_original_resources/vae_provenance/report.md": "7c57796d6376aff00895371c16969f458916b367767872fb303e3ec3f9d92b24",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S36_resource_recovery/vae_relation_review.md": "fc3c196a713f0b3260eefee9ca097f315d2c6fd5236e6d79b012b2f3067f3aa8",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/autoencoders/autoencoder_kl.py": "ed47d3851678665a2cdce463052ff5e5767cb8e69b5e1f69c2126867bddd73db",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/configuration_utils.py": "150e730b607002122fd52e4d70fd36fe42631658438e8e85efab277759fa4574",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S20_environment/site-packages/diffusers/models/modeling_utils.py": "26213ad08ac77072529716dc4adba9de83a3477431b8c84838712ac43c5d6bb2",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/unit_renderer_hook.py": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/generation_gate.py": "a7eba411cf9f34ea3324aa7bfd7260bfc811dac016d52ab446c43632eda2cac3",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/runtime_adapter.py": "711abdb32060b5aa1ba9213e810ca13ab6277db84a0d0984178baf163e836a70",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/launch_generation.py": "2998383f07bd9437440b24f465ef5624d7291890b8f750c9b6ce2795c33bfb35",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/create_launch_authorization.py": "907cf947158cb123e78b25d4f80f4f65f1f511e766f24df2675500dfc441d28a",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/PROTOCOL.md": "82f0882401bc7ac79b9f893973b076a3dfbbd570a8cafaf1e23a5f0c4ae71691",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+  },
+  "s39_loading_manifest": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/review_attachment_01/manifest.json",
+    "sha256": "2631479b193dd4a64cf65ca3574b5b2a07715c1a7e553c10b4113761a52437e6"
+  },
+  "s39_resource_core_sha256": "816d86cbdb529f5621b4e9e210ec6ddd925390eb33c75cad07dc0664d12fb416",
+  "s39_loading_evidence": {
+    "launch": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/loading_attempt_01/receipt.json",
+      "sha256": "272df44fae38bf20ac441afc080bc60ae4f4b49a5db2d94c822f35d1ff929237"
+    },
+    "worker": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/loading_attempt_01/worker_receipt.json",
+      "sha256": "a081b5e3dc33f535bf3cb2f3c334fe3a62ce70c1c035eb11c6afcf9923cb4a42"
+    },
+    "runtime_loading": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/results/S39_declared_ft_mse_component_loading/runtime_loading.json",
+      "sha256": "95221d97e21f571b1559409486f19eed869742246bdc9bf8f49bfba0801607c9"
+    },
+    "full_resource_gate": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/loading_attempt_01/full_resource_gate.json",
+      "sha256": "62e5f67f5c05f7a8a091cf4850d17016660fe1a05901c13f1c6c06750369f9f2"
+    }
+  },
+  "s39_loading_review": {
+    "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S39_component_variant/loading_attempt_01/independent_loading_evidence_review.json",
+    "sha256": "5707a2ca8e300084a7371b8979b046cdab1021d63409de155a61db53f246da5a"
+  },
+  "parent_bindings": {
+    "s40_manifest": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+      "sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe"
+    },
+    "s42_preregistration": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+      "sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+    }
+  },
+  "derivation_policy": {
+    "row": "C2_UNIT_REPAIRED_S64",
+    "base_row": "B0/S40",
+    "allowed_scientific_differences": {
+      "retrieval_variant": {
+        "id": "s64_positive_camera_depth_median_units_v1",
+        "scope": "renderer_boundary_instance_hook",
+        "length_unit_rule": "median_of_all_strictly_positive_camera_z",
+        "scaled_fields": [
+          "surfel.position",
+          "surfel.radius",
+          "pose.translation"
+        ],
+        "preserved_fields": [
+          "rotation",
+          "focal",
+          "normal",
+          "source_ID",
+          "cache"
+        ],
+        "depth_unit": "dimensionless_camera_depth_in_positive_median_units",
+        "retrieval_weight": "original_cos_over_1_plus_dimensionless_depth",
+        "physical_length_unit": "UNKNOWN",
+        "hook": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/unit_renderer_hook.py",
+          "sha256": "0894e80833433e72ba7909ec7b7602e872b88d644939ecc64c3ce90fdf4ec31d"
+        },
+        "adapter": {
+          "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S61_unit_consistent_retrieval/unit_consistent_renderer.py",
+          "sha256": "a90410b517b20bfa137cdd00a0bbc3b73c1489ebb8a8d0ab672cb06e6387de6c"
+        },
+        "designed_after_C2_failure": true,
+        "eligible_for_original_cohort": false,
+        "new_method_validated": false
+      },
+      "input_image": {
+        "from": "changi.jpg",
+        "to": "living_room.jpg"
+      },
+      "seed": {
+        "from": 42,
+        "to": 44,
+        "yaml_byte_policy": "UNIQUE_SEED_SUBSTITUTION_PLUS_ONE_TERMINAL_LF",
+        "surfaces": [
+          "manifest.controls.seed",
+          "inference_config.seed",
+          "python_numpy_torch_rng"
+        ]
+      }
+    },
+    "administrative_differences": [
+      "output_root",
+      "schema_and_status_labels",
+      "row_specific_source_identities",
+      "review_bindings",
+      "timestamps"
+    ],
+    "all_other_generation_controls_equal": true,
+    "scoring_or_visual_access_in_this_stage": false
+  },
+  "freeze_preparation": {
+    "schema": "s47-c2-core-freeze-v1",
+    "tool_source": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/freeze_c2_manifest.py",
+      "sha256": "76661687dbf6a5a24ec988d6e259c1f3a1e1cc2d2c46cfb44685ecf0b7303049"
+    },
+    "freeze_protocol": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/FREEZE_PROTOCOL.md",
+      "sha256": "ca0613794a87141c56e2ba5ab0141b3b19fe6fe5b4c22432061ef26796c01836"
+    },
+    "base_s40": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S40_declared_variant_generation/review_attachment_01/manifest.json",
+      "sha256": "9951a78909a7d792dd536cea067c14e369cff776115a078d2f61c66c085cdebe"
+    },
+    "s42_preregistration": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S42_baseline_failure_preregistration/PROTOCOL.md",
+      "sha256": "89fb44e0b77a85a66fe611cd2f885fed0288229cbb027e04da25fc0631507b3f"
+    },
+    "component_bodies_read": 0,
+    "pixels_decoded": 0,
+    "scientific_imports": 0,
+    "purpose": "Await two separately authored reviews of the exact C2 baseline core"
+  },
+  "review_receipts": {
+    "source_review": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/SOURCE_REVIEW.json",
+      "sha256": "2bff084ec95c3e4c237016cd15e4b122757bb338ac59ab5bd4b2e3b6dd2aea9d"
+    },
+    "runtime_freeze": {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S64_unit_repaired_generation/RUNTIME_FRESHNESS_REVIEW.json",
+      "sha256": "b579801d6ecd5d0d017b5b28f8c098bd189805850bc8e654ae70877b93d7bad9"
+    }
+  }
+}

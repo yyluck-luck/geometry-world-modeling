@@ -1,0 +1,81 @@
+{
+  "schema": "s90-route-agent-diagnostic-v1",
+  "role": "independent read-only listener and protocol check",
+  "observed_utc": "2026-09-11T09:59:37+00:00",
+  "observed_beijing": "2026-09-11T17:59:37+08:00",
+  "scope": {
+    "allowed": [
+      "read macOS effective proxy endpoint fields",
+      "inspect local listener ownership for ports 7897 and 9190",
+      "send minimal protocol handshakes and HEAD requests"
+    ],
+    "forbidden_respected": [
+      "proxy subscriptions, tokens, accounts, API keys and config contents were not read",
+      "system proxy/TUN settings were not changed",
+      "no large download; HTTP tests used HEAD and discarded bodies",
+      "no model, image, depth or scoring operation"
+    ]
+  },
+  "system_proxy_readback": {
+    "source": "scutil --proxy",
+    "HTTPEnable": 1,
+    "HTTPProxy": "127.0.0.1",
+    "HTTPPort": 7897,
+    "HTTPSEnable": 1,
+    "HTTPSProxy": "127.0.0.1",
+    "HTTPSPort": 7897,
+    "SOCKSEnable": 1,
+    "SOCKSProxy": "127.0.0.1",
+    "SOCKSPort": 7897,
+    "ProxyAutoConfigEnable": 0,
+    "interpretation": "macOS currently advertises one loopback endpoint (7897) for HTTP, HTTPS and SOCKS; this is a readback, not a setting change"
+  },
+  "listeners": [
+    {
+      "endpoint": "127.0.0.1:7897",
+      "tcp_listen": false,
+      "lsof_result": "no TCP LISTEN row at probe time",
+      "protocol_probe": {
+        "tcp_connect": "ok",
+        "socks5_noauth_greeting_hex": "0500",
+        "http_origin_form_head_status": "HTTP/1.1 400 Bad Request",
+        "http_absolute_form_head_example_status": "HTTP/1.1 200 OK",
+        "http_absolute_form_elapsed_ms": 1048.5,
+        "socks5_https_head": "HTTP/2 200 from example.com; curl exit 0"
+      },
+      "interpretation": "A live TCP service accepted SOCKS5 no-auth negotiation and HTTP proxy absolute-form traffic. lsof's missing LISTEN row is an observation inconsistency (likely process/listener race or lsof filtering), so ownership is not claimed from lsof."
+    },
+    {
+      "endpoint": "127.0.0.1:9190",
+      "tcp_listen": true,
+      "owner_redacted": "ninjadesk (PID omitted from durable report)",
+      "protocol_probe": {
+        "tcp_connect": "ok",
+        "socks5_noauth_greeting": "no response before 3s timeout",
+        "http_origin_form_head_status": "HTTP/1.1 200 OK",
+        "response_headers_seen": [
+          "Access-Control-Allow-Headers",
+          "Access-Control-Allow-Methods",
+          "Access-Control-Allow-Origin",
+          "Content-Type: text/html; charset=utf-8"
+        ]
+      },
+      "interpretation": "9190 behaves as a local HTTP management/UI service, not a SOCKS5 proxy. Response body was not persisted or analyzed."
+    }
+  ],
+  "conclusion": {
+    "route_status": "LOCAL_PROXY_ROUTE_VERIFIED_FOR_MINIMAL_TESTS",
+    "verified": [
+      "macOS effective proxy fields point to 127.0.0.1:7897",
+      "7897 accepted both SOCKS5 no-auth negotiation and HTTP proxy requests",
+      "a small HTTPS HEAD via SOCKS5 reached example.com with curl exit 0",
+      "9190 accepted HTTP HEAD and rejected/ignored SOCKS5 greeting"
+    ],
+    "not_verified": [
+      "RTMV/Hugging Face Range request or archive reachability",
+      "NinjaDesktop upstream subscription/profile health",
+      "any scientific data availability or model result"
+    ],
+    "next_safe_step": "Root may run the already-frozen single 512-byte HTTPS Range probe through http://127.0.0.1:7897; preserve exact 206 and Content-Range gates and retain all failure receipts."
+  }
+}

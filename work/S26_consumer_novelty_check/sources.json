@@ -1,0 +1,272 @@
+{
+  "schema": "s26-consumer-novelty-check-v1",
+  "recorded_utc": "2026-09-06T15:25:31.888735+00:00",
+  "agent": "/root/research_novelty_routes",
+  "scope": "Bounded original-method neighbor check; no models, GA, true prediction arrays or GT bytes; no scorer or main ledger edits",
+  "query_groups": [
+    {
+      "axis": "core method plus priors",
+      "queries": [
+        "G-CUT3R guided 3D reconstruction camera depth prior integration paper",
+        "2025 2026 pointmap reconstruction known poses depth priors geometry optimization Pow3R MapAnything"
+      ]
+    },
+    {
+      "axis": "online geometry and memory",
+      "queries": [
+        "2026 online 3D reconstruction known camera poses ray conditioning pointmap memory",
+        "RayMap3R arxiv"
+      ]
+    },
+    {
+      "axis": "adversarial test-time constraint prior",
+      "queries": [
+        "Learning 3D Reconstruction with Priors in Test Time paper",
+        "Ray-Aware Pointer Memory with Adaptive Updates 2605.05749"
+      ]
+    }
+  ],
+  "selection": "Five method papers chosen for camera/depth prior fusion, test-time output constraints and ray-state gate. Ray-aware pointer paper was found but not expanded into a sixth reviewed method; third-party summaries were not used as mechanism evidence.",
+  "papers": [
+    {
+      "id": "g_cut3r",
+      "title": "G-CUT3R: Guided 3D Reconstruction with Camera and Depth Prior Integration",
+      "authors": [
+        "Ramil Khafizov",
+        "Artem Komarichev",
+        "Ruslan Rakhimov",
+        "Peter Wonka",
+        "Evgeny Burnaev"
+      ],
+      "year": 2025,
+      "url": "https://arxiv.org/html/2508.11379v2",
+      "read_scope": [
+        "3 overview and CUT3R recap",
+        "3.2 modality encoding and decoder fusion",
+        "3.3-3.4 objective and training",
+        "4.3 comparison guidance caveat"
+      ],
+      "four_axes": {
+        "object": "recurrent CUT3R features and predictions",
+        "mechanism": "trained modality encoders with decoder zero-convolution fusion",
+        "input_granularity": "per-view RGB and optional K/pose/depth plus depth mask",
+        "setting": "guided sequential reconstruction; no VMem consumer validation"
+      },
+      "discovery_reuse": "work/S23_innovation_2_geometry/sources.json; original HTML reopened here",
+      "verification": "Original arXiv full-text method sections opened and read this task; no method claim from search snippets",
+      "accessed_utc_date": "2026-09-06",
+      "local_model_run": false
+    },
+    {
+      "id": "pow3r",
+      "title": "Pow3R: Empowering Unconstrained 3D Reconstruction with Camera and Scene Priors",
+      "authors": [
+        "Wonbong Jang",
+        "Philippe Weinzaepfel",
+        "Vincent Leroy",
+        "Lourdes Agapito",
+        "Jerome Revaud"
+      ],
+      "year": 2025,
+      "url": "https://arxiv.org/html/2503.17316v1",
+      "metadata_url": "https://arxiv.org/abs/2503.17316",
+      "publication": "CVPR 2025, author arXiv metadata verified",
+      "read_scope": [
+        "3.1 overall architecture",
+        "3.2 optional conditioning",
+        "3.3 downstream tasks"
+      ],
+      "four_axes": {
+        "object": "two-view pointmap network",
+        "mechanism": "intrinsic/depth encoder injection and pose decoder CLS injection",
+        "input_granularity": "paired images and optional relative pose/K/depth",
+        "setting": "pairwise up-to-scale reconstruction, not persistent online state"
+      },
+      "verification": "Original arXiv full-text method sections opened and read this task; no method claim from search snippets",
+      "accessed_utc_date": "2026-09-06",
+      "local_model_run": false
+    },
+    {
+      "id": "mapanything",
+      "title": "MapAnything: Universal Feed-Forward Metric 3D Reconstruction",
+      "authors": [
+        "Nikhil Keetha",
+        "Norman Müller",
+        "Johannes Schönberger",
+        "Lorenzo Porzi",
+        "Yuchen Zhang",
+        "Tobias Fischer",
+        "Arno Knapitsch",
+        "Duncan Zauss",
+        "Ethan Weber",
+        "Nelson Antunes",
+        "Jonathon Luiten",
+        "Manuel Lopez-Antequera",
+        "Samuel Rota Bulò",
+        "Christian Richardt",
+        "Deva Ramanan",
+        "Sebastian Scherer",
+        "Peter Kontschieder"
+      ],
+      "year": 2025,
+      "url": "https://arxiv.org/html/2509.13414v1",
+      "read_scope": [
+        "3 optional modalities and output factoring",
+        "3.1 encoders",
+        "3.2 factored predictions",
+        "3.3 training"
+      ],
+      "four_axes": {
+        "object": "joint multi-view metric scene prediction",
+        "mechanism": "factored rays/depth/pose/scale with optional geometric token encoding",
+        "input_granularity": "N views with per-modality subsets of views",
+        "setting": "heterogeneous multi-view feed-forward reconstruction"
+      },
+      "verification": "Original arXiv full-text method sections opened and read this task; no method claim from search snippets",
+      "accessed_utc_date": "2026-09-06",
+      "local_model_run": false
+    },
+    {
+      "id": "tco",
+      "title": "Learning 3D Reconstruction with Priors in Test Time",
+      "authors": [
+        "Lei Zhou",
+        "Haoyu Wu",
+        "Akshat Dave",
+        "Dimitris Samaras"
+      ],
+      "year": 2026,
+      "url": "https://arxiv.org/html/2604.03878v1",
+      "metadata_url": "https://arxiv.org/abs/2604.03878",
+      "publication": "Accepted to CVPR 2026 per author arXiv metadata; CVF search also exposes paper",
+      "latest_version_check": "arXiv abstract submission history on access lists v1 only",
+      "read_scope": [
+        "3.2 constraints, rendered prediction compatibility, priors and scale handling",
+        "3.3 shared decoder adaptation and frozen heads",
+        "3.4 LoRA/renderer implementation",
+        "4.1.1 alignment and sparse-view evaluation scope",
+        "4.3 fine-tuning ablation as design context; no metrics copied"
+      ],
+      "four_axes": {
+        "object": "shared decoder parameters of VGGT/pi3",
+        "mechanism": "LoRA test-time optimization, output-prior penalties and rendering compatibility",
+        "input_granularity": "multiview RGB with known camera or depth priors",
+        "setting": "pointmap/camera tasks; not frozen-old-prefix GA to Surfel"
+      },
+      "closest_direct_falsifier": true,
+      "verification": "Original arXiv full-text method sections opened and read this task; no method claim from search snippets",
+      "accessed_utc_date": "2026-09-06",
+      "local_model_run": false
+    },
+    {
+      "id": "raymap3r",
+      "title": "RayMap3R: Inference-Time RayMap for Dynamic 3D Reconstruction",
+      "authors": [
+        "Feiran Wang",
+        "Zezhou Shang",
+        "Gaowen Liu",
+        "Yan Yan"
+      ],
+      "year": 2026,
+      "url": "https://arxiv.org/html/2603.20588v1",
+      "project_url": "https://raymap3r.github.io/",
+      "publication": "arXiv methods used; project page states ECCV 2026 acceptance, venue record not independently checked here",
+      "read_scope": [
+        "3.1 rays and memory",
+        "3.2 static bias",
+        "3.3 predicted-pose ray remap, discrepancy and state gate",
+        "3.4-3.5 reset alignment and smoothing"
+      ],
+      "four_axes": {
+        "object": "streaming state update and pose retrieval",
+        "mechanism": "image versus ray-only prediction discrepancy, attention transfer and gating",
+        "input_granularity": "image stream and auxiliary rays from main-branch predicted pose",
+        "setting": "dynamic-scene streaming reconstruction, not external known-pose hard constraints"
+      },
+      "verification": "Original arXiv full-text method sections opened and read this task; no method claim from search snippets",
+      "accessed_utc_date": "2026-09-06",
+      "local_model_run": false
+    }
+  ],
+  "access_failures": [
+    {
+      "url": "https://openaccess.thecvf.com/content/CVPR2025/papers/Jang_Pow3R_Empowering_Unconstrained_3D_Reconstruction_with_Camera_and_Scene_Priors_CVPR_2025_paper.pdf",
+      "result": "web open internal error; used original arXiv HTML instead"
+    },
+    {
+      "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Jang_Pow3R_Empowering_Unconstrained_3D_Reconstruction_with_Camera_and_Scene_Priors_CVPR_2025_paper.html",
+      "result": "403; author arXiv metadata confirms venue"
+    },
+    {
+      "url": "https://openaccess.thecvf.com/content/CVPR2026/html/Zhou_Learning_3D_Reconstruction_with_Priors_in_Test_Time_CVPR_2026_paper.html",
+      "result": "403; original arXiv methods and author venue metadata used"
+    }
+  ],
+  "local_file_identities": [
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/IDEA_GENERATION_FOCUS_CURRENT.md",
+      "sha256": "93b860780af7f37c6e375146898e8e740a6c6cb3486e4e59bc3eb4b0414d8856",
+      "bytes": 7080
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S25_consumer_relevance/consumer_relevance.md",
+      "sha256": "225343b5df2d5a58b7923fc6061e37c8073161655f8c1d2d5766b9db3c805df4",
+      "bytes": 8462
+    },
+    {
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S23_innovation_2_geometry/sources.json",
+      "sha256": "3088c488883302cef5aee1a0643c408e79ff1954b44cd3cc3ffc45d04be91775",
+      "bytes": 28540
+    },
+    {
+      "path": "/Users/rocket/Documents/Codex/2026-09-05/users-rocket-desktop-hkust-it-ip/work/Supervisor-Skills/handbook/02_Idea_Generation/2.2_想Idea的思路_更高更快更强.md",
+      "sha256": "f3ca0a15f072dc15145b940f03c00f1ece61e5955ca359afd95ab0ff9b2718dd",
+      "bytes": 7846
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/SKILL.md",
+      "sha256": "630ce9528f472637830b216bf6de231e6dfdcdae4d3b16976324da5ce2d145fb",
+      "bytes": 13597
+    },
+    {
+      "path": "/Users/rocket/.codex/skills/idea-evaluator/references/fatal-flaws.md",
+      "sha256": "236dc67ddea96aba2d52b61adb5d0d9f69c05d683d49938914f066d0996e2679",
+      "bytes": 8659
+    },
+    {
+      "path": "/Users/rocket/.claude/skills/sci-scientific-critical-thinking/SKILL.md",
+      "sha256": "0db52bacb62ec0f73b51569bab142f484df06546ebb17a42a056376c09335791",
+      "bytes": 23705
+    }
+  ],
+  "unchanged_scoring_controls": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26_consumer.py": "5e10c2a990ac7e9db8337740854b49a02fa18fdd0793e222984091acc1c2ff63",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/S26_CONSUMER_SCORING_PROTOCOL.md": "433e3242c9188cac241b2b74ff3854ba4175df400350f97f1ebb83334538cc04"
+  },
+  "verdicts": {
+    "generic_known_camera_condition_or_loss_or_ray_gate_as_novel_method": "Reject and Pivot: direct prior mechanisms",
+    "specific_consumer_surviving_failure_question": "Retain only as untested problem pending real baseline; no invented failure threshold"
+  },
+  "skills_execution": {
+    "supervisor_2_2": "Entire chapter read; baseline to failure to root cause applied; no new implementation before consumer evidence",
+    "idea_evaluator": "Skill and fatal-flaws reference read; F1/F9 early gate only; broad method version rejected, no lifecycle/radar decoration",
+    "claude_scientific_critical_thinking": "Previously read in this session; applied construct validity, control/source distinction, confounding and sample limits; no Claude model/CLI"
+  },
+  "performed_counts": {
+    "new_model_runs": 0,
+    "ga_runs": 0,
+    "true_prediction_arrays_read": 0,
+    "gt_byte_reads": 0,
+    "new_weight_downloads": 0,
+    "experiments": 0
+  },
+  "limitations": [
+    "Five selected primary method sections; not exhaustive survey or full supplemental code audit",
+    "No evidence that proposed consumer failure exists yet",
+    "Technical data separation does not recreate blindness to already seen S23 data",
+    "Known cameras alone do not make image-generation-consistent scene geometry",
+    "No claim that foreign backbones/gsplat/LoRA are runnable on local M3; no installation or execution",
+    "Future controls are recommendations, not frozen or executed tests"
+  ],
+  "review_sha256": "64d14f33184110550ddf097321eaccfb90ed4ea2173ae19179f877bcf6870c93"
+}

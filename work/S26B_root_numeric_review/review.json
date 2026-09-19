@@ -1,0 +1,196 @@
+{
+  "status": "NEEDS_REVISION_BEFORE_MAIN",
+  "recorded_utc": "2026-09-06T16:10:05.032905+00:00",
+  "reviewer": "research_novelty_routes; different from root recompute.py author; main and true inputs were not executed/read",
+  "reviewed_source_sha256": {
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S26B_root_numeric_review/recompute.py": "7077f1d6d33ca93224bc96abbc619ccbf010b6a47492b7a2546e7b1afe6ff5d4",
+    "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/scripts/score_s26b_consumer.py": "02317889281583ae0fd8a12a1148811c9e9a0afb7bcf75275aea9fd1a34f5cc7"
+  },
+  "actual_activity": {
+    "main_executions": 0,
+    "true_GT_file_reads": 0,
+    "true_output_npz_byte_reads": 0,
+    "real_array_decodes": 0,
+    "models": 0,
+    "GA": 0,
+    "artificial_only_checks": true
+  },
+  "verified": {
+    "integer_center_mapping": {
+      "equivalence": "floor((2*i+1)*480/(2*384)) = floor(5*(2*i+1)/8); identical width reduction640/512",
+      "checked_y_positions": 384,
+      "checked_x_positions": 512,
+      "all_equal": true,
+      "source_bounds_y": [
+        0,
+        479
+      ],
+      "source_bounds_x": [
+        0,
+        639
+      ]
+    },
+    "strict_delta": {
+      "real_algebra": "For positive finite p,g, max(p/g,g/p)<1.25 iff p<1.25*g and g<1.25*p",
+      "floating_boundary_artificial_scan": "Generated all raw uint16 values 1..65535; each raw/5000 float64 g, cast threshold1.25*g and g/1.25 to FP32, plus adjacent representable FP32 on either side",
+      "cases_checked": 393210,
+      "observed_predicate_mismatches": 0,
+      "not_a_claim": "This is synthetic boundary validation, not actual data scoring or a general real-arithmetic proof for arbitrary dtypes/scales"
+    },
+    "null_and_denominator_artificial_cases": [
+      {
+        "name": "empty_gt",
+        "metrics": {
+          "gt_valid_pixels": 0,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 0,
+          "absrel": null,
+          "rmse_m": null,
+          "delta1": null
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "invalid_on_valid_gt",
+        "metrics": {
+          "gt_valid_pixels": 2,
+          "prediction_invalid_on_gt_pixels": 1,
+          "delta1_success_pixels": 1,
+          "absrel": null,
+          "rmse_m": null,
+          "delta1": 0.5
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "invalid_outside_gt",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 1,
+          "absrel": 0.0,
+          "rmse_m": 0.0,
+          "delta1": 1.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "all_positive_wrong",
+        "metrics": {
+          "gt_valid_pixels": 2,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 0,
+          "absrel": 4.95,
+          "rmse_m": 9.0,
+          "delta1": 0.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "exact_upper",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 0,
+          "absrel": 0.25,
+          "rmse_m": 0.25,
+          "delta1": 0.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "exact_lower",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 0,
+          "absrel": 0.2,
+          "rmse_m": 0.25,
+          "delta1": 0.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "near_upper",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 1,
+          "absrel": 0.24999988079071045,
+          "rmse_m": 0.24999988079071045,
+          "delta1": 1.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "near_lower",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 0,
+          "delta1_success_pixels": 1,
+          "absrel": 0.19999990463256836,
+          "rmse_m": 0.24999988079071045,
+          "delta1": 1.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "negative_prediction",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 1,
+          "delta1_success_pixels": 0,
+          "absrel": null,
+          "rmse_m": null,
+          "delta1": 0.0
+        },
+        "matches_original_pure_function": true
+      },
+      {
+        "name": "infinite_prediction",
+        "metrics": {
+          "gt_valid_pixels": 1,
+          "prediction_invalid_on_gt_pixels": 1,
+          "delta1_success_pixels": 0,
+          "absrel": null,
+          "rmse_m": null,
+          "delta1": 0.0
+        },
+        "matches_original_pure_function": true
+      }
+    ],
+    "baseline_flow": "Within explicit mode loop all four current receipts/seals/NPZ hashes are checked before explicit GT loop. Prediction-invalid pixels on valid GT remain in delta denominator; any such pixel nulls frame AbsRel/RMSE. uint16 GT makes g>0 equivalent to finite-positive."
+  },
+  "required_corrections": [
+    {
+      "id": "R1",
+      "severity": "MAJOR",
+      "location": "main first contract identities hash loop, parent read",
+      "problem": "The contract currently accepts an arbitrary identity map. It neither requires parent/self binding nor prohibits a sensor-GT path, so all4-seal-before-any-GT is not a guarantee of the entry point. At inspection contract.json did not exist, so no safe external field restriction was available to inherit.",
+      "fix": "Constrain contract identities to explicit allowed control paths and require parent+self entries before hashing any listed path; root must freeze actual values. Do not place sensor/output payload files in this initial identity set."
+    },
+    {
+      "id": "R2",
+      "severity": "MAJOR",
+      "location": "producer loop versus score_receipt input_sha256_before_after",
+      "problem": "The review hashes the current producer receipts/seals/NPZs but does not require them to match the original scoring PASS input_sha256_before_after. A current self-consistent replacement set under the same parent could be recomputed instead of the precise set scored.",
+      "fix": "Before GT, require all current producer identity entries to equal the original score receipt input map; bind the original metrics parent/domain and the common recovery output chain. Preserve the narrow IMPORT_VALIDATED label."
+    },
+    {
+      "id": "R3",
+      "severity": "MINOR",
+      "location": "aggregate loop and per_frame selection",
+      "problem": "Only three depth means are recomputed. Original aggregate also has prediction_invalid_fraction_on_gt mean; count/frame/defined metadata and method-key completeness are not checked. Iterating only existing metrics keys can silently omit a missing group.",
+      "fix": "Assert 28 unique per-frame mode/index rows; exact method sets for new4/all8/old4; check the fourth invalid-fraction mean and relevant fixed frame counts/defined counts, or explicitly narrow any report saying all group means. Prefer include all originally reported denominators/count sums."
+    },
+    {
+      "id": "R4",
+      "severity": "MINOR",
+      "location": "common_old check and final evidence_scope",
+      "problem": "common_old checks validation_status and zero new_GA but does not retain producer_kind, recovery link, historical gaps or unchanged originalFAILED status in the review receipt.",
+      "fix": "Carry the explicitly inherited IMPORT_VALIDATED scope and historical missing observations into the final receipt; do not treat the fourth output as a fourth newly executed GA."
+    }
+  ],
+  "nonblocking_observation": "Assertions currently create no failure receipt; a failed run can leave input_seal without receipt and a repeat would overwrite it. Either a root caller must preserve first-attempt artifacts or add fail-closed attempt bookkeeping before execution. No actual run has failed in this review.",
+  "next_gate": "Root edits only its new recompute.py, preserves this review, then reviewer rechecks changed source SHA. No original scoring code/data changes."
+}

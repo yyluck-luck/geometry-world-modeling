@@ -1,0 +1,45 @@
+{
+  "schema": "s20-source-and-import-pre-review-v1",
+  "status": "SOURCE_PASS_IMPORT_GUARD_RECOMMENDATIONS_PENDING_ROOT",
+  "completed_utc": "2026-09-06T12:46:12.793692+00:00",
+  "read_only_review": true,
+  "model_calls": 0,
+  "weight_data_reads": 0,
+  "import_smoke_runs": 0,
+  "source_files_verified": 199,
+  "additional_patches": [
+    "modeling/pipeline.py",
+    "utils/util.py"
+  ],
+  "patches_match_previously_tested_S17_candidates_exactly": true,
+  "cpu_flash_source_unchanged": true,
+  "source_plan_bound": true,
+  "script_sha256": {
+    "prepare_source.py": "e8e449363b24261e3e2656720c8e5c6f8a82ea0bd0ebfb8eca3c7d014d2ffb9d",
+    "source_manifest.json": "66f913d7a7be7890447ea01e766c4bef10e2818fcafd7a8141d2e01d7bdbe841",
+    "import_smoke.py": "6b7fcf4c4ed89bec719c11ccbd51588ec427481f87a3976e4a7a0575350db249",
+    "wheel_plan_v2.json": "90f0f93266d63aea4077f48a98389287156bdc42d819fef214d6731d26786b41"
+  },
+  "actual_scope": [
+    "read full prepare_source and import_smoke",
+    "parse Python AST without import",
+    "hash and compare 199 small isolated source files against manifest and S17C base",
+    "confirm two patched candidates and original transformer identity"
+  ],
+  "positive_findings": [
+    "S20 overlay precedes S17C overlay and isolated source",
+    "working directory is isolated source",
+    "original model classes not explicitly constructed",
+    "torch.load and PIL open prohibited before pipeline import",
+    "profile blocks five custom model constructors",
+    "CPU/RoPE/load inherited without additional math or NMS changes",
+    "no old environment install proposed"
+  ],
+  "requested_guard_clarifications": [
+    "normalize open paths before ROOT/data subtree check; deny original test_samples and weight .bin",
+    "deny socket audit connect/sendto and subprocess channels if claiming no network beyond normal Python connect monkeypatch"
+  ],
+  "planned_scope_not_security_sandbox": "Intended local import is reviewed; Python guards are observable best-effort restrictions, not a general hostile-code sandbox.",
+  "full_environment_import_result": "not run by this reviewer; pending root execution",
+  "full_model_execution": "not authorized by this preparation receipt"
+}

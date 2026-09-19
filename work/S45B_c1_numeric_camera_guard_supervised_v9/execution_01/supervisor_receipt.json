@@ -1,0 +1,80 @@
+{
+  "completed_utc": "2026-09-08T12:49:43.668789+00:00",
+  "details": {
+    "fork_bound_execution": {
+      "interpreter_binding_sha256": "5489a76444cb2029765f378e4b186dc7cf3d41448da880e089508594d636c945",
+      "interpreter_process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "launch_mechanism": "FORK_ALREADY_RUNNING_INTERPRETER_THEN_SANDBOX_INIT_NO_EXEC",
+      "ordinary_interpreter_path_reopened": false,
+      "ordinary_worker_path_reopened": false,
+      "schema": "s45b-v9-fork-bound-worker-execution-v1",
+      "worker_source": {
+        "bytes": 90459,
+        "device": 16777234,
+        "inode": 262348371,
+        "mode": 33188,
+        "sha256": "a0653726f63b896c6c1b3185221c8dde2838833599b93010c9cd239a5427e836"
+      }
+    },
+    "memory_limit_exceeded": false,
+    "memory_monitor_failed": false,
+    "no_fork_sandbox_preflight_sha256": "2902c5ff1518eed13a148a38d43afb629057f9bd717f5acd6549c86873108889",
+    "output_limit_exceeded": false,
+    "resource_usage": {
+      "cpu_limit_seconds": 120,
+      "elapsed_seconds": 0.15528200002154335,
+      "expected_process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "max_observed_memory_bytes": 60293120,
+      "memory_mechanism": "Darwin proc_pid_rusage V4 plus exact-pid wait4 high-water evidence",
+      "memory_monitor_samples": 8,
+      "peak_phys_footprint_bytes": 56738128,
+      "peak_resident_size_bytes": 59523072,
+      "process_uuid": "aef99cc53bca30bab987cb4132804e09",
+      "rss_limit_bytes": 2147483648,
+      "stderr_bytes": 0,
+      "stderr_limit_bytes": 65536,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_limit_bytes": 65536,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "system_cpu_seconds": 0.019155,
+      "time_limit_seconds": 300.0,
+      "user_cpu_seconds": 0.108651,
+      "wait4_peak_rss_bytes": 60293120
+    },
+    "timed_out": false,
+    "worker_pid": 16643,
+    "worker_returncode": 0,
+    "worker_source": {
+      "bytes": 90459,
+      "lstat": {
+        "ctime_ns": 1788870409147673166,
+        "device": 16777234,
+        "inode": 262348371,
+        "mode": 33188,
+        "mtime_ns": 1788870409147673166,
+        "nlink": 1,
+        "size": 90459,
+        "type": "regular"
+      },
+      "no_process_creation_audit": {
+        "audit_sha256": "bf53be7553cd02e6c05073ebddf7b55c2ea340977ec07ef4b5a2f21c586e99dc",
+        "status": "PASS_EXACT_WORKER_NO_PROCESS_CREATION_AST"
+      },
+      "path": "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v9/camera_guard.py",
+      "sha256": "a0653726f63b896c6c1b3185221c8dde2838833599b93010c9cd239a5427e836"
+    }
+  },
+  "error": "Camera tensor shape is outside c2w/K scope",
+  "error_type": "ValueError",
+  "failed_phase": "WORKER_EVIDENCE_AND_SOURCE_REVALIDATION",
+  "images_viewed": 0,
+  "model_renderer_generation_runs": 0,
+  "passed": false,
+  "pixel_bodies_opened": 0,
+  "pixels_decoded": 0,
+  "schema": "s45b-c1-numeric-camera-guard-supervisor-failure-v1",
+  "status": "FAILED_OR_PARTIAL_C1_NUMERIC_CAMERA_SUPERVISION",
+  "terminal_authority": false,
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v9/supervise_camera_guard.py\", line 1947, in formal_supervision\n    complete_validation = validate_complete_worker_artifacts(\n        worker, report, worker_receipt,\n    ...<3 lines>...\n        interpreter_binding_sha256,\n    )\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v9/supervise_camera_guard.py\", line 1613, in validate_complete_worker_artifacts\n    validate_camera_tensor_identities(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        report[\"camera_tensor_identities\"], body_count, body_bytes,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v9/supervise_camera_guard.py\", line 1520, in validate_camera_tensor_identities\n    require(camera_shape or batch_shape,\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            \"Camera tensor shape is outside c2w/K scope\")\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S45B_c1_numeric_camera_guard_supervised_v9/supervise_camera_guard.py\", line 107, in require\n    raise ValueError(message)\nValueError: Camera tensor shape is outside c2w/K scope\n"
+}

@@ -1,0 +1,61 @@
+315:                 original_step = sampler.sampler_step
+316: 
+317:                 def observed_step(*args, **kwargs):
+318:                     budget()
+319:                     step = len(result['steps']) + 1
+320:                     entry = dict(step=step, started_utc=utc(), rng_before=rng_sha(np, torch))
+321:                     try:
+322:                         value = original_step(*args, **kwargs)
+323:                     except Exception as error:
+324:                         entry.update(failed_utc=utc(), rng_after=rng_sha(np, torch),
+325:                                      error_type=type(error).__name__, error=str(error))
+326:                         steps_file.write(json.dumps(entry) + '\n')
+327:                         raise
+328:                     entry.update(completed_utc=utc(), rng_after=rng_sha(np, torch),
+329:                                  finite=bool(torch.isfinite(value).all()), shape=list(value.shape),
+330:                                  dtype=str(value.dtype))
+331:                     result['steps'].append(entry)
+332:                     steps_file.write(json.dumps(entry) + '\n')
+333:                     progress('step', step=step)
+334:                     require(entry['finite'] and step <= 50, 'Invalid sampler step output/count')
+335:                     budget()
+336:                     return value
+337: 
+338:                 sampler.sampler_step = observed_step
+339:                 sampler_calls = []
+340: 
+341:                 def observed_sampler(denoiser_call, noise, **kwargs):
+342:                     require(not sampler_calls, 'Original sampler called more than once')
+343:                     sampler_calls.append(1)
+344:                     result['noise'] = save_array(arm_dir/'noise.npy', noise.detach().cpu().numpy().copy(), np)
+345:                     result['sampler_entry_rng'] = write_json(arm_dir/'sampler_entry_rng.json',
+346:                                                              rng_json(rng_capture(np, torch)))
+347:                     result['sampler_entry_rng_state_sha256'] = rng_sha(np, torch)
+348:                     value = sampler(denoiser_call, noise, **kwargs)
+349:                     result['arrays']['all8_latents'] = save_array(arm_dir/'all8_latents.npy',
+350:                                                                   value.detach().cpu().numpy(), np)
+351:                     return value
+352: 
+353:                 random.setstate(common[0])
+354:                 np.random.set_state(common[1])
+355:                 torch.set_rng_state(common[2].clone())
+356:                 result['restored_rng_state_sha256'] = rng_sha(np, torch)
+357:                 require(result['restored_rng_state_sha256'] == common_hash, 'Actual RNG restore differs')
+358:                 samples, latents = util['do_sample'](model, ae, denoiser, observed_sampler,
+359:                     c, uc, data['post_cond_optical_c2ws'], data['K_pixels_576'], data['input_masks'],
+360:                     H=576, W=576, C=4, F=8, T=8, cfg=2.0, decoding_t=1,
+361:                     verbose=True, global_pbar=None, return_latents=True, device='cpu')
+362:                 target = samples[~data['input_masks']]
+363:                 result['arrays']['targets_fp32'] = save_array(arm_dir/'targets_fp32.npy',
+364:                                                                 target.detach().cpu().numpy(), np)
+365:                 require(list(samples.shape) == [8,3,576,576] and samples.dtype == torch.float32
+366:                         and bool(torch.isfinite(samples).all()), 'Full8 decode shape/precision/finite')
+367:                 require(list(latents.shape) == [8,4,72,72] and latents.dtype == torch.float32
+368:                         and bool(torch.isfinite(latents).all()), 'Full8 latent shape/precision/finite')
+369:                 quantized = np.stack([np.array(util['tensor_to_pil'](frame)) for frame in target])
+370:                 result['arrays']['targets_uint8'] = save_array(arm_dir/'targets_uint8.npy', quantized, np)
+371:                 result['quantizer'] = [dict(target_id=i, raw_min=float(frame.min()),
+372:                     maps_minus1_plus1=bool(frame.min() < -.1)) for i, frame in zip([20,21,22,23], target)]
+373:                 require(len(result['steps']) == 50 and len(sampler_calls) == 1, 'Incomplete50-step sampling')
+374:                 result.update(status='COMPLETE_ARM', full_decoded_shape=list(samples.shape),
+375:                               full_decoded_dtype=str(samples.dtype), completed_steps=50, sampler_calls=1)
