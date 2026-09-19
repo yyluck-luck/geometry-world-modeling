@@ -1841,3 +1841,64 @@ R15-E 的 oracle 排序中,"跨层 duplicate-state consistency"只排第 4,**不
 
 故 CausVid 当前状态:**静态 HIT,oracle 证据最强,但仍未达到 R15-E 要求的
 "公开合同 + 事前冻结关系 + 公共可观察违反"三件套。**
+
+## 2026-09-19 **撤回:CausVid 不是 HIT,是 CLEAN。我的"最强 oracle 实例"无效。**
+
+**这是我今天第二次撤回一个已经当作头条报出去的发现。** 必须完整记录。
+
+### 我错在哪
+
+我声称:Self-Forcing 的 `else` 分支补上了 CausVid 缺失的 KV index 重置,
+而这构成"后继实现声明意图"的最强 oracle。**两层都错了。**
+
+**第一层:CausVid 的 KV cache 根本没有那两个字段。**
+`causvid/models/wan/causal_inference.py:48-60` 的 `_initialize_kv_cache` 建的字典**只有 `"k"` 和 `"v"`**:
+```python
+kv_cache1.append({
+    "k": torch.zeros([batch_size, 32760, 12, 128], ...),
+    "v": torch.zeros([batch_size, 32760, 12, 128], ...)
+})
+```
+全仓库 grep `global_end_index|local_end_index` → **零匹配**。
+Self-Forcing 是**自己新增**这两个字段(配合其 `local_attn_size` 滚动缓存设计,`SF:283-292`),
+**因此它那段重置不是在修 CausVid 的缺失重置——那两个字段在 CausVid 里不存在。**
+
+**第二层:CausVid 本来就不需要跨调用重置。**
+`causal_inference.py:140` — `current_start = block_index * num_frame_per_block * frame_seq_length`,
+其中 `block_index` 是**每次 `inference()` 内重新开始的局部循环变量**(`num_blocks` 每次调用重算);
+`causal_model.py:140-141` — 按绝对位置写入 `kv_cache["k"][:, current_start:current_end]`;
+`causal_model.py:143` — 只读 `kv_cache["k"][:, :current_end]`。
+**位置每次从 0 重算、缓存被从头覆写、读取范围恒在本次已写区域内,`current_end` 之外的陈旧内容从不被读。**
+
+**结论:CausVid = CLEAN。** 审计表中 HIT 数由 3 降为 **2**,其中 VMem 的 oracle 仍未决,
+故**可辩护的 HIT 只剩 GEN3C 一个**。
+
+### 根因:我犯的正是那条被反复警告的错误
+
+R15-E 早就说过:**"某字段没出现在 reset 路径里"最多是静态异常信号,不是充分证据。**
+我接受了这个结论,却在 CausVid 上**又一次只看 `else` 分支的不对称,没有追消费端**。
+Stream F 的审计也同样:它的 C2 理由是"`else` 只重置 cross-attention 的 `is_init`",
+**观察到了不对称,但没有验证 KV cache 是否存在需要重置的索引状态**。它不存在。
+
+**这是一个假阳性,而且是本方与外部复核同时漏掉的。**
+
+### 立即生效的审计规程修正
+
+**任何 HIT 判定必须追到消费端,证明存在真实的陈旧读取;
+仅凭"未发现 reset 路径"不得判 HIT,只能判 SUSPECT-UNTRACED。**
+
+依此重审现有判定:
+- **GEN3C 仍成立** —— 其陈旧 `model_seeded` 被 `server_base.py:122` 的准入门**直接读取**,
+  且该读取**不是每次重算**的;消费端已追到。与 CausVid 形成对照:
+  CausVid 的消费端参数每次重算,GEN3C 的消费端是持久标志。
+- **VMem**:消费端已追到(`pipeline.py:708` 无条件读 `self.initial_threshold`),故陈旧读取真实存在;
+  但 oracle(该字段"本应被清除")仍 UNRESOLVED。
+- **CLEAN 判定普遍安全**,因为它们的依据是"找到了显式重置",而非"没找到"。
+- **NEAR 判定(MagicWorld、PlayGen)需按新规程重审**,本轮未做。
+
+### 方法论
+
+**同一条错误我在一天内犯了两次:第一次是 oracle 提案,第二次是 CausVid。
+两次都是把"结构不对称"当成"存在缺陷"。**
+外部复核在第一次纠正了我,但第二次它自己也漏了 —— 说明该错误不是我个人的疏忽,
+而是这类审计的**系统性失效模式**,必须用规程(追消费端)而不是靠警觉来防。
