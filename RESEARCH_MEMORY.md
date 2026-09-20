@@ -2656,3 +2656,125 @@ R24-P 说 `self.c2ws` "只有两处写入"。两轮**各自独立**指出这不�
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回;
 对外消息仍被禁止。**"LIVE" 不等于"新"** —— 本轮明确不做 occupancy,
 十个幸存者是否被占据,是下一轮的事。
+
+---
+
+## 2026-09-20 R28-T:B36–B55 合同筛选(补上我留的缺口)
+
+`gpt-6-astra` / `ultra`,跑在**隔离 git worktree** 里(v2.22 首次实施)。
+R24-P 的 B36–B55 原文在 `CODEX_R24P_GENERATION_20260920.md:435`(B36)至 `:776`(B55)。
+**我独立复核:`:650-781` 区间有 19 个 `### B` 标题,加上 `:435` 的 B36 恰好 20 项,与声明一致。**
+
+**裁定:LIVE 6 / UNPRICED 14 / NO-CLAIM 0 / NO-STAKEHOLDER 0 / NOT-FALSIFIABLE 0。**
+
+六个 LIVE:B36 资源感知稀疏注意力 · B39 自然失败挖掘器 · B45 几何因果干预目标 ·
+B46 分位数校准与 conformal 拒答 · B48 空间哈希/八叉树神经缓存 · B49 pose-graph/地图联合优化。
+
+### 与 A 侧判然不同的分布,以及它给出的理由
+
+A 侧 27/55 是 NO-CLAIM;B 侧尾部 **0** 个 NO-CLAIM。R28-T 明确解释了为什么不是宽松:
+> 这些候选都能指出潜在决策者和一个可证伪的结果;**未定义合同不应被偷换成"不可证伪"**。
+
+即 UNPRICED(合同未闭合)与 NOT-FALSIFIABLE(原则上无法证伪)是两种死法,
+把前者写成后者会高估自己的筛除严格度。这条区分我接受。
+
+### Q1:没有任何 B36–B55 候选胜过 B21
+
+B39 的原始 S–M 只是候选生成阶段的粗量级,不能当作已比 B21 便宜;
+B36 约 M–L,B45/B46/B48/B49 至少 M–L;B55 与全部 UNPRICED 连任务/接口合同都没闭合。
+**B21 仍是最便宜的可信条件路径**(~200–800 H800-h、6–14 周 + ScanNet++ 2–6 周关键路径,须 F/T+W+U+C)。
+
+### Q2:本轮唯一的新信息——一扇更窄的授权门
+
+**B36 / B48 / B49 若实现为 exact runtime kernel 与经典 pose-graph、不学习任何新权重,
+可以走 `H+SN+U+C` 的系统 bundle,免去 `F/T+W`。**
+这是 26/28 两轮里唯一一处"授权面可以更小"的发现。
+但它是**条件性**的:一旦改用 learned mask / learned cache / learned weighting,立刻退回 `F/T+W+U+C`。
+且没有任何尾部候选能绕开 `H`(独立 held-out)或 `C`(算力),
+也没有任何候选能把"单独给 U"变成决定性科学结果。
+
+### Q3:不改变"现在不要解冻"
+
+与 R26-R 一致,且四个前置问题不变。
+
+### v2.22 首次实施结果:有效
+
+R28-T 跑在 `$SP/wt_r28t`,主工作树在整轮期间只有我自己的两个 PROMPT 未跟踪文件,
+worktree 内 `git status` 只有它自己的一个新文件。**兄弟进程互删没有复现。**
+
+### 授权状态(未变)
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+R28-T 自述其嵌套 codex 调用两次失败(`Operation not permitted`;
+换临时 `CODEX_HOME` 后 `401 Unauthorized / Missing bearer`),**没有虚构外部裁定** —— 这是正确处理。
+
+---
+
+## 2026-09-20 R27-S:占据检查**未完成** —— codex 账户额度耗尽
+
+这一轮是整条新管线的关键一环:对十个幸存者做占据检查。**它没有产出任何文件。**
+
+在 395,697 tokens 处被打断:
+```
+ERROR: You've hit your usage limit.
+try again at Sep 26th, 2026 1:12 AM.
+```
+`S_EXIT=1`,`work/agents/CODEX_R27S_*` 不存在,`git status` 只有我自己的两个 PROMPT 文件。
+
+**十个幸存者是否被占据,目前无答案。** 不得把本条记录当作"未被占据"。
+
+### 一个我差点犯的归因错误
+
+日志里有大量成篇的表格与参考文献(WorldMem、VideoTitans、PAGER、HSC、LoRA3D、STORM、
+FGB-Future/SOCF-A/DLV 的证伪矩阵等)。**这些不是 R27-S 的产出。**
+它们是 R27-S 在检索途中读取并回显的**仓库既有文件**:
+`work/agents/innovation_literature_scan_round2_20260916.md`、`innovation_live_20260915.md` 等,日期为 09-15/16。
+`grep` 出来的"实质性散文"里,绝大部分属于这一类。
+**如果直接把它们当成本轮占据结论记进账本,就是凭空制造了一份没有人做出的裁定。**
+依据:那两个文件在仓库里可检索到,且早于本轮五天。
+
+### 它留下的确实属于自己的东西:检索轨迹
+
+R27-S 的 web search 查询串是它自己的行为记录,可以用。这些查询指向的先例**高度具体**,
+且多数是**有名字的经典方法**,不是泛泛的"有人做过类似的":
+
+| 幸存者 | R27-S 正在查的先例 |
+|---|---|
+| A4 query 共识稳定性 | Nogueira & Brown,*Measuring Stability of Feature Selection*(JMLR) |
+| A5 覆盖–距离–新颖性重排 | Carbonell & Goldstein 1998 **MMR**(SIGIR);`arXiv:2604.05259` |
+| A6 遮挡/深度风险优先 | *Neural Visibility Field for Uncertainty-Driven Active Mapping*(CVPR 2024) |
+| A22 受限 source counterfactual | **ContextCite** `arXiv:2409.00729` |
+| A89 per-frame mass cap | **H2O Heavy-Hitter Oracle** `arXiv:2306.14048` |
+| A90 per-surfel 贡献归一化 | **EWA Surface Splatting**(2002) |
+| A91 校准 focal/principal point | Zhang,相机标定(IEEE TPAMI) |
+
+### 我自己核验的部分(非 codex 产出,标明作者)
+
+用 arXiv API 直接查证,四个 ID 全部为真且标题相符:
+- `2409.00729` = *ContextCite: Attributing Model Generation to Context*
+- `2306.14048` = *H₂O: Heavy-Hitter Oracle for Efficient Generative Inference of LLMs*(2023-06-24)
+- `2604.05259` = *Coverage Optimization for Camera View Selection*(2026-04-06)
+- `2602.07854` = *Geometry-Aware Rotary Position Embedding for Consistent Video World Model*
+
+读了后两篇摘要,给出**初步、非结论性**的判断:
+
+**COVER(2604.05259)对 A5 威胁最大。** 它的核心是
+"minimizing a tractable approximation of the Fisher Information Gain, which reduces to
+favoring viewpoints that **cover geometry that has been insufficiently observed by past cameras**",
+并在 "fixed and embodied data acquisition scenarios" 上评测。
+覆盖准则本身已公开发表。
+**但对象不同**:COVER 是 *active* view selection(决定相机下一步去哪,采集阶段),
+A5 是 *passive* retrieval(在冻结生成器前挑已观测帧)。
+按 registry 四元组,`object of change` 与 `time of intervention` 都不同。
+**这指向 ADJACENT 而非 OCCUPIED,但 delta 是否够一个 reviewer 接受,我没有答案。**
+
+**H2O 对 A89 是反向的。** H2O 是*保留* heavy hitter(目标是吞吐/显存),
+A89 是*抑制*单帧吸走全部质量(目标是 weighted unique support)。估计量不同。同样偏 ADJACENT。
+
+**以上只读了两篇摘要,不构成占据裁定。** 正式裁定需要按 claim 三元组逐条做完,
+且要读到具体章节而非摘要。这件事**没有做完**。
+
+### 结论
+
+新管线的前两步(合同筛选 A / B)已完成并有结果;**第三步(占据)被额度中断**。
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
