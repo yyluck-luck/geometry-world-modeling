@@ -2291,3 +2291,60 @@ owner 明确指示:**松开 C6** —— 即取消"贡献必须是 method"这一�
    项目把大量时间投在测量基础设施与完整性门上,真正开始机制搜索时可执行空间已很窄。
 
 **下一步:对轴 (g) 做占据性评估——这是八条轴中唯一从未被评估的一条。**
+
+## 2026-09-20 R21-M 轴 (g) 占据评估:**AXIS-G-OCCUPIED —— 八条轴全部关闭**
+
+C6 松开后,轴 (g) 是八条轴中唯一占据状态未知的一条(此前被标为"被 owner 贡献类型要求排除",
+**是被要求排除,不是被文献占据排除**)。现已评估完毕。
+
+### 裁定
+
+**三个子区全部被占,且是在"可发表的一般性主张"这一层面被占:**
+
+| 子区 | 状态 |
+|---|---|
+| (g1) metrics | OCCUPIED —— 从 FVD/VBench 式视频度量到相机/几何专用世界模型度量 |
+| (g2) benchmarks | OCCUPIED —— 相机控制、交互、长视界稳定性、记忆/revisit 套件 |
+| **(g3) experimental-validity machinery** | **OCCUPIED** —— 我预判"被占得少得多",**预判错误** |
+
+### 关掉 (g3) 的两篇(我已逐条核实标题为真)
+
+- **arXiv:2607.07196 — *Validate the Dream Before You Trust Its Verdict: Admissibility for
+  World-Model Simulators***:规定生成式世界模型作为 test oracle 时必须先被 accredited,
+  其裁决才能算作 assurance evidence;定义 **L0–L4 admissibility ladder**
+  (生成质量 → 动作鲁棒性 → OOD/envelope → 失败归因 → 模拟裁决向现实的迁移)。
+  **这是本项目 validity gate 思路的一般化版本,且已发表。**
+- **arXiv:2606.31672 — *WorldRoamBench: An Open-World Benchmark for Long-Horizon Stability of
+  Interactive World Models***:在物理评分**之前**发布显式 validity gate。
+
+### Lead 2 亦被直接填掉
+
+我曾寄望于 Steady-Forcing(2606.14732)自己喊出的评价缺口
+("VBench 奖励 drift 引起的光流作为 Dynamic Degree,却不直接惩罚 texture hardening 与 flow stagnation")。
+**该缺口已被 arXiv:2608.28694 *SNF-Bench: Separating Static Drift from Natural Flow in
+Long-Horizon Fixed-Camera Video Generation* 填补。**
+
+### 其余已核实的占据证据(10/10 引用为真)
+
+WBench(2605.25874)· WorldMark(2604.21686)· PlayWorld(2608.13552)·
+Omni-WorldBench(2603.22212)· MBench(2606.00793)·
+Geometry-Aware RoPE for Consistent Video World Model(2602.07854)·
+Quantitative Video World Model Evaluation for Geometric-Consistency(2605.15185)·
+**Preregistration for Experiments with AI Agents(2606.11217)** —— 连预注册也被占。
+
+### 对项目的意义
+
+本项目的 order-invariance gate、pre-scoring census、byte-identity gate、pre-declared discard、
+审计四元组,**作为 worked audit 仍然有用,但其原则已不再是未被占据的**。
+窄表述("没有论文恰好具有本项目的 retrieval-arm 字节同一性/顺序/溯源门")
+被标为 **UNVERIFIED 且 search-bounded**,**不能支撑 AXIS-G-OPEN**:
+审稿人可以指出直接的 world-model validity-gate 先例,再把本项目的包归类为
+**单消费者实现,缺乏跨系统外部效度与外部采用**。
+
+**结论:在"冻结消费者 + 零 GPU + 本学期"三约束下,八条轴均已被占。
+这不再是推断,而是逐条检索加引用核实的结果。**
+
+### 仍未被检验的唯一假设
+
+**这张轴图本身可能就是错的工具。** 十三轮问的都是"方向 X 被占了吗",
+从未问过"这个领域里一个被接收的贡献长什么形状"。该问题已交 R22-N。
