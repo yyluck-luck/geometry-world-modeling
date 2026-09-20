@@ -2468,3 +2468,117 @@ astra 五次 `model is at capacity`(82k/131k/22k/3.7k tokens,以及去 priority 
 **以后遇 capacity,第一步应去掉 priority 再试,而非直接换模型。** 我前四次重试因一直带 priority 而白跑。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;冻结消费者约束不变;800 GPU-hours 维持撤回。
+
+## 2026-09-20 R23-O Astra 复核:**推翻 sol 的 SHAPE-AVAILABLE,降级为 INSUFFICIENT**
+
+我在 prompt 里写过:"十四轮'否'之后第一个'是',恰恰最可能是动机性推理"。**它确实没站住。**
+
+### 四条彼此独立的降级理由
+
+1. **Q1 新颖性未证成,目前看像是已有机制的领域迁移/组合。**
+   四元组是"有用的、保守的内部审计契约",但 R22-N **未证明它是一个新 oracle**,
+   而非 state-pollution 与 order-dependence 既有机制在生成模型上的领域特化组合。
+
+2. **Q2 两条朴素规则失效是反例,不是贡献。**
+   未检出任何已发表来源把"两条朴素规则都失效"写成具名的双向定理(标 **UNVERIFIED**),
+   **但其各个方向都不令人意外**:PolDet(消费者已知前即存在污染)、
+   PRADET 与 test-independence(动态识别 reader/order 关系)、
+   ODRepair/iFixFlakies(reset helper 不完整)、NIO(重复执行暴露自污染)。
+   **两个项目内案例只确立领域相关性,不确立新颖性或发生率。**
+
+3. **Q3 R22-N 自身的推理有普适主张超出受限证据**,且其 static-HIT 分类
+   **把 VMem 未决的 oracle 与 GEN3C 的静态 oracle 混在一起**。
+
+4. **Q4 独立复核条件当前无法满足**,且那六条**遗漏了语义生命周期 oracle 与基线不可约化检验**。
+
+### 最重要的缺失条件(Astra 原话要点)
+
+> **最重要的缺失条件是 semantic oracle。"不在 `reset()` 里"只是异常信号。**
+> 审计必须声明:公开边界何时承诺隔离、何时持久化是有意的 history/autoregression、哪些状态被允许存活。
+> **dominance 证明也需要声明范围**:确切 commit、公开 API/配置包络、别名、异常、对象替换、动态分派。
+> **"任何地方都不存在覆盖"不能仅因一次本地源码搜索没找到赋值就成立。**
+
+### 关于独立复核者(直接影响可行性)
+
+> **"owner 控制的重标注或另一个在环模型,都不是独立盲审者。"**
+> 若无法获得环外复核者,该主张**必须停留在受限的内部审计协议层级并标记 `INSUFFICIENT`**。
+
+我事先就把这个问题写进了 Q4:**我供不了独立复核者**——我是审计者,astra 已在环十六轮。
+它确认:这不使整个想法逻辑上不可能,**但确实阻断了当前设定下的可发表验证包**。
+
+### 其他被点名遗漏的条件
+
+(i) 预注册的抽样框与版本/commit 同一性;(ii) 对 PolDet/PRADET/order-reordering/ODRepair/NIO 的**基线对比**;
+(iii) 测试已知假阳/假阴的**变异或有限状态控制**;(iv) 已发布 artifact 的**独立再执行**;
+(v) 明确区分**静态代码可达性 / 语义缺陷 / 已测输出后果**的错误分类学。
+
+### 重新考虑的最低路径
+
+冻结生命周期契约与范围 → 建立**预注册的真值套件**(含已知假阳/假阴控制:
+absent-but-recomputed、reset-present-but-wrong-scope、conditional/late reset、
+overwrite-before-consume、intentional history continuation、genuine stale consumer)→
+对上述既有工作做基线对比 → 取得环外复核 →
+**关键结果必须是有效性判定的改进,不是两个轶事。**
+
+### 记录纪律
+
+R22-N 的 SHAPE-AVAILABLE 我已按当时证据记录;**本降级以同等显著度记录**,不追溯删改前条。
+`new_method_validated=false`;`novelty_authorization=NONE`;冻结消费者不变;800 GPU-hours 维持撤回。
+
+## 2026-09-20 R24-P 无约束生成:**我的八轴图在结构上是不完整的**
+
+本轮首次反转流程:**不给轴图、不给占据表、不给已关闭清单,只生成不评判。**
+产出 896 行,Part A(冻结+零 GPU)与 Part B(假设解冻)合计 45+ 个机制级候选,**全部未经占据筛查**。
+
+### Part C:八槽的十一个结构性盲点(示例引用 6/6 已核实为真)
+
+**根本诊断:** 八槽把搜索空间建成一个**单一运行时管线的 intervention topology**
+(证据读 / 条件表示 / 持久状态 / 目标分解 / 跨调用转移 / 几何耦合 / 调用内采样 / 测量)。
+它适合回答"**在现有消费者的哪个节点动手**",**但不是论文贡献的完整本体**。
+
+> **"增加第九个内部轴还不够;不少贡献改变的是边界、数据、任务或判定规则,
+> 无法定位到任何一个运行时节点。"**
+
+| 盲点 | 会被我的枚举错分/漏掉的真实工作 |
+|---|---|
+| C1 任务/能力定义与 action-observation contract | **Genie** 2402.15391 —— 塞进"条件表示"会丢掉 action contract 本身 |
+| C2 数据引擎、监督与课程 | 2406.17711 —— 归入 retrieval 会混淆"训练数据选择"与"在线 context 选择" |
+| C3 学习目标与训练—推理契约 | **Diffusion Forcing / Self Forcing** —— 叫"within-call inference dynamics"**会漏掉训练契约** |
+| C4 系统/编译器/硬件/资源合同 | **FlashAttention** 2205.14135 —— **八槽没有"执行介质/资源合同"这一维** |
+| C5 benchmark/数据集/验证协议**作为对象** | VBench、WorldModelBench —— 对象是可复用的评测边界,不只是给 VMem 加指标 |
+| C6 交互闭环、策略与用户协议 | Genie、**GAIA-1** 2309.17080 |
+| C7 不确定性、风险、拒答与 assurance | **2512.05927 World Models That Know When They Don't Know** |
+| C8 理论性质与因果可辨识性 | 横跨所有节点,不能指向单一 slot |
+| C9 表征学习范式 | **2404.08471(V-JEPA)** —— 归入"条件表示"会把训练 regime 与部署条件混为一谈 |
+| C10 跨层共同设计与可复现 artifact | 八槽会把这种科学结论错误缩成"measurement" |
+| C11 **应改用多层地图** | `object of change × time of intervention × claim/stakeholder`,每项链接 evidence contract |
+
+**C11 是可操作的修正:** 一个候选可同时落在 data+training+runtime,**不应强迫它选唯一 slot**;
+这样"生成→筛选"的顺序才不会再被我自己的轴图提前截断。
+
+### Part D:我二十三轮都没问过的那个问题
+
+> **"我们真正要交付的贡献对象和 estimand 是什么,谁会据此改变决定;
+> 在不预设内部干预轴的情况下,哪个最小证据合同足以让这个决定可复核?"**
+
+口语版:先问**"我要改变的是系统、任务、证据合同,还是读者对 world model 这个词的判断?
+谁会因为这项工作采取不同动作?"** —— 而不是先问**"哪个内部槽位还空着?"**
+
+> 旧流程默认:固定一个消费者,找一个尚未被占的内部干预,就可能得到方法论文。
+> **这个默认把四个层次压扁了。**
+
+**最要害的一句:**
+> **"它避免把'没有找到第九个槽位'误当成'没有研究问题'。"**
+
+### 正确顺序(采纳)
+
+**先固定 `claim + estimand + stakeholder + minimal evidence contract`,再从 A/B 中选一个可证伪机制。**
+
+### 必须同时记录的限制(防止把这条当成突破)
+
+1. **这不证明存在创新。** 它证明的是**搜索被框错了**,而在正确框架下的重新搜索**尚未进行**。
+2. **45+ 候选全部未经占据筛查**,按今天的记录,先前每一轮占据检索的结果都是"已占"。
+3. Part B 的候选需要解冻 + 算力 + 时间三者同时满足,**本学期仍不可行**。
+4. R23-O 刚刚把诊断方向降级为 `INSUFFICIENT`;**本轮不改变该裁定**。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
