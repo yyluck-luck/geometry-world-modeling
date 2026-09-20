@@ -2348,3 +2348,52 @@ Quantitative Video World Model Evaluation for Geometric-Consistency(2605.15185)�
 
 **这张轴图本身可能就是错的工具。** 十三轮问的都是"方向 X 被占了吗",
 从未问过"这个领域里一个被接收的贡献长什么形状"。该问题已交 R22-N。
+
+## 2026-09-20 贡献形态分析(我的第一遍,**待 astra 复核,勿当结论**)
+
+十四轮来所有占据检索都问同一个问题:**"方向 X 被占了吗?"**
+该问法预设:**新颖性是靠在固定轴图上找一块无主机制获得的。**
+本轮第一次问另一个问题:**这个领域里一篇被接收的论文,贡献长什么形状?**
+
+### 我的初判分类(8 篇,摘要已实取)
+
+| 论文(会议) | 形态 |
+|---|---|
+| GEN3C(CVPR 2025 Highlight)2503.03751 | ④ 表示替换(显式 3D cache)+ ① |
+| EscherNet(CVPR 2024)2402.03908 | ④ 表示替换(相机位置编码)+ ⑤ 规模扩展 |
+| VMem 2506.18903 | ④ 表示替换(surfel-indexed view memory) |
+| Diffusion Forcing(NeurIPS 2024)2407.01392 | ② **问题重构**(统一 next-token 预测与 full-sequence diffusion 两族) |
+| Self Forcing 2506.08009 | ① 新机制(针对已命名问题 exposure bias) |
+| **rliable(NeurIPS 2021 Outstanding)2108.13264** | ⑦ **负面结果** + ⑧ 测量 |
+| **Deep RL that Matters(AAAI 2018)1709.06560** | ⑦ **负面结果** |
+| **Implementation Matters(ICLR 2020)2005.12729** | ⑦ **负面结果** |
+
+### 两条初步观察
+
+**观察一:形态 ① 在本样本中是少数。**
+世界模型那批的主导形态是 **④ 表示替换** ——
+GEN3C 换成显式 3D 缓存、EscherNet 换成相机位置编码、VMem 换成 surfel 索引记忆。
+**而本项目十四轮全部对着 ① 优化。** 若 astra 在更大样本上证实该分布,
+则结论不是"没有创新空间",而是**"一直在找错种类的东西"**。
+
+**观察二:形态 ⑦(负面/局限结果)是高规格的真实形态,本项目从未尝试。**
+rliable 获 NeurIPS Outstanding Paper;Deep RL that Matters 为 AAAI;Implementation Matters 为 ICLR。
+三者共同结构:**"这个领域相信的东西经不起检验。"**
+
+### 必须同时记录的限制(防止自我说服)
+
+**⑦ 之所以能发,是因为它推翻了领域所相信的东西。**
+本项目的负面结果(预声明修复失败 −0.016 dB、15/20 CLEAN、0/20 实测)
+**是关于本项目自身 harness 的,不是关于领域信念的**。
+
+唯一可能触及领域信念的是 VMem 那条:
+**其论文宣称 surfel-indexed memory 带来一致性,而实测其检索在 12/14 窗口选到不同帧集合。**
+但 R19-K 已裁定:**缺可辩护 oracle,不能把该测量提升为缺陷主张。**
+
+**故本条记录是"待检验的形态假设",不是新方向。**
+`new_method_validated=false`;`novelty_authorization=NONE`。
+
+### 执行状态
+
+R22-N 连续三次 `Selected model is at capacity`(82k / 131k / 22k tokens)——
+**容量错误,非逻辑失败**。未静默更换模型(owner 明令每轮须用 astra ultra),第四次重跑中。
