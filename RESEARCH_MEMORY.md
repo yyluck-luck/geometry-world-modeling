@@ -2582,3 +2582,77 @@ R22-N 的 SHAPE-AVAILABLE 我已按当时证据记录;**本降级以同等显著
 4. R23-O 刚刚把诊断方向降级为 `INSUFFICIENT`;**本轮不改变该裁定**。
 
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+
+---
+
+## 2026-09-20 R25-Q / R26-R:合同筛选(先 claim 后占据)——**第一次出现幸存者**
+
+两轮均为 `codex exec -m gpt-6-astra -c model_reasoning_effort="ultra"`(去 `service_tier="priority"`)。
+本轮**刻意把 occupancy 推迟**,按 R24-P 的处方执行:
+先固定 `claim + estimand + stakeholder + minimal evidence contract`,再谈占据。
+前二十三轮的顺序是反的,所以每一轮都只能返回"已占"。
+
+### R25-Q(Part A,零 GPU / 冻结消费者)
+
+范围自动扩到 R24-P 的全部 55 项 A 候选(A1–A25、A45–A60、A87–A100;
+原文 `CODEX_R24P_GENERATION_20260920.md:30-219、:538-648、:798-894`),不是我 prompt 里写的 25 项。
+
+**裁定:LIVE 10 / NEEDS-RESOURCES 16 / NO-CLAIM 27 / NO-STAKEHOLDER 2 —— 45/55 本轮不存活。**
+(我独立重数表格状态列,四个数字吻合。)
+
+十个幸存者全部是**选择层**(retrieval/selection)claim,**都不宣称生成质量**:
+A4 多假设 query 共识 · A5 覆盖–距离–新颖性重排 · A6 遮挡/深度风险优先 ·
+A14 自适应候选预算 · A22 受限 source counterfactual replay ·
+A89 per-frame mass cap · A90 per-surfel 贡献归一化 · A91 校准 focal/principal point ·
+A92 min/softmin 轨迹距离 · A94 重复 source-ID 衰减。
+
+**Q4 = 有。** 本周零 GPU 可执行。决策价值最高的首个产物是
+**A6 的 CPU-only selector risk receipt**(本轮未创建该文件):
+逐候选 projected conflict / hole / visible-area、固定 K 选择、
+distance-only 与 clean-geometry 负控制、预登记聚合规则与 kill threshold。
+明确边界:"只判断选择层风险 proxy,不调用 VMem、不读 future outcome、不宣称生成质量。"
+
+按决策价值/单位成本排序:A22 > A6 > A5 > A14 > A4。
+A22 有前置条件——**只有在 exact replay / 几何 source artifact 可读时才成立**,否则立刻降为 NEEDS-RESOURCES。
+
+45 个死亡候选的共同失败模式(Q3),第 6 条最重要:
+> 生成轮次仍隐含 slot-first 偏差:先问哪个内部位置能改,再补 claim。
+
+即 R24-P 诊断出的病,在 R24-P **自己生成候选时仍然存在**。
+
+### R26-R(Part B,需解冻)
+
+**裁定:本学期没有任何 Part B 路径能完成一个可辩护的决定性结果,即使 owner 今天解冻。**
+死因不是候选没价值,而是每条活路线都需要**尚不存在的独立 held-out 证据**;
+走 ScanNet++ v2 还要 owner+supervisor 签字并等 2–6 周,而账本已记录 term mostly consumed。
+
+最便宜的条件路径:**B21 质量—新颖性双门控写入**,约 200–800 H800-h、6–14 周,
+外加 ScanNet++ 的 2–6 周关键路径;须解除 F/T + W + U + C。
+
+**Q4 建议:现在不要解冻。** 先要 owner 回答四件事(目标是否改为 8–14 周后续工作 /
+是否签 ScanNet++ 申请 / 给完整 bundle 还是单项空授权 / 是否把第二 consumer 与独立复核写进验收)。
+理由:空授权只买到 wrapper、首轮图或开发面板,买不到能经受审查的 method result。
+
+### 两轮独立给出的同一条源码更正
+
+R24-P 说 `self.c2ws` "只有两处写入"。两轮**各自独立**指出这不完整:
+`:180` 绑定、`:1297` append,但 `:1360` 还有 undo 路径的 `pop()` 原位删除,且无 setter/property。
+
+**我独立复核:`grep -n "self\.c2ws" pipeline.py` 共 21 处,
+其中仅 180 / 1297 / 1360 是 mutation,其余全为读取或注释行。更正成立。**
+其余行号声明(`get_context_info:1249`、`torch.cat:1263`、
+`get_translation_scaling_factor:1265`、R24-P 的 B1@225、S/M/L/XL@223)逐条复核,全部命中。
+
+### 我造成的两个缺口
+
+1. **B36–B55 未筛。** R24-P 实际生成了 55 项 B 候选,我的 prompt 只写 B1–B35。
+   R26-R 在正文第 7 行主动声明了这个边界,没有顺带裁定。20 项待补。
+2. **并发删除。** 见 `RESEARCH_PRINCIPLES.md` v2.22:R25-Q 在收尾自检时
+   `rm` 掉了 R26-R 的产物。全文从日志 heredoc 回显中复原,
+   109 行/33275 字节,与 R26-R 自测一致,SHA-256 `aed2ac16f93fa496...`。
+
+### 授权状态(未变)
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回;
+对外消息仍被禁止。**"LIVE" 不等于"新"** —— 本轮明确不做 occupancy,
+十个幸存者是否被占据,是下一轮的事。
