@@ -2397,3 +2397,74 @@ rliable 获 NeurIPS Outstanding Paper;Deep RL that Matters 为 AAAI;Implementati
 
 R22-N 连续三次 `Selected model is at capacity`(82k / 131k / 22k tokens)——
 **容量错误,非逻辑失败**。未静默更换模型(owner 明令每轮须用 astra ultra),第四次重跑中。
+
+## 2026-09-20 R22-N 贡献形态分析:**SHAPE-AVAILABLE**(第一个非纯关闭的结果)
+
+`PRODUCED_BY=gpt-5.6-sol/xhigh; PENDING_ASTRA_REVIEW` —— astra 五次容量拒绝(见下),owner 授权替代。
+
+### 先纠正我自己的初判
+
+我上一条记了"形态 ①(既有任务上的新机制)在样本中是少数"。**未被证实,撤回该措辞。**
+本轮明确:2/18 的平铺分布是**刻意平衡取样的产物,不是领域估计**;我自选的 8 篇同样不具代表性。
+
+**能站住的更弱结论:形态 ① 显然不是唯一被接收的形态,
+而项目此前"只找机制"的搜索目标不具代表性。** 要真实比例需随机、按会议分层的语料。
+
+### 裁定:SHAPE-AVAILABLE —— measurement / validity apparatus
+
+**面向审稿人的主张(逐字保留):**
+
+> **For stateful released video/world-model systems, reset correctness cannot be inferred either
+> from a field being absent from `reset()` or from a reset call being present. A four-tuple audit
+> that links the writer on call A, the public A→B sequence, the exact consumer on B, and a
+> dominance proof that no recompute/overwrite/reset covers that state is a falsifiable validity
+> apparatus that reclassifies apparent lifecycle hits and exposes order-dependent stale-state paths.**
+
+**关键点:今天两个方向的错误恰好是该主张的内容,不是失败。**
+CausVid 假阳性 = "字段不在 reset 里不能推出缺陷";GEN3C 假阴性 = "存在 reset 调用不能推出干净"。
+
+### 已核实的被接收先例(两条 proceedings 直链均 HTTP 200)
+
+- **VBench: Comprehensive Benchmark Suite for Video Generative Models** — **CVPR 2024**,arXiv:2311.17982
+  <https://openaccess.thecvf.com/content/CVPR2024/html/Huang_VBench_Comprehensive_Benchmark_Suite_for_Video_Generative_Models_CVPR_2024_paper.html>
+- **WorldModelBench: Judging Video Generation Models As World Models** — **NeurIPS 2025 Datasets and Benchmarks Track**,arXiv:2502.20694
+  <https://proceedings.neurips.cc/paper_files/paper/2025/hash/4ec03ed08a3fcb59e1c815b5598beff1-Abstract-Datasets_and_Benchmarks_Track.html>
+
+本轮 11/11 arXiv 引用经我独立核实标题吻合。
+
+### 从未尝试过的形态,以及为什么(Q3)
+
+1. **Regime extension** —— 从未尝试。**是冻结消费者 + 零 GPU + 撤回额度的刻意后果,不是疏忽。**
+2. **Scaling / efficiency** —— 从未尝试,同样被算力与消费者约束阻断。
+3. **System integration 作为新颖性主张** —— 从未尝试;项目有 wrapper 与审计基础设施,但从未把"组合"当作可发表主张。
+
+问题重构、新能力定义、负面/局限、测量 —— **在生命周期审计这一轮才被触及,且只到探索性/静态证据层级。**
+
+### 存活条件(6 条,全部零 GPU / CPU 范围)
+
+1. **先冻结**四元组、判定类与 dominance 规则,再重审;发布 manifest、代码路径、哈希与负控制;
+2. **独立复核者对标签盲审**,报告一致性,并与两条朴素规则("字段不在 reset 里"、"存在 reset 调用")对比
+   —— **关键结果必须是可复现的重分类,不是挑出来的轶事**;
+3. **再加 2–3 个独立发布系统**,含**已知干净的负控制**与一个阳性案例;**无声明抽样框则不得声称 prevalence**;
+4. 至少一个阳性案例给出端到端后果**或**完全可复现的静态非法状态 trace;
+   **若只有静态证据,须称 static lifecycle defect,不得暗示生成视频退化**;
+5. artifact 必须 **CPU 可运行且可被采用**:一条命令、不可变输入、trace 输出、字节同一性、
+   HIT/measured HIT/NEAR/CLEAN 四类明确分离;
+6. **VMem 的测量必须与审计主张分离** —— 现有对比不得被用来制造缺失的 oracle/后果合取。
+
+### 最强反对意见(接受)
+
+不是四元组不自洽,而是**现有证据尚未建立外部效度与结论影响**:面板是便利取样;
+GEN3C 静态案例无端到端运行;VMem 有测量但无可辩护 oracle;`+0.245 dB` 是暴露开发序列上的泄漏对比、仅 RGB PSNR。
+**"15/20 CLEAN"是看起来像可靠性的计数,不是 prevalence 结果。**
+
+若独立复核、跨系统案例与可采用的 CPU artifact 无法产出,**正确的降级是 `INSUFFICIENT`。**
+
+### 执行层记录:容量诊断
+
+astra 五次 `model is at capacity`(82k/131k/22k/3.7k tokens,以及去 priority 后仍拒)。
+**诊断结论:`service_tier="priority"` 池饱和是其中两次的真因,不是模型不可用。**
+`gpt-5.6-sol` 去掉 priority 后可用;`gpt-6-astra` 去掉 priority 后仍拒 —— astra 本身饱和。
+**以后遇 capacity,第一步应去掉 priority 再试,而非直接换模型。** 我前四次重试因一直带 priority 而白跑。
+
+`new_method_validated=false`;`novelty_authorization=NONE`;冻结消费者约束不变;800 GPU-hours 维持撤回。
