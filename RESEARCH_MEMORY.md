@@ -2867,3 +2867,56 @@ submodular view selection——它正是**从已有视图中**结合质量与覆
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
 **本轮无 codex 仓库内复核** —— Pro 读不到仓库,所有仓库事实均由我转述,
 它无法履行 "verify, do not trust"。待 9/26 额度恢复后由 astra 补做。
+
+---
+
+## 2026-09-21 **OWNER DECISION C7:走 world model 创新路线,接受跨学期**
+
+Owner 原话:针对"想做 world model 创新 → 必须解冻(训练/微调/权重/算力),
+而且要独立 held-out 数据,ScanNet++ 申请 2–6 周还没启动,本学期做不完"——
+**"没事 走这个"。**
+
+### 这条决策确定了什么
+
+1. **方向选定:Part B(需解冻的世界模型路线),不是 Part A(选择层)。**
+2. **明确接受本学期无法完成**,目标改为跨学期工作。
+   这直接推翻了 R26-R/R28-T 全部 `TERM-IMPOSSIBLE` 标记的**决策含义** ——
+   那些标记本身仍然成立(事实没变),但它们不再构成否决理由。
+3. **A 侧五个幸存者退居次要。** 它们仍是有效的零 GPU 工程/测量件,
+   但不再是主线交付。理由见同日 R29-P1:
+   按当前表述没有一项能独立支撑一篇有竞争力的方法论文,且它们**不是世界模型创新** ——
+   全部是选择层主张,明确不宣称生成质量,不改变模型如何表示或预测世界。
+
+### 这条决策**没有**确定什么(必须显式补齐,不得推定)
+
+- **未确定解冻哪几项。** R26-R 的记号:`T`(从头训练)、`F`(微调/LoRA/adapter)、
+  `W`(新 head/adapter/权重)、`U`(上游/消费者/状态写回改动)、`MC`(多消费者/真实 action interface)、
+  `C`(恢复可用 GPU-hours)。**R26-R 明确警告:只给单项是"空授权",
+  会把候选停在接口或首图,买不到能经受审查的 method result。**
+- **未确定具体候选。** B 侧 55 项中,真正触及世界建模的是
+  B3(增量 neural field/tri-plane 记忆)、B4(可写可删可修订记忆控制器)、
+  B5(长程 recurrent world-state token)、B8(世界坐标扩散+可微渲染)、
+  B9(静态/动态 slot 分解)、B10(闭环轨迹规划)。
+  注意:R26-R 推荐的 **B21 是"最便宜的可信路径",不是"最像世界模型创新的路径"** ——
+  这两个判据在本次决策后已经分离,不得混用。
+- **未改变授权旗标。** `new_method_validated=false`;`novelty_authorization=NONE`。
+  这两项记录的是"结果是否已验证",与方向决策无关,不因 C7 变动。
+- **未恢复算力。** 800 H800-hour tranche 仍为撤回状态;恢复需另行决定。
+- **对外消息仍被禁止**(`AGENTS.md`)。
+
+### 立即进入关键路径的事项
+
+**ScanNet++ v2 申请是当前最长前置项:2–6 周,需 owner 与 supervisor 双签,尚未启动。**
+它不消耗 GPU、不依赖解冻范围、也不依赖候选选定 —— 因此**应当最先启动**,
+否则无论后续怎么决策,都会被这 2–6 周卡住。
+(依据:`docs/proposal_v2/NEW_PROPOSAL_DRAFT_20260919.md:82-97,112-147`,
+由 R26-R 与 R28-T 两轮独立复核。)
+
+### 与 proposal 的关系(须向 supervisor 说明)
+
+现行 proposal `NEW_PROPOSAL_DRAFT_20260919.md` 的机制是 **lineage-aware memory fusion**,
+且第 24 行明写 **"Retrieval is held fixed"** —— 它冻结检索、只改融合。
+该 proposal 已因代数缺陷被标记 **NO-GO as written**(最优权重下矩阵项提供零额外信息,
+本项目数值验证误差 4.4e-16),800 GPU-hours 被 reviewer 撤回。
+**C7 选择的 B 侧路线与该 proposal 不是同一机制**,需要新的 proposal 或实质修订,
+不能当作原 proposal 的继续执行。
