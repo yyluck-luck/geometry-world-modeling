@@ -2778,3 +2778,92 @@ A89 是*抑制*单帧吸走全部质量(目标是 weighted unique support)。估
 
 新管线的前两步(合同筛选 A / B)已完成并有结果;**第三步(占据)被额度中断**。
 `new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+
+---
+
+## 2026-09-21 R29-P1:GPT-6 Pro 占据裁定(五个 A 侧幸存者)—— **无 codex 外部复核**
+
+渠道:本机 `ChatGPT.app`,档位 **Pro, 5 of 5**,经 AppleScript 驱动(见 `AGENTS.md` 新增章节)。
+原因:codex 额度耗尽至 2026-09-26;`gpt-6-pro` 在 ChatGPT 账户下经 codex 调用返回
+`400 not supported`,但在 app 内本来就可用。
+
+### 总裁定
+
+**五项全部 ADJACENT,无一 OCCUPIED。** 但它同时给出第二个、更重要的结论:
+
+> 当前结论不是"五项已被文献全部占位",而是
+> **"五项都没有被精确占位证据直接杀死,但按现在的主张,没有一项足以独立支撑一篇有竞争力的方法论文"。**
+> 这两个结论必须分开。
+
+它明确拒绝给任何一项 OPEN,理由是:**不会用"没搜到完全相同的三个指标名字"来声称开放**,
+并主动声明检索未穷尽(SLAM/SfM/MVS 补充材料未全查,部分全文链接无法访问),
+因此 ADJACENT 意为"已核实近邻不能直接占掉此估计量",而非"已证明不存在更近的论文"。
+
+| 候选 | 裁定 | 它对贡献大小的判断 |
+|---|---|---|
+| A4 query 共识 | ADJACENT | 小;"加扰动、投票、更稳定"不够 |
+| A5 覆盖–距离–新颖性 | ADJACENT | **很小**;高度接近覆盖优化与去冗余的应用 |
+| A6 遮挡/深度风险 | ADJACENT | **五项中最可能形成实质几何结果** |
+| A14 自适应预算 | ADJACENT | 有工程价值;通用"自适应更省算力"剩余为空 |
+| A22 source 反事实 | ADJACENT | 有审计价值;删源归因本身无方法新颖性 |
+
+建议:A22 当测量资格检查,A5 当强基线,A4 当稳健性控制,只给 A6/A14 很小的 CPU 证据预算。
+
+### 它提出的、我没想到的致命反驳(全部接受)
+
+1. **A4 的稳定性可以被无用选择器赢下。** 永远返回同一组 K 帧,扰动不稳定性恒为零。
+   因此 A4 即使成立也未建立部署价值。还须防止把"每次重跑共识"偷换成
+   "预生成一张固定共识列表应对所有扰动"——后者是构造性地消除变化。
+2. **A5 的 hole-rate 与 coverage 可能不是两份独立证据。** 若用同一目标像素全集和互补定义,
+   `hole-rate = 1 − coverage`。且若 duplicate 仅指重复 frame ID,无放回选择自动保证无重复,
+   那不是几何结果。最强基线是**直接贪心最大化边际联合覆盖**,不是 MMR 的某个加权版本。
+3. **A6 存在伪改善路径:** 选择器丢掉难像素后,只在剩余重叠区算冲突率,冲突率自然下降。
+   **必须先固定可比较的评价区域和分母,再调权重。** 另:目标真值深度可用于评估,
+   但若部署时不可得就不能进入选帧风险分数,否则测到的是"带额外信息的选择"。
+4. **A22 的归一化可能无定义:** 若无干预复放方差为零,"除以复放方差"就没有定义;
+   不得事后加一个方便的极小常数再把巨大比值解释成强因果证据。
+   更根本的:**身份支持 ≠ 深度必要性** —— 两个 source 提供完全相同深度,A 因 tie-breaking 被记为身份;
+   删 A 后 B 接管,深度完全不变而身份改变。这不是归因失败,也不证明 A 没被用到。
+5. **A14 必须与一组充分调优的固定预算比**,而非只比一个明显过大的预算;
+   且须计入停止判据、投影、候选生成与打分的全部 CPU 成本。
+   "先把所有候选算完再宣布只用了前一部分"不构成节省。
+
+### 引用核验(我自己做,13 条)
+
+**零编造。** 10 个 arXiv ID 全部真实且标题完全吻合。具体数字抽查:
+
+- DIBR `1802.03079` Table:`AVERAGE NUMBER OF PIXELS IN HOLES (PER FRAME)`,
+  Ballet 2PV=**877** → 2PV+2CV=**96** / 2PV+SW=**210**,减少率 89.02%/76.09%。
+  我自行验算 877→96 = 89.05%、877→210 = 76.06%,与论文一致。**连"选择性 warping 反而留下更多孔洞"的反直觉方向都对。**
+- Tao `2110.00696`:`IMI 275.20 ms` / `Tao 47.39 ms`,紧邻 Table VII,故该行确在 Table VI。
+- JMLR 18(2018) 1–54,§6.2 `Figure 12: Comparing the stability of LASSO and different
+  parametrisations of Stability Selection in four classification/regression data sets`
+  (Spambase/Boston housing/Sonar/Madelon)。**注意实为三作者**(Nogueira, Sechidis, Brown)。
+- The Visual Computer 2025/07 DOI `10.1007/s00371-025-03944-3` 解析正常。
+- MMR DOI `10.1145/290941.291025`:ACM 返回 403,**未能访问核验**(标为未验,非错误)。
+
+**唯一瑕疵:** Al-Jazzazi `2505.15636` 原文为 "**up to** 30-40% decrease"(上界),
+Pro 转述为"可减少**约** 30%–40%",把上界说成典型值。方向正确,程度轻微夸大。
+
+### 一次我差点记下的假错误
+
+初核 VMem 时我用最新版,发现消融在 **§4.4** 且全文 `FOV` 出现 **0 次**,
+与 Pro 所称 "§4.6 含 temporal-only / FOV-overlap / top-K 消融" 不符,一度判为引用错误。
+**排除版本差异后:v1 确为 `4.6. Ablation Study`,且紧邻文本为 `Temporal | Field of View (FOV) | VMem`。**
+Pro 原文写的是"所核 **v1** 的 §4.6" —— 版本、节号、内容三项全中,最新版只是重编号并改了措辞。
+**是我忽略了它标注的版本。** 这是今日第三次险些记入不实内容(前两次:
+险将仓库旧文件当作 R27-S 产出;R25-Q 删除 R26-R 成果)。
+
+### 对我自己"主动 vs 被动"防线的修正
+
+我(以及 Pro)都判定 COVER `2604.05259` 与 NVF `2406.06948` 属 ADJACENT,
+理由是 active acquisition ≠ passive retrieval(`object of change` 与 `time of intervention` 均不同)。
+**但 Pro 指出这条防线不足以排除所有近邻**,并举出 The Visual Computer 2025 那篇
+submodular view selection——它正是**从已有视图中**结合质量与覆盖做选择。
+我核验该文献真实存在。**因此"别人都是主动采集"这条辩护被实质削弱,必须停止依赖它。**
+
+### 状态
+
+`new_method_validated=false`;`novelty_authorization=NONE`;800 GPU-hours 维持撤回。
+**本轮无 codex 仓库内复核** —— Pro 读不到仓库,所有仓库事实均由我转述,
+它无法履行 "verify, do not trust"。待 9/26 额度恢复后由 astra 补做。
