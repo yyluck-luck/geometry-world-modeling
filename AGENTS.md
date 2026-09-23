@@ -77,3 +77,21 @@ codex exec -m gpt-6-astra \
 8. **夜间科研必须用 ChatGPT.app 协同**(owner 2026-09-21 指定),且按本节方法驱动。
    夜间是 codex 额度最容易见底的时段,也是无人值守时段;Pro 渠道是此时的主力外部大脑。
    仍适用第 6 条:Pro 读不到仓库,其结论必须标注"无 codex 外部复核"并择期补做。
+
+## Language rule for external models (owner, 2026-09-22)
+
+**All tasks sent to codex, and all prompts written for the owner to send to GPT, must be entirely in English.**
+- Codex prompts and the shared preamble contain no Chinese, and the preamble explicitly requires the output file to be written in English, because codex otherwise follows the Chinese in the ledger.
+- Prompts handed to the owner for the ChatGPT app are written in English, including the request section. Do not add "Answer in Chinese".
+- Explanations to the owner in this conversation stay in Chinese; only the prompts themselves are English.
+
+## Fallback when codex is unavailable (owner, 2026-09-22)
+
+If codex cannot run (quota, capacity that does not clear, region block, CLI failure), ask the question in the owner's
+desktop ChatGPT app, in a GPT-6 astra conversation, driven by the AppleScript bridge described above.
+All GPT-6 Pro/app rules still apply: regular (not temporary) chat, navigate by title before reading, verify a
+marker before reading, no `activate` in read loops, prompts in English. Conclusions obtained this way cannot
+read the repository and must be marked "no codex repository-level review".
+
+Codex on the SuperPOD login node is blocked by region (HTTP 403 from HKUST egress). It works only through the
+reverse SSH tunnel to the Mac's Clash proxy: `source ~/.codex_proxy_env && codex` on slogin-01, while the tunnel is up.
