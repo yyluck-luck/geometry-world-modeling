@@ -95,3 +95,14 @@ read the repository and must be marked "no codex repository-level review".
 
 Codex on the SuperPOD login node is blocked by region (HTTP 403 from HKUST egress). It works only through the
 reverse SSH tunnel to the Mac's Clash proxy: `source ~/.codex_proxy_env && codex` on slogin-01, while the tunnel is up.
+
+## SSH connection budget for SuperPOD (2026-09-23, after an incident)
+
+Polling Slurm by opening a fresh SSH connection every 30-45 s, plus a tunnel that reconnected every 15 s, ended with
+SuperPOD closing connections before the SSH handshake (`kex_exchange_identification: Connection closed by remote
+host`) from the Mac's egress IP. TACC previously banned an IP for too many attempts. Rules:
+- Reuse one connection: poll through the existing `claude-ssh` session or an SSH ControlMaster
+  (`-o ControlMaster=auto -o ControlPath=~/.ssh/cm-%r@%h -o ControlPersist=10m`), never a new connection per poll.
+- Poll no more often than every 2 minutes; prefer one wait loop *on the cluster* (inside tmux) over remote polling.
+- Never auto-reconnect a tunnel in a tight loop; back off exponentially and stop after 3 failures.
+- If connections are refused, stop all automated SSH and wait; do not keep testing.
