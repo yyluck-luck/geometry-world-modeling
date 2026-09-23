@@ -1,4 +1,61 @@
-## 2026-09-24 R44阈值审计更正（优先于旧R43摘要）
+## 2026-09-24 R50协议完成与Astra复核阻断
+
+R50完成了 CGLR 信息路径的 synthetic-only CPU 协议设计，没有执行。协议固定 canonical
+JSON/SHA-256、H2 provenance 硬前置、A/C/B/U 三 patch 四区域、7个 matched arms、细胞级分母
+和终止结果：`H2_UNIDENTIFIABLE`、`REJECT_FIXTURE`、`REJECT_CONTRACT`、
+`REJECT_NON_IDENTIFIABLE` 或 `PASS_INFORMATION_PATHWAY_ONLY`。它只能检验合成信息路径，不能
+验证 learned world model 或文献新颖性。
+
+按项目规则启动了 GPT-6 Astra 外部复核；它直接核对了 pinned source 和没有
+`pointmap_frame` 声明这一事实，但嵌套复核因 `401 Unauthorized` 失败，没有产生独立 memo，
+不能写成共识。R51 已交给专门创新代理，审查 R50 是否有 tautological arms、可见性/分母/hash
+漏洞和真正的证伪性。H2 provenance 仍未解决，不执行 fixture、C8 replay、GPU、S103、S132 或
+GRC。保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R49：CGLR独立方法新颖性暂拒
+
+R49对 Reveal-Intervention/CGLR 做了敌对的先验和可识别性审查。3D belief/occupancy 更新、
+residual transfer、固定噪声局部编辑、counterfactual 分支、geometry-conditioned 生成和
+delayed-state correction 都已有近邻，因此当前 CGLR 不能作为独立新方法声称。仅剩的可检验
+残差是 typed provenance-gated reveal commit：测量证据不可变、预测 provenance、residual+3D
+support 门控、outside-support 精确守恒、no-reveal 精确不变、以及对不重叠第三视角的影响。
+如果 mask-only、append-only、residual transport 或 generic completion 达到相同效果，机制不可
+识别；若 H2 pointmap-frame provenance 未解决，直接标记 `H2_UNIDENTIFIABLE`。
+
+R50 已交给专门创新代理，要求只写三 patch CPU/synthetic 协议、六组 matched arms、hash/分母和
+明确的 PASS/REJECT 分支，不得执行。保持 C8/GPU/S103/S132/GRC 阻断，保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R48红队结论与R49创新循环
+
+R48对R47源边界合同做了专门的敌对审查。R47可以保留为设计草案，但暂不能执行：CUT3R
+辅助函数的代数测试不能证明真实 learned pointmap 在 CUT3R/VMem 边界采用哪个坐标系。
+必须把 H2 拆成 H2-source 与 H2-model-boundary，并要求明确的 pointmap-frame 来源字段和
+可用 CPU 检查的边界产物；否则只能记为 `H2_UNIDENTIFIABLE`。H1 仍只是在已存 map 上的
+评估器坐标代数问题，不能当作 H2 证据。
+
+同时修正三点：H1/H2/K/crop/单位/容差必须在 source/synthetic 阶段冻结；scene_13 只能在
+冻结后估计一个 metric scale；scene_13/scene_14 都是已经暴露的 C8 development 数据，
+scene_14 只能叫 analysis-held-out development；depth consistency 的分母必须是 N_ray，
+零射线标记 `UNTESTABLE_NO_RAY`。R49 已交给专门创新代理，审查 Reveal-Intervention/CGLR
+是否有可辩护的机制差异和最小 CPU 证伪测试。没有 replay、GPU、Slurm、receipt 或 flags 修改。
+保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R45 C8支持审计完成（物理支持稀缺前提不成立）
+
+远程 job 609623 在 dgx-45 完成，12分55秒，exit 0:0；回执为 MAPS_COMPLETE_NO_DIFFUSION，
+14条记录、0 blocked。CPU mask 评估14/14 harness gate通过。B（12帧库中可见）在所有窗口都
+很高，范围0.755--0.984，均值约0.888；四帧交付上下文 C 也高，没有 low-B 稀缺窗口，
+也没有 high-B/low-C 交付失败窗口。
+
+J（VMem surfel/深度命中）在所有窗口都低，但预注册的 pose-convention 条件只有3/14窗口
+通过，逐目标深度相关中位数约0.190，部分深度比达到数百。因此 J 当前只能标为
+UNINTERPRETABLE_POSE_CONVENTION，不能解释成物理稀缺或已证实索引失败。
+
+结论：本面板不支持 hidden-surface predictor 的前提；不启动 RCA/BRD adapter、扩散或新的
+GPU方法pilot。下一步只做只读的参考系/尺度/索引链路审计；RCA/BRD保留为blocked hypothesis，
+DCR只作为评价setting备选。保持 new_method_validated=false、novelty_authorization=NONE。
+\n## 2026-09-24 R44阈值审计更正（优先于旧R43摘要）
 
 R44独立审查拒绝把R43提出的 recall、false-write、outside-support、third-camera 数字当作证据级门槛。6/8只是点估计；false scene-write必须按24个非scene case计分；outside-support优先要求未触及序列化状态的hash完全相同，否则使用复放校准的绝对/相对容差；S132目前 future_scoring_permitted=false，不能在本合同里做third-camera评分。这些数字最多是后续 pilot screen，不能写成PASS门槛。
 
@@ -3449,3 +3506,47 @@ B/C 以 OpenCV 相机到世界约定读取数据集位姿时跨帧深度一致�
 VMem 翻转 y/z → 期望 OpenGL。**harness 输入端位姿约定错配是消费失败的首要候选解释,尚待直接检验。**
 历史:项目在 `docs/INNOVATION_GUIDANCE_CURRENT.md:112` 曾在观察器里漏掉过这个 y/z 转换;S76(TUM)曾得到"只有部分方向响应";
 S103 起换到 RGB-D Scenes v2 后从未专门核对该数据集位姿约定。结果文档:`work/S130_C8_diagnostics/results_support_job609623/RESULT.md`。
+## 2026-09-24 R46 坐标系审计：C8 的 J 不能解释
+
+对 C8 job 609623 做了只读代数审计。产生 retrieval map 时使用的是
+`render_c2w_transformed = render_c2w_dataset @ diag(1,-1,-1,1)`；但冻结的 CPU
+评估器先用原始 dataset pose 把 target depth 反投影，再把未翻转的 camera point
+投到这个已翻转坐标系的 map。56 个 receipt pose 对都严格满足该变换（最大绝对误差
+0.0），所以这是确定性的 y/z 坐标约定不一致，不是模型质量证据。
+
+因此低 J 继续标为 `UNINTERPRETABLE_POSE_CONVENTION`，不能当作物理支持稀缺或索引
+失败。另有一个尚未证实的上游风险：producer 把 `dataset_c2w @ D` 传入 CUT3R，而
+CUT3R 的深度反投影采用 optical x-right/y-down/z-forward；需要独立 CPU/source replay，
+不能和已证实的 evaluator bug 混为一谈。RCA/BRD 在当前面板关闭，DCR 只保留为约定受控的评测 setting。下一步只能先
+冻结并审核新的 CPU 坐标恒等式与尺度合同；在此之前不重算 J、不跑 adapter/扩散/S103/
+same-pool/GRC。保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+## 2026-09-24 R47 远端权重完整性再次确认
+
+在 `slogin-01` 重新计算远端五个必需文件的 SHA-256，全部与已有 PASS 回执一致：
+`vmem_weights.pth`、`cut3r_512_dpt_4_64.pth`、`open_clip_model.safetensors`、
+`diffusion_pytorch_model.safetensors`、`config.json`。VMem transfer 状态保持
+`COMPLETE_SHA_VERIFIED`，不需要续传，也不重复 no-data model-load smoke。
+
+当前关键路径是 R47 的 CPU H1/H2 source-boundary 合同。H1 是已证实的 evaluator 坐标遗漏，
+H2 是 `T_cv @ F` 传给 OpenCV 风格 CUT3R pointmap 的未决风险。在 H2 和共同尺度解决前，
+不重算 C8、不跑 S103/S132/GRC/GPU。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+## 2026-09-24 R48：R47 CPU 合同完成，进入敌对复核
+
+R47 已生成并同步 CPU H1/H2 source-boundary 合同，包含 synthetic fixture、候选变换、
+controls、scene-level calibration-only scale、完整分母和停止条件。已补充限制：scene_13/14
+都属于已暴露 C8 development panel；scene_14 只能称为合同内的 held-out split，不能称为
+项目盲测或 model-unseen。
+
+创新代理现已 verified RUNNING，进行 R48 敌对审读。审读和 owner review 完成前，不执行
+真实 C8 重评分、GPU/Slurm、S103、S132 或 GRC。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+---
+
+## 2026-09-23 **OWNER DECISION C9:批准位姿约定检验(新 GPU 实验,约 1 H800 小时)**
+
+Owner 在看到 C8 实验 2 结论后批准("批,跑")。范围:在 14 个面板窗口上对比"原始数据集位姿(OpenCV)"与
+"转换为 VMem 期望的 OpenGL 约定(y/z 列取反)"两种输入,双种子,测生成 PSNR 与 surfel 自身渲染深度一致性。
+预测与阈值须在运行前提交;原生条件须逐字节复现密封输出;沿用 C8 的 tmux+回执流程;不训练、不下载。
+工作上限沿用 20 H800-h 的剩余额度(C8 两实验合计约 0.5 H800-h)。旗标不变。
