@@ -1,3 +1,141 @@
+## 2026-09-24 R61发现执行顺序和 owner gate 缺口，R62修正已分配
+
+R61 发现 R60 仍有四个硬缺口：preflight 要求 computed 但 computed 在之后才生成；
+H2 缺失可能先导致 context hash failure；十个 arm 的 ID/rule/typed 参数映射没有完整
+固定；供给的 hash 没有逐项重算核对；owner review 只是文字要求。R62 将加入两阶段
+static→materialize→H2→hash→score、OWNER_ACCEPTED gate、完整 arm mapping 和 raw/supplied
+hash checklist，只做设计修正。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空
+不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R60完成，R61做最终 owner-readiness 审查
+
+R60 已固定执行顺序：先递归 marker/type preflight，失败就在 canonicalization 和哈希前
+拒绝；通过后才物化 computed、计算哈希，再检查 H2，最后才允许 arm scoring。真实
+arm ID、typed rule object、哈希重算和 H2-before-score 都已写入设计。R61 只做最终审查，
+不执行 fixture 或 GPU。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空
+不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R59发现 placeholder 缺口，R60补 preflight
+
+R59 发现 R58 只明确禁止一个 COMPUTED_BEFORE_HASH marker，其他 COMPUTED_FROM_*、
+metadata_only、canonical arm name/rule-only JSON 等描述性占位符仍可能进入 hash subject。
+R60 将增加递归 execution_preflight：检查所有必需字段、类型和 marker，在 canonicalization
+和哈希前拒绝缺失或占位值。R59 的 computed-only、hash non-recursion、排除域和 arm
+matching 已通过。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空
+不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R58完成，R59做最终 schema 审查
+
+R58 已物化 computed envelope：projected_pixels、visibility_masks、computed sets/counts
+及其哈希都在运行前准备，base-input 路径统一指向 computed，fixture_context hash 和
+全域排除清单已固定，arm-rule 参数禁止携带 event、expected、post-state 或 target truth。
+R59 现在只检查 placeholder、递归哈希和剩余泄漏风险，不执行 fixture 或 GPU。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空
+不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R57发现 computed envelope 缺口，R58修正已分配
+
+R57 发现 R56 虽然把 expected/computed 语义分开，但 projected_pixels、visibility_masks、
+computed sets/counts 没有落到一个可复算的物化 envelope，fixture-context 的排除域也
+没有完全写清，arm rule 参数还需要禁止携带 event、expected、post-state 和 target truth。
+R58 将补齐 computed 路径、fixture_context_sha256、全域排除和 arm-rule invariant，只做
+设计修正。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成。最新 SSH 调度检查仍有 missing-slurm-module 警告，
+队列为空不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R56完成，R57做 owner-readiness 审查
+
+R56 已修正 R55 的 oracle 泄漏：expected visibility 只作 reviewer declaration，computed
+visibility 由 world points 和相机几何在运行时生成，所有查询、分母、指标和哈希只用
+computed；深度先量化再 tie-break；R56 明确覆盖 R52 旧投影谓词，并物化所有 hash
+path 字段。R57 现在只做设计审查，不执行 fixture、真实 C8、replay 或 GPU。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成。最新 SSH 到达 slogin-01，但 squeue 有缺少 slurm
+module 的警告，当前队列为空不能独立确认。Astra 因 HTTP 401 没有独立 memo。
+new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R55发现 oracle 泄漏，R56修正已分配
+
+R55 发现 R54 仍不能执行：literal visibility_sets 如果直接作为 computed mask，会把
+几何答案写进 fixture，造成 oracle 泄漏和不可复现的 replay。修正必须分离
+expected_visibility_sets 与 computed_visibility_sets，让查询、分母和哈希只使用
+computed；先量化深度再做最近深度加 cell-id tie-break；明确覆盖 R52 的旧 continuous
+bounds；并补齐所有 hash path 对应的物化字段。R56 已分配为设计补丁，仍不执行真实
+数据或 GPU。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成。Astra 因 HTTP 401 没有独立 memo。
+new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R54完成，R55进入敌对审查
+
+R54 已把 R53 要求的 manifest 修正写成设计附录：可见性按相机和 patch 分开记录，
+不能跨相机比较像素；使用 round-nearest-even 后再做边界、正深度、朝向和最近深度加
+cell-id 遮挡判断；查询分离和 fixture/base-input/arm-rule/arm-input 的哈希域与路径
+都已固定。R55 现在只做一致性和反同义性审查，不执行 fixture 或任何真实数据/GPU。
+
+关键依赖没有变化：VMem 五个文件 SHA 已通过，旧 model-load smoke 已完成；H2 的
+learned pointmap frame provenance 和 CPU 边界证据仍缺。没有 H2 必须停在
+H2_UNIDENTIFIABLE。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R53审查完成，R54修正循环已分配
+
+R53 对 R52 的合成协议做了设计审查，发现一个必须修正的问题：不同相机的像素坐标
+不在同一个图像平面，不能用像素集合求交来证明查询分离。舍入和边界判断也必须固定
+为一个可执行规则，哈希必须明确字段路径和域前缀。R54 已分配给专职 Innovation
+Agent，只允许写设计补丁，不允许执行 fixture、读取或重放真实 C8、改 receipt、提交
+GPU/Slurm、运行 S103/S132/GRC。
+
+当前关键状态未变：五个 VMem 文件已完成 SHA-256 校验，旧的 no-data model-load
+smoke 已完成；H1 是评估器坐标遗漏，H2 的 learned pointmap frame provenance 和
+CPU 边界证据仍缺失。没有 H2 就必须停在 H2_UNIDENTIFIABLE。Astra 外部审查因
+HTTP 401 没有产生 memo。new_method_validated=false 和
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R52修订完成，进入owner-readiness审查
+
+R52按R51完成了设计修订：加入 no-provenance/no-conservation/same-residual 三个
+access-matched controls、measured/wrong-component 事件、逐 cell world-point 投影和
+visibility hashes、统一 base_input/per-arm-rule hashes、分开的 appearance/depth 分母与
+零分母终止，并把合成成功标签限制为 `PASS_CONTRACT_REPLAY`。仍未执行 fixture、真实 C8、
+replay、GPU/Slurm，H2 provenance 仍是硬前置。R53 已交给专门创新代理做 owner-readiness
+审查；Astra 外部复核因 401 没有独立 memo。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+
+## 2026-09-24 R51红队发现R50存在构造性证伪缺口
+
+R51审查拒绝直接执行R50：CGLR 被预先赋予 residual/provenance/conservation 行为，而
+mask-only、generic-global、untyped transport、append-only 和 shuffle controls 被故意削弱，
+因此不同签名可能只是协议写死的结果。R50 的相机/patch 可见性也只写了计数，没有 world
+points、投影、遮挡/深度谓词和 mask hash，不能证明第三视角真的不重叠。
+
+必须加入三组 access-matched controls（no provenance、no conservation、same residual mask）、
+measured/wrong-component 事件、逐 cell 世界点与投影计算、visibility hash、分开的
+appearance/depth 分母，并把可能的 PASS 改成仅表示 synthetic conformance 的
+`PASS_CONTRACT_REPLAY`。R52 已交给专门创新代理做设计修订；不执行 fixture，不读真实 C8，
+不提交 GPU/Slurm。Astra 外部复核仍因 401 失败，没有独立共识。H2 provenance 未解决，保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
 ## 2026-09-24 R50协议完成与Astra复核阻断
 
 R50完成了 CGLR 信息路径的 synthetic-only CPU 协议设计，没有执行。协议固定 canonical
@@ -3550,3 +3688,16 @@ Owner 在看到 C8 实验 2 结论后批准("批,跑")。范围:在 14 个面板
 "转换为 VMem 期望的 OpenGL 约定(y/z 列取反)"两种输入,双种子,测生成 PSNR 与 surfel 自身渲染深度一致性。
 预测与阈值须在运行前提交;原生条件须逐字节复现密封输出;沿用 C8 的 tmux+回执流程;不训练、不下载。
 工作上限沿用 20 H800-h 的剩余额度(C8 两实验合计约 0.5 H800-h)。旗标不变。
+
+---
+
+## 2026-09-23 C9 结果(job 609666):位姿约定检验 **INCONCLUSIVE**;surfel 深度一致性改善但未达预注册标准;尺度爆炸与约定无关
+
+复现校验:原生 32/32 与密封 S111 static 逐字节相同,PSNR 32/32 与 S113 一致。
+主判据:平均 Δ(gl − native)= **+0.687 dB**,12/16 为正 → 预注册判定 **INCONCLUSIVE**(需 ≥ +1.0 dB)。
+逐窗口 −2.53 到 +3.72 dB,方向不一致。
+次判据:自身渲染深度相关中位 0.190 → **0.594**(11/13 窗口上升),但深度比在 [0.5,2] 的窗口 7/13 < 12 → **NOT RESTORED**。
+**深度比约 400–960 倍的 5 个窗口在两种约定下相同且倍数几乎不变 → 该尺度爆炸不是位姿约定造成的**,是 surfel 重建的独立失败。
+gl surfel 运行在 scene_13 w200 报 IndexError(13/14 完成)。
+结论:约定显著影响 VMem 行为,但转换并不一致地改善生成;位姿约定假说**既未证实也未推翻**。每窗口仅 2 种子,
+而 C8 实验 1 显示种子间差约 1.5 dB,逐窗口 Δ 噪声大。GPU 约 0.65 H800-h(C8+C9 合计约 1.2)。
