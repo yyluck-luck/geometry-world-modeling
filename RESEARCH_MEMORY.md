@@ -1,4 +1,9 @@
-## 2026-09-16T12:49:05+08:00 — GPU隔离镜像卡点解除（合成探针通过）；下一步仍是合同而不是跑模型
+## 2026-09-24 R44阈值审计更正（优先于旧R43摘要）
+
+R44独立审查拒绝把R43提出的 recall、false-write、outside-support、third-camera 数字当作证据级门槛。6/8只是点估计；false scene-write必须按24个非scene case计分；outside-support优先要求未触及序列化状态的hash完全相同，否则使用复放校准的绝对/相对容差；S132目前 future_scoring_permitted=false，不能在本合同里做third-camera评分。这些数字最多是后续 pilot screen，不能写成PASS门槛。
+
+当前远程只有已授权的C8支持审计 job 609623 在dgx-45运行，未提交正式S103/GRC。方法排序保持 RCA > BRD > CGLR/CRR评价算子 > DCR。保持 new_method_validated=false、novelty_authorization=NONE。
+\n## 2026-09-16T12:49:05+08:00 — GPU隔离镜像卡点解除（合成探针通过）；下一步仍是合同而不是跑模型
 
 **用户问题：** "GPU 侧需要你或 ITSC 确认能否拿到可固定的镜像/registry 权限——你不能确认吗？" 本轮实际去确认了，结论：**技术上可以自己确认，不需要 ITSC 开权限**；只有一个"要不要花 1.5GB 下载"的决定需要用户点头（用户选择了"现在就做"）。
 
@@ -3405,3 +3410,42 @@ Owner 同时要求:代码实时推送到 GitHub。此后诊断代码写在 `work
 
 对后续的约束:R37 候选的击杀条件之一"规范化槽位 0 参考系/尺度后效应消失"现可直接操作 ——
 后续一切上下文/顺序对比必须用 RS 约定并报告多种子。GPU 用量约 0.12 H800-h(7 分 02 秒)。
+## 2026-09-24 R43 heartbeat — C8 support running; RCA/BRD合同已冻结（当前状态）
+
+本轮先按要求重读项目原则、主账、流程检查表、计划和交接，并只读核对远程。远程为
+slogin-01，队列中唯一任务是 609623 (c8-support)，在持久 tmux c8_support 内使用
+dgx-45 的1张 H800 运行；日志位于 /home/yliutz/gwm_probe_receipts/C8/support-609623.out
+和 .err。这项任务是用户已批准的 C8 支持审计，不是 S103、GRC、训练或方法验证；没有
+重复提交。
+
+C8 槽位因子结果已核实并保留：seed 42 的原生槽位0效应来自参考系×平移尺度交互；RS
+规范化后四格效应至多约0.023 dB，seed 7 还会变号。因此后续相机条件比较必须固定
+RS 规范化并使用多种子。支持稀缺/交付/索引问题仍等 609623 回执，当前不能先下结论。
+
+R42/R43 的方法候选已收敛：RCA（把延迟 RGB-D 残差分为场景、相机规约/尺度、瞬态/
+传感器）为主，BRD（正/负 reveal 删除预测鬼影）为次，CGLR/CRR 只作因果评价算子，
+若两者都被先验占据则转 DCR 静态 setting/benchmark。已写入零 GPU 合同：
+work/S132_RCA_BRD_contract/DESIGN_AND_PREREGISTRATION.md 和
+work/S132_RCA_BRD_contract/episode_schema.json。合同冻结8个 episode、至少2个未来
+相机、独立几何mask、证据不可变、ITT分母、RS规范化、强对照和明确击杀条件；不授权
+模型前向、adapter、训练、Slurm 或正式 GRC。
+
+下一步：等 609623 完成并核对回执；本地做 S132 schema/hash 自检并取得两作者审阅；
+若支持高则关闭 hidden-surface 方法线，若支持低且来源有效才继续最小 CPU routing/mask
+contract。保持 new_method_validated=false、novelty_authorization=NONE，
+不得把作业运行、CPU合同或agent意见写成方法成立。
+
+---
+
+## 2026-09-23 C8 实验 2 结果(job 609623):**消费失败,不是支持稀缺**;"预测隐藏几何"门槛未过;疑似位姿约定错配
+
+复现校验 14/14 通过。**B 14/14 在 0.755–0.984;交付 4 帧的 C 0.78–0.97;PSNR ≤ 16 dB 12/14。**
+预注册判定:**消费失败 11/14,中间 3/14,真稀缺 0/14(失败层 0/12)**。
+**"预测隐藏几何"类方法(CAGF/BLSC/Reveal-Event/R37)的试点门槛(≥8/14 低 B)未过。**
+预注册动作:审计 get_cond/去噪器的消费过程,暂不加几何预测器。
+
+修正案 3 的位姿约定诊断**失败**(自身渲染深度相关中位 0.19 < 0.5;深度比在部分窗口约 380–1030 倍),J 按规则不可解释。
+B/C 以 OpenCV 相机到世界约定读取数据集位姿时跨帧深度一致率达 75–98% → 数据集位姿几乎确定是 OpenCV;
+VMem 翻转 y/z → 期望 OpenGL。**harness 输入端位姿约定错配是消费失败的首要候选解释,尚待直接检验。**
+历史:项目在 `docs/INNOVATION_GUIDANCE_CURRENT.md:112` 曾在观察器里漏掉过这个 y/z 转换;S76(TUM)曾得到"只有部分方向响应";
+S103 起换到 RGB-D Scenes v2 后从未专门核对该数据集位姿约定。结果文档:`work/S130_C8_diagnostics/results_support_job609623/RESULT.md`。
