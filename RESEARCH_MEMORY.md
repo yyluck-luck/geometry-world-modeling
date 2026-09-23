@@ -1,3 +1,116 @@
+## 2026-09-24 R71发现 typed H2 schema 缺口，R72修正已分配
+
+R71 发现 R70 的 canonical H2 JSON 仍把 max_abs_error 和 hash 示例写成描述性字符串。
+R72 将改为 numeric type exemplar，加上实测替换、numeric threshold/type 检查和 angle-
+bracket/hash marker 拒绝规则。其余 manifest chain、T_c2w、H2 precedence 和授权范围
+通过。没有伪造 provenance。
+
+OWNER_ACCEPTED review 和独立 H2 provenance 仍缺。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R70完成，R71做最终 canonical H2 审查
+
+R70 已统一 canonical H2 packet：T_c2w camera→world、双向 homogeneous 检查、实测 numeric
+error 与 threshold、当前 R70 manifest chain，以及旧 T_frame 公式的明确废止。R71 只做
+最终审查，不执行 fixture/GPU。
+
+OWNER_ACCEPTED review 和独立 H2 provenance 仍缺。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R69发现 H2 packet schema drift，R70合并 canonical schema
+
+R69 发现 R66/R68 的 H2 清单仍有旧 T_frame 公式，R68 的 max_abs_error 还是表达式文字，
+owner accepted_manifest 仍指向旧 R64。R70 将统一 canonical T_c2w schema、双向 formula、
+实测 numeric error 与独立 threshold，并把 owner manifest 更新到 R68 当前版本；旧字段
+全部标记 superseded。没有伪造 provenance。
+
+OWNER_ACCEPTED review 和独立 H2 provenance 仍缺。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R68完成，R69做最终 H2 packet 审查
+
+R68 已统一 H2 的变换方向：T_c2w 明确是 camera→world，同时检查
+X_world=T_c2w@[p_frame;1] 和 p_frame=inv(T_c2w)@[X_world;1]，最大误差必须 <=1e-6；
+world-to-camera 只能用明确 T_w2c 名称。R69 只检查公式、字段、frame label、source/
+boundary artifact 和 CPU entry 是否一致，不执行 fixture/GPU。
+
+OWNER_ACCEPTED review 和独立 H2 provenance 仍缺。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R67发现 H2 transform direction 冲突，R68修正已分配
+
+R67 发现 H2 清单把 T_frame 标成 camera-to-world，却用 inverse(T_frame) @ p_frame
+重建 world point，方向相互矛盾。R68 将显式使用 T_c2w camera→world，并用 homogeneous
+forward 与 inverse 两个检查，二者误差都必须 <=1e-6；若真实 producer 是 world→camera，
+必须使用明确不同的命名和公式。没有伪造 provenance。
+
+OWNER_ACCEPTED review 和独立 H2 证据仍缺，所以不能运行 fixture。VMem SHA 已通过，旧
+model-load smoke 已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。
+Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R66完成，R67审查 owner/H2 清单
+
+R66 已列出实际 owner_gate、H2 provenance、source manifest 和 boundary identity 的完整
+证据要求，并明确独立 reviewer 和 synthetic CPU-only 进入条件；没有伪造 hash、身份或
+时间。R67 只审查清单是否可验证、是否扩大授权，不执行 fixture/GPU。
+
+只有实际 OWNER_ACCEPTED review evidence 与独立 H2 provenance 都通过后，才考虑
+synthetic fixture-only CPU conformance。否则停在 OWNER_REVIEW_REQUIRED 或
+H2_UNIDENTIFIABLE。VMem SHA 已通过，旧 model-load smoke 已完成；调度检查有
+missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有独立 memo。
+new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R65通过，R66准备 owner/H2 证据清单
+
+R65 敌对审查 PASS：owner gate、phase 顺序、H2 precedence、十个 arm 的 access matching、
+hash 逐项重算和泄漏排除都没有发现具体缺陷。这只是 owner-ready 的设计 schema，不是
+执行或方法验证。R66 只准备实际 OWNER_ACCEPTED review artifact 和独立 H2 provenance
+所需的字段与检查，不伪造证据，不运行 fixture/GPU。
+
+下一步只有在两类证据都通过后，才考虑 synthetic fixture-only CPU conformance。否则
+停在 OWNER_REVIEW_REQUIRED 或 H2_UNIDENTIFIABLE。VMem SHA 已通过，旧 model-load
+smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空不能确认。Astra 因
+HTTP 401 没有独立 memo。new_method_validated=false、novelty_authorization=NONE。
+
+## 2026-09-24 R64完成，R65做最终 gate 审查
+
+R64 已修正 H2 precedence：phase 0 排除 h2_provenance，phase 2 统一处理 H2 的缺失、
+占位、格式、frame 和 identity 错误，并在任何 H2-dependent hash 或 arm score 前返回
+H2_UNIDENTIFIABLE。R65 只做最终 gate 审查，不执行 fixture 或 GPU。
+
+VMem 五个文件 SHA 已通过，旧 model-load smoke 已完成；调度检查仍有
+missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有独立 memo。
+new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R63发现 H2 precedence 缺口，R64修正已分配
+
+R63 发现 phase 0 的通用 marker 扫描如果处理 H2 的 REQUIRED/missing 占位，会先返回
+REJECT_FIXTURE，违反 H2_UNIDENTIFIABLE 的优先级。R64 将让 phase 0 排除
+h2_provenance/*，由 phase 2 统一处理 H2 缺失、marker、格式和 identity 失败，再进入
+任何 H2-dependent hash 或 arm score。其他 owner gate、arm mapping、hash 重算和泄漏
+约束通过。
+
+VMem 五个文件 SHA 已通过，旧 model-load smoke 已完成；调度检查仍有
+missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有独立 memo。
+new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R62完成，R63做最终敌对审查
+
+R62 已固定五阶段顺序：static preflight → computed materialization → H2 gate → 全部
+supplied hash 的 raw-vs-supplied 核对 → arm score。OWNER_ACCEPTED 是硬门，十个 arm
+的 ID、rule 和 typed parameters 已完整映射。R63 只做最终敌对审查，不执行 fixture 或
+GPU。
+
+H2 的 learned pointmap frame provenance 和 CPU 边界证据仍缺。VMem 五个文件 SHA 已
+通过，旧 model-load smoke 已完成；调度检查仍有 missing-slurm-module 警告，队列为空
+不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
 ## 2026-09-24 R61发现执行顺序和 owner gate 缺口，R62修正已分配
 
 R61 发现 R60 仍有四个硬缺口：preflight 要求 computed 但 computed 在之后才生成；
@@ -3701,3 +3814,14 @@ Owner 在看到 C8 实验 2 结论后批准("批,跑")。范围:在 14 个面板
 gl surfel 运行在 scene_13 w200 报 IndexError(13/14 完成)。
 结论:约定显著影响 VMem 行为,但转换并不一致地改善生成;位姿约定假说**既未证实也未推翻**。每窗口仅 2 种子,
 而 C8 实验 1 显示种子间差约 1.5 dB,逐窗口 Δ 噪声大。GPU 约 0.65 H800-h(C8+C9 合计约 1.2)。
+
+---
+
+## 2026-09-23 零 GPU 排查:5 个窗口的 surfel 尺度爆炸 —— 焦距、基线两个解释均被排除
+
+对象:C8/C9 中深度比约 400–960 倍、且与位姿约定无关的 5 个窗口(scene_13 w150/250/300/350、scene_14 w150)。
+- **CUT3R 焦距**:爆炸窗口中位数约 525–566,与正常窗口(464–621)同一范围 → 不是焦距估计失败。
+- **bank 相机基线**:爆炸窗口 0.157–0.354 m,正常窗口 0.228–0.517 m,**两组重叠**;scene_13 w200 基线 0.228 m 未爆炸,
+  scene_14 w150 基线 0.354 m 却爆炸 → 小基线不是充分解释。
+- surfel 数量爆炸窗口偏少(637–1738 vs 1193–3266),但区间重叠,区分度弱。
+原因**未查明**。继续排查需要 CUT3R 全局对齐的中间量(逐帧深度、优化后位姿),当时未保存;需重跑检索并保存这些量(需 GPU 授权)。
