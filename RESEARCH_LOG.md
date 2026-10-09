@@ -18074,3 +18074,13 @@ PASS: full seven-file refresh completed; no new owner evidence, recovery trigger
 证据：`Read-only heartbeat check at 2026-09-24T13:39:08Z found no files under work newer than the 13:29 UTC reconciliation. VMem fresh five-of-five SHA PASS and historical no-data smoke remain valid; SSH exit 255 leaves sync stale/unverified and is not retried.`
 
 下一步：Wait for readable owner evidence or signed owner packet; do not relaunch innovation or execute parser/data/GPU/Slurm/evaluation paths.
+
+## 2026-10-09T22:50:57+08:00 · S133 surfel scale blow-up root cause + candidate fix (CPU stage-1 reproduction, 14 windows, 2x2); owner authorization rule simplified
+
+Root cause: VMem star-graph MST PnP mask conf>3 empty on low-confidence 3DMatch frames -> silent identity-pose fallback -> similarity scale s~300-700 (5 windows) or ~0.02-0.08 (3 new collapse windows). PnP success count separates classes 14/14; pose convention irrelevant. Adaptive PnP threshold fix: 0/14 blow-ups, 12/14 depth ratio in [0.5,2], residual median 0.70. Sealed memory-arm retrievals used the broken map in 8/14 windows.
+
+时间依据：current clock；记录写入于 2026-10-09T14:50:57+00:00。
+
+证据：`work/S133_scale_debug/RESULT.md`；`work/S133_scale_debug/PROTOCOL.md`；`work/S133_scale_debug/STAGE1_native_fix1.json`；`CURRENT_STATUS.md`；`AGENTS.md`
+
+下一步：S134 protocol: rerun C8 support retrieval with fix on GPU; certify map; then regenerate memory arms with >=8 seeds

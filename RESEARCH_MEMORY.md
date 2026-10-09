@@ -1,3 +1,13 @@
+## 2026-10-09 S133:surfel 尺度爆炸根因已定位并修复(stage 1);owner 授权规则改为单文件 protocol
+
+**根因**:VMem 用星形配对(0–j)+ `init="mst"` 做 dust3r 全局对齐;view 1–4 靠 `fast_pnp` 求位姿,掩码为 CUT3R 置信度 > 3。3DMatch 帧置信度常低于 3 → 掩码为空 → PnP 返回 None → `minimum_spanning_tree` **静默回退为单位阵** → 相机中心重合 → `align_multiple_poses` 相似变换缩放 s≈300–700(爆炸)或部分重合时 s≈0.02–0.08(塌缩)。stage 2 经 `preset_depth` 继承。
+**证据**:本机 CPU 复现(同权重 SHA 45f7e98a…、同源码),14 窗口 2×2(native/gl × 原始/修复)。PnP 成功数 14/14 区分失败类型:0/4→爆炸(5/5,正是 C8/C9 那 5 个窗口),2/4→塌缩(3/3,新发现:scene_13 w100/w200、scene_14 w100,H800 C8 日志 stage-1 深度最大值 0.23/0.10/0.13 m 独立印证),4/4→正常(6/6)。位姿约定对此无影响。
+**修复**(候选,非上游行为):MST PnP 阈值 = min(3, 各视角置信度中位数最小值)。爆炸 0/14;深度比落在 [0.5,2] 12/14(原 5/14);残余系统性偏小,中位 0.70。
+**影响**:8/14 窗口的 surfel 地图错尺度 >10×;C8 harness 14/14 复现 sealed context → S103/S111 memory arm 的检索是在坏地图上做的,报告里 `memory_* − static` 对比反映的是失灵的记忆。C8 consumption 解读、C9 也需重读。
+**规则变更**:AGENTS.md 新增 owner 授权规则——一份带日期的 protocol 文件即授权;R112–R249 的签名/quorum/packet 门槛退役;连续两轮无新代码/数据/结果即停止。TACC gpu13/gpu14 获准使用。
+**下一步**:S134(需 owner 批 protocol)——用修复后的流程重跑 C8 support retrieval(stage1+2+检索图),验证 own-render 深度比/相关和 context 是否改变;地图合格后再用 ≥8 seed 重生成 memory arm。
+证据:`work/S133_scale_debug/{PROTOCOL,RESULT}.md`、`STAGE1_*_fix*.json`、`CURRENT_STATUS.md`。
+
 ## 2026-09-24 R249交接：没有 recovery trigger，继续 END-LINE
 
 R249 文件 `work/agents/CODEX_R249_RECOVERY_TRIGGER_CHECK.md` 已核验，源文件与仓库文件 SHA-256 均为 `cd7da72c4020cf64db36e8605703aec4f25edba28074a633ef47d9ae0934335c`。只读检查没有找到可读的 S104/CUT3R/VMem geometry-failure 文件或 evidence index，因此没有 recovery trigger。
