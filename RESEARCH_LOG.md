@@ -18094,3 +18094,13 @@ S134: native map gate 11/14 FAIL (no native generation); gl+fix gate PASS; fix c
 证据：`work/S134_tacc_fixed_map/RESULT.md`；`work/S135_scale_init/RESULT.md`；`work/S136_repaired_memory/PROTOCOL.md`
 
 下一步：Evaluate S136 step A gate on H800, append mem_rep_gl to plan, finish 8-seed generation on both sites, score, analyze Q1-Q4
+
+## 2026-10-10T01:06:39+08:00 · S136 step A (H800 canonical + 3090) and S137 geometric baselines
+
+Repaired memory (gl+KPS+chunk4) passes the map gate on H800: 14/14 scale in range (0.77-1.26), own-render corr 0.785, 12/12 frames in memory; canonical INIT=kps (median |log r| 0.099 vs kpsK 0.172). 3090 also passes but contexts match H800 7/14 (TF32). S137: copy-nearest 15.52 dB and CUT3R+KPS warp 20.08 dB vs VMem static 14.56 (native)/15.25 (gl) on C9 2-seed reference; KPS beats S133 fix by +1.73 dB [0.83,2.79] downstream.
+
+时间依据：current clock；记录写入于 2026-10-09T17:06:39+00:00。
+
+证据：`work/S136_repaired_memory/PROTOCOL.md`；`work/S136_repaired_memory/results/stepA_superpod`；`work/S137_geometry_baselines/RESULT.md`
+
+下一步：Finish 8-seed generation on both sites (plan_v2, 71 contexts), score, analyze Q1-Q4 and S137 against S136 static

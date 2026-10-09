@@ -61,3 +61,6 @@ Report after step B. Any follow-up needs a new protocol file.
 - S134 Amendment 1 is honoured inside S136: the S134 gl + S133-fix map passed its gate on H800 (12/14 in scale range,
   median own-render corr 0.63, none extreme). The S134 gl arm mem_fix_gl is added (plan_v1b; 3 new unique contexts).
   Its pre-registered S134 contrasts are mem_fix_gl − mem_orig_gl and mem_fix_gl − static_gl.
+- Step A gate (H800): gl_kps_chunk4 PASS (14/14 in [0.5,2], median |log r| 0.099, corr 0.785); gl_kpsK_chunk4 PASS
+  (14/14, 0.172, 0.754). **Canonical INIT = kps** by the pre-registered rule. plan_v2 = plan_v1b + mem_rep_gl.
+  TACC cross-check (3090) also passes (14/14, corr 0.80), but its contexts match H800 in only 7/14 windows (TF32, S135).
