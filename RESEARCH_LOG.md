@@ -18084,3 +18084,13 @@ Root cause: VMem star-graph MST PnP mask conf>3 empty on low-confidence 3DMatch 
 证据：`work/S133_scale_debug/RESULT.md`；`work/S133_scale_debug/PROTOCOL.md`；`work/S133_scale_debug/STAGE1_native_fix1.json`；`CURRENT_STATUS.md`；`AGENTS.md`
 
 下一步：S134 protocol: rerun C8 support retrieval with fix on GPU; certify map; then regenerate memory arms with >=8 seeds
+
+## 2026-10-10T00:41:10+08:00 · S134 step A (H800+3090), S135 CPU analyses (KPS, pose-NMS equivalence, TF32, memory holes, convention detector), S136 launched
+
+S134: native map gate 11/14 FAIL (no native generation); gl+fix gate PASS; fix changes default contexts in 4/14; H800 vs 3090 contexts agree 8-9/14. S135: KPS median scale error 41%->5.5%; gl wins KPS convention test 14/14; VMem retrieval equals pose-distance NMS over memory frames 14/14 (3090 fp32; H800 with TF32 emulation); S111 priming leaves offsets 25/30/35 out of memory. S136 step A on H800 (job 672240) and generation on 3090 running.
+
+时间依据：current clock；记录写入于 2026-10-09T16:41:10+00:00。
+
+证据：`work/S134_tacc_fixed_map/RESULT.md`；`work/S135_scale_init/RESULT.md`；`work/S136_repaired_memory/PROTOCOL.md`
+
+下一步：Evaluate S136 step A gate on H800, append mem_rep_gl to plan, finish 8-seed generation on both sites, score, analyze Q1-Q4

@@ -120,6 +120,9 @@ recorded in that file, is sufficient.
   are retired.
 - Anti-loop stop rule: if two consecutive rounds (agent or codex) produce no new code, data, or result, stop
   and report to the owner instead of opening another audit round. Process documents never count as progress.
+- Owner standing authorization (2026-10-09): "You don't need to ask me anything from here on out". Agents proceed
+  autonomously through successive protocols, propose and test new methods, and still write each protocol file before
+  running it. This covers compute on SuperPOD/TACC. It does not cover messages to others.
 - `new_method_validated` and `novelty_authorization` still change only by explicit owner decision.
 - Compute: SuperPOD H800 (see SSH budget above) and TACC `gpu13`/`gpu14` (owner-approved 2026-10-09;
   per-node storage rules in the TACC notes) may be used for authorized protocols. Prefer local CPU when a

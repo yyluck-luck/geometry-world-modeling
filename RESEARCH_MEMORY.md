@@ -1,3 +1,10 @@
+## 2026-10-09 S134/S135:检索=位姿NMS;KPS尺度初始化;TF32跨硬件差异;记忆空洞;S136进行中
+
+**S134(H800 job 671986 + TACC 3090)**:H800 复现封存 context 14/14;native+S133修复 门槛 11/14 未过 → 按预注册不生成。修复只改变 4/14 窗口的默认检索。gl+修复 通过门槛(12/14,own-render corr 0.63)→ gl arm 在 S136 内生成。H800 与 3090 检索仅 8–9/14 一致。
+**S135(CPU)**:①新方法 KPS(已知位姿稠密重投影求尺度 σ):真实 stage-1 尺度中位误差 41%→5.5%(14/14 在[0.5,2],13/14 在[0.8,1.25]);已知内参反而更差;全局优化 400 步不改变尺度。②KPS 可作位姿约定检测器:gl 重投影误差 14/14 窗口更低。③VMem 检索 = surfel 可见性候选集上的位姿距离 NMS;修复后地图上与纯位姿 NMS 在 3090 上 14/14 相同,H800 上用 TF32 模拟后 14/14 相同(CUT3R croco.py 全局开 TF32)→ 跨硬件差异完全解释。④项目 priming(5+7)使 bank 偏移 25/30/35 永不进入记忆。
+**S136(进行中)**:修复后记忆 = gl + KPS + 分批 priming;H800 step A job 672240;生成 8 seed(H800 42,7,1,2;3090 3,4,5,6):Q1 约定(C9 复现)、Q2 修复记忆 vs static、Q3/Q4 及 S134 gl 对比。
+证据:`work/S134_tacc_fixed_map/RESULT.md`、`work/S135_scale_init/RESULT.md`、`work/S136_repaired_memory/PROTOCOL.md`。
+
 ## 2026-10-09 S133:surfel 尺度爆炸根因已定位并修复(stage 1);owner 授权规则改为单文件 protocol
 
 **根因**:VMem 用星形配对(0–j)+ `init="mst"` 做 dust3r 全局对齐;view 1–4 靠 `fast_pnp` 求位姿,掩码为 CUT3R 置信度 > 3。3DMatch 帧置信度常低于 3 → 掩码为空 → PnP 返回 None → `minimum_spanning_tree` **静默回退为单位阵** → 相机中心重合 → `align_multiple_poses` 相似变换缩放 s≈300–700(爆炸)或部分重合时 s≈0.02–0.08(塌缩)。stage 2 经 `preset_depth` 继承。
