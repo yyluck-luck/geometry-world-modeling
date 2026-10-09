@@ -5,7 +5,7 @@ Protocol: `PROTOCOL.md` (+ Amendment 1). Sites: SuperPOD H800 job 671986 (canoni
 
 ## Harness
 - The H800 native/orig contexts reproduce the sealed C8 job 609623 contexts **14/14 for both NMS-on and NMS-off**.
-- TACC setup: all 5 weights match the transfer receipt by SHA-256, and the env is the exact SuperPOD freeze
+- TACC setup (checked on gpu13 at setup time): all 5 weights match the transfer receipt by SHA-256, and the env is the exact SuperPOD freeze
   (Python 3.11.16, torch 2.7.0+cu126). The model-process stage holds no depth and no target color. Windows overlap,
   so one window's target can be another window's bank frame, but each window's process reads only its own bank
   (as in C8/C9).
@@ -29,8 +29,9 @@ The ×300–700 blow-up windows 13 w250/w300/w350 keep **identical** contexts. S
 ## Cross-hardware reproducibility of VMem retrieval
 Same code, inputs and weights. H800 and RTX 3090 agree on NMS-on contexts in only **8/14** (orig) and **9/14** (fix)
 windows. On the 3090, orig scene_13 w200 also fails with the `IndexError` that C9 saw under gl on H800.
-S135 traces the divergence to TF32: CUT3R's `croco.py` sets `torch.backends.cuda.matmul.allow_tf32 = True` globally
-on import, and VMem's pose geodesic is then computed with TF32 on the H800.
+S135: CUT3R's `croco.py` sets `torch.backends.cuda.matmul.allow_tf32 = True` globally on import. CPU emulation of
+TF32 input rounding in VMem's pose geodesic reproduces the H800 contexts 14/14, and fp32 reproduces the 3090 contexts
+14/14. That is consistent with, but does not prove, TF32 being used for that matmul on the H800 (codex R250).
 
 ## gl variants (Amendment 1)
 | H800 | in [0.5, 2] | > 10 | median own-render corr | BLOCKED |
@@ -40,8 +41,9 @@ on import, and VMem's pose geodesic is then computed with TF32 on the H800.
 
 **gl + fix passes the Amendment-1 gate.** The gl arms are therefore generated, inside S136 (plan_v1b: static_gl,
 mem_orig_gl, mem_fix_gl, 8 seeds, both sites). Under gl the fix changes NMS-on contexts in 2/13 windows.
-The convention lifts the own-render correlation from about 0.1–0.2 (native) to about 0.6. That is the geometric
-side of the C8/C9 convention mismatch.
+Under gl the own-render correlation is about 0.6, versus about 0.1–0.2 under native (an association on this panel).
+`eval_map_s134.py` does not enforce the correlation or BLOCKED conditions; they were checked by hand (gl fix:
+corr 0.63, no BLOCKED window).
 
 ## Files
 `results/stepA_superpod/` (H800 receipts, maps, map evaluations, context report), `results/stepA_tacc/` (3090 receipts).

@@ -18104,3 +18104,13 @@ Repaired memory (gl+KPS+chunk4) passes the map gate on H800: 14/14 scale in rang
 证据：`work/S136_repaired_memory/PROTOCOL.md`；`work/S136_repaired_memory/results/stepA_superpod`；`work/S137_geometry_baselines/RESULT.md`
 
 下一步：Finish 8-seed generation on both sites (plan_v2, 71 contexts), score, analyze Q1-Q4 and S137 against S136 static
+
+## 2026-10-10T03:14:59+08:00 · S136 8-seed generation (H800+3090), S137 geometric baselines and S137c warp4/hybrid, codex R250 audit, S138 depth-optimisation fix
+
+Convention gl-native +0.89 dB [0.25,1.47]; repaired memory vs static -0.06 [-1.15,0.94]; memory-static native -0.22 (8 seeds, inconclusive); CUT3R+KPS warp beats VMem static by +5.7/+4.8 dB (16/16), SSIM agrees; VMem reproduces same-pose warp contexts (+0.000 dB) and copies grey holes; codex R250 verified core claims, corrected wordings, found B2 half-pixel bug (fixed, <=0.016 dB) and the get_depthmaps detach (VMem never optimises depth); re-enabling optimisation harms scale (12/14 worse, downstream -0.20 dB).
+
+时间依据：current clock；记录写入于 2026-10-09T19:14:59+00:00。
+
+证据：`work/S136_repaired_memory/RESULT.md`；`work/S137_geometry_baselines/RESULT.md`；`work/S138_depth_opt/RESULT.md`；`work/agents/CODEX_R250_S133_S137_AUDIT.md`；`CURRENT_STATUS.md`
+
+下一步：Held-out long-trajectory scene with revisits/occlusion; deterministic retrieval; write-up

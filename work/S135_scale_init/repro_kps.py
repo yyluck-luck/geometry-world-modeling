@@ -50,6 +50,7 @@ from cloud_opt.dust3r_opt import init_im_poses as IIP
 PROBE = {}
 PNP_FIX = False
 KPS_LOG = []
+OPTFIX = False
 _orig_align = IIP.align_multiple_poses
 def _probe_align(src, tgt):
     s, R, T = _orig_align(src, tgt)
@@ -141,7 +142,7 @@ def run_window(model, scene, start, niter, convention):
         m = (G > 0) & (d > 0) & np.isfinite(d)
         pix_ratio.append(float(np.median(d[m] / G[m])) if m.sum() > 100 else None)
         pix_corr.append(float(np.corrcoef(d[m], G[m])[0, 1]) if m.sum() > 100 else None)
-    return dict(scene=scene, window_start=start, convention=convention, pnp_fix=PNP_FIX, kps=list(KPS_LOG), bank=bank, niter=niter,
+    return dict(scene=scene, window_start=start, convention=convention, pnp_fix=PNP_FIX, optfix=OPTFIX, kps=list(KPS_LOG), bank=bank, niter=niter,
                 seconds=round(time.time() - t0, 1), **PROBE,
                 est_depth_median=est, dataset_depth_median=gt, depth_ratio=ratio,
                 depth_ratio_median=float(np.median(ratio)),
@@ -159,8 +160,11 @@ def main():
     ap.add_argument('--pnp-fix', action='store_true')
     ap.add_argument('--kps', action='store_true')
     ap.add_argument('--kps-known-k', action='store_true')
+    ap.add_argument('--optfix', action='store_true')
     a = ap.parse_args()
-    global PNP_FIX; PNP_FIX = a.pnp_fix
+    global PNP_FIX, OPTFIX; PNP_FIX = a.pnp_fix; OPTFIX = a.optfix
+    if a.optfix:
+        sys.path.insert(0, str(REPO / 'work/S138_depth_opt')); import optfix; optfix.install()
     if a.kps:
         import kps
         kK = cut3r_K(DS / SCENE_DIR['scene_13']) if a.kps_known_k else None   # both scenes share K (checked)
@@ -172,8 +176,8 @@ def main():
     out = Path(a.out); rows = json.loads(out.read_text())['rows'] if out.exists() else []
     for scene, start in wins:
         r = run_window(model, scene, start, a.niter, a.convention)
-        rows = [x for x in rows if (x['scene'], x['window_start'], x['convention'], x.get('pnp_fix', False), bool(x.get('kps')), bool(x.get('kps') and x['kps'][0].get('known_K')), x['niter']) !=
-                (scene, start, a.convention, PNP_FIX, a.kps, a.kps_known_k, a.niter)] + [r]
+        rows = [x for x in rows if (x['scene'], x['window_start'], x['convention'], x.get('pnp_fix', False), bool(x.get('kps')), bool(x.get('kps') and x['kps'][0].get('known_K')), x.get('optfix', False), x['niter']) !=
+                (scene, start, a.convention, PNP_FIX, a.kps, a.kps_known_k, a.optfix, a.niter)] + [r]
         out.write_text(json.dumps({'schema': 's133-stage1-repro-v1', 'device': 'cpu', 'rows': rows}, indent=1) + '\n')
         print(f"[s135] {a.convention} kps={int(a.kps)} fix={int(PNP_FIX)} {scene} w{start} kps_sigma={(r['kps'][0].get('sigma') if r['kps'] else None)} s={r.get('s', float('nan')):.3g} src_med={r.get('src_med_dist', float('nan')):.4g} "
               f"tgt_med={r.get('tgt_med_dist', float('nan')):.4g} depth_ratio_med={r['depth_ratio_median']:.3g} pix_ratio={r['pix_ratio_median']:.3g} pix_corr={r['pix_corr_median']:.3g} ({r['seconds']}s)", flush=True)

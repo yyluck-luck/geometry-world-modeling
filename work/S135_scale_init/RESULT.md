@@ -22,11 +22,13 @@ x_j ∝ R_j0·P + σ·t_j0. That uses ~10^5 points instead of 5 centres.
 | gl KPS-K (known K) | 13/14 | 10/14 | 0.926 | 0.130 | 0.977 |
 | native KPS-K | 1/14 | 0/14 | ~1000 (σ at grid floor) | 6.94 | 0.974 |
 
-- KPS cuts the median scale error from 41% to 5.5%. Depth shape (correlation) is unchanged, as expected.
+- KPS cuts the median |log ratio| from 0.410 to 0.055, i.e. median relative scale error from about 33.5% to 5.4%
+  (metric named explicitly after codex R250). Depth shape (correlation) is unchanged, as expected.
 - Known intrinsics are worse than a fitted focal. CUT3R's pointmaps carry their own implicit focal, and the true K
   mismatches it.
-- The 400-iteration global alignment never moves the global scale: niter 0 and 400 give identical ratios
-  (`STAGE1_*_niter0.json`). Initialisation alone sets the scale.
+- niter 0 and 400 gave identical ratios on the 4 windows tested (`STAGE1_*_niter0.json`). Root cause (found by codex
+  R250, verified in S138): VMem's fork detaches `im_depthmaps` in `get_depthmaps`, so the alignment never optimises
+  depth at all. Initialisation alone sets the map.
 
 ## 2. KPS as a pose-convention detector (new)
 For each window, compare the minimum KPS reprojection error with the poses converted to gl and with them left native.
@@ -38,12 +40,13 @@ the dataset poses are OpenCV and VMem needs the gl input. It uses no depth groun
 Code (`modeling/pipeline.py`, get_context_info): visible surfels only form a candidate multiset. Ranking is pose
 geodesic distance (rotation angle + 0.1·translation in metres), and the four contexts come from pose-distance NMS.
 `pose_only_retrieval.py` re-implements the post-render steps.
-- With the repaired (S133-fix) map, pose-only NMS over the frames that own surfels **equals VMem's actual
-  selection on the RTX 3090 in 14/14 windows**. Rendering adds nothing: every memory frame is a candidate in 13/14
-  windows.
-- On H800 the same holds **14/14 once the 3×3 rotation product is computed in TF32**. It is 9/14 in fp32.
-  CUT3R's `croco.py` globally sets `torch.backends.cuda.matmul.allow_tf32 = True` on import.
-  This explains the S134 cross-hardware divergence (H800 and 3090 agree in only 9/14 windows).
+- With the repaired (S133-fix) map, fp32 pose-only NMS over the frames that own surfels **equals VMem's actual
+  selection on the RTX 3090 in 14/14 windows** (re-run independently by codex R250). Every memory frame is a
+  candidate in 13/14 windows.
+- Against the H800 contexts the fp32 reimplementation matches 9/14. With TF32 input rounding (round-to-nearest)
+  emulated in the 3×3 rotation product it matches **14/14**; truncation gives 7/14. CUT3R's `croco.py` globally sets
+  `allow_tf32 = True`. This is a strong numerical explanation of the H800/3090 divergence, but not an instrumented
+  proof of the kernel used.
 - With the broken map, the candidate set shrinks to 4–5 frames in exactly the windows whose contexts the fix changes.
   That is why a ×300–700 blow-up leaves most contexts unchanged: at those depths every frame stays "visible".
 
@@ -57,8 +60,9 @@ schedule.
 - The report's memory-vs-static contrasts compare static against a pose-NMS selector restricted to 9 of 12 frames,
   run on a map that was broken in 8/14 windows but mostly irrelevant to the selection, and hardware-dependent in
   5/14 windows through TF32.
-- On short-baseline windows like these, VMem's 3D memory reduces to camera-orientation retrieval. Geometry can only
-  matter through visibility, which needs occlusion or out-of-view history that this panel lacks.
+- On this panel, VMem's 3D memory acts as camera-orientation retrieval with a visibility filter. Geometry can only
+  matter through that filter, which needs occlusion or out-of-view history the panel lacks. This scope comes from
+  these receipts, not from all VMem regimes.
 
 ## Files
 `kps.py`, `test_kps.py`, `repro_kps.py`, `run_arms.sh`, `summarize_arms.py`, `ARM_*.json`, `ARMS_SUMMARY.txt`,

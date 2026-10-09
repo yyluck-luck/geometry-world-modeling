@@ -38,8 +38,9 @@ construction, 5 frames, niter 400, lr 0.01). Not a method validation.
 Values are from the `native` arms. The `gl` arms are identical to three significant figures: flipping camera
 axes does not move camera centres, so the pose convention cannot cause or cure this failure.
 
-- PnP success count separates the failure classes 14/14: 0/4 → blow-up (5/5), 2/4 → collapse (3/3),
-  4/4 → normal range (6/6).
+- PnP success count separates the catastrophic classes: 0/4 → blow-up (5/5), 2/4 → collapse (3/3). The six 4/4
+  windows have no catastrophic failure (ratios 0.445–0.906), though 13 w50 at 0.445 is below the [0.5, 2] gate.
+  (Wording corrected after codex R250.)
 - The blow-up windows are exactly the five C8/C9 windows. Magnitudes agree with the H800 runs to the same
   order (CPU 371–877 vs C8 render 380–770).
 - **New: three collapse windows** (scene_13 w100/w200, scene_14 w100) are the same bug with the opposite sign.
@@ -50,15 +51,15 @@ axes does not move camera centres, so the pose convention cannot cause or cure t
 - Blow-up removed: **yes**. Fix arms have 0 windows with ratio > 10 (orig: 5 > 100).
 - Scale certified, [0.5, 2] in ≥ 12/14: **met exactly, 12/14** (orig 5/14). The two failures are
   scene_13 w50 (0.445, unchanged by the fix) and scene_14 w150 (0.333).
-- Residual: the fixed scale is biased low (median ratio 0.70). This is a separate, smaller problem, consistent
+- Residual: the fixed scale is biased low (median ratio 0.668; corrected from "0.70" after codex R250). This is a separate, smaller problem, consistent
   with similarity registration over 4–7 cm baselines. Per protocol it is not tuned here.
 
 ## What this changes
 In 8 of the 14 panel windows, VMem's spatial memory was built on a point cloud mis-scaled by more than 10×
 (5 windows ×300–900, 3 windows ×0.02–0.08). C8's harness reproduced the sealed context lists 14/14 with this
 pipeline, so the sealed memory-arm retrievals (S103/S111, and the report's `memory_* − static` contrasts)
-were selected from this broken map in those windows. Those contrasts measure a malfunctioning memory, not
-VMem's intended geometry-based retrieval. The report should say so. The C8 "consumption failure" reading and
+were selected from this broken map in those windows. The map was malfunctioning in those windows. Whether that changed the
+retrieved contexts is a separate question: S134/S135 later found the contexts unchanged in most of them. The report should say so. The C8 "consumption failure" reading and
 the C9 surfel diagnostics need re-reading in the same light.
 
 ## Limitations

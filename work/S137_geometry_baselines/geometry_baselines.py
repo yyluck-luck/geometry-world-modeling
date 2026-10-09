@@ -19,6 +19,8 @@ from scipy import ndimage
 REL = {'scene_13': 'heldout_3dmatch_scene13/extracted/rgbd-scenes-v2-scene_13',
        'scene_14': 'heldout_3dmatch_scene14/extracted/rgbd-scenes-v2-scene_14'}
 WINDOWS = [0, 50, 100, 150, 200, 250, 300, 350]; CTX = [0, 15, 30, 45]; TGT = [60, 75, 90, 105]
+import os
+SPLAT = int(os.environ.get('SPLAT', '1'))
 
 
 def to_model_grid(rgb_u8):  # identical transform to score_c9.future_rgb_to_model_grid
@@ -62,8 +64,11 @@ def warp(ctx, Tt, K, H=480, W=640):
         uu, vv, col, zz = uu[inb], vv[inb], col[inb], zz[inb]
         order = np.argsort(-zz)                       # far first, near overwrite
         uu, vv, col, zz = uu[order], vv[order], col[order], zz[order]
-        closer = zz < zbuf[vv, uu]
-        zbuf[vv[closer], uu[closer]] = zz[closer]; img[vv[closer], uu[closer]] = col[closer]
+        for dy in range(SPLAT):          # SPLAT=1: one pixel per point (S137a/b); SPLAT=2: 2x2 footprint (exploratory)
+            for dx in range(SPLAT):
+                u2 = np.clip(uu + dx, 0, W - 1); v2 = np.clip(vv + dy, 0, H - 1)
+                closer = zz < zbuf[v2, u2]
+                zbuf[v2[closer], u2[closer]] = zz[closer]; img[v2[closer], u2[closer]] = col[closer]
     valid = np.isfinite(zbuf)
     if valid.any() and not valid.all():
         _, (iy, ix) = ndimage.distance_transform_edt(~valid, return_indices=True)
