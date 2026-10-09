@@ -1,5 +1,7 @@
 # Geometry-aware World Modeling
 
+> **当前状态请先读 [`CURRENT_STATUS.md`](CURRENT_STATUS.md)**（2026-10-09 更新）。下文为早期 S0–S7 阶段说明，保留作历史。
+
 本机可复现的几何记忆部件研究。当前已完成固定源码审计、S0/S0b人工记忆诊断、S1人工最终选图诊断、S2真实RGB-D接口检查、S3真实测量对照、S4真实模型两图检查与S5真实模型三段72图检查、S6学习几何选帧与S7固定观测事件重放。完整视频生成仍是后续独立验收项。
 
 先读 `docs/START_HERE_CN.md`、`docs/S7_RESULTS.md`、`docs/S6_RESULTS.md`，此前阶段见S3/S4/S5_RESULTS。S0-S3英文正文见 `docs/TECHNICAL_REPORT.md`，学习几何补充见 `docs/LEARNED_GEOMETRY_REPORT.md`，原proposal交付跟踪见 `docs/PROJECT_DELIVERY_TRACKER.md`。持续状态以 `RESEARCH_MEMORY.md` 为准，按实际时间记录的行动在 `RESEARCH_LOG.md`；原始事件账本是只追加的 `research_events.jsonl`。

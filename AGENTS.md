@@ -106,3 +106,21 @@ host`) from the Mac's egress IP. TACC previously banned an IP for too many attem
 - Poll no more often than every 2 minutes; prefer one wait loop *on the cluster* (inside tmux) over remote polling.
 - Never auto-reconnect a tunnel in a tight loop; back off exponentially and stop after 3 failures.
 - If connections are refused, stop all automated SSH and wait; do not keep testing.
+
+## Owner authorization rule (owner, 2026-10-09) — supersedes the R112–R249 packet requirements
+
+The owner (the user) authorizes a new experiment by **one dated protocol file** in the stage directory
+(e.g. `work/S133_scale_debug/PROTOCOL.md`) containing: question, inputs, source/weight hashes, primary
+metric, controls, leakage boundary, stopping rule, output directory. The owner's approval in conversation,
+recorded in that file, is sufficient.
+
+- Not required, and must not be re-introduced as gates: signed owner/reviewer packets, quorum or membership
+  proofs, key rotation/status, trusted-time attestation, replay stores, external audit identities. The
+  R112–R249 memos are kept as history only; their "NOT_READY_OWNER_PACKET / END-LINE / NO_REOPEN" states
+  are retired.
+- Anti-loop stop rule: if two consecutive rounds (agent or codex) produce no new code, data, or result, stop
+  and report to the owner instead of opening another audit round. Process documents never count as progress.
+- `new_method_validated` and `novelty_authorization` still change only by explicit owner decision.
+- Compute: SuperPOD H800 (see SSH budget above) and TACC `gpu13`/`gpu14` (owner-approved 2026-10-09;
+  per-node storage rules in the TACC notes) may be used for authorized protocols. Prefer local CPU when a
+  diagnostic fits there.
