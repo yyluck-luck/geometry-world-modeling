@@ -1,3 +1,1194 @@
+## 2026-09-24 R249交接：没有 recovery trigger，继续 END-LINE
+
+R249 文件 `work/agents/CODEX_R249_RECOVERY_TRIGGER_CHECK.md` 已核验，源文件与仓库文件 SHA-256 均为 `cd7da72c4020cf64db36e8605703aec4f25edba28074a633ef47d9ae0934335c`。只读检查没有找到可读的 S104/CUT3R/VMem geometry-failure 文件或 evidence index，因此没有 recovery trigger。
+
+R248 stop rule 继续有效：CGLR 保持 `END-LINE`，不新增方法候选；Innovation Agent 完成 R249 后按规则暂停。只有出现包含路径、hash、observed failure、estimand 和 controls 的 owner artifact，或完整 signed owner/reviewer packet，才恢复审查。
+
+关键路径仍是 evidence restoration 与 owner packet。Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、`new_method_validated=false`、`novelty_authorization=NONE` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH 255 后同步 stale/unverified 且不重试。
+
+下一步：等待可读 owner evidence，再做只读 Gate/claim audit；此前不重启创新、不运行 parser/data/GPU/Slurm/evaluation。
+
+## 2026-09-24 R248交接：END-LINE 闭环完成，暂停创新循环
+
+R248 文件 `work/agents/CODEX_R248_CLOSURE_PACKAGE_AUDIT.md` 已核验，源文件与仓库文件 SHA-256 均为 `17dfe4f98f222bd7435ab2f77b86e1bf4f7555601de8f9d5af64929e1965d1e8`。审计确认 R245/R247 的 claim boundary、有限 prior-art、falsifiability、identifiability、状态不变量和执行边界都完整，结论不过度。
+
+R245 已退役 CGLR benchmark，R246 没有可防御的新 geometry candidate，R247 找到 occlusion/frame/selective-evidence/hidden-surface 的直接重叠；R248 没有发现会改变结论的遗漏。因此在 owner evidence 到来前暂停创新循环。Innovation Agent 已完成并按 stop rule 暂停；恢复条件是可读的 observed-failure 文件或完整 signed owner/reviewer packet。
+
+关键路径回到 evidence index 与 owner packet。当前 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method `END-LINE`；VMem 五项 SHA PASS 和历史 no-data smoke 有效且不重跑；SSH 255 后同步 stale/unverified 且不重试。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：恢复可读证据或收到授权包，再做只读 Gate 审计；在此之前不重启创新、不运行 parser/data/GPU/Slurm/evaluation，也不进入 S103/S132/GRC。
+
+## 2026-09-24 R244交接：R243 反证审查收窄 CGLR 候选
+
+R243 文件 `work/agents/CODEX_R243_CGLR_GAP_REDTEAM.md` 已核验，源文件与仓库文件 SHA-256 均为 `5a66c44ddc03ce938531723ad0733e0abedce5750258b8c339580a336973745a`。审查加入 COMFORT、FoREST、ViewSpatial-Bench、MAVIS、BCEA、SIEVES、REVEAL-Bench 的重叠分析，否定“provenance/reference-frame/evidence acquisition 普遍无人研究”的宽泛说法，只保留一个有条件的组合：同一可见 artifact、只揭示 provenance、hidden counter-world、以及 false-unique 接受指标。它仍不是创新证明。
+
+替代 Innovation Agent 已完成 R243，并已核实运行 R244：只做 8 分钟静态 protocol/falsification 设计，写一个文件；不运行代码、数据、模型、benchmark、GPU、Slurm 或评测。R244 需要给出可预注册的 2x2、generic abstention/frame/source/evidence controls、封存结果、side-channel 审计、估计量、分母和拒绝阈值。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method `END-LINE`。VMem 五项 SHA PASS 和历史 no-data smoke 继续有效，不重跑；SSH 255 后的远端同步仍 stale/unverified，不重试。`new_method_validated=false`、`novelty_authorization=NONE` 不变；没有 owner/reviewer packet 和 P2/P3/P4 实例化对象前，不执行任何路径。
+
+下一步：核对 R244 文件和 SHA。若仍不可识别，继续 END-LINE；只有收到并核验完整授权包后，才可考虑静态协议检查，不能越过 S103 baseline 与 same-pool controls 进入 formal GRC。
+
+## 2026-09-24 R243交接：对 CGLR mechanism-gap 做 adversarial prior-art review
+
+R242 已核验，文件 `work/agents/CODEX_R242_CGLR_PRIOR_ART.md`，SHA-256 `1110ab42aa143da82c1da37ce113355cf46737d57442b4934d7114649e2f5067`。bounded primary-source audit 发现 abstention benchmark、conformal/selective prediction、uncertainty calibration 和 evidence acquisition 的直接重叠；没有在这组查询中直接看到“固定可见 artifact、只揭示 producer-frame provenance、对 hidden counter-world 检验 false-unique”的原文，但这只是机制 gap candidate，不是 novelty proof，检索覆盖仍有限。
+
+替代 Innovation Agent 已核实运行 R243，继续审查 provenance/source attribution、reference-frame metadata、active evidence acquisition 和 multimodal selective prediction 的近邻工作；不得执行代码、模型或评测。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。paired-trace 作为验收对象已被 R240 判为不可识别。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status、CGLR prior-art adjudication 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得执行 parser/consumer、解析 commitment、访问项目/受保护数据、fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R243 prior-art red-team artifact 与 SHA；在直接 overlap 和独立控制证据未解决前继续静态阻塞。
+
+## 2026-09-24 R242交接：转向 CGLR prior-art audit
+
+R241 已核验，文件 `work/agents/CODEX_R241_CGLR_FAILURE_REVIEW.md`，SHA-256 `92b0992781e2204857f310b8d8cddc2582f7567df97d782d64c05ed7f3231a24`。它发现 CGLR 的 provenance reveal 可能只是增加 evidence、改变顺序/显著性或触发 generic abstention；最小静态判别协议是 provenance-only vs neutral-metadata 的 2x2，并交叉 ambiguous counter-world 与 known-unique control。协议未执行，机制未验证。
+
+替代 Innovation Agent 已核实运行 R242，审查 primary sources 和 official implementations，比较 provenance-only false-unique rejection 与 generic selective prediction/abstention；不得执行代码、模型或评测。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。paired-trace 作为验收对象已被 R240 判为不可识别。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status、CGLR prior-art adjudication 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得执行 parser/consumer、解析 commitment、访问项目/受保护数据、fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R242 prior-art artifact 与 SHA；在直接原文重叠与独立控制证据未解决前继续静态阻塞。
+
+## 2026-09-24 R241交接：paired-trace 假设当前拒绝，转向 CGLR 失败驱动审查
+
+R240 已核验，文件 `work/agents/CODEX_R240_PAIR_DECISION.md`，SHA-256 `9fbdc9369f7c597a5f918a3f2202e9e0179fbf070ba4999ecee0615b5402654a`。结论是 paired-trace 作为验收对象不可识别：side-channel predictor、canonical single-factor diff、sealed-envelope 和独立 H1/H0 adjudication 证据都缺失。它只保留为条件设计，不能改名为 pilot 或 exploratory execution。
+
+替代 Innovation Agent 已核实运行 R241，做 Reveal-Intervention/CGLR 的静态失败驱动审查，并对照 R38 已知 overlap；不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status、CGLR 独立 adjudication 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得执行 paired traces、parser/consumer、解析 commitment、访问项目/受保护数据、fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R241 CGLR artifact 与 SHA；没有外部证据和 Gate 0 前继续静态阻塞。
+
+## 2026-09-24 R240交接：paired traces 仍有 timing/encoding/error/access 侧信道
+
+R239 已核验，文件 `work/agents/CODEX_R239_SIDECHANNEL_FINAL_REVIEW.md`，SHA-256 `8b3af482a15aecb9689c17e8b2d210dcccb0a6c36c364c346c90bbd3c6cad3d0`。它发现 timing、compression、encryption randomness、retry/error 和 access-count 仍可能泄漏标签；要求等化、side-channel audit 和 hidden-label predictor gate，否则拒绝 paired-trace 假设。
+
+替代 Innovation Agent 已核实运行 R240，做最终静态 protocol decision，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status、sealed/equalized traces 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R240 artifact 与 SHA；在侧信道和独立 adjudication 证据缺失时，将 paired idea 明确判为不可识别，继续静态阻塞。
+
+## 2026-09-24 R238交接：paired traces 需要 sealed outcomes 和 canonical diff audit
+
+R237 已核验，文件 `work/agents/CODEX_R237_PAIRED_TRACE_REDTEAM.md`，SHA-256 `ccad3d48bce1af95395c1fb7ffc3702ce503a2c48345ad6916ea18cc97d8f1d6`。它发现 expected-outcome leakage、单因素差异不可识别、control asymmetry；要求 sealed outcomes、canonical allowed-path diff audit、independent adjudication 和 unresolved-control rejection。paired traces 仍只是 synthetic protocol。
+
+替代 Innovation Agent 已核实运行 R238，继续做静态 pair protocol 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status、sealed outcomes、canonical diff audit 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R238 artifact 与 SHA；在 paired protocol 的独立密封和审计证据到达前继续静态阻塞。
+
+## 2026-09-24 R235最终交接：invalidation ack 需要 signer/membership/version/order 绑定
+
+R235 已核验，文件 `work/agents/CODEX_R235_CACHE_FINAL_REVIEW.md`，SHA-256 `478b0f20142488c846099d2ecbc087f5d1810c84bdbc4b7efc718001179c40ad`。它发现 invalidation acknowledgements 还缺 authenticated signer identities、当前 membership/version、threshold 和 event order；未满足时必须保持 `B_STATIC_ONLY`。本轮静态创新审查已完成，没有消费任何外部 artifact。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：等待真实 owner-supplied external audit package；下一次 heartbeat 若仍无 package，再分配一轮有界静态创新审查。
+
+## 2026-09-24 R235交接：key-status cache 需要 propagation 和 quorum ack
+
+R234 已核验，文件 `work/agents/CODEX_R234_KEY_STATUS_REVIEW.md`，SHA-256 `a3c8e4d7da59ea715b2125b87253d236da5a00b31245b2a4bd890601dd696edb`。它发现 cache invalidation 还缺传播保证、replica acknowledgements、freshness 和 consistency checks；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R235，继续做静态 cache-consistency 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、传播完成的 key status 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R235 artifact 与 SHA；在完整外部审计和 key-status propagation 证据到达前继续静态阻塞。
+
+## 2026-09-24 R234交接：key status 需要认证 freshness 和 cache invalidation
+
+R233 已核验，文件 `work/agents/CODEX_R233_ATTESTATION_FINAL_REVIEW.md`，SHA-256 `948abcc207337a48189fa7fabc1027f86afaf2f76d56c4500f08f06b923ff0f0`。它发现 revocation/rotation status 还缺 fresh authenticated source、cache invalidation 和 consistency checks；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R234，继续做静态 key-status 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation、fresh key status 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R234 artifact 与 SHA；在完整外部审计和可信 key status 证据到达前继续静态阻塞。
+
+## 2026-09-24 R233交接：time attestation 需要 freshness/replay 和 key lifecycle
+
+R232 已核验，文件 `work/agents/CODEX_R232_TIME_AUTH_FINAL_REVIEW.md`，SHA-256 `01f23bd6b340b4f9e7668ae1586cb18bb85f2f5c13f9b3db1572bd211963257a`。它发现 authenticated time 还缺 attestation freshness/non-replay 和 authority-key lifecycle；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R233，继续做静态 attestation 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted time attestation 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R233 artifact 与 SHA；在完整外部审计和可信时间 attestation 证据到达前继续静态阻塞。
+
+## 2026-09-24 R232交接：rotation time 需要 authenticated authority 和跨验证者一致性
+
+R231 已核验，文件 `work/agents/CODEX_R231_ROTATION_TIME_REVIEW.md`，SHA-256 `62fa98086bb825f8a52ee54936e09fcac804af496cf3f97c062775d887ad360c`。它发现 rotation ordering 的时间还缺 authenticated authority/anchor、monotonic epoch、cross-verifier consistency 和 rollback detection；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R232，继续做静态 time-authority 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted rotation time authority 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R232 artifact 与 SHA；在完整外部审计和可信 time 证据到达前继续静态阻塞。
+
+## 2026-09-24 R231交接：rotation time/order 需要统一可信规则
+
+R230 已核验，文件 `work/agents/CODEX_R230_ROTATION_FINAL_REVIEW.md`，SHA-256 `8232a676664d72e6904cbf8b9547883ee185a34b36b88aa67d498c6401566f60`。它发现 activation/revocation timestamp 还缺统一 trusted time、skew bound、确定性 overlap boundary 和 ordering consensus；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R231，继续做静态 time/order 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership/key、trusted rotation time policy 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R231 artifact 与 SHA；在完整外部审计和 deterministic rotation 证据到达前继续静态阻塞。
+
+## 2026-09-24 R230交接：key rotation 需要 quorum authorization 和 overlap/revocation
+
+R229 已核验，文件 `work/agents/CODEX_R229_KEY_FINAL_REVIEW.md`，SHA-256 `108776c3cdff73d0b049c5a6f216d26a1212d69faa5570b8ddb76e5a2b1af1ba`。它发现 key rotation 还缺授权 quorum、版本单调性、旧新 key overlap 和 retired-key revocation；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R230，继续做静态 rotation-consensus 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership key、rotation quorum 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R230 artifact 与 SHA；在完整外部审计和 key rotation 证据到达前继续静态阻塞。
+
+## 2026-09-24 R229交接：membership key 需要可信锚点和 rotation rollback 保护
+
+R228 已核验，文件 `work/agents/CODEX_R228_MEMBERSHIP_FINAL_REVIEW.md`，SHA-256 `8b5f105d5bea3af4af6258eaae71b0a02d6ff8614d4ca727994229f45d34c1dc`。它发现 membership signature 还缺 trusted key anchor、signer authorization、current key version、rotation policy 和 rollback protection；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R229，继续做静态 key-rotation 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership config/key 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R229 artifact 与 SHA；在完整外部审计、membership key 和 replay/quorum 证据到达前继续静态阻塞。
+
+## 2026-09-24 R228交接：quorum membership 需要认证版本和成员核验
+
+R227 已核验，文件 `work/agents/CODEX_R227_QUORUM_FINAL_REVIEW.md`，SHA-256 `3623b2a39b213d6534544c829e27162c57e2a84627da3878273a5638fbaed541`。它发现 quorum membership 还缺 authenticated/versioned config、freshness、member identity verification 和 exact-config quorum；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R228，继续做静态 membership 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、认证 membership config 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R228 artifact 与 SHA；在完整外部审计和 quorum 证据到达前继续静态阻塞。
+
+## 2026-09-24 R227交接：replay replica 需要 quorum 和 failover 证据
+
+R226 已核验，文件 `work/agents/CODEX_R226_REPLAY_STATE_REVIEW.md`，SHA-256 `512dc284a36e5854be047b75bc54da3cc6a440ee5d70ee1b89bceec6065aa88d`。它发现 replica consistency 和 durable commit 还缺 authoritative quorum、validated failover checkpoint、stale-replica rejection 与 split-brain fail-closed 规则；未满足时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R227，继续做静态 quorum/failover 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store、quorum/failover 证据或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R227 artifact 与 SHA；在完整外部审计和 replay quorum 证据到达前继续静态阻塞。
+
+## 2026-09-24 R226交接：replay store 需要完整 integrity/rollback/replica/commit 证据
+
+R225 已核验，文件 `work/agents/CODEX_R225_REPLAY_FINAL_REVIEW.md`，SHA-256 `1c11c3db167fd509ad29853fda62caa1f80b9efeceb4a304f5b58074eda91a91`。它发现 durable replay state 还缺 integrity binding、rollback detection、replica consistency、checkpoint monotonicity 和 durable commit acknowledgement；未满足时必须拒绝并保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R226，继续做静态 replay-state 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、完整 replay store 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R226 artifact 与 SHA；在完整外部审计、信任和 replay 证据到达前继续静态阻塞。
+
+## 2026-09-24 R225交接：replay state 需要 issuer binding 和持久化
+
+R224 已核验，文件 `work/agents/CODEX_R224_TIME_REPLAY_REVIEW.md`，SHA-256 `5cac8f182ac6f225aa3f48b6cb81d04224a855b62c8d62f51290c7971ae150cb`。它发现 nonce/sequence 还缺 issuer binding、单调性、持久 verifier state 和 reset protection；未满足时必须拒绝并保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R225，继续做静态 replay 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source、持久 replay state 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R225 artifact 与 SHA；在完整外部审计、信任和 replay 证据到达前继续静态阻塞。
+
+## 2026-09-24 R223交接：trust/revocation source 需要认证和 freshness
+
+R222 已核验，文件 `work/agents/CODEX_R222_TRUST_FINAL_REVIEW.md`，SHA-256 `5df39e9eaf997da2530d34d339ae6e9895f523a92ed286ee330513746fa18596`。它发现 trusted key、revocation 与 validity 还缺少可信来源和新鲜度；需要 trust anchor、revocation source/signature、fetch time、max age、freshness 和 source-authenticity 检查，未通过时必须保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R223，继续做静态 trust-source 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest、认证且新鲜的 trust source 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R223 artifact 与 SHA；在完整外部审计和认证新鲜证据到达前继续静态阻塞。
+
+## 2026-09-24 R221交接：manifest 需要外部 owner/signer 绑定
+
+R220 已核验，文件 `work/agents/CODEX_R220_MANIFEST_FINAL_REVIEW.md`，SHA-256 `49735abb4bd487991645a4f0c2a6bda7eecd3c5f14159a7d21680d2fda3d5e77`。它发现仅有 immutable hash 仍不足以证明字段集来自外部可信 owner；需要 owner identity/commitment、detached signature、签名验证和 authority scope，未验证时必须拒绝并保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R221，继续做静态签名约束审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、外部绑定 manifest 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R221 artifact 与 SHA；在外部绑定 manifest 和独立全通过证据到达前，继续静态阻塞。
+
+## 2026-09-24 R219交接：需要 immutable field manifest
+
+R218 final schema review 已核验，文件 `work/agents/CODEX_R218_FINAL_SCHEMA_REVIEW.md`，SHA-256 `b28aa75d1c9c2b093334bab6082e683ae6c85e0edc1d84a27ccadf475ea2ba59`。它发现 R217 虽然拒绝未知/缺失 token，但没有固定 required result-field manifest；遗漏字段可能绕过“all pass”。修复要求是 immutable manifest + exact set equality，缺失或多余字段都必须拒绝并保持 `B_STATIC_ONLY`。
+
+替代 Innovation Agent 已核实运行 R219，继续做静态 manifest 审查，不得执行 parser/consumer 或任何实验。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record、immutable manifest 或独立验证；VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R219 artifact 与 SHA；在真实 owner-supplied manifest 和独立全通过证据到达前，继续静态阻塞。
+
+## 2026-09-24 R217交接：未知 token 仍需 fail-closed 修复
+
+R215 已生成并核验静态 owner-artifact acceptance schema，文件 `work/agents/CODEX_R215_OWNER_ARTIFACT_SCHEMA.md`，SHA-256 `41d41fa03430320155808c1f52cb33883591e7a8bfb6cb2d7b891a0f392aead2`。它只定义未来外部 audit record 的字段；所有实际值仍是 `MISSING_EVIDENCE` 或 `pending`，不能当作外部证据。
+
+R216 red-team 发现：schema 虽列出 `pass | fail | pending`，却没有明确拒绝未知或缺失 token。`work/agents/CODEX_R216_OWNER_SCHEMA_REDTEAM.md` 已核验，SHA-256 `41d2fa37b4802e70ef505386bf5f47674faa71de6820b8f181e2faf73609ff35`。替代 Innovation Agent 已核实运行 R217，补充这一条 fail-closed 规则。
+
+当前仍是 Branch B `NOT_READY_OWNER_PACKET`、`B_STATIC_ONLY`、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN`。VMem 五项 SHA PASS，历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified 且不重试。没有 signed owner/reviewer packet、P2/P3/P4 实例、真实 external audit record 或独立验证；不得运行 parser/consumer、解析 commitment、访问项目/受保护数据、执行 fixture/runner、GPU/Slurm、C8/evaluation、S103/S132/GRC、receipt 或 flags。`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R217 artifact 与 SHA；任何未知/缺失 token 或其他 `MISSING_EVIDENCE` 都继续停留在 `B_STATIC_ONLY`，等待真实 owner-supplied external audit evidence。
+
+## 2026-09-24 R210交接：静态语义通过，等待真实 external audit record
+
+R209 continuation synthesis 已复制并核验 SHA-256 `a809853e3b1ce1b18d75b82c7f4d37f64404a7f26eb546ca77fb9ba3327a553c`。静态语义通过，但晋级仍被 concrete external audit record 与 independent verification 缺失阻塞。可接受的外部对象必须给出 external ID、integrity digest、existence check、verifier identity、audit scope 和 non-self-reference proof；在此之前所有观察保持 `MISSING_EVIDENCE`。
+
+替代创新代理已核实运行 R210，设计该未来外部对象的 acceptance checklist/schema，只能写 synthetic/MISSING_EVIDENCE，不得远程检索、运行 parser/consumer、解析 commitment、访问项目/受保护数据，不得执行 fixture、runner、GPU、Slurm、evaluation、receipt、flags。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R210 checklist 与 SHA；checklist 不是外部证据。
+
+## 2026-09-24 R203交接：唯一晋级阻塞是独立 enforcement audit
+
+R202 continuation synthesis 已复制并核验 SHA-256 `7737493123abe43a3801bd7ef6134b27b6bbe113f5629c9a641696e7d2ee9e89`。当前只保留最窄 benchmark-only 条件假设；唯一 promotion blocker 是需要独立审计的 consumer，证明 all-rules matching、terminal rejection、fixed order、unknown/deprecated-field rejection 和 no branch transition 真正被执行。下一项合格非 GPU 对象是 static independent enforcement audit record schema，不能运行 consumer。
+
+替代创新代理已核实运行 R203，设计该 audit-record schema，只能写 synthetic/MISSING_EVIDENCE，不得运行 parser/consumer、解析 commitment、访问项目/受保护数据，不得执行 fixture、runner、GPU、Slurm、evaluation、receipt、flags。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R203 schema 与 SHA，即使完整也只能保持 protocol-only。
+
+## 2026-09-24 R196交接：静态 guard 逻辑完整，但缺独立 enforcement audit
+
+R195 artifact 已复制并核验 SHA-256 `cdf0411450a814b5b9013c65e191e5e32d8c268d395f122037fb420058e76208`。结论：explicit null 是唯一可以继续 static branch 的状态；missing、present、unknown、unlisted 都 terminal reject。晋级仍被独立 enforcement audit 阻塞，声明式规则本身不能证明下游 consumer 会执行 all-rules、terminal rejection、fixed order 和 unknown reject。
+
+替代创新代理已核实运行 R196，设计未来 enforcement-audit memo schema，只能使用 synthetic/MISSING_EVIDENCE，不得实现或运行 parser、解析 commitment、访问项目/受保护数据，不得执行 fixture、runner、GPU、Slurm、evaluation、receipt、flags。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R196 schema 与 SHA，即使完整也只能保持 protocol-only。
+
+## 2026-09-24 R186交接：保留最窄 benchmark 假设，准备下一项静态 audit memo schema
+
+R185 continuation synthesis 已复制并核验 SHA-256 `a61224d0e67fa309b951dca68c7ff3bb0552ed101bcb21c3588d02ef79452a35`。它只保留最窄的 benchmark-only 条件假设，并明确五项 hard blockers：sealed commitments 不可 dereference、完整 canonicalization recipe、deterministic control comparison、fail-closed Branch B、independent adjudication。下一项合格的非 GPU 对象是 synthetic sealed-reference/access-policy + canonicalization-control audit memo；不能实例化 item 或运行模型。
+
+替代创新代理已核实运行 R186，设计该 audit memo 的 schema，只能使用 synthetic/MISSING_EVIDENCE，不得解析 commitment，不得访问项目/受保护数据，不得执行 fixture、runner、GPU、Slurm、evaluation、receipt、flags。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R186 schema 与 SHA，即使完整也只能保持 protocol-only。
+
+## 2026-09-24 R183交接：R182 晋级失败，R183 只补四项机器可读 blocker
+
+R182 artifact 已复制并核验 SHA-256 `c538e286be564408880d908f1f0fe6c8356669dc76248c3ebf9c983cbe9ca92d`。静态 no-access 意图通过，但晋级失败：sealed-reference access policy 未定义、canonicalization recipe 不完整、control comparison 未解决、Branch B/Branch A 没有 machine-readable boundary。
+
+替代创新代理已核实运行 R183，提出四项不可执行 delta：sealed-reference access policy、版本化 canonicalization recipe、deterministic control-format comparison、`Branch B_STATIC_ONLY`/`allowed_next_branch:null` 边界。全部使用 synthetic/MISSING_EVIDENCE，不修改旧文件，不产生 benchmark 结果。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R183 delta 与 SHA；即使四项 blocker 写全，也只能保持 protocol-only。
+
+## 2026-09-24 R181交接：R180 暴露 schema blocker，R181 只提出不可执行修复
+
+R180 artifact 已复制并核验 SHA-256 `c833dbc5e399563acb7d95152456349d5c77577883481155890c68f07827658c`。结论是 R179 只适合作为 static-only schema，不能直接执行：latent world/answer sets 会泄漏 oracle，uniqueness 与 format-match 字段可能循环，hash placeholder 缺 canonicalization 规范，action 字段也没有强制 no-execution gate。
+
+替代创新代理已核实运行 R181，提出 sealed latent worlds/answer commitments、canonicalization version/encoding/hash 状态、非循环 uniqueness decision refs、format audit refs，以及 `execution_authorization:false`、`model_access:prohibited`、`result_writes:prohibited`。R181 仍只使用 synthetic/MISSING_EVIDENCE，未修改 R179，也没有任何执行。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R181 delta 与 SHA；即使修复一致，也只能保持 protocol-only，不能实例化或执行。
+
+## 2026-09-24 R179交接：FUP/AReject 仅条件保留，进入静态 packet schema 准备
+
+R178 artifact 已复制到目标仓库并核验 SHA-256 `1c95deacabf90afc3ae51260d2e23d843ccf441075052551b11097f5d573c782`。当前只把 FUP/AReject 保留为条件性的 benchmark hypothesis，不接受为 benchmark claim。必须先解决五项 blocker：独立 latent-world specification、metadata leakage proof、blinded semantic/geometric control、matched known-unique 与 generic-abstention controls、独立 identifiability/adjudication；无法满足时退役该 hypothesis。
+
+替代创新代理已核实运行 R179，进行七分钟的 static paired-item specification/audit schema 准备，只能使用 synthetic placeholders 和 missing-evidence markers。禁止项目/受保护数据、模型运行、fixture、runner、GPU、Slurm、evaluation、receipt、flags。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。signed owner/reviewer package 与实例化 P2/P3/P4 对象缺失；R140 internal QA、method END-LINE、`NO_COMMAND_AVAILABLE`、`NO_REOPEN` 不变。VMem 五项 SHA PASS、历史 no-data smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+下一步：核验 R179 schema 与 SHA，任何 missing evidence 都保持 blocker，不实例化或执行 packet。
+
+## 2026-09-24 R173交接：Branch A 的 minimum package 已明确
+
+R172 明确了离开 Branch B 所需的 exact external package：signed owner/reviewer cover/index、实例化 P2 metadata audit 与分开的 public/oracle manifests、实例化 P3 chronology/access log、实例化 P4 trusted-wrapper/oracle object、cross-object hashes、signatures、验收标准和 stop branches。R162/R164 草案及旧 R91–R99 packets 不能替代。artifact SHA-256 为 `e54af04f7c67f959e5aa747bd988835a0caf4f87fbbcf63e9d6006860aaa5ef8`。
+
+当前仍 Branch B：`NOT_READY_OWNER_PACKET`。不远程检索、不分配 Branch-A agent、不创建或执行 benchmark。R166 scorer-artifact 条件、R140 internal QA、method END-LINE 不变；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R172：定义最小 ACTION_REQUIRED packet
+
+R172 只整理离开 Branch B 所需的最小 externally supplied evidence package，并区分当前 readiness evidence 与无关的历史 schema packets。只写一个 blocker artifact，禁止 SSH、代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+当前仍是 `NOT_READY_OWNER_PACKET`。R166 scorer-artifact 条件、R164 protocol-only、R140 internal QA 和 method END-LINE 不变。VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R171交接：Branch B 已由本地证据确认
+
+R170 local audit 只找到 R162 proposal、R164 draft、R168 handoff 和当前账本；没有 signed owner/reviewer packet，也没有实例化 P2/P3/P4 evidence objects。分支决定是 Branch B：`NOT_READY_OWNER_PACKET`。artifact SHA-256 为 `22ec56f297bf4a8709cd612264da200fd0d1517c9ccc30bd7698826d3faefb24`。继续等待，不分配 Branch-A agent，不创建或执行 benchmark。
+
+R166 scorer-artifact 条件、R164 protocol-only、R140 internal QA 和 method END-LINE 不变。VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R170：本地 Branch-B selection audit
+
+R170 只检查本地仓库是否出现新的 signed owner/reviewer packet 或已实例化的 P2/P3/P4 schemas，足以把 R169 从 Branch B 切到 Branch A。SSH 被拒时不再探测；只用本地文件和 ledger。只写一个 audit artifact，禁止 benchmark execution。
+
+默认仍是 `NOT_READY_OWNER_PACKET`。R166 scorer-artifact 条件、R164 draft、R140 internal QA 和 method END-LINE 不变。VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R169交接：当前选择 Branch B
+
+R168 定义了 readiness 两分支：Branch A 只有在 signed owner/reviewer packet 和完整 P2/P3/P4 instances 到达后才做核验；Branch B 在 packet 缺失或不完整时保持 `NOT_READY_OWNER_PACKET`、等待、不创建 benchmark artifact。当前证据选择 Branch B。artifact SHA-256 为 `e5616873fd5ea87c74dcc00b2abecd5e5db3e146c8f4587c45c3f08fba89ac49`。
+
+R166 的 scorer-artifact falsification 条件、R164 `NOT_READY`、R140 internal QA 和 method END-LINE 不变。VMem 五项 SHA PASS，历史 smoke 不重跑；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R168：整理 signed-packet readiness branches
+
+R168 只定义两条后续分支：A) 收到 signed owner/reviewer packet 且 P2/P3/P4 schemas 已实例化，才做 fresh readiness audit；B) packet 缺失或不完整，继续等待。只写一个 handoff artifact，禁止搜索扩展、代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R166 的 scorer-artifact falsification 条件、R164 `NOT_READY`、R140 internal QA 和 method END-LINE 保持不变。VMem 五项 SHA PASS，历史 smoke 不重跑；signed packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R167交接：FUP/AReject 仍未验证
+
+R166 hostile challenge 确认 `FUP/AReject` 可能完全由 threshold/rounding/unit、map hash/call count/regeneration、wrapper/oracle、metadata leakage 或 scorer implementation 造成。只有 held-out controls 和 independent rerun 分离这些 artifacts 后，conditional protocol 才能保留。artifact SHA-256 为 `4e5ddf88ae0a1bfb01e1dc87203befbda65bcc93175b3cca09b46c65991256a9`。
+
+没有 empirical benchmark。R164 draft 仍 `NOT_READY`，R140 是 internal QA，method END-LINE。当前不实现、不执行；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R166：测试 scorer engineering confound
+
+R166 只检查 hidden-frame `FUP/AReject` gap 是否完全由 threshold、map hash、branch call count 或 synthetic wrapper 等 scorer engineering choices 造成。只写一个 hostile artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R164 packet 仍是 `NOT_READY`，R140 是 internal QA，method END-LINE。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R165交接：final packet draft 仍 NOT_READY
+
+R164 将完整 corrected checklist 与 P2/P3/P4 schemas 合并，保留所有 stop branches 和 field-wide novelty limitation。artifact SHA-256 为 `3e9e3938c79c700a7fa1d91f8c9e21c96e3cbb51ceb1cc4affee77ce0a052825`。draft 仍是 `NOT_READY`，必须有 signed、hash-committed schema instances 才能 readiness review。
+
+R140 是 internal QA，method END-LINE；当前不实现、不执行。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R164：合并 final packet draft
+
+R164 将 R158 corrected owner packet 与 R162 的 P2/P3/P4 machine-readable schemas 合并，保留所有 stop branches、field-wide novelty limitation 和 `NOT_READY` 状态。只写一个 draft artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R140 仍是 internal QA，method END-LINE。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R163交接：P2/P3/P4 schemas 已提出
+
+R162 为 P2 metadata audit、P3 two-custodian chronology/access log、P4 trusted-wrapper/oracle pre-call commit 定义了最小 machine-readable schemas，包含 hashes、timestamps、custodians、reviewer checks 和固定 stop branches。artifact SHA-256 为 `0bf3955921cd3cdca9d4a581809e0dc60b0ba17bd351e670589909915d2fe805`。
+
+Packet 仍是 `NOT_READY`，需要 owner/reviewer 接受并产生真实 evidence。R140 是 internal QA，method END-LINE；当前不实现、不执行。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R162：补出 P2/P3/P4 schema proposal
+
+R162 只为 R160 的三个缺口提出 minimal machine-readable schemas：P2 metadata-sanitization audit、P3 two-custodian chronology/access logs、P4 trusted-wrapper/oracle manifest 与 pre-call commit。只写一个 protocol artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+Corrected packet 仍是 `NOT_READY`；R140 是 internal QA，method END-LINE。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R161交接：corrected packet 仍 NOT_READY
+
+R160 evidence matrix 已逐项绑定 requirement、evidence object、custodian/reviewer、pre-score timing 和 stop branch。结果：P2 仍缺 metadata-sanitization audit schema/sign-off，P4 仍缺 trusted-wrapper/oracle manifest schema 和 pre-call commit，P3 仍缺可审计 chronology/access logs；packet 现在是 `NOT_READY`。artifact SHA-256 为 `a149a4cdcec817aebd96c11ee54253279b36320f70da501c3624bdaf6e82230d`。同时确认该 packet 不能证明 field-wide novelty。
+
+这是 protocol QA，不是 benchmark evidence。R140 仍是 internal QA，method END-LINE。当前不实现、不执行；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R160：检查 corrected packet 的 evidence matrix
+
+R160 只把 R158 的每个 requirement 映射到可审计 evidence object、custodian/reviewer、pre-score timing 和 stop branch，并检查是否仍有 non-circularity gap。只写一个 artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R158 protocol、R140 internal QA 和 method END-LINE 不变。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R159交接：corrected owner packet 完成
+
+R158 合并了 R154/R156 的全部修正，形成 corrected owner/reviewer packet：public/oracle manifest 分离、metadata 清理、two-custodian label custody、四个 disjoint strata、oracle 独立于 producer self-description、immutable-map audit、固定 denominator 与 rerun controls。artifact SHA-256 为 `ce7a27ce31268cd392136cde14c10fa866612d44b81787e29c10bb645c0cb110`。
+
+这是 protocol preparation，不是 benchmark evidence。R140 仍是 internal QA，method END-LINE。signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R158：合并 corrected owner packet
+
+R158 将 R154 checklist 与 R156 四项修正合并成一份 corrected owner/reviewer packet：public/oracle manifest 分离和 metadata 清理、two-custodian hidden-label release、四个 disjoint `FUP/AReject` strata、以及独立于 producer self-description 和 rerun evidence 的 oracle truth。只写一个 protocol artifact，禁止执行。
+
+R140 仍是 internal QA，method line END-LINE；未来 benchmark 仍需独立授权。VMem 五项 SHA PASS，历史 smoke 不重跑；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R157交接：packet adversarial fixes
+
+R156 发现 R154 owner packet 还需四个修正：public/oracle manifest 分离并清理 metadata、可审计的 two-custodian hidden-label release、把 `FUP/AReject` 分成 in-H-correct、in-H-misdeclared、out-H-canonical、out-H-unknown 四个 strata，以及让 oracle truth 独立于 producer self-description 并在 prediction sealing 前隐藏。每项都有 stop branch。artifact SHA-256 为 `43e66cde6ee0b9288344856093f71d1e9e704a0b2ae6235d1c01bad0f457921c`。
+
+这仍是 conditional protocol correction，不是 benchmark evidence 或 method。R140 是 internal QA，method END-LINE。当前不实现、不执行；VMem 五项 SHA PASS，历史 smoke 不重跑；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R156：最后 packet adversarial check
+
+R156 只检查 R154 owner packet 是否有 circular 或 leakage-prone requirement，使 hidden-label custody 与 `FUP`/`AReject` 看似可识别但实际不可验证。只写一个 artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。若无新增问题，就冻结 protocol 并等待 signed owner/reviewer authorization。
+
+R154 protocol、R140 internal QA 和 method END-LINE 不变。VMem 五项 SHA PASS，历史 smoke 不重跑；signed owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R155交接：owner-review checklist 完成
+
+R154 完成了 conditional FUP/AReject benchmark 的 owner-review checklist。内容包括 source-pinned manifests、hidden label custody、一个 immutable map 与 hash/call count、units/schema、不对称 held-out geometry、scorer freeze、固定 denominator 和 confidence intervals、independent rerun 以及 hard stop branches。artifact SHA-256 为 `d2b9e712e43d308141994bfcbcc4ec47f6c1a7ee916c603ed9aaa502e1d9626c`。
+
+这是 protocol preparation，不是 benchmark evidence。R140 仍是 internal QA，method line END-LINE。当前没有 signed owner/H2/fixture/runner packet，`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R154：准备 owner-review packet checklist
+
+R154 只把 R152 的条件 benchmark protocol 转成 owner-review checklist，覆盖 hidden labels、immutable map/hash/call count、units/schema、held-out geometry、scorer freeze、FUP/AReject denominator、uncertainty、independent rerun 和 stop branches，并检查剩余歧义。只写一个 artifact，禁止代码、数据、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R152 protocol 和 method END-LINE 不变：R140 是 internal QA，未来 benchmark 必须独立授权。VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R153交接：冻结条件 benchmark protocol
+
+R152 完成了 R150 的 protocol refinement。`FUP`/`AReject` 只在以下条件下保留：hidden source-pinned frame label、声明的 hypothesis set、一个 immutable map、固定 hash/call count、source-pinned units/schema、不对称 held-out geometry、冻结 tolerance、canonical out-of-hypothesis controls 和 independent rerun。artifact SHA-256 为 `03caefc6f38b3d98401f1fdc91f4aa91e7fff32945aabccb42817a432a00b0e9`。
+
+这是未来独立 benchmark-construction project 的 protocol candidate，不是 benchmark result，也不是 method。R140 仍是 internal evaluator hygiene；method line END-LINE。当前不实现、不评分、不执行。VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R152：细化 FUP/AReject 协议
+
+R152 只审查 R150 提出的 hidden-frame `FUP`/`AReject` 是否可识别，并列出 residual threshold、map regeneration、hidden units/depth schema 等最强混杂解释、最小 controls 和 rejection criteria。限定为 R150 与已引用 sources；只写一个 protocol artifact，禁止扩大检索、代码、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。
+
+R150 的狭义评测缺口和 method END-LINE 保持不变：R140 是 internal QA，未来 benchmark 必须独立授权。VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R151交接：R150 找到狭义评测缺口
+
+R150 hostile check 对 R148 做了一个狭义修正：现有 cited checks 没有测量 hidden producer-frame 导致的 false unique certification。可预注册的两个 estimand 是 `FUP`（真实 frame 在声明 hypotheses 外却唯一通过的概率）和 `AReject`（应当输出 `H2_UNIDENTIFIABLE` 的正确拒绝概率）。这不是 reconstruction/view-synthesis/geometry/memory 方法创新，只支持未来独立授权的 benchmark-construction project。artifact SHA-256 为 `157cbe29f48225212d5d674c8202597c9ce1db89c5e64dbaa2e24aa9d1349de2`。
+
+R140 仍只是 internal evaluator hygiene；未来项目需要至少三个 producer family、hidden frame labels、held-out geometry/poses、一个 immutable map、固定 denominator、baseline、confidence intervals 和 independent rerun。当前不实现、不执行。VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R150：最后一次 benchmark hostile challenge
+
+R150 只检查 R148 是否遗漏了一个现有 camera/frame/multi-query/reprojection checks 未覆盖的独立 estimand 或 failure mode。限定为 R148 和已引用 primary/official sources；只写一个 artifact，四分钟上限，禁止扩大检索、代码、fixture、runner、GPU、Slurm、C8/evaluation、receipt、flags。若仍无缺口，就关闭 innovation claim 分支并保持 END-LINE。
+
+状态不变：VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R149交接：R148 否决独立 benchmark gap
+
+R148 的 bounded benchmark-falsification 得出 PASS/END-LINE：在 R140/R146 和已引用 primary/official sources 的证据范围内，没有可辩护的独立 benchmark gap。COLMAP/PyTorch3D 已覆盖 camera round trips，Nerfstudio/COLMAP/3DGS/DUSt3R 已覆盖 frame contracts，NeRF/pixelNeRF/iMAP/3DGS 已覆盖 fixed-map multi-query，MVS 已覆盖 geometric consistency；R140 的 2x2 table 只是 QA packaging。artifact SHA-256 为 `51059f076347993fdf5034b8695283470c6535f28dcc24a2edb84e4d2b11fde6`。
+
+停止 benchmark novelty development，R140 只保留 internal evaluator hygiene。未来 benchmark 如要启动，必须是新的 construction project，先证明独立 estimand、至少三个 producer family、hidden conventions、held-out geometry、冻结 baseline 和 independent rerun。当前 VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R148：限定 benchmark-falsification cycle
+
+R148 只检查未来 multi-system frame-contract benchmark 是否还有独立 evaluation gap。输入限定为 R140/R146 和已经检查过的 primary/official sources；只允许写一个 artifact，禁止 benchmark data、代码、fixture、runner、GPU、Slurm、C8/evaluation、receipt 和 flags。若没有精确、可证伪的独立 gap，就保留 END-LINE；若有，也只能作为新的 benchmark construction project，不会重开 method line。
+
+当前状态不变：VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、`novelty_authorization=NONE`、GRC 未验证。
+
+## 2026-09-24 R147交接：R146 否决当前 benchmark-paper framing
+
+R146 结论：R140 当前只能作为 internal evaluator QA，不能作为 benchmark paper。现有材料只有
+一个 fixture、一个未确定 producer schema、没有多系统测量、hidden-label held-out split、frozen
+baseline matrix 或 independent rerun。未来 benchmark 需要多 producer family、隐藏 convention、
+固定 denominator/metrics、held-out geometry 和独立复核；那是新的 construction project。artifact
+SHA-256 为 `02200c4bf67a641f063c0231b188aeee8006eab511d7f3e71683e82bfe4341f9`。
+
+停止 innovation claim development，不实现、不评分。owner/H2/fixture/runner packet 缺失，
+`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；
+END-LINE、`NO_REOPEN`、`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R146交接：检查 R140 是否只有 benchmark 价值
+
+R146 启动一个 bounded benchmark-only classification，检查 R140 是否存在独立的 benchmark gap，
+还是只属于 internal evaluator QA。只允许使用 R140/R142/R144 和已引用的 primary/official sources，
+必须写 benchmark gap、构建/评价要求、最近重叠、最小有效 experiment 与拒绝条件；不读 benchmark
+data，不执行代码，不碰 protected C8/evaluation、runner、GPU、Slurm、receipt、flags。
+
+主方法线仍 END-LINE；VMem 五项 SHA PASS，历史 smoke 不重跑；owner/H2/fixture/runner packet 缺失，
+`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`new_method_validated=false`、
+`novelty_authorization=NONE`、`NO_REOPEN` 不变。
+
+## 2026-09-24 R145交接：R144 再次确认 END-LINE
+
+R144 的最后一次 stop-rule challenge 仍未找到可辩护的 reconstruction/view-synthesis method
+distinction。COLMAP/PyTorch3D 覆盖 identity tests，NeRF/pixelNeRF/iMAP/3DGS 覆盖 fixed-map
+multi-query，Nerfstudio/COLMAP/3DGS/DUSt3R 覆盖 frame contracts；R140 只保留 evaluator-hygiene /
+benchmark packaging。artifact SHA-256 为 `7892b68816b452cde738c1a51f32fe96fae06d8a8024a5a4476ea7f4a0e5c711`。
+
+后续最小 CPU experiment 仍需 owner sign-off、source-pinned producer API/frame/schema/units、
+一个 immutable map、same-map raw/F3 query 和预注册 held-out estimand；未知或 tie 就停在
+`H2_UNIDENTIFIABLE`。主线 `NO_COMMAND_AVAILABLE`、END-LINE、`NO_REOPEN`、
+`new_method_validated=false`、`novelty_authorization=NONE` 不变；VMem SHA PASS，历史 smoke 不重跑。
+
+## 2026-09-24 R144交接：最后一次 END-LINE stop-rule challenge
+
+R144 正在做一个 bounded read-only challenge，只看 R140/R142 artifacts 和已引用的 primary/official
+sources，检查是否有一项仍可辩护的方法差别。必须写一个新 artifact；若没有，则明确 reaffirm
+END-LINE。不能访问 protected data、不能执行代码或 fixture、不能碰 runner/GPU/Slurm/receipt/flags。
+
+当前仍为 R142 的结论：R140 只保留 evaluator-hygiene QA，owner/H2/fixture/runner packet 缺失，
+`NO_COMMAND_AVAILABLE`；VMem 五项 SHA PASS，历史 smoke 不重跑；SSH exit 255 后同步 stale/unverified；
+`new_method_validated=false`、`novelty_authorization=NONE`、END-LINE、`NO_REOPEN` 不变。
+
+## 2026-09-24 R143交接：R142 否决 R140 的 method novelty framing
+
+R142 直接检查了 COLMAP、Nerfstudio、PyTorch3D、MVS、NeRF/iMAP/3DGS 等原始论文或官方实现。
+相机轴转换、project/unproject round-trip、forward/backward reprojection 和固定 map 多视角
+query 都有直接先例；没有证据支持 R140 的 ingredients 构成新方法。精确 2x2 packaging 未找到，
+但“没搜到”不算 novelty 证据。R140 只保留为 evaluator-hygiene QA contract，研究/创新主张
+执行 END-LINE。artifact SHA-256 为 `d2b1f8dd806cd97d6c291da56e1c630b3c986599607d301e2627235354555b73`。
+
+不实现、不执行 fixture。owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`；VMem
+五项 SHA PASS，历史 smoke 有效且不重跑；SSH exit 255 后同步 stale/unverified；END-LINE、
+`NO_REOPEN`、`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R142交接：检查 same-map protocol 的直接先例
+
+R142 启动一个 bounded primary-source prior-art/red-team 审查，直接检查 R140 的 immutable
+map + same-map raw/F3 cross-query 是否已在 3-D reconstruction/view synthesis 文献或官方实现中
+明确出现。必须保存标题、URL、访问日期、实际 inspected evidence、overlap 和 falsifiable
+implication；不能访问 protected data，不能执行代码或触碰 GPU/Slurm/runner/receipt/flags。
+
+主线不变：VMem 五项 SHA PASS，历史 smoke 有效且不重跑；owner/H2/fixture/runner packet 缺失，
+`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；END-LINE、`NO_REOPEN`、
+`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R141交接：R140 完成 same-map cross-query protocol
+
+R140 完成修正版 protocol：一个 immutable、source-pinned producer map；预注册 `T_in` 和
+frame tag；同一 map 上做 RAW/F3 的 2x2 confusion table；固定 `N_den=24` 和 tolerance；
+只有唯一 pass 才继续，否则 `H2_UNIDENTIFIABLE`。producer schema、frame tag、units 仍是
+UNKNOWN。artifact SHA-256 为 `a9220d08e4d36712a3c15daa929854caa38ada636c929f25ff8352cb2ed9aad0`。
+
+R140 后本轮 innovation 停止。owner/H2/runner packet 和 fresh readiness audit 是唯一后续
+前置条件；`NO_COMMAND_AVAILABLE`、END-LINE、`NO_REOPEN`、`new_method_validated=false`、
+`novelty_authorization=NONE` 不变。VMem 五项 SHA PASS，历史 smoke 有效且不重跑；SSH
+exit 255 后同步 stale/unverified。
+
+## 2026-09-24 R140交接：R138 发现 fixture 的关键可识别性漏洞
+
+R140 正在写一个新的 protocol-only artifact，修正 R138 指出的漏洞：必须先冻结一个
+source-pinned、immutable producer map，登记 producer input pose 和 pre-registered frame tag，
+再用 raw 与 `F3` query 交叉查询同一个 map，并用 2x2 confusion table 判定。tie、缺失或非
+finite 结果都保持 `H2_UNIDENTIFIABLE`。不写代码、不执行、不读 protected data、不碰
+runner/GPU/Slurm/receipt/flags。
+
+VMem fresh receipt 仍为五项 SHA 全部匹配，历史 smoke 有效且不重跑；owner/H2/fixture/runner
+packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；END-LINE、
+`NO_REOPEN`、`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R139交接：R138 发现 fixture 的关键可识别性漏洞
+
+R138 发现 R137 的 `RAW_RAW` 和 `FLIP_FLIP` 如果各自生成 map/query pair，会让两个分支
+在自己的 map 上构成 tautology，无法识别 producer frame。修正要求：先冻结一个 source-pinned、
+immutable map，记录 producer input pose 和 pre-registered frame tag，再用 raw 与 flipped query
+交叉查询同一个 map；只有唯一 same-map pass 才能继续，否则保持 `H2_UNIDENTIFIABLE`。artifact
+SHA-256 为 `36a5ed1bc7745c9d5fb916434f803aabdc15aa5f3bca4fca7a56b18da56b4cea`。
+
+R137 原文保留为历史，不静默修改；本轮 innovation loop 在 R138 后停止。owner/H2/fixture/runner
+packet 缺失，`NO_COMMAND_AVAILABLE`、END-LINE、`NO_REOPEN`、`new_method_validated=false`、
+`novelty_authorization=NONE` 不变。VMem SHA 和历史 smoke 有效，不重跑；SSH exit 255 后同步
+仍 stale/unverified。
+
+## 2026-09-24 R138交接：fixture protocol 已固定，最后一次红队审查进行中
+
+R137 完成 protocol-only synthetic CPU fixture 规范：固定 plane/cube、3 个 camera、K/F3/F4、
+双向误差、source tolerance、`N_den=72`、RAW_RAW/FLIP_FLIP 分支、唯一通过条件和 owner/H2/
+runner gates。artifact SHA-256 为 `fb82ebf99d15ad347ae1f5762563ce9f39114663923e60a043c1a73f95a4dd4a`。
+producer semantics 和 owner assignment 仍是 blocker。
+
+R138 是最后一个 bounded protocol red-team cycle，只允许写一个新 artifact 指出可识别性缺陷或
+确认没有 material flaw；不改协议、不写代码、不执行。结束后停止本轮 innovation loop，等待
+owner packet 和 fresh readiness audit。`NO_COMMAND_AVAILABLE`、END-LINE、`NO_REOPEN`、
+`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R137交接：R136 无法唯一确定 producer frame
+
+R136 的 adversarial source-only 检查结果为 `UNRESOLVED`：transformed pipeline callsite
+削弱了 raw-frame neutralization 的解释，但 upstream producer internals 不可见，仍保留
+`H2_UNIDENTIFIABLE`。artifact SHA-256 为
+`277cc9d8ca97db66b89f9f2bf2f648c4e9c75231e01fe3cc47f350d81462d236`；没有 method claim。
+
+R137 正在写一个 protocol-only 的 synthetic CPU frame identity fixture 规范，包含固定几何、
+pose/camera、双向误差、容差、分母、分支和拒绝条件。不能写代码或执行，不能读 protected
+data，也不能触碰 runner/GPU/Slurm/receipt/flags。owner/H2/runner packet 和 fresh readiness
+audit 仍是唯一可进入后续的前置条件；`NO_COMMAND_AVAILABLE`、END-LINE、`NO_REOPEN`、
+`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R136交接：R135 支持 evaluator hygiene，但 producer frame 仍未定
+
+R135 的 source-only 审查完成：源码证据支持 evaluator 的 frame-join 风险，但不能证明
+CUT3R producer 的实际 metric frame，保留 `H2_UNIDENTIFIABLE`。artifact 的 SHA-256 为
+`962a5a8a0067f395e96f69292b773bbb9cbfa1a2fe07a5c0e4001db6a113b296`。这不是 method claim，
+也不改变 validation flags。
+
+R136 已启动一个 bounded adversarial source-only cycle，检查 upstream producer 或 retrieval-map
+callsite 是否已经抵消该 transform mismatch。只允许源码和非 sealed callsite，必须写一个新
+artifact；若证据不足记录 `UNRESOLVED`，不访问 protected data、不执行 runner/GPU/Slurm。
+
+下一步证据仍是 source-pinned synthetic CPU identity fixture，要求双向误差 `<=1e-6` 且唯一
+支持一种 transform。owner/H2/fixture/runner packet 缺失，`NO_COMMAND_AVAILABLE`、END-LINE、
+`NO_REOPEN`、`new_method_validated=false`、`novelty_authorization=NONE` 不变；VMem SHA
+和历史 smoke 有效，不重跑。
+
+## 2026-09-24 R135交接：最后一次受限 pose source-only 审查进行中
+
+R135 启动一个最终、严格限时的 source-only Innovation Agent 审查。只允许检查
+`compute_support_masks.py`、管线坐标变换定义和一个非 sealed 备忘录，并写入一个
+新 artifact；禁止 protected C8/evaluation、sealed maps、GT、predictions、runner、GPU、
+Slurm、receipt 和 flags。若 bounded window 内没有 artifact，记录 ACTION_REQUIRED 并停止
+重试；stall 不能说明 pose hypothesis 的正面或负面结论。
+
+主线保持暂停：VMem 五项 SHA 已 PASS，历史 no-data smoke 有效且不重跑；owner/H2/fixture/
+runner packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；
+`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE` 不变。
+
+## 2026-09-24 R134交接：R133 pose audit 阻塞，不能据此下结论
+
+R133 的 source-only pose/convention audit 没有产出：原 agent 和缩小范围的 retry 都在 bounded window 内 stalled，随后被中断；没有读 protected data、sealed maps、GT、predictions，也没有执行 runner/GPU/Slurm。不要把这个 blocker 当成 pose hypothesis 的正面或负面证据。
+
+R131/R132 END-LINE 和 owner-action blocked 保持：VMem SHA 已验证，历史 smoke 不重跑；packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255 后同步 stale/unverified；`NO_REOPEN`、`new_method_validated=false`、`novelty_authorization=NONE` 不变。未来只有在工具恢复时才可重试 bounded source-only audit。
+
+## 2026-09-24 R133接续：源码级 pose/convention 失败驱动审查
+
+R132 保持 END-LINE：缺少 owner/H2/runner packet 时没有可行动的 geometry-method claim。R133 启动一个 bounded source-only Innovation Agent，审查 C8 pose/convention 问题是否只是 evaluator hygiene、可证伪机制或仍未决；只看源码和非 sealed memo，不读 protected C8/evaluation、sealed maps、GT、predictions，不跑 runner。
+
+主线仍暂停：`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`；VMem SHA 与历史 smoke 有效不重跑，SSH exit 255 后同步 stale/unverified。
+
+## 2026-09-24 R132交接：R131 PASS，END-LINE 保持
+
+R131 通过最终 stop-rule challenge：缺少 owner/H2/runner packet 时，没有可行动的 falsifiable geometry-method claim。CGLR 拒绝为方法创新；GSCR/RCA 为 END-LINE；DCR 仅 benchmark；SOCF/FGB 仅条件协议；N04/N13 仅诊断。
+
+当前 VMem `COMPLETE_SHA_VERIFIED`，历史 no-data smoke 有效且不重跑；local packet 缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255，R111 后同步 stale/unverified。保持 `NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`。不得 expose/execute/dispatch/schedule command，不读 protected C8/evaluation，不跑 GPU/Slurm/S103/S132/GRC，不改 receipt/flags。
+
+唯一下一步是 owner 提供完整、独立审查、content-addressed synthetic-only packet，再按顺序 fresh audit。下一轮 innovation/red-team 只有在该前置条件通过后才启动；当前不暗示跨会话 autonomous execution。
+
+## 2026-09-24 R131接续：R130 PASS，进入最终 stop-rule challenge
+
+R130 通过：四个 anchored-final-root 条件和完整 paused/no-execution 边界在 plan、handoff、memory、method direction 与 R126 canonical memo 一致。owner packet 仍缺失，`NO_COMMAND_AVAILABLE`；SSH exit 255，R111 后同步 stale/unverified。
+
+唯一状态转移仍是 owner 提供完整、独立审查的 synthetic-only packet，再做 fresh readiness audit。R131 只挑战“没有 owner packet 时是否还有可行动、可证伪的 geometry-method claim”；若没有，就记录 END-LINE 及拒绝条件。不得发明方法、发现或执行命令、读保护数据、跑 GPU/Slurm/C8/eval/S103/S132/GRC、改 receipt 或 flags。
+
+## 2026-09-24 R129接续：补齐 memory 顶部的完整禁止执行边界
+
+R129 确认四个 anchored-final-root 条件已在当前记录一致，但发现 memory 顶部只概括了“禁止执行边界”。现已明确写出：不得 expose、execute、dispatch、schedule command；不得读 protected data；不得做 GPU/Slurm、C8/evaluation replay、S103/S132/GRC；不得改 receipt 或 flags。owner packet 仍缺失，SSH exit 255 使 R111 后同步 stale/unverified。
+
+保持 fixed-manifest owner bytes、retained FD 锚定 verified root device/inode/parent、最后 digest 后禁用缓存 root 路径、变化时 fail closed 为 `STALE`/`REMOTE_PROVENANCE_UNVERIFIED` 并换新 nonce；`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`、VMem SHA 和历史 smoke 不变。R130 做最终 read-only 五记录复核。
+
+## 2026-09-24 R128接续：修正 R127 方法方向遗漏，等待一致性复核
+
+R127 发现 method direction 只写了 anchored-final-root 名称，没有列出四个细节；现已补齐：owner bytes 在 fixed manifest、retained FD 锚定 root device/inode/parent、最后 digest 后不按缓存 root 名称查路径、任何变化或无法证明锚定都 fail closed 为 `STALE`/`REMOTE_PROVENANCE_UNVERIFIED` 并换新 nonce。
+
+R128 只重跑五份记录的一致性审计。此修改是 provenance wording，不是执行或方法授权。保持 `NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`；VMem SHA、历史 smoke、SSH stale/unverified 不变。
+
+## 2026-09-24 R127接续：R126 发现 TOCTOU，加入锚定最终目录条件
+
+R126 发现：最后一次 digest 后若按路径重新打开 owner/H2 文件，目录项可被替换；而 owner review bytes 也没有明确纳入 fixed manifest。现将条件写清：owner bytes 必须在 fixed manifest 中；最后 digest 后所有 readiness read 必须通过 retained FD 锚定 verified root 的 device/inode/parent entry（O_NOFOLLOW 加等价 beneath/no-reparse）；不能再按缓存 root 名称查路径。root、parent、owner bytes/hash 或 role 文件变化都 fail closed 为 `STALE`/`REMOTE_PROVENANCE_UNVERIFIED` 并换新 nonce。
+
+这只是 provenance contract 修正，不是执行结果或方法授权。保持 `NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`；VMem SHA 和历史 smoke 不变，不重跑。R127 做 read-only consistency audit。
+
+## 2026-09-24 R126接续：R125 PASS，审查 replay/substitution 反例
+
+R125 通过 acceptance matrix：加入同一 fresh R98 snapshot 上重算 canonical owner hash、R85 role-bound code/H2/boundary hashes、snapshot nonce/digest，并要求 runner-code manifest 与 H2-source manifest 不同的合取条件。实际 packet 仍缺失，`NO_COMMAND_AVAILABLE` 不变。
+
+R126 只做 read-only adversarial audit，寻找 race、stale snapshot、alias 或 role substitution 的具体反例；不创建 runner/command/fixture，不做方法声明。SSH exit 255，R111 后同步仍 stale/unverified；VMem SHA 与历史 smoke 不变。
+
+## 2026-09-24 R125接续：R124 PASS，继续保持 owner-action blocked
+
+R124 通过：owner packet→fresh readiness audit 的边界清楚；SSH exit 255 使 R111 后同步保持 stale/unverified。项目继续暂停。R125 只做 read-only acceptance-matrix audit，核对 role、source/code SHA、typed H2、boundary、owner review、immutable snapshot 和 status precedence，寻找能阻止 replay/substitution 的具体条件；不生成命令、不执行、不改门禁。
+
+保持 `NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`。VMem SHA 和历史 no-data smoke 有效，不重跑。
+
+## 2026-09-24 R124接续：R123 PASS，交接可安全暂停
+
+R123 通过最终 handoff-state audit：记录内部一致，唯一下一步是 owner 提供一份完整、独立审查、synthetic-only packet，再做 fresh readiness audit。SSH 仍以 connection closed/exit 255 失败；R111 后远端同步仍是 stale/unverified，不能当成 ready 或缺失证据。
+
+保持 `NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、`new_method_validated=false`、`novelty_authorization=NONE`。VMem SHA 和历史 no-data smoke 有效，不重跑。R124 只做 bounded read-only owner-action readiness-boundary audit；不执行命令、不发现 runner、不读保护数据、不跑 GPU/Slurm/C8/eval/S103/S132/GRC、不改 receipt 或 flags。
+
+## 2026-09-24 R123接续：R122 PASS，可安全停在 owner-action blocked
+
+R122 确认项目可安全暂停：唯一下一步是 owner 提供完整 independently reviewed synthetic-only packet，再做 fresh readiness audit。远端 timeout 只保持 stale/unverified，不触发 retry/readiness；历史 retry 只是 append-only 记录。不得 expose/execute/dispatch/schedule command，也不得重开方法线。
+
+R123 正做最终 handoff-state audit。`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、VMem、smoke、flags 不变。
+
+## 2026-09-24 R122接续：R121 PASS，stale remote 边界已确认
+
+R121 通过：local artifact ABSENT→`NO_COMMAND_AVAILABLE`；SSH timeout→remote stale/unverified；未来文件→present-but-unverified，必须通过 role/SHA/owner/H2/snapshot。timeout 不会变成 OWNER_ACCEPTED、H2 pass 或 command permission。
+
+R122 正做 stopping-rule audit，确认 handoff 只留下明确 owner action，不暗示跨会话 autonomous execution。远端同步仍未验证，Gate 0/END-LINE/flags 不变。
+
+## 2026-09-24 R121接续：R120 确认 local absent、remote stale-unverified
+
+R120 在 local exact-path 检查中确认 review_artifact、source_code_manifest、h2_source_manifest、h2_packet、boundary_artifact、fixture 和 runner 全部 ABSENT；远端 SSH banner probe timeout，只能记为 stale/unverified，不能当作 ready。R93/R100 远端缺失只是历史证据。唯一 owner action 是提供完整 independently reviewed synthetic-only packet 和 review-only command text/discovery evidence。
+
+R121 正核对 absent / stale-unverified / present-but-unverified 的边界。`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、VMem、smoke、flags 不变。
+
+## 2026-09-24 R120接续：R119 PASS，command boundary 已闭合
+
+R119 通过：R106/R114/R92 与 R75/R77 plans 及 handoff 都明确 command text/discovery evidence 只供 review，禁止 CPU/GPU/Slurm/C8/eval execute、dispatch、schedule 或 runnable exposure。R120 做最后 owner packet status audit。
+
+SSH 当前不可达，R111 后远端 SHA 仍未验证。Local owner/H2/fixture/runner 仍缺失；`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、VMem、smoke、flags 不变。
+
+## 2026-09-24 R119接续：R118 残留 CPU authorization wording 已修正
+
+R118 发现 R114 旧段落只禁止 GPU，未明确禁止 CPU execute/dispatch/schedule；现已替换为完整 review-only boundary，并删除重复 addendum。R119 正做最终 wording verify。自 R111 后远端同步仍因 SSH closure 未验证，不能声称已同步。
+
+## 2026-09-24 R118接续：R117 的 command wording 已统一替换
+
+R117 发现 R106/R114/R92 仍有 unqualified command 语句；现已全部替换为：只提供 supported CPU command text 和 discovery evidence 供 review，完整 packet/gates 独立接受前禁止 execute、dispatch、schedule 或暴露 runnable；R92 改成 checklist 只支持后续 owner decision、不授权 execution。R118 正做最终 consistency verify。
+
+自 R111 后的 SSH sync 仍在 SHA 前 connection closed，远端更新未验证。`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、VMem、smoke、flags 不变。
+
+## 2026-09-24 R117接续：R116 review-only command wording 已应用
+
+R116 发现 R115 的措辞还没进入 R106/R114；现已在两个历史 memo 追加统一句子：只提供 supported CPU command text 和 discovery evidence 供审阅，完整 packet/gates 独立接受前禁止 execute、dispatch、schedule 或暴露为 runnable。R117 正做 consistency audit。
+
+自 R111 后的远端同步仍因 SSH connection closed 未验证。`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE、VMem、smoke 和 flags 不变。
+
+## 2026-09-24 R116接续：R115 收紧 command wording，不增加授权
+
+R115 只发现措辞风险：owner 只能提供 command text 和 discovery evidence 供审阅，禁止执行、dispatch、schedule 或暴露为 runnable。没有新增 schema/gate/authorization，`NO_COMMAND_AVAILABLE`、`NO_REOPEN`、END-LINE 和 flags 不变。
+
+R116 正做最后 wording consistency audit。R112–R115 最新远端同步因 SSH connection closed 尚未验证；不要声称已同步。VMem、smoke 和所有执行限制不变。
+
+## 2026-09-24 R115接续：R114 PASS 完成 owner action checklist
+
+R114 汇总并通过 owner packet 清单，明确状态优先级：snapshot mutation→`STALE`/`REMOTE_PROVENANCE_UNVERIFIED`；malformed canonical/type/hash/alias→`REJECT_FIXTURE`；well-formed owner 缺失/过期/replay/mismatch→`OWNER_REVIEW_REQUIRED`；owner 通过后 H2 failure→`H2_UNIDENTIFIABLE`；access-matched control reproduction→`REJECT_NON_IDENTIFIABLE`。清单是 readiness evidence，不是执行授权。
+
+R115 正做 authorization-boundary audit。最近同步 R112–R114 更新时 SSH 连接关闭，远端 SHA 尚未验证；不要声称这些最新更新已同步。Gate 0、NO_REOPEN、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R114接续：R113 NO_REOPEN
+
+R113 确认不重开方法线：R104 已否决 CGLR 方法创新，R45/R46 没有有效 support/H2 前提，R100–R112 的 owner/H2/fixture/runner packet 仍缺失。唯一保留 falsifier 是 shared base input 下，若 access-matched `mask_only_local` 或 `residual_transport_untyped` 复现完整 CGLR event signature，就 `REJECT_NON_IDENTIFIABLE`。
+
+R114 正把负结果整理成 owner action checklist，并核对 R106/R109/R110/R112 的状态优先级。Gate 0、END-LINE、DCR benchmark-only、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R113接续：R112 PASS，owner hash schema 已闭合
+
+R112 核对通过：唯一 supplied hash 是 `/owner_gate/review_artifact_sha256`；`owner_subject_sha256` 只在内部重算，不是 JSON 字段、alias 或 alternate subject。owner 只需提供已有 R70/R85 review artifact 并绑定 R98 final frozen snapshot，不增加 schema。
+
+R113 正做最后一次 END-LINE challenge；除非出现真正的 mechanism-level evidence 和完整 owner/H2 packet，否则输出 `NO_REOPEN`。Gate 0、DCR benchmark-only、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R112接续：R111 收束 owner hash 为单字段 canonical 规则
+
+R111 发现 `owner_subject_sha256` 不能落成 JSON 字段或 alias；唯一 supplied hash 是 `/owner_gate/review_artifact_sha256`，内部只删除这一个字段后用 canonical_json_v2 重算 subject。R85 manifest identity、R98 snapshot freshness 和 status precedence 保持不变：snapshot 先判 STALE/REMOTE_PROVENANCE_UNVERIFIED，再判 OWNER_REVIEW_REQUIRED。
+
+R112 正做最终 closure audit。owner/H2/fixture/runner 仍缺失，Gate 0、END-LINE、DCR benchmark-only、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R111接续：R110 发现 owner-gate replay/substitution 缺口
+
+R110 指出 R109 还缺三类绑定：review hash 的 canonical subject、R85 的 code/H2/boundary manifest identity、以及 fresh immutable snapshot/final digest。最终 phase-0 要求 `owner_subject_sha256`（canonical_json_v2 去掉 self-hash）、完整且角色/哈希分离的 manifest identity、fresh snapshot ID 和 readiness 前重算 final digest；owner 缺失/过期/replay/substitution 统一 `OWNER_REVIEW_REQUIRED`，先于 materialization/H2。
+
+R111 正做最终只读 provenance audit。local exact-path 仍没有 owner/H2/fixture/support command，Gate 0、END-LINE、DCR benchmark-only、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R110接续：R109 补齐 machine-readable owner gate
+
+R109 发现 R108 仍可能让没有独立授权的 H2 packet 进入 materialization。最终要求是 `owner_gate.status=OWNER_ACCEPTED`、真实 review_artifact_sha256、accepted protocol、完整 R52/R62/R64/R68/R70 manifest chain、synthetic-only scope、decision time 和 reviewer role；顺序为 owner_gate→asymmetric materialization→H2→hash→CPU identity。owner 缺失/过期/哈希不匹配时 `OWNER_REVIEW_REQUIRED`，H2/fixture/分母失败继续用各自 terminal status。
+
+R110 正做 owner-gate substitution/replay/staleness 的只读 red-team。Gate 0、END-LINE、DCR benchmark-only、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R109接续：R108 补齐最终 typed H2 接收字段
+
+R108 确认仅有 `T_cv F + F3` helper algebra 不足以证明 CUT3R 实际 pointmap frame。最终 packet 必须有真实 frame_label、`T_c2w`、camera-to-world、OpenCV convention、source/boundary SHA、forward/inverse 公式、双向 measured error≤1e-6 和 PASS；同时保留 R107 的 asymmetric geometry、非对称 K、单位/crop/half-pixel/rounding/quantization/occlusion、独立 renderer/evaluator 和 raw/F T/inverse 负控。顺序固定为 owner→materialize→H2→hash→CPU identity；H2 缺失/冲突、负控通过或字段不能冻结就拒绝 DCR。
+
+R109 只做 final readiness audit。DCR 仍 benchmark-only，hidden-surface 方法 END-LINE；Gate 0 仍 `NO_COMMAND_AVAILABLE`。VMem、smoke、flags 和禁止读取受保护数据/跑 GPU 的限制不变。
+
+## 2026-09-24 R108接续：R107 修正 DCR falsifier 的自洽通过风险
+
+R107 发现单点/对称 fixture 可能让错误的 K、depth unit、crop、rounding 或共享 projection helper 自洽通过。最低修正是 asymmetric off-axis、多于三个正 metric depth、三个带旋转/平移相机、`fx != fy`、非中心 `cx,cy`、mm→m 显式转换、独立 renderer/evaluator、camera-keyed visibility/occlusion，以及 raw/`F T_cv`/inverse-pose 负控。负控通过或多个 convention 不可区分时，`H2_UNIDENTIFIABLE` 并拒绝 DCR。
+
+R108 正做最后 acceptance audit；即使通过，也只说明 benchmark falsifier 写清楚，不会重开 END-LINE 或授权执行。Gate 0、VMem、smoke、flags 和 `NO_COMMAND_AVAILABLE` 不变。
+
+## 2026-09-24 R107接续：R106 确认 END-LINE，并审查 DCR 的最小反证
+
+R106 证明当前 END-LINE 有依据：GSCR/RCA 已被已有方法覆盖，C8 H2 未解决，且没有 hidden-surface precondition。若以后要重开方法搜索，必须同时有 H2 source/boundary identity、convention-controlled support、held-out calibration、source-pinned R62 runner/fixture/controls、独立 prior-art separation 和 OWNER_ACCEPTED immutable provenance。
+
+R106 保留的最低 benchmark 反证是已知 K、metric depth、三相机的 plane/cube：地图用 `T_cv F`，查询用 raw `T_cv` 加 `F_3`，命中和深度必须完全一致；不一致就拒绝 DCR。R107 正在做只读 red-team，检查 frame、depth unit、intrinsic 假设。Gate 0、flags 和执行限制不变。
+
+## 2026-09-24 R106接续：R105 对 hidden-surface 方法搜索执行 END-LINE
+
+R105 最后审查 GSCR/RCA，发现它仍是 robust SLAM、数据关联和 validation gate；SceneSense、SC-Explorer、INGRID、3D-Belief 已覆盖近邻。C8 H2 约定未解决，且没有 hidden-surface precondition，因此没有可辩护的新 geometry-aware mechanism。对 hidden-surface 方法搜索执行 END-LINE；DCR 只保留为 conditional benchmark。R106 只做 closure/reopen-criteria audit，不继续改名式脑暴。
+
+执行状态不变：VMem fresh SHA 通过，历史 no-data smoke 成功；Gate 0 仍缺 owner-reviewed packet 和 supported command，保持 `NO_COMMAND_AVAILABLE`。保持 `new_method_validated=false`、`novelty_authorization=NONE`，不读受保护 C8/eval，不跑 GPU/Slurm/S103/S132/GRC。
+
+## 2026-09-24 R105接续：R104 否决 CGLR 的方法创新主张
+
+R104 的结论是：CGLR 现在只能作为 reveal-event benchmark / falsification harness，不能作为 Gate 0 的方法创新。R103 的 byte-identical base input、typed transition、hash/provenance 和 owner/H2 gate 是评估卫生要求，不是新 operator、representation、loss 或 information pathway。Edicho/CWM 的 local-counterfactual editing，加上 PERSIST/INGRID 与 generic belief/completion，已覆盖主要机制组成。
+
+R105 正从尚未解释的 C8 geometry/convention failure 做一次有界 pivot：最多提出一个真正区别于 residual transfer、local editing、counterfactual masking、persistent 3-D state 和 generic completion 的候选；若没有可防守候选，就记录 END-LINE。没有实现或 GPU 实验。
+
+执行状态不变：VMem fresh SHA 通过，历史 no-data smoke 成功；Gate 0 仍缺 owner-reviewed runner/manifest/fixture/H2 packet/OWNER_ACCEPTED artifact/supported command，保持 `NO_COMMAND_AVAILABLE`。保持 `new_method_validated=false`、`novelty_authorization=NONE`，不读受保护 C8/eval、不跑 GPU/Slurm/S103/S132/GRC。
+
+## 2026-09-24 R104接续：R103发现 access-equivalence 致命混淆
+
+R103 发现 equal-area + same-noise 仍不能保证 CGLR、append-only、generic、global、shuffle 各 arm 收到完全相同的 residual、provenance、support、visibility、threshold 和 budget。必须逐事件 materialize camera-keyed computed visibility，让所有 arm 共享 byte-identical `base_input_sha256`，只能改变 typed transition rule；加入 measured / wrong-component controls，并保留完整 event-vector 与分通道分母。base mismatch、复制 expected visibility、target leakage 时 `REJECT_FIXTURE`；完整签名相同则 `REJECT_NON_IDENTIFIABLE`；零分母 `UNTESTABLE_NO_DENOMINATOR`；H2 失败优先 `H2_UNIDENTIFIABLE`。
+
+这只是协议修正，不是结果或创新证明。VMem fresh SHA 和历史 smoke 仍通过；Gate 0 仍缺 owner-reviewed synthetic packet 与 supported command，保持 `NO_COMMAND_AVAILABLE`。R104 Innovation Agent 正在做 prior-art/novelty boundary audit，继续保持 `new_method_validated=false`、`novelty_authorization=NONE`，不读受保护 C8/eval，不跑 GPU。
+
+## 2026-09-24 R103接续：R102保留一个可证伪候选，但没有验证创新
+
+R102 完成了只读反证。当前只保留 conditional Reveal-Intervention/CGLR causal locality，形式是 synthetic-first CPU discriminator，不是已验证方法。协议必须用同随机种子 paired pre/post、等面积 reveal/untouched difference-in-differences、至少两个 future cameras，并加入 append-only、generic、global、no-reveal、shuffled-mask controls；H1/H2 pose identity 先过，另外报告 RGB/geometry、held-out scale、support precision 和 outside-support update mass。若 H2 不唯一、与 generic control 一样、只在 reveal camera 有收益、出现 leakage/global drift/shuffled-mask gain，或 H1 修复后效果消失，立即否决机制。
+
+执行阻塞未变：VMem 五个文件 fresh SHA 已通过，历史 no-data smoke 已成功；Gate 0 仍缺 source-pinned runner、code manifest、fixture、boundary/H2 packet、OWNER_ACCEPTED artifact 和 supported command，保持 `NO_COMMAND_AVAILABLE`。R103 Innovation Agent 正在做针对 S131/R46 的 hostile protocol audit。保持 `new_method_validated=false`、`novelty_authorization=NONE`，不读受保护 C8/eval，不跑 GPU/Slurm/S103/S132/GRC。
+
+## 2026-09-24 R102 心跳核对：VMem 已重新验证，Gate 0 仍被 owner packet 阻塞
+
+心跳文本里的“VMem transfer partial / remote SHA 未验证”是旧起始状态，已被新证据覆盖。刚在 `slogin-01` 对 `/home/yliutz/gwm_weights_20260915` 的五个文件逐一重新计算 SHA256，全部与可信的 20260916 receipt 一致；记录在 `work/S101_env_bootstrap/VMEM_FRESH_REVERIFY_20260924.json`。没有匹配 `gwm_weights` 的传输进程，发现的两个 rsync 属于其他项目。VMem 状态是 `COMPLETE_SHA_VERIFIED`，历史 no-data model-load smoke 已成功，不重跑。
+
+Gate 0 仍为 `NO_COMMAND_AVAILABLE`。R100 仍未找到 source-pinned runner、code manifest、canonical fixture、boundary/H2 packet、`OWNER_ACCEPTED` identity artifact 或 supported CPU command。下一步必须由 owner 提供并独立审阅完整 synthetic-only packet，再重跑 R92/R100 readiness checklist。之前不读受保护 C8/eval、不实现或执行 runner、不提交 GPU/Slurm、不跑 S103/S132/GRC、不改 receipt 或 flags。
+
+已启动 R102 有界 Innovation Agent 周期：把 stale-start 矛盾与 C8 pose-convention 失败线索结合，对 Reveal-Intervention/CGLR 做一次 failure-driven 反证；必须给出可证伪 CPU discriminator 或有理由否决，并写清 competing explanation 与 kill condition。保持 `new_method_validated=false`、`novelty_authorization=NONE`，GRC-Memory 仍未验证。
+
+## 2026-09-24 R100完成，当前阻塞为 owner synthetic-only packet
+
+R100 在 local/remote 都找不到 runner、source_code_manifest、fixture、boundary_artifact、
+h2_source_manifest、h2_packet、OWNER_ACCEPTED review_artifact 或 supported command；S131
+仍是 CONTRACT_ONLY。唯一 owner action：提供并独立审阅一份完整 synthetic-only packet，包含
+source-pinned runner/code manifest、canonical fixture、实测 boundary/H2 + R70 packet 和
+R89 OWNER_ACCEPTED review artifact。packet 到达后先重跑 R92/R100 readiness checklist，
+之前保持 `NO_COMMAND_AVAILABLE`。
+
+没有打开 C8/eval，没有执行命令或实验，没有提交 GPU/Slurm，receipt 和 flags 未改变。
+VMem SHA 已验证，旧 model-load smoke 已完成；远程调度有 missing-slurm-module 警告，空队列
+不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R99通过，R100做 post-audit readiness recheck
+
+R99 通过 local/remote provenance guard；两侧均具备 exact set、fresh nonce、content digest、
+fsync/atomic rename、read-only/no-follow、reopen/full digest 和 readiness recheck，且不替代
+R89/R70。R100 只读重新检查是否出现 source-pinned runner/code manifest、canonical fixture、
+boundary/H2 artifacts、OWNER_ACCEPTED identity artifact 或 supported command；每项标记
+absent 或 present-but-unverified，不打开 C8/evaluation data。
+
+当前仍为 `NO_COMMAND_AVAILABLE`。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度
+仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。
+保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R98完成，R99做 local/remote symmetric provenance 最终审查
+
+R98 已把 remote freeze 对称应用到 local：fixed manifest-set no-follow staging、逐文件 hash、
+fsync file/parent、atomic content-addressed rename、read-only/no-follow final root、reopen/full
+digest，之后只使用 final root。R99 比较两侧协议，检查 mutation/replay/TOCTOU，并再次确认
+runner/H2 artifact 仍不存在；只读，不授权执行。
+
+R99 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍
+有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R97发现 local snapshot freeze 缺口，R98对称修正
+
+R97 审查通过 remote freeze，但发现 local staging 没有明确 fsync、atomic rename 到 final
+content-addressed root、read-only/no-follow 和 rename 后 reopen/digest。R98 只把 remote
+freeze 对称应用到 local；attestation/readiness 只能使用 final frozen root，任何 mutation
+变成 `REMOTE_PROVENANCE_UNVERIFIED`/ `STALE`。
+
+R98 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`，同步不授权执行。VMem SHA 已验证，旧 model-load smoke 已
+完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401
+没有独立 memo。保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R96完成，R97审查 immutable snapshot attestation
+
+R96 已补上 R95 的 TOCTOU：local/remote content-addressed immutable snapshot、fresh nonce、
+O_NOFOLLOW regular-file reopen、atomic rename/fsync、read-only frozen root、post-freeze
+full digest，以及 owner/H2 readiness 前 local final digest。任何 mutation 都变成
+`REMOTE_PROVENANCE_UNVERIFIED`/ `STALE`。R97 只做最终敌对审查，并检查与 R89 owner hash/
+R70 H2 的边界。
+
+R97 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+同步不授权执行，当前仍为 `NO_COMMAND_AVAILABLE`。VMem SHA 已验证，旧 model-load smoke 已
+完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401
+没有独立 memo。保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R95发现 TOCTOU，R96设计 immutable snapshot 修正
+
+R95 审查 R94 的 nonce、集合、hash、link/path、replay 和 ledger append 防护都通过，但发现
+hash-time staging 到 readiness 使用之间有 TOCTOU。R96 只补充 local/remote content-addressed
+immutable snapshot、atomic rename/fsync、`O_NOFOLLOW` reopen、freeze-before-readiness 和
+使用前 final digest；任何 mutation 变成 `REMOTE_PROVENANCE_UNVERIFIED`/ `STALE`。该 guard
+不能替代 R89 owner hash 或 R70 H2。
+
+R96 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+同步仍不授权执行，当前保持 `NO_COMMAND_AVAILABLE`。VMem SHA 已验证，旧 model-load smoke
+已完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401
+没有独立 memo。保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R94完成，R95审查 stale-remote provenance guard
+
+R94 针对 R93 的 stale remote 发现设计 `provenance_sync_attestation_v1`：local fresh nonce
+和完整 path/role/hash manifest，remote 做 exact-set/no-extra/no-missing、symlink/hard-link、
+size/SHA 检查，local 最终比 nonce、set digest、role/path/hash。stale、partial、content/role
+swap、replay、ledger append 都保持 unverified/stale。R95 只读审查 TOCTOU/replay，并确认
+它不能替代 R89 owner hash 或 R70 H2 gate。
+
+R95 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+`SYNC_VERIFIED` 不等于科学 ready；当前仍为 `NO_COMMAND_AVAILABLE`。VMem SHA 已验证，旧
+model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra
+因环境错误/HTTP 401 没有独立 memo。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+
+## 2026-09-24 R93确认远程 stale records，R94设计 provenance guard
+
+R93 核对 local/remote 后确认全部 runner、fixture、H2、owner artifact 和 command 都不存在；
+S131 只有 CONTRACT_ONLY。另发现 remote 在同步前缺少 R70/R89/R92 等当前 protocol memo，
+同步后十个指定文件的 local/remote SHA 一致。R94 只读设计一个 manifest-set 完整性和
+whole-ledger digest/status guard，防止 stale/partial checkout 被误认成 owner/H2 ready。
+同步本身不构成科学验证或执行授权。
+
+R94 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，
+空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R92完成，R93核对实际 local/remote artifact
+
+R92 已按依赖排序 owner/H2 acceptance checklist。R93 只读核对 local 和 remote 文件系统中的
+source-pinned runner/code manifest、canonical fixture、boundary_artifact、h2_source_manifest、
+实测 h2_packet、OWNER_ACCEPTED review_artifact/manifest_identity 和 supported CPU command。
+每项必须标记 absent、present-but-unverified 或 verified，且不打开真实 C8/evaluation data。
+
+R93 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，
+空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R91确认缺 artifact，R92整理 owner/H2 acceptance checklist
+
+R91 静态确认 `NO_COMMAND_AVAILABLE` 仍成立：缺少 source-pinned CGLR runner/code manifest、
+OWNER_ACCEPTED review_artifact/manifest_identity、canonical fixture、h2_source_manifest、
+实测 h2_packet、boundary_artifact 和 supported command；S131 只有 schema/design。R92 只读
+整理这些先决条件的顺序、证据路径、owner action 和 failure/stop 分支，不授权实现。
+
+R92 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，
+空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R90通过，R91检查 owner/H2 就绪和替换攻击
+
+R90 通过 canonical_json_v2 最终审查。R91 现在只读检查真实 owner-reviewed tuple、独立 H2
+source manifest、boundary artifact、受支持 runner 和 executable fixture 是否出现，并建立
+content/role/path/owner-hash/duplicate-key/Unicode/decimal 替换攻击矩阵，标明应该在哪个阶段拒绝。
+没有真实证据前仍是 `NO_COMMAND_AVAILABLE`。
+
+R91 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，
+空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R89完成，R90做 canonical_json_v2 最终审查
+
+R89 已完成 canonical_json_v2：strict UTF-8/no BOM、duplicate-key 拒绝、Unicode scalar
+直接 bytes、固定 lowercase control escape、禁止 slash escape/unpaired surrogate、
+arbitrary-precision finite plain decimal、递归 key 排序、固定 separators；owner subject
+唯一是删除 `/owner_gate/review_artifact_sha256` 后的完整 review_artifact canonical bytes。
+R90 只做最终敌对审查，检查 determinism、self-hash deletion 和 phase precedence。
+
+R90 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、实际 OWNER_ACCEPTED tuple
+或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有
+missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。
+保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R88发现 parser canonicalization 歧义，R89修正
+
+R88 审查确认 R87 的 UTF-8、字段、self-hash、owner subject 和阶段顺序通过，但 string
+escaping 与 decimal rendering 仍可能依赖 runtime。R89 只定义 normative `canonical_json_v2`：
+Unicode scalar 直接 UTF-8；control char 用固定 lowercase escape；禁止 slash escape 和
+unpaired surrogate；number 用 arbitrary-precision finite decimal，禁止 NaN/Inf/-0/exponent，
+只有一种 plain decimal 表示。此 canonical bytes 是唯一 owner-hash subject；phase 0 先重算，
+phase 2 保留 `H2_UNIDENTIFIABLE` 优先级。
+
+R89 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、实际 OWNER_ACCEPTED tuple
+或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有
+missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。
+保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R87完成，R88做 canonical owner-hash 最终审查
+
+R87 已完成 R86 的最小修正：严格 UTF-8/no-BOM、duplicate-key 拒绝、唯一顶层
+`/manifest_identity` 且恰好七字段、禁止 unknown/alias；owner hash 唯一绑定去掉 self-hash
+字段后的完整 review_artifact，使用递归 key 排序、固定 separators/escaping 和有限 JSON
+number。phase 0 检查 parse/tuple/owner hash/code identity，phase 2 独立重算 code/H2/boundary
+并和 tuple、H2 packet 比较，失败先返回 `H2_UNIDENTIFIABLE`。
+
+R88 只做最终敌对审查，不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，
+不运行 S103/S132/GRC。当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、
+实际 OWNER_ACCEPTED tuple 或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke 已
+完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401
+没有独立 memo。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+
+## 2026-09-24 R86发现 canonical owner-hash 歧义，R87修正
+
+R86 审查确认 R85 的身份、重算和失败优先级都通过，但 “exact canonical tuple bytes” 没有
+定义 duplicate JSON key、UTF-8、canonical owner hash subject，可能让 parser 接受隐藏替换。
+R87 只补充可执行规则：严格 UTF-8、拒绝 duplicate key；唯一的 `/manifest_identity` 只能有
+七个字段，禁止 unknown/alias；owner hash 唯一绑定去掉 self-hash 字段后的整个 review_artifact，
+使用递归 key 排序、固定 separators、有限 JSON 数和禁止 alternate encoding。phase 0/2 都要
+检查并重算，失败先返回 `H2_UNIDENTIFIABLE`。
+
+R87 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、实际 OWNER_ACCEPTED tuple
+或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有
+missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP 401 没有独立 memo。
+保持 `new_method_validated=false`、`novelty_authorization=NONE`。
+
+## 2026-09-24 R85完成，R86做 identity tuple 最终审查
+
+R85 已完成 R84 的最小修正：owner-reviewed `manifest_identity` 现在机器可读地绑定
+runner code、H2 source 和 H2 boundary 三个身份，并固定 schema/role/root/path。phase 0
+先检查 owner binding、类型、placeholder、交叉标记和 code/H2 非相等；phase 2 独立重算
+三个 hash，再和 tuple 及 H2 packet 比较，任何失败先返回 `H2_UNIDENTIFIABLE`。
+
+R86 只做最终敌对审查，不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，
+不运行 S103/S132/GRC。当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、
+实际 OWNER_ACCEPTED tuple 或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke
+已完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra 因环境错误/HTTP
+401 没有独立 memo。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+
+下一步：核对 R86；若 PASS，请求 owner review 和真实 H2 证据；未满足前不得进入 fixture、
+C8 replay、GPU/Slurm、S103、S132 或 GRC。
+
+## 2026-09-24 R84发现内容替换风险，R85补充 identity tuple
+
+R84 审查确认 R83 的两套 manifest 分离、phase-2 H2-first 和四根目录 guard 都通过，但
+仅靠不同路径和字段仍不能证明内容没有被替换。R85 只做设计修正：增加 owner 审核的机器可读
+`manifest_identity` 元组，包含 code、H2 source、boundary 三个 hash 及 schema/role；
+phase 0 校验 owner binding、类型、root/path 和 code/H2 非相等，phase 2 独立重算并同时和
+tuple、R70 H2 packet 比较，任何不匹配先返回 `H2_UNIDENTIFIABLE`。
+
+R85 不实现、不执行、不读真实 C8、不改 receipt，不提交 GPU/Slurm，不运行 S103/S132/GRC。
+当前仍为 `NO_COMMAND_AVAILABLE`：没有受支持 runner、fixture、OWNER_ACCEPTED identity
+artifact 或独立实测 H2 packet。VMem SHA 已验证，旧 model-load smoke 已完成；远程调度仍有
+missing-slurm-module 警告，空队列不能确认；Astra 因 HTTP 401 没有独立 memo。保持
+`new_method_validated=false`、`novelty_authorization=NONE`。
+
+下一步：核对 R85；若通过，请请求 owner review 和真实 H2 证据；未满足前不得进入 fixture、
+C8 replay、GPU/Slurm、S103、S132 或 GRC。
+
+## 2026-09-24 R83完成，R84审查 code/H2 身份边界
+
+R83 已完成 R82 要求的身份拆分：`runner_code_manifest_sha256` 只绑定不可变 runner code root；
+新的 `h2_source_manifest.json` 单独绑定 producer/boundary 文件，并在 phase 2 与 H2 packet、
+boundary artifact 交叉验证。身份不一致必须先返回 `H2_UNIDENTIFIABLE`，不能进入
+fixture_context、hash 或 arm score。
+
+R84 正在做一次有界敌对审查，只审设计，不实现、不执行、不读真实 C8、不改 receipt，不提交
+GPU/Slurm，不运行 S103/S132/GRC。当前仍是 `NO_COMMAND_AVAILABLE`：没有受支持的 runner、
+executable fixture、OWNER_ACCEPTED artifact 或独立实测 H2 packet。VMem SHA 已验证，旧
+model-load smoke 已完成；远程调度仍有 missing-slurm-module 警告，空队列不能确认；Astra
+因 HTTP 401 没有独立 memo。保持 `new_method_validated=false`、
+`novelty_authorization=NONE`。
+
+下一步：核对 R84；若 PASS，请求 owner 审查的 source-pinned runner 和真实独立 H2 证据；
+若 REVISE，只做最小设计修正。未满足前不得进入 fixture、C8 replay、GPU/Slurm、S103、
+S132 或 GRC。
+
+## 2026-09-24 R82发现 code/H2 manifest 混淆，R83分离设计
+
+R82 发现 R81 把 runner code manifest 错当成 R70 H2 的 source_manifest。R83 将分离
+runner_code_manifest_sha256 与 h2_source_manifest.json：后者绑定真实 producer/boundary
+文件，在 phase 2 与 H2 packet、boundary artifact 一起验证，失败先返回
+H2_UNIDENTIFIABLE，再进行 fixture_context/hash。NO_COMMAND_AVAILABLE 继续有效。
+
+下一步需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R81完成，R82做 source manifest 最终审查
+
+R81 已消除 source manifest 自哈希：files[] 覆盖 code root 中除 manifest 自身外的每个
+regular code/docs 文件一次，manifest 只做结构校验，重算后的 hash 绑定 R70 H2 和
+fixture.owner_gate。所有 runner 路径仍不存在，NO_COMMAND_AVAILABLE 有效。R82 只做最终
+审查，不实现不执行。
+
+下一步需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R80发现 source manifest 自哈希歧义，R81修正
+
+R80 发现 source_code_manifest 如果把自身列入 files[]，即使只排除 supplied hash，也会
+形成 size/digest 自引用。R81 将规定 files[] 精确覆盖 code_root 中除 manifest 自身外的
+所有 regular code/docs 文件一次；manifest 自身只做结构校验，并绑定 source_manifest_sha256。
+NO_COMMAND_AVAILABLE 保持有效。
+
+下一步仍需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load
+smoke 已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401
+没有独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R79完成，R80做四根目录最终审查
+
+R79 已完成四根目录 audit-hook 设计：stdlib/code 只读、source manifest 覆盖 code、
+input 仅 synthetic JSON/text、output 原子新建并只写 receipt；每次 open 记录 role，
+拒绝 symlink/traversal/alias/hard-link/socket/process/GPU/dynamic-import 逃逸。所有
+runner 路径仍不存在，NO_COMMAND_AVAILABLE 有效。R80 只做最终审查，不实现不执行。
+
+下一步需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R78发现 audit-hook root 矛盾，R79修正设计
+
+R78 发现 runner 必须读取 immutable code 和 Python stdlib，但 R77 audit hook 把 input/
+output 之外所有 open 都拒绝，导致 runner 无法启动。R79 将加入四类 root allowlist：
+stdlib、immutable code、input、new output；code/stdlib 只读，每次 open 记录 role，并拒绝
+symlink/traversal/alias/hard-link/socket/process/GPU/dynamic-import 逃逸。NO_COMMAND_AVAILABLE
+保持有效。
+
+下一步仍需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load
+smoke 已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP
+401 没有独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R77完成，R78做 runner 计划最终审查
+
+R77 已完成 R76 的七项设计修正：canonical fixture/owner 绑定、完整 S131 role/cardinality、
+分离 source/protocol manifest、原子输出和 partial receipt、stdlib/audit/path 防护、九类
+hash 域与 marker 拒绝、future-query/target/output 边界。所有 runner 路径仍不存在，
+NO_COMMAND_AVAILABLE 继续有效。R78 只做最终敌对审查，不实现不执行。
+
+下一步需要经过审查的 source-pinned runner 和实际 owner/H2 证据。VMem SHA 已通过，旧
+model-load smoke 已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。
+Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、novelty_authorization=NONE
+保持不变。
+
+## 2026-09-24 R76否决 runner 计划，R77修正设计
+
+R76 在实现前否决了 runner 计划，要求 canonical fixture 内绑定 owner_gate、完整 S131
+role/cardinality 检查、source_code_manifest 与 protocol_manifest 分离、原子输出和
+partial receipt、可执行 stdlib/audit/path 防护、九类 hash 域与 marker 拒绝，以及
+输入/输出角色边界。R77 只修订未来计划，不实现、不执行；所有路径仍不存在。
+
+下一步需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R75完成，R76审查 runner 计划
+
+R75 只完成未来 runner 的 source-pinned 实现计划：JSON-only 不可变输入输出、R62 五阶段、
+R70/R72 owner/H2 gate、CPU/no-data 防护、terminal code 和 review deliverable。所有路径
+都标为 future proposed，当前没有 runner 或 fixture。R76 只审查范围和隐式数据/GPU访问，
+不实现不执行。
+
+下一步需要经过审查的 runner 和实际 owner/H2 证据。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R74发现 NO_COMMAND_AVAILABLE，R75规划 runner
+
+R74 静态检索确认仓库没有支持 CGLR/R62/R70/R72 的 synthetic CPU runner、fixture、
+OWNER_ACCEPTED artifact 或实测 H2 packet；S131 只是 CONTRACT_ONLY，S26/S82/S85 不能
+替代。当前状态是 NO_COMMAND_AVAILABLE。R75 只规划 source-pinned runner 的实现边界，
+不实现、不执行、不读真实 C8。
+
+下一步需要实际 owner/H2 证据和经过审查的 dedicated runner。VMem SHA 已通过，旧
+model-load smoke 已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。
+Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R73通过，R74查找 synthetic CPU 命令
+
+R73 typed-H2 最终审查 PASS：numeric/regex、marker precedence、双向误差重算、R70 chain、
+H2 顺序和 synthetic-only 范围没有具体缺陷。执行仍被阻断，因为实际 OWNER_ACCEPTED
+review evidence 和独立实测 H2 packet 尚不存在。R74 只查找以后可用的 synthetic CPU
+conformance 命令，不执行、不读真实 C8、不伪造证据。
+
+VMem SHA 已通过，旧 model-load smoke 已完成；调度检查有 missing-slurm-module 警告，
+队列为空不能确认。Astra 因 HTTP 401 没有独立 memo。new_method_validated=false、
+novelty_authorization=NONE 保持不变。
+
+## 2026-09-24 R72完成，R73做最终 typed-H2 审查
+
+R72 已将 H2 executable fields 固定为 numeric error/threshold，要求从双向 boundary check
+实测替换，并拒绝 angle-bracket、描述性字符串和非法 hash。R73 只检查 regex/type、
+marker precedence、实测误差重算、owner chain 和 synthetic-only 范围，不执行 fixture/GPU。
+
+OWNER_ACCEPTED review 和独立 H2 provenance 仍缺。VMem SHA 已通过，旧 model-load smoke
+已完成；调度检查有 missing-slurm-module 警告，队列为空不能确认。Astra 因 HTTP 401 没有
+独立 memo。new_method_validated=false、novelty_authorization=NONE 保持不变。
+
 ## 2026-09-24 R71发现 typed H2 schema 缺口，R72修正已分配
 
 R71 发现 R70 的 canonical H2 JSON 仍把 max_abs_error 和 hash 示例写成描述性字符串。
