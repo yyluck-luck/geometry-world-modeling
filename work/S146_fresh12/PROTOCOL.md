@@ -36,3 +36,13 @@ of a chess-derived fixed rule (not absence from VMem/CUT3R pretraining).
   history fractions, discovery R_2seed_hindsight and local-vs-global with nulls recomputed, two-invocation sealing).
 - Budget: cap 24 RTX 3090 GPU-hours (generation ≤ 1,344 four-target outputs before deduplication + step A + replay).
   Queue: S143 confirmation → S144 → S145 → S146 (CPU preparation in parallel). INELIGIBLE/INVALID_ASSAY ≠ negative result.
+
+## Amendment 1 (2026-10-11 ≈ 00:00 UTC; before any S146 generation or target scoring) — convention gate
+The implemented convention gate required both residuals to be finite, stricter than R265 §3 ("fail on non-finite, tied or
+ambiguous diagnostics" for the decision). Result on the five fixed H frames: apt1/kitchen gl 32.3 px vs native 109.8 px;
+apt2/luke gl 140.3 px vs native non-finite; office2/5a gl 15.6 px vs native non-finite. A non-finite residual means no scale
+makes that convention consistent. Corrected rule, fixed now: the winner's residual must be finite and the loser's must be
+non-finite or ≥ 2× the winner's; AND an independent bank-only agreement check on a second fixed frame set per room — the
+first window's recent C frames C[s0, s0+5, …, s0+20] (bank frames, never targets) — must select the same convention
+under the same rule. Disagreement or failure → that room INELIGIBLE (no substitution). The 12-Scenes README does not state
+the axis convention; the release's pose family is that of 7-Scenes, for which the same detector selected gl (S139).
