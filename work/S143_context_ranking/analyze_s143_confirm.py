@@ -1,43 +1,76 @@
 #!/usr/bin/env python3
-"""S143 Amendment-1 confirmation: selections frozen on discovery seeds 3-6, evaluated on fresh seeds 42,7,1,2.
-usage: analyze_s143_confirm.py <POOL.json> <WARP_SCORES.json> <discovery gen scores> <fresh gen scores> <POSE_ARMS.json> <out.json>"""
-import json, sys
+"""S143 fresh-seed block (Amendment 1, corrected by Amendment 2 / codex R261). Descriptive, not formal confirmation.
+Selections frozen from discovery seeds 3-6 (c_W from warps; c_G_disc = argmax of the 4-seed discovery mean; r_disc = best
+discovery rule), saved with input hashes BEFORE any fresh contrast is computed; then evaluated on fresh seeds 42,7,1,2
+with seed panels as replication units.
+usage: analyze_s143_confirm.py <POOL.json> <WARP_SCORES.json> <discovery scores> <fresh scores> <POSE_ARMS.json> <out.json>"""
+import hashlib, json, math, sys
 from pathlib import Path
 import numpy as np
-POOL, WS, GD, GF, PA = [json.loads(Path(p).read_text()) for p in sys.argv[1:6]]; OUT = Path(sys.argv[6])
+paths = [Path(p) for p in sys.argv[1:6]]; OUT = Path(sys.argv[6])
+POOL, WS, GD, GF, PA = [json.loads(p.read_text()) for p in paths]
 pair = {r['window_id']: r['pair'] for r in PA['rows']}; DISC, FRESH = (3, 4, 5, 6), (42, 7, 1, 2)
-def table(G, seeds):
+
+
+class InvalidAssay(Exception):
+    pass
+
+
+def check(cond, msg):
+    if not cond: raise InvalidAssay(msg)
+
+
+def table(G, seeds, name):
+    expected = {(w['window_id'], s['set_id'], sd) for w in POOL['windows'] for s in w['sets'] for sd in seeds}
     t = {}
     for r in G['runs'].values():
-        wid, sid = r['ctx_key'].split('__', 1)
-        if r['seed'] in seeds:
-            assert (wid, sid, r['seed']) not in t; t[(wid, sid, r['seed'])] = r['psnr_db']
+        wid, sid = r['ctx_key'].split('__', 1); k = (wid, sid, r['seed'])
+        check(k not in t, f'{name}: duplicate cell {k}')
+        check(k in expected, f'{name}: unexpected cell {k}')
+        check(r['psnr_db'] is not None and math.isfinite(r['psnr_db']), f'{name}: non-finite {k}')
+        t[k] = r['psnr_db']
+    check(set(t) == expected, f'{name}: missing {len(expected - set(t))} cells')
     return t
-td, tf = table(GD, DISC), table(GF, FRESH)
-rows, panel = [], {s: [] for s in FRESH}
+
+
+try:
+    wids = [w['window_id'] for w in POOL['windows']]; check(len(set(wids)) == len(wids) == 24, 'window ids')
+    for w in POOL['windows']:
+        for ru in range(1, 7):
+            check(sum(ru in s['rules'] for s in w['sets']) == 1, f"rule {ru} not mapped to exactly one set in {w['window_id']}")
+        for s in w['sets']:
+            check(math.isfinite(WS['windows'][w['window_id']]['sets'][s['set_id']]['warp_psnr']), 'non-finite Q_W')
+    td, tf = table(GD, DISC, 'discovery'), table(GF, FRESH, 'fresh')
+except InvalidAssay as e:
+    OUT.write_text(json.dumps({'status': 'INVALID_ASSAY', 'reason': str(e)}, indent=1) + '\n'); print('INVALID_ASSAY:', e); sys.exit(2)
+
+# ---- 1. frozen selections from discovery only (saved before any fresh contrast) ----
+sel = {}
 for w in POOL['windows']:
     wid = w['window_id']; S = w['sets']; rmin = {s['set_id']: min(s['rules']) for s in S}
-    assert all((wid, s['set_id'], sd) in td for s in S for sd in DISC) and all((wid, s['set_id'], sd) in tf for s in S for sd in FRESH)
     qw = {s['set_id']: WS['windows'][wid]['sets'][s['set_id']]['warp_psnr'] for s in S}
-    qd = {s['set_id']: np.mean([td[(wid, s['set_id'], sd)] for sd in DISC]) for s in S}
+    qd = {s['set_id']: float(np.mean([td[(wid, s['set_id'], sd)] for sd in DISC])) for s in S}
     pick = lambda q: min((-q[k], rmin[k], k) for k in q)[2]
-    cw, cg = pick(qw), pick(qd)
-    rows.append({'window_id': wid, 'c_W': cw, 'c_G_disc': cg, 'sets': S,
-                 'C': float(np.mean([tf[(wid, cg, sd)] - tf[(wid, cw, sd)] for sd in FRESH]))})
-    for sd in FRESH: panel[sd].append(tf[(wid, cg, sd)] - tf[(wid, cw, sd)])
-# discovery global rule
-def set_of(row, rule): return next(s['set_id'] for s in row['sets'] if rule in s['rules'])
-r_disc = max(range(1, 7), key=lambda ru: (np.mean([np.mean([td[(r['window_id'], set_of(r, ru), sd)] for sd in DISC]) for r in rows]), -ru))
-for r in rows:
-    r['Gc'] = float(np.mean([tf[(r['window_id'], r['c_G_disc'], sd)] - tf[(r['window_id'], set_of(r, r_disc), sd)] for sd in FRESH]))
-def boot(v):
-    rng = np.random.default_rng(0); b = [rng.choice(v, len(v)).mean() for _ in range(10000)]; return [float(x) for x in np.percentile(b, [2.5, 97.5])]
-C = np.array([r['C'] for r in rows]); Gc = np.array([r['Gc'] for r in rows])
-pm = {p: float(np.mean([r['C'] for r in rows if pair[r['window_id']] == p])) for p in sorted(set(pair.values()))}
-seed_means = {sd: float(np.mean(v)) for sd, v in panel.items()}
-res = {'C': {'mean': float(C.mean()), 'ci95': boot(C), 'pair_means': pm, 'fresh_seed_panel_means': seed_means},
-       'window_specific_vs_disc_rule': {'rule': r_disc, 'mean': float(Gc.mean()), 'ci95': boot(Gc)},
-       'frac_windows_cG_equals_cW': float(np.mean([r['c_W'] == r['c_G_disc'] for r in rows])), 'rows': rows}
-res['CONFIRMED'] = bool(C.mean() >= 0.20 and res['C']['ci95'][0] > 0 and sum(v > 0 for v in seed_means.values()) >= 3 and sum(v < 0 for v in pm.values()) < 2)
+    sel[wid] = {'c_W': pick(qw), 'c_G_disc': pick(qd), 'rule_to_set': {ru: next(s['set_id'] for s in S if ru in s['rules']) for ru in range(1, 7)}}
+r_disc = max(range(1, 7), key=lambda ru: (np.mean([np.mean([td[(w, sel[w]['rule_to_set'][ru], sd)] for sd in DISC]) for w in wids]), -ru))
+frozen = {'selections': sel, 'r_disc': r_disc, 'input_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths[:3]}}
+(OUT.parent / (OUT.stem + '_FROZEN_SELECTIONS.json')).write_text(json.dumps(frozen, indent=1) + '\n')
+
+# ---- 2. fresh evaluation: seed panels are the replication unit ----
+def block(alt_of):
+    per_seed = {sd: float(np.mean([tf[(w, sel[w]['c_G_disc'], sd)] - tf[(w, alt_of(w), sd)] for w in wids])) for sd in FRESH}
+    per_win = np.array([np.mean([tf[(w, sel[w]['c_G_disc'], sd)] - tf[(w, alt_of(w), sd)] for sd in FRESH]) for w in wids])
+    pm = {p: float(np.mean([per_win[i] for i, w in enumerate(wids) if pair[w] == p])) for p in sorted(set(pair.values()))}
+    rng = np.random.default_rng(0); b = [rng.choice(per_win, len(per_win)).mean() for _ in range(10000)]
+    m = float(np.mean(list(per_seed.values())))
+    gate = bool(m >= 0.20 and sum(v > 0 for v in per_seed.values()) >= 3 and sum(v < 0 for v in pm.values()) < 2)
+    return {'mean': m, 'seed_panel_means': per_seed, 'pair_means': pm,
+            'window_bootstrap_ci95_descriptive': [float(x) for x in np.percentile(b, [2.5, 97.5])], 'gate_descriptive': gate}
+res = {'status': 'VALID', 'note': 'descriptive fresh-seed block; seed panels are the unit; no formal seed-level inference',
+       'C_frozen4_discovery': block(lambda w: sel[w]['c_W']),
+       'local_vs_global': dict(block(lambda w: sel[w]['rule_to_set'][r_disc]), rule=r_disc),
+       'frac_windows_cG_equals_cW': float(np.mean([sel[w]['c_W'] == sel[w]['c_G_disc'] for w in wids]))}
+res['FRESH_SEED_GATE'] = res['C_frozen4_discovery']['gate_descriptive']
+res['FRESH_SEED_GATE_LOCAL'] = res['local_vs_global']['gate_descriptive']
 OUT.write_text(json.dumps(res, indent=1, default=str) + '\n')
-print(json.dumps({k: v for k, v in res.items() if k != 'rows'}, indent=1, default=str))
+print(json.dumps(res, indent=1, default=str))

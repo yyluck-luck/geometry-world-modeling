@@ -72,3 +72,21 @@ discovery result, to avoid outcome-dependent sampling).
   mean_w [Q_G^fresh(c_G_disc) − Q_G^fresh(set of r_disc)].
 - Reported separately from the discovery primary; no pooled re-selection over 8 seeds counts as confirmation. Seeds share
   windows and the chess panel stays exposed (seed-level, not scene-level, replication).
+
+## Amendment 2 (2026-10-10 ≈ 20:00 UTC; before any S143 score exists) — codex R261 corrections to Amendment 1
+`work/agents/CODEX_R261_S143_AMENDMENT_REJECTION.md` (adopted).
+1. The fresh-seed block is **descriptive, not a formal confirmation**. Estimand renamed `C_frozen4_discovery`: with the
+   discovery choices frozen, the expected paired PSNR advantage of c_G_disc over c_W on these fixed windows. Seed panels
+   are the replication unit: D_s = mean_w[Q_G(w, c_G_disc, s) − Q_G(w, c_W, s)] for each fresh seed s. Reported gate
+   `FRESH_SEED_GATE` (descriptive): mean_s D_s ≥ +0.20 dB, ≥ 3 of 4 D_s > 0, no negative pair mean in 2 of 3 pairs. The
+   window bootstrap interval is reported but carries no seed-generalization guarantee; no formal seed-level inference
+   is claimed with four panels. It does not retroactively confirm the two-seed discovery estimand R.
+2. Local-versus-global (window-specific structure): the same per-seed panel means and pair means for
+   c_G_disc vs the discovery-best rule r_disc, with its own descriptive status `FRESH_SEED_GATE_LOCAL`.
+3. Fail-closed validation: exact expected (window, unique set, seed) keys for discovery (3–6) and fresh (42, 7, 1, 2)
+   score tables, no extra or duplicate cells, finite values, each rule mapped to exactly one set per window; otherwise the
+   analysis stops with INVALID_ASSAY (not a negative result).
+4. Descriptive Spearman correction in `analyze_s143.py`: average ranks for ties, undefined (null) for constant ranks.
+5. Provenance: the confirmation chain refuses to run if `gen_s141.py`, `s141_common.py`, `score_s140.py` or the plan differ
+   from the discovery run's recorded hashes; c_W, c_G_disc and r_disc are saved with input hashes before fresh contrasts.
+6. Wording: fresh seeds are "disjoint from S143 discovery; previously used in S139 (H800)".

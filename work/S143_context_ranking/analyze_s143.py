@@ -100,11 +100,18 @@ res['decision'] = {
 res['decision']['CLAIM_SHORTFALL'] = all(res['decision'][k] for k in ('a_R_above_threshold', 'b_ci_lower_positive', 'c_no_negative_pair_in_2_of_3', 'd_warp_spread_ge_1dB'))
 
 # ---- descriptive ----
-def spearman(a, b):
-    ra, rb = np.argsort(np.argsort(a)), np.argsort(np.argsort(b))
+def avg_rank(x):  # Amendment 2 (R261): average ranks for ties
+    x = np.asarray(x, float); order = np.argsort(x, kind='stable'); r = np.empty(len(x)); i = 0
+    while i < len(x):
+        j = i
+        while j + 1 < len(x) and x[order[j + 1]] == x[order[i]]: j += 1
+        r[order[i:j + 1]] = (i + j) / 2.0; i = j + 1
+    return r
+def spearman(a, b):  # undefined (None) for constant ranks
+    ra, rb = avg_rank(a), avg_rank(b)
     return float(np.corrcoef(ra, rb)[0, 1]) if len(a) > 2 and ra.std() > 0 and rb.std() > 0 else None
 sp = [spearman(QW[ii], QG[ii].mean(1)) for ii in idx]
-res['spearman_QW_QG_within_window'] = {'mean': float(np.mean([s for s in sp if s is not None])), 'per_window': sp}
+res['spearman_QW_QG_within_window'] = {'mean': (float(np.mean([s for s in sp if s is not None])) if any(s is not None for s in sp) else None), 'per_window': sp}
 res['per_rule_means'] = {}
 for ru in range(1, 7):
     ci = [next(i for i in idx[wi] if ru in cells[i][3]) for wi in range(nW)]
