@@ -12,7 +12,7 @@ We audit a frozen VMem configuration (arXiv:2506.18903; repository `runjiali-rl/
 (arXiv:2501.12387) to build a surfel memory and retrieve four context frames for a camera-conditioned video diffusion
 model. On exposed windows from two RGB-D Scenes v2 sequences:
 
-1. **Three integration defects.** (a) dust3r's MST initialisation silently replaces failed PnP solves with identity
+1. **Three integration defects** (two in the released code path, one in this project's own harness). (a) dust3r's MST initialisation silently replaces failed PnP solves with identity
    poses. The similarity registration then scales the surfel cloud ×300–900 or ×0.02–0.08 in 8 of 14 windows.
    (b) The project's priming schedule never put 3 of 12 bank frames into memory. (c) VMem's CUT3R fork detaches the
    depth maps, so its 400-iteration global alignment never optimises depth.
@@ -31,14 +31,16 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
    +1.2 dB above native static. Given aligned target-pose warps as context, VMem reproduces them (+0.000 dB) and adds no
    refinement.
 
-6. **On held-out cross-sequence revisits (7-Scenes chess, pre-registered), retrieval works but generation does not use it.**
+6. **On held-out cross-sequence revisits (7-Scenes chess, pre-registered), retrieval finds useful views, but the
+   generator does not turn them into a detectable gain.**
    VMem retrieves history-sequence frames (88.5%) whose warp is +1.46 dB [+0.91, +2.05] better than the recent static
    frames' warp. Yet VMem's generation from them is −0.18 dB [−0.52, +0.15] vs static. A warp of the same contexts
    beats VMem by +3.21 dB in 24/24 windows. By SSIM, generating from retrieved history is even worse than from
    recent frames (−0.019 [−0.032, −0.006]).
 7. **A training-free consumption fix does not replicate.** Warp-guided sampling (RePaint-style, §7.2) gains +0.79 dB
-   over the warp on the development panel, but +0.02 dB [−0.10, +0.13] on held-out chess. It reliably polishes covered
-   pixels (+0.24 dB); hole filling helps only where contexts show the missing content.
+   over the warp on the development panel, but +0.02 dB [−0.10, +0.13] on held-out chess. It reliably polishes pixels
+   the warp covers (+0.24 dB); in pixels the warp does not cover it helps on the development panel and hurts on chess
+   (why is an untested hypothesis).
 
 Items 1–5 come from an exposed development panel (2 scenes, 14–16 windows, 4 targets each). Item 6 comes from a scene
 held out from this project's design decisions (§7).
@@ -175,11 +177,16 @@ holes. A re-implemented loop with no intervention reproduces VMem's sampler byte
 on the development panel (2 seeds). RePaint s = 0.5 was selected by a pre-registered rule: +0.785 dB [+0.56, +1.00]
 over the warp, 15/16 windows, almost all from holes (+1.85 dB). On held-out chess (24 windows, 8 seeds, mem_vmem
 contexts) it gives **+0.020 dB [−0.095, +0.134]** (PSNR, primary: no material change) and +0.025 SSIM. Covered pixels
-improve (+0.24 dB, 23/24); holes get worse (−0.24 dB). The frozen generator can polish aligned content and fill
-context-visible gaps, but not genuinely unobserved regions.
+improve (+0.24 dB, 23/24); pixels the warp does not cover get worse (−0.24 dB). One hypothesis, not tested: uncovered
+pixels on the development panel are mostly crop bands that the contexts do show, while on chess they are regions no
+context observed. "Uncovered" means uncovered by this warp, not a certified disocclusion label.
 
 ## 8. Limitations
 One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
+Chess is held out from design decisions up to S139, but S140/S141 reuse its windows, so it is no longer an untouched set.
+"No detectable gain" (NO_MATERIAL_CHANGE) is not equivalence, and "no benefit" is not "no use": conditioning can change
+outputs without improving them. Shared intrinsics across arms do not guarantee that all arms are equally affected by
+calibration error. S140 rejects one sampling intervention; it does not show that only fine-tuning can help.
 PSNR, plus SSIM in §6–7 (the two metrics disagree on chess for warp vs generator). Seed blocks are confounded with hardware. CPU stage-1 evidence (§2.1, §3) is not byte-identical
 to GPU runs. Forward splatting leaves cracks. The 7-Scenes RGB focal (585, documented) is approximate. Pretraining
 exposure of CUT3R/VMem to these datasets is not verified.
@@ -195,6 +202,16 @@ exposure of CUT3R/VMem to these datasets is not verified.
 `work/S133_scale_debug`, `work/S134_tacc_fixed_map`, `work/S135_scale_init`, `work/S136_repaired_memory`,
 `work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`. Each holds PROTOCOL.md, RESULT.md,
 scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audit (owner-approved): `work/agents/SELF_AUDIT_S139.md`. One-page state: `CURRENT_STATUS.md`.
+
+## Related work found by retrieval (codex R253; independently re-verified)
+The S139 pattern is partly precedented. MemLearner (arXiv:2606.31734) reports a memory-query module whose conditioning is
+ignored. Spatia (arXiv:2512.15716, Table 4) finds reference frames alone do not help while projections do. VMem's own
+paper (arXiv:2506.18903, Table 4, RealEstate10K cycle trajectories, K = 4) reports 14.82 dB PSNR with surfel retrieval vs
+13.27 dB with camera-distance selection, unlike our chess result (mem_vmem − mem_pose −0.18 dB). The regimes differ
+(regenerating its own imagined frames on cycle trajectories vs predicting real frames on cross-sequence revisits with a
+32-frame bank); the difference is not explained here. IDs, titles and the quoted table values were re-checked against
+arXiv by the main agent. Warp-conditioned generation itself is established
+(ViewCrafter arXiv:2409.02048, MultiDiff arXiv:2406.18524, GEN3C arXiv:2503.03751, AnyRecon arXiv:2604.19747).
 
 ## References
 - VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory. arXiv:2506.18903.

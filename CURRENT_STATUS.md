@@ -58,10 +58,16 @@ no-op, the TF32 hardware dependence, and the 8-seed memory − static (−0.22 d
 memory claim must beat.
 
 ## Next candidates (each needs a protocol file)
-- Finish the write-up: `docs/report/TECHNICAL_REPORT_20261010.md` (v2, includes S139).
-- S139 self-audited (`work/agents/SELF_AUDIT_S139.md`); codex optional from 2026-10-10 (owner).
-- Science on this frozen consumer is exhausted. Retrieval/memory repairs (S133–S139) and a sampling-side fix (S140)
-  do not make it use geometry. Fine-tuning the generator would be the next step, outside a frozen-model study.
+- **S141 running (TACC gpu13):** generator fine-tuning, A = attention LoRA, B = A + warp-latent input branch, 10000 steps
+  each on 6 other 7-Scenes scenes; evaluation on the S139 chess windows (protocol 7cefe20e + Amendment 1, a67cb62a).
+  Fidelity gate passed; A trained; B finishing; evaluation chains running.
+- After S141: one outcome-selected follow-up at most (codex R255: E1 alignment test if B beats the warp, E2 trained
+  warp-as-context if B ties/loses, E3 pixel fusion if A improves but B loses), then write up.
+- Wording (codex R253/R255): "retrieved views do not become a detectable generated-frame gain", not "the generator does
+  not use memory"; the frozen-consumer study rejected the tested interventions, it is not exhaustive. Ignored-memory
+  has precedent (MemLearner 2606.31734); warp conditioning is established (ViewCrafter, MultiDiff, AnyRecon).
+- Research ideation/rejection/retrieval goes through codex gpt-6-astra (ultra) from 2026-10-10 (owner); run checks
+  can be self-audited.
 
 ## Closed or retired
 Duplicate-slot / NMS tuning; hidden-surface / support-scarcity predictors; generic selector scores (crowded:
