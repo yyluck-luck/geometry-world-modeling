@@ -18114,3 +18114,13 @@ Convention gl-native +0.89 dB [0.25,1.47]; repaired memory vs static -0.06 [-1.1
 证据：`work/S136_repaired_memory/RESULT.md`；`work/S137_geometry_baselines/RESULT.md`；`work/S138_depth_opt/RESULT.md`；`work/agents/CODEX_R250_S133_S137_AUDIT.md`；`CURRENT_STATUS.md`
 
 下一步：Held-out long-trajectory scene with revisits/occlusion; deterministic retrieval; write-up
+
+## 2026-10-10T11:48:41+08:00 · S139 cross-sequence revisit test (7-Scenes chess, pre-registered, H800+3090, 576 generations) and report v2
+
+Primary mem_vmem - static_recent -0.181 dB [-0.518,+0.145] NO_MATERIAL_CHANGE; history-favourable -0.334 vs recent-favourable +0.126 (prediction not supported). Retrieved history frames are geometrically better (B2 warp +1.46 dB [+0.91,+2.05]; surfel selection beats pose-only +0.46 in history-favourable windows) but the generator does not use them (warp beats VMem generation from the same contexts by +3.21 dB, 24/24). codex R251 blocked by capacity (7 attempts).
+
+时间依据：current clock；记录写入于 2026-10-10T03:48:41+00:00。
+
+证据：`work/S139_crossseq_revisit/RESULT.md`；`docs/report/TECHNICAL_REPORT_20261010.md`；`CURRENT_STATUS.md`
+
+下一步：External review of S139 and report v2 when codex capacity returns; consumption-side intervention if continuing

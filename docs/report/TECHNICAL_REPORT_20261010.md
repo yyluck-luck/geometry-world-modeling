@@ -1,6 +1,6 @@
 # What a Frozen Surfel-Memory Video World Model Actually Does: Integration Defects, a Known-Pose Scale Fix, and Geometric Baselines
 
-Technical report v2, 2026-10-10 (DRAFT — §7 pending S139). HKUST CSIT6910 independent project.
+Technical report v2, 2026-10-10. HKUST CSIT6910 independent project.
 Supersedes the interpretation, not the record, of `TECHNICAL_REPORT_20260918.md`, which is kept unchanged.
 Project flags: `new_method_validated=false`, `novelty_authorization=NONE`.
 
@@ -30,8 +30,13 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
    +1.2 dB above native static. Given aligned target-pose warps as context, VMem reproduces them (+0.000 dB) and adds no
    refinement.
 
-All numbers are on an exposed development panel (2 scenes, 14–16 windows, 4 targets each). §7 reports a pre-registered
-cross-sequence revisit test on 7-Scenes chess (held out from this project's design decisions).
+6. **On held-out cross-sequence revisits (7-Scenes chess, pre-registered), retrieval works but generation does not use it.**
+   VMem retrieves history-sequence frames (88.5%) whose warp is +1.46 dB [+0.91, +2.05] better than the recent static
+   frames' warp. Yet VMem's generation from them is −0.18 dB [−0.52, +0.15] vs static. A warp of the same contexts
+   beats VMem by +3.21 dB in 24/24 windows.
+
+Items 1–5 come from an exposed development panel (2 scenes, 14–16 windows, 4 targets each). Item 6 comes from a scene
+held out from this project's design decisions (§7).
 
 ---
 
@@ -135,13 +140,27 @@ reproduces the grey (−5.4 dB). Filling uncovered pixels with VMem's own output
 (−1.3 dB, also in SSIM). B2 is a direct geometric predictor, not a capacity-matched generator control. These contrasts
 are diagnostic.
 
-## 7. Cross-sequence revisits on 7-Scenes chess (S139) — PENDING
-Pre-registered (`work/S139_crossseq_revisit/PROTOCOL.md`, frozen before content access). Three history → current
-sequence pairs, 24 windows. The bank holds 20 frames from another traversal plus 12 recent frames. Arms: static_recent,
-mem_vmem (repaired memory) and mem_pose (pose-only NMS). 8 seeds. Results to be added.
+## 7. Cross-sequence revisits on 7-Scenes chess (S139)
+Pre-registered (`work/S139_crossseq_revisit/PROTOCOL.md`, committed before any content was read). Three history →
+current sequence pairs, 24 windows. Bank = 20 frames from another traversal + 12 recent frames; targets 2–3.5 s ahead.
+Repaired memory (gl, KPS, full coverage). Arms: static_recent, mem_vmem, mem_pose (pose-only NMS). 8 seeds, both sites;
+576 generations. The KPS residual selects gl in 3/3 pairs. 16/24 windows are history-favourable by pose.
+
+| contrast | Δ PSNR (dB) | 95% CI | windows + | verdict |
+|---|---|---|---|---|
+| **mem_vmem − static_recent** (primary) | **−0.181** | [−0.518, +0.145] | 10/24 | NO_MATERIAL_CHANGE |
+| — history-favourable / recent-favourable | −0.334 / +0.126 | | | prediction not supported |
+| mem_vmem − mem_pose | −0.182 | [−0.405, +0.038] | 9/24 | NO_MATERIAL_CHANGE |
+| mem_pose − static_recent | +0.002 | [−0.363, +0.324] | 13/24 | NO_MATERIAL_CHANGE |
+
+Used geometrically, the same contexts tell a different story. A B2 warp from mem_vmem contexts beats one from static
+contexts by +1.46 [+0.91, +2.05] (history-favourable +1.95 [+1.24, +2.68]). In history-favourable windows the
+surfel-visibility selection beats pose-only selection (+0.46 [+0.02, +0.94]). The warp beats VMem's own generation from
+the same contexts by +3.21 [+2.84, +3.58] (24/24). With a 32-frame bank, retrieval finds genuinely useful long-range
+history, which it did not need to on the 12-frame panel. The generator does not turn it into better frames.
 
 ## 8. Limitations
-One frozen consumer. Two exposed scenes for §2–6 and one held-out scene for §7. 14–24 windows, 4 targets each.
+One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
 PSNR, plus SSIM in §6. Seed blocks are confounded with hardware. CPU stage-1 evidence (§2.1, §3) is not byte-identical
 to GPU runs. Forward splatting leaves cracks. The 7-Scenes RGB focal (585, documented) is approximate. Pretraining
 exposure of CUT3R/VMem to these datasets is not verified.

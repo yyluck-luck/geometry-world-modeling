@@ -1,4 +1,4 @@
-# Current status — read this first (updated 2026-10-09, after S133–S138 and codex R250 audit)
+# Current status — read this first (updated 2026-10-10, after S133–S139 and codex R250 audit)
 
 One page. Everything else in the repository is supporting evidence or history.
 
@@ -36,6 +36,12 @@ far better than the frozen generator.
    the 400-iteration alignment is a no-op for depth. Re-enabling optimisation *hurts*: scale shrinks (|log r| worse
    in 12/14 with KPS; downstream −0.20 dB). The right repair is KPS with no depth optimisation.
 
+10. **Held-out cross-sequence revisits (S139, 7-Scenes chess, pre-registered).** With 32-frame banks drawing on another
+   traversal, VMem retrieves history frames (88.5%) that are geometrically better: their warp is +1.46 dB
+   [+0.91, +2.05] above the static frames' warp. Yet its generation from them ties static (−0.18 dB [−0.52, +0.15]),
+   and the history-favourable stratum is not better (−0.33). The bottleneck is the generator's cross-view use of
+   context, not retrieval.
+
 ## Earlier results still standing
 - Duplicate-slot repair: closed negative, −0.016 dB vs a +0.20 dB bar (`docs/report/TECHNICAL_REPORT_20260918.md`).
 - Slot 0 is a coordinate/scale intervention (`work/S130_C8_diagnostics/results_slot_job609617/RESULT.md`).
@@ -47,9 +53,10 @@ no-op, the TF32 hardware dependence, and the 8-seed memory − static (−0.22 d
 memory claim must beat.
 
 ## Next candidates (each needs a protocol file)
-- A held-out scene with longer trajectories and real revisits/occlusion, where visibility (not pose) could matter.
-- Deterministic retrieval (geodesic in fp64 / TF32 off) to remove the hardware dependence.
-- A write-up: diagnostic + KPS as a small method contribution, with the geometric baselines.
+- Finish the write-up: `docs/report/TECHNICAL_REPORT_20261010.md` (v2, includes S139).
+- External review of S139 (codex R251/R252 blocked by model capacity on 2026-10-10).
+- If continuing the science: a consumption-side intervention (e.g. geometry-aligned context injection) is the only
+  remaining lever; retrieval/memory repairs are exhausted on this consumer.
 
 ## Closed or retired
 Duplicate-slot / NMS tuning; hidden-surface / support-scarcity predictors; generic selector scores (crowded:
@@ -66,6 +73,6 @@ numbers and the S137 arithmetic. It refuted several wordings (now corrected), fo
 
 ## Where things are
 Stage results `work/S133_scale_debug/`, `work/S134_tacc_fixed_map/`, `work/S135_scale_init/`,
-`work/S136_repaired_memory/`, `work/S137_geometry_baselines/`, `work/S138_depth_opt/` (each has PROTOCOL.md + RESULT.md) · report
+`work/S136_repaired_memory/`, `work/S137_geometry_baselines/`, `work/S138_depth_opt/`, `work/S139_crossseq_revisit/` (each has PROTOCOL.md + RESULT.md) · report v2 `docs/report/TECHNICAL_REPORT_20261010.md` · report
 `docs/report/TECHNICAL_REPORT_20260918.md` · ledger `RESEARCH_MEMORY.md` (newest first) · events
 `research_events.jsonl` · rules `AGENTS.md`, `RESEARCH_PRINCIPLES.md`.

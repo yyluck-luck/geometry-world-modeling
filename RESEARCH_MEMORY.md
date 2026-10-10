@@ -1,3 +1,12 @@
+## 2026-10-10 S139 完成:保留场景跨序列回访——检索有效,生成器用不上
+
+**设计**:7-Scenes chess(内容接触前冻结 protocol,commit 27fbfef1),3 对序列(历史→当前),24 窗口;记忆库 = 另一条序列 20 帧 + 近期 12 帧;修复后的记忆(gl+KPS+全覆盖);arm:static_recent / mem_vmem / mem_pose;8 seed(H800+3090),576 次生成。KPS 约定检测 gl 3/3。
+**结果**:主对比 mem_vmem − static_recent **−0.18 dB [−0.52,+0.15]**(10/24,无实质变化);历史有利窗口 −0.33、近期有利 +0.13(与预测相反)。mem_vmem − mem_pose −0.18;mem_pose − static +0.00。
+**关键对照**:同样的 context 做几何投影(B2):mem_vmem 比 static 高 **+1.46 dB [+0.91,+2.05]**(历史有利 +1.95),检索到的历史帧几何上确实更有用;历史有利窗口里 surfel 检索比纯位姿还好 +0.46 [+0.02,+0.94]。但 VMem 生成用不上:B2 比 VMem 同 context 生成高 +3.21 dB,24/24。
+**结论**:瓶颈不在检索/记忆,在生成器跨视角使用 context。检索/记忆修复在这个模型上已经用尽;若继续,唯一杠杆在消费端。
+**未完成**:codex R251 预审 7 次全部 capacity 失败,S139 外部复核待补。报告 v2 `docs/report/TECHNICAL_REPORT_20261010.md` 已含 S139。
+证据:`work/S139_crossseq_revisit/RESULT.md`、`results/S139_ANALYSIS.json`、`results/S139_BASELINE_CONTRASTS.json`。
+
 ## 2026-10-09 S136/S137/S138 完成 + codex R250 审查:约定 +0.89 dB;修好的记忆仍无增益;几何基线 +5 dB;VMem 从不优化深度
 
 **S136(8 seed,H800+3090,568 次生成)**:harness 32/32 与封存 S111 哈希一致。Q1 约定 gl−native **+0.89 dB [+0.25,+1.47]**(12/16;两区块 +0.83/+0.95)→ 改进,C9 的 +1.0 门槛未达。Q2 修复记忆(gl+KPS+分批,门槛 14/14、corr 0.785)− static −0.06 [−1.15,+0.94] 无实质变化;Q3 修复−原始 −0.15;Q4 原始记忆−static(native)−0.22 [−0.82,+0.39] 不确定(报告里 2 seed 的 −0.485 不再成立)。
