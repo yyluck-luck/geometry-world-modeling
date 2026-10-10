@@ -41,6 +41,10 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
    over the warp on the development panel, but +0.02 dB [−0.10, +0.13] on held-out chess. It reliably polishes pixels
    the warp covers (+0.24 dB); in pixels the warp does not cover it helps on the development panel and hurts on chess
    (why is an untested hypothesis).
+8. **Fine-tuning the generator (§7.3): domain adaptation helps, memory still does not, warp conditioning failed.** An
+   attention LoRA trained on six other 7-Scenes rooms improves held-out chess by +0.33 dB [+0.08, +0.59] (memory contexts)
+   and RGB-D Scenes by +1.16 dB. After adaptation, retrieved memory is still worse than recent frames (−0.33 dB). Adding
+   the target-pose warp as an extra input (established warp+mask conditioning) did not work: −3.56 dB below the warp.
 
 Items 1–5 come from an exposed development panel (2 scenes, 14–16 windows, 4 targets each). Item 6 comes from a scene
 held out from this project's design decisions (§7).
@@ -181,6 +185,30 @@ improve (+0.24 dB, 23/24); pixels the warp does not cover get worse (−0.24 dB)
 pixels on the development panel are mostly crop bands that the contexts do show, while on chess they are regions no
 context observed. "Uncovered" means uncovered by this warp, not a certified disocclusion label.
 
+### 7.3 Fine-tuning the generator (S141)
+Two LoRA variants (rank 16 on every attention projection; base frozen) trained in parallel on two RTX 3090s, 10000 steps
+each, on 2000 fixed clips from 7-Scenes fire, heads, office, pumpkin, redkitchen and stairs (chess and RGB-D Scenes
+excluded). A: LoRA only. B: A plus a zero-initialised convolution that feeds the VAE latent of the B2 warp and its coverage
+at the target frames into the first UNet layer (a ViewCrafter/MultiDiff-style recipe; no method novelty is claimed).
+With adapters at initialisation both reproduce the base model byte-for-byte. Evaluation on the S139 chess windows,
+seeds 3–6, RTX 3090, against the base outputs of the same seeds:
+
+| contrast | Δ PSNR (dB) | 95% CI | windows + | verdict | Δ SSIM |
+|---|---|---|---|---|---|
+| **A_mem − base_mem** (primary A) | **+0.330** | [+0.078, +0.585] | 17/24 | IMPROVES | +0.018 |
+| A_static − base_static | +0.448 | [+0.096, +0.822] | 17/24 | IMPROVES | +0.007 |
+| A_mem − A_static | −0.332 | [−0.669, +0.006] | 5/24 | INCONCLUSIVE | −0.008 |
+| **B_mem − B2 warp** (primary B) | **−3.558** | [−3.913, −3.201] | 0/24 | WORSENS | +0.073 |
+| RGB-D Scenes A_static − base (exposed, 16 windows) | +1.162 | [+0.612, +1.729] | 13/16 | IMPROVES | +0.039 |
+| RGB-D Scenes B_static − base | −2.617 | [−3.425, −1.828] | 0/16 | WORSENS | −0.057 |
+
+Domain mismatch is a real factor: adaptation on other rooms of the same sensor improves the held-out room and transfers to
+a different dataset. It does not make retrieved history useful: after adaptation the recent-frame context still wins.
+B neither copies nor refines its warp. Its outputs are no closer to the warp than the base model's, and its loss is in
+low-frequency layout and colour. On chess it has the highest SSIM of all arms (smoother outputs), while on RGB-D it is
+worse than the base model in both metrics. The monitor denoising loss stayed flat for both variants, so the A gain shows
+up in sampling, not in the training objective's validation curve. One run per variant; chess was examined in S139/S140.
+
 ## 8. Limitations
 One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
 Chess is held out from design decisions up to S139, but S140/S141 reuse its windows, so it is no longer an untouched set.
@@ -200,7 +228,7 @@ exposure of CUT3R/VMem to these datasets is not verified.
 
 ## 10. Artifact index
 `work/S133_scale_debug`, `work/S134_tacc_fixed_map`, `work/S135_scale_init`, `work/S136_repaired_memory`,
-`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`. Each holds PROTOCOL.md, RESULT.md,
+`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`, `work/S141_finetune`. Each holds PROTOCOL.md, RESULT.md,
 scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audit (owner-approved): `work/agents/SELF_AUDIT_S139.md`. One-page state: `CURRENT_STATUS.md`.
 
 ## Related work found by retrieval (codex R253; independently re-verified)

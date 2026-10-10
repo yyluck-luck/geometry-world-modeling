@@ -67,6 +67,20 @@ in uncovered pixels; versus base_mem it is −0.20 (covered) / −0.42 dB (uncov
   the difference-in-differences is +0.36 [+0.03, +0.70]. Exploratory, and it comes with B's overall PSNR loss.
 - **S142 branch:** PRIMARY_B = WORSENS → per the frozen S142 table, no E1/E2/E3; write up.
 
+## Exploratory output diagnostics (after all verdicts; `results/tacc/eval/OUTPUT_DIAGNOSTICS.json`, `diag_outputs_s141.py`)
+Chess mem_vmem contexts, 24 windows × seeds 3–6, framewise means:
+| arm | mean signed error (grey levels) | PSNR | low-pass PSNR (σ 4 px) | high-freq. energy / target | PSNR to the warp |
+|---|---|---|---|---|---|
+| base_mem | +0.73 | 11.34 | 12.10 | 0.947 | 11.46 |
+| A_mem | −7.96 | 11.66 | 12.34 | 0.757 | 11.88 |
+| B_mem | +3.78 | 11.07 | 11.67 | 0.714 | 11.50 |
+| B2 warp | −3.73 | 14.65 | 16.58 | 1.472 | — |
+- B is no closer to the warp than the frozen base is (11.50 vs 11.46 dB): the warp branch had little effect on the output;
+  B neither copies nor refines the warp. Its PSNR deficit is in low frequencies (layout/colour: 11.67 vs base 12.10).
+- Both adapters remove high-frequency energy (0.76, 0.71 of the target's vs 0.95 for base), consistent with higher SSIM
+  from fewer invented fine textures. A also darkens the output by ~8 grey levels on average while gaining PSNR.
+- These are descriptive; no mechanism was tested.
+
 ## Limits
 One training run per variant, one seed; 10000 LoRA steps on 2000 clips; chess examined earlier in S139/S140 (held out from
 training, not untouched); window CIs on three dependent sequence pairs; training memory contexts were pose-only (eval
