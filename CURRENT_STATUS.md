@@ -63,9 +63,13 @@ memory claim must beat.
   RGB-D Scenes +1.16 dB. B (A + warp-latent input branch) fails: B_mem − warp **−3.56 dB** (WORSENS; highest SSIM on chess,
   worse than base on RGB-D). After adaptation memory is still not useful: A_mem − A_static −0.33 dB. Self-audit passes.
 - **S142 not run:** frozen branch table, PRIMARY_B = WORSENS → write up.
-- **S143 running (TACC, since 19:15 UTC, ≈ 3 h):** exploratory context-ranking audit from codex ideation R259 (rejection
-  R260): 6 context packages per window; does the set the warp prefers match the set VMem prefers (cross-fitted 2-seed
-  hindsight selector, frozen equal-mean null simulations)? Replay gate passed.
+- **S143 discovery done (exploratory, exposed chess; `work/S143_context_ranking/RESULT.md`):** the context set the warp
+  prefers leaves a held-seed generation shortfall R = +0.320 dB [+0.19, +0.46] (above the frozen null 95th percentile 0.291);
+  per rule, the generator does best with nearest-4 (11.94 dB) and worst with VMem's own retrieval (11.19); the warp does
+  best with coverage-greedy (15.41). Fresh-seed descriptive block (Amendments 1–3) running.
+- **Queued on TACC:** S144 (adapter A × S140 warp-guided sampler, development gate first), S145 (B branch ablations),
+  S146 (project-fresh replication on 12-Scenes apt1/kitchen, apt2/luke, office2/5a: nearest-4 vs VMem retrieval; staged,
+  conventions verified gl in all rooms by two bank-only checks; CPU pool/warps in progress).
 - Next: S143 analysis; report v3 (S141 + S143); write-up. Other codex ideas on file: in-loop robust data-consistency (R257
   P), multiscale residual fusion and test-time memory-in-weights (R258), GEN3C second consumer on H800 (R259).
 - Wording (codex R253/R255): "retrieved views do not become a detectable generated-frame gain", not "the generator does

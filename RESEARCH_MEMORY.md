@@ -1,3 +1,10 @@
+## 2026-10-11 S143 发现期 + S144–S146 排队(codex 新想法落地)
+
+**S143(探索性,chess 已暴露)**:同一历史库里 6 种 context 集合。warp 最偏好的集合 vs 生成器最偏好的集合:R_2seed_hindsight **+0.320 dB [+0.19,+0.46]**,高于冻结的 null 95% 分位 0.291 → 结论成立(探索性)。逐规则:生成器最喜欢 nearest-4(相机最近的 4 帧,不做 NMS,11.94 dB),最差的是 VMem 自己的检索(11.19,比随机还低);warp 最喜欢覆盖率贪心(15.41)。新 seed 描述性复核在跑(Amendment 3 预注册了 r_disc vs mem_vmem/c_W/static)。
+**codex 流程**:R262(S141 结果后构想)→ S144(A + S140 采样 2×2 析因,先过开发门)、S145(B 分支消融);R264(S143 后构想)→ S146:在 12-Scenes 的三个从未用过的房间上复现"nearest-4 胜过 VMem 检索"(R265 否定轮修正后冻结;apt2/bed 位姿缺失按元数据规则换成 apt2/luke;两次仅用 bank 帧的约定检验都选 gl)。
+**排队**:S143 复核 → S144 → S145 → S146(TACC 两张 3090 不停);SuperPOD 拒绝 SSH、gpu14 驱动不匹配。
+证据:`work/S143_context_ranking/`、`work/S144_A_wgs/`、`work/S145_B_diagnosis/`、`work/S146_fresh12/`、`work/agents/CODEX_R262..R265_*.md`。
+
 ## 2026-10-10 S141 生成器微调完成:领域 LoRA 有效(+0.33 dB,且迁移到 RGB-D +1.16 dB);warp 条件变体失败;微调后记忆仍无用
 
 **设计**:TACC gpu13 两张 3090 并行,7-Scenes 另外 6 个场景 2000 个固定 clip,各训练 10000 步。A = 全部 attention 的 LoRA r16;B = A + 零初始化的 warp 隐变量/覆盖率输入分支。chess(S139 窗口)和 RGB-D Scenes 都不参与训练。协议 7cefe20e + Amendment 1 a67cb62a(评估前根据 codex R254 加固;新增探索臂 B_static)。

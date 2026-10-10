@@ -18144,3 +18144,13 @@ PRIMARY A +0.330 dB [+0.078,+0.585] IMPROVES (RGB-D +1.16); PRIMARY B -3.558 dB 
 证据：`work/S141_finetune/RESULT.md`；`work/S141_finetune/results/S141_ANALYSIS.json`；`work/agents/SELF_AUDIT_S141.md`；`work/S143_context_ranking/PROTOCOL.md`
 
 下一步：finish S143 (~22:30 UTC), analyze with frozen nulls; then report v3 and write-up
+
+## 2026-10-11T07:48:10+08:00 · S143 discovery analysis; S144/S145/S146 designed with codex (R262-R265), frozen, implemented and queued on TACC
+
+S143 R_2seed_hindsight +0.320 dB [+0.19,+0.46] above null95 0.291 (exploratory): generator prefers nearest-4, VMem retrieval worst; S146 fresh 12-Scenes rooms staged, conventions gl by two bank-only checks
+
+时间依据：current clock；记录写入于 2026-10-10T23:48:10+00:00。
+
+证据：`work/S143_context_ranking/results/S143_ANALYSIS.json`；`work/S146_fresh12/PROTOCOL.md`
+
+下一步：S143 fresh-seed block (~02:00 UTC), then S144 dev gate, S145, S146
