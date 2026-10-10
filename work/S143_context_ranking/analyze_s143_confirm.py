@@ -66,10 +66,23 @@ def block(alt_of):
     gate = bool(m >= 0.20 and sum(v > 0 for v in per_seed.values()) >= 3 and sum(v < 0 for v in pm.values()) < 2)
     return {'mean': m, 'seed_panel_means': per_seed, 'pair_means': pm,
             'window_bootstrap_ci95_descriptive': [float(x) for x in np.percentile(b, [2.5, 97.5])], 'gate_descriptive': gate}
+def block_rule(ru, alt_of):   # Amendment 3: like block(), with the frozen rule's set in place of c_G_disc
+    per_seed = {sd: float(np.mean([tf[(w, sel[w]['rule_to_set'][ru], sd)] - tf[(w, alt_of(w), sd)] for w in wids])) for sd in FRESH}
+    per_win = np.array([np.mean([tf[(w, sel[w]['rule_to_set'][ru], sd)] - tf[(w, alt_of(w), sd)] for sd in FRESH]) for w in wids])
+    pm = {p: float(np.mean([per_win[i] for i, w in enumerate(wids) if pair[w] == p])) for p in sorted(set(pair.values()))}
+    rng = np.random.default_rng(0); b = [rng.choice(per_win, len(per_win)).mean() for _ in range(10000)]
+    m = float(np.mean(list(per_seed.values())))
+    return {'mean': m, 'seed_panel_means': per_seed, 'pair_means': pm, 'wins': int((per_win > 0).sum()),
+            'window_bootstrap_ci95_descriptive': [float(x) for x in np.percentile(b, [2.5, 97.5])],
+            'gate_descriptive': bool(m >= 0.20 and sum(v > 0 for v in per_seed.values()) >= 3 and sum(v < 0 for v in pm.values()) < 2)}
 res = {'status': 'VALID', 'note': 'descriptive fresh-seed block; seed panels are the unit; no formal seed-level inference',
        'C_frozen4_discovery': block(lambda w: sel[w]['c_W']),
        'local_vs_global': dict(block(lambda w: sel[w]['rule_to_set'][r_disc]), rule=r_disc),
        'frac_windows_cG_equals_cW': float(np.mean([sel[w]['c_W'] == sel[w]['c_G_disc'] for w in wids]))}
+# Amendment 3: r_disc versus rule 3 (mem_vmem), c_W, rule 1 (static) on fresh seeds (descriptive)
+res['rule_contrasts'] = {f'r_disc(rule {r_disc}) - rule 3 (mem_vmem)': block_rule(r_disc, lambda w: sel[w]['rule_to_set'][3]),
+                         f'r_disc(rule {r_disc}) - c_W': block_rule(r_disc, lambda w: sel[w]['c_W']),
+                         f'r_disc(rule {r_disc}) - rule 1 (static)': block_rule(r_disc, lambda w: sel[w]['rule_to_set'][1])}
 res['FRESH_SEED_GATE'] = res['C_frozen4_discovery']['gate_descriptive']
 res['FRESH_SEED_GATE_LOCAL'] = res['local_vs_global']['gate_descriptive']
 OUT.write_text(json.dumps(res, indent=1, default=str) + '\n')

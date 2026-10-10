@@ -90,3 +90,15 @@ discovery result, to avoid outcome-dependent sampling).
 5. Provenance: the confirmation chain refuses to run if `gen_s141.py`, `s141_common.py`, `score_s140.py` or the plan differ
    from the discovery run's recorded hashes; c_W, c_G_disc and r_disc are saved with input hashes before fresh contrasts.
 6. Wording: fresh seeds are "disjoint from S143 discovery; previously used in S139 (H800)".
+
+## Amendment 3 (2026-10-10 ≈ 22:50 UTC; after the discovery analysis, before any fresh-seed output is scored or read)
+Discovery (`results/S143_ANALYSIS.json`) showed, descriptively, that the generator's best single rule was rule 4
+(nearest-4, chosen in both folds) and that VMem's own retrieval (rule 3, mem_vmem) had the lowest mean generated PSNR of the
+six rules. Because this observation came from the discovery data, it is checked only on the fresh seeds (42, 7, 1, 2),
+added here before any fresh score exists (fresh generation running; no scorer has touched it):
+- Additional descriptive fresh-seed contrasts, using r_disc frozen from discovery (the rule with the best 4-seed discovery
+  mean): (i) r_disc − rule 3 (mem_vmem, VMem's retrieval), (ii) r_disc − c_W (warp-selected set), (iii) r_disc − rule 1
+  (static_recent). Same descriptive gate and reporting as Amendment 2 (seed-panel means as units: mean ≥ +0.20 dB,
+  ≥ 3 of 4 panels positive, no negative pair mean in 2 of 3; window bootstrap descriptive). SSIM reported alongside.
+- These are exploratory and cannot be promoted to confirmation of a deployable retriever (same exposed panel, seed-level
+  replication only). Implemented in `analyze_s143_confirm.py` (block `rule_contrasts`).
