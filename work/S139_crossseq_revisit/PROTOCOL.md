@@ -60,3 +60,19 @@ appear in a bank (C frames < s+60; H is another sequence).
 
 ## Stopping
 Report after scoring. No window, pair or threshold changes after content exposure.
+
+## Amendment 1 (2026-10-10 ~02:20 UTC, before any S139 score)
+- Unzip: all six sequences have 1000 pose/color/depth files. seq-01.zip reports a warning on its directory entry
+  ("ucsize <> csize for STORED entry"). No file is missing.
+- KPS convention check (CPU, first 5 bank frames of each pair; `CONVENTION_CHECK.json`): **gl wins 3/3** (median
+  reprojection 9–16 px vs 103 px–∞ for native, where σ collapses to the grid floor). gl is used, as planned.
+- Pose-only quantities (`POSE_ARMS.json`): 16/24 windows are history-favourable. mem_pose contexts draw 50–100% of their
+  frames from the history sequence.
+- Generation of the arms that do not depend on step A (static_recent, mem_pose; plan_v1, 48 contexts) started on TACC
+  (seeds 3–6) while H800 step A runs. mem_vmem is appended when step A finishes (plan_v2, superset).
+- Step A (H800 job 674961) done: 24/24 windows OK, memory covers 32/32 bank frames in every window, KPS σ stable
+  across the three constructs; VMem contexts are 88.5% history frames on average; mem_vmem ≠ mem_pose in 24/24
+  windows (with 32 frames the surfel visibility keeps only the top-14 candidates). plan_v2 = plan_v1 + 24 mem_vmem
+  contexts (72 unique). H800 step B (job 674991) builds the same plan from the receipt inside the job.
+- Exploratory (not pre-registered): B2 warp from mem_pose contexts 14.35 dB vs from static_recent 13.11 dB; B0
+  copy-nearest bank frame 12.22 dB.

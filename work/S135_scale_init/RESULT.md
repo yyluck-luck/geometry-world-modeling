@@ -67,3 +67,10 @@ schedule.
 ## Files
 `kps.py`, `test_kps.py`, `repro_kps.py`, `run_arms.sh`, `summarize_arms.py`, `ARM_*.json`, `ARMS_SUMMARY.txt`,
 `pose_only_retrieval.py`, `POSE_ONLY_native_fix{0,1}.json`, `STAGE1_*`.
+
+## Addendum (2026-10-10): deterministic retrieval
+Pose-only NMS computed with the geodesic in **float64** (numpy) on the repaired map (S134 native_fix1 receipts) equals the
+actual RTX 3090 contexts in **14/14** windows and the H800 contexts in 9/14. Float64 and the 3090's fp32 give the same
+selection; the H800 deviates in 5/14, consistently with TF32 rounding being permitted globally by CUT3R's croco.py.
+A one-line fix makes VMem's retrieval hardware-independent: compute `geodesic_distance` in float64, or run retrieval
+with `torch.backends.cuda.matmul.allow_tf32 = False`. Not applied to any S136/S139 canonical run, which keeps VMem as is.
