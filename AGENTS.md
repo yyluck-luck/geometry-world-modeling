@@ -16,9 +16,17 @@ The project uses HKUSTDial/Supervisor-Skills. Relevant skills and pinned upstrea
 
 For the user-requested OpenAI harness reference and local DeepSeek installation, see `docs/HARNESS_GUIDE.md`. Tool installation is not model access or scientific validation.
 
-## Codex / GPT-6 Astra 外部复核层(2026-09-19 起;2026-10-10 起改为可选)
+## Codex / GPT-6 Astra 外部复核层(2026-09-19 起;2026-10-10 调整两次)
 
-**Owner 2026-10-10:"u can do by yourself not codex"。** 复核可由 agent 自己完成(独立重算、逐行核对源码、对照预注册),codex 不再是必经步骤;codex 可用时仍可作为额外复核。自审结果写入 `work/agents/SELF_AUDIT_*.md`,并在结论里注明"self-audit, no codex"。
+**Owner 2026-10-10(晚):"From now on, use the 'GPT-6 Astra Ultra' model in Codex for your research (ideation, rejection, retrieval)."**
+即 `codex exec -m gpt-6-astra -c model_reasoning_effort="ultra"`(命令见下)。**构想(ideation)、否定/挑刺(rejection)、
+文献与代码检索(retrieval)三类研究工作必须经过它**;每个新实验的设计在冻结协议前要过一轮 rejection,
+结果出来后的下一步要过一轮 ideation。输出写 `work/agents/CODEX_R###_*.md`,prompt 存 `work/agents/prompts/`。
+遇到 capacity 错误直接重跑;持续不可用时按下文 fallback,并在账本标注。
+
+**Owner 2026-10-10(早):"u can do by yourself not codex"** —— 仍适用于对本方运行结果的**核查/复核**(独立重算、
+逐行核对源码、对照预注册):可由 agent 自审,写 `work/agents/SELF_AUDIT_*.md`,结论注明 "self-audit"。
+codex 可用时也可以用于复核,但复核不是它的必经步骤;研究三类工作(构想/否定/检索)才是。
 
 
 **每一轮决策与创新探索都必须经过 codex,且用最高档。** 不是可选的辅助。

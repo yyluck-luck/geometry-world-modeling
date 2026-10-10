@@ -25,6 +25,11 @@ B = [ctx(w, 'mem_vmem', 'B_mem') for w in wins]
 fid = [dict(A[24], ctx_key=A[24]['base_ctx_key'], ctx_group='fidA'), ]
 fidB = [dict(B[0], ctx_key=B[0]['base_ctx_key'], ctx_group='fidB')]
 BR = [dict(b, ctx_key=b['base_ctx_key'], ctx_group=b['base_ctx_key'], mode='base_mem') for b in B]   # base outputs, region split
-for name, cs in (('plan_eval_A.json', A), ('plan_eval_B.json', B), ('plan_fid_A.json', fid), ('plan_fid_B.json', fidB), ('plan_base_regions.json', BR)):
+# Amendment 1 (exploratory): B with static_recent contexts and the warps of those contexts (S141_warps_chess_static)
+BS = [dict(ctx(w, 'static_recent', 'B_static'), warp_files=[f"{w}__static_recent__{t.replace('/', '_')}.npz" for t in base[(w, 'static_recent')]['target_refs']]) for w in wins]
+BSR = [dict(b, ctx_key=b['base_ctx_key'], ctx_group=b['base_ctx_key'], mode='base_static') for b in BS]   # base static, region split
+M = json.loads((Path(sys.argv[1]).parent / 'WINDOW_MANIFEST.json').read_text())
+assert all(base[(w['window_id'], 'static_recent')]['ctx_refs'] == w['static_recent'] for w in M['windows'])
+for name, cs in (('plan_eval_A.json', A), ('plan_eval_B.json', B), ('plan_fid_A.json', fid), ('plan_fid_B.json', fidB), ('plan_base_regions.json', BR), ('plan_eval_Bstatic.json', BS), ('plan_base_static_regions.json', BSR)):
     (OUT / name).write_text(json.dumps({'schema': 's141-eval-plan-v1', 'scene_dir': 'chess', 'contexts': cs}, indent=1) + '\n')
     print(name, len(cs))

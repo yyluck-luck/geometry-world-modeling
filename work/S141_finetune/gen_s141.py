@@ -188,6 +188,9 @@ for c, seed in jobs:
     conv = c.get('convention', 'gl'); c2ws = convert(c2ws, conv); qc2w = convert(qc2w, conv)
     ts = time.time()
     tgt = sample_s141(lat, emb, c2ws, Ks_t, qc2w, qK, seed, w5)
+    # R254 F4: a numerical failure must stay a failure (no NaN-cast black frames reaching the scorer)
+    if tgt.shape != (4, 3, 576, 576) or not np.isfinite(tgt).all():
+        raise RuntimeError(f"bad output {c['ctx_key']} s{seed}: shape {tgt.shape} finite {bool(np.isfinite(tgt).all())}")
     tmp = f.with_suffix('.tmp.npy'); np.save(tmp, tgt, allow_pickle=False); tmp.rename(f)
     rec = {'ctx_key': c['ctx_key'], 'variant': VARIANT, 'adapter': ADAPTER, 'adapter_sha256': ADAPTER_SHA, 'window_id': c['window_id'],
            'seed': seed, 'seconds': round(time.time() - ts, 2), 'output': {'path': str(f), 'sha256': sha_file(f)},

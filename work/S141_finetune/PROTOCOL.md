@@ -68,3 +68,32 @@ No chess or RGB-D Scenes 13/14 frame enters training. Evaluation targets are rea
 
 ## Stopping
 One training run per variant. No evaluation-driven hyperparameter changes. Report after evaluation.
+
+## Amendment 1 (2026-10-10 ≈ 11:00 UTC; during training, before any evaluation output exists)
+Prompted by codex `gpt-6-astra` (ultra) rounds R253 (retrieval), R254 (hostile review), R255 (ideation)
+(`work/agents/CODEX_R25{3,4,5}_*.md`). The frozen primaries, arms, steps and verdict rule are unchanged.
+1. **Fidelity gate passed** before B training (RTX 3090, seed 3, window seq-02_from_seq-01_s0150 mem_vmem): base S139
+   output, A and B with zero-init adapters are byte-identical (SHA-256 913394e0…; `fid/FIDELITY_SHA256.txt`).
+   The evaluation chain now refuses to run unless that receipt shows three equal hashes (R254 F1).
+2. **Evaluation hardening (R254 F2–F5, F11, F16):** the final adapter is verified before use (step 10000, variant,
+   rank, tensor count, all finite; `check_adapter_s141.py`); output directories must be fresh; each pass must yield
+   exactly contexts × 4 outputs and scores; non-finite or mis-shaped generations abort (`gen_s141.py`); the analyzer
+   requires exact, unique, paired window-seed cells; base comparator outputs are checked against their generation
+   receipts (`verify_base_s141.py`); the RGB-D secondary contrasts are implemented before results
+   (A_static − base_static, B_static − B2 warp, B_static − base_static, B_static − A_static; 16 windows, seeds 3–6;
+   base = S136 RTX 3090 static_gl outputs).
+3. **New exploratory arm B_static** (R253: without it a B win cannot speak to retrieval): B with the S139 static_recent
+   contexts and the B2 warps of those contexts (`data/S141_warps_chess_static`, CPU, reproducing the S139 B2-static
+   scores exactly: max |Δ| = 0.0 dB over 24 windows; context frames and target poses only). Exploratory contrasts:
+   B_static − B2(static), B_mem − B_static, B_static − A_static, and (B_mem − B_static) − (A_mem − A_static).
+   They are labelled exploratory and cannot replace a primary.
+4. **Correction (R254 F17):** the clip-list SHA-256 is c2fbdd49e87426d837aa5e90a8e694cddd9032864079cef53c29a66991740f36
+   (the prefix above was mistyped). The monitor split holds out the *current/target* sequences office/seq-10 and
+   redkitchen/seq-14; in monitor clips the history sequence may be a training sequence.
+5. **Disclosures fixed in advance (R254 F6–F15):** NO_MATERIAL_CHANGE is the registered label, not equivalence. Training
+   memory contexts use pose-only selection (S139 mem_pose), evaluation uses mem_vmem. Training warps were GPU CUT3R,
+   evaluation warps CPU. The warp branch's learned bias also reaches context slots, and the warp is in both CFG branches.
+   The training loss supervises target frames only; context-state trajectories at sampling time are not trained.
+   Chess is held out from training but was examined in S139/S140 (not an untouched confirmation set). Region labels are
+   "covered / uncovered by the warp", not certified disocclusion. B is an established conditioning recipe (ViewCrafter-
+   / MultiDiff-style warp+mask input); no method novelty is claimed for it.
