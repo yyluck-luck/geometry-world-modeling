@@ -58,11 +58,16 @@ no-op, the TF32 hardware dependence, and the 8-seed memory − static (−0.22 d
 memory claim must beat.
 
 ## Next candidates (each needs a protocol file)
-- **S141 running (TACC gpu13):** generator fine-tuning, A = attention LoRA, B = A + warp-latent input branch, 10000 steps
-  each on 6 other 7-Scenes scenes; evaluation on the S139 chess windows (protocol 7cefe20e + Amendment 1, a67cb62a).
-  Fidelity gate passed; A trained; B finishing; evaluation chains running.
-- After S141: one outcome-selected follow-up at most (codex R255: E1 alignment test if B beats the warp, E2 trained
-  warp-as-context if B ties/loses, E3 pixel fusion if A improves but B loses), then write up.
+- **S141 done (generator fine-tuning, `work/S141_finetune/RESULT.md`):** A (attention LoRA, 10000 steps on 6 other
+  7-Scenes rooms) improves held-out chess: A_mem − base_mem **+0.33 dB [+0.08, +0.59]** (IMPROVES), A_static +0.45, and
+  RGB-D Scenes +1.16 dB. B (A + warp-latent input branch) fails: B_mem − warp **−3.56 dB** (WORSENS; highest SSIM on chess,
+  worse than base on RGB-D). After adaptation memory is still not useful: A_mem − A_static −0.33 dB. Self-audit passes.
+- **S142 not run:** frozen branch table, PRIMARY_B = WORSENS → write up.
+- **S143 running (TACC, since 19:15 UTC, ≈ 3 h):** exploratory context-ranking audit from codex ideation R259 (rejection
+  R260): 6 context packages per window; does the set the warp prefers match the set VMem prefers (cross-fitted 2-seed
+  hindsight selector, frozen equal-mean null simulations)? Replay gate passed.
+- Next: S143 analysis; report v3 (S141 + S143); write-up. Other codex ideas on file: in-loop robust data-consistency (R257
+  P), multiscale residual fusion and test-time memory-in-weights (R258), GEN3C second consumer on H800 (R259).
 - Wording (codex R253/R255): "retrieved views do not become a detectable generated-frame gain", not "the generator does
   not use memory"; the frozen-consumer study rejected the tested interventions, it is not exhaustive. Ignored-memory
   has precedent (MemLearner 2606.31734); warp conditioning is established (ViewCrafter, MultiDiff, AnyRecon).

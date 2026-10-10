@@ -56,3 +56,19 @@ A miss = no demonstrated shortfall with this pool and selector budget (not equiv
 failure or missing cells = invalid assay, not a negative result; no post-score pool replacement or window deletion.
 Seeds 3–6 are reused discovery seeds; this is not confirmation. Cap 8 RTX 3090 GPU-hours (≤ 6 × 24 × 4 generations +
 replay). One run.
+
+## Amendment 1 (2026-10-10 ≈ 19:40 UTC, while discovery generation runs; no S143 score exists yet) — fresh-seed confirmation
+Follows R260 §3.4 ("freeze selections on discovery seeds, evaluate on fresh independent seed panels without
+reselection"). SuperPOD refused connections (SSH budget rule: stop), gpu14 still has an NVML mismatch, so the
+confirmation runs on the same two TACC RTX 3090s immediately after discovery, **unconditionally** (it is run whatever the
+discovery result, to avoid outcome-dependent sampling).
+- Fresh seeds 42, 7, 1, 2 (never used in S143 discovery; used in S139 only on H800, so new on this hardware); same pool,
+  plans, sampler, scorer, gates. Output `gen_confirm_part{0,1}`.
+- Selections frozen from discovery only: c_W(w) (warp, deterministic); c_G_disc(w) = argmax over sets of the mean Q_G
+  over discovery seeds 3–6 (ties: lowest rule); r_disc = the single rule with the best mean discovery Q_G over windows.
+- **Confirmation contrast** C = mean_w [Q_G^fresh(c_G_disc) − Q_G^fresh(c_W)], Q_G^fresh = mean over the 4 fresh seeds.
+  Confirmed only if C ≥ +0.20 dB, window-bootstrap lower bound > 0, at least 3 of the 4 fresh seed panels have a positive
+  panel-mean contrast, and no negative pair mean in 2 of 3 pairs. Same for window-specific structure:
+  mean_w [Q_G^fresh(c_G_disc) − Q_G^fresh(set of r_disc)].
+- Reported separately from the discovery primary; no pooled re-selection over 8 seeds counts as confirmation. Seeds share
+  windows and the chess panel stays exposed (seed-level, not scene-level, replication).

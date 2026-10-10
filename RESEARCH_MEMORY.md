@@ -1,3 +1,11 @@
+## 2026-10-10 S141 生成器微调完成:领域 LoRA 有效(+0.33 dB,且迁移到 RGB-D +1.16 dB);warp 条件变体失败;微调后记忆仍无用
+
+**设计**:TACC gpu13 两张 3090 并行,7-Scenes 另外 6 个场景 2000 个固定 clip,各训练 10000 步。A = 全部 attention 的 LoRA r16;B = A + 零初始化的 warp 隐变量/覆盖率输入分支。chess(S139 窗口)和 RGB-D Scenes 都不参与训练。协议 7cefe20e + Amendment 1 a67cb62a(评估前根据 codex R254 加固;新增探索臂 B_static)。
+**结果(预注册,seed 3–6)**:主 A:A_mem − base_mem **+0.330 dB [+0.078,+0.585]** IMPROVES(17/24),SSIM +0.018;A_static − base_static +0.45;RGB-D 面板 A_static − base **+1.16 dB**(13/16)。主 B:B_mem − warp **−3.56 dB** WORSENS(0/24),RGB-D 上 −7.43;B 在 chess 上 SSIM 全场最高(0.505)但 PSNR 只有基线水平,RGB-D 上两项都比基线差。微调后 A_mem − A_static −0.33(5/24):检索记忆仍然不如近期帧。探索:(B_mem−B_static)−(A_mem−A_static) +0.36 [+0.03,+0.70]。
+**结论**:领域差距是真实因素,LoRA 可以修;但"检索到的历史用不上"在微调后依然存在。B 这套现成的 warp+mask 配方在本预算下没学会用 warp。按冻结的 S142 分支表(B WORSENS)→ 不做 E1/E2,转写作。
+**流程**:owner 指定研究三类工作用 codex gpt-6-astra ultra(R253–R260,37 个引用已核验);owner 要求"用 codex 创造新想法"→ 三条并行构想流 R257/R258/R259 → 新实验 S143(context 排序审计,exploratory,R260 否定轮修正后冻结 0cabac3c,19:15 UTC 开跑)。
+证据:`work/S141_finetune/RESULT.md`、`results/S141_ANALYSIS.json`、`work/agents/SELF_AUDIT_S141.md`、`work/agents/CODEX_R25{3..9}_*.md`、`CODEX_R260_*`。
+
 ## 2026-10-10 S140 几何引导采样(WGS)+ S139 SSIM 复核;codex 改为可选(owner:"u can do by yourself")
 
 **S140**:冻结 VMem 的采样端修复(模型不变)。自写采样循环与原版逐字节一致。开发集(3DMatch,6 变体×2 seed)选出 W2 RePaint s=0.5:比纯投影 +0.79 dB [+0.56,+1.00](空洞区 +1.85)。**确认集(chess 24 窗×8 seed)不复现:+0.02 dB [−0.10,+0.13]**;覆盖区 +0.24(23/24)、空洞区 −0.24;SSIM +0.025。

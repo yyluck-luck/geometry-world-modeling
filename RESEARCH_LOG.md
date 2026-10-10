@@ -18134,3 +18134,13 @@ Dev: RePaint s=0.5 +0.785 dB over warp (holes +1.85). Confirmation on chess: +0.
 证据：`work/S140_warp_guided/RESULT.md`；`work/agents/SELF_AUDIT_S140.md`；`work/agents/SELF_AUDIT_S139.md`；`docs/report/TECHNICAL_REPORT_20261010.md`
 
 下一步：Frozen-consumer study complete; fine-tuning the generator would be next (out of scope)
+
+## 2026-10-11T03:20:52+08:00 · S141 generator fine-tuning (A LoRA, B warp-conditioned; TACC 2x RTX 3090, 10000 steps each) evaluated on held-out chess + RGB-D Scenes; S142 branch applied; S143 launched
+
+PRIMARY A +0.330 dB [+0.078,+0.585] IMPROVES (RGB-D +1.16); PRIMARY B -3.558 dB vs warp WORSENS (SSIM highest on chess); A_mem - A_static -0.33 (memory still not useful); self-audit all pass; S142 -> write up; S143 context-ranking audit frozen 0cabac3c and running
+
+时间依据：current clock；记录写入于 2026-10-10T19:20:52+00:00。
+
+证据：`work/S141_finetune/RESULT.md`；`work/S141_finetune/results/S141_ANALYSIS.json`；`work/agents/SELF_AUDIT_S141.md`；`work/S143_context_ranking/PROTOCOL.md`
+
+下一步：finish S143 (~22:30 UTC), analyze with frozen nulls; then report v3 and write-up
