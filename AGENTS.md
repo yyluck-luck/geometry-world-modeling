@@ -16,7 +16,10 @@ The project uses HKUSTDial/Supervisor-Skills. Relevant skills and pinned upstrea
 
 For the user-requested OpenAI harness reference and local DeepSeek installation, see `docs/HARNESS_GUIDE.md`. Tool installation is not model access or scientific validation.
 
-## Codex / GPT-6 Astra 是本项目的强制外部复核层(2026-09-19 起)
+## Codex / GPT-6 Astra 外部复核层(2026-09-19 起;2026-10-10 起改为可选)
+
+**Owner 2026-10-10:"u can do by yourself not codex"。** 复核可由 agent 自己完成(独立重算、逐行核对源码、对照预注册),codex 不再是必经步骤;codex 可用时仍可作为额外复核。自审结果写入 `work/agents/SELF_AUDIT_*.md`,并在结论里注明"self-audit, no codex"。
+
 
 **每一轮决策与创新探索都必须经过 codex,且用最高档。** 不是可选的辅助。
 

@@ -18124,3 +18124,13 @@ Primary mem_vmem - static_recent -0.181 dB [-0.518,+0.145] NO_MATERIAL_CHANGE; h
 证据：`work/S139_crossseq_revisit/RESULT.md`；`docs/report/TECHNICAL_REPORT_20261010.md`；`CURRENT_STATUS.md`
 
 下一步：External review of S139 and report v2 when codex capacity returns; consumption-side intervention if continuing
+
+## 2026-10-10T13:40:19+08:00 · S140 warp-guided sampling (dev + held-out confirmation, H800+3090) and S139 SSIM re-check; codex optional per owner
+
+Dev: RePaint s=0.5 +0.785 dB over warp (holes +1.85). Confirmation on chess: +0.020 dB [-0.095,+0.134] (no material change), covered +0.24, holes -0.24, SSIM +0.025; VMem SSIM 0.470 > warp 0.432 on chess (geometry advantage is PSNR-only there). S139 in SSIM: memory - static -0.019 [-0.032,-0.006] (worse). Self-audits replace codex.
+
+时间依据：current clock；记录写入于 2026-10-10T05:40:19+00:00。
+
+证据：`work/S140_warp_guided/RESULT.md`；`work/agents/SELF_AUDIT_S140.md`；`work/agents/SELF_AUDIT_S139.md`；`docs/report/TECHNICAL_REPORT_20261010.md`
+
+下一步：Frozen-consumer study complete; fine-tuning the generator would be next (out of scope)

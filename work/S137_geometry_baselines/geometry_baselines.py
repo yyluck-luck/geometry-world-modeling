@@ -76,6 +76,19 @@ def warp(ctx, Tt, K, H=480, W=640):
     return img, float(valid.mean())
 
 
+def warp_raw(ctx, Tt, K, H=480, W=640):
+    """Same 1-pixel splat as warp(); returns (nearest-filled image, boolean coverage mask). Added for S140."""
+    img, _ = warp(ctx, Tt, K, H, W)
+    zb = np.full((H, W), np.inf); v, u = np.mgrid[0:H, 0:W]; Ki = np.linalg.inv(K)
+    for rgb, depth, Tc in ctx:
+        m = depth > 0; pix = np.stack([u[m], v[m], np.ones(m.sum())], 0)
+        Xw = Tc[:3, :3] @ ((Ki @ pix) * depth[m]) + Tc[:3, 3:4]; Xt = Tt[:3, :3].T @ (Xw - Tt[:3, 3:4])
+        z = Xt[2]; ok = z > 1e-3
+        uu = np.round(K[0, 0] * Xt[0, ok] / z[ok] + K[0, 2]).astype(int); vv = np.round(K[1, 1] * Xt[1, ok] / z[ok] + K[1, 2]).astype(int)
+        inb = (uu >= 0) & (uu < W) & (vv >= 0) & (vv < H); zb[vv[inb], uu[inb]] = np.minimum(zb[vv[inb], uu[inb]], z[ok][inb])
+    return img, np.isfinite(zb)
+
+
 def main():
     DS, C9, OUT = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
     c9 = json.loads(C9.read_text())['arms']

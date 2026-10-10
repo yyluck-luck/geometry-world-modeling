@@ -9,7 +9,8 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent; REPO = HERE.parents[1]
 ARM, OUT = sys.argv[1], Path(sys.argv[3]); PLAN = json.loads(Path(sys.argv[2]).read_text()) if sys.argv[2] != 'NONE' else None
-sys.argv = [sys.argv[0]]
+SAVE = Path(sys.argv[4]) if len(sys.argv) > 4 else None   # S140: save model-grid warps (filled, valid)
+_ARGV = list(sys.argv); sys.argv = [sys.argv[0]]
 sys.path.insert(0, str(REPO / 'work/S135_scale_init')); sys.path.insert(0, str(REPO / 'work/S137_geometry_baselines'))
 from geometry_baselines import to_model_grid, warp, geo          # noqa: E402 (S137 warp, scorer transform, VMem geodesic)
 ROOT = REPO / 'data/S139_chess/chess'
@@ -57,6 +58,13 @@ else:
         out = R.SI.run_inference_from_pil(pils, model, poses=vm, depths=None, lr=0.01, niter=0, device='cpu')
         ctx = [(load(r, 'color.png'), depth640(d[0].numpy()), load(r, 'pose.txt')) for r, d in zip(seen, out['depths'])]
         preds = [warp(ctx, load(t, 'pose.txt'), K)[0] for t in c['target_refs']]
+        if SAVE is not None:
+            from geometry_baselines import warp_raw   # same splat, returns coverage
+            SAVE.mkdir(parents=True, exist_ok=True)
+            for t, p_img in zip(c['target_refs'], preds):
+                _, valid = warp_raw(ctx, load(t, 'pose.txt'), K)
+                vm = to_model_grid(np.repeat(valid[..., None].astype(np.uint8) * 255, 3, 2))[..., 0] > 127
+                np.savez_compressed(SAVE / f"{c['window_id']}__{ARM}__{t.replace('/', '_')}.npz", filled=to_model_grid(p_img), valid=vm)
         rows.append({'window_id': c['window_id'], 'ctx_refs': refs, 'psnr': psnr4(preds, c['target_refs']),
                      'kps': list(LOG), 'seconds': round(time.time() - t0, 1)})
         print(f"[b2] {ARM} {c['window_id']} {rows[-1]['psnr']:.2f}", flush=True)

@@ -53,5 +53,5 @@ capacity-matched generator control.)
 ## Limits
 One scene (chess), three sequence pairs (dependent through shared history banks), 24 windows, PSNR only, one frozen
 consumer. 7-Scenes RGB focal 585 is the documented nominal value; relocalisation work often uses ≈ 525 for RGB. The same
-K is used for every arm, so arm contrasts are unaffected but absolute geometry is approximate. The codex pre-result
-review (R251) could not run (model at capacity, 7 attempts); an external review is outstanding.
+K is used for every arm, so arm contrasts are unaffected but absolute geometry is approximate. codex reviews (R251/R252) could not run (model at capacity). Per owner instruction (2026-10-10), a self-audit
+replaced them: `work/agents/SELF_AUDIT_S139.md` (all automated checks pass; primary recomputed −0.1805 dB).

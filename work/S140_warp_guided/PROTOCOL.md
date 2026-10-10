@@ -45,3 +45,11 @@ dataset depth. Scoring is separate.
 
 ## Stopping
 Report after stage 2. No variant changes after stage-2 scores.
+
+## Amendment 1 (2026-10-10 ~04:45 UTC, after stage 1, before any stage-2 run)
+Fidelity: mode `none` (re-implemented loop) is byte-identical to the original sampler (`ref`) for seeds 42 and 7.
+Stage 1 (`results/DEV_ANALYSIS.json`): W2 0.5 20.87 dB / SSIM 0.730; W2 1.0 20.61; W1 0.3 20.24; W1 0.5 18.94;
+W3 18.60; W1 0.7 17.91. B2 is 20.09 / 0.721; VMem static_gl is 15.25. **Selected by the rule: W2 RePaint, s = 0.5**
+(−B2 +0.785 dB [+0.56, +1.00], 15/16 windows on the exposed panel; selection among 6 variants inflates this, hence
+stage 2). Stage 2 uses W2 0.5 only (plan_confirm.json, 24 contexts).
+Codex review is optional from 2026-10-10 (owner); a self-audit replaces it.

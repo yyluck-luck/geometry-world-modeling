@@ -25,15 +25,20 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
 4. **The camera convention matters more than the memory.** Converting the dataset's OpenCV poses to the OpenGL input VMem
    expects improves static generation by +0.89 dB [+0.25, +1.47] (8 seeds). Even with every defect repaired, memory
    shows no detectable gain over a fixed static context: −0.06 dB [−1.15, +0.94].
-5. **Training-free geometry beats the frozen generator on this panel.** A CUT3R + KPS forward warp (RGB + poses) is
-   +5.7 dB (native) / +4.8 dB (gl) above VMem's static output, 16/16 windows. Copying the nearest history frame is
+5. **Training-free geometry beats the frozen generator in PSNR.** A CUT3R + KPS forward warp (RGB + poses) is
+   +5.7 dB (native) / +4.8 dB (gl) above VMem's static output, 16/16 windows; SSIM agrees on this panel but not on
+   held-out chess (§7). Copying the nearest history frame is
    +1.2 dB above native static. Given aligned target-pose warps as context, VMem reproduces them (+0.000 dB) and adds no
    refinement.
 
 6. **On held-out cross-sequence revisits (7-Scenes chess, pre-registered), retrieval works but generation does not use it.**
    VMem retrieves history-sequence frames (88.5%) whose warp is +1.46 dB [+0.91, +2.05] better than the recent static
    frames' warp. Yet VMem's generation from them is −0.18 dB [−0.52, +0.15] vs static. A warp of the same contexts
-   beats VMem by +3.21 dB in 24/24 windows.
+   beats VMem by +3.21 dB in 24/24 windows. By SSIM, generating from retrieved history is even worse than from
+   recent frames (−0.019 [−0.032, −0.006]).
+7. **A training-free consumption fix does not replicate.** Warp-guided sampling (RePaint-style, §7.2) gains +0.79 dB
+   over the warp on the development panel, but +0.02 dB [−0.10, +0.13] on held-out chess. It reliably polishes covered
+   pixels (+0.24 dB); hole filling helps only where contexts show the missing content.
 
 Items 1–5 come from an exposed development panel (2 scenes, 14–16 windows, 4 targets each). Item 6 comes from a scene
 held out from this project's design decisions (§7).
@@ -157,11 +162,25 @@ Used geometrically, the same contexts tell a different story. A B2 warp from mem
 contexts by +1.46 [+0.91, +2.05] (history-favourable +1.95 [+1.24, +2.68]). In history-favourable windows the
 surfel-visibility selection beats pose-only selection (+0.46 [+0.02, +0.94]). The warp beats VMem's own generation from
 the same contexts by +3.21 [+2.84, +3.58] (24/24). With a 32-frame bank, retrieval finds genuinely useful long-range
-history, which it did not need to on the 12-frame panel. The generator does not turn it into better frames.
+history, which it did not need to on the 12-frame panel. The generator does not turn it into better frames. A
+re-check in SSIM over the same 576 outputs gives mem_vmem − static_recent = −0.019 [−0.032, −0.006] (8/24), so the
+conclusion survives a second metric. On chess, however, VMem's own frames have higher SSIM (0.470) than the warp
+(0.432): nearest-fill streaks in 45% disoccluded area hurt structure. The geometric baseline's advantage is a PSNR
+(pixel-alignment) advantage.
+
+### 7.2 Warp-guided sampling (S140)
+A sampling-loop intervention with the model unchanged. The target latents start from the noised warp (SDEdit); with
+RePaint, the covered latent blocks are reset to the noised warp after every step, so the denoiser only generates the
+holes. A re-implemented loop with no intervention reproduces VMem's sampler byte-for-byte. Six variants were screened
+on the development panel (2 seeds). RePaint s = 0.5 was selected by a pre-registered rule: +0.785 dB [+0.56, +1.00]
+over the warp, 15/16 windows, almost all from holes (+1.85 dB). On held-out chess (24 windows, 8 seeds, mem_vmem
+contexts) it gives **+0.020 dB [−0.095, +0.134]** (PSNR, primary: no material change) and +0.025 SSIM. Covered pixels
+improve (+0.24 dB, 23/24); holes get worse (−0.24 dB). The frozen generator can polish aligned content and fill
+context-visible gaps, but not genuinely unobserved regions.
 
 ## 8. Limitations
 One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
-PSNR, plus SSIM in §6. Seed blocks are confounded with hardware. CPU stage-1 evidence (§2.1, §3) is not byte-identical
+PSNR, plus SSIM in §6–7 (the two metrics disagree on chess for warp vs generator). Seed blocks are confounded with hardware. CPU stage-1 evidence (§2.1, §3) is not byte-identical
 to GPU runs. Forward splatting leaves cracks. The 7-Scenes RGB focal (585, documented) is approximate. Pretraining
 exposure of CUT3R/VMem to these datasets is not verified.
 
@@ -174,8 +193,8 @@ exposure of CUT3R/VMem to these datasets is not verified.
 
 ## 10. Artifact index
 `work/S133_scale_debug`, `work/S134_tacc_fixed_map`, `work/S135_scale_init`, `work/S136_repaired_memory`,
-`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`. Each holds PROTOCOL.md, RESULT.md,
-scripts and receipts. External reviews: `work/agents/CODEX_R250_S133_S137_AUDIT.md`. One-page state: `CURRENT_STATUS.md`.
+`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`. Each holds PROTOCOL.md, RESULT.md,
+scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audit (owner-approved): `work/agents/SELF_AUDIT_S139.md`. One-page state: `CURRENT_STATUS.md`.
 
 ## References
 - VMem: Consistent Interactive Video Scene Generation with Surfel-Indexed View Memory. arXiv:2506.18903.

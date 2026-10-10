@@ -1,3 +1,12 @@
+## 2026-10-10 S140 几何引导采样(WGS)+ S139 SSIM 复核;codex 改为可选(owner:"u can do by yourself")
+
+**S140**:冻结 VMem 的采样端修复(模型不变)。自写采样循环与原版逐字节一致。开发集(3DMatch,6 变体×2 seed)选出 W2 RePaint s=0.5:比纯投影 +0.79 dB [+0.56,+1.00](空洞区 +1.85)。**确认集(chess 24 窗×8 seed)不复现:+0.02 dB [−0.10,+0.13]**;覆盖区 +0.24(23/24)、空洞区 −0.24;SSIM +0.025。
+**SSIM 细节**:chess 上 VMem 自身 SSIM 0.470 > WGS 0.457 > 投影 0.432(45% 空洞的最近邻拉丝伤结构)→"几何胜过生成器"只在 PSNR 上成立,大遮挡场景 SSIM 下不成立。
+**S139 SSIM 复核**:记忆 − static −0.019 [−0.032,−0.006] 变差 → S139 结论在第二指标下更强。
+**结论**:冻结模型上能做的都做了(检索/记忆修复 + 采样端修复),生成器仍用不上几何;下一步只能微调生成器,超出冻结模型诊断范围。
+**流程**:codex 连续容量失败;owner 指示自审 → AGENTS.md 改为 codex 可选,自审写 `work/agents/SELF_AUDIT_*.md`。
+证据:`work/S140_warp_guided/RESULT.md`、`work/agents/SELF_AUDIT_S139.md`、`work/agents/SELF_AUDIT_S140.md`、报告 v2 §7.2。
+
 ## 2026-10-10 S139 完成:保留场景跨序列回访——检索有效,生成器用不上
 
 **设计**:7-Scenes chess(内容接触前冻结 protocol,commit 27fbfef1),3 对序列(历史→当前),24 窗口;记忆库 = 另一条序列 20 帧 + 近期 12 帧;修复后的记忆(gl+KPS+全覆盖);arm:static_recent / mem_vmem / mem_pose;8 seed(H800+3090),576 次生成。KPS 约定检测 gl 3/3。

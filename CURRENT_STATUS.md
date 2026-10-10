@@ -1,4 +1,4 @@
-# Current status — read this first (updated 2026-10-10, after S133–S139 and codex R250 audit)
+# Current status — read this first (updated 2026-10-10, after S133–S140)
 
 One page. Everything else in the repository is supporting evidence or history.
 
@@ -28,7 +28,8 @@ far better than the frozen generator.
    report's memory − static −0.485 dB (2 seeds) becomes −0.22 dB [−0.82, +0.39] at 8 seeds (INCONCLUSIVE) (S136).
 7. **Training-free geometry beats the frozen generator** (S137, against the 8-seed static; a diagnostic contrast,
    not a matched generator control). Copying the nearest history frame +1.16 dB vs native static. CUT3R + KPS forward
-   warp (RGB + pose) +5.73 dB vs native and +4.84 dB vs gl, 16/16 windows. SSIM agrees (+0.11 / +0.14).
+   warp (RGB + pose) +5.73 dB vs native and +4.84 dB vs gl, 16/16 windows. SSIM agrees on this panel (+0.11 / +0.14),
+   but not on held-out chess, where VMem's frames have higher SSIM than the warp (S140). The advantage is pixel alignment.
 8. **Same-pose behaviour** (S137c, 8 seeds). Given aligned target-pose warps as context, VMem reproduces them
    (+0.000 dB [−0.044, +0.053]): pre-warping lifts it +4.8 dB over static, purely by copying. With grey holes it copies
    the grey (−5.4 dB). Its own content for uncovered pixels is worse than nearest fill (hybrid −1.3 dB; SSIM too).
@@ -42,6 +43,10 @@ far better than the frozen generator.
    and the history-favourable stratum is not better (−0.33). The bottleneck is the generator's cross-view use of
    context, not retrieval.
 
+11. **Warp-guided sampling (S140, training-free consumption fix).** Dev panel +0.79 dB over the warp (6-way
+   selection); held-out chess **+0.02 dB [−0.10, +0.13]**, so it does not replicate. Covered pixels +0.24 dB (23/24),
+   holes −0.24 dB. S139 re-checked in SSIM: memory − static −0.019 [−0.032, −0.006] (worse).
+
 ## Earlier results still standing
 - Duplicate-slot repair: closed negative, −0.016 dB vs a +0.20 dB bar (`docs/report/TECHNICAL_REPORT_20260918.md`).
 - Slot 0 is a coordinate/scale intervention (`work/S130_C8_diagnostics/results_slot_job609617/RESULT.md`).
@@ -54,9 +59,9 @@ memory claim must beat.
 
 ## Next candidates (each needs a protocol file)
 - Finish the write-up: `docs/report/TECHNICAL_REPORT_20261010.md` (v2, includes S139).
-- External review of S139 (codex R251/R252 blocked by model capacity on 2026-10-10).
-- If continuing the science: a consumption-side intervention (e.g. geometry-aligned context injection) is the only
-  remaining lever; retrieval/memory repairs are exhausted on this consumer.
+- S139 self-audited (`work/agents/SELF_AUDIT_S139.md`); codex optional from 2026-10-10 (owner).
+- Science on this frozen consumer is exhausted. Retrieval/memory repairs (S133–S139) and a sampling-side fix (S140)
+  do not make it use geometry. Fine-tuning the generator would be the next step, outside a frozen-model study.
 
 ## Closed or retired
 Duplicate-slot / NMS tuning; hidden-surface / support-scarcity predictors; generic selector scores (crowded:
@@ -73,6 +78,6 @@ numbers and the S137 arithmetic. It refuted several wordings (now corrected), fo
 
 ## Where things are
 Stage results `work/S133_scale_debug/`, `work/S134_tacc_fixed_map/`, `work/S135_scale_init/`,
-`work/S136_repaired_memory/`, `work/S137_geometry_baselines/`, `work/S138_depth_opt/`, `work/S139_crossseq_revisit/` (each has PROTOCOL.md + RESULT.md) · report v2 `docs/report/TECHNICAL_REPORT_20261010.md` · report
+`work/S136_repaired_memory/`, `work/S137_geometry_baselines/`, `work/S138_depth_opt/`, `work/S139_crossseq_revisit/`, `work/S140_warp_guided/` (each has PROTOCOL.md + RESULT.md) · report v2 `docs/report/TECHNICAL_REPORT_20261010.md` · report
 `docs/report/TECHNICAL_REPORT_20260918.md` · ledger `RESEARCH_MEMORY.md` (newest first) · events
 `research_events.jsonl` · rules `AGENTS.md`, `RESEARCH_PRINCIPLES.md`.
