@@ -23,6 +23,9 @@ For the user-requested OpenAI harness reference and local DeepSeek installation,
 文献与代码检索(retrieval)三类研究工作必须经过它**;每个新实验的设计在冻结协议前要过一轮 rejection,
 结果出来后的下一步要过一轮 ideation。输出写 `work/agents/CODEX_R###_*.md`,prompt 存 `work/agents/prompts/`。
 遇到 capacity 错误直接重跑;持续不可用时按下文 fallback,并在账本标注。
+**Owner 2026-10-10:"u can use my codex to help u create new ideas and ways"** —— ideation 轮要**生成式**:先发散(≥12 个
+不同想法),再对最有希望的 5 个做文献查重(核验 arXiv ID + 标题),最后收敛到 ≤3 个 1–2 天内可跑的实验;
+不要只做收口/写作建议。可并行开多条不同视角的 ideation 流(机制 / 从发现到方法 / 评测与分析)。
 
 **Owner 2026-10-10(早):"u can do by yourself not codex"** —— 仍适用于对本方运行结果的**核查/复核**(独立重算、
 逐行核对源码、对照预注册):可由 agent 自审,写 `work/agents/SELF_AUDIT_*.md`,结论注明 "self-audit"。
