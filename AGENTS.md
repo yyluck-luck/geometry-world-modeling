@@ -26,6 +26,9 @@ For the user-requested OpenAI harness reference and local DeepSeek installation,
 **Owner 2026-10-10:"u can use my codex to help u create new ideas and ways"** —— ideation 轮要**生成式**:先发散(≥12 个
 不同想法),再对最有希望的 5 个做文献查重(核验 arXiv ID + 标题),最后收敛到 ≤3 个 1–2 天内可跑的实验;
 不要只做收口/写作建议。可并行开多条不同视角的 ideation 流(机制 / 从发现到方法 / 评测与分析)。
+**Owner 2026-10-11:"also you can use codex local to help you any works"** —— codex 也可用于任何工作:实现/代码审查(实验跑之前
+先让 codex 审代码)、独立重算、出图脚本、文档草稿等。实现类任务可在 brief 里指定它可写的新目录/文件;它的产出一律由主 agent
+核验(读代码、跑测试、看图)后才采用。
 
 **Owner 2026-10-10(早):"u can do by yourself not codex"** —— 仍适用于对本方运行结果的**核查/复核**(独立重算、
 逐行核对源码、对照预注册):可由 agent 自审,写 `work/agents/SELF_AUDIT_*.md`,结论注明 "self-audit"。
