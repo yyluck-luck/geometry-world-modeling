@@ -1,6 +1,6 @@
 # What a Frozen Surfel-Memory Video World Model Actually Does: Integration Defects, a Known-Pose Scale Fix, and Geometric Baselines
 
-Technical report v2, 2026-10-10. HKUST CSIT6910 independent project.
+Technical report v2, 2026-10-10 (updated 2026-10-11: S144, S145). HKUST CSIT6910 independent project.
 Supersedes the interpretation, not the record, of `TECHNICAL_REPORT_20260918.md`, which is kept unchanged.
 Project flags: `new_method_validated=false`, `novelty_authorization=NONE`.
 
@@ -45,6 +45,8 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
    attention LoRA trained on six other 7-Scenes rooms improves held-out chess by +0.33 dB [+0.08, +0.59] (memory contexts)
    and RGB-D Scenes by +1.16 dB. After adaptation, retrieved memory is still worse than recent frames (−0.33 dB). Adding
    the target-pose warp as an extra input (established warp+mask conditioning) did not work: −3.56 dB below the warp.
+   Inference-time ablations (§7.5) show that B's warp branch helps under B's own LoRA (−0.42 dB without it), so the
+   failure sits in what the LoRA learned jointly with the branch, not in the branch or its context-slot bias.
 9. **Which context helps the generator is not what helps geometry (§7.4, exploratory).** Among six context packages from
    the same history bank, the one the warp prefers leaves a +0.32 dB held-seed generation shortfall (replicated on fresh
    seeds, +0.38 dB). A plain nearest-camera rule beats VMem's own retrieval by +0.74 dB on fresh seeds, for VMem's own
@@ -235,9 +237,36 @@ worst of the six for its own generator on this panel. This differs from VMem's R
 and baseline definitions differ (codex R264); here the repaired retrieval package and a changed slot order are compared.
 Consumer-specific evidence utility is not new as a concept (FAR, arXiv:2609.34677).
 
+### 7.5 Why warp conditioning did not help (S144, S145; training-free follow-ups)
+**S144** combined adapter A with the §7.2 warp-guided sampler. It asked whether skipping the final covered-latent overwrite
+("release") lets an adapted generator refine what it is given. On a development panel (32 clips from two 7-Scenes monitor
+sequences, seeds 3–4), release changed PSNR by less than 0.01 dB for both the frozen and the adapted model (interaction
+−0.003 dB; the gate required +0.20), so the experiment stopped by rule before any case panel. A + warp-guided sampling beat
+the raw warp by +0.21 dB, but one global convex blend of a generated frame and the warp (α ≈ 0.55–0.6, fitted on the same
+clips) beat it by a further ~0.2 dB. That blend advantage is optimistic and was never tested on held-out windows.
+
+**S145** asked why B failed, with inference-time ablations of B's warp branch and B's LoRA kept fixed (chess, 24 windows,
+seeds 3–6). With the intervention disabled, the ablation code reproduced the archived B output byte-for-byte.
+
+| arm (B's LoRA kept) | branch contribution | mean PSNR | Δ vs B_original [95% CI] | windows + | Δ SSIM |
+|---|---|---|---|---|---|
+| B_original | W(e) + b | 11.01 | — | — | — |
+| **B_off** (primary) | 0 | 10.59 | **−0.42 [−0.68, −0.18]** | 7/24 | −0.025 |
+| **B_target_only** (key secondary) | b and W(e) on target frames only | 10.68 | **−0.33 [−0.39, −0.27]** | 0/24 | −0.061 |
+| B_bias_only | b | 10.48 | −0.54 [−0.79, −0.30] | 4/24 | −0.042 |
+| B_permuted | W(warp shuffled within coverage strata) + b | 10.58 | −0.44 [−0.57, −0.32] | 1/24 | −0.021 |
+| references: A / raw warp | — | 11.61 / 14.57 | B_off − A −1.01 | 3/24 | −0.006 |
+
+Removing the branch makes this B worse, so under B's co-trained LoRA the branch contributes positively. Removing the
+learned bias from the four context slots is worse in every window, which rejects the hypothesis that this context-slot
+offset caused B's failure. No arm reaches A or the warp. B's deficit therefore lies in what its LoRA learned together with
+the branch. Inference-time ablations cannot say how that LoRA would have trained without the branch. A teacher-forced
+one-step probe disagreed with the rollout ranking (the zeroed-input condition had lower one-step error at four of six
+noise levels, yet bias-only is the worst rollout) and is reported only as a diagnostic.
+
 ## 8. Limitations
 One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
-Chess is held out from design decisions up to S139, but S140/S141 reuse its windows, so it is no longer an untouched set.
+Chess is held out from design decisions up to S139, but S140, S141 and S143–S145 reuse its windows, so it is no longer an untouched set.
 "No detectable gain" (NO_MATERIAL_CHANGE) is not equivalence, and "no benefit" is not "no use": conditioning can change
 outputs without improving them. Shared intrinsics across arms do not guarantee that all arms are equally affected by
 calibration error. S140 rejects one sampling intervention; it does not show that only fine-tuning can help.
@@ -254,8 +283,8 @@ exposure of CUT3R/VMem to these datasets is not verified.
 
 ## 10. Artifact index
 `work/S133_scale_debug`, `work/S134_tacc_fixed_map`, `work/S135_scale_init`, `work/S136_repaired_memory`,
-`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`, `work/S141_finetune`, `work/S143_context_ranking`. Each holds PROTOCOL.md, RESULT.md,
-scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audit (owner-approved): `work/agents/SELF_AUDIT_S139.md`. One-page state: `CURRENT_STATUS.md`.
+`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`, `work/S141_finetune`, `work/S143_context_ranking`, `work/S144_A_wgs`, `work/S145_B_diagnosis`. Each holds PROTOCOL.md, RESULT.md,
+scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audits (owner-approved): `work/agents/SELF_AUDIT_S139.md` … `SELF_AUDIT_S145.md`. One-page state: `CURRENT_STATUS.md`.
 
 ## Related work found by retrieval (codex R253; independently re-verified)
 The S139 pattern is partly precedented. MemLearner (arXiv:2606.31734) reports a memory-query module whose conditioning is
