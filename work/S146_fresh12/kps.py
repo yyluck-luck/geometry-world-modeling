@@ -36,12 +36,9 @@ def _proj_residual(P, pix, R, t, sigma, pp, f_fixed=None):
 def estimate_sigma(views, sigma_grid=SIGMA_GRID, refine=True):
     """views: list of dicts with P (N,3) points of view j in view-0 frame (CUT3R units), pix (N,2) their pixels in
     view j, R (3,3), t (3,) known metric transform view0 -> view j, pp (2,). Returns sigma, per-view focals, curve."""
-    def total(sig):   # S146 Amendment 2 (KPS-R): mean over views with a finite residual; requires >= half of the views
+    def total(sig):
         res = [_proj_residual(v['P'], v['pix'], v['R'], v['t'], sig, v['pp'], v.get('f')) for v in views]
-        fin = [r for r, _ in res if np.isfinite(r)]
-        if len(fin) < int(np.ceil(0.5 * len(res))):
-            return float('inf'), [f for _, f in res]
-        return float(np.mean(fin)), [f for _, f in res]
+        return float(np.mean([r for r, _ in res])), [f for _, f in res]
     curve = np.array([total(s)[0] for s in sigma_grid])
     k = int(np.argmin(curve))
     best = sigma_grid[k]
@@ -119,8 +116,7 @@ def install(IIP, log=None, max_points=20000, seed=0, known_K=None):
             if f is not None and np.isfinite(f):
                 self._set_focal(i, float(f))
         if log is not None:
-            n_fin = int(sum(np.isfinite(f) for f in focals)) if focals else 0
-            log.append({'kps': 'OK', 'variant': 'KPS-R', 'n_views': len(views), 'n_views_finite': n_fin, 'known_K': known_K is not None, 'sigma': sigma, 'metres_per_unit': 1.0 / sigma, 'median_reproj_px': err,
+            log.append({'kps': 'OK', 'known_K': known_K is not None, 'sigma': sigma, 'metres_per_unit': 1.0 / sigma, 'median_reproj_px': err,
                         'focals': [None if f is None else float(f) for f in [im_focals[0]] + list(focals)]})
 
     IIP.init_minimum_spanning_tree = kps_init

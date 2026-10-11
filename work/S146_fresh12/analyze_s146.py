@@ -4,6 +4,7 @@
   seal     <POOL.json> <WARP_SCORES.json> <gen scores> <out FROZEN.json>     (reads ONLY discovery seeds 3-6)
   evaluate <POOL.json> <FROZEN.json> <gen scores> <out.json>                (sealed selectors on evaluation seeds)
   prep143  <POOL.json> <WARP_SCORES.json> <gen scores> <out_dir>            (inputs for analyze_s143.py on rules 1-6, seeds 3-6)
+  op-primary <POOL_OP.json> <op scores> <out.json>   (Amendment 3 operational assay, evaluation seeds only)
 Primary: d(r,s) = mean_w[PSNR(rule 4) - PSNR(rule 3 sorted)], evaluation seeds 42,7,1,2; pass iff D >= 0.20, all D_r > 0,
 >= 3 of 4 D_s > 0. Same gate vs native-order rule 3 for the broader wording."""
 import hashlib, json, math, sys
@@ -104,3 +105,33 @@ elif mode == 'prep143':
     for name, obj in (('POOL143.json', pool), ('GEN143.json', gen), ('PAIRS143.json', pa), ('WARPS143.json', WS)):
         (OD / name).write_text(json.dumps(obj) + '\n')
     print('prepared', len(gen['runs']), 'discovery runs')
+
+elif mode == 'op-primary':   # Amendment 3 (R267): operational assay, evaluation seeds 42,7,1,2 only
+    P, G, OUT = J(sys.argv[2]), J(sys.argv[3]), Path(sys.argv[4])
+    assert P['n_windows'] == 24 and not P['unavailable'] and [sum(w['room'] == r for w in P['windows']) for r in ROOMS] == [8, 8, 8]
+    res = {}
+    for metric in ('psnr_db', 'ssim'):
+        t = table(G, EVAL, P, metric); blk = {}
+        for name, a, b in (('PRIMARY nearest4 - mem_vmem(sorted)', lambda w: pkg(w, 4), lambda w: pkg(w, 3)),
+                           ('nearest4 - mem_vmem(native order)', lambda w: pkg(w, 4), lambda w: pkg(w, native=True)),
+                           ('nearest4 - static', lambda w: pkg(w, 4), lambda w: pkg(w, 1)),
+                           ('nearest4 - mem_pose', lambda w: pkg(w, 4), lambda w: pkg(w, 2)),
+                           ('mem_vmem native - sorted', lambda w: pkg(w, native=True), lambda w: pkg(w, 3))):
+            blk[name] = matrix(P, t, a, b, EVAL)
+        means = {}
+        for w in P['windows']:
+            for st in w['sets']:
+                for ru in (st['rules'] or ['nat3']): means.setdefault(str(ru), []).append(np.mean([t[(w['window_id'], st['set_id'], sd)] for sd in EVAL]))
+        blk['per_rule_means'] = {k: float(np.mean(v)) for k, v in means.items()}
+        res[metric] = blk
+    ps, pn = res['psnr_db']['PRIMARY nearest4 - mem_vmem(sorted)'], res['psnr_db']['nearest4 - mem_vmem(native order)']
+    ss, sn = res['ssim']['PRIMARY nearest4 - mem_vmem(sorted)']['D'], res['ssim']['nearest4 - mem_vmem(native order)']['D']
+    res['DECISION'] = {'pass_sorted': ps['gate'], 'pass_native': pn['gate'], 'ssim_block_sorted': bool(ss < -0.01), 'ssim_block_native': bool(sn < -0.01),
+                       'wording': ('both orderings pass' if ps['gate'] and pn['gate'] else 'slot-policy-dependent (sorted only)' if ps['gate'] else
+                                   'no operational transfer at the frozen practical threshold'),
+                       'history_fraction_mem_vmem': float(np.mean([w['stepA']['frac_history'] for w in P['windows']])),
+                       'note': 'gate is a PSNR practical threshold; SSIM block is separate'}
+    OUT.write_text(json.dumps(res, indent=1) + '\n')
+    for k in ('PRIMARY nearest4 - mem_vmem(sorted)', 'nearest4 - mem_vmem(native order)', 'nearest4 - static', 'nearest4 - mem_pose', 'mem_vmem native - sorted'):
+        b = res['psnr_db'][k]; print(f"{k:38s} D {b['D']:+.3f} rooms {({r: round(v, 3) for r, v in b['D_room'].items()})} seeds {({x: round(v, 3) for x, v in b['D_seed'].items()})} PSNR-gate {b['gate']} | SSIM D {res['ssim'][k]['D']:+.4f}")
+    print('per-rule PSNR', {k: round(v, 3) for k, v in res['psnr_db']['per_rule_means'].items()}); print('DECISION', res['DECISION'])

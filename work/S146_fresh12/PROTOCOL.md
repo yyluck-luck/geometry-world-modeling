@@ -60,3 +60,24 @@ to KPS when all views are finite (unit-checked). Applies to every S146 KPS call:
 memory (VMem's own retrieval), and per-package warps. Gates: kps OK, variant KPS-R, finite positive scale, finite objective,
 ≥ half of the views with finite positive focal. Fraction of finite views recorded per call. A gate failure remains
 INELIGIBLE/INVALID_ASSAY (no substitution).
+
+## Amendment 3 (2026-10-11 ≈ 03:40 UTC; after the bank-only KPS diagnostic, before any S146 step-A selection, generation or target scoring) — operational assay with the original KPS
+Adopted in full: codex `gpt-6-astra` (ultra) decision round R267 (`work/agents/CODEX_R267_S146_PATH_DECISION.md`), §3
+"Exact proposed protocol amendment" (binding text) and §4 claim wording. Exposure: chosen after reading the bank-only
+KPS_DIAG records (`diag/`), which found non-finite original-KPS objectives in 19/72 constructions (11/24 windows) and views
+with ~40–47% non-positive depth in apt2/luke and office2/5a. No step-A selection, generation or target score existed.
+- The original geometry-qualified primary is INVALID_ASSAY at preflight and unexecuted (not a non-replication).
+  Amendment 2's dynamic KPS-R is withdrawn (rejected by R266; file kept as `kps_R_dynamic_REJECTED.py`, never used on TACC).
+- Comparator **VMem-KPS-original-operational-v1**: original S139 KPS (SHA 71528da4…) with observer-only logging
+  (`kps_orig_obs.py`), step A via `run_retrieval_s146op.py` (NMS explicit at both calls; selector output validated before
+  coercion: exactly four integer, unique, in-range indices, no target collision; no repeat-fill; selection receipt before
+  the optional render). Observer parity on an exposed chess window (identical contexts, surfels, scales) is a hard gate.
+  Internal geometry is diagnostic only (no exclusion for non-finite objectives, depth fractions, default focals).
+- Packages: rule 1 static, 2 mem_pose, 3 mem_vmem (bank-sorted), 4 nearest-4, native-order mem_vmem. Deleted prospectively:
+  rule 5, rule 6, discovery seeds 3–6, warps/Q_W, hindsight/local-vs-global and region claims.
+- Global gate: every one of the 24 windows must yield a validated policy output with the declared construction sequence
+  (non-root KPS counts [4, 19, 31]); otherwise OPERATIONAL_PANEL_UNAVAILABLE (no dropping, no substitution, no mem_pose promotion).
+- Evaluation seeds 42, 7, 1, 2 only; exposed generator replay; sealing before scoring; generation-only scorer
+  (`score_gen_s146.py`, S140 metric, no warp reads). Primary as before (D ≥ 0.20, all D_r > 0, ≥ 3/4 D_s > 0) against
+  bank-sorted and, for the broader wording, native-order mem_vmem; SSIM block per ordering; nearest − static and
+  nearest − mem_pose secondary. Namespace `operational_v1`; ≤ 480 generations; total cap 24 GPU-h.
