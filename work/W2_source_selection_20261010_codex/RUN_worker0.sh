@@ -1,0 +1,5 @@
+#!/bin/bash
+set -eu
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH='/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_environment/site-packages'
+'/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/.venv-cut3r/bin/python' /Users/rocket/Documents/Codex/2026-10-10/i-m-sharing-my-github-repo/work/week1-wt/work/W2_source_selection_20261010_codex/generate_candidates.py --manifest /Users/rocket/Documents/Codex/2026-10-10/i-m-sharing-my-github-repo/work/week1-wt/work/W2_source_selection_20261010_codex/MANIFEST.json --data-root /Users/rocket/Documents/Codex/2026-10-10/i-m-sharing-my-github-repo/work/week1-wt/work/W2_source_selection_20261010_codex/data --vmem-source '/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/work/S17C_interface_preparation/isolated_vmem_source' --weights '/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/data/cut3r/cut3r_512_dpt_4_64.pth' --out /Users/rocket/Documents/Codex/2026-10-10/i-m-sharing-my-github-repo/work/week1-wt/work/W2_source_selection_20261010_codex/candidates --device cpu --threads 4 --shard 0/2 --protocol-sha 834ecf0b57992c4ebdfd82b27723cc47d6be5f9cdb1d2bba923ae499e94eadb9

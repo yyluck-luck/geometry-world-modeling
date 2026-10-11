@@ -1,0 +1,604 @@
+{
+  "common": {
+    "code_hashes": {
+      "CUT3R/add_ckpt_path.py": "40c45aec68241a855e4a09e6a7c95aeadb4ff6fc5fa40568ee98b586b5dc6d5a",
+      "CUT3R/cloud_opt/base_opt.py": "24fab15094c0fff9ff1527d7b74911543c28926bccaa1867afb91246aa255719",
+      "CUT3R/cloud_opt/commons.py": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+      "CUT3R/cloud_opt/dust3r_opt/__init__.py": "8230021ec2368b3fcb6d7441d4e2c98f562d1c5696496f162919119d5c714b6f",
+      "CUT3R/cloud_opt/dust3r_opt/base_opt.py": "edd07a0d04e72c5687149f9dd90c36bfebcdac365c424e3ba9161fc73c495134",
+      "CUT3R/cloud_opt/dust3r_opt/commons.py": "0f634d97d70b8656361a0e21b5c5b4d2ea0aa6515999d6c9260744ee43d60c7a",
+      "CUT3R/cloud_opt/dust3r_opt/init_im_poses.py": "b3f59fbf32fd9690e63551ac14dc957edef9145bb3d5544fcb53a6eb3758bb21",
+      "CUT3R/cloud_opt/dust3r_opt/optimizer.py": "f78f52eee0fc5e435e2c8b16a868174a285e7155577c11eef0f82a464e207b11",
+      "CUT3R/cloud_opt/init_all.py": "32a46d46987671c20907e53af5277b4a7598989d56eb9b41f2c60578d478904f",
+      "CUT3R/cloud_opt/utils.py": "56f622ab8b78c99a62c83dc0e2ebac3ee7202df826889f433856c2df26d12cf7",
+      "CUT3R/config/dpt_512_vary_4_64.yaml": "becfd7b9f78212fb03f914a586230b59655618dbe24af6b58400b72f499aa360",
+      "CUT3R/config/linear_224_fixed_16.yaml": "fef27402b726bf272f89d9e5b50b82622cc0942e58d80931a88f46663ceee7f5",
+      "CUT3R/config/stage1.yaml": "1a2e3485b5b951ed809b7d31278d8b6480eca9ecd150b47a22c28841c0abe066",
+      "CUT3R/config/stage2.yaml": "3e823fbb67785e1822b9acf273bf67a7969588b8b4dfac7360d6d8839b739d82",
+      "CUT3R/config/stage3.yaml": "ea9b4aa3f3a8347912bc4eb75995457d091ee6b1658a0ecaddf26cf0081cf468",
+      "CUT3R/config/stage4.yaml": "559184be945d1dfd09034d3a9e8b0d703ec6539ff4fd7249b7b83cee2c37e5e0",
+      "CUT3R/datasets_preprocess/custom_convert2TUM.py": "fe09eb729dee08dedb8072f03ffc750feb89842bde57d49c4f39efe71bf88b0c",
+      "CUT3R/datasets_preprocess/flow_IO.py": "f02be0ed65cdb0a4cf7febeab09c369c4ae2dab70f49b4b3b84467150ee42dc3",
+      "CUT3R/datasets_preprocess/generate_set_arkitscenes.py": "457342eaf7aceeac99315bb04f8c5d2139ca1f09fb9e673f68a393595f44ce87",
+      "CUT3R/datasets_preprocess/generate_set_scannet.py": "ef2cf8887cfd8d59b2e92606c78005e1de248911da550e4329ce7bc15119e3b2",
+      "CUT3R/datasets_preprocess/generate_set_scannetpp.py": "1a83317326d8a6ea3a13dc0c79061be7aeefdaf52c98152734a27e29cfa4750a",
+      "CUT3R/datasets_preprocess/merge_dl3dv.py": "b02619f948e12ade5c7bc45addc993af1bb168ec6b6b1af9a28db319e5b2023e",
+      "CUT3R/datasets_preprocess/path_to_root.py": "cb216d17088f7e0d28b9703eee6236d937b36939fb990c0de46b0909175a4866",
+      "CUT3R/datasets_preprocess/preprocess_3dkb.py": "05d000c8c80adc13390ef486e981d1311548542c429932902854c0faed78848a",
+      "CUT3R/datasets_preprocess/preprocess_arkitscenes.py": "adc5196672879c5e20cb2d5c73422eaa51b862a84ba3235990057d73916f76ac",
+      "CUT3R/datasets_preprocess/preprocess_arkitscenes_highres.py": "d57384b55439417ae7df1b1ca4d16d6e51a9c43509d18e2530b5a9acb70c1909",
+      "CUT3R/datasets_preprocess/preprocess_bedlam.py": "48f08cb5cd2869e94ab3f2e9298aec1b23ceeb44545e88548fccce316ec2166b",
+      "CUT3R/datasets_preprocess/preprocess_blendedmvs.py": "9c38374af15594a3043a87e825da8b201de189c242c8628ff236a1730440a306",
+      "CUT3R/datasets_preprocess/preprocess_co3d.py": "e09b6790eb6238a56ed9f56590d462453bc99e570b8f3b6ecfaf54f2a2b56acc",
+      "CUT3R/datasets_preprocess/preprocess_cop3d.py": "8903c74462078c2472aa18cf9efc5960cf4fcbdd7f30828501a937e4acb29ebc",
+      "CUT3R/datasets_preprocess/preprocess_dl3dv.py": "b9d8544208cff23ae2c06b768ded354706f7112d54015c4739f076d832b05371",
+      "CUT3R/datasets_preprocess/preprocess_dynamic_replica.py": "cf4070adebe12b91309be93e615c354cecd36ab3dfdf33144444892156d4f56d",
+      "CUT3R/datasets_preprocess/preprocess_eden.py": "89d3760f8bb0363a4760af8e521928ca22ec13b76b8647540ffeead917c8a970",
+      "CUT3R/datasets_preprocess/preprocess_hoi4d.py": "8eec0d20ababb9037e37b25feeee831b058d297b9ca2353cafd5647d5b25e7dd",
+      "CUT3R/datasets_preprocess/preprocess_hypersim.py": "781710f37d859cbe6aa71d8581170f286106747b8fc6e747991ed97b2bea4e14",
+      "CUT3R/datasets_preprocess/preprocess_irs.py": "c7c0a0c2faca242ceebc5130469bb12f9009eefbabfc16e498f460097a5efe01",
+      "CUT3R/datasets_preprocess/preprocess_mapfree.py": "a1020be3aab912d97e0d68d771214d72c86d813b61eff5cc8586928c4c28dab0",
+      "CUT3R/datasets_preprocess/preprocess_mapfree2.py": "50e77d0a0230246363aa252d4a68e1f19f9147c93080bf5d0e487f87489fa1f1",
+      "CUT3R/datasets_preprocess/preprocess_megadepth.py": "a2f793737b425de587e4c78dd7e83695487168151c8b29fa578334b91f83c007",
+      "CUT3R/datasets_preprocess/preprocess_mp3d.py": "03904e5a51d0ec9724e938e74a393f4a04d07af6420085669c2d98856763019a",
+      "CUT3R/datasets_preprocess/preprocess_mvimgnet.py": "8b13507a7ca4b35556980ebf9d5fbd9e943d35406c9db993cd2744fcde8b6cca",
+      "CUT3R/datasets_preprocess/preprocess_mvs_synth.py": "dae4c1f514b24ad6d45924982b1f69b479bdcd253b82ad16b30e4b63ad550be8",
+      "CUT3R/datasets_preprocess/preprocess_omniobject3d.py": "c2b9974ac5fc946ce78cac6c33b69485a3a4a7952834efdfd00250e6a83986b3",
+      "CUT3R/datasets_preprocess/preprocess_point_odyssey.py": "3aeb90d15477e2477e323f036d94c50f88b1473b28093840156c9ae91d67496f",
+      "CUT3R/datasets_preprocess/preprocess_re10k.py": "ea86a3d92a070e98ee344fb915715992d98ace0f8865067a5c00363089f6ae4a",
+      "CUT3R/datasets_preprocess/preprocess_scannet.py": "c33aa8b8f23428bf436e615da3b809659f5c2e2b50f969d5926f208c4ae44206",
+      "CUT3R/datasets_preprocess/preprocess_scannetpp.py": "c56451d8442a789b56789f5ab9bc55e9ef0ca8857871aac5954b5afa1a80468a",
+      "CUT3R/datasets_preprocess/preprocess_smartportraits.py": "e971840aa5c9a76e87882003b3437248d299c499fe4a9a1ab592615ff213d01f",
+      "CUT3R/datasets_preprocess/preprocess_spring.py": "548f6331f824c3022964823010f34f5a9d73f22399382d7fa476a921c899f9bf",
+      "CUT3R/datasets_preprocess/preprocess_synscapes.py": "4858479412f57a2829bc2beac1a0262645118ea7cd9b997a52168b34a6b93650",
+      "CUT3R/datasets_preprocess/preprocess_tartanair.py": "405cf2d85fcad895e3cc73603a60646e68e0b9a352a00eb830797b11b97e3d17",
+      "CUT3R/datasets_preprocess/preprocess_uasol.py": "aadf12f36c7ef09a704b755caad6ba223ff27ee7158459c72456d60edd60e7c6",
+      "CUT3R/datasets_preprocess/preprocess_unreal4k.py": "b2cabae2c6545f3f2b725f8920c167191b164c94079efd8c62982b22d196f97b",
+      "CUT3R/datasets_preprocess/preprocess_urbansyn.py": "0a47257191622c8ef2a353abf99977918db070a2f42d6a8e36493337299cb1bf",
+      "CUT3R/datasets_preprocess/preprocess_waymo.py": "a346718ccb6466c10c7dbd32b646bdac634c726f78b1284a8ccb02f2435afe98",
+      "CUT3R/datasets_preprocess/preprocess_wildrgbd.py": "4fb05b192f957a24465f9a9779458f01728a0aae51292c529c8fac3272cf835a",
+      "CUT3R/datasets_preprocess/read_write_model.py": "c6fc769acd4340a84089d8f1f08b17e0b416e5c05a76298d2f6091892ab70600",
+      "CUT3R/datasets_preprocess/utils/cropping.py": "d0fa01449d91f2517f6c056b04f550620aca1c56c0b0c44467f30eebb5c6e72a",
+      "CUT3R/datasets_preprocess/utils/parallel.py": "13f6c083c4810e09a8307b640fd92f24bdd56bf1c3283da8f6ac0870120adcc8",
+      "CUT3R/demo.py": "6ceac42b7f6155fdd956ee86e73d51cc70cae4c6a6b93ee88e224e6097c1bfe6",
+      "CUT3R/demo_ga.py": "0298568a5e44f8697a0db2fc4c9e4bf421c60010a0994a42ddd5f2380cac6c89",
+      "CUT3R/eval/mv_recon/base.py": "a5d99e4c8659458b75172b6448d20aa7f4ec1dc7a03272d9ec660a76a9d30e24",
+      "CUT3R/eval/mv_recon/criterion.py": "cd2968323426d2de0a11dc40cc2e9995afec51191a3e84a5c7b81e62f2720db5",
+      "CUT3R/eval/mv_recon/data.py": "8db14fce5a79644173402cddc98a27517b5c1e8df5db25918785a9d829e6448a",
+      "CUT3R/eval/mv_recon/dataset_utils/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "CUT3R/eval/mv_recon/dataset_utils/corr.py": "13c76ab33851a37a9374146e3ba1b0a3bf1099e6e45ca6cc9c872249b8d98698",
+      "CUT3R/eval/mv_recon/dataset_utils/cropping.py": "cab9e419db61139360ebe496f1f30af1f79b9a74898586f4bcfc06d8176a7617",
+      "CUT3R/eval/mv_recon/dataset_utils/transforms.py": "cd0b470f85e2fd16d06c404c2766072a0956bbd06fae8111739aafe98d889fc3",
+      "CUT3R/eval/mv_recon/launch.py": "734cc4d87358d5a6bd1e8fada71d63998f931e41e494fc0c11755b12735c9eac",
+      "CUT3R/eval/mv_recon/utils.py": "19c832dce471873b0f9abbf6dbd33c43b6d025edbd35e16a635e98a326b8217f",
+      "CUT3R/eval/relpose/evo_utils.py": "62d5d9694501760c3d4f4a474ee7130848c921f580253f93d11478c064a262b0",
+      "CUT3R/eval/relpose/launch.py": "01292f2bac5f1a04d37f093217ff8c4bb237e2748ef15fad463c6d6109e2a6e1",
+      "CUT3R/eval/relpose/metadata.py": "bacdc417700ec78bf299ef68271e801cbdab631e9b1f2cd6cdcdc8aef03186b8",
+      "CUT3R/eval/relpose/utils.py": "f58d9558865899bb3fbaeb167358e5f119ff3a029bf29cddb7f9094b6a8071c3",
+      "CUT3R/src/croco/datasets/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "CUT3R/src/croco/datasets/crops/extract_crops_from_images.py": "40d0deaa505957e33e29b690825ad05305136b4769615911ad01756c49e028cf",
+      "CUT3R/src/croco/datasets/habitat_sim/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "CUT3R/src/croco/datasets/habitat_sim/generate_from_metadata.py": "e1f03764fc02c17b46a0194c5751d5d582ebdb1f4e00c8e89c6e84d55ffb27c3",
+      "CUT3R/src/croco/datasets/habitat_sim/generate_from_metadata_files.py": "256b884779bccbbf23b8f17af2003a93da03cbf4288ab8361399ec3e0b0cb944",
+      "CUT3R/src/croco/datasets/habitat_sim/generate_multiview_images.py": "f1f29c975905b469f700a147e5acbd9462535dcf6798a041df74d8f91d6498ea",
+      "CUT3R/src/croco/datasets/habitat_sim/multiview_habitat_sim_generator.py": "e3ac040aa682c5b0181b2820551b018e7e8dbe1b992d511a2a597461ccf782aa",
+      "CUT3R/src/croco/datasets/habitat_sim/pack_metadata_files.py": "229db302fb8332cbe6635e5f2f05976fe5610332b4d27e24898290f4b5f85c33",
+      "CUT3R/src/croco/datasets/habitat_sim/paths.py": "2c46a5b329717acf7032810cc9ed6a556007a2ba566ff7374849e5614a3ff37a",
+      "CUT3R/src/croco/datasets/pairs_dataset.py": "e7deac836d7e51024a28ea5ed1f3559fd3ae243f447fa1f364ab22bc7c8854d0",
+      "CUT3R/src/croco/datasets/transforms.py": "e2ead70dbd3cb762930ea459b1ab3bab397a9f0ca3cb395f42400745532fc1d2",
+      "CUT3R/src/croco/models/blocks.py": "1ad00f2be14dcc38c6322011e134a9cba30ad445e0fe5ceb50fbb65b9febd807",
+      "CUT3R/src/croco/models/criterion.py": "19d837dec5326843d0e4c03ffae6cab0f9274f0c3354894e7fcd9762c97ef47c",
+      "CUT3R/src/croco/models/croco.py": "ecdfa14cceba7c99007a2548a804f2c3ecac85c29f12c9228a92838ac38aabfa",
+      "CUT3R/src/croco/models/croco_downstream.py": "5c85337ca98a97940c6c4600c624ae2eec9af8435ce6b7ad5275e837bf27f160",
+      "CUT3R/src/croco/models/curope/__init__.py": "d30b867f4f8b45f019c2b9a24ef38146867e09fc0d86c55232cc56e5b1d4938e",
+      "CUT3R/src/croco/models/curope/curope2d.py": "dc49348fc210445a9b12252e1faf2ec678346e3ae3ef9735867eb39556739377",
+      "CUT3R/src/croco/models/curope/setup.py": "7b85998c132be2ece2eef307d088355e73c39b326c874518862b34f1fd209057",
+      "CUT3R/src/croco/models/dpt_block.py": "42d7fe6afaff9c6ca6acf1b808eddb6e6d480722b95d04c08da8ce27cd17d476",
+      "CUT3R/src/croco/models/head_downstream.py": "b02fdbfeb55dd3ffa53c2442a566df2f33f43bda7ffb84237665ef78f615dad8",
+      "CUT3R/src/croco/models/masking.py": "541cf1fac15d432d40fd89502e820103309d59aa1bb8e54d1088aea1fe72a460",
+      "CUT3R/src/croco/models/pos_embed.py": "ad1870ae29ad7e55358f0b5ebb4bdd47342d91474f4de472dca781b0dd248d70",
+      "CUT3R/src/croco/models/rope_cpu.py": "732f6b4f44147ac05f710f633451e26b59d5ee691dd31cdda6a252ed8461e8a9",
+      "CUT3R/src/croco/pretrain.py": "d9ab7f1f3c1d4175e5eb4be181de5b2941ddb31fe6a9904212936beaa0d4ca1a",
+      "CUT3R/src/croco/stereoflow/augmentor.py": "728502a9a6732b3970367a266e8f9f8bad2421273f4a528df0e4a2012777ba59",
+      "CUT3R/src/croco/stereoflow/criterion.py": "29d8fc10728d56a1c64269372fbba477fb01f405e9ff1fe1fdb0df00c7c13337",
+      "CUT3R/src/croco/stereoflow/datasets_flow.py": "94b8a487e1d90cc3495840ffe1385c20ebcec9a3d53918dcba9cf200bbcc1917",
+      "CUT3R/src/croco/stereoflow/datasets_stereo.py": "5229e5eb7a4605a55cd0194c229be69974f1b1cc820c00638c155ad484da4912",
+      "CUT3R/src/croco/stereoflow/engine.py": "0c98d5eca3d81cd24092f37d1a04a1f0d94716098c6112af566ec203bfdf90b8",
+      "CUT3R/src/croco/stereoflow/test.py": "9b2037c221595588a9c1684ecf9bedc5786069a7378f136984998d469c1ea252",
+      "CUT3R/src/croco/stereoflow/train.py": "504e0fbf6bf43cfb177a5b689add022db755bc954edd509fef0acb4b2b9693ad",
+      "CUT3R/src/croco/utils/misc.py": "26e81b62e015e8bb9bda7b58c6705db5d51421df000efbb0d64a3ed481673572",
+      "CUT3R/src/dust3r/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "CUT3R/src/dust3r/blocks.py": "a2c2f7fe3f941007456f832a708d14227503d03a5d17beb1aef55345bf94b089",
+      "CUT3R/src/dust3r/datasets/__init__.py": "44d163045a71f2c769262f07efada2266648f7232f40ca7d20129297c127d83a",
+      "CUT3R/src/dust3r/datasets/arkitscenes.py": "531f7082312bd3306e1b6eacb31572642d56f7b0a6e3a472e5ee12f3e656565c",
+      "CUT3R/src/dust3r/datasets/arkitscenes_highres.py": "f79e8f322b84b677ad3ac4f2c2a30de694db17110ad601a2da641bfd1592b14c",
+      "CUT3R/src/dust3r/datasets/base/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "CUT3R/src/dust3r/datasets/base/base_multiview_dataset.py": "d6de79a1c030d9ac6e8085e8751497075e9f9664e36c21eb8a75ba79425c82f9",
+      "CUT3R/src/dust3r/datasets/base/batched_sampler.py": "b07c99a09618e5af7e0ffe664007fd9194cf5b6a8f6dc247a5d20e812078230c",
+      "CUT3R/src/dust3r/datasets/base/easy_dataset.py": "720d42133416b83d793dde830283ae8c1267e8d1eaca884bf4c6af0d77626d64",
+      "CUT3R/src/dust3r/datasets/bedlam.py": "1f7e1834b3c2d964a38196583c10ed62122a4421289fc44afa66fe620ed63c67",
+      "CUT3R/src/dust3r/datasets/blendedmvs.py": "c3e62991f5aae1bd1b7134ff000e3e6bce266305f7d894e2a396f1e84f289cd1",
+      "CUT3R/src/dust3r/datasets/co3d.py": "9eaf54792831c38cdae571e0cd7f73c7b46140c1747de84f76e7b86acb5db33e",
+      "CUT3R/src/dust3r/datasets/cop3d.py": "011da64ae58ff38ab993c38860a465a5eef35ad83c08cdd3f079b6540acd485d",
+      "CUT3R/src/dust3r/datasets/dl3dv.py": "a6df42342e9cf8ec382750f73d79bb007161e1bf5a7dbd4845f22291feafb2e1",
+      "CUT3R/src/dust3r/datasets/dynamic_replica.py": "c2fa93cf842e3af15ccbc843f14fe72e4be88741e1200ec637cc18bddcc974a3",
+      "CUT3R/src/dust3r/datasets/eden.py": "67146a2ea020d46842392a85258e5848bc14f0821b47a7b6b5ba083db06cb4ff",
+      "CUT3R/src/dust3r/datasets/hoi4d.py": "471296779fbd64093c0aee3d7f279d1e02e1366abb07afef990621489b72e3f5",
+      "CUT3R/src/dust3r/datasets/hypersim.py": "43d4851eab94fb053c0d919adca3d534f7ac04532b35396ddb3adbf974cfda74",
+      "CUT3R/src/dust3r/datasets/irs.py": "f6ffc7162a1dde1510b8500150f045f8244bdf033b105f8395f093c74818169d",
+      "CUT3R/src/dust3r/datasets/mapfree.py": "fbc4d12bb9f2e06915a7065115ac3a623c5368febabaa61ba1a6ff704625e137",
+      "CUT3R/src/dust3r/datasets/megadepth.py": "ef2736d369ccf3fb3b75739934b58297c64fe33eaf4a725060217482e63fc336",
+      "CUT3R/src/dust3r/datasets/mp3d.py": "3e20428e776f42c93423aa2aabfdbd174febbe6a92c9470d83afd3688050258b",
+      "CUT3R/src/dust3r/datasets/mvimgnet.py": "a75252d8106f05fe95cf409028aba31d93c3a7b1dce68b0b3d4bbdd6c0833c95",
+      "CUT3R/src/dust3r/datasets/mvs_synth.py": "c87b10ff5331934399cb4c883a051b6432c67c316edab551daee3998ab8d36f3",
+      "CUT3R/src/dust3r/datasets/omniobject3d.py": "0f11e6da03b9fe41e86f40fe1281e1ad5e89ec050643e731f0176236c6089282",
+      "CUT3R/src/dust3r/datasets/pointodyssey.py": "5ead728f8a1a89568d38f8a7ca8c1423c9cb41194ebbf01a5271ddfa9854dd9d",
+      "CUT3R/src/dust3r/datasets/realestate10k.py": "d56877dac5303ffef371832f370bdc4e24c13d8fe45cec26c645e7707d470747",
+      "CUT3R/src/dust3r/datasets/scannet.py": "89f549daf57cbe821d15f7050b7c9fba0ebc4e813aa4ca436245edda8a6f8a9b",
+      "CUT3R/src/dust3r/datasets/scannetpp.py": "88b2400c9d9fe0e4d50364112194362c6bb1cda3decdaabc24ab12e74943c2c3",
+      "CUT3R/src/dust3r/datasets/smartportraits.py": "6acc2076c1e4b6866dfada9c3fb9848333e2f83012c98fd955253d8dac19092b",
+      "CUT3R/src/dust3r/datasets/spring.py": "98f3c2bb4565d2eff0cf26b79f50759cfe2e138117b4dae20ff675297ef4a088",
+      "CUT3R/src/dust3r/datasets/synscapes.py": "2c2e047055922150a529b6b5b8b41ad47bd66810fbd6d7806051aa3e05b0f03b",
+      "CUT3R/src/dust3r/datasets/tartanair.py": "351cf02bfb408b6fe9c9aa1481dcdfb0f31c260bfe11dd796c8d028cb42ad56e",
+      "CUT3R/src/dust3r/datasets/threedkb.py": "5e16195ffff7cf350365c24fb986de0c2f6c73050243f3a5c131ae9c27b4b0eb",
+      "CUT3R/src/dust3r/datasets/uasol.py": "f729162f30ae3c3895e0f11af5cbd767d7a2236a5554455d31fd914706a1b17d",
+      "CUT3R/src/dust3r/datasets/unreal4k.py": "1b5528a7239f01051125b7378898ff95fc0b7b7813894d237c9124e38e69f0ce",
+      "CUT3R/src/dust3r/datasets/urbansyn.py": "1f5f40b60354c47212c541c812dd9e041a5c442d92bd1c61fd85262a60702b22",
+      "CUT3R/src/dust3r/datasets/utils/__init__.py": "b75338cd2bc70ca0d9dac551d4727a0e11a8098d15a85487691a538d0284c473",
+      "CUT3R/src/dust3r/datasets/utils/corr.py": "6195285c9dc0c477a03c0d7624a068d0b3dd52386da09aa9a74e1c4c466bdef8",
+      "CUT3R/src/dust3r/datasets/utils/cropping.py": "33344ee7ae0a5dfdd0330fb76a0f3a256755c318b01c56d1434d08be57c8124b",
+      "CUT3R/src/dust3r/datasets/utils/transforms.py": "10308410a74d5b9ce263b77f0b94418bad3deaa7f1a3e0c330216538ba07d0d6",
+      "CUT3R/src/dust3r/datasets/vkitti2.py": "1a1d9ca9ee4628332411dadbb333eb4b6f131d681ade6f4aa15100a8e2b58706",
+      "CUT3R/src/dust3r/datasets/waymo.py": "c4b92fdb09e48cd8a65e7d20cd6e3f68686f262d74b443dc37823999c18f67c3",
+      "CUT3R/src/dust3r/datasets/wildrgbd.py": "0ab18544678679ec0be20bbe08a43abcd20e2f7cd6cdd712fd50f45ed1fed206",
+      "CUT3R/src/dust3r/heads/__init__.py": "2c8dc02560652e95a1be26122871b36ee170146a1add538a3ae8bd7bb7cee339",
+      "CUT3R/src/dust3r/heads/dpt_head.py": "7368f698a66711f5ac3ce8e6c4a51c9b0fbda12f9ebda1499cd45595ec600310",
+      "CUT3R/src/dust3r/heads/linear_head.py": "c52a465d11c1b8ee9145a379e8801682fe1db5ac9f076e5a55de364ec9efa424",
+      "CUT3R/src/dust3r/heads/postprocess.py": "1053c35f0962f91ad8b985a702dd5c2cff4fd94ff92d96340ff7a8dbabe81384",
+      "CUT3R/src/dust3r/inference.py": "989349373427a234aeba0bd9460346008b8cdd236aed6c019c38e5ba0dd1f161",
+      "CUT3R/src/dust3r/losses.py": "57168959c3ecfdc881460b10c186048dfc6240e582f8251cd31de456bc2ab3cb",
+      "CUT3R/src/dust3r/model.py": "43b82c734f264a2e0e0a242dbd2d42855fe4e794cc25c0d433d6ef1b0dc54150",
+      "CUT3R/src/dust3r/patch_embed.py": "c0dae36e876d2124f0e31403a3a306db7e6d5bd69d8e9c6f16bbfb81c82eef3d",
+      "CUT3R/src/dust3r/post_process.py": "e2ef308ee09ae547f64c3e8e5314cc6dd60a5ff37b2e548812af53f8f1ad1f37",
+      "CUT3R/src/dust3r/utils/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "CUT3R/src/dust3r/utils/camera.py": "f18a3ecc54492ae2878f285ad756fb1d26dbc0c4146bcf76d3f7ed2665c35d73",
+      "CUT3R/src/dust3r/utils/device.py": "19cf83aff5ec5581e2a5b3b5776937e9f238f384ba6d4c4173607ba5136f8eaf",
+      "CUT3R/src/dust3r/utils/geometry.py": "441319cc7965bb4f76b47a86bed54347883f21e01424f8538eed90461987d04d",
+      "CUT3R/src/dust3r/utils/image.py": "a2738085cdf0f713289a3a42dbd49a1f39325eb3ad590af65970fe4609209d96",
+      "CUT3R/src/dust3r/utils/misc.py": "35fba8576962fb7d17b3a335ff63de93989fbfa9c24afcfdc436322da240cd97",
+      "CUT3R/src/dust3r/utils/parallel.py": "8af1ba7e2e52a7daf1af51a955b98f7b5de3e24e70e66ab5dd3555c8df48aefb",
+      "CUT3R/src/dust3r/utils/path_to_croco.py": "3d8c68320432fd7e3527f6bb94390f2a44195957ee5460539c1d807faf35367e",
+      "CUT3R/src/dust3r/utils/render.py": "c0b286d8725ac4d5fe98f148848c100b7bc137193a98f4a6107ff5a79016449f",
+      "CUT3R/src/dust3r/viz.py": "ef736c54ff88a04474b10becf0da754a6deab94a803d5d338aeba91722ea8915",
+      "CUT3R/src/train.py": "3c8e2ba204ac9a000ead3ad903687b7071c2f53d487044d96e6b001b04359e93",
+      "CUT3R/surfel_inference.py": "8a348645cd387147c35635f0a6b432d85bcf844e3839bd5a000d8147a85b17d5",
+      "CUT3R/viser_utils.py": "e476b28c9fec525d2311d554d06d504cd38667e354ea9f4cd346be4773d86f13",
+      "generate_candidates.py": "46e0a3539e7dd25747519539efbee3911fea9f3beb37f5b61c8c481fac0509fe",
+      "kps.py": "71528da426aff2f573968411e7f60d3d112e62eaeb33f2f29007c63e50b0345f"
+    },
+    "environment": {
+      "cuda": null,
+      "cudnn": null,
+      "cudnn_benchmark": false,
+      "deterministic_algorithms": false,
+      "device": "cpu",
+      "device_name": "arm64",
+      "dtype": "float32",
+      "float32_matmul_precision": "highest",
+      "interop_threads": 1,
+      "known_K": false,
+      "lr": 0.01,
+      "niter": 0,
+      "packages": {
+        "einops": "0.8.1",
+        "numpy": "1.26.4",
+        "opencv-python-headless": "4.11.0.86",
+        "pillow": "10.3.0",
+        "roma": "1.5.1",
+        "scipy": "1.16.2",
+        "torch": "2.7.0",
+        "torchvision": "0.22.0",
+        "transformers": "4.48.3"
+      },
+      "platform": "macOS-27.2-arm64-arm-64bit",
+      "python": "3.12.14",
+      "seed": 0,
+      "size": 512,
+      "tf32_cudnn": false,
+      "tf32_matmul": false,
+      "threads": 4
+    },
+    "weight_sha256": "45f7e98a0a64dbeb54901ae2b878cd8cd125f20a4497316483f0bd6f109f8103"
+  },
+  "freeze_sha256": "02952d91ffa73c27d15935c60cfc174f65024b02aa0e095e3d1096fa691fe16b",
+  "ground_truth_opened": false,
+  "manifest_sha256": "abc4b2a057c96913f8d3e23607fe9266bb8bd46b206792ea25dd8dce61dcf8ff",
+  "protocol_sha256": "ad4d816a8cca486a2d1c245258c41169b7413018d289046b864d82510473457d",
+  "records": [
+    {
+      "npz": "scene_13__w0000__c0.npz",
+      "npz_sha256": "8915f31b723f787fd19b889e871f2783e4ff7ad5cdb36c27178311ded5db6a13",
+      "receipt": "scene_13__w0000__c0.json",
+      "receipt_sha256": "ad3037047e021a4f15aa4b236734a1bde7dfa17840b5e965d728059a3ecb395b"
+    },
+    {
+      "npz": "scene_13__w0000__c1.npz",
+      "npz_sha256": "0bebd613ad008c24b148d940deddba153b4fb9a9a31af01f30ebf3c64dda60ab",
+      "receipt": "scene_13__w0000__c1.json",
+      "receipt_sha256": "b9694277298aad16bec9c93c9f3d5019da8c4747910f1c6169c3177827d5ad44"
+    },
+    {
+      "npz": "scene_13__w0000__c2.npz",
+      "npz_sha256": "dc7a5520aea060ed3397ee536f6fc8612ac98be1f655c2fb57a629dbb2e3e9b6",
+      "receipt": "scene_13__w0000__c2.json",
+      "receipt_sha256": "18a3d3b96eccdee94c930e8776e219a3e04af134fa345613ffdc3bda0f57653d"
+    },
+    {
+      "npz": "scene_13__w0000__c3.npz",
+      "npz_sha256": "7dcf2b3e0eb23b72ecc3f4cd41c0e9869933ae81f21def11ceab2bc5f1e84a5a",
+      "receipt": "scene_13__w0000__c3.json",
+      "receipt_sha256": "e40d7ffba671fc542d4b5cb0157fed5a6b75542931f0c53dde61cf9b27346d89"
+    },
+    {
+      "npz": "scene_13__w0050__c0.npz",
+      "npz_sha256": "3cf4ac2ed8e3ccdaa85916d7e49d234f7fafb62c3d8d390545a918860bdfcff5",
+      "receipt": "scene_13__w0050__c0.json",
+      "receipt_sha256": "0e90f41f326142ddae254412feb5e6d146ad5c69a3bbdc08180e6ae73b7850dd"
+    },
+    {
+      "npz": "scene_13__w0050__c1.npz",
+      "npz_sha256": "e5983478e7c7f16075fd25ce77f4dfd97db47fef52e211a928cd39dde7bad311",
+      "receipt": "scene_13__w0050__c1.json",
+      "receipt_sha256": "54abcc8a7736b59ee603a775baf80618040a8c062d88384c96cbd7a038fd1eab"
+    },
+    {
+      "npz": "scene_13__w0050__c2.npz",
+      "npz_sha256": "d8bf469af71ea7476f1e539b2082fc6cd2ed75f3a5e34b61c2c99986f4efb89d",
+      "receipt": "scene_13__w0050__c2.json",
+      "receipt_sha256": "063e9d60e5bacd86066dd71bc00f10fa290473354775f4a15e7d81c0f3fc467e"
+    },
+    {
+      "npz": "scene_13__w0050__c3.npz",
+      "npz_sha256": "e2e3fa97447dd77f3b968080d7770ecc9514aa8f8bc4fed16f74841ded982285",
+      "receipt": "scene_13__w0050__c3.json",
+      "receipt_sha256": "46bde7ef18ec3d0dcab2f5ebf128f09d9a8a6cf0520f603fb6a2a18906a363f1"
+    },
+    {
+      "npz": "scene_13__w0100__c0.npz",
+      "npz_sha256": "bc5c1b73b1b6bb25d093cd8fc637348d4a294ea7d36f91cdceb70a69db8e77be",
+      "receipt": "scene_13__w0100__c0.json",
+      "receipt_sha256": "c82a6cfd79289248a7ad37ad17d191d8d38286ad962dbf087ba97dbc999bb71f"
+    },
+    {
+      "npz": "scene_13__w0100__c1.npz",
+      "npz_sha256": "224fbcc75950e79631d5ac1ce0db81523f702ca4a0249d7eddc9381cf6a91ff4",
+      "receipt": "scene_13__w0100__c1.json",
+      "receipt_sha256": "3af3fdb54610d4bc11b97752b90761ea7a47d4beea8b13c2f7db48d6ca302cfa"
+    },
+    {
+      "npz": "scene_13__w0100__c2.npz",
+      "npz_sha256": "edafd9e3b037d3783c2e8e65806d4daf2c8283a796263b7a1b081863827fadf9",
+      "receipt": "scene_13__w0100__c2.json",
+      "receipt_sha256": "119490747b9400772f27587688bcf9737487a6c10365b3cde9c04ee6d1cac283"
+    },
+    {
+      "npz": "scene_13__w0100__c3.npz",
+      "npz_sha256": "67732e6583cec236695625521abc6318c027559696c3f32122a1c0d83ac03f9f",
+      "receipt": "scene_13__w0100__c3.json",
+      "receipt_sha256": "42b7aafddc8d6862cdbc86961a609e96886859c61f372419fcb7e704c370a2ef"
+    },
+    {
+      "npz": "scene_13__w0150__c0.npz",
+      "npz_sha256": "2068ee95ade0130cb5419b76bea4a199cd248da55e526eac2efa3b9e5e9d38bd",
+      "receipt": "scene_13__w0150__c0.json",
+      "receipt_sha256": "fe4a6433b4ad3165efe86422fd21d68acbda2795ceb605a5f53782a516b3db57"
+    },
+    {
+      "npz": "scene_13__w0150__c1.npz",
+      "npz_sha256": "6423d7bc75d909ccd74a65c488e36b87a3b22ae882e367c0597b3fc7d998c600",
+      "receipt": "scene_13__w0150__c1.json",
+      "receipt_sha256": "4afe55f1b9a2dcfcd4e8404fad95da2a536f854f529fde185000f3a130508805"
+    },
+    {
+      "npz": "scene_13__w0150__c2.npz",
+      "npz_sha256": "981a2b1e570b832add1eb51a1750ccf6c3138bc9b399953729924971605268f5",
+      "receipt": "scene_13__w0150__c2.json",
+      "receipt_sha256": "9cf8f984a869c299494b1aeb9eabf5dbad231a910e61c02cbd34898e5c826f60"
+    },
+    {
+      "npz": "scene_13__w0150__c3.npz",
+      "npz_sha256": "391282f6a68020048489623d16ce857f303341e9999112825048c6f740353838",
+      "receipt": "scene_13__w0150__c3.json",
+      "receipt_sha256": "5add27b81fdeaec282fac8d410c3d57588b6f1de02c989dc2f56047150962e4b"
+    },
+    {
+      "npz": "scene_13__w0200__c0.npz",
+      "npz_sha256": "5fdc88723ebcc215627ae38fac45e48e58782365d957e064fa61667bab26977f",
+      "receipt": "scene_13__w0200__c0.json",
+      "receipt_sha256": "a2528aa7b8a9c0268c4ec17a088bf81881249043569ec1832a8e1effb4c7313a"
+    },
+    {
+      "npz": "scene_13__w0200__c1.npz",
+      "npz_sha256": "d9f21a4dd223f820fe830bd16e3d7b60f10d66101aa575d0da52754e9d19de55",
+      "receipt": "scene_13__w0200__c1.json",
+      "receipt_sha256": "8c1058ffc87bfb8a4c5a5de44822d8eb8a3373d1267b354a8fe4b21e5929670a"
+    },
+    {
+      "npz": "scene_13__w0200__c2.npz",
+      "npz_sha256": "300fb4585159607995c9461c1c6ae20e975000921918031b85af5376627f754d",
+      "receipt": "scene_13__w0200__c2.json",
+      "receipt_sha256": "244b8b597149af1d998a5c48a2af4e43df06c9a5d373c86e8ee6c225d17c6503"
+    },
+    {
+      "npz": "scene_13__w0200__c3.npz",
+      "npz_sha256": "2d4c3309eaef686cccee11177a4c348ed979cfec014ea202bdf770617a9f159a",
+      "receipt": "scene_13__w0200__c3.json",
+      "receipt_sha256": "f535511805157944780a4a1b9be3304bbcb5e5949c3b0e4a038520281fa7203b"
+    },
+    {
+      "npz": "scene_13__w0250__c0.npz",
+      "npz_sha256": "e3165a419a387a20dbdb8a6ccf75f73758f1f48d6b6bc21381b5e15dd475362a",
+      "receipt": "scene_13__w0250__c0.json",
+      "receipt_sha256": "e454c3943dec15415b3e4a5b2fd010ceb981495187cf0be74518fe98d44c649f"
+    },
+    {
+      "npz": "scene_13__w0250__c1.npz",
+      "npz_sha256": "e879e207042fb70652b67446097076224071aa43ba357f005b1622e93ff027f6",
+      "receipt": "scene_13__w0250__c1.json",
+      "receipt_sha256": "173c80312e800cbc72f5aafb6119168004339044d7446707e27847c5727996f1"
+    },
+    {
+      "npz": "scene_13__w0250__c2.npz",
+      "npz_sha256": "f002d9ebf36970c0cd6b182ae89e2f805ba343e37e6d561de01d545a69ef0f25",
+      "receipt": "scene_13__w0250__c2.json",
+      "receipt_sha256": "1eca3a757321224ba6535a45bb7c383da72b67c6aba91692c30c3bd78ca4d803"
+    },
+    {
+      "npz": "scene_13__w0250__c3.npz",
+      "npz_sha256": "4eef8bc1a99575a39df138b4b7efcb7985dd0c3315599ad6d299eb95355225a3",
+      "receipt": "scene_13__w0250__c3.json",
+      "receipt_sha256": "36ab6aa5172248dad1fa85d66c479f5cd3f9cce524cd56b21b5533c7366bd8dc"
+    },
+    {
+      "npz": "scene_13__w0300__c0.npz",
+      "npz_sha256": "ee0103721d387444f2ba98c890a9e58c9a691f3fba2ebb71c467d08f55db560c",
+      "receipt": "scene_13__w0300__c0.json",
+      "receipt_sha256": "a66320c5d59ebe4e270eef90d77266a9f853bddbec46c49983768608307e1182"
+    },
+    {
+      "npz": "scene_13__w0300__c1.npz",
+      "npz_sha256": "8c41c98e9863cb146055f463b8e0d6ecf4ab9bed011df84b9c252ec4afcc2e8b",
+      "receipt": "scene_13__w0300__c1.json",
+      "receipt_sha256": "0e66d5128bd98485cf6741723439c7e3542b11f3664432ea3212ba0c8896d68d"
+    },
+    {
+      "npz": "scene_13__w0300__c2.npz",
+      "npz_sha256": "c1b6bdecf56a149c0d9d3ed195f49142fad693920c2cac8600e2d4ad229a4f87",
+      "receipt": "scene_13__w0300__c2.json",
+      "receipt_sha256": "cde708fc930e4c9b3f18f5e5878ed2e3827506569d150cee33bde524851c9b19"
+    },
+    {
+      "npz": "scene_13__w0300__c3.npz",
+      "npz_sha256": "91e069d8300cb4e7bbef83a0c93477a334e2c71527d278aa921ddd7e49f080fd",
+      "receipt": "scene_13__w0300__c3.json",
+      "receipt_sha256": "3a0b6a4b36e30cddeeadb965db109bcb7d402b70d718654ce3a0fc042452e661"
+    },
+    {
+      "npz": "scene_13__w0350__c0.npz",
+      "npz_sha256": "7c63636dab7cd490b3bffb023a14c731e9ed55abfa90c28c8547313581eb45fc",
+      "receipt": "scene_13__w0350__c0.json",
+      "receipt_sha256": "c7f686392f9ef16de135958d7ea38c9102be6a43a1bda41a723278945d37e951"
+    },
+    {
+      "npz": "scene_13__w0350__c1.npz",
+      "npz_sha256": "2bec0c43021617a8792af1e3060fd5613e02d243d9fda698abc443432429829f",
+      "receipt": "scene_13__w0350__c1.json",
+      "receipt_sha256": "9ba472d2fad218f0475ad39dac41a5b2d0cb4dcc5456874783d2d63c2901a400"
+    },
+    {
+      "npz": "scene_13__w0350__c2.npz",
+      "npz_sha256": "7746e144f0fd92e7a98588b60ddeb899b6e80c76db0161a49c965ae7664c5e4c",
+      "receipt": "scene_13__w0350__c2.json",
+      "receipt_sha256": "b69c3418a08d9bfa57c2698efafe429ad036b4ffc0187ae4eeb13f72451ad044"
+    },
+    {
+      "npz": "scene_13__w0350__c3.npz",
+      "npz_sha256": "b25bbf8406f94d33828aa5ee334357acb5414a26322aefe108d2cc16c3e6be67",
+      "receipt": "scene_13__w0350__c3.json",
+      "receipt_sha256": "f6f19d5e96b4cd49fd07335e302672c3e7c346ddecd7ce71ec437360372d6038"
+    },
+    {
+      "npz": "scene_14__w0000__c0.npz",
+      "npz_sha256": "0e6e1b41567f77e37bab8528117dc918f11638dcc051af6cbc9057bfd8383027",
+      "receipt": "scene_14__w0000__c0.json",
+      "receipt_sha256": "9f3c36845a480be10a56651649a42ff20ab3d76a65e3bfe015c6620d049f76fc"
+    },
+    {
+      "npz": "scene_14__w0000__c1.npz",
+      "npz_sha256": "1024f8647f6b0a1f71a615da9b4488281cd2388ab560799ccb59c88472d58229",
+      "receipt": "scene_14__w0000__c1.json",
+      "receipt_sha256": "8b6a160eb4998924ee8ac0aef386b7a26afc886f842b11371653c3c3c4ba0b44"
+    },
+    {
+      "npz": "scene_14__w0000__c2.npz",
+      "npz_sha256": "e4e9ccf2ff02e684f9e6f69b7207bd267e48acd95b4d3972c83ffbf81a8be072",
+      "receipt": "scene_14__w0000__c2.json",
+      "receipt_sha256": "dd777ec4e36e83180f30d62e090c3cca78ecefac9d3fa143323455845efb87fd"
+    },
+    {
+      "npz": "scene_14__w0000__c3.npz",
+      "npz_sha256": "8aa61215d8a2c2e0ce6293f38480cc3c388b707c48ffd576e8a51b258315578a",
+      "receipt": "scene_14__w0000__c3.json",
+      "receipt_sha256": "9229b588bb51485d5232c9cba5e1ddebf3509bb18f663c820fa71e6731648f24"
+    },
+    {
+      "npz": "scene_14__w0050__c0.npz",
+      "npz_sha256": "2ad672fbfd0a31fbf068340d57d7b3ccedf1baf026537238ce738551b629f48c",
+      "receipt": "scene_14__w0050__c0.json",
+      "receipt_sha256": "bd2a7742acd01e4e0f3514d8128480c0654a8eecbef02609402342b5698a694c"
+    },
+    {
+      "npz": "scene_14__w0050__c1.npz",
+      "npz_sha256": "265dd1cda99338ec5d89751a75becd971448e55372a378d221b20c188367eb1e",
+      "receipt": "scene_14__w0050__c1.json",
+      "receipt_sha256": "522f1d97955874da64f4c09ae97e755a834a9fb5fd86f481bb1dafd347d29898"
+    },
+    {
+      "npz": "scene_14__w0050__c2.npz",
+      "npz_sha256": "78e55c38c0ea890df6ae44c819833884e59c21f86b0e396cb2b3597ba5d8fa3b",
+      "receipt": "scene_14__w0050__c2.json",
+      "receipt_sha256": "3b6e7abe8b2628e54d11096105634029cedf2f315dc50384d5c06f8c713cf69b"
+    },
+    {
+      "npz": "scene_14__w0050__c3.npz",
+      "npz_sha256": "6ec7304ce218e0e191eaad49a3ab7bfb6b69e7a7e696de75d288f8f5c8600031",
+      "receipt": "scene_14__w0050__c3.json",
+      "receipt_sha256": "0d28798fe2cdd3e2e2983e539959747e4b9d6b68f8dfe8c26f7a2e172e511698"
+    },
+    {
+      "npz": "scene_14__w0100__c0.npz",
+      "npz_sha256": "d23f57fd2520bf6a36a11995300500fa76e6351b51741e27cf0fa249c9589118",
+      "receipt": "scene_14__w0100__c0.json",
+      "receipt_sha256": "f04702689d7fe8b044a4aaf9d67854fa03c82d4b88fda0f4ec91c6682439e996"
+    },
+    {
+      "npz": "scene_14__w0100__c1.npz",
+      "npz_sha256": "d7458be89023c236a53a1aecefd7fd4b17e61c169f1720045d46b41a75b50c11",
+      "receipt": "scene_14__w0100__c1.json",
+      "receipt_sha256": "da82278bb4f05a4cc7fb88a60714e759f0d0e25603436fff43252cbfffe9554f"
+    },
+    {
+      "npz": "scene_14__w0100__c2.npz",
+      "npz_sha256": "09cc5abef52471b979c60b16ad5f69ce6897aad4e1be8290851530f252b0b03b",
+      "receipt": "scene_14__w0100__c2.json",
+      "receipt_sha256": "7c5f3f6f873116b572a38051f8acff1efe2dd6870f3213227f787f64e4fa9dba"
+    },
+    {
+      "npz": "scene_14__w0100__c3.npz",
+      "npz_sha256": "2f01ba18540747bfe3c9b13c990cdcd171752407effddec858dc0de2f276f4e0",
+      "receipt": "scene_14__w0100__c3.json",
+      "receipt_sha256": "70ad5cee68e5b58cc05f7b5483a28303d780f6e7fc9f6c73b4fe510e72fec065"
+    },
+    {
+      "npz": "scene_14__w0150__c0.npz",
+      "npz_sha256": "3b6f61b1a9df1a897103904a5c2daee578d3c84d14e893e2a0d61f91c5f4fcec",
+      "receipt": "scene_14__w0150__c0.json",
+      "receipt_sha256": "2db95aa412a5bf884470559f138ff092e6d79ba6af8f28d45dac6293b3ed6f63"
+    },
+    {
+      "npz": "scene_14__w0150__c1.npz",
+      "npz_sha256": "64d2ed189cbb1433222c30890ab8b5fdc0e41d310ed0630036efe408f5b8bf49",
+      "receipt": "scene_14__w0150__c1.json",
+      "receipt_sha256": "e842ff630da7fadcd197c11579917501f7c350296d3e15698a5eeaf91ccf0723"
+    },
+    {
+      "npz": "scene_14__w0150__c2.npz",
+      "npz_sha256": "b219510f4ab45149249614bef5137d330636c34d3be64956f6e9c7372e821ba0",
+      "receipt": "scene_14__w0150__c2.json",
+      "receipt_sha256": "ea7efd1c822e8b053d0648bf62a9e6597f4a717c9864ce95525403297114a36e"
+    },
+    {
+      "npz": "scene_14__w0150__c3.npz",
+      "npz_sha256": "345d2569c283c75430492aaacfd61cedb831df86d6178de7f492ad1bada32644",
+      "receipt": "scene_14__w0150__c3.json",
+      "receipt_sha256": "800d909b4e6101aa5cd3c587037c1833967e7a8ce42c7cf734243c2311f2d88a"
+    },
+    {
+      "npz": "scene_14__w0200__c0.npz",
+      "npz_sha256": "db734e985c8f577d1ed35732a80fb6bf5c8b8ba4adcffa6490b50fe02db6a9cc",
+      "receipt": "scene_14__w0200__c0.json",
+      "receipt_sha256": "51c27e70dffc1567ecdfb17f63329eaf984aa049535af70b73e065e297934cb7"
+    },
+    {
+      "npz": "scene_14__w0200__c1.npz",
+      "npz_sha256": "e12e1a00b7a3bb458d5963978e99830e363697414fbfe56ef1e077bc6f6f364c",
+      "receipt": "scene_14__w0200__c1.json",
+      "receipt_sha256": "080a296c068a2ac551bc772c7875d21fbf1664f073486f62b5ff635e81ca4b76"
+    },
+    {
+      "npz": "scene_14__w0200__c2.npz",
+      "npz_sha256": "4957fd03a77ebfd96e0ffc26e846c049b4b138b3e0035b16b3f25dc27c8a66d4",
+      "receipt": "scene_14__w0200__c2.json",
+      "receipt_sha256": "b1708fe2dcfae5c0d7b5df39b4069c25cbf98e1a12b1b1eeed5a8e65be014348"
+    },
+    {
+      "npz": "scene_14__w0200__c3.npz",
+      "npz_sha256": "4449fc8a385144a890c6b689ae99df68e636475728b782d15f1810518dd3df2c",
+      "receipt": "scene_14__w0200__c3.json",
+      "receipt_sha256": "404e53c0113296eb12d6a37beb93cf13f34e63eeb4515f8f0096e239336ccfa8"
+    },
+    {
+      "npz": "scene_14__w0250__c0.npz",
+      "npz_sha256": "e1895a0c544935d08726237087bba27c9f944e7807158015cccbeff615bf9f85",
+      "receipt": "scene_14__w0250__c0.json",
+      "receipt_sha256": "d5d8797fb92981659b8d77439f3aec4bb4d539988abe19234a20be8f7d42b2e2"
+    },
+    {
+      "npz": "scene_14__w0250__c1.npz",
+      "npz_sha256": "9b6832bd368c24397164a149dc48340998f1edb029e7483b14482968c128e74a",
+      "receipt": "scene_14__w0250__c1.json",
+      "receipt_sha256": "aa2f554348b43ea61d03c6ebd504afb5f8289d351bc3dd2627b0e887a041a81b"
+    },
+    {
+      "npz": "scene_14__w0250__c2.npz",
+      "npz_sha256": "0e06d8ef7730948575d72face1c5c67890d759df43074efecfcc858815ded86d",
+      "receipt": "scene_14__w0250__c2.json",
+      "receipt_sha256": "748f731ea3ff0e1b8ce32a5ec000f013e93be42dc46b1ca963ded175bbedb223"
+    },
+    {
+      "npz": "scene_14__w0250__c3.npz",
+      "npz_sha256": "7ad7d40b950ebed15298448fbec7fe709f9eff578b0a8b6daca6a8cf4f8e6576",
+      "receipt": "scene_14__w0250__c3.json",
+      "receipt_sha256": "f7f6bfe8014c98ff20b4178ff7ff2f69058bc71467306c2e67f5a0a0953e038e"
+    },
+    {
+      "npz": "scene_14__w0300__c0.npz",
+      "npz_sha256": "d952a8ed13815726b93aaf2dcfd70a11d37049b7caaffba5b7548127a159f212",
+      "receipt": "scene_14__w0300__c0.json",
+      "receipt_sha256": "41d11adf89c560a8f498cb40f8633389402cb67278cc17013d652218bb8e272e"
+    },
+    {
+      "npz": "scene_14__w0300__c1.npz",
+      "npz_sha256": "6a1889c24a295f96a2086b4ae1f539491af135c65453f6e02a8025752fa286c4",
+      "receipt": "scene_14__w0300__c1.json",
+      "receipt_sha256": "11ba876401e0e8183bfcf46d5f43e21026c1b3ad95c64d69e8394037843c795b"
+    },
+    {
+      "npz": "scene_14__w0300__c2.npz",
+      "npz_sha256": "43f46d559add93e8a59697bb46ef368e8540c39acf1409ff86834bd7f2e8a147",
+      "receipt": "scene_14__w0300__c2.json",
+      "receipt_sha256": "26a848c7d591ffe877522eef16397ecdbd38d7f3b4624cc7264616a58ba06091"
+    },
+    {
+      "npz": "scene_14__w0300__c3.npz",
+      "npz_sha256": "2ba663f2b119090e1c790aed783ffae1180717c8758d2865636f533abb81724b",
+      "receipt": "scene_14__w0300__c3.json",
+      "receipt_sha256": "de4fc1fd76c2fb2c6162d0722c65118eb77030e2e5b4ace2947da80546bf83c9"
+    },
+    {
+      "npz": "scene_14__w0350__c0.npz",
+      "npz_sha256": "ebe9c8c96a2655fdd012bc10fe4c9c2673d16cc1102081f3a07207945b327835",
+      "receipt": "scene_14__w0350__c0.json",
+      "receipt_sha256": "b0d8b6f26e85420d49916e2b4865450f9fbef5956212238669b6c78ccd566aa2"
+    },
+    {
+      "npz": "scene_14__w0350__c1.npz",
+      "npz_sha256": "b82fc783754ca36dcfe4f8748e05bb580af67f3c422597a45b75c3ed242d0a9e",
+      "receipt": "scene_14__w0350__c1.json",
+      "receipt_sha256": "ab7cc23cdd61540c45aa8342fa202b391eb59b7cd7e9c654f20bebfa83fa1922"
+    },
+    {
+      "npz": "scene_14__w0350__c2.npz",
+      "npz_sha256": "d1d4207d7b36f514c6ab3c53d0b737dedb2ef94abb728e4509af8135dba27f01",
+      "receipt": "scene_14__w0350__c2.json",
+      "receipt_sha256": "0a3df674b938981c0596d96a82f5144c72e553431fcf038f3dddb4cab4835e55"
+    },
+    {
+      "npz": "scene_14__w0350__c3.npz",
+      "npz_sha256": "af187a552bcb8172e9a5e704e2e558719df90f947625953cb97037d78255adba",
+      "receipt": "scene_14__w0350__c3.json",
+      "receipt_sha256": "5c8db3282f3f794a200559a6bcacf2dbc308b37ae95be4c9c66ec8444434d706"
+    }
+  ],
+  "sealed_utc": "2026-10-10T12:11:05.888118+00:00"
+}
