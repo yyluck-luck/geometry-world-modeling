@@ -47,8 +47,23 @@ preference structure is window-specific beyond a single global rule.
   exact baselines differ (codex R264 examines this).
 - Sorting mem_vmem into bank order lowered its warp from 14.57 to 14.38 dB: context order matters to CUT3R.
 
-## Fresh seeds (Amendments 1–3): pending
-Descriptive block with selections frozen on discovery seeds; seed panels as units.
+## Fresh seeds 42, 7, 1, 2 (Amendments 1–3; `results/S143_FRESH.json`; descriptive, seed panels as units)
+Selections frozen from discovery seeds only and saved before any fresh contrast (`results/S143_FRESH_FROZEN_SELECTIONS.json`);
+fresh generation passed the provenance gate (generator, helper, plan, scorer identical to discovery). 576 cells, all RTX 3090.
+| contrast | mean | fresh seed panels (42 / 7 / 1 / 2) | pairs | descriptive gate |
+|---|---|---|---|---|
+| C_frozen4_discovery: c_G_disc − c_W | **+0.384 dB** | +0.37 / +0.28 / +0.39 / +0.49 | +0.45 / +0.45 / +0.25 | pass |
+| local vs global: c_G_disc − rule 4 | +0.277 dB | +0.25 / +0.18 / +0.28 / +0.39 | +0.56 / +0.19 / +0.08 | pass |
+| **Amendment 3: nearest-4 − mem_vmem (VMem retrieval)** | **+0.738 dB** | +0.82 / +0.90 / +0.60 / +0.63 | +0.56 / +0.56 / +1.10 (17/24 windows) | pass |
+| Amendment 3: nearest-4 − c_W | +0.108 dB | +0.12 / +0.10 / +0.11 / +0.10 | −0.10 / +0.26 / +0.17 | fail (< 0.20) |
+| Amendment 3: nearest-4 − static | +0.442 dB | +0.51 / +0.48 / +0.47 / +0.31 | +0.26 / +0.44 / +0.63 | pass |
+Independent recomputation (separate minimal code): R = 0.320443 (discovery), nearest-4 − mem_vmem = +0.747 (discovery) /
++0.738 dB (fresh), equal to the analysis outputs.
+
+**Reading.** The discovery pattern holds on fresh seeds: the generator-preferred package beats the warp-preferred one
+(+0.38 dB, every seed panel), and the simple nearest-camera rule beats VMem's own surfel retrieval by +0.74 dB for VMem's
+own generator (every seed panel, every sequence pair). This is seed-level replication on the same exposed room; a scene-level
+test on untouched rooms is S146. Nearest-4 is not reliably better than the warp-preferred set (+0.11, below the bar).
 
 ## Limits
 One exposed scene (three sequence pairs sharing history banks), 24 windows, six construction rules, one frozen consumer,
