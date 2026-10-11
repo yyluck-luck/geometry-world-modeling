@@ -61,7 +61,7 @@ for w, s in jobs:
     with torch.no_grad():
         out = PM.run_inference_from_pil(pils, model, poses=gp, depths=None, lr=0.01, niter=0, device='cpu')
     kl = [dict(l) for l in LOG]
-    assert len(kl) == 1 and kl[0].get('kps') == 'OK' and np.isfinite(kl[0]['sigma']) and np.isfinite(kl[0]['median_reproj_px']), (w['window_id'], tag, kl)
+    assert len(kl) == 1 and kl[0].get('kps') == 'OK' and kl[0].get('variant') == 'KPS-R' and np.isfinite(kl[0]['sigma']) and np.isfinite(kl[0]['median_reproj_px']), (w['window_id'], tag, kl)
     ctx = [(np.asarray(Image.open(root / r.split('/')[0] / f"frame-{r.split('/')[1]}.color.png").convert('RGB')), depth640(d[0].detach().float().numpy()),
             gp[i].astype(np.float64)) for i, (r, d) in enumerate(zip(refs, out['depths']))]
     for t, n in zip(w['targets'], names):

@@ -46,3 +46,17 @@ non-finite or ≥ 2× the winner's; AND an independent bank-only agreement check
 first window's recent C frames C[s0, s0+5, …, s0+20] (bank frames, never targets) — must select the same convention
 under the same rule. Disagreement or failure → that room INELIGIBLE (no substitution). The 12-Scenes README does not state
 the axis convention; the release's pose family is that of 7-Scenes, for which the same detector selected gl (S139).
+
+## Amendment 2 (2026-10-11 ≈ 02:20 UTC; before any S146 step-A retrieval, generation or target scoring) — robust KPS (KPS-R)
+Phase-1 preparation stopped at window apt1_kitchen_s0465: in the 32-frame bank star one history view had < 50 valid
+points relative to the root view, so its KPS residual was infinite; KPS averages residuals over views, so the objective
+was infinite for every scale and the reported scale meaningless (the gate correctly refused it). Apartment traversals span
+several areas; chess (one small room) never produced this: S139 step-A KPS calls 72/72 finite, S143 rule-5 calls 24/24 finite
+(so the change below reproduces every chess retrieval exactly). Disclosed side finding: S141 B training warps had 47/2032
+clips with a non-finite KPS objective.
+**KPS-R** (S146 copy of kps.py only; S139/S143 code unchanged): the scale objective is the mean residual over views with a
+finite residual, defined only if at least half of the non-root views are finite (else infinite → gate failure). Identical
+to KPS when all views are finite (unit-checked). Applies to every S146 KPS call: rule-5 bank geometry, step-A repaired
+memory (VMem's own retrieval), and per-package warps. Gates: kps OK, variant KPS-R, finite positive scale, finite objective,
+≥ half of the views with finite positive focal. Fraction of finite views recorded per call. A gate failure remains
+INELIGIBLE/INVALID_ASSAY (no substitution).

@@ -93,8 +93,10 @@ if PHASE == '1':
             with torch.no_grad():
                 out = PM.run_inference_from_pil(pils, model, poses=gp, depths=None, lr=0.01, niter=0, device='cpu')
             kl = [dict(l) for l in LOG]
-            assert len(kl) == 1 and kl[0].get('kps') == 'OK' and np.isfinite(kl[0]['sigma']) and np.isfinite(kl[0]['median_reproj_px']) \
-                and all(f is not None and np.isfinite(f) and f > 0 for f in kl[0]['focals']), ('rule-5 geometry invalid', w['window_id'], kl)
+            fin = [f for f in kl[0]['focals'] if f is not None and np.isfinite(f)] if kl else []
+            assert len(kl) == 1 and kl[0].get('kps') == 'OK' and kl[0].get('variant') == 'KPS-R' and np.isfinite(kl[0]['sigma']) and kl[0]['sigma'] > 0 \
+                and np.isfinite(kl[0]['median_reproj_px']) and len(fin) >= int(np.ceil(0.5 * len(kl[0]['focals']))) and all(f > 0 for f in fin), \
+                ('rule-5 geometry invalid (KPS-R gate, Amendment 2)', w['window_id'], kl)
             cov = [[cover(depth640(d[0].detach().float().numpy()), gp[i].astype(np.float64), gt[j]) for j in range(4)] for i, d in enumerate(out['depths'])]
             sel = []; gains = []; union = [np.zeros_like(cov[0][0]) for _ in range(4)]
             for _ in range(4):
@@ -122,7 +124,8 @@ else:
         assert r['status'] == 'OK', (w['window_id'], 'step A blocked')
         assert len(raw) == 4 and len(set(raw)) == 4, (w['window_id'], 'not four unique retrieved ids', raw)
         assert sorted(r['memory_frames']) == sorted(bank), (w['window_id'], 'memory coverage', len(r['memory_frames']))
-        assert all(l.get('kps') == 'OK' and np.isfinite(l.get('sigma', np.nan)) for l in r['kps_log']), (w['window_id'], 'step-A KPS')
+        assert all(l.get('kps') == 'OK' and l.get('variant') == 'KPS-R' and np.isfinite(l.get('sigma', np.nan)) and np.isfinite(l.get('median_reproj_px', np.nan))
+                   for l in r['kps_log']), (w['window_id'], 'step-A KPS-R gate (Amendment 2)')
         sets = {int(k): v for k, v in w['rules_phase1'].items()}; sets[3] = sorted(raw, key=lambda x: order[x])
         uniq = {}
         for rule in range(1, 7):
