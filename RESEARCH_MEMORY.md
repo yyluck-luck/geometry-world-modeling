@@ -1,3 +1,12 @@
+## 2026-10-11 S145 结果:B 的 warp 分支在 B 自己的 LoRA 下是有用的;"上下文偏置"假说不成立
+
+**设计(R262 E2 + R263 §4,冻结 56785b92)**:固定 S141 B 检查点(0dd40c86),保留全部 LoRA,只在推理时改 warp 输入分支:关掉(B_off)、只作用于目标帧(target_only)、只留偏置(bias_only)、覆盖率分层内打乱 warp 隐变量(permuted)。chess 24 窗 × seed 3–6,重放门逐字节通过,4.27 GPU-h。
+**结果**:主对比 B_off − B_original **−0.423 dB [−0.678,−0.181]** WORSENS(7/24);次对比 target_only − original **−0.334 [−0.393,−0.272]** WORSENS(**0/24**);bias_only −0.54、permuted −0.44;SSIM 和覆盖/空洞两个区域方向都一样。B_off − A −1.01 dB;所有分支臂都比 warp 低约 3.9 dB。
+**解读**:分支在 B 共同训练出来的 LoRA 下是正贡献;把上下文槽位上的常数偏置去掉反而更差,说明 LoRA 已经适应了这个偏置。B 落后 A 的原因在 LoRA 本身学到的东西,不在分支推理时的贡献;推理时消融推不出训练时的原因(重训不在 S145 范围内)。教师强制 probe 和生成排序对不上(zero5 的单步误差更低,但 bias_only 是最差的生成臂),只作诊断。
+**审计**:`self_audit_s145.py` 75/75 通过,独立重算误差 1.8e-15。
+**S146**:操作性对比 05:41 UTC 开跑(先做 parity 检查)。
+证据:`work/S145_B_diagnosis/RESULT.md`、`results/S145_ANALYSIS.json`、`work/agents/SELF_AUDIT_S145.md`。
+
 ## 2026-10-11 S143 新 seed 复现;S144 开发门失败;S146 改为"操作性对比"
 
 **S143 新 seed(42/7/1/2,描述性)**:生成器偏好的组合比 warp 偏好的好 **+0.38 dB**(4/4 seed 面板);**nearest-4 比 VMem 自己的检索好 +0.74 dB**(4/4 面板、3/3 序列对)。独立重算一致。自审 `work/agents/SELF_AUDIT_S143.md`。

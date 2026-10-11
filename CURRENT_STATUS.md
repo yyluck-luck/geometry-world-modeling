@@ -67,10 +67,12 @@ memory claim must beat.
   (4/4 seed panels) and **nearest-4 − VMem's own retrieval +0.74 dB** (4/4 panels, 3/3 pairs). Exploratory, exposed room.
 - **S144 stopped at its development gate:** terminal release null (I = −0.003 dB); a development-fitted global blend of
   generation and warp beats A + warp-guided sampling by ~0.2 dB (optimistic; no case panel).
-- **S145 running:** B branch ablations (replay gate passed).
-- **S146 queued (operational assay, Amendment 3):** VMem's KPS memory geometry is invalid on the 12-Scenes banks (bank-only
+- **S145 done (`work/S145_B_diagnosis/RESULT.md`):** under B's own LoRA the warp branch helps: B_off − B_original
+  **−0.42 dB** [−0.68, −0.18] and target-only − original **−0.33 dB** (0/24 windows), both WORSENS, so the context-bias
+  explanation is not supported. B's deficit to A (−0.59 dB) sits in its co-trained LoRA. Inference-time only.
+- **S146 running (operational assay, Amendment 3, started 2026-10-11 05:41 UTC):** VMem's KPS memory geometry is invalid on the 12-Scenes banks (bank-only
   diagnostic), so the strict assay is INVALID at preflight; the operational comparison nearest-4 vs the original-KPS VMem
-  retrieval package (evaluation seeds) runs after S145.
+  retrieval package (evaluation seeds).
 - Next: S143 analysis; report v3 (S141 + S143); write-up. Other codex ideas on file: in-loop robust data-consistency (R257
   P), multiscale residual fusion and test-time memory-in-weights (R258), GEN3C second consumer on H800 (R259).
 - Wording (codex R253/R255): "retrieved views do not become a detectable generated-frame gain", not "the generator does

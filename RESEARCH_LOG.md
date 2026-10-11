@@ -18164,3 +18164,13 @@ S143 fresh: nearest-4 - VMem retrieval +0.74 dB (4/4 seed panels); S144 stopped 
 证据：`work/S143_context_ranking/results/S143_FRESH.json`；`work/S144_A_wgs/RESULT.md`；`work/S146_fresh12/diag`
 
 下一步：S145 (~05:45 UTC) then S146 operational (~09:30 UTC)
+
+## 2026-10-11T13:49:16+08:00 · S145 B branch ablations under B's fixed LoRA (4 arms x 24 chess windows x seeds 3-6, replay gate passed, 4.27 GPU-h) analysed and self-audited
+
+PRIMARY B_off - B_original -0.423 dB [-0.678,-0.181] WORSENS (7/24); B_target_only - B_original -0.334 [-0.393,-0.272] WORSENS (0/24) -> context-bias hypothesis not supported; bias_only -0.54, permuted -0.44; B_off - A -1.01; branch helps under B's own LoRA, B's deficit sits in the co-trained LoRA; self-audit 75/75
+
+时间依据：current clock；记录写入于 2026-10-11T05:49:16+00:00。
+
+证据：`work/S145_B_diagnosis/RESULT.md`；`work/S145_B_diagnosis/results/S145_ANALYSIS.json`；`work/agents/SELF_AUDIT_S145.md`
+
+下一步：monitor S146 operational chain (started 05:41 UTC); then codex ideation round, report v3
