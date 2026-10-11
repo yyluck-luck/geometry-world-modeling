@@ -130,6 +130,15 @@ ADAPTER_SHA = None
 if ADAPTER != 'NONE':
     st = torch.load(ADAPTER, map_location='cpu', weights_only=False)
     assert st['variant'] == VARIANT and st['rank'] == RANK, (st['variant'], st['rank'])
+    assert set(st['adapter']) == set(C.adapter_state(pipe.model)), 'adapter key set mismatch'          # R274 #1
+    assert all(torch.isfinite(v).all() for v in st['adapter'].values()), 'non-finite adapter tensor'
+    _EA = os.environ.get('EXPECT_ARM')                                   # supplied by the chain, not read from the checkpoint
+    if _EA == 'A_hist':
+        assert 'arm' not in st and sha_file(ADAPTER) == os.environ['EXPECT_SHA'], 'historical A adapter identity'
+    else:
+        assert _EA is not None and st.get('schema') == 's147-ckpt-v1' and st.get('arm') == _EA and st.get('step') == int(os.environ['EXPECT_STEP']), \
+            ('S147 adapter identity', st.get('schema'), st.get('arm'), st.get('step'), _EA, os.environ.get('EXPECT_STEP'))
+        assert st['base_adapter_sha256'] == os.environ['EXPECT_BASE_SHA'], 'S147 adapter base (A) identity'
     res = pipe.model.load_state_dict(st['adapter'], strict=False)
     assert not res.unexpected_keys and not [k for k in res.missing_keys if '.down.' in k or '.up.' in k or '.warp.' in k], res
     ADAPTER_SHA = sha_file(ADAPTER)
@@ -142,7 +151,9 @@ print(f'[s141] variant {VARIANT} adapter {ADAPTER} attn {n_attn}', flush=True)
 import hashlib as _hl
 BRANCH = os.environ.get('BRANCH', 'orig')
 assert BRANCH in ('orig', 'target_only', 'off', 'bias_only', 'permuted', 'null') and (BRANCH == 'orig' or VARIANT == 'B')
-assert BRANCH != 'null' or (PROTO is not None and tuple(PROTO.shape) == (4,))
+assert BRANCH != 'null' or (PROTO is not None and tuple(PROTO.shape) == (4,) and torch.isfinite(PROTO).all())
+if BRANCH == 'null':                                                     # must be the frozen training prototype (R274 #1)
+    assert [float(x).hex() for x in PROTO.tolist()] == json.loads(Path(os.environ['PROTO_JSON']).read_text())['prototype_hex'], 'prototype identity'
 _GMASK = {'g': None}   # target-frame indicator per 8-frame group, from ~input_masks (R263 4.2)
 _BR = {'cur': BRANCH}  # S147: effective branch per context (a package with geometry_valid == false -> true bypass 'off')
 if VARIANT == 'B':
@@ -272,12 +283,18 @@ for c, seed in jobs:
     if key0 not in cache:
         cache.clear()
         imgs = torch.stack([load_rgb(*sp(r)) for r in c['ctx_refs']]).to(device, dtype)
-        ws = [np.load(WARP_DIR / wf) for wf in c['warp_files']]
-        wimg = torch.stack([torch.from_numpy(z['filled'].astype(np.float32) / 255. * 2 - 1).permute(2, 0, 1) for z in ws]).to(device, dtype)
-        cov = torch.stack([torch.nn.functional.avg_pool2d(torch.from_numpy(z['valid'].astype(np.float32))[None, None], 8)[0] for z in ws]).to(device)
+        need_warp = mode != 'none' or (VARIANT == 'B' and _BR['cur'] != 'off')   # A / bypass never read a (possibly failed) warp (R274 #3)
+        if need_warp:
+            ws = [np.load(WARP_DIR / wf) for wf in c['warp_files']]
+            assert all(z['filled'].dtype == np.uint8 and z['filled'].shape == (576, 576, 3) and z['valid'].shape == (576, 576) for z in ws), c['ctx_key']
+            wimg = torch.stack([torch.from_numpy(z['filled'].astype(np.float32) / 255. * 2 - 1).permute(2, 0, 1) for z in ws]).to(device, dtype)
+            cov = torch.stack([torch.nn.functional.avg_pool2d(torch.from_numpy(z['valid'].astype(np.float32))[None, None], 8)[0] for z in ws]).to(device)
+        else:
+            cov = torch.zeros((4, 1, 72, 72), device=device, dtype=dtype)
         with torch.inference_mode():
             lat = encode_vae_image(imgs, ae, device, dtype); emb = encode_image(imgs, clip, device, dtype)
-            zw = encode_vae_image(wimg, ae, device, dtype)
+            zw = encode_vae_image(wimg, ae, device, dtype) if need_warp else torch.zeros((4, 4, 72, 72), device=device, dtype=dtype)
+        assert torch.isfinite(zw).all() and torch.isfinite(cov).all() and bool(((cov >= 0) & (cov <= 1)).all()), ('warp latent/coverage check', c['ctx_key'])
         moved = None
         if VARIANT == 'B' and _BR['cur'] == 'permuted':
             zw, moved = perm_latent(zw, cov, c['window_id'], c['target_refs'])

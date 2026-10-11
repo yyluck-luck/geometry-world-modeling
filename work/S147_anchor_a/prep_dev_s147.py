@@ -2,8 +2,8 @@
 """S147 development preparation (CPU; before any S147 training). R273 §7 D-E.
 usage: prep_dev_s147.py <plan_dev_s147.json> <data_root (S144 stage7)> <CPU warp dir> <S144 dev_A dir> <out_dir>
 1. DEV_GEOMETRY_VALIDITY.json: per package, from its own CPU construction receipt (WARP_LOG_monitor_cpu.jsonl) and arrays:
-   every KPS record has finite median reprojection, finite positive sigma and finite focals; filled is uint8 (576,576,3);
-   valid is a (576,576) boolean mask. No target pixels are read.
+   every KPS record has finite median reprojection, finite positive sigma and finite positive focals; filled is uint8
+   (576,576,3); valid is a (576,576) boolean mask. A missing or incomplete receipt stops the run. No target pixels are read.
 2. COPY (every package): per target, the context frame nearest to the target camera under the S141 geo distance
    (0.1 x camera-centre distance + relative rotation angle, trace clamp; ties -> first in context order), on the reference grid.
    For invalid packages a fallback warp file (filled = COPY, valid = zeros) is written to <out>/fallback_warps/ together
@@ -39,11 +39,13 @@ def geo(a, b):  # build_clips_s141.geo (W_T = 0.1)
 validity, copies, fb_plan = {}, {}, []
 for c in plan:
     k = c['ctx_key']; root = DS / c['scene_dir']; r = logs.get(k); why = []
-    if r is None: why.append('no receipt')
-    else:
-        for q in r['kps']:
-            if not (fin(q.get('median_reproj_px')) and fin(q.get('sigma')) and q['sigma'] > 0 and all(fin(f) for f in q.get('focals', []))):
-                why.append('non-finite KPS record')
+    if r is None or not isinstance(r.get('kps'), list) or not r['kps']:                     # missing provenance blocks (R274 #2)
+        raise RuntimeError(f'INVALID_IMPLEMENTATION: missing KPS provenance for {k}')
+    for q in r['kps']:
+        if not {'median_reproj_px', 'sigma', 'focals'} <= q.keys() or not q['focals']:
+            raise RuntimeError(f'INVALID_IMPLEMENTATION: incomplete KPS provenance for {k}')
+        if not (fin(q['median_reproj_px']) and fin(q['sigma']) and q['sigma'] > 0 and all(fin(f) and f > 0 for f in q['focals'])):
+            why.append('invalid KPS record')
     for f in c['warp_files']:
         z = np.load(WD / f)
         if z['filled'].dtype != np.uint8 or z['filled'].shape != (576, 576, 3) or z['valid'].shape != (576, 576) or z['valid'].dtype != bool:
@@ -74,13 +76,17 @@ for c in plan:
     else:
         zs = [np.load(OUT / 'fallback_warps' / f"{k}__fallback__t{j}.npz") for j in range(4)]; B2 = [z['filled'] for z in zs]; Mk = [z['valid'] for z in zs]
     for s in (3, 4):
-        A = [M.pred_u8(f) for f in np.load(AD / f"{k}__s{s}.npy")]
+        arr = np.load(AD / f"{k}__s{s}.npy", allow_pickle=False)
+        assert arr.shape == (4, 3, 576, 576) and np.isfinite(arr).all(), (k, s)
+        A = [M.pred_u8(f) for f in arr]
         per[(k, s)] = {a: M.metrics(M.blend(A, B2, a), refs, Mk, with_ssim=False)['psnr_db'] for a in GRID}
 seq = {c['ctx_key']: c['seq'] for c in plan}
 def score(a):
     cm = {k: np.mean([per[(k, s)][a] for s in (3, 4)]) for k in seq}
     return float(np.mean([np.mean([v for kk, v in cm.items() if seq[kk] == q]) for q in sorted(set(seq.values()))]))
 sc = {a: score(a) for a in GRID}; best = max(sc.values()); alpha = min(a for a in GRID if sc[a] == best)
+assert alpha == 0.30, f'INVALID_IMPLEMENTATION: frozen BL_A0 alpha changed to {alpha}'                # frozen value (PROTOCOL)
+a_hashes = {f"{c['ctx_key']}__s{s}.npy": sha(AD / f"{c['ctx_key']}__s{s}.npy") for c in plan for s in (3, 4)}
 (OUT / 'BL_A0_ALPHA.json').write_text(json.dumps({'alpha': alpha, 'psnr_by_alpha': sc, 'rule': 'max seed-then-clip, sequence-equal mean PSNR; ties smaller',
-    'inputs': {'plan_sha256': sha(PL), 'A_none_dir': str(AD), 'validity_sha256': sha(OUT / 'DEV_GEOMETRY_VALIDITY.json')}}, indent=1) + '\n')
+    'inputs': {'plan_sha256': sha(PL), 'A_none_dir': str(AD), 'A_none_sha256': a_hashes, 'validity_sha256': sha(OUT / 'DEV_GEOMETRY_VALIDITY.json')}}, indent=1) + '\n')
 print('BL_A0 alpha', alpha, round(best, 4))

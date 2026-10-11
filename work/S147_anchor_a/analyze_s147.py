@@ -15,9 +15,15 @@ THR, TOL = 0.20, -0.01
 ARMS = ['F_geo', 'F_null', 'J_geo', 'A_cont', 'F_geo_proto', 'F_geo_perm', 'A_none', 'COPY', 'B2', 'V', 'BL_A0', 'BL_AC']
 PRACTICAL = ['A_none', 'A_cont', 'COPY', 'B2', 'V', 'BL_A0', 'BL_AC']
 runs = S['runs']; assert len(runs) == 64
-clips = sorted({r['window_id'] for r in runs.values()}); assert len(clips) == 32
-for w in clips:
-    for s in (3, 4): assert f'{w}__s{s}' in runs, (w, s)
+expected = {c['ctx_key']: c for c in json.loads(Path(__file__).with_name('plan_dev_s147.json').read_text())['contexts']}   # frozen plan (R274 #10)
+assert len(expected) == 32 and set(runs) == {f'{w}__s{s}' for w in expected for s in (3, 4)}
+clips = sorted(expected)
+for w, c in expected.items():
+    rr = [runs[f'{w}__s{s}'] for s in (3, 4)]; assert rr[0]['geometry_valid'] == rr[1]['geometry_valid'], w
+    for s, r in zip((3, 4), rr):
+        assert (r['window_id'], r['seed'], r['seq'], r['kind']) == (c['window_id'], s, c['seq'], c['kind']), (w, s)
+        for a in ARMS:
+            for m in ('psnr_db', 'ssim'): assert isinstance(r[a][m], (int, float)) and math.isfinite(r[a][m]), (w, s, a, m)
 seq = {r['window_id']: r['seq'] for r in runs.values()}; SEQS = sorted(set(seq.values())); assert len(SEQS) == 2
 valid = {r['window_id']: r['geometry_valid'] for r in runs.values()}
 # comparators on valid packages must equal the archived S144 scores (same cells, same functions)
@@ -41,7 +47,9 @@ def clip_means(arm, m):
     return out
 
 
-def panel(d):   # equal mean of sequence means over clips with defined values
+def panel(d):   # equal mean of sequence means over clips with defined values; None if a sequence has none (regions only)
+    if any(not any(seq[w] == q and d[w] is not None for w in clips) for q in SEQS):
+        return None, {q: None for q in SEQS}
     sm = {q: float(np.mean([d[w] for w in clips if seq[w] == q and d[w] is not None])) for q in SEQS}
     return float(np.mean(list(sm.values()))), sm
 
@@ -49,6 +57,7 @@ def panel(d):   # equal mean of sequence means over clips with defined values
 def contrast(a, b):
     d = {w: (a[w] - b[w]) if a[w] is not None and b[w] is not None else None for w in clips}
     m, sm = panel(d); rng = np.random.default_rng(0); groups = {q: [d[w] for w in clips if seq[w] == q and d[w] is not None] for q in SEQS}
+    if m is None: return {'mean': None, 'seq_means': sm, 'ci95': None, 'wins': None, 'n': 0}
     bt = [np.mean([np.mean(rng.choice(groups[q], len(groups[q]))) for q in SEQS]) for _ in range(10000)]
     return {'mean': m, 'seq_means': sm, 'ci95': [float(x) for x in np.percentile(bt, [2.5, 97.5])],
             'wins': int(sum(v > 0 for v in d.values() if v is not None)), 'n': int(sum(v is not None for v in d.values()))}
@@ -67,6 +76,27 @@ for m in ('psnr_db', 'ssim', 'psnr_covered', 'psnr_holes'):
                                               and runs[f'{w}__s{s}']['F_null'][m] is not None]) for q in SEQS])) for s in (3, 4)}
     res[m] = blk
 P, Q = res['psnr_db'], res['ssim']
+
+
+def descriptive(ws, seeds=(3, 4), src=None, arms=None):   # descriptive only; cannot change any gate (R274 #10)
+    src = src or runs; arms = arms or ARMS; out = {'n_clips': len(ws), 'sequences': {}}
+    for q in SEQS:
+        ww = [w for w in ws if seq[w] == q]
+        out['sequences'][q] = {'n_clips': len(ww), 'means': {m: {a: (float(np.mean([np.mean([src[f'{w}__s{s}'][a][m] for s in seeds]) for w in ww])) if ww else None)
+                                                                for a in arms} for m in ('psnr_db', 'ssim')}}
+    ok = all(out['sequences'][q]['n_clips'] for q in SEQS)
+    out['means'] = {m: {a: (float(np.mean([out['sequences'][q]['means'][m][a] for q in SEQS])) if ok else None) for a in arms} for m in ('psnr_db', 'ssim')}
+    if src is runs:
+        out['contrasts'] = {m: {f'{a} - {b}': (out['means'][m][a] - out['means'][m][b]) if ok else None for a, b in pairs} for m in ('psnr_db', 'ssim')}
+    return out
+
+
+res['fallback_fraction'] = sum(not v for v in valid.values()) / len(clips)
+res['valid_only_descriptive'] = descriptive([w for w in clips if valid[w]])
+res['individual_seed_panels_descriptive'] = {str(s): descriptive(clips, (s,)) for s in (3, 4)}
+res['categories_descriptive'] = {kd: descriptive([w for w in clips if expected[w]['kind'] == kd]) for kd in ('memory', 'static')}
+res['archived_BL_FC_original_geometry_descriptive_only'] = descriptive(clips, src=S4['runs'], arms=['BL_FC'])
+res['region_pixel_denominators'] = {k: r['region_pixels'] for k, r in runs.items()}
 ge = lambda a, b: P[f'{a} - {b}']['mean'] >= THR and Q[f'{a} - {b}']['mean'] >= TOL
 pos2 = lambda a, b: all(v > 0 for v in P[f'{a} - {b}']['seq_means'].values())
 nonneg2 = lambda a, b: all(v >= 0 for v in P[f'{a} - {b}']['seq_means'].values())

@@ -16,6 +16,7 @@ from pathlib import Path
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import s141_common as C
+from proto_s147 import prototype, encode as proto_encode
 import torch
 import torch.nn.functional as F
 
@@ -47,12 +48,12 @@ if BRANCH:
     for c in train + val:
         if c['id'] in INVALID: continue
         o = torch.load(WARP / f"{c['id']}.pt"); w = torch.cat([o['zw'], o['cov'][:, None]], 1).float()
-        assert w.shape == (4, 5, 72, 72) and torch.isfinite(w).all(), c['id']; W5[c['id']] = w
-    zsum = torch.zeros(4, dtype=torch.float64); n = 0
-    for c in train:
-        if c['id'] in INVALID: continue
-        zsum += W5[c['id']][:, :4].double().sum(dim=(0, 2, 3)); n += 4 * 72 * 72
-    PROTO = (zsum / n).float()                                            # per-channel mean warp latent (valid training clips)
+        assert w.shape == (4, 5, 72, 72) and torch.isfinite(w).all(), c['id']
+        assert ((w[:, 4] >= 0) & (w[:, 4] <= 1)).all(), c['id']; W5[c['id']] = w
+    PROTO = prototype(W5[c['id']][:, :4] for c in train if c['id'] not in INVALID)   # proto_s147.prototype (shared code)
+    if os.environ.get('PROTO_JSON') and not os.environ.get('ENG_CLIPS'):   # frozen before training; must match bit-for-bit (full list only)
+        want = json.loads(Path(os.environ['PROTO_JSON']).read_text())['prototype_hex']
+        assert proto_encode(PROTO)['prototype_hex'] == want, ('prototype differs from the frozen PROTOTYPE.json', proto_encode(PROTO), want)
     if ARM == 'F_null':
         for k in W5: W5[k] = torch.cat([PROTO.view(1, 4, 1, 1).expand(4, 4, 72, 72), W5[k][:, 4:]], 1).contiguous()
 Kg = C.model_grid_K(C.K7).to(dev)
@@ -78,8 +79,12 @@ net = C.VMemWrapper(model)
 den = C.DiscreteDenoiser(C.DDPMDiscretization(), num_idx=1000, device=dev)
 opt = torch.optim.AdamW(params, lr=LR, weight_decay=0.0)
 sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / WARM))
-META = {'arm': ARM, 'variant': 'B' if BRANCH else 'A', 'rank': RANK, 'base_adapter': str(ADA), 'base_adapter_sha256': sha(ADA),
-        'invalid_list_sha256': sha(INV), 'prototype': PROTO}
+TRAINABLE = sorted(n_ for n_, p in model.named_parameters() if p.requires_grad)
+FROZEN = os.environ.get('S147_FROZEN_INPUTS')
+META = {'schema': 's147-ckpt-v1', 'arm': ARM, 'variant': 'B' if BRANCH else 'A', 'rank': RANK, 'base_adapter': str(ADA), 'base_adapter_sha256': sha(ADA),
+        'invalid_list_sha256': sha(INV), 'clips_sha256': sha(CLIPS), 'frozen_inputs_sha256': sha(FROZEN) if FROZEN else None,
+        'recipe': {'STEPS': STEPS, 'LR': LR, 'WARMUP': WARM, 'P_UNCOND': PU, 'RANK': RANK, 'CKPT': CK, 'ENG_CLIPS': os.environ.get('ENG_CLIPS')},
+        'trainable_names': TRAINABLE, 'prototype': PROTO, 'prototype_hex': None if PROTO is None else proto_encode(PROTO)['prototype_hex']}
 print(f'[train] arm {ARM} attn {n_attn} trainable lora {n_lora / 1e6:.3f}M warp {n_warp} clips {len(train)} (invalid '
       f'{sum(c["id"] in INVALID for c in train)}) val {len(val)} steps {STEPS} ckpt {CK} proto {None if PROTO is None else PROTO.tolist()}', flush=True)
 
@@ -119,28 +124,51 @@ def validate():
 
 
 def adapter_blob(step):
-    return {'adapter': C.adapter_state(model), 'step': step, **META}
+    return {'adapter': C.adapter_state(model), 'step': step, 'valid_updates': valid_updates, **META}
 
 
 # ---- resume ----
 step = 0; valid_updates = 0; last = OUT / 'ckpt_last.pt'; logf = OUT / 'train_log.jsonl'; schf = OUT / 'schedule.jsonl'
 PYR = random.Random(0); GEN = torch.Generator(device=dev); GEN.manual_seed(0)      # isolated training streams
-if last.exists():
+def read_schedule():
+    d = {}
+    if schf.exists():
+        for l in schf.read_text().splitlines():
+            if l.strip(): r = json.loads(l); d[r['step']] = r
+    return d
+
+
+if last.exists():   # resume admission (R274 #1): schema, provenance, keys, frozen tensors, prototype and clocks
     s = torch.load(last, weights_only=False)
-    assert s['arm'] == ARM
-    model.load_state_dict(s['adapter'], strict=False); opt.load_state_dict(s['opt']); sched.load_state_dict(s['sched'])
-    step, valid_updates = s['step'], s['valid_updates']
+    for k in ('schema', 'arm', 'variant', 'rank', 'base_adapter_sha256', 'invalid_list_sha256', 'clips_sha256', 'frozen_inputs_sha256',
+              'recipe', 'trainable_names', 'prototype_hex'):
+        assert s.get(k) == META[k], ('resume metadata mismatch', k, s.get(k), META[k])
+    expect = C.adapter_state(model)
+    assert set(s['adapter']) == set(expect), 'resume adapter key set mismatch'
+    assert all(s['adapter'][k].shape == expect[k].shape and s['adapter'][k].dtype == expect[k].dtype and torch.isfinite(s['adapter'][k]).all() for k in expect)
+    if ARM in ('F_geo', 'F_null'):
+        assert all(torch.equal(s['adapter'][k], stA['adapter'][k]) for k in stA['adapter']), 'resume: frozen A LoRA differs'
+    sch = read_schedule(); st_, vu = s['step'], s['valid_updates']
+    assert all(k in sch for k in range(st_)) and sum(not sch[k]['skip'] for k in range(st_)) == vu, 'resume: schedule prefix / valid clock mismatch'
+    assert s['sched']['last_epoch'] == vu and all(int(v['step']) == vu for v in s['opt']['state'].values()), 'resume: optimizer/scheduler clock mismatch'
+    schf.write_text(''.join(json.dumps(sch[k]) + '\n' for k in range(st_)))     # drop records of the interrupted segment
+    res_ = model.load_state_dict(s['adapter'], strict=False); assert not res_.unexpected_keys
+    opt.load_state_dict(s['opt']); sched.load_state_dict(s['sched'])
+    step, valid_updates = st_, vu
     random.setstate(s['py']); np.random.set_state(s['np']); torch.set_rng_state(s['torch']); torch.cuda.set_rng_state(s['cuda'])
     PYR.setstate(s['pyr']); GEN.set_state(s['gen'].cpu() if hasattr(s['gen'], 'cpu') else s['gen'])
+    RESUMED_ORDER_SHA = s['order_sha']
     print(f'[train] resumed at step {step} (valid updates {valid_updates})', flush=True)
 
 
 def save(path):
+    t0_ = time.time()
     torch.save({**adapter_blob(step), 'opt': opt.state_dict(), 'sched': sched.state_dict(), 'valid_updates': valid_updates,
+                'order_sha': hashlib.sha256(json.dumps([int(x) for x in order]).encode()).hexdigest(),
                 'py': random.getstate(), 'np': np.random.get_state(), 'torch': torch.get_rng_state(), 'cuda': torch.cuda.get_rng_state(),
                 'pyr': PYR.getstate(), 'gen': GEN.get_state()},
                str(path) + '.tmp')
-    os.replace(str(path) + '.tmp', path)
+    os.replace(str(path) + '.tmp', path); log({'step': step, 'save_seconds': time.time() - t0_})
 
 
 def log(rec):
@@ -152,6 +180,8 @@ if step == 0:
     tv = time.time(); v, vs = validate(); log({'step': 0, 'val': v, 'val_by_sigma': vs, 'val_seconds': time.time() - tv}); print(f'[val] step 0 {v:.5f} {vs}', flush=True)
 perm_rng = np.random.default_rng(0); order = []
 for _ in range(max(1, (step - 1) // len(train) + 1) if step > 0 else 1): order = list(perm_rng.permutation(len(train)))  # as train_s141
+if step > 0:
+    assert hashlib.sha256(json.dumps([int(x) for x in order]).encode()).hexdigest() == RESUMED_ORDER_SHA, 'resume: permutation cursor mismatch'
 t_last = time.time(); run_steps = 0; acc = []; skipped = 0; gn = torch.tensor(0.0)
 while step < STEPS and run_steps < MAXRUN:
     if step % len(train) == 0 and step > 0: order = list(perm_rng.permutation(len(train)))

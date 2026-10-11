@@ -58,12 +58,14 @@ snap = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 opt = torch.optim.AdamW(params, lr=1e-4, weight_decay=0.0)
 res['optimizer_membership_ok'] = len(opt.param_groups[0]['params']) == 2 and all(any(p is q for q in params) for p in opt.param_groups[0]['params'])
 for tag in ('c', 'uc'):
+    before = [p_.detach().clone() for p_ in params]
     cc = C.extend_concat(cond[tag], W5)
     opt.zero_grad(set_to_none=True); L = loss_of(net, cc); L.backward()
     gw = model.input_blocks[0][0].warp.weight.grad; gb = model.input_blocks[0][0].warp.bias.grad
     res[f'{tag}_loss'] = float(L); res[f'{tag}_grad_norm_w'] = float(gw.norm()); res[f'{tag}_grad_norm_b'] = float(gb.norm())
     ok &= bool(torch.isfinite(L) and torch.isfinite(gw).all() and torch.isfinite(gb).all() and gw.norm() > 0)
-opt.step()
+    opt.step()                                                           # one update per conditioning case (R274 #9)
+    res[f'{tag}_parameter_update'] = any(not torch.equal(p_, b_) for p_, b_ in zip(params, before)); ok &= res[f'{tag}_parameter_update']
 after = {k: v.detach().cpu() for k, v in model.state_dict().items()}
 changed = [k for k in snap if not torch.equal(snap[k], after[k])]
 res['changed_tensors'] = changed; ok &= sorted(changed) == names
