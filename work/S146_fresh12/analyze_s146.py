@@ -118,10 +118,12 @@ elif mode == 'op-primary':   # Amendment 3 (R267): operational assay, evaluation
                            ('nearest4 - mem_pose', lambda w: pkg(w, 4), lambda w: pkg(w, 2)),
                            ('mem_vmem native - sorted', lambda w: pkg(w, native=True), lambda w: pkg(w, 3))):
             blk[name] = matrix(P, t, a, b, EVAL)
+            if metric == 'ssim': blk[name].pop('gate')
         means = {}
         for w in P['windows']:
             for st in w['sets']:
-                for ru in (st['rules'] or ['nat3']): means.setdefault(str(ru), []).append(np.mean([t[(w['window_id'], st['set_id'], sd)] for sd in EVAL]))
+                for ru in st['rules']: means.setdefault(str(ru), []).append(np.mean([t[(w['window_id'], st['set_id'], sd)] for sd in EVAL]))
+            means.setdefault('nat3', []).append(np.mean([t[(w['window_id'], pkg(w, native=True), sd)] for sd in EVAL]))
         blk['per_rule_means'] = {k: float(np.mean(v)) for k, v in means.items()}
         res[metric] = blk
     ps, pn = res['psnr_db']['PRIMARY nearest4 - mem_vmem(sorted)'], res['psnr_db']['nearest4 - mem_vmem(native order)']

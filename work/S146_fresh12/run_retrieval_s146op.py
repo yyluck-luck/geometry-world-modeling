@@ -95,6 +95,23 @@ def save_map(rec,info,root):
  f=root/'retrieval_maps.npz'; np.savez_compressed(f,**arrays); rec['retrieval_maps']=str(f)
 if INIT in ('kps','kpsK'):
  import importlib; kps=importlib.import_module(os.environ.get('KPS_MODULE','kps_orig_obs')); IIP.init_minimum_spanning_tree=_ORIG_INIT; kps.install(IIP,log=KPS_LOG,known_K=cut3r_K(K0.astype(np.float64)) if INIT=='kpsK' else None)
+def policy_state_sha256():
+ import hashlib
+ h=hashlib.sha256()
+ def add(v):
+  if isinstance(v,torch.Tensor): v=v.detach().cpu().numpy()
+  a=np.ascontiguousarray(v)
+  h.update(str((a.dtype.str,a.shape)).encode()); h.update(a.tobytes())
+ for surfel in pipe.surfels:
+  for name in ('position','normal','radius','color'):
+   value=getattr(surfel,name)
+   if value is None: h.update(b'None')
+   else: add(value)
+ for name in ('surfel_Ks','surfel_depths','c2ws','Ks'):
+  h.update(name.encode())
+  for value in getattr(pipe,name): add(value)
+ h.update(json.dumps({str(k):list(map(int,v)) for k,v in sorted(pipe.surfel_to_timestep.items())},sort_keys=True).encode())
+ return h.hexdigest()
 records=[]; T4=int(cfg.model.target_num_frames)
 for w in MANIFEST['windows']:
  reset(); PROBES.clear(); KPS_LOG.clear(); bank=w['bank']; targets=w['targets']; recbase={'window_id':w['window_id'],'pair':w['pair'],'start':w['start'],'bank':bank,'targets':targets}
@@ -124,22 +141,23 @@ for w in MANIFEST['windows']:
   if not (okint and len(ids)==4 and len(set(ids))==4 and all(0<=i<len(bank) for i in ids) and not set(bank[i] for i in ids)&set(targets)):
    raise RuntimeError(f'POLICY_UNAVAILABLE: invalid selector output {rawt.tolist()}')
   raw=[bank[i] for i in ids]; consumer=list(raw)   # no repeat-fill (R267)
+  parity_sha=policy_state_sha256() if os.environ.get('CAPTURE_POLICY_STATE')=='1' else None
   wroot0=OUT/w['window_id']; wroot0.mkdir(parents=True,exist_ok=True)
   (wroot0/'SELECTION_RECEIPT.json').write_text(json.dumps({'window_id':w['window_id'],'raw_indices':ids,'raw_contexts':raw,'kps_log':list(KPS_LOG)},indent=1,default=str)+'\n')
   wroot=OUT/w['window_id']; wroot.mkdir(parents=True,exist_ok=True)
   s2t=pipe.surfel_to_timestep
-  s2t_keys=np.array(sorted(int(k) for k in s2t.keys()),dtype=np.int64)
-  s2t_vals=[list(s2t[k]) for k in s2t_keys.tolist()]
-  np.savez_compressed(wroot/'surfel_to_timestep.npz',keys=s2t_keys,lengths=np.array([len(v) for v in s2t_vals],dtype=np.int64),flat=np.array([int(x) for v in s2t_vals for x in v],dtype=np.int64))
-  target_K=float(np.mean(pipe.surfel_Ks)) if np.ndim(pipe.surfel_Ks[0])==0 else np.mean(pipe.surfel_Ks,axis=0)
-  tc=np.asarray(q[-1:].detach().cpu())[0]
   try:
+   s2t_keys=np.array(sorted(int(k) for k in s2t.keys()),dtype=np.int64)
+   s2t_vals=[list(s2t[k]) for k in s2t_keys.tolist()]
+   np.savez_compressed(wroot/'surfel_to_timestep.npz',keys=s2t_keys,lengths=np.array([len(v) for v in s2t_vals],dtype=np.int64),flat=np.array([int(x) for v in s2t_vals for x in v],dtype=np.int64))
+   target_K=float(np.mean(pipe.surfel_Ks)) if np.ndim(pipe.surfel_Ks[0])==0 else np.mean(pipe.surfel_Ks,axis=0)
+   tc=np.asarray(q[-1:].detach().cpu())[0]
    info=pipe.render_surfels_to_image(pipe.surfels,pipe.get_transformed_c2ws(tc),[target_K*0.65]*2,principal_points=(int(cfg.surfel.width/2),int(cfg.surfel.height/2)),image_width=int(cfg.surfel.width),image_height=int(cfg.surfel.height))
    rr={'target':targets[-1]}; save_map(rr,info,wroot); rr['frame_count']=pipe.process_retrieved_spatial_information(info)[1]
   except Exception as dexc:
    rr={'target':targets[-1],'diagnostic_render_failed':f'{type(dexc).__name__}: {dexc}'}
   wrec=dict(recbase,status='OK',raw_contexts={'memory_nms_on_clean':raw},consumer_contexts={'memory_nms_on_clean':consumer},
-            n_surfels=int(len(pipe.surfels)),memory_frames=sorted({bank[int(t)] for v in s2t.values() for t in v}),
+            n_surfels=int(len(pipe.surfels)),parity_state_sha256=parity_sha,memory_frames=sorted({bank[int(t)] for v in s2t.values() for t in v}),
             frac_history_in_context=sum(r.startswith(w['history_seq']) for r in consumer)/4.0,
             init=INIT,convention=CONVENTION,kps_log=list(KPS_LOG),construct_probes=list(PROBES),render_last_target=rr,
             seconds=round(time.time()-t0,1))
@@ -149,6 +167,6 @@ for w in MANIFEST['windows']:
   import traceback
   records.append(dict(recbase,status=('POLICY_UNAVAILABLE' if 'POLICY_UNAVAILABLE' in str(exc) else 'BLOCKED'),error=f'{type(exc).__name__}: {exc}',traceback=traceback.format_exc()[-2000:]))
   print(f"[s146op] {w['window_id']} BLOCKED {exc}",flush=True)
-blocked=sum(1 for r in records if r.get('status')=='BLOCKED')
+blocked=sum(1 for r in records if r.get('status')!='OK')
 (Path(OUT/'RETRIEVAL_RECEIPT.json')).write_text(json.dumps({'schema':'s139-retrieval-v1','convention':CONVENTION,'init':INIT,'status':'MAPS_COMPLETE_NO_DIFFUSION' if not blocked else 'PARTIAL','recorded_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'hostname':socket.gethostname(),'slurm_job_id':os.environ.get('SLURM_JOB_ID'),'records':records,'blocked_records':blocked,'new_method_validated':False,'novelty_authorization':'NONE'},indent=2,default=str)+'\n')
 print(json.dumps({'records':len(records),'blocked':blocked}))

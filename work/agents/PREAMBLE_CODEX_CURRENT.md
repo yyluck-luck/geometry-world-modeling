@@ -13,7 +13,7 @@ You are running inside a checkout of the project repository with read access and
 ## Hard constraints for THIS run
 - No GPU, no training, no weight or dataset downloads, no Slurm submissions, no SSH to clusters. Read, compute on CPU, search the web.
 - No contact with anyone. No messages, issues, PRs, emails.
-- Write only the output file named in the brief. Modify no other file.
+- Write only the output file(s) or directory the brief names. Modify no other file.
 - `new_method_validated=false`, `novelty_authorization=NONE`. Nothing you write changes them.
 
 ## Concurrency

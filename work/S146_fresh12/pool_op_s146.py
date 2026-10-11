@@ -29,18 +29,27 @@ def select(cands, c2ws, target, thr, CTX=4):  # pose_arms_s139.select
 rows, unavailable = [], []
 for room in ROOMS:
     M = json.loads((MD / f'WINDOW_MANIFEST_{room}.json').read_text()); root = STAGE / room
-    R = {r['window_id']: r for r in json.loads((SA / room / 'RETRIEVAL_RECEIPT.json').read_text())['records']}
+    recs = json.loads((SA / room / 'RETRIEVAL_RECEIPT.json').read_text())['records']
+    expected_ids = [w['window_id'] for w in M['windows']]
+    assert M['scene_dir'] == room and len(expected_ids) == len(set(expected_ids)) == 8, ('manifest identity', room)
+    assert [r['window_id'] for r in recs] == expected_ids, ('receipt panel/order mismatch', room)
+    R = {r['window_id']: r for r in recs}
     pose = lambda ref: np.loadtxt(root / ref.split('/')[0] / f"frame-{ref.split('/')[1]}.pose.txt").reshape(4, 4)
     for w in M['windows']:
         bank, tg = w['bank'], w['targets']; r = R.get(w['window_id'], {}); order = {x: i for i, x in enumerate(bank)}
         raw = (r.get('raw_contexts') or {}).get('memory_nms_on_clean', [])
         kl = r.get('kps_log', []); counts = [len(l.get('finite_at_best', [])) for l in kl]
-        ok = (r.get('status') == 'OK' and len(raw) == 4 and len(set(raw)) == 4 and all(x in order for x in raw) and not set(raw) & set(tg)
-              and r.get('bank') == bank and counts == [4, 19, 31])
+        ok = (r.get('status') == 'OK' and len(raw) == 4 and len(set(raw)) == 4 and all(x in order for x in raw)
+              and len(bank) == len(set(bank)) == 32 and len(tg) == len(set(tg)) == 4 and not set(bank) & set(tg)
+              and w.get('priming_chunks') == [15, 12] and r.get('bank') == bank and r.get('targets') == tg
+              and r.get('init') == 'kps' and r.get('convention') == 'gl'
+              and (r.get('consumer_contexts') or {}).get('memory_nms_on_clean') == raw
+              and counts == [4, 19, 31] and all(l.get('kps') == 'OK' and l.get('known_K') is False for l in kl)
+              and [len(p.get('conf_median', [])) for p in r.get('construct_probes', [])] == [5, 20, 32])
         if not ok: unavailable.append({'window_id': w['window_id'], 'status': r.get('status'), 'raw': raw, 'kps_counts': counts, 'error': r.get('error')}); continue
         bp = [pose(x) for x in bank]; tp = [pose(x) for x in tg]
         pw = sorted(geo32(bp[i], bp[j]) for i in range(5) for j in range(i + 1, 5)); thr = pw[int(len(pw) * 0.5)]
-        tq = tp[-1].copy(); tq[:3, :3] = Rot.from_quat(Rot.from_matrix(tq[:3, :3]).as_quat()).as_matrix()
+        tq = np.asarray(tp[-1], dtype=np.float32).copy(); tq[:3, :3] = Rot.from_quat(Rot.from_matrix(tq[:3, :3]).as_quat()).as_matrix()
         dist = [np.mean([geo64(b, t) for t in tp]) for b in bp]
         sets = {1: list(w['static_recent']), 2: [bank[i] for i in select(list(range(32)), bp, tq, thr)],
                 3: sorted(raw, key=lambda x: order[x]), 4: [bank[i] for i in sorted(np.argsort(np.array(dist), kind='stable')[:4])]}

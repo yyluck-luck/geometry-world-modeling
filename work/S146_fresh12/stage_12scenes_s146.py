@@ -29,8 +29,12 @@ for col, room in ROOMS:
     Kc = np.array([float(x) for x in inf['m_calibrationColorIntrinsic'].split()]).reshape(4, 4)[:3, :3]
     sx, sy = W / cw, H / ch
     K = np.array([[Kc[0, 0] * sx, 0, (Kc[0, 2] + 0.5) * sx - 0.5], [0, Kc[1, 1] * sy, (Kc[1, 2] + 0.5) * sy - 0.5], [0, 0, 1]])
-    seqs = [(int(a), int(b)) for a, b in re.findall(r'start=(\d+) ; end=(\d+)', (rdir / 'split.txt').read_text())]
-    (h0, h1), (c0, c1) = seqs[0], seqs[1]
+    rows = re.findall(r'(sequence[01])\s*\[frames=(\d+)\]\s*\[start=(\d+) ; end=(\d+)\]', (rdir / 'split.txt').read_text())
+    assert len(rows) == 2 and {x[0] for x in rows} == {'sequence0', 'sequence1'}, (key, 'split labels')
+    seqs = {name: (int(a), int(b), int(n)) for name, n, a, b in rows}
+    (h0, h1, nh), (c0, c1, nc) = seqs['sequence0'], seqs['sequence1']
+    assert h0 == 0 and h1 >= h0 and c1 >= c0 and c0 == h1 + 1, (key, 'split ranges')
+    assert nh == h1 - h0 + 1 and nc == c1 - c0 + 1, (key, 'split counts')
     out = STAGE / key; out.mkdir(parents=True, exist_ok=True)
     np.savetxt(out / 'camera-intrinsics.txt', K, fmt='%.6f')
     for sname, (a, b) in (('seq-00', (h0, h1)), ('seq-01', (c0, c1))):
