@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""R269: render report figures from one immutable Git revision, on CPU.
+"""R270: render report figures from one immutable Git revision, on CPU.
 
 Run from the repository root with a Python containing NumPy and Matplotlib:
 python -B docs/report/figures/make_figures.py. Only this directory receives outputs.
@@ -89,6 +89,8 @@ PATHS = {
     "S139_B": "work/S139_crossseq_revisit/results/S139_BASELINE_CONTRASTS.json",
     "S140": "work/S140_warp_guided/results/CONFIRM_ANALYSIS.json",
     "S139_SSIM": "work/S140_warp_guided/results/s139_ssim/S139_SSIM_ANALYSIS.json",
+    "B2_STATIC": "work/S139_crossseq_revisit/BASE_b2_static.json",
+    "B2_MEM": "work/S139_crossseq_revisit/BASE_b2_mem_vmem.json",
     "S141": "work/S141_finetune/results/S141_ANALYSIS.json",
     "S143": "work/S143_context_ranking/results/S143_ANALYSIS.json",
     "FRESH": "work/S143_context_ranking/results/S143_FRESH.json",
@@ -98,7 +100,7 @@ PATHS = {
     "GATE": "work/S144_A_wgs/results/DEV_GATE.json",
     **{f"KPS{i}": f"work/S146_fresh12/diag/KPS_DIAG_{i}.json" for i in range(3)},
 }
-DATA, SOURCES, VALUES, FIGURES, CHECKS, BLOCKED = {}, {}, [], [], [], []
+DATA, SOURCES, VALUES, FIGURES, CHECKS, BLOCKED, LIMITATIONS = {}, {}, [], [], [], [], []
 
 
 def git(*args):
@@ -137,8 +139,16 @@ def value(fig, label, metric, val, source, key, kind="MEASURED", ci=None, formul
 
 def save(fig, stem, title, caption, sources):
     fig.canvas.draw()
+    if stem == "fig02a_s141_chess":
+        renderer = fig.canvas.get_renderer()
+        for ax in fig.axes:
+            for label in ax.texts:
+                bounds = label.get_window_extent(renderer)
+                if bounds.x0 <= ax.bbox.x1 or not fig.bbox.contains(bounds.x1, bounds.y1):
+                    raise ValueError("fig02a value column overlaps plot or leaves canvas")
+        CHECKS.append("fig02a: renderer confirms all value-label bounding boxes are outside the axes and inside the canvas; zero lines and markers remain inside axes.")
     for ext in ("png", "pdf"):
-        metadata = {"Creator": "R269 make_figures.py", "Title": title,
+        metadata = {"Creator": "R270 make_figures.py", "Title": title,
                     "CreationDate": None, "ModDate": None} if ext == "pdf" else None
         fig.savefig(OUT / f"{stem}.{ext}", dpi=300, facecolor="white", metadata=metadata)
     plt.close(fig)
@@ -149,6 +159,10 @@ def forest(stem, title, rows, category, source="S141", footer=None):
     """Plot archived intervals without recomputing confidence limits."""
     fig, axes = plt.subplots(1, 2, figsize=(11.6, max(4.8, 1.1 + 0.63 * len(rows))))
     fig.subplots_adjust(left=0.34, right=0.975, top=0.80, bottom=0.23, wspace=0.36)
+    value_column = stem == "fig02a_s141_chess"
+    if value_column:
+        fig.set_size_inches(12.8, 5.2)
+        fig.subplots_adjust(left=0.32, right=0.90, wspace=0.62)
     fig.suptitle(title, y=0.97, fontsize=15, fontweight="bold")
     for ax, metric, xlabel in zip(axes, ("psnr_db", "ssim"), ("Δ PSNR (dB)", "Δ SSIM")):
         for y, (section, key, label, primary) in enumerate(rows):
@@ -160,8 +174,13 @@ def forest(stem, title, rows, category, source="S141", footer=None):
             marker = "D" if primary else "o"
             ax.errorbar(m, y, xerr=[[m-lo], [hi-m]], fmt=marker, color=color,
                         markersize=7, capsize=4, linewidth=1.6)
-            ax.annotate(f"{m:+.3f}", (m, y), xytext=(0, 9), textcoords="offset points",
-                        ha="center", fontsize=9, color="#27313A")
+            if value_column:
+                # A separate column cannot cross a zero line, interval or marker.
+                ax.text(1.04, y, f"{m:+.3f}", transform=ax.get_yaxis_transform(),
+                        ha="left", va="center", fontsize=10, color="#27313A")
+            else:
+                ax.annotate(f"{m:+.3f}", (m, y), xytext=(0, 9), textcoords="offset points",
+                            ha="center", fontsize=9, color="#27313A")
         ax.axvline(0, color="#69737D", linewidth=1, linestyle="--")
         ax.set_yticks(range(len(rows)), [r[2] for r in rows] if ax is axes[0] else [])
         ax.set_ylim(len(rows)-0.45, -0.6)
@@ -170,6 +189,105 @@ def forest(stem, title, rows, category, source="S141", footer=None):
         ax.grid(axis="x")
     fig.text(0.34, 0.035, footer or "Points: mean contrast. Bars: archived 95% window-bootstrap CI.\nPositive values favour the first arm; PSNR and SSIM use separate scales.", fontsize=10)
     save(fig, stem, title, category, [source])
+
+
+def fig_s139_s140():
+    """Keep heterogeneous archived schemas explicit; never infer a missing metric."""
+    stem = "fig01_s139_s140_chess"
+    s139, ssim, s140 = DATA["S139"], DATA["S139_SSIM"], DATA["S140"]
+    arms = ("static_recent", "mem_vmem", "mem_pose")
+    if set(s139["arm_means_db"]) != set(arms) or set(ssim["ssim_means"]) != set(arms):
+        raise ValueError("Unexpected S139 arm-mean schema")
+    static, memory = DATA["B2_STATIC"], DATA["B2_MEM"]
+    for d, arm in ((static, "static_recent"), (memory, "mem_vmem")):
+        if d["schema"] != "s139-baselines-v1" or d["arm"] != arm:
+            raise ValueError("Unexpected S139 baseline schema")
+        if len({r["window_id"] for r in d["rows"]}) != len(d["rows"]):
+            raise ValueError("Duplicate S139 baseline windows")
+    windows = {r["window_id"] for r in static["rows"]}
+    if windows != {r["window_id"] for r in memory["rows"]}:
+        raise ValueError("Static/memory B2 populations differ")
+    primary = s139["contrasts"]["PRIMARY_mem_vmem_vs_static_recent"]
+    if primary["n_windows"] != len(windows) or s139["seeds_per_window"] != [8]:
+        raise ValueError("Unexpected S139 window/seed counts")
+    if any("ssim" in r for r in static["rows"]):
+        raise ValueError("Static B2 SSIM is now present; review schema and replace N/A")
+    LIMITATIONS.append("Figure 1: B2(static_recent) SSIM is not recorded in the committed inputs. B2_STATIC:/rows/* contains psnr but no ssim; S140 warps score mem_vmem contexts only. The SSIM cell is explicitly N/A, not zero or an estimate.")
+    labels = ["VMem · static_recent", "VMem · mem_vmem", "VMem · mem_pose",
+              "B2 · static_recent", "B2 · mem_vmem", "S140 WGS · mem_vmem"]
+    means = {"psnr_db": [], "ssim": []}
+    for metric in means:
+        src, key = ("S139", "arm_means_db") if metric == "psnr_db" else ("S139_SSIM", "ssim_means")
+        for arm, label in zip(arms, labels):
+            means[metric].append(value(stem, label, metric, DATA[src][key][arm], src, ptr(key, arm)))
+        if metric == "psnr_db":
+            means[metric].append(value(stem, labels[3], metric, np.mean([r["psnr"] for r in static["rows"]]),
+                                       "B2_STATIC", "/rows/*/psnr", kind="DERIVED",
+                                       formula="arithmetic mean over unique /rows/*/window_id; deterministic warp, no seed replication"))
+            if not math.isclose(np.mean([r["psnr"] for r in memory["rows"]]), s140[metric]["means"]["B2"], rel_tol=0, abs_tol=1e-10):
+                raise ValueError("S139 memory warp disagrees with S140 B2 PSNR")
+        else:
+            means[metric].append(None)
+        for arm, label in zip(("B2", "WGS"), labels[4:]):
+            means[metric].append(value(stem, label, metric, s140[metric]["means"][arm], "S140", ptr(metric, "means", arm)))
+        if not s140[metric]["seeds_complete_8"] or not math.isclose(means[metric][1], s140[metric]["means"]["VMem"], rel_tol=0, abs_tol=1e-10):
+            raise ValueError("S139/S140 VMem means or seed counts disagree")
+    contrasts = {}
+    for metric in means:
+        if metric == "psnr_db":
+            entries = [("S139", ("contrasts", "PRIMARY_mem_vmem_vs_static_recent"), "mean_db", "ci95_window", "n_windows")]
+        else:
+            entries = [("S139_SSIM", ("contrasts", "mem_vmem-static_recent_ssim"), "mean", "ci", "n")]
+        entries += [("S140", (metric, key), "mean", "ci95", "n") for key in ("B2_minus_VMem", "WGS_minus_B2")]
+        contrast_labels = ["VMem(mem_vmem) − VMem(static_recent)", "B2(mem_vmem) − VMem(mem_vmem)", "WGS − B2(mem_vmem)"]
+        contrasts[metric] = []
+        for (src, parts, mk, ck, nk), label, (a, b) in zip(entries, contrast_labels, ((1, 0), (4, 1), (5, 4))):
+            d = DATA[src]
+            for part in parts:
+                d = d[part]
+            m = value(stem, label, "contrast " + metric, d[mk], src, ptr(*parts) + f"/{{{mk},{ck}}}", ci=d[ck])
+            if d[nk] != len(windows) or not math.isclose(m, means[metric][a]-means[metric][b], rel_tol=0, abs_tol=1e-10):
+                raise ValueError("S139/S140 contrast population or mean mismatch")
+            contrasts[metric].append((m, *d[ck]))
+    # This file is formatted text; retain it only as a rounding check.
+    m, lo, hi = contrasts["psnr_db"][1]
+    if not DATA["S139_B"]["B2_mem_vmem - VMem mem_vmem"]["all"].startswith(f"{m:+.2f} [{lo:+.2f},{hi:+.2f}]"):
+        raise ValueError("Rounded S139 baseline contrast disagrees with full-precision S140")
+    fig, axes = plt.subplots(2, 2, figsize=(13.2, 8.2), gridspec_kw={"height_ratios": [1.35, 1]})
+    fig.subplots_adjust(left=0.31, right=0.94, bottom=0.16, top=0.84, hspace=0.65, wspace=0.43)
+    for col, metric in enumerate(means):
+        ax = axes[0, col]
+        for y, m in enumerate(means[metric]):
+            if m is None:
+                ax.text(0.5, y, "N/A · SSIM not recorded", transform=ax.get_yaxis_transform(),
+                        va="center", ha="center", fontsize=10, color="#59636D")
+            else:
+                ax.plot(m, y, marker=MARKERS[y], color=COLORS[y], markersize=8, linestyle="none")
+                ax.annotate(f"{m:.3f}", (m, y), xytext=(9, 0), textcoords="offset points", va="center", fontsize=10)
+        ax.set_yticks(range(6), labels if col == 0 else [])
+        ax.set_ylim(5.7, -0.7)
+        ax.set_xlim((10.8, 15.6) if col == 0 else (0.41, 0.515))
+        ax.set_xlabel("Mean PSNR (dB)" if col == 0 else "Mean SSIM")
+        ax.set_title("(a) Arm means · PSNR" if col == 0 else "(b) Arm means · SSIM", fontsize=13)
+        ax.grid(axis="x")
+        ax = axes[1, col]
+        for y, (m, lo, hi) in enumerate(contrasts[metric]):
+            ax.errorbar(m, y, xerr=[[m-lo], [hi-m]], fmt=MARKERS[y], color=COLORS[y], markersize=7, capsize=4)
+            ax.text(1.035, y, f"{m:+.3f}", transform=ax.get_yaxis_transform(), va="center", fontsize=10)
+        ax.axvline(0, color="#69737D", linestyle="--", linewidth=1)
+        ax.set_yticks(range(3), ["VMem: mem_vmem − static_recent", "B2(mem_vmem) − VMem(mem_vmem)", "WGS − B2(mem_vmem)"] if col == 0 else [])
+        ax.set_ylim(2.6, -0.6)
+        ax.margins(x=0.15)
+        ax.set_xlabel("Δ PSNR (dB)" if col == 0 else "Δ SSIM")
+        ax.set_title("(c) Paired contrasts · PSNR" if col == 0 else "(d) Paired contrasts · SSIM", fontsize=13)
+        ax.grid(axis="x")
+    fig.suptitle("S139 / S140 · Chess: arm means and key contrasts", fontsize=16, fontweight="bold", y=0.97)
+    fig.text(0.31, 0.90, f"{len(windows)} windows · 8 generation seeds per window · separate metric scales", fontsize=11)
+    fig.text(0.08, 0.035, "B2: geometric warp; WGS: warp-guided sampling. Arm means are descriptive (no archived mean CIs).\nContrast bars: archived 95% window-bootstrap CIs after seed averaging; positive favours the first arm.\nB2(static_recent) SSIM is unavailable in the committed snapshot; the missing cell is not an estimated score.", fontsize=10)
+    save(fig, stem, "S139 / S140 chess arm means and contrasts",
+         "B2(mem_vmem) exceeds VMem(mem_vmem) in PSNR but trails it in SSIM; WGS minus B2 includes zero for PSNR and is positive for SSIM. The top panels show every requested arm, with unavailable static-context B2 SSIM explicitly marked N/A. The bottom panels retain the archived paired window-bootstrap intervals on seed-averaged windows, not confidence intervals over scenes or seed panels. S139's window interval is used, not its separate pair-cluster sensitivity interval.",
+         ["S139", "S139_SSIM", "S140", "B2_STATIC", "B2_MEM", "S139_B"])
+    CHECKS.append("S139/S140: explicit numeric schema mapping; static/memory B2 unique window sets match; all contrast counts and mean differences agree; S139/S140 VMem means and B2 memory PSNR agree within 1e-10; rounded baseline text agrees. Static B2 SSIM is N/A.")
 
 
 def fig_s141():
@@ -305,24 +423,50 @@ def fig_s144():
     if not math.isclose(interaction, gate["means"]["I"], abs_tol=1e-10):
         raise ValueError("S144 interaction mismatch")
     value("fig04_s144_development", "Interaction I (annotation)", "PSNR dB", gate["means"]["I"], "GATE", "/means/I")
-    fig, ax = plt.subplots(figsize=(9.7, 7.8))
-    fig.subplots_adjust(left=0.22, right=0.94, top=0.86, bottom=0.16)
+    deltas = {arm: value("fig04_s144_development", f"{arm} − B2", "PSNR difference dB", means[arm]-means["B2"],
+                        "DEV", f"/runs/*/{{{arm},B2}}/psnr_db", kind="DERIVED",
+                        formula="seed-averaged window mean of arm minus seed-averaged window mean of B2") for arm in arms}
+    threshold = value("fig04_s144_development", "Required A_R advantage", "gate dB", 0.20,
+                      "GATE", "/checks/means_ge_0.20", kind="ANALYTICAL",
+                      formula="threshold encoded in check name; work/S144_A_wgs/analyze_s144.py:56-57 and PROTOCOL.md:20-23")
+    ceiling = value("fig04_s144_development", "Relevant-control ceiling relative to B2", "PSNR difference dB",
+                    deltas["A_R"]-threshold, "DEV,GATE", "/runs/*/{A_R,B2}/psnr_db; /checks/means_ge_0.20",
+                    kind="DERIVED", formula="(mean A_R - mean B2) - 0.20; applies to A_C and mandatory controls only")
+    fig, ax = plt.subplots(figsize=(10.8, 8.8))
+    fig.subplots_adjust(left=0.28, right=0.95, top=0.80, bottom=0.20)
     ys = np.arange(len(arms))
     colors = ["#8F9AA4"] * 2 + [COLORS[0]] * 2 + [COLORS[2]] * 3 + [COLORS[3]] * 4 + [COLORS[1]] * 3
-    bars = ax.barh(ys, [means[a] for a in arms], color=colors, height=0.68, edgecolor="#3B444C", linewidth=0.5)
-    ax.bar_label(bars, labels=[f"{means[a]:.3f}" for a in arms], padding=5, fontsize=10)
-    labels = ["B2 · warp", "V · VAE round-trip", "F_C · frozen, clamp", "F_R · frozen, release", "A_C · adapted, clamp", "A_R · adapted, release", "A_none · adapted only", "P_V · covered paste", "P_FC · covered paste", "P_AC · covered paste", "REV_AC · reverse paste", "BL_V · fitted blend", "BL_FC · fitted blend", "BL_AC · fitted blend"]
+    for y, arm, color in zip(ys, arms, colors):
+        if arm == "A_none":
+            ax.plot(-0.06, y, marker="<", color=color, markersize=9, clip_on=False)
+            ax.annotate(f"Off scale: {deltas[arm]:+.3f} dB ({means[arm]:.2f} dB absolute)",
+                        (-0.06, y), xytext=(14, 0), textcoords="offset points", va="center", fontsize=10,
+                        bbox={"facecolor": "white", "edgecolor": "none", "pad": 2}, zorder=5)
+            continue
+        marker = "D" if arm.startswith("BL_") else "s" if arm.startswith(("P_", "REV_")) else "o"
+        ax.plot(deltas[arm], y, marker=marker, color=color, markersize=8, markeredgecolor="#3B444C", markeredgewidth=0.6)
+        ax.annotate(f"{deltas[arm]:+.3f}", (deltas[arm], y), xytext=(9, 0), textcoords="offset points",
+                    va="center", fontsize=10, bbox={"facecolor": "white", "edgecolor": "none", "pad": 1}, zorder=5)
+    labels = ["B2 · warp †", "V · VAE round-trip †", "F_C · frozen, clamp", "F_R · frozen, release", "A_C · adapted, clamp †", "A_R · adapted, release", "A_none · context-only", "P_V · covered paste †", "P_FC · covered paste †", "P_AC · covered paste †", "REV_AC · reverse paste", "BL_V · fitted blend †", "BL_FC · fitted blend †", "BL_AC · fitted blend †"]
     ax.set_yticks(ys, labels)
-    ax.invert_yaxis()
-    ax.set_xlim(0, max(means.values())*1.13)
-    ax.set_xlabel("Development mean PSNR (dB)")
+    ax.set_ylim(len(arms)-0.3, -0.8)
+    ax.set_xlim(-0.06, 0.49)
+    ax.axvline(0, color="#9BA4AC", linewidth=1, zorder=0)
+    ax.axvline(ceiling, color=COLORS[4], linestyle="--", linewidth=1.4, zorder=0)
+    ax.axvline(deltas["A_R"], color=COLORS[2], linestyle=":", linewidth=1.4, zorder=0)
+    ax.annotate("", xy=(ceiling, 1.07), xytext=(deltas["A_R"], 1.07), xycoords=ax.get_xaxis_transform(),
+                arrowprops={"arrowstyle": "<->", "color": "#47525C"}, annotation_clip=False)
+    ax.text((ceiling+deltas["A_R"])/2, 1.095, "+0.20 dB required advantage", transform=ax.get_xaxis_transform(), ha="center", fontsize=10)
+    ax.text(ceiling, 1.025, "Control ceiling †", transform=ax.get_xaxis_transform(), ha="center", fontsize=10, color=COLORS[4])
+    ax.text(deltas["A_R"], 1.025, "A_R", transform=ax.get_xaxis_transform(), ha="center", fontsize=10, color=COLORS[2])
+    ax.set_xlabel("Development mean PSNR difference from B2 (dB) · zoomed")
     ax.grid(axis="x")
     status = "PASS" if gate["PERFORMANCE_GO"] else "FAIL — stopped at development gate"
     fig.suptitle(f"S144 · {status}", fontsize=15, fontweight="bold", y=0.97)
-    fig.text(0.22, 0.89, f"Interaction I = {gate['means']['I']:+.4f} dB", fontsize=12)
-    fig.text(0.07, 0.035, "Development only. Blends were fitted on this panel; their scores are optimistic.\nEqual weight per window after seed averaging. No confidence intervals are supplied for arm means.", fontsize=10)
-    save(fig, "fig04_s144_development", "S144 development arm/control PSNR",
-         "S144 fails its archived development gate. Bars include every scored arm/control and start at zero. V denotes the warp's VAE round-trip; F/A are frozen/adapted backbones, C/R are terminal clamp/release, P replaces covered pixels, REV reverses that paste, and BL is a development-fitted global blend. These development scores do not establish held-out improvement.", ["DEV", "GATE"])
+    fig.text(0.28, 0.92, f"B2 = {means['B2']:.3f} dB · Interaction I = {gate['means']['I']:+.4f} dB", fontsize=11)
+    fig.text(0.07, 0.035, "Development only. Blends fitted on development, optimistic; no held-out improvement claim.\n† A_C and mandatory controls must lie at or left of the ceiling: (A_R − B2) − 0.20 dB.\nThe full gate also tests interaction, SSIM and per-sequence signs. A_R is the reference, not a control.\nEqual weight per window after seed averaging. No archived CIs for these descriptive arm differences.", fontsize=10)
+    save(fig, "fig04_s144_development", "S144 development arm/control differences from B2",
+         "S144 fails its archived development gate. Every arm/control is shown relative to B2 on a zoomed dot plot; A_none is explicitly annotated off scale with its absolute PSNR. The dashed control ceiling is (A_R − B2) − 0.20 dB, so only dagger-marked gate controls must lie to its left; the dotted line marks A_R. V is the warp's VAE round-trip; F/A are frozen/adapted backbones, C/R are terminal clamp/release, P replaces covered pixels, REV reverses the paste, and BL is a development-fitted global blend whose score is optimistic. The complete gate additionally checks interaction, SSIM and per-sequence signs.", ["DEV", "GATE"])
     CHECKS.append("S144: complete, unique seed cells; derived arm differences and interaction agree with DEV_GATE (1e-10 dB).")
 
 
@@ -409,6 +553,8 @@ def write_readme(revision, command, outputs):
              "new_method_validated=false; novelty_authorization=NONE"]
     for s in BLOCKED:
         lines.append("BLOCKED " + s)
+    for s in LIMITATIONS:
+        lines.append("LIMITATION " + s)
     lines += ["PLOTTED VALUES (round-trip Python float representations)",
               "figure | label | metric | value | ci95_low | ci95_high | evidence | source:key | derivation"]
     for r in VALUES:
@@ -420,10 +566,11 @@ def write_readme(revision, command, outputs):
     status = "PARTIAL" if BLOCKED else "COMPLETE"
     lines.append(f"{status} {len(FIGURES)} figures; {2*len(FIGURES)} verified exports; {len(BLOCKED)} blocked figure request(s)")
     transcript = "\n".join(lines) + "\n"
-    sections = ["# R269 report figures", "",
+    sections = ["# R270 report figures", "",
                 f"**{status}: {len(FIGURES)} figures / {2*len(FIGURES)} verified PNG and PDF exports.** Figure 1 is blocked by missing committed S139/S140 inputs; details below." if BLOCKED else f"**Complete: {len(FIGURES)} figures / {2*len(FIGURES)} verified exports.**", "",
                 f"Source snapshot: `{revision}`. CPU only; all numeric inputs are Git blobs from this snapshot. Local ignored/uncommitted JSONs, source images, target frames, weights and datasets are not read.", "",
                 "`new_method_validated=false`; `novelty_authorization=NONE`.", "",
+                "R270 adds Figure 1, replaces fig04's zero-origin bars with arm-minus-B2 dots and an A_R-relative gate, and moves fig02a values into separate columns outside the plotting axes. Static-context B2 SSIM is unavailable and is explicitly marked N/A. The committed R269 script and README are preserved in `r269_snapshot/`.", "",
                 "## Reproduce", "", "From the repository root:", "", "```bash", command, "```", "",
                 "The script prints every plotted value and interval with its JSON key, verifies source consistency, writes this README, and checks export signatures and PNG DPI. `--revision` freezes inputs even if another process advances HEAD. Missing sources are explicit and never replaced with different-seed results or transcribed report prose.", "",
                 "## Produced figures", ""]
@@ -432,28 +579,54 @@ def write_readme(revision, command, outputs):
                      f["caption"], "", "Sources: " + ", ".join(f"`{s}`" for s in f["sources"]) + ".", ""]
     sections += ["## Missing sources / limitations", ""]
     sections += ["- " + x for x in BLOCKED] or ["None of the requested input files are missing from this snapshot."]
+    sections += ["", *["- " + x for x in LIMITATIONS]]
     sections += ["", "The brief's POOL file is committed at `work/S143_context_ranking/POOL.json`, outside its `results/` directory. S141 is split across three figures and S143 across two to keep individual labels readable. No new statistical intervals are fitted: only archived intervals are shown; arm means and diagnostics without supplied intervals remain descriptive.", "",
                  "## Source files and content hashes", "", "| Alias | Committed file | Git blob | SHA-256 |", "|---|---|---|---|"]
     for alias, s in SOURCES.items():
         sections.append(f"| {alias} | `{s['path']}` | `{s['blob']}` | `{s['sha256']}` |")
+    sections += ["", "## Figure 1 schema mapping", "",
+                 "| Quantity | Exact source/key | Treatment |", "|---|---|---|",
+                 "| VMem arm PSNR means | `S139:/arm_means_db/{static_recent,mem_vmem,mem_pose}` | Archived numeric means |",
+                 "| VMem arm SSIM means | `S139_SSIM:/ssim_means/{static_recent,mem_vmem,mem_pose}` | Archived numeric means |",
+                 "| B2 static PSNR | `B2_STATIC:/rows/*/psnr`, identified by `/rows/*/window_id` | Arithmetic mean over unique windows |",
+                 "| B2 static SSIM | No field in `B2_STATIC:/rows/*` | N/A; no score or CI fabricated |",
+                 "| B2 memory and WGS means | `S140:/{psnr_db,ssim}/means/{B2,WGS}` | Archived numeric means |",
+                 "| VMem memory minus static PSNR | `S139:/contrasts/PRIMARY_mem_vmem_vs_static_recent/{mean_db,ci95_window}` | Window CI, not pair-cluster CI |",
+                 "| VMem memory minus static SSIM | `S139_SSIM:/contrasts/mem_vmem-static_recent_ssim/{mean,ci}` | Archived window CI |",
+                 "| B2 memory minus VMem memory | `S140:/{psnr_db,ssim}/B2_minus_VMem/{mean,ci95}` | Archived numeric means and window CIs |",
+                 "| WGS minus B2 memory | `S140:/{psnr_db,ssim}/WGS_minus_B2/{mean,ci95}` | Archived numeric means and window CIs |",
+                 "| Baseline consistency | `B2_MEM:/rows/*/psnr`; `S139_B:/B2_mem_vmem - VMem mem_vmem/all` | Mean and rounded-text checks only; the rounded string is not a plotted input |", "",
+                 "Schema distinctions are intentional: S139 PSNR has `mean_db` and `ci95_window`, S139 SSIM has `mean` and `ci`, and S140 has `mean` and `ci95`. The baseline contrast JSON contains formatted strings, not full-precision numeric estimates. Arm means have no supplied CIs. S140's published B2 SSIM is retained: the analysis merges duplicate warp records with last-input precedence, not site averaging (`work/S140_warp_guided/analyze_confirm_s140.py:11`)."]
     sections += ["", "## Definitions and code provenance", "",
                  "JSON paths below use JSON Pointer syntax; `*` and `[room=...]` explicitly denote the filters described in the derivation column. `MEASURED` means an archived experimental summary copied from JSON, not a new experiment. `DERIVED` means a deterministic aggregation of stored measurements. Decimal strings preserve the loaded Python floats; plot labels are rounded only for legibility.", "",
+                 "- S139 contrasts average paired seeds per window and use window-bootstrap intervals: `work/S139_crossseq_revisit/analyze_s139.py:21`, `:30`, `:38`. Arm means: `:56`. Static B2 context selection and PSNR-only output: `work/S139_crossseq_revisit/baselines_s139.py:49`, `:68`.",
+                 "- S140 means and window-bootstrap intervals: `work/S140_warp_guided/analyze_confirm_s140.py:21`, `:25`, `:28`, `:32`. The stored intervals use 10,000 resamples with RNG seed 0 and percentile endpoints 2.5 and 97.5; none are refitted here.",
                  "- S141 window-mean contrasts and bootstrap: `work/S141_finetune/analyze_s141.py:22`, `:33`, `:63`, `:70`, `:96`; registration and scope: `work/S141_finetune/PROTOCOL.md:51`, `:72`.",
-                 "- S144 seed averaging and gate: `work/S144_A_wgs/analyze_s144.py:14`, `:28`, `:49`; control definitions: `work/S144_A_wgs/PROTOCOL.md:9`.",
+                 "- S144 seed averaging and gate: `work/S144_A_wgs/analyze_s144.py:14`, `:28`, `:49`, `:56`; control definitions: `work/S144_A_wgs/PROTOCOL.md:9`. The gate requires A_R minus A_C and every mandatory control to be at least +0.20 dB (`:20`); in arm-minus-B2 coordinates the control ceiling is `(A_R - B2) - 0.20`. The +0.20 constant is ANALYTICAL, encoded in `GATE:/checks/means_ge_0.20` and corroborated by the protocol and analyzer, not an experimental measurement.",
                  "- S143 rule names: `work/S143_context_ranking/PROTOCOL.md:14`. Rule mapping is checked against the committed POOL and WARP files. Fresh inference scope is stated by `FRESH:/note`. No discovery seed-panel points are fabricated.",
                  "- S146 uses the stored whole-objective `err` and `positive_depth_frac` fields. A non-finite objective is counted once per construction/window; it is not a per-view failure count.", "",
                  "## Design and validation", "",
-                 "Experimental-results guidance from the figure-designer skill was applied: vector PDFs plus 300 dpi PNGs, DejaVu Sans at readable panel sizes, an Okabe–Ito qualitative palette and viridis diagnostic scales, direct labels/marker shapes in addition to colour, and no fitted trend or selective winning-arm display. Forest plots include zero; S144 bars start at zero; scatter and heatmap axes are explicit. Use panels near their intended full slide/report width; do not shrink multi-panel figures into a narrow column.", "",
-                 "The complete final script stdout follows, including the exact-value table, consistency checks, export sizes and SHA-256 hashes. Repository tests are not invoked by the figure script; this is a deterministic visualization of archived results, not a new model experiment.", "",
-                 "### Environment correction and repository check", "",
-                 "The supplied project venv has NumPy but lacks Matplotlib. No packages or environments were changed. Rendering uses the existing Homebrew Python environment named by the command above. The initial attempt ended before rendering:", "",
-                 "```bash", ".venv-cut3r/bin/python -B docs/report/figures/make_figures.py --revision 52bdb866eb5987cb97f4d68c1f991d4e1e4ab05c", "```", "", "Complete output (initial script version):", "", "```text",
-                 'Traceback (most recent call last):',
-                 '  File "/Users/rocket/Desktop/HKUST IT/ip-/geometry-world-modeling/docs/report/figures/make_figures.py", line 31, in <module>',
-                 '    import matplotlib', "ModuleNotFoundError: No module named 'matplotlib'", "```", "",
-                 "A scoped existing CPU metric test was run with bytecode writes disabled; it checks the repository's synthetic RGB-D metrics, not the figure code. No root linter configuration or existing plotting tests were found. The full unrelated repository suite was not run under this task's restricted-write boundary.", "",
-                 "```bash", "PYTHONDONTWRITEBYTECODE=1 .venv-cut3r/bin/python -B tests/test_rgbd_metrics.py", "```", "", "Complete output:", "", "```text", "..........", "----------------------------------------------------------------------", "Ran 10 tests in 0.011s", "", "OK", "```", "",
+                 "Experimental-results guidance from the figure-designer skill was applied: vector PDFs plus 300 dpi PNGs, DejaVu Sans at readable panel sizes, an Okabe–Ito qualitative palette and viridis diagnostic scales, direct labels/marker shapes in addition to colour, and no fitted trend or selective winning-arm display. Forest plots include zero; S144 is an explicitly zoomed dot plot of differences with the off-scale value annotated; scatter and heatmap axes are explicit. Use panels near their intended full slide/report width; do not shrink multi-panel figures into a narrow column.", "",
+                 "The complete final script stdout follows, including the exact-value table, consistency checks, export sizes and SHA-256 hashes. Separate verification commands and their complete output are in `verification.log` when supplied. No root linter configuration or plotting test suite is configured. The full unrelated suite is outside this restricted-write figure task; a scoped existing CPU metric test is documented in that log. This is a visualization of archived results, not a new model experiment.", "",
                  "## Exact command and complete stdout", "", "```text", transcript.rstrip(), "```", ""]
+    code_lines = Path(__file__).read_text().splitlines()
+    sections += ["## Figure implementation locations", ""]
+    for function, description in (("fig_s139_s140", "Figure 1 schema mapping, means, CI sources and N/A handling"),
+                                  ("forest", "fig02a value columns outside the plotting axes"),
+                                  ("fig_s144", "B2-relative dots, A_R gate ceiling and off-scale context-only arm"),
+                                  ("save", "Export generation and rendered fig02a label bounds"),
+                                  ("validate_outputs", "Export signatures, vector-PDF check and PNG resolution")):
+        line = next(i for i, text in enumerate(code_lines, 1) if text.startswith(f"def {function}("))
+        sections.append(f"- {description}: `docs/report/figures/make_figures.py:{line}`.")
+    sections += ["", "## Files and follow-up", "",
+                 "Updated `make_figures.py` and this README; generated eight PNG/PDF figure pairs and `render.log`. Verification evidence is in `verification.log` and `pdf_previews/`; original script/README backups are in `r269_snapshot/`. All authored changes are inside `docs/report/figures/`. Existing unrelated review files were left untouched.", "",
+                 "Remaining data limitation: to fill the static B2 SSIM cell in a future session, an authoritative scored result would need to be archived and committed. This task does not generate it or change any research authorization state.", ""]
+    verification = OUT / "verification.log"
+    if verification.exists():
+        sections += ["## Additional verification record", "",
+                     "[Complete verification log](verification.log). These separately captured commands check the existing CPU metric tests, independent numeric aggregation, PNG decoding, PDF opening/rasterization and text bounds. The changed PNGs and their PDF renders were also visually inspected. The full unrelated repository suite was not run; no project linter is configured.", "",
+                     "A preliminary environment probe imported Matplotlib without the renderer's cache suppression and reported creating a temporary cache outside the requested output directory. That incidental cache creation is a scope exception; the rendering script itself redirects configuration into this directory and suppresses font-cache writes (`make_figures.py:29`). No packages or environments were changed.", "",
+                     "```text", verification.read_text().rstrip(), "```", ""]
     (OUT / "README.md").write_text("\n".join(sections))
     print(transcript, end="")
 
@@ -465,12 +638,12 @@ def main():
     revision = git("rev-parse", "--verify", args.revision + "^{commit}").decode().strip()
     for alias in PATHS:
         load(alias, revision)
-    missing = [PATHS[s] for s in ("S139", "S139_B", "S140", "S139_SSIM") if s not in DATA]
+    missing = [PATHS[s] for s in ("S139", "S139_B", "S140", "S139_SSIM", "B2_STATIC", "B2_MEM") if s not in DATA]
     if missing:
         BLOCKED.append("Figure 1 (S139/S140) not plotted: requested result JSONs absent from this committed snapshot: " + "; ".join(missing) + ". These paths are ignored by Git in this checkout. Commit the authoritative files, then add/verify their schema before rendering this panel; no ignored result bytes were read.")
     else:
-        raise RuntimeError("Figure 1 source schema must be verified before first committed-input rendering.")
-    required = [s for s in PATHS if s not in ("S139", "S139_B", "S140", "S139_SSIM")]
+        fig_s139_s140()
+    required = [s for s in PATHS if s not in ("S139", "S139_B", "S140", "S139_SSIM", "B2_STATIC", "B2_MEM")]
     if any(s not in DATA for s in required):
         raise RuntimeError("Missing committed inputs: " + str([s for s in required if s not in DATA]))
     fig_s141()
