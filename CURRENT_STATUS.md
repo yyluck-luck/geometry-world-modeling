@@ -63,13 +63,14 @@ memory claim must beat.
   RGB-D Scenes +1.16 dB. B (A + warp-latent input branch) fails: B_mem − warp **−3.56 dB** (WORSENS; highest SSIM on chess,
   worse than base on RGB-D). After adaptation memory is still not useful: A_mem − A_static −0.33 dB. Self-audit passes.
 - **S142 not run:** frozen branch table, PRIMARY_B = WORSENS → write up.
-- **S143 discovery done (exploratory, exposed chess; `work/S143_context_ranking/RESULT.md`):** the context set the warp
-  prefers leaves a held-seed generation shortfall R = +0.320 dB [+0.19, +0.46] (above the frozen null 95th percentile 0.291);
-  per rule, the generator does best with nearest-4 (11.94 dB) and worst with VMem's own retrieval (11.19); the warp does
-  best with coverage-greedy (15.41). Fresh-seed descriptive block (Amendments 1–3) running.
-- **Queued on TACC:** S144 (adapter A × S140 warp-guided sampler, development gate first), S145 (B branch ablations),
-  S146 (project-fresh replication on 12-Scenes apt1/kitchen, apt2/luke, office2/5a: nearest-4 vs VMem retrieval; staged,
-  conventions verified gl in all rooms by two bank-only checks; CPU pool/warps in progress).
+- **S143 done:** discovery R = +0.320 dB (above null95 0.291); fresh seeds: generator-preferred − warp-preferred +0.38 dB
+  (4/4 seed panels) and **nearest-4 − VMem's own retrieval +0.74 dB** (4/4 panels, 3/3 pairs). Exploratory, exposed room.
+- **S144 stopped at its development gate:** terminal release null (I = −0.003 dB); a development-fitted global blend of
+  generation and warp beats A + warp-guided sampling by ~0.2 dB (optimistic; no case panel).
+- **S145 running:** B branch ablations (replay gate passed).
+- **S146 queued (operational assay, Amendment 3):** VMem's KPS memory geometry is invalid on the 12-Scenes banks (bank-only
+  diagnostic), so the strict assay is INVALID at preflight; the operational comparison nearest-4 vs the original-KPS VMem
+  retrieval package (evaluation seeds) runs after S145.
 - Next: S143 analysis; report v3 (S141 + S143); write-up. Other codex ideas on file: in-loop robust data-consistency (R257
   P), multiscale residual fusion and test-time memory-in-weights (R258), GEN3C second consumer on H800 (R259).
 - Wording (codex R253/R255): "retrieved views do not become a detectable generated-frame gain", not "the generator does

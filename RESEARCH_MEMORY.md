@@ -1,3 +1,11 @@
+## 2026-10-11 S143 新 seed 复现;S144 开发门失败;S146 改为"操作性对比"
+
+**S143 新 seed(42/7/1/2,描述性)**:生成器偏好的组合比 warp 偏好的好 **+0.38 dB**(4/4 seed 面板);**nearest-4 比 VMem 自己的检索好 +0.74 dB**(4/4 面板、3/3 序列对)。独立重算一致。自审 `work/agents/SELF_AUDIT_S143.md`。
+**S144(A + S140 采样析因)**:开发门失败 → 按冻结规则停止。末步释放无效(I=−0.003 dB);A+WGS 比 warp 高 +0.21,但一个开发集拟合的全局混合(生成 × warp,α≈0.55–0.6)比它还高 0.19–0.21 dB(乐观,未在案例面板验证)。S140 的"覆盖区打磨"大多可由 warp 的 VAE 往返复现。
+**S146(12-Scenes 新房间)**:bank-only 诊断发现 VMem 的 CUT3R+KPS 记忆在这些多区域公寓 bank 上几何无效(19/72 次构建目标函数非有限,luke/office2 有视图 ~40–47% 深度为负)。codex R266 否定了我临时写的 KPS-R;R267 决定:严格版判 INVALID(预检),改跑"操作性对比"(原版 KPS + 只读观测、选择器输出严格校验、只用评估 seed、删除依赖几何的臂)。已冻结(Amendment 3)并排队在 S145 后。
+**S145**:B 分支消融在跑(重放门已过)。
+证据:`work/S143_context_ranking/RESULT.md`、`work/S144_A_wgs/RESULT.md`、`work/S146_fresh12/PROTOCOL.md`、`work/agents/CODEX_R266_*`、`CODEX_R267_*`。
+
 ## 2026-10-11 S143 发现期 + S144–S146 排队(codex 新想法落地)
 
 **S143(探索性,chess 已暴露)**:同一历史库里 6 种 context 集合。warp 最偏好的集合 vs 生成器最偏好的集合:R_2seed_hindsight **+0.320 dB [+0.19,+0.46]**,高于冻结的 null 95% 分位 0.291 → 结论成立(探索性)。逐规则:生成器最喜欢 nearest-4(相机最近的 4 帧,不做 NMS,11.94 dB),最差的是 VMem 自己的检索(11.19,比随机还低);warp 最喜欢覆盖率贪心(15.41)。新 seed 描述性复核在跑(Amendment 3 预注册了 r_disc vs mem_vmem/c_W/static)。
