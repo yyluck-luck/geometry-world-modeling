@@ -82,7 +82,8 @@ Chess mem_vmem contexts, 24 windows × seeds 3–6, framewise means:
 - These are descriptive; no mechanism was tested.
 
 ## Limits
-One training run per variant, one seed; 10000 LoRA steps on 2000 clips; chess examined earlier in S139/S140 (held out from
+B's training warps: 47 of 2032 clips had a non-finite KPS objective (one view with too few valid points), so their scale
+came from a degenerate search (found during S146, 2026-10-11; evaluation warps unaffected). One training run per variant, one seed; 10000 LoRA steps on 2000 clips; chess examined earlier in S139/S140 (held out from
 training, not untouched); window CIs on three dependent sequence pairs; training memory contexts were pose-only (eval
 mem_vmem); training warps GPU vs eval warps CPU; NO_MATERIAL_CHANGE is not equivalence (R254).
 

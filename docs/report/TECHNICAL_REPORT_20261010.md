@@ -45,6 +45,10 @@ model. On exposed windows from two RGB-D Scenes v2 sequences:
    attention LoRA trained on six other 7-Scenes rooms improves held-out chess by +0.33 dB [+0.08, +0.59] (memory contexts)
    and RGB-D Scenes by +1.16 dB. After adaptation, retrieved memory is still worse than recent frames (−0.33 dB). Adding
    the target-pose warp as an extra input (established warp+mask conditioning) did not work: −3.56 dB below the warp.
+9. **Which context helps the generator is not what helps geometry (§7.4, exploratory).** Among six context packages from
+   the same history bank, the one the warp prefers leaves a +0.32 dB held-seed generation shortfall (replicated on fresh
+   seeds, +0.38 dB). A plain nearest-camera rule beats VMem's own retrieval by +0.74 dB on fresh seeds, for VMem's own
+   generator. A test on untouched 12-Scenes rooms is under way.
 
 Items 1–5 come from an exposed development panel (2 scenes, 14–16 windows, 4 targets each). Item 6 comes from a scene
 held out from this project's design decisions (§7).
@@ -209,6 +213,28 @@ low-frequency layout and colour. On chess it has the highest SSIM of all arms (s
 worse than the base model in both metrics. The monitor denoising loss stayed flat for both variants, so the A gain shows
 up in sampling, not in the training objective's validation curve. One run per variant; chess was examined in S139/S140.
 
+### 7.4 Same evidence, different consumers (S143; exploratory, exposed chess)
+Pool per window (24 S139 windows): 1 static_recent, 2 mem_pose, 3 mem_vmem (VMem's retrieval), 4 nearest-4 (smallest mean
+pose distance to the four targets, no NMS), 5 coverage-greedy (union forward-splat support from bank CUT3R + KPS depth),
+6 random; frames in bank order. For each package: the B2 warp's PSNR (Q_W) and VMem's generated PSNR (Q_G, seeds 3–6).
+The pre-registered estimand R compares a cross-fitted two-seed hindsight selector with the warp-selected package on held-out
+seeds; its threshold came from frozen equal-mean null simulations.
+
+| quantity | discovery (seeds 3–6) | fresh seeds 42/7/1/2 (frozen selections) |
+|---|---|---|
+| generator-preferred − warp-preferred package | R = +0.320 dB [+0.19, +0.46] (null95 0.291) | +0.384 dB, 4/4 seed panels |
+| window-specific choice − best single rule | +0.275 [+0.12, +0.44] | +0.277 dB, 4/4 |
+| nearest-4 − VMem retrieval | +0.747 dB | **+0.738 dB, 4/4 panels, 3/3 pairs** |
+| nearest-4 − warp-preferred package | — | +0.108 (below the bar) |
+
+Mean generated PSNR by rule: nearest-4 11.94, coverage-greedy 11.92, mem_pose 11.58, static 11.49, random 11.38, VMem
+retrieval 11.19. Mean warp PSNR: coverage-greedy 15.41, mem_vmem 14.38, nearest-4 14.30, static 13.11. Within-window rank
+correlation between warp and generated PSNR: 0.16. Reading: the generator benefits most from the views whose cameras are
+closest to the targets; geometry benefits most from views that cover the targets. VMem's diversity-seeking retrieval is the
+worst of the six for its own generator on this panel. This differs from VMem's RealEstate10K cycle ablation, whose regime
+and baseline definitions differ (codex R264); here the repaired retrieval package and a changed slot order are compared.
+Consumer-specific evidence utility is not new as a concept (FAR, arXiv:2609.34677).
+
 ## 8. Limitations
 One frozen consumer. Two exposed scenes for §2–6; one held-out scene (three sequence pairs sharing history banks) for §7. 14–24 windows, 4 targets each.
 Chess is held out from design decisions up to S139, but S140/S141 reuse its windows, so it is no longer an untouched set.
@@ -228,7 +254,7 @@ exposure of CUT3R/VMem to these datasets is not verified.
 
 ## 10. Artifact index
 `work/S133_scale_debug`, `work/S134_tacc_fixed_map`, `work/S135_scale_init`, `work/S136_repaired_memory`,
-`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`, `work/S141_finetune`. Each holds PROTOCOL.md, RESULT.md,
+`work/S137_geometry_baselines`, `work/S138_depth_opt`, `work/S139_crossseq_revisit`, `work/S140_warp_guided`, `work/S141_finetune`, `work/S143_context_ranking`. Each holds PROTOCOL.md, RESULT.md,
 scripts and receipts. External review: `work/agents/CODEX_R250_S133_S137_AUDIT.md`; self-audit (owner-approved): `work/agents/SELF_AUDIT_S139.md`. One-page state: `CURRENT_STATUS.md`.
 
 ## Related work found by retrieval (codex R253; independently re-verified)
