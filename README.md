@@ -1,5 +1,7 @@
 # Geometry-aware World Modeling
 
+> **2026-10-10 research reset:** [experiment map, literature and next study](docs/research_reset_20261010/README.md). This snapshot distinguishes completed evidence, stopped candidates and active jobs; the early-stage text below remains historical.
+
 > **当前状态请先读 [`CURRENT_STATUS.md`](CURRENT_STATUS.md)**（2026-10-09 更新）。下文为早期 S0–S7 阶段说明，保留作历史。
 
 本机可复现的几何记忆部件研究。当前已完成固定源码审计、S0/S0b人工记忆诊断、S1人工最终选图诊断、S2真实RGB-D接口检查、S3真实测量对照、S4真实模型两图检查与S5真实模型三段72图检查、S6学习几何选帧与S7固定观测事件重放。完整视频生成仍是后续独立验收项。

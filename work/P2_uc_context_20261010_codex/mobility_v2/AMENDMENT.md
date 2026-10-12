@@ -1,0 +1,14 @@
+# P2 operational amendment 1 — 2026-10-10 Los Angeles
+
+Owner instruction: inspect both gpu13 and gpu14 and use an available card. Frozen before any P2 model generation or outcome. This changes execution placement only. The original scientific protocol, source/code fingerprint bd662441005e98cddb6331d914e9b0c1c21effca3f83e49befca0059bf66102c, inputs, five arms, exact native replay, seeds, scoring, bootstrap and all kill gates remain binding. Original files remain byte-for-byte preserved.
+
+One owner-authorized RTX3090 on gpu13 or gpu14 may run the entire panel. The selected host and UUID must be observed idle twice at least120seconds apart, memory<100MiB and utilization<5%, then checked immediately before acquisition. Live S143–S149 chains retain their registered GPU3/4 reservations on their own host; jobs on those cards do not reserve unrelated cards. No other user's allocation may be displaced. Unknown driver/occupancy status is ineligible, not idle. One host-local queue at a time, one persistent exclusive shared namespace claim, one model execution; no speculative second queue. The original queue deadline remains 2026-10-12T04:06:05.649259+00:00. Total GPU cap remains7200seconds including replay and loading.
+
+Before installing/starting this revision, suspend only the verified original waiting P2 queue, check no descendants, GPU_STARTED, results or execution failure; terminate only that verified waiting process and confirm its exact tmux session is absent. If execution has already begun, abort migration and resume only the suspended queue. Record retirement and claim before replacement launch in the SAME namespace and with the SAME tmux name. This is a queued-job handoff, never a duplicate experiment or retry of a scientific failure.
+
+The amended runner adds host/UUID binding and verifies the new additive manifest, then verifies every original frozen file. The final idle check precedes results-directory creation. No generation/scoring algorithm changes. The original native byte-equality replay remains the compatibility gate on either host. Do not rebuild or upgrade shared Python/driver packages.
+
+GPU14 currently has an incompatible installed NVML/kernel pair and is ineligible until compatibility and occupancy can be verified. Its failure does not stop an otherwise healthy gpu13 queue or pause the whole research automation.
+
+
+Operational revision2, frozen before any model execution: independent code review found that final acquisition rechecked memory/utilization but omitted compute-process and current reservation state. Repeat the full fail-closed predicate after input hashing, and reject tmux-query errors. Preserve v1 and its receipts. Retire the still-waiting v1 queue before a single v2 handoff; do not rerun a model or reset the original deadline/cap. No scientific changes.
